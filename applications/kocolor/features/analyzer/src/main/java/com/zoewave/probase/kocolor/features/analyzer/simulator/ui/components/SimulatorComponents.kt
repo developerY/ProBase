@@ -41,6 +41,7 @@ import com.zoewave.probase.kocolor.features.analyzer.R
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.SimulatorEvent
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.SimulationStep
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorUiState
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.ResultTab
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.core.model.ritual.CosmeticItem
@@ -141,10 +142,10 @@ fun MessagingStep(
                     
                     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                         IconButton(onClick = { onEvent(SimulatorEvent.CapturePortrait) }) {
-                            Icon(Icons.Default.PhotoCamera, null, tint = Color.DarkGray.copy(alpha = 0.6f), modifier = Modifier.size(22.dp))
+                            Icon(Icons.Default.PhotoCamera, null, tint = Color.Black.copy(alpha = 0.6f), modifier = Modifier.size(20.dp))
                         }
                         IconButton(onClick = { onEvent(SimulatorEvent.PickPortrait) }) {
-                            Icon(Icons.Default.Collections, null, tint = Color.DarkGray.copy(alpha = 0.6f), modifier = Modifier.size(22.dp))
+                            Icon(Icons.Default.Image, null, tint = Color.Black.copy(alpha = 0.6f), modifier = Modifier.size(20.dp))
                         }
                     }
                 }
@@ -433,7 +434,7 @@ fun AnalysisStep(
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
             modifier = Modifier.width(280.dp),
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            textAlign = TextAlign.Center
         )
     }
 }
@@ -491,11 +492,53 @@ fun ResultStep(
         }
 
         item {
-            Text(stringResource(R.string.applications_kocolor_features_analyzer_simulator_vault_selections), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                ResultTabPill(
+                    label = "Face",
+                    isSelected = uiState.selectedResultTab == ResultTab.FACE,
+                    onClick = { onEvent(SimulatorEvent.SelectResultTab(ResultTab.FACE)) },
+                    modifier = Modifier.weight(1f)
+                )
+                ResultTabPill(
+                    label = "Clothes",
+                    isSelected = uiState.selectedResultTab == ResultTab.CLOTHES,
+                    onClick = { onEvent(SimulatorEvent.SelectResultTab(ResultTab.CLOTHES)) },
+                    modifier = Modifier.weight(1f)
+                )
+            }
         }
 
-        items(uiState.recommendedClothing) { item: ClothingItem ->
-            ResultCard(uiState = item, onEvent = {}, navTo = navTo)
+        if (uiState.selectedResultTab == ResultTab.CLOTHES) {
+            if (uiState.recommendedClothing.isEmpty()) {
+                items(3) { i ->
+                    PlaceholderResultCard(label = when(i) {
+                        0 -> "Top"
+                        1 -> "Bottom"
+                        else -> "Shoes"
+                    })
+                }
+            } else {
+                items(uiState.recommendedClothing) { item ->
+                    ResultCard(clothingItem = item, onEvent = {}, navTo = navTo)
+                }
+            }
+        } else {
+            if (uiState.recommendedCosmetics.isEmpty()) {
+                items(3) { i ->
+                    PlaceholderResultCard(label = when(i) {
+                        0 -> "Eyes"
+                        1 -> "Cheeks"
+                        else -> "Lips"
+                    })
+                }
+            } else {
+                items(uiState.recommendedCosmetics) { item ->
+                    ResultCard(cosmeticItem = item, onEvent = {}, navTo = navTo)
+                }
+            }
         }
         
         item {
@@ -512,33 +555,88 @@ fun ResultStep(
 }
 
 @Composable
-fun ResultCard(
-    uiState: ClothingItem,
-    onEvent: (Unit) -> Unit,
-    navTo: (KoColorRoute) -> Unit
-) {
-    val item = uiState
+private fun PlaceholderResultCard(label: String) {
     Card(
-        modifier = Modifier.fillMaxWidth().height(140.dp),
+        modifier = Modifier.fillMaxWidth().height(140.dp).alpha(0.5f),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFEEEEEE))
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.height(IntrinsicSize.Min)) {
             Box(
-                modifier = Modifier.fillMaxHeight().width(120.dp).background(item.colorHex?.let { parseColor(it) } ?: Color(0xFFF5F5F5)),
+                modifier = Modifier.fillMaxHeight().width(120.dp).background(Color(0xFFF9F9F9)),
                 contentAlignment = Alignment.Center
             ) {
-                if (item.imageUrl != null) {
-                    AsyncImage(model = item.imageUrl, contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                Icon(Icons.Default.Inventory2, null, tint = Color.Black.copy(alpha = 0.05f), modifier = Modifier.size(32.dp))
+            }
+            Column(modifier = Modifier.padding(20.dp)) {
+                Text(text = label.uppercase(), style = MaterialTheme.typography.labelSmall, color = Color.LightGray, fontWeight = FontWeight.Bold)
+                Text(text = "Pending Selection", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, fontFamily = FontFamily.Serif, color = Color.LightGray)
+                Text(text = "AI Curation in Progress", style = MaterialTheme.typography.bodySmall, color = Color.LightGray.copy(alpha = 0.5f))
+            }
+        }
+    }
+}
+
+@Composable
+private fun ResultTabPill(
+    label: String,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        onClick = onClick,
+        modifier = modifier.height(48.dp),
+        shape = RoundedCornerShape(24.dp),
+        color = if (isSelected) Color.Black else Color(0xFFF3F2F8),
+        shadowElevation = if (isSelected) 4.dp else 0.dp
+    ) {
+        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+            Text(
+                text = label.uppercase(),
+                style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.sp),
+                fontWeight = FontWeight.Black,
+                color = if (isSelected) Color.White else Color.Gray
+            )
+        }
+    }
+}
+
+@Composable
+fun ResultCard(
+    clothingItem: ClothingItem? = null,
+    cosmeticItem: CosmeticItem? = null,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit
+) {
+    val name = clothingItem?.name ?: cosmeticItem?.name ?: ""
+    val brand = clothingItem?.brand ?: cosmeticItem?.brand ?: stringResource(R.string.applications_kocolor_features_analyzer_simulator_bespoke)
+    val category = clothingItem?.category?.name ?: cosmeticItem?.microCategory?.displayName ?: ""
+    val imageUrl = clothingItem?.imageUrl ?: cosmeticItem?.imageUrl
+    val colorHex = clothingItem?.colorHex ?: cosmeticItem?.colorHex
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFEEEEEE))
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.height(IntrinsicSize.Min)) {
+            Box(
+                modifier = Modifier.fillMaxHeight().width(120.dp).background(colorHex?.let { parseColor(it) } ?: Color(0xFFF5F5F5)),
+                contentAlignment = Alignment.Center
+            ) {
+                if (imageUrl != null) {
+                    AsyncImage(model = imageUrl, contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
                 } else {
                     Icon(Icons.Default.Inventory2, null, tint = Color.Black.copy(alpha = 0.1f), modifier = Modifier.size(32.dp))
                 }
             }
             Column(modifier = Modifier.padding(20.dp)) {
-                Text(text = item.category.name, style = MaterialTheme.typography.labelSmall, color = Color.Gray, fontWeight = FontWeight.Bold)
-                Text(text = item.name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, fontFamily = FontFamily.Serif)
-                Text(text = item.brand ?: stringResource(R.string.applications_kocolor_features_analyzer_simulator_bespoke), style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                Text(text = category, style = MaterialTheme.typography.labelSmall, color = Color.Gray, fontWeight = FontWeight.Bold)
+                Text(text = name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, fontFamily = FontFamily.Serif)
+                Text(text = brand, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
             }
         }
     }
@@ -549,7 +647,7 @@ fun ResultCard(
 private fun ResultCardPreview() {
     MaterialTheme {
         ResultCard(
-            uiState = ClothingItem(name = "Shirt", category = ClothingCategory.TOPS),
+            clothingItem = ClothingItem(name = "Shirt", category = ClothingCategory.TOPS),
             onEvent = {},
             navTo = {}
         )

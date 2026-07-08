@@ -22,13 +22,15 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+enum class ResultTab { FACE, CLOTHES }
+
 data class StyleSimulatorUiState(
     val morningRoutineCompleted: Boolean = false,
     val circadianContext: String = "Defense & Protection",
     val wellnessScore: Double = 0.85,
     val recommendedPalette: List<String> = emptyList(),
     val recommendedClothing: List<ClothingItem> = emptyList(),
-    val recommendedAccessories: List<ClothingItem> = emptyList(),
+    val recommendedCosmetics: List<CosmeticItem> = emptyList(),
     val isAnalyzing: Boolean = false,
     val simulationStep: SimulationStep = SimulationStep.MESSAGING,
     val userMessage: String = "",
@@ -46,7 +48,9 @@ data class StyleSimulatorUiState(
     
     // Family-based anchors (Constraint set by user)
     val anchoredClothingFamilies: Map<ClothingCategory, ColorFamily> = emptyMap(),
-    val anchoredCosmeticFamilies: Map<MacroCategory, ColorFamily> = emptyMap()
+    val anchoredCosmeticFamilies: Map<MacroCategory, ColorFamily> = emptyMap(),
+    
+    val selectedResultTab: ResultTab = ResultTab.CLOTHES
 )
 
 enum class SimulationStep {
@@ -65,6 +69,7 @@ sealed class SimulatorEvent {
     data class ToggleCosmeticFamily(val category: MacroCategory, val family: ColorFamily) : SimulatorEvent()
     data class SelectClothingCategory(val category: ClothingCategory) : SimulatorEvent()
     data class SelectCosmeticCategory(val category: MacroCategory) : SimulatorEvent()
+    data class SelectResultTab(val tab: ResultTab) : SimulatorEvent()
 }
 
 sealed class SimulatorEffect {
@@ -93,6 +98,7 @@ class StyleSimulatorViewModel @Inject constructor(
     private val _anchoredCosmeticFamilies = MutableStateFlow<Map<MacroCategory, ColorFamily>>(emptyMap())
     private val _simulationStep = MutableStateFlow(SimulationStep.MESSAGING)
     private val _simulationResult = MutableStateFlow<StyleBlueprint?>(null)
+    private val _selectedResultTab = MutableStateFlow(ResultTab.CLOTHES)
 
     val uiState: StateFlow<StyleSimulatorUiState> = combine(
         sessionRepository.faceUri,
@@ -104,7 +110,8 @@ class StyleSimulatorViewModel @Inject constructor(
         _anchoredClothingFamilies,
         _anchoredCosmeticFamilies,
         _simulationStep,
-        _simulationResult
+        _simulationResult,
+        _selectedResultTab
     ) { array ->
         val faceUri = array[0] as String?
         val allClothing = array[1] as List<ClothingItem>
@@ -116,6 +123,7 @@ class StyleSimulatorViewModel @Inject constructor(
         val anchoredCosmetics = array[7] as Map<MacroCategory, ColorFamily>
         val step = array[8] as SimulationStep
         val result = array[9] as StyleBlueprint?
+        val resultTab = array[10] as ResultTab
 
         val clothingFamilies = allClothing.filter { it.category == selectedClothingCat }
             .groupBy { it.colorFamily }
@@ -138,10 +146,9 @@ class StyleSimulatorViewModel @Inject constructor(
             rationale = result?.rationale,
             recommendedPalette = result?.recommendedPalette ?: emptyList(),
             recommendedClothing = allClothing.filter { it.id in (result?.selectedClothingIds ?: emptyList()) },
-            recommendedAccessories = allCosmetics.filter { it.id in (result?.selectedCosmeticIds ?: emptyList()) }.map { 
-                ClothingItem(id = it.id, name = it.name, brand = it.brand, category = ClothingCategory.OTHER, colorHex = it.colorHex)
-            },
-            isLocalResult = result?.rationale?.startsWith("Local Architect") ?: false
+            recommendedCosmetics = allCosmetics.filter { it.id in (result?.selectedCosmeticIds ?: emptyList()) },
+            isLocalResult = result?.rationale?.startsWith("Local Architect") ?: false,
+            selectedResultTab = resultTab
         )
     }.stateIn(
         scope = viewModelScope,
@@ -188,6 +195,7 @@ class StyleSimulatorViewModel @Inject constructor(
                 _anchoredCosmeticFamilies.value = emptyMap()
                 _simulationStep.value = SimulationStep.MESSAGING
                 _simulationResult.value = null
+                _selectedResultTab.value = ResultTab.CLOTHES
             }
             SimulatorEvent.CapturePortrait -> {
                 viewModelScope.launch {
@@ -227,6 +235,9 @@ class StyleSimulatorViewModel @Inject constructor(
             }
             is SimulatorEvent.SelectCosmeticCategory -> {
                 _selectedCosmeticCategory.value = event.category
+            }
+            is SimulatorEvent.SelectResultTab -> {
+                _selectedResultTab.value = event.tab
             }
         }
     }
@@ -298,13 +309,16 @@ class StyleSimulatorViewModel @Inject constructor(
     private fun saveSelectionToColorTab() {
         viewModelScope.launch {
             val state = uiState.value
+            val recommendations = state.recommendedClothing + state.recommendedCosmetics.map {
+                ClothingItem(id = it.id, name = it.name, brand = it.brand, category = ClothingCategory.OTHER, colorHex = it.colorHex)
+            }
             val outfitSuggestion = OutfitSuggestion(
                 occasion = state.userMessage,
                 advice = state.rationale ?: "",
-                keyPieces = (state.recommendedClothing + state.recommendedAccessories).map { it.name },
+                keyPieces = recommendations.map { it.name },
                 colorCombinations = state.recommendedPalette,
-                wardrobeItemIds = (state.recommendedClothing + state.recommendedAccessories).map { it.id },
-                suggestedItems = (state.recommendedClothing + state.recommendedAccessories).map { item ->
+                wardrobeItemIds = recommendations.map { it.id },
+                suggestedItems = recommendations.map { item ->
                     SuggestedPiece(
                         name = item.name,
                         category = item.category.name,
