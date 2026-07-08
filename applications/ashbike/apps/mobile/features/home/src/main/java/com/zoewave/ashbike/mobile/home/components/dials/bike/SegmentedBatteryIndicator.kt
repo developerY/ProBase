@@ -20,10 +20,7 @@ fun SegmentedBatteryIndicator(batteryLevel: Int) {
     val segments = 10
     val filledSegments = (batteryLevel / (100 / segments)).coerceAtMost(10)
     // Color logic (red -> green) or discrete steps
-    val fillColor =
-        _root_ide_package_.com.zoewave.ashbike.mobile.home.components.dials.bike.batteryColor(
-            batteryLevel
-        )
+    val fillColor = batteryColor(batteryLevel)
 
     Row(
         modifier = Modifier

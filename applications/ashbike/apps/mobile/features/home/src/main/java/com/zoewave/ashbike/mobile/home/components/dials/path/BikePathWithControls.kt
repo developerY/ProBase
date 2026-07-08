@@ -95,7 +95,7 @@ fun BikePathWithControls(
                 .fillMaxHeight(),
             contentAlignment = Alignment.Center
         ) {
-            _root_ide_package_.com.zoewave.ashbike.mobile.home.components.dials.path.BigBikeProgressIndicator(
+            BigBikeProgressIndicator(
                 uiState = uiState,
                 onEvent = onHomeEventStable,
                 trackHeight = trackHeight,

@@ -30,7 +30,7 @@ fun BikeDashboard(
                 horizontalArrangement = Arrangement.spacedBy(8.dp) // Gap between boxes
             ) {
                 // 1. Battery Stat
-                _root_ide_package_.com.zoewave.ashbike.mobile.home.components.dials.bike.BikeStatCard(
+                BikeStatCard(
                     icon = Icons.Default.ElectricBolt, // Or your Battery icon
                     label = "Battery",
                     // Logic: If not null, show "100%", otherwise show "--%"
@@ -39,7 +39,7 @@ fun BikeDashboard(
                 )
 
                 // 2. Motor Stat
-                _root_ide_package_.com.zoewave.ashbike.mobile.home.components.dials.bike.BikeStatCard(
+                BikeStatCard(
                     icon = Icons.Default.PedalBike, // Or your Motor icon
                     label = "Motor",
                     // Logic: takeIf { it > 0 } returns null if 0, triggering the "--" fallback
@@ -47,7 +47,7 @@ fun BikeDashboard(
                 )
 
                 // 3. Gear Stat (From Glass)
-                _root_ide_package_.com.zoewave.ashbike.mobile.home.components.dials.bike.BikeStatCard(
+                BikeStatCard(
                     icon = Icons.Default.Settings, // Gear Icon
                     label = "Gear",
                     value = uiState.formattedGear, // Connected to Glass Data
@@ -57,7 +57,7 @@ fun BikeDashboard(
             // --------------------------------------------------
 
             // "Tap to Connect" Button (Existing)
-    _root_ide_package_.com.zoewave.ashbike.mobile.home.components.dials.bike.BikeCard(
+    BikeCard(
         uiState = uiState,
         onHomeEvent = onHomeEvent
     )

@@ -44,10 +44,7 @@ private fun InterpolatedBatteryIndicator(
     modifier: Modifier = Modifier
 ) {
     // Get the interpolated color based on the battery level.
-    val batteryColor =
-        _root_ide_package_.com.zoewave.ashbike.mobile.home.components.dials.bike.interpolatedBatteryColor(
-            batteryLevel
-        )
+    val batteryColor = interpolatedBatteryColor(batteryLevel)
 
     // Show a simple box with the computed background color.
     Box(
@@ -152,7 +149,7 @@ fun BikeBatteryCharge(
             // If connected, show the segmented battery indicator.
             if (isConnected && batteryLevel != null) {
                 Spacer(modifier = Modifier.height(8.dp))
-                _root_ide_package_.com.zoewave.ashbike.mobile.home.components.dials.bike.SegmentedBatteryIndicator(
+                SegmentedBatteryIndicator(
                     batteryLevel = batteryLevel,
                     modifier = Modifier.fillMaxWidth()
                 )

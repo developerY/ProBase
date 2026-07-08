@@ -34,7 +34,7 @@ enum class StatsSectionType {
 @Composable
 fun StatsSection(
     uiState: HomeUiState.Success,
-    sectionType: com.zoewave.ashbike.mobile.home.components.dials.StatsSectionType,
+    sectionType: StatsSectionType,
     onEvent: (HomeEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -48,7 +48,7 @@ fun StatsSection(
         if (isBikeComputerOn) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
 
     val currentStats: List<StatItem> = when (sectionType) {
-        _root_ide_package_.com.zoewave.ashbike.mobile.home.components.dials.StatsSectionType.HEALTH -> {
+        StatsSectionType.HEALTH -> {
             // --- DYNAMIC HEART RATE COLOR LOGIC ---
             val hr = bikeData.heartbeat
             val heartRateColor = if (hr != null && isBikeComputerOn) {
@@ -81,7 +81,7 @@ fun StatsSection(
             )
         }
 
-        _root_ide_package_.com.zoewave.ashbike.mobile.home.components.dials.StatsSectionType.EBIKE -> listOf(
+        StatsSectionType.EBIKE -> listOf(
             StatItem(
                 icon = Icons.AutoMirrored.Filled.BatteryUnknown,
                 label = stringResource(R.string.applications_ashbike_apps_mobile_features_home_feature_main_label_battery),
