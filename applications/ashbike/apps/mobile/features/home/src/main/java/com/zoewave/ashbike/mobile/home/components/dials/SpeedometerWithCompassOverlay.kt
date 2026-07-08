@@ -21,7 +21,7 @@ fun SpeedometerWithCompassOverlay(
 ) {
     Box(modifier = modifier) {
         // 1) The main speedometer
-        _root_ide_package_.com.zoewave.ashbike.mobile.home.components.dials.FancySpeedometer(
+        FancySpeedometer(
             currentSpeed = currentSpeed,
             maxSpeed = maxSpeed,
             modifier = Modifier.fillMaxSize(),
@@ -34,7 +34,7 @@ fun SpeedometerWithCompassOverlay(
                 .align(Alignment.Center) // First, align the container to the center
                 .offset(y = 77.dp)       // Then, push it down with a vertical offset
         ) {
-            _root_ide_package_.com.zoewave.ashbike.mobile.home.components.dials.path.unused.DigitalCompassCard(
+            com.zoewave.ashbike.mobile.home.components.dials.path.unused.DigitalCompassCard(
                 headingDegrees = heading,
                 modifier = Modifier
                     .size(width = 120.dp, height = 40.dp)

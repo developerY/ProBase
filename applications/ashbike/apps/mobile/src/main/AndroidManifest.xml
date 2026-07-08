@@ -28,8 +28,6 @@
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
 
-    <attribution android:tag="xr_projected" android:label="@string/applications_ashbike_apps_mobile_glass_app_label" />
-
     <!-- android:dataExtractionRules="@xml/data_extraction_rules" -->
     <!-- android:enableOnBackInvokedCallback="true" -->
     <application
@@ -61,16 +59,6 @@
             <intent-filter>
                 <action android:name="android.intent.action.VIEW_PERMISSION_USAGE" />
                 <category android:name="android.intent.category.HEALTH_PERMISSIONS" />
-            </intent-filter>
-        </activity>
-
-        <activity
-            android:name="com.zoewave.ashbike.mobile.glass.GlassesMainActivity"
-            android:exported="true"
-            android:label="@string/applications_ashbike_apps_mobile_glass_app_label"
-            android:requiredDisplayCategory="xr_projected">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
 

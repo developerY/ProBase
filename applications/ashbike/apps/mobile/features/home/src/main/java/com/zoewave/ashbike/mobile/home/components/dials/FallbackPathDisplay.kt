@@ -58,7 +58,7 @@ private data class PathSegmentData(
 
 // Data class to hold all calculated values for drawing
 private data class FallbackPathDrawingData(
-    val segments: List<com.zoewave.ashbike.mobile.home.components.dials.PathSegmentData>,
+    val segments: List<PathSegmentData>,
     val minSpeed: Double,
     val maxSpeed: Double
 )
@@ -110,7 +110,7 @@ fun FallbackPathDisplay(
 
                 val segments = fixes.zipWithNext().map { (p0, p1) ->
                     val p0SpeedKmh = (p0.speed ?: 0f) * 3.6
-                    _root_ide_package_.com.zoewave.ashbike.mobile.home.components.dials.PathSegmentData(
+                    PathSegmentData(
                         startOffset = project(p0.lat, p0.lng),
                         endOffset = project(p1.lat, p1.lng),
                         speedKmh = p0SpeedKmh
@@ -129,7 +129,7 @@ fun FallbackPathDisplay(
                         if (currentMax <= minSpeed && segments.isNotEmpty()) minSpeed + 0.1 else currentMax
                     }
                 }
-                _root_ide_package_.com.zoewave.ashbike.mobile.home.components.dials.FallbackPathDrawingData(
+                FallbackPathDrawingData(
                     segments,
                     minSpeed,
                     maxSpeed

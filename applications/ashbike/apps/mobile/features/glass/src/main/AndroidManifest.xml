@@ -1,4 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- 1. The attribution tag sits at the root level -->
+    <attribution
+        android:tag="xr_projected"
+        android:label="@string/applications_ashbike_apps_mobile_features_glass_label" />
+
+    <!-- 2. The application block handles the UI components -->
+    <application>
+        <activity
+            android:name="com.zoewave.ashbike.mobile.glass.GlassesMainActivity"
+            android:exported="true"
+            android:label="@string/applications_ashbike_apps_mobile_features_glass_label"
+            android:requiredDisplayCategory="xr_projected">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
+        </activity>
+    </application>
+
 </manifest>

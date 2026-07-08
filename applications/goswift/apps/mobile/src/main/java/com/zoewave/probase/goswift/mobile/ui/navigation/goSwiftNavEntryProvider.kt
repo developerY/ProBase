@@ -27,6 +27,7 @@ fun goSwiftNavEntryProvider(
             GoSwiftDestination.Log -> {
                 InputUiRoute(
                     modifier = Modifier.fillMaxSize(),
+                    onBack = onBack,
                     navTo = navigateTo
                 )
             }
@@ -51,7 +52,8 @@ fun goSwiftNavEntryProvider(
             GoSwiftDestination.Hydration -> {
                 HydrationUiRoute(
                     modifier = Modifier.fillMaxSize(),
-                    onNavigateToSettings = { navigateTo(GoSwiftDestination.Settings) }
+                    onNavigateToSettings = { navigateTo(GoSwiftDestination.Settings) },
+                    onBack = onBack
                 )
             }
         }

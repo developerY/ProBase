@@ -27,7 +27,6 @@ private fun buildApolloClient(context: Context): ApolloClient {
 
     return ApolloClient.Builder()
         .serverUrl("https://api.yelp.com/v3/graphql")
-        .webSocketServerUrl("wss://api.yelp.com/v3/graphql")
         .okHttpClient(okHttpClient)
         // In v4, the normalized cache API is very similar, just package changes
         .normalizedCache(MemoryCacheFactory(maxSizeBytes = 10 * 1024 * 1024))

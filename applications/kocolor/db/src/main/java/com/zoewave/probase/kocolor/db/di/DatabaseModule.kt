@@ -5,6 +5,7 @@ import androidx.room3.Room
 import com.zoewave.probase.features.ai.capture.domain.SmartCaptureSettings
 import com.zoewave.probase.core.data.repository.AiConfigurationSettings
 import com.zoewave.probase.core.data.repository.HydrationSettings
+import com.zoewave.probase.core.data.di.AppHydration
 import com.zoewave.probase.kocolor.db.KoColorDatabase
 import com.zoewave.probase.kocolor.db.KoColorSettings
 import com.zoewave.probase.kocolor.db.dao.ClothingDao
@@ -37,6 +38,7 @@ abstract class DatabaseModule {
 
     @Binds
     @Singleton
+    @AppHydration
     abstract fun bindHydrationSettings(impl: KoColorSettings): HydrationSettings
 
     companion object {

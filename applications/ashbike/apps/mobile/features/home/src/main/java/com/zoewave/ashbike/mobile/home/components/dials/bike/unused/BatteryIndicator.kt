@@ -27,7 +27,7 @@ fun RotatedBatteryIndicator(
 ) {
     // Wrap the BatteryIndicator in a Box with a rotation modifier.
     Box(modifier = modifier.rotate(-90f)) {
-        _root_ide_package_.com.zoewave.ashbike.mobile.home.components.dials.bike.unused.BatteryIndicator(
+        BatteryIndicator(
             batteryLevel = batteryLevel
         )
     }

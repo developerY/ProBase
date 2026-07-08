@@ -1,6 +1,5 @@
 <resources>
     <string name="applications_ashbike_apps_mobile_app_name">AshBike</string>
-    <string name="applications_ashbike_apps_mobile_glass_app_label">AshBike Glass</string>
 
     <string name="applications_ashbike_apps_mobile_top_bar_title_ashbike">AshBike</string>
     <string name="applications_ashbike_apps_mobile_top_bar_title_dashboard">AshBike Dashboard</string>
