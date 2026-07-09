@@ -37,13 +37,16 @@ import com.zoewave.probase.features.xr.glass.samples.ButtonsSamples
 import com.zoewave.probase.features.xr.glass.samples.CardSamples
 import com.zoewave.probase.features.xr.glass.samples.ColorsSamples
 import com.zoewave.probase.features.xr.glass.samples.DepthEffectLevelsSample
+import com.zoewave.probase.features.xr.glass.samples.GlimmerComparisonSamples
 import com.zoewave.probase.features.xr.glass.samples.GlimmerLazyListSamples
+import com.zoewave.probase.features.xr.glass.samples.GlimmerSliderSamples
 import com.zoewave.probase.features.xr.glass.samples.GlimmerPagerSamples
 import com.zoewave.probase.features.xr.glass.samples.IconButtonSamples
 import com.zoewave.probase.features.xr.glass.samples.IconSamples
 import com.zoewave.probase.features.xr.glass.samples.IconToggleButtonsSamples
 import com.zoewave.probase.features.xr.glass.samples.IndirectPointerGestureSamples
 import com.zoewave.probase.features.xr.glass.samples.ListItemSamples
+import com.zoewave.probase.features.xr.glass.samples.Material3Samples
 import com.zoewave.probase.features.xr.glass.samples.ObjectRecognitionScreen
 import com.zoewave.probase.features.xr.glass.samples.ShapesSamples
 import com.zoewave.probase.features.xr.glass.samples.SpatialNoteOverlay
@@ -139,6 +142,9 @@ fun GlassApp(
                         GlimmerSample.Vision -> VisionRoute()
                         GlimmerSample.ObjectRecognition -> ObjectRecognitionScreen()
                         GlimmerSample.SpatialNote -> SpatialNoteOverlay()
+                        GlimmerSample.Material3 -> Material3Samples()
+                        GlimmerSample.GlimmerComparison -> GlimmerComparisonSamples()
+                        GlimmerSample.Slider -> GlimmerSliderSamples()
                     }
                 }
             }

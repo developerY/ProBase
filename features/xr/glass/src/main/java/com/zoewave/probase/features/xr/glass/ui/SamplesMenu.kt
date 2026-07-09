@@ -38,6 +38,9 @@ enum class GlimmerSample(val title: String) {
     Vision("Vision AI"),
     ObjectRecognition("Object Recognition"),
     SpatialNote("Spatial Note"),
+    Material3("Standard Material 3"),
+    GlimmerComparison("Glimmer Comparison"),
+    Slider("Glimmer Slider (Custom)"),
     Ritual("Morning Ritual Layout");
 
     fun next(): GlimmerSample {
