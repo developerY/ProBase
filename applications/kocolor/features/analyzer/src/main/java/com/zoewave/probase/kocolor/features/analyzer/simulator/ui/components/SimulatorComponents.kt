@@ -516,26 +516,26 @@ fun ResultStep(
                 // Left Column: Chromatic Core & Toggle
                 Column(
                     modifier = Modifier
-                        .width(140.dp)
+                        .width(100.dp)
                         .fillMaxHeight()
-                        .padding(16.dp),
+                        .padding(vertical = 16.dp, horizontal = 12.dp),
                     verticalArrangement = Arrangement.SpaceBetween,
                     horizontalAlignment = Alignment.Start
                 ) {
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         Text(
-                            text = "CHROMATIC CORE",
-                            style = MaterialTheme.typography.labelSmall,
+                            text = "CHROMATIC",
+                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
                             fontWeight = FontWeight.Black,
                             color = MaterialTheme.colorScheme.primary
                         )
                         uiState.recommendedPalette.forEach { hex ->
                             Box(
                                 modifier = Modifier
-                                    .size(width = 100.dp, height = 60.dp)
-                                    .clip(RoundedCornerShape(12.dp))
+                                    .size(width = 68.dp, height = 54.dp)
+                                    .clip(RoundedCornerShape(10.dp))
                                     .background(parseColor(hex))
-                                    .border(1.dp, Color.Black.copy(alpha = 0.05f), RoundedCornerShape(12.dp))
+                                    .border(1.dp, Color.Black.copy(alpha = 0.05f), RoundedCornerShape(10.dp))
                             )
                         }
                     }
@@ -624,9 +624,9 @@ private fun ResultTabToggle(
 ) {
     Surface(
         modifier = Modifier
-            .width(110.dp)
-            .height(56.dp),
-        shape = RoundedCornerShape(28.dp),
+            .width(76.dp)
+            .height(44.dp),
+        shape = RoundedCornerShape(22.dp),
         color = Color(0xFFF3F2F8)
     ) {
         Row(
@@ -642,12 +642,11 @@ private fun ResultTabToggle(
                     .clickable { onTabSelected(ResultTab.FACE) },
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = "FACE",
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Black,
-                    color = if (selectedTab == ResultTab.FACE) Color.White else Color.Gray,
-                    fontSize = 10.sp
+                Icon(
+                    imageVector = Icons.Default.Face,
+                    contentDescription = "FACE",
+                    tint = if (selectedTab == ResultTab.FACE) Color.White else Color.Gray,
+                    modifier = Modifier.size(20.dp)
                 )
             }
             Box(
@@ -659,12 +658,11 @@ private fun ResultTabToggle(
                     .clickable { onTabSelected(ResultTab.CLOTHES) },
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = "OUT",
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Black,
-                    color = if (selectedTab == ResultTab.CLOTHES) Color.White else Color.Gray,
-                    fontSize = 10.sp
+                Icon(
+                    imageVector = Icons.Default.Checkroom,
+                    contentDescription = "CLOTHES",
+                    tint = if (selectedTab == ResultTab.CLOTHES) Color.White else Color.Gray,
+                    modifier = Modifier.size(20.dp)
                 )
             }
         }
@@ -673,34 +671,43 @@ private fun ResultTabToggle(
 
 @Composable
 fun ClothingBlueprintView(uiState: StyleSimulatorUiState) {
+    val blueprintOffset = (-30).dp
+    val horizontalShift = 20.dp
+    
     Box(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
         contentAlignment = Alignment.Center
     ) {
-        // Central Silhouette Anchor
+        // Central Silhouette Anchor (Scaled up and centered)
         Box(
             modifier = Modifier
-                .width(160.dp)
+                .width(220.dp)
                 .fillMaxHeight()
+                .offset(x = horizontalShift, y = blueprintOffset)
                 .clip(RoundedCornerShape(32.dp))
-                .alpha(0.08f),
+                .alpha(0.35f),
             contentAlignment = Alignment.Center
         ) {
-            Icon(Icons.Default.Accessibility, null, modifier = Modifier.fillMaxSize(), tint = Color.Black)
+            Image(
+                painter = painterResource(id = R.drawable.applications_kocolor_feartues_analyzer_body),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Fit
+            )
         }
 
         // Callout Lines
         Canvas(modifier = Modifier.fillMaxSize()) {
-            val center = Offset(size.width / 2, size.height / 2)
+            val center = Offset(size.width / 2 + horizontalShift.toPx(), size.height / 2 + blueprintOffset.toPx())
             val dashEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
 
             // Top (Left)
             drawLine(
                 color = Color.LightGray,
                 start = Offset(center.x - 30.dp.toPx(), center.y - 80.dp.toPx()),
-                end = Offset(center.x - 80.dp.toPx(), center.y - 140.dp.toPx()),
+                end = Offset(center.x - 120.dp.toPx(), center.y - 120.dp.toPx()),
                 pathEffect = dashEffect, strokeWidth = 1.dp.toPx()
             )
 
@@ -708,7 +715,7 @@ fun ClothingBlueprintView(uiState: StyleSimulatorUiState) {
             drawLine(
                 color = Color.LightGray,
                 start = Offset(center.x + 40.dp.toPx(), center.y + 40.dp.toPx()),
-                end = Offset(center.x + 80.dp.toPx(), center.y + 60.dp.toPx()),
+                end = Offset(center.x + 120.dp.toPx(), center.y + 20.dp.toPx()),
                 pathEffect = dashEffect, strokeWidth = 1.dp.toPx()
             )
 
@@ -716,7 +723,7 @@ fun ClothingBlueprintView(uiState: StyleSimulatorUiState) {
             drawLine(
                 color = Color.LightGray,
                 start = Offset(center.x - 20.dp.toPx(), center.y + 160.dp.toPx()),
-                end = Offset(center.x - 80.dp.toPx(), center.y + 180.dp.toPx()),
+                end = Offset(center.x - 120.dp.toPx(), center.y + 160.dp.toPx()),
                 pathEffect = dashEffect, strokeWidth = 1.dp.toPx()
             )
         }
@@ -729,27 +736,30 @@ fun ClothingBlueprintView(uiState: StyleSimulatorUiState) {
             label = "TOP",
             productName = topItem?.name ?: "Pending...",
             colorHex = topItem?.colorHex,
-            modifier = Modifier.align(Alignment.TopStart).padding(top = 20.dp)
+            modifier = Modifier.align(Alignment.TopStart).padding(top = 20.dp).offset(y = blueprintOffset)
         )
 
         BlueprintCallout(
             label = "BOTTOM",
             productName = bottomItem?.name ?: "Pending...",
             colorHex = bottomItem?.colorHex,
-            modifier = Modifier.align(Alignment.CenterEnd).padding(bottom = 40.dp)
+            modifier = Modifier.align(Alignment.CenterEnd).padding(bottom = 40.dp).offset(y = blueprintOffset)
         )
 
         BlueprintCallout(
             label = "SHOES",
             productName = shoeItem?.name ?: "Pending...",
             colorHex = shoeItem?.colorHex,
-            modifier = Modifier.align(Alignment.BottomStart).padding(bottom = 20.dp)
+            modifier = Modifier.align(Alignment.BottomStart).padding(bottom = 20.dp).offset(y = blueprintOffset)
         )
     }
 }
 
 @Composable
 fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
+    val blueprintOffset = (-30).dp
+    val horizontalShift = 20.dp
+    
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -759,7 +769,8 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
         // Central Face Anchor (Always use Line-Art for Blueprint feel)
         Box(
             modifier = Modifier
-                .size(260.dp)
+                .size(280.dp)
+                .offset(x = horizontalShift, y = blueprintOffset)
                 .clip(CircleShape)
                 .background(Color.White.copy(alpha = 0.5f))
         ) {
@@ -773,29 +784,29 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
 
         // Callout Lines
         Canvas(modifier = Modifier.fillMaxSize()) {
-            val center = Offset(size.width / 2, size.height / 2)
+            val center = Offset(size.width / 2 + horizontalShift.toPx(), size.height / 2 + blueprintOffset.toPx())
             val dashEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
 
             // Eyes (Top Left)
             drawLine(
                 color = Color.LightGray,
-                start = Offset(center.x - 40.dp.toPx(), center.y - 40.dp.toPx()),
-                end = Offset(center.x - 80.dp.toPx(), center.y - 120.dp.toPx()),
+                start = Offset(center.x - 40.dp.toPx(), center.y - 50.dp.toPx()),
+                end = Offset(center.x - 120.dp.toPx(), center.y - 120.dp.toPx()),
                 pathEffect = dashEffect, strokeWidth = 1.dp.toPx()
             )
 
-            // Cheeks (Mid Left)
+            // Cheeks (Mid Left - Lowered)
             drawLine(
                 color = Color.LightGray,
-                start = Offset(center.x - 60.dp.toPx(), center.y + 10.dp.toPx()),
-                end = Offset(center.x - 80.dp.toPx(), center.y + 60.dp.toPx()),
+                start = Offset(center.x - 60.dp.toPx(), center.y + 30.dp.toPx()),
+                end = Offset(center.x - 120.dp.toPx(), center.y + 100.dp.toPx()),
                 pathEffect = dashEffect, strokeWidth = 1.dp.toPx()
             )
 
             // Lips (Bottom Right)
             drawLine(
                 color = Color.LightGray,
-                start = Offset(center.x + 20.dp.toPx(), center.y + 60.dp.toPx()),
+                start = Offset(center.x + 20.dp.toPx(), center.y + 70.dp.toPx()),
                 end = Offset(center.x + 80.dp.toPx(), center.y + 140.dp.toPx()),
                 pathEffect = dashEffect, strokeWidth = 1.dp.toPx()
             )
@@ -809,21 +820,21 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
             label = "EYES",
             productName = eyesItem?.name ?: "Pending...",
             colorHex = eyesItem?.colorHex,
-            modifier = Modifier.align(Alignment.TopStart).padding(top = 20.dp)
+            modifier = Modifier.align(Alignment.TopStart).padding(top = 10.dp).offset(y = blueprintOffset)
         )
 
         BlueprintCallout(
             label = "CHEEKS",
             productName = cheeksItem?.name ?: "Pending...",
             colorHex = cheeksItem?.colorHex,
-            modifier = Modifier.align(Alignment.CenterStart).padding(top = 100.dp)
+            modifier = Modifier.align(Alignment.CenterStart).padding(top = 220.dp).offset(y = blueprintOffset)
         )
 
         BlueprintCallout(
             label = "LIPS",
             productName = lipsItem?.name ?: "Pending...",
             colorHex = lipsItem?.colorHex,
-            modifier = Modifier.align(Alignment.BottomEnd).padding(bottom = 20.dp)
+            modifier = Modifier.align(Alignment.BottomEnd).padding(bottom = 0.dp).offset(y = blueprintOffset - 10.dp)
         )
     }
 }
@@ -840,15 +851,15 @@ fun BlueprintCallout(
     Box(modifier = modifier) {
         Card(
             modifier = Modifier
-                .width(if (isExpanded) 130.dp else 85.dp)
+                .width(if (isExpanded) 120.dp else 72.dp)
                 .clickable { isExpanded = !isExpanded },
-            shape = RoundedCornerShape(12.dp),
+            shape = RoundedCornerShape(10.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.98f)),
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
         ) {
             Column(
-                modifier = Modifier.padding(8.dp),
-                verticalArrangement = Arrangement.spacedBy(2.dp),
+                modifier = Modifier.padding(6.dp),
+                verticalArrangement = Arrangement.spacedBy(1.dp),
                 horizontalAlignment = Alignment.Start
             ) {
                 Text(
