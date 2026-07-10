@@ -516,26 +516,26 @@ fun ResultStep(
                 // Left Column: Chromatic Core & Toggle
                 Column(
                     modifier = Modifier
-                        .width(100.dp)
+                        .width(80.dp)
                         .fillMaxHeight()
-                        .padding(vertical = 16.dp, horizontal = 12.dp),
+                        .padding(vertical = 16.dp, horizontal = 8.dp),
                     verticalArrangement = Arrangement.SpaceBetween,
                     horizontalAlignment = Alignment.Start
                 ) {
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         Text(
                             text = "CHROMATIC",
-                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
+                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
                             fontWeight = FontWeight.Black,
                             color = MaterialTheme.colorScheme.primary
                         )
                         uiState.recommendedPalette.forEach { hex ->
                             Box(
                                 modifier = Modifier
-                                    .size(width = 68.dp, height = 54.dp)
-                                    .clip(RoundedCornerShape(10.dp))
+                                    .size(width = 64.dp, height = 48.dp)
+                                    .clip(RoundedCornerShape(8.dp))
                                     .background(parseColor(hex))
-                                    .border(1.dp, Color.Black.copy(alpha = 0.05f), RoundedCornerShape(10.dp))
+                                    .border(1.dp, Color.Black.copy(alpha = 0.05f), RoundedCornerShape(8.dp))
                             )
                         }
                     }
@@ -624,13 +624,13 @@ private fun ResultTabToggle(
 ) {
     Surface(
         modifier = Modifier
-            .width(76.dp)
-            .height(44.dp),
-        shape = RoundedCornerShape(22.dp),
+            .width(64.dp)
+            .height(36.dp),
+        shape = RoundedCornerShape(18.dp),
         color = Color(0xFFF3F2F8)
     ) {
         Row(
-            modifier = Modifier.fillMaxSize().padding(4.dp),
+            modifier = Modifier.fillMaxSize().padding(2.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
@@ -646,7 +646,7 @@ private fun ResultTabToggle(
                     imageVector = Icons.Default.Face,
                     contentDescription = "FACE",
                     tint = if (selectedTab == ResultTab.FACE) Color.White else Color.Gray,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(16.dp)
                 )
             }
             Box(
@@ -662,7 +662,7 @@ private fun ResultTabToggle(
                     imageVector = Icons.Default.Checkroom,
                     contentDescription = "CLOTHES",
                     tint = if (selectedTab == ResultTab.CLOTHES) Color.White else Color.Gray,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(16.dp)
                 )
             }
         }
@@ -758,7 +758,7 @@ fun ClothingBlueprintView(uiState: StyleSimulatorUiState) {
 @Composable
 fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
     val blueprintOffset = (-30).dp
-    val horizontalShift = 20.dp
+    val horizontalShift = 10.dp
     
     Box(
         modifier = Modifier
@@ -782,15 +782,78 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
             )
         }
 
-        // Callout Lines
+        // Callout Lines & Shades
         Canvas(modifier = Modifier.fillMaxSize()) {
             val center = Offset(size.width / 2 + horizontalShift.toPx(), size.height / 2 + blueprintOffset.toPx())
             val dashEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
 
+            // 1. Draw "Shades" (Soft Glows on the face)
+            val eyesItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.EYES }
+            val cheeksItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.DIMENSION }
+            val lipsItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.LIPS }
+
+            // Eyes Shade
+            eyesItem?.colorHex?.let { hex ->
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(parseColor(hex).copy(alpha = 0.35f), Color.Transparent),
+                        center = Offset(center.x - 35.dp.toPx(), center.y - 45.dp.toPx()),
+                        radius = 20.dp.toPx()
+                    ),
+                    radius = 20.dp.toPx(),
+                    center = Offset(center.x - 35.dp.toPx(), center.y - 45.dp.toPx())
+                )
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(parseColor(hex).copy(alpha = 0.35f), Color.Transparent),
+                        center = Offset(center.x + 35.dp.toPx(), center.y - 45.dp.toPx()),
+                        radius = 20.dp.toPx()
+                    ),
+                    radius = 20.dp.toPx(),
+                    center = Offset(center.x + 35.dp.toPx(), center.y - 45.dp.toPx())
+                )
+            }
+
+            // Cheeks Shade
+            cheeksItem?.colorHex?.let { hex ->
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(parseColor(hex).copy(alpha = 0.3f), Color.Transparent),
+                        center = Offset(center.x - 45.dp.toPx(), center.y + 25.dp.toPx()),
+                        radius = 35.dp.toPx()
+                    ),
+                    radius = 35.dp.toPx(),
+                    center = Offset(center.x - 45.dp.toPx(), center.y + 25.dp.toPx())
+                )
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(parseColor(hex).copy(alpha = 0.3f), Color.Transparent),
+                        center = Offset(center.x + 45.dp.toPx(), center.y + 25.dp.toPx()),
+                        radius = 35.dp.toPx()
+                    ),
+                    radius = 35.dp.toPx(),
+                    center = Offset(center.x + 45.dp.toPx(), center.y + 25.dp.toPx())
+                )
+            }
+
+            // Lips Shade
+            lipsItem?.colorHex?.let { hex ->
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(parseColor(hex).copy(alpha = 0.4f), Color.Transparent),
+                        center = Offset(center.x, center.y + 75.dp.toPx()),
+                        radius = 25.dp.toPx()
+                    ),
+                    radius = 25.dp.toPx(),
+                    center = Offset(center.x, center.y + 75.dp.toPx())
+                )
+            }
+
+            // 2. Draw Callout Lines
             // Eyes (Top Left)
             drawLine(
                 color = Color.LightGray,
-                start = Offset(center.x - 40.dp.toPx(), center.y - 50.dp.toPx()),
+                start = Offset(center.x - 30.dp.toPx(), center.y - 45.dp.toPx()),
                 end = Offset(center.x - 120.dp.toPx(), center.y - 120.dp.toPx()),
                 pathEffect = dashEffect, strokeWidth = 1.dp.toPx()
             )
@@ -798,16 +861,16 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
             // Cheeks (Mid Left - Lowered)
             drawLine(
                 color = Color.LightGray,
-                start = Offset(center.x - 60.dp.toPx(), center.y + 30.dp.toPx()),
-                end = Offset(center.x - 120.dp.toPx(), center.y + 100.dp.toPx()),
+                start = Offset(center.x - 45.dp.toPx(), center.y + 20.dp.toPx()),
+                end = Offset(center.x - 140.dp.toPx(), center.y + 110.dp.toPx()),
                 pathEffect = dashEffect, strokeWidth = 1.dp.toPx()
             )
 
             // Lips (Bottom Right)
             drawLine(
                 color = Color.LightGray,
-                start = Offset(center.x + 20.dp.toPx(), center.y + 70.dp.toPx()),
-                end = Offset(center.x + 80.dp.toPx(), center.y + 140.dp.toPx()),
+                start = Offset(center.x, center.y + 70.dp.toPx()),
+                end = Offset(center.x + 100.dp.toPx(), center.y + 160.dp.toPx()),
                 pathEffect = dashEffect, strokeWidth = 1.dp.toPx()
             )
         }
@@ -827,7 +890,7 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
             label = "CHEEKS",
             productName = cheeksItem?.name ?: "Pending...",
             colorHex = cheeksItem?.colorHex,
-            modifier = Modifier.align(Alignment.CenterStart).padding(top = 220.dp).offset(y = blueprintOffset)
+            modifier = Modifier.align(Alignment.CenterStart).padding(top = 260.dp).offset(y = blueprintOffset)
         )
 
         BlueprintCallout(
@@ -851,9 +914,9 @@ fun BlueprintCallout(
     Box(modifier = modifier) {
         Card(
             modifier = Modifier
-                .width(if (isExpanded) 120.dp else 72.dp)
+                .width(if (isExpanded) 120.dp else 64.dp)
                 .clickable { isExpanded = !isExpanded },
-            shape = RoundedCornerShape(10.dp),
+            shape = RoundedCornerShape(8.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.98f)),
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
         ) {
