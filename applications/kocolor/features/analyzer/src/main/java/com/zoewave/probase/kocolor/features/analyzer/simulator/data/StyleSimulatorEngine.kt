@@ -71,15 +71,15 @@ class StyleSimulatorEngine @Inject constructor(
 
         // Tier 1: Probabilistic (Cloud Gemini BYOK Multimodal) - FALLBACK for Nano failures
         if (!apiKey.isNullOrBlank()) {
-            android.util.Log.d("StyleSimulatorEngine", "THINKING: Attempting Tier 1 (Cloud Gemini 1.5 Flash Fallback)...")
+            android.util.Log.d("StyleSimulatorEngine", "THINKING: Attempting Tier 1 (Cloud Gemini $modelName Fallback)...")
             try {
                 val cloudResult = architectCloudBlueprint(prompt, userPortrait, apiKey, modelName)
                 if (cloudResult != null) {
-                    android.util.Log.d("StyleSimulatorEngine", "SUCCESS: Blueprint generated via Tier 1 in ${System.currentTimeMillis() - startTime}ms")
+                    android.util.Log.d("StyleSimulatorEngine", "SUCCESS: Blueprint generated via Tier 1 ($modelName) in ${System.currentTimeMillis() - startTime}ms")
                     return cloudResult
                 }
             } catch (e: Exception) {
-                android.util.Log.w("StyleSimulatorEngine", "THINKING: Tier 1 fallback failed (${e.message})")
+                android.util.Log.w("StyleSimulatorEngine", "THINKING: Tier 1 fallback ($modelName) failed (${e.message})")
             }
         }
 
@@ -96,8 +96,11 @@ class StyleSimulatorEngine @Inject constructor(
         apiKey: String,
         modelName: String
     ): StyleBlueprint? {
+        // Strip "models/" prefix if present, as the SDK handles it
+        val sanitizedModelName = modelName.removePrefix("models/")
+        
         val generativeModel = GenerativeModel(
-            modelName = modelName,
+            modelName = sanitizedModelName,
             apiKey = apiKey,
             generationConfig = generationConfig {
                 responseMimeType = "application/json"
