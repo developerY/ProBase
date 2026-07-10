@@ -1,14 +1,18 @@
 package com.zoewave.probase.features.xr.glass
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResultLauncher
 import androidx.camera.core.ExperimentalLensFacing
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ComposeUiFlags
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -16,6 +20,8 @@ import androidx.xr.glimmer.GlimmerTheme
 import androidx.xr.projected.ProjectedDeviceController
 import androidx.xr.projected.ProjectedDisplayController
 import androidx.xr.projected.experimental.ExperimentalProjectedApi
+import androidx.xr.projected.permissions.ProjectedPermissionsRequestParams
+import androidx.xr.projected.permissions.ProjectedPermissionsResultContract
 import com.zoewave.probase.core.data.repository.GlassBridgeRepository
 import com.zoewave.probase.core.data.repository.LiveAiRepository
 import com.zoewave.probase.features.xr.glass.data.GlassSessionRepository
@@ -37,6 +43,13 @@ class GlassesMainActivity : ComponentActivity() {
     private var displayController: ProjectedDisplayController? = null
     private var isVisualUiSupported by mutableStateOf(false)
     private var areVisualsOn by mutableStateOf(true)
+
+    private val requestPermissionLauncher: ActivityResultLauncher<List<ProjectedPermissionsRequestParams>> =
+        registerForActivityResult(ProjectedPermissionsResultContract()) { results ->
+            if (results[Manifest.permission.CAMERA] == true) {
+                android.util.Log.d("GlassesMain", "Camera permission granted")
+            }
+        }
 
     private var initialSample: GlimmerSample? = null
 
@@ -69,6 +82,9 @@ class GlassesMainActivity : ComponentActivity() {
 
         // Initialize features. Phone app is responsible for pre-requesting permissions.
         initializeGlassesFeatures()
+
+        // Request hardware permissions for AI glasses features (e.g. Vision, Object Recognition)
+        requestHardwarePermissions()
 
         lifecycleScope.launch {
             glassBridgeRepository.glassCommands.collect { command ->
@@ -134,6 +150,23 @@ class GlassesMainActivity : ComponentActivity() {
                     glassSessionRepository.updateConnection(false)
                 }
             }
+        }
+    }
+
+    private fun requestHardwarePermissions() {
+        val permissions = listOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO)
+        val missingPermissions = permissions.filter {
+            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
+        }
+
+        if (missingPermissions.isNotEmpty()) {
+            val params = ProjectedPermissionsRequestParams(
+                permissions = missingPermissions,
+                rationale = "Camera and Microphone access are required to provide an immersive experience on your glasses."
+            )
+            // Best Practice: Speak the rationale since instructions aren't audible by default on glasses
+            params.rationale?.let { audioInterface.speak(it) }
+            requestPermissionLauncher.launch(listOf(params))
         }
     }
 
