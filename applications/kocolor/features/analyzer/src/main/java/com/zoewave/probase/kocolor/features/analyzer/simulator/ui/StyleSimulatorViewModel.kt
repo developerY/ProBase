@@ -271,6 +271,8 @@ class StyleSimulatorViewModel @Inject constructor(
                 state.fullCosmeticInventory.filter { it.macroCategory == cat && it.colorFamily == family }
             }
 
+            val preferredModel = aiSettings.aiModelFlow.first()
+
             _simulationStep.value = SimulationStep.BIO_MARKERS
             delay(1000)
             _simulationStep.value = SimulationStep.ROUTINE
@@ -289,7 +291,8 @@ class StyleSimulatorViewModel @Inject constructor(
                 userPortrait = userPortrait,
                 anchoredClothing = anchoredClothing,
                 anchoredCosmetics = anchoredCosmetics,
-                apiKey = apiKey
+                apiKey = apiKey,
+                modelName = preferredModel
             )
             
             userPortrait?.recycle()
