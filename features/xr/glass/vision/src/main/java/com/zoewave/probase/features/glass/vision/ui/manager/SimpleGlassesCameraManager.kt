@@ -77,9 +77,15 @@ class SimpleGlassesCameraManager @Inject constructor(
                 val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
 
                 if (!cameraProvider.hasCamera(cameraSelector)) {
-                    val msg = "ERROR: Hardware camera not found on projected device."
+                    val isEmulator = android.os.Build.PRODUCT.contains("sdk") || android.os.Build.MODEL.contains("Emulator")
+                    val msg = if (isEmulator) {
+                        "EMULATOR LIMIT: Virtual camera not supported on projected bridge."
+                    } else {
+                        "ERROR: Hardware camera not found on glasses."
+                    }
                     addLog(msg)
                     Log.w(tag, msg)
+                    _cameraSource.value = if (isEmulator) "Emulator (No Camera)" else "Hardware Missing"
                     return@launch
                 }
                 

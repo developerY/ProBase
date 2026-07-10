@@ -109,14 +109,25 @@ fun UnifiedVisionRoute(
         viewModel.initializeAsHostCommander()
     }
 
-    // 2. Bulletproof Initialization: Key on both Permission and Activity presence
+    // 2. Reactive Lifecycle: Initialize on Connect + Permission, Teardown on Disconnect
     LaunchedEffect(isGranted, activity) {
+        if (activity == null) return@LaunchedEffect
+        
         viewModel.onEvent(VisionUiEvent.CheckPermissions(context))
-        if (isGranted && activity != null) {
-            Log.d("VisionUI", "Permission is GRANTED and Activity is ready. FIRING INITIALIZE!")
-            viewModel.cameraManager.initialize(activity)
+
+        if (android.os.Build.VERSION.SDK_INT >= 36) {
+            ProjectedContext.isProjectedDeviceConnected(context, Dispatchers.Main).collect { connected ->
+                if (connected && isGranted) {
+                    Log.d("VisionUI", "Bridge CONNECTED and Permission GRANTED. Initializing hardware...")
+                    viewModel.cameraManager.initialize(activity)
+                } else if (!connected) {
+                    Log.w("VisionUI", "Bridge DISCONNECTED. Tearing down hardware...")
+                    viewModel.cameraManager.teardown()
+                }
+            }
         } else {
-            Log.d("VisionUI", "Initialization pending: isGranted=$isGranted, activity=${activity?.let { "Ready" } ?: "Null"}")
+            // Fallback for older API levels where we assume connection if the activity is running
+            if (isGranted) viewModel.cameraManager.initialize(activity)
         }
     }
 
