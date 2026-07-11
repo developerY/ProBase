@@ -44,5 +44,16 @@
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name="com.zoewave.probase.features.xr.glass.SystemAlertActivity"
+            android:exported="true"
+            android:label="System Alert"
+            android:requiredDisplayCategory="xr_projected"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
+        </activity>
     </application>
 </manifest>
