@@ -3,8 +3,10 @@ package com.zoewave.probase.features.xr.glass.ui
 import androidx.camera.camera2.interop.ExperimentalCamera2Interop
 import androidx.camera.core.ExperimentalLensFacing
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
@@ -22,6 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -189,6 +192,37 @@ fun GlassApp(
                             color = Color.White
                         )
                     }
+                }
+            }
+        }
+
+        // --- Lifecycle Paused Badge ---
+        AnimatedVisibility(
+            visible = uiState.isPaused,
+            enter = slideInVertically { it } + fadeIn(),
+            exit = slideOutVertically { it } + fadeOut(),
+            modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 24.dp)
+        ) {
+            Card(
+                color = Color.DarkGray.copy(alpha = 0.8f),
+                modifier = Modifier.padding(8.dp)
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        Icons.Default.Info,
+                        contentDescription = null,
+                        tint = Color.Yellow,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = "ON_PAUSE (Still Rendering)",
+                        style = GlimmerTheme.typography.bodySmall,
+                        color = Color.White
+                    )
                 }
             }
         }

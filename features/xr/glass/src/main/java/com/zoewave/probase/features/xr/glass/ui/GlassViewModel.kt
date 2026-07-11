@@ -28,6 +28,7 @@ class GlassViewModel @Inject constructor(
 
     private val _currentDate = MutableStateFlow(getStartOfDay(System.currentTimeMillis()))
     private val _notificationText = MutableStateFlow<String?>(null)
+    private val _isPaused = MutableStateFlow(false)
     
     val uiState: StateFlow<GlassUiState> = combine(
         _currentDate.flatMapLatest { date ->
@@ -52,14 +53,16 @@ class GlassViewModel @Inject constructor(
         },
         liveAiRepository.isSessionActive,
         liveAiRepository.audioLevel,
-        _notificationText
-    ) { activeRoutine, isAiActive, aiLevel, notification ->
+        _notificationText,
+        _isPaused
+    ) { activeRoutine, isAiActive, aiLevel, notification, paused ->
         GlassUiState(
             morningRoutine = activeRoutine,
             isLoading = false,
             isAiActive = isAiActive,
             aiAudioLevel = aiLevel,
-            notificationText = notification
+            notificationText = notification,
+            isPaused = paused
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), GlassUiState())
 
@@ -72,6 +75,10 @@ class GlassViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun setPaused(paused: Boolean) {
+        _isPaused.value = paused
     }
 
     private fun showNotification(text: String) {

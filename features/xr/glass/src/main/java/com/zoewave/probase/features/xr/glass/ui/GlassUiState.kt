@@ -7,5 +7,6 @@ data class GlassUiState(
     val isLoading: Boolean = true,
     val isAiActive: Boolean = false,
     val aiAudioLevel: Float = 0f,
-    val notificationText: String? = null
+    val notificationText: String? = null,
+    val isPaused: Boolean = false
 )

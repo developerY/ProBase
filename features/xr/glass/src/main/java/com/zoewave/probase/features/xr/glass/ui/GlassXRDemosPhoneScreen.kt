@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Cast
 import androidx.compose.material.icons.filled.CastConnected
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -51,6 +52,7 @@ import com.zoewave.probase.features.glass.vision.ui.UnifiedVisionRoute
 import com.zoewave.probase.features.glass.vision.ui.VisionUiEvent
 import com.zoewave.probase.features.glass.vision.ui.VisionViewModel
 import com.zoewave.probase.features.xr.glass.GlassesMainActivity
+import com.zoewave.probase.features.xr.glass.SystemAlertActivity
 
 @androidx.annotation.OptIn(ExperimentalLensFacing::class)
 @OptIn(
@@ -84,7 +86,8 @@ fun GlassXRDemosPhoneRoute(
         onStopDemo = { viewModel.updateActiveSample(null) },
         onNextSample = { sample -> viewModel.updateActiveSample(sample.next()) },
         onPreviousSample = { sample -> viewModel.updateActiveSample(sample.previous()) },
-        onSendNotification = { text -> viewModel.sendNotification(text) }
+        onSendNotification = { text -> viewModel.sendNotification(text) },
+        onTriggerAlert = { launchAlertOnGlasses(context) }
     )
 }
 
@@ -101,6 +104,7 @@ fun GlassXRDemosPhoneScreen(
     onNextSample: (GlimmerSample) -> Unit,
     onPreviousSample: (GlimmerSample) -> Unit,
     onSendNotification: (String) -> Unit,
+    onTriggerAlert: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -226,16 +230,27 @@ fun GlassXRDemosPhoneScreen(
 
                             if (isConnected) {
                                 Spacer(Modifier.height(16.dp))
-                                androidx.compose.material3.Button(
-                                    onClick = { onSendNotification("Hello DroidCon from Phone!") },
-                                    modifier = Modifier.fillMaxWidth(),
-                                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                                        containerColor = Color(0xFF4CAF50)
-                                    )
-                                ) {
-                                    Icon(Icons.Default.Notifications, contentDescription = null)
-                                    Spacer(Modifier.width(8.dp))
-                                    Text("Ping Glasses")
+                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    androidx.compose.material3.Button(
+                                        onClick = { onSendNotification("Hello DroidCon from Phone!") },
+                                        modifier = Modifier.weight(1f),
+                                        colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                                            containerColor = Color(0xFF4CAF50)
+                                        )
+                                    ) {
+                                        Icon(Icons.Default.Notifications, contentDescription = null)
+                                        Spacer(Modifier.width(8.dp))
+                                        Text("Ping")
+                                    }
+                                    
+                                    androidx.compose.material3.OutlinedButton(
+                                        onClick = { onTriggerAlert() },
+                                        modifier = Modifier.weight(1f)
+                                    ) {
+                                        Icon(Icons.Default.Warning, contentDescription = null)
+                                        Spacer(Modifier.width(8.dp))
+                                        Text("Alert")
+                                    }
                                 }
                             }
                         }
@@ -311,6 +326,29 @@ private fun launchOnGlasses(context: android.content.Context, sample: GlimmerSam
         val intent = Intent(context, GlassesMainActivity::class.java).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             putExtra("initial_sample", sample.name)
+        }
+        context.startActivity(intent)
+    }
+}
+
+@OptIn(ExperimentalProjectedApi::class)
+private fun launchAlertOnGlasses(context: android.content.Context) {
+    if (android.os.Build.VERSION.SDK_INT >= 35) {
+        try {
+            val options = ProjectedContext.createProjectedActivityOptions(context)
+            val intent = Intent(context, SystemAlertActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(intent, options.toBundle())
+        } catch (e: Exception) {
+            val intent = Intent(context, SystemAlertActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(intent)
+        }
+    } else {
+        val intent = Intent(context, SystemAlertActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         context.startActivity(intent)
     }
