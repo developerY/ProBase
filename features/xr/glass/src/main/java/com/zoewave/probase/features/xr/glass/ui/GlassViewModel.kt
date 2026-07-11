@@ -2,6 +2,7 @@ package com.zoewave.probase.features.xr.glass.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.zoewave.probase.core.data.repository.GlassBridgeRepository
 import com.zoewave.probase.core.data.repository.LiveAiRepository
 import com.zoewave.probase.core.data.repository.RitualRepository
 import com.zoewave.probase.core.model.ritual.RoutineTime
@@ -21,10 +22,12 @@ import javax.inject.Inject
 class GlassViewModel @Inject constructor(
     private val ritualRepository: RitualRepository,
     private val liveAiRepository: LiveAiRepository,
-    private val glassSessionRepository: GlassSessionRepository
+    private val glassSessionRepository: GlassSessionRepository,
+    private val glassBridgeRepository: GlassBridgeRepository
 ) : ViewModel() {
 
     private val _currentDate = MutableStateFlow(getStartOfDay(System.currentTimeMillis()))
+    private val _notificationText = MutableStateFlow<String?>(null)
     
     val uiState: StateFlow<GlassUiState> = combine(
         _currentDate.flatMapLatest { date ->
@@ -48,15 +51,38 @@ class GlassViewModel @Inject constructor(
             }
         },
         liveAiRepository.isSessionActive,
-        liveAiRepository.audioLevel
-    ) { activeRoutine, isAiActive, aiLevel ->
+        liveAiRepository.audioLevel,
+        _notificationText
+    ) { activeRoutine, isAiActive, aiLevel, notification ->
         GlassUiState(
             morningRoutine = activeRoutine,
             isLoading = false,
             isAiActive = isAiActive,
-            aiAudioLevel = aiLevel
+            aiAudioLevel = aiLevel,
+            notificationText = notification
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), GlassUiState())
+
+    init {
+        viewModelScope.launch {
+            glassBridgeRepository.glassCommands.collect { command ->
+                if (command.startsWith("SHOW_NOTIFICATION:")) {
+                    val text = command.removePrefix("SHOW_NOTIFICATION:")
+                    showNotification(text)
+                }
+            }
+        }
+    }
+
+    private fun showNotification(text: String) {
+        viewModelScope.launch {
+            _notificationText.value = text
+            kotlinx.coroutines.delay(5000) // Auto-hide after 5 seconds
+            if (_notificationText.value == text) {
+                _notificationText.value = null
+            }
+        }
+    }
 
     private fun getStartOfDay(timestamp: Long): Long {
         val cal = java.util.Calendar.getInstance()

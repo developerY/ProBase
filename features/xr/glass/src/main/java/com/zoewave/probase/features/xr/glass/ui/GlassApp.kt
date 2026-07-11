@@ -2,6 +2,11 @@ package com.zoewave.probase.features.xr.glass.ui
 
 import androidx.camera.camera2.interop.ExperimentalCamera2Interop
 import androidx.camera.core.ExperimentalLensFacing
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,11 +16,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -25,6 +32,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.xr.glimmer.Card
 import androidx.xr.glimmer.GlimmerTheme
 import androidx.xr.glimmer.Icon
 import androidx.xr.glimmer.IconButton
@@ -145,6 +153,41 @@ fun GlassApp(
                         GlimmerSample.Material3 -> Material3Samples()
                         GlimmerSample.GlimmerComparison -> GlimmerComparisonSamples()
                         GlimmerSample.Slider -> GlimmerSliderSamples()
+                    }
+                }
+            }
+        }
+
+        // --- Notification Overlay ---
+        AnimatedVisibility(
+            visible = uiState.notificationText != null,
+            enter = slideInVertically { -it } + fadeIn(),
+            exit = slideOutVertically { -it } + fadeOut(),
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .padding(top = 40.dp)
+        ) {
+            uiState.notificationText?.let { text ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Default.Notifications,
+                            contentDescription = null,
+                            tint = GlimmerTheme.colors.primary,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(Modifier.width(16.dp))
+                        Text(
+                            text = text,
+                            style = GlimmerTheme.typography.bodyMedium,
+                            color = Color.White
+                        )
                     }
                 }
             }
