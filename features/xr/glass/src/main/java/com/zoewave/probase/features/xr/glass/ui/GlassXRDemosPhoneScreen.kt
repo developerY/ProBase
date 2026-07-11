@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,6 +21,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Cast
 import androidx.compose.material.icons.filled.CastConnected
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -81,7 +83,8 @@ fun GlassXRDemosPhoneRoute(
         },
         onStopDemo = { viewModel.updateActiveSample(null) },
         onNextSample = { sample -> viewModel.updateActiveSample(sample.next()) },
-        onPreviousSample = { sample -> viewModel.updateActiveSample(sample.previous()) }
+        onPreviousSample = { sample -> viewModel.updateActiveSample(sample.previous()) },
+        onSendNotification = { text -> viewModel.sendNotification(text) }
     )
 }
 
@@ -97,6 +100,7 @@ fun GlassXRDemosPhoneScreen(
     onStopDemo: () -> Unit,
     onNextSample: (GlimmerSample) -> Unit,
     onPreviousSample: (GlimmerSample) -> Unit,
+    onSendNotification: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -219,6 +223,21 @@ fun GlassXRDemosPhoneScreen(
                                     else "These samples are designed to be projected onto intelligent eyewear. Connect your glasses and tap 'Launch' to see the Glimmer UI in action.",
                                 style = MaterialTheme.typography.bodyMedium
                             )
+
+                            if (isConnected) {
+                                Spacer(Modifier.height(16.dp))
+                                androidx.compose.material3.Button(
+                                    onClick = { onSendNotification("Hello DroidCon from Phone!") },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                                        containerColor = Color(0xFF4CAF50)
+                                    )
+                                ) {
+                                    Icon(Icons.Default.Notifications, contentDescription = null)
+                                    Spacer(Modifier.width(8.dp))
+                                    Text("Ping Glasses")
+                                }
+                            }
                         }
                     }
                 }

@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.xr.projected.ProjectedDeviceController
 import androidx.xr.projected.experimental.ExperimentalProjectedApi
+import com.zoewave.probase.core.data.repository.GlassBridgeRepository
 import com.zoewave.probase.features.xr.glass.data.GlassSessionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
@@ -14,7 +15,8 @@ import javax.inject.Inject
 @OptIn(ExperimentalProjectedApi::class)
 @HiltViewModel
 class GlassXRDemosViewModel @Inject constructor(
-    private val repository: GlassSessionRepository
+    private val repository: GlassSessionRepository,
+    private val bridgeRepository: GlassBridgeRepository
 ) : ViewModel() {
 
     val isConnected: StateFlow<Boolean> = repository.isConnected
@@ -22,6 +24,12 @@ class GlassXRDemosViewModel @Inject constructor(
 
     fun updateActiveSample(sample: GlimmerSample?) {
         repository.updateActiveSample(sample)
+    }
+
+    fun sendNotification(text: String) {
+        viewModelScope.launch {
+            bridgeRepository.sendGlassCommand("SHOW_NOTIFICATION:$text")
+        }
     }
 
     fun checkConnection(context: Context) {
