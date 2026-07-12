@@ -1,8 +1,11 @@
 package com.zoewave.probase.features.glass.vision.ui.manager
 
+import android.hardware.camera2.CaptureRequest
 import android.util.Log
+import android.util.Range
 import android.util.Size
 import androidx.activity.ComponentActivity
+import androidx.camera.camera2.interop.Camera2Interop
 import androidx.camera.camera2.interop.ExperimentalCamera2Interop
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ExperimentalLensFacing
@@ -99,11 +102,20 @@ class SimpleGlassesCameraManager @Inject constructor(
                     .setResolutionStrategy(resolutionStrategy)
                     .build()
 
-                addLog("[INIT] Building ImageCapture use case...")
-                imageCapture = ImageCapture.Builder()
+                addLog("[INIT] Building ImageCapture use case with thermal throttling...")
+                val imageCaptureBuilder = ImageCapture.Builder()
                     .setResolutionSelector(resolutionSelector)
                     .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
-                    .build()
+
+                // BEST PRACTICE: Set FPS to 10 for Computer Vision to save battery/heat 
+                // as recommended in the Android XR documentation.
+                Camera2Interop.Extender(imageCaptureBuilder)
+                    .setCaptureRequestOption(
+                        CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, 
+                        Range(10, 10)
+                    )
+
+                imageCapture = imageCaptureBuilder.build()
 
                 try {
                     addLog("[INIT] Unbinding previous use cases...")
