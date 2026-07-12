@@ -52,8 +52,17 @@ class GlassesMainActivity : ComponentActivity() {
 
     private val requestPermissionLauncher: ActivityResultLauncher<List<ProjectedPermissionsRequestParams>> =
         registerForActivityResult(ProjectedPermissionsResultContract()) { results ->
-            if (results[Manifest.permission.CAMERA] == true) {
-                android.util.Log.d("GlassesMain", "Camera permission granted")
+            val cameraGranted = results[Manifest.permission.CAMERA] == true
+            val audioGranted = results[Manifest.permission.RECORD_AUDIO] == true
+            
+            android.util.Log.d(LIFECYCLE_TAG, "Permissions Result: Camera=$cameraGranted, Audio=$audioGranted")
+            
+            if (cameraGranted) {
+                // Initialize Vision features if needed
+            }
+            if (!audioGranted) {
+                // Audio is critical for the glasses experience
+                android.util.Log.w(LIFECYCLE_TAG, "Audio permission denied. Some features will be limited.")
             }
         }
 

@@ -24,7 +24,7 @@ class StyleSimulatorEngine @Inject constructor(
         {
           "rationale": "string",
           "selectedClothingIds": ["Long", "Long", "Long"],
-          "selectedCosmeticIds": ["Long", "Long", "Long", ...],
+          "selectedCosmeticIds": ["Long", "Long", "Long", "..."],
           "recommendedPalette": ["#HEX", "#HEX", "#HEX"]
         }
     """.trimIndent()
@@ -46,15 +46,17 @@ class StyleSimulatorEngine @Inject constructor(
     ): StyleBlueprint {
         val startTime = System.currentTimeMillis()
         
-        // 1. Manifest Minification (Cloud-Optimization)
+        // 1. Manifest Minification (Cloud-Optimization via Tuple Matrix)
         val minifiedManifest = minifyManifest(
             availableWardrobe, availableCosmetics, anchoredClothing, anchoredCosmetics
         )
+        android.util.Log.d("StyleSimulatorEngine", "DATA_OUT (Minified Manifest): $minifiedManifest")
 
         val prompt = buildArchitectPrompt(
             userIntent, circadianContext, routineCompleted, wellnessScore, weatherContext, 
             minifiedManifest, fashionProfile
         )
+        android.util.Log.d("StyleSimulatorEngine", "DATA_OUT (Full Prompt):\n$prompt")
 
         // Tier 1.5: Local LLM (Gemini Nano) - PREFERRED Tier for speed/cost
         android.util.Log.d("StyleSimulatorEngine", "THINKING: Attempting Tier 1.5 (On-Device Gemini Nano)...")
@@ -79,13 +81,13 @@ class StyleSimulatorEngine @Inject constructor(
                     return cloudResult
                 }
             } catch (e: Exception) {
-                android.util.Log.w("StyleSimulatorEngine", "THINKING: Tier 1 fallback ($modelName) failed (${e.message})")
+                android.util.Log.e("StyleSimulatorEngine", "THINKING: Tier 1 fallback ($modelName) failed", e)
             }
         }
 
         // Tier 2: Deterministic (Local Heuristics) - Final Safety Net
         android.util.Log.d("StyleSimulatorEngine", "THINKING: Attempting Tier 2 (Local Heuristic Architect)...")
-        val localResult = architectLocalBlueprint(userIntent, availableWardrobe)
+        val localResult = architectLocalBlueprint(userIntent, availableWardrobe, availableCosmetics)
         android.util.Log.d("StyleSimulatorEngine", "SUCCESS: Blueprint generated via Tier 2 in ${System.currentTimeMillis() - startTime}ms")
         return localResult
     }
@@ -114,6 +116,7 @@ class StyleSimulatorEngine @Inject constructor(
 
         val response = generativeModel.generateContent(inputContent)
         val jsonText = response.text ?: return null
+        android.util.Log.d("StyleSimulatorEngine", "DATA_IN (Cloud Response Raw): $jsonText")
         return sanitizeAndDecode(jsonText)
     }
 
@@ -123,6 +126,16 @@ class StyleSimulatorEngine @Inject constructor(
         anchoredWardrobe: List<ClothingItem>,
         anchoredCosmetics: List<CosmeticItem>
     ): String {
+        // Vibe Key: 0=casual, 1=professional, 2=gala, 3=smart-casual, 4=formal, 5=lounge
+        fun Formality.toKey(): String = when(this) {
+            Formality.CASUAL -> "0"
+            Formality.PROFESSIONAL -> "1"
+            Formality.GALA -> "2"
+            Formality.SMART_CASUAL -> "3"
+            Formality.FORMAL -> "4"
+            Formality.LOUNGE -> "5"
+        }
+
         // Pruning: If a category is anchored, only include those items.
         val anchoredCategories = anchoredWardrobe.map { it.category }.toSet()
         val prunedWardrobe = wardrobe.filter { item ->
@@ -138,17 +151,17 @@ class StyleSimulatorEngine @Inject constructor(
             } else true
         }
 
-        // Mapping to Lightweight DTOs
+        // Mapping to Lightweight Matrix Tuples [ID, Type, Hex, VibeKey]
         val minWardrobe = prunedWardrobe.groupBy { it.category.name.lowercase() }
             .mapValues { (_, items) ->
-                items.distinctBy { "${it.category}_${it.colorFamily}" } // Deduplication
-                    .map { MinifiedClothing(it.id.toString(), it.name.lowercase(), it.colorHex ?: "unknown", it.formality.name.lowercase()) }
+                items.distinctBy { "${it.category}_${it.colorFamily}" }
+                    .map { listOf(it.id.toString(), it.name.lowercase(), it.colorHex ?: "#000000", it.formality.toKey()) }
             }
 
         val minCosmetics = prunedCosmetics.groupBy { it.macroCategory.name.lowercase() }
             .mapValues { (_, items) ->
                 items.distinctBy { "${it.microCategory}_${it.colorFamily}" }
-                    .map { MinifiedCosmetic(it.id.toString(), it.name.lowercase(), it.colorHex ?: "unknown") }
+                    .map { listOf(it.id.toString(), it.microCategory.name.lowercase(), it.colorHex ?: "#000000") }
             }
 
         return json.encodeToString(CloudManifest(minWardrobe, minCosmetics))
@@ -173,7 +186,12 @@ class StyleSimulatorEngine @Inject constructor(
             
             IMAGE DATA: I have provided a portrait of the user. Use this as the source of truth for their visual canvas.
             
-            AVAILABLE VAULT (MINIFIED MANIFEST):
+            AVAILABLE VAULT (MATRIX REPRESENTATION):
+            Legend:
+            - Clothing Schema: [ID, Name/Type, ColorHex, VibeKey]
+            - VibeKey: 0=casual, 1=professional, 2=gala, 3=smart-casual, 4=formal, 5=lounge
+            - Cosmetic Schema: [ID, MicroCategory, ColorHex]
+            
             $minifiedManifest
             
             GOAL:
@@ -206,32 +224,40 @@ class StyleSimulatorEngine @Inject constructor(
      */
     fun architectLocalBlueprint(
         userIntent: String,
-        availableWardrobe: List<ClothingItem>
+        availableWardrobe: List<ClothingItem>,
+        availableCosmetics: List<CosmeticItem>
     ): StyleBlueprint {
         val selectedItems = mutableListOf<ClothingItem>()
+        val selectedCosmetics = mutableListOf<CosmeticItem>()
         
-        // Simple heuristic selection based on categories
+        // 1. Pick Clothes
         val tops = availableWardrobe.filter { it.category == ClothingCategory.TOPS }
         val bottoms = availableWardrobe.filter { it.category == ClothingCategory.BOTTOMS }
         val shoes = availableWardrobe.filter { it.category == ClothingCategory.SHOES }
         
-        fun List<ClothingItem>.smartPick(): ClothingItem? {
+        fun <T> List<T>.smartPick(nameSelector: (T) -> String, notesSelector: (T) -> String?): T? {
             if (this.isEmpty()) return null
             val matches = this.filter { item ->
                 userIntent.split(" ").any { keyword -> 
-                    item.name.contains(keyword, ignoreCase = true) || 
-                    (item.notes?.contains(keyword, ignoreCase = true) ?: false)
+                    nameSelector(item).contains(keyword, ignoreCase = true) || 
+                    (notesSelector(item)?.contains(keyword, ignoreCase = true) ?: false)
                 }
             }
             return matches.randomOrNull() ?: this.random()
         }
 
-        tops.smartPick()?.let { selectedItems.add(it) }
-        bottoms.smartPick()?.let { selectedItems.add(it) }
-        shoes.smartPick()?.let { selectedItems.add(it) }
+        tops.smartPick({it.name}, {it.notes})?.let { selectedItems.add(it) }
+        bottoms.smartPick({it.name}, {it.notes})?.let { selectedItems.add(it) }
+        shoes.smartPick({it.name}, {it.notes})?.let { selectedItems.add(it) }
         
-        val accessories = availableWardrobe.filter { it.category == ClothingCategory.ACCESSORIES }.shuffled().take(2)
-        selectedItems.addAll(accessories)
+        // 2. Pick Cosmetics (Trinity: Eyes, Cheeks, Lips)
+        val eyes = availableCosmetics.filter { it.macroCategory == MacroCategory.EYES }
+        val cheeks = availableCosmetics.filter { it.macroCategory == MacroCategory.DIMENSION }
+        val lips = availableCosmetics.filter { it.macroCategory == MacroCategory.LIPS }
+
+        eyes.smartPick({it.name}, {it.notes})?.let { selectedCosmetics.add(it) }
+        cheeks.smartPick({it.name}, {it.notes})?.let { selectedCosmetics.add(it) }
+        lips.smartPick({it.name}, {it.notes})?.let { selectedCosmetics.add(it) }
 
         val palette = selectedItems.mapNotNull { it.dominantHex }.distinct().toMutableList()
         if (palette.isEmpty()) palette.add("#FFFFFF")
@@ -244,7 +270,7 @@ class StyleSimulatorEngine @Inject constructor(
         return StyleBlueprint(
             rationale = "Local Architect: Selected from your vault based on intent.",
             selectedClothingIds = selectedItems.map { it.id },
-            selectedCosmeticIds = emptyList(),
+            selectedCosmeticIds = selectedCosmetics.map { it.id },
             recommendedPalette = finalPalette
         )
     }
@@ -259,22 +285,7 @@ data class StyleBlueprint(
 )
 
 @Serializable
-private data class MinifiedClothing(
-    val id: String,
-    val type: String,
-    val hex: String,
-    val vibe: String
-)
-
-@Serializable
-private data class MinifiedCosmetic(
-    val id: String,
-    val type: String,
-    val hex: String
-)
-
-@Serializable
 private data class CloudManifest(
-    val wardrobe: Map<String, List<MinifiedClothing>>,
-    val cosmetics: Map<String, List<MinifiedCosmetic>>
+    val wardrobe: Map<String, List<List<String>>>,
+    val cosmetics: Map<String, List<List<String>>>
 )
