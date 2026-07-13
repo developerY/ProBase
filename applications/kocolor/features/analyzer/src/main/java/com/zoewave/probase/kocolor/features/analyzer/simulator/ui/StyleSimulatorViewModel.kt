@@ -295,10 +295,46 @@ class StyleSimulatorViewModel @Inject constructor(
                 modelName = preferredModel
             )
             
+            // Translate Rationale: Swap <ITEM:id> tags for rich names
+            val translatedRationale = translateRationale(
+                blueprint.rationale,
+                state.fullClothingInventory,
+                state.fullCosmeticInventory
+            )
+
             userPortrait?.recycle()
-            _simulationResult.value = blueprint
+            _simulationResult.value = blueprint.copy(rationale = translatedRationale)
             _simulationStep.value = SimulationStep.RESULT
         }
+    }
+
+    private fun translateRationale(
+        rawRationale: String,
+        clothing: List<ClothingItem>,
+        cosmetics: List<CosmeticItem>
+    ): String {
+        // Matches <ITEM:w_16> or <ITEM:c_5>
+        val tagPattern = "<ITEM:([wc])_(\\d+)>".toRegex()
+        var translated = rawRationale
+        
+        tagPattern.findAll(rawRationale).forEach { match ->
+            val fullTag = match.value
+            val domain = match.groupValues[1] // 'w' or 'c'
+            val id = match.groupValues[2].toLongOrNull() ?: return@forEach
+            
+            val richName = if (domain == "w") {
+                clothing.find { it.id == id }?.let { 
+                    "${it.brand ?: ""} ${it.name.removePrefix(it.brand ?: "")}".trim()
+                }
+            } else {
+                cosmetics.find { it.id == id }?.let {
+                    "${it.brand} ${it.name.removePrefix(it.brand)}".trim()
+                }
+            }
+            
+            translated = translated.replace(fullTag, richName ?: "this item")
+        }
+        return translated
     }
 
     private fun loadBitmapFromUri(uri: Uri): android.graphics.Bitmap? {

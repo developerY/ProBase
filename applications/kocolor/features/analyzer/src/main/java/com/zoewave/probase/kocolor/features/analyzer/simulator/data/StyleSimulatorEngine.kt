@@ -3,7 +3,11 @@ package com.zoewave.probase.kocolor.features.analyzer.simulator.data
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.content
 import com.google.ai.client.generativeai.type.generationConfig
-import com.zoewave.probase.core.model.ritual.*
+import com.zoewave.probase.core.model.ritual.ClothingCategory
+import com.zoewave.probase.core.model.ritual.ClothingItem
+import com.zoewave.probase.core.model.ritual.CosmeticItem
+import com.zoewave.probase.core.model.ritual.Formality
+import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.features.ai.local.data.LocalAiEngine
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -155,13 +159,13 @@ class StyleSimulatorEngine @Inject constructor(
         val minWardrobe = prunedWardrobe.groupBy { it.category.name.lowercase() }
             .mapValues { (_, items) ->
                 items.distinctBy { "${it.category}_${it.colorFamily}" }
-                    .map { listOf(it.id.toString(), it.name.lowercase(), it.colorHex ?: "#000000", it.formality.toKey()) }
+                    .map { listOf("w_${it.id}", it.name.lowercase(), it.colorHex ?: "#000000", it.formality.toKey()) }
             }
 
         val minCosmetics = prunedCosmetics.groupBy { it.macroCategory.name.lowercase() }
             .mapValues { (_, items) ->
                 items.distinctBy { "${it.microCategory}_${it.colorFamily}" }
-                    .map { listOf(it.id.toString(), it.microCategory.name.lowercase(), it.colorHex ?: "#000000") }
+                    .map { listOf("c_${it.id}", it.microCategory.name.lowercase(), it.colorHex ?: "#000000") }
             }
 
         return json.encodeToString(CloudManifest(minWardrobe, minCosmetics))
@@ -191,6 +195,7 @@ class StyleSimulatorEngine @Inject constructor(
             - Clothing Schema: [ID, Name/Type, ColorHex, VibeKey]
             - VibeKey: 0=casual, 1=professional, 2=gala, 3=smart-casual, 4=formal, 5=lounge
             - Cosmetic Schema: [ID, MicroCategory, ColorHex]
+            - IDs: Prefixed with 'w_' for Wardrobe and 'c_' for Cosmetics.
             
             $minifiedManifest
             
@@ -202,6 +207,9 @@ class StyleSimulatorEngine @Inject constructor(
                - If humidity/heat is high, select a matte/long-wear foundation or primer.
             4. Create a 3-color Palette (HEX codes) harmonizing the whole look.
             5. Provide a brief rationale. Mention WHY you selected the specific DEFENSIVE items for the current weather.
+               CRITICAL SYNTAX RULE: When referencing ANY selected item in your rationale, you MUST use the exact inline tag format <ITEM:id>. Do not attempt to guess or describe the item's brand in the text.
+               GOOD EXAMPLE: "I selected <ITEM:w_5> for its breathability, paired with <ITEM:c_14>."
+               BAD EXAMPLE: "I selected the Brunello top (#w_5)..."
             
             Respond ONLY with a valid JSON object matching this schema:
             {
