@@ -27,8 +27,8 @@ class StyleSimulatorEngine @Inject constructor(
     private val BLUEPRINT_SCHEMA = """
         {
           "rationale": "string",
-          "selectedClothingIds": ["Long", "Long", "Long"],
-          "selectedCosmeticIds": ["Long", "Long", "Long", "..."],
+          "selectedClothingIds": ["String", "String", "String"],
+          "selectedCosmeticIds": ["String", "String", "String", ...],
           "recommendedPalette": ["#HEX", "#HEX", "#HEX"]
         }
     """.trimIndent()
@@ -214,8 +214,8 @@ class StyleSimulatorEngine @Inject constructor(
             Respond ONLY with a valid JSON object matching this schema:
             {
               "rationale": "string",
-              "selectedClothingIds": [Long, Long, Long],
-              "selectedCosmeticIds": [Long, Long, Long, ...],
+              "selectedClothingIds": ["String", "String", "String"],
+              "selectedCosmeticIds": ["String", "String", "String", ...],
               "recommendedPalette": ["#HEX", "#HEX", "#HEX"]
             }
         """.trimIndent()
@@ -277,8 +277,8 @@ class StyleSimulatorEngine @Inject constructor(
 
         return StyleBlueprint(
             rationale = "Local Architect: Selected from your vault based on intent.",
-            selectedClothingIds = selectedItems.map { it.id },
-            selectedCosmeticIds = selectedCosmetics.map { it.id },
+            selectedClothingIds = selectedItems.map { "w_${it.id}" },
+            selectedCosmeticIds = selectedCosmetics.map { "c_${it.id}" },
             recommendedPalette = finalPalette
         )
     }
@@ -287,8 +287,8 @@ class StyleSimulatorEngine @Inject constructor(
 @Serializable
 data class StyleBlueprint(
     val rationale: String,
-    val selectedClothingIds: List<Long>,
-    val selectedCosmeticIds: List<Long>,
+    val selectedClothingIds: List<String>,
+    val selectedCosmeticIds: List<String>,
     val recommendedPalette: List<String>
 )
 
