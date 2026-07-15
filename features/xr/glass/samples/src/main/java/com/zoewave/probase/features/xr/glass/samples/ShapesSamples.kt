@@ -1,7 +1,13 @@
 package com.zoewave.probase.features.xr.glass.samples
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,7 +27,7 @@ fun ShapesSamples() {
         Row(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
             Box(
                 modifier = Modifier
-                    .size(80.dp)
+                    .size(70.dp)
                     .clip(GlimmerTheme.shapes.small)
                     .background(GlimmerTheme.colors.secondary)
             ) {
@@ -35,6 +41,15 @@ fun ShapesSamples() {
                     .background(GlimmerTheme.colors.primary)
             ) {
                 Text("Medium", modifier = Modifier.padding(4.dp))
+            }
+
+            Box(
+                modifier = Modifier
+                    .size(90.dp)
+                    .clip(GlimmerTheme.shapes.large)
+                    .background(GlimmerTheme.colors.negative)
+            ) {
+                Text("Large", modifier = Modifier.padding(4.dp))
             }
         }
     }
