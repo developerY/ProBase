@@ -22,7 +22,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-enum class ResultTab { FACE, CLOTHES }
+enum class ResultTab { FACE, CLOTHES, NAILS }
 
 data class StyleSimulatorUiState(
     val morningRoutineCompleted: Boolean = false,
