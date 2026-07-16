@@ -29,7 +29,7 @@ class StyleSimulatorEngine @Inject constructor(
           "rationale": "string",
           "selectedClothingIds": ["String", "String", "String"],
           "selectedCosmeticIds": ["String", "String", "String", ...],
-          "recommendedPalette": ["#HEX", "#HEX", "#HEX"]
+          "recommendedPalette": ["#HEX", "#HEX", "#HEX", "#HEX"]
         }
     """.trimIndent()
 
@@ -200,23 +200,21 @@ class StyleSimulatorEngine @Inject constructor(
             $minifiedManifest
             
             GOAL:
-            1. Select BEST 3 clothing items (Top, Bottom, Shoes) from the manifest.
-            2. Select exactly 3 PIGMENT makeup items (1 Eye, 1 Cheek, 1 Lip) from the manifest.
+            1. Select BEST 3 clothing items (Top, Bottom, Shoes) from the manifest. Prioritize user anchors.
+            2. Select exactly 4 PIGMENT makeup items (1 Eye, 1 Cheek, 1 Lip, 1 Nail) from the manifest. Prioritize user anchors.
             3. Select 1-2 DEFENSIVE items (Complexion/Skincare) from the manifest based strictly on the WEATHER/ATMOSPHERIC data. 
                - If UV is high, select an SPF product.
                - If humidity/heat is high, select a matte/long-wear foundation or primer.
-            4. Create a 3-color Palette (HEX codes) harmonizing the whole look.
-            5. Provide a brief rationale. Mention WHY you selected the specific DEFENSIVE items for the current weather.
+            4. Create a 4-color Palette (HEX codes) harmonizing the whole look. The 4th color MUST be the selected Nail color.
+            5. Provide a brief rationale. Mention WHY you selected the specific DEFENSIVE items for the current weather and why you chose the nail color.
                CRITICAL SYNTAX RULE: When referencing ANY selected item in your rationale, you MUST use the exact inline tag format <ITEM:id>. Do not attempt to guess or describe the item's brand in the text.
-               GOOD EXAMPLE: "I selected <ITEM:w_5> for its breathability, paired with <ITEM:c_14>."
-               BAD EXAMPLE: "I selected the Brunello top (#w_5)..."
             
             Respond ONLY with a valid JSON object matching this schema:
             {
               "rationale": "string",
               "selectedClothingIds": ["String", "String", "String"],
-              "selectedCosmeticIds": ["String", "String", "String", ...],
-              "recommendedPalette": ["#HEX", "#HEX", "#HEX"]
+              "selectedCosmeticIds": ["String", "String", "String", "String", ...],
+              "recommendedPalette": ["#HEX", "#HEX", "#HEX", "#HEX"]
             }
         """.trimIndent()
     }
@@ -258,22 +256,28 @@ class StyleSimulatorEngine @Inject constructor(
         bottoms.smartPick({it.name}, {it.notes})?.let { selectedItems.add(it) }
         shoes.smartPick({it.name}, {it.notes})?.let { selectedItems.add(it) }
         
-        // 2. Pick Cosmetics (Trinity: Eyes, Cheeks, Lips)
+        // 2. Pick Cosmetics (Trinity: Eyes, Cheeks, Lips, Nails)
         val eyes = availableCosmetics.filter { it.macroCategory == MacroCategory.EYES }
         val cheeks = availableCosmetics.filter { it.macroCategory == MacroCategory.DIMENSION }
         val lips = availableCosmetics.filter { it.macroCategory == MacroCategory.LIPS }
+        val nails = availableCosmetics.filter { it.macroCategory == MacroCategory.NAILS }
 
         eyes.smartPick({it.name}, {it.notes})?.let { selectedCosmetics.add(it) }
         cheeks.smartPick({it.name}, {it.notes})?.let { selectedCosmetics.add(it) }
         lips.smartPick({it.name}, {it.notes})?.let { selectedCosmetics.add(it) }
+        nails.smartPick({it.name}, {it.notes})?.let { selectedCosmetics.add(it) }
 
         val palette = selectedItems.mapNotNull { it.dominantHex }.distinct().toMutableList()
         if (palette.isEmpty()) palette.add("#FFFFFF")
         
-        while (palette.size < 3) {
-            palette.add(listOf("#000000", "#808080", "#E0E0E0", "#333333").random())
+        selectedCosmetics.forEach { item ->
+            item.colorHex?.let { palette.add(it) }
         }
-        val finalPalette = palette.take(3)
+
+        while (palette.size < 4) {
+            palette.add(listOf("#000000", "#808080", "#E0E0E0", "#333333", "#8B0000").random())
+        }
+        val finalPalette = palette.take(4)
 
         return StyleBlueprint(
             rationale = "Local Architect: Selected from your vault based on intent.",

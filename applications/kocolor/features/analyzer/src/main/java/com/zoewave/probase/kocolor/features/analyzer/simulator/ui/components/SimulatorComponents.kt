@@ -184,7 +184,8 @@ fun MessagingStep(
                 categories = listOf(
                     Triple("Eyes", Icons.Default.Visibility, MacroCategory.EYES),
                     Triple("Cheeks", Icons.Default.FaceRetouchingNatural, MacroCategory.DIMENSION),
-                    Triple("Lips", Icons.Default.Face, MacroCategory.LIPS)
+                    Triple("Lips", Icons.Default.Face, MacroCategory.LIPS),
+                    Triple("Nails", Icons.Default.PanTool, MacroCategory.NAILS)
                 ),
                 selectedCategory = uiState.selectedCosmeticCategory,
                 onCategorySelect = { onEvent(SimulatorEvent.SelectCosmeticCategory(it as MacroCategory)) },
@@ -873,11 +874,20 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
                 end = Offset(center.x + 100.dp.toPx(), center.y + 160.dp.toPx()),
                 pathEffect = dashEffect, strokeWidth = 1.dp.toPx()
             )
+
+            // Nails (Bottom Right - Lower)
+            drawLine(
+                color = Color.LightGray,
+                start = Offset(center.x + 40.dp.toPx(), center.y + 80.dp.toPx()),
+                end = Offset(center.x + 120.dp.toPx(), center.y + 180.dp.toPx()),
+                pathEffect = dashEffect, strokeWidth = 1.dp.toPx()
+            )
         }
 
         val eyesItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.EYES }
         val cheeksItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.DIMENSION }
         val lipsItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.LIPS }
+        val nailsItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.NAILS }
 
         BlueprintCallout(
             label = "EYES",
@@ -897,6 +907,13 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
             label = "LIPS",
             productName = lipsItem?.name ?: "Pending...",
             colorHex = lipsItem?.colorHex,
+            modifier = Modifier.align(Alignment.BottomEnd).padding(bottom = 0.dp).offset(x = (-30).dp, y = blueprintOffset - 50.dp)
+        )
+
+        BlueprintCallout(
+            label = "NAILS",
+            productName = nailsItem?.name ?: "Pending...",
+            colorHex = nailsItem?.colorHex,
             modifier = Modifier.align(Alignment.BottomEnd).padding(bottom = 0.dp).offset(y = blueprintOffset - 10.dp)
         )
     }
