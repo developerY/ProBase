@@ -9,6 +9,7 @@ enum class MacroCategory(val displayName: String, val description: String) {
     DIMENSION("Color & Dimension", "Products that bring life, shadow, and light."),
     EYES("Eyes & Brows", "All definition for the upper face."),
     LIPS("Lips", "All color and care for the mouth."),
+    NAILS("Nails", "Polish, care, and enhancements."),
     HAIR("Haircare", "Cleanse, treat, and style."),
     HYGIENE("Hygiene & Bath", "Daily body care and sanitization."),
     ORAL("Oral Care", "Smile preservation and hygiene."),
@@ -103,7 +104,7 @@ enum class MicroCategory(val macro: MacroCategory) {
     
     // Hands & Nails
     HAND_CREAM(MacroCategory.HYGIENE),
-    NAIL_POLISH(MacroCategory.TOOLS),
+    NAIL_POLISH(MacroCategory.NAILS),
     
     // Tools
     BRUSHES(MacroCategory.TOOLS),
