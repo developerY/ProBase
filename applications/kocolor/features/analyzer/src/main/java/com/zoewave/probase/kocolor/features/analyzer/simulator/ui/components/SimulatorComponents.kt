@@ -549,10 +549,10 @@ fun ResultStep(
 
                 // Right Column: Blueprint View
                 Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
-                    if (uiState.selectedResultTab == ResultTab.FACE) {
-                        FaceBlueprintView(uiState)
-                    } else {
-                        ClothingBlueprintView(uiState)
+                    when (uiState.selectedResultTab) {
+                        ResultTab.FACE -> FaceBlueprintView(uiState)
+                        ResultTab.CLOTHES -> ClothingBlueprintView(uiState)
+                        ResultTab.NAILS -> HandBlueprintView(uiState)
                     }
                 }
             }
@@ -560,7 +560,11 @@ fun ResultStep(
 
         // 3. The Atelier List
         item {
-            val label = if (uiState.selectedResultTab == ResultTab.FACE) "COSMETIC ATELIER" else "CLOTHING ATELIER"
+            val label = when (uiState.selectedResultTab) {
+                ResultTab.FACE -> "COSMETIC ATELIER"
+                ResultTab.CLOTHES -> "CLOTHING ATELIER"
+                ResultTab.NAILS -> "NAIL ATELIER"
+            }
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 2.sp),
@@ -569,32 +573,46 @@ fun ResultStep(
             )
         }
 
-        if (uiState.selectedResultTab == ResultTab.CLOTHES) {
-            if (uiState.recommendedClothing.isEmpty()) {
-                items(3) { i ->
-                    PlaceholderResultCard(label = when (i) {
-                        0 -> "Top"
-                        1 -> "Bottom"
-                        else -> "Shoes"
-                    })
-                }
-            } else {
-                items(uiState.recommendedClothing) { item ->
-                    ResultCard(clothingItem = item, onEvent = {}, navTo = navTo)
+        when (uiState.selectedResultTab) {
+            ResultTab.CLOTHES -> {
+                if (uiState.recommendedClothing.isEmpty()) {
+                    items(3) { i ->
+                        PlaceholderResultCard(label = when (i) {
+                            0 -> "Top"
+                            1 -> "Bottom"
+                            else -> "Shoes"
+                        })
+                    }
+                } else {
+                    items(uiState.recommendedClothing) { item ->
+                        ResultCard(clothingItem = item, onEvent = {}, navTo = navTo)
+                    }
                 }
             }
-        } else {
-            if (uiState.recommendedCosmetics.isEmpty()) {
-                items(3) { i ->
-                    PlaceholderResultCard(label = when (i) {
-                        0 -> "Eyes"
-                        1 -> "Cheeks"
-                        else -> "Lips"
-                    })
+            ResultTab.NAILS -> {
+                val nailItems = uiState.recommendedCosmetics.filter { it.macroCategory == MacroCategory.NAILS }
+                if (nailItems.isEmpty()) {
+                    item { PlaceholderResultCard(label = "Nails") }
+                } else {
+                    items(nailItems) { item ->
+                        ResultCard(cosmeticItem = item, onEvent = {}, navTo = navTo)
+                    }
                 }
-            } else {
-                items(uiState.recommendedCosmetics) { item ->
-                    ResultCard(cosmeticItem = item, onEvent = {}, navTo = navTo)
+            }
+            else -> {
+                val nonNailCosmetics = uiState.recommendedCosmetics.filter { it.macroCategory != MacroCategory.NAILS }
+                if (nonNailCosmetics.isEmpty()) {
+                    items(3) { i ->
+                        PlaceholderResultCard(label = when (i) {
+                            0 -> "Eyes"
+                            1 -> "Cheeks"
+                            else -> "Lips"
+                        })
+                    }
+                } else {
+                    items(nonNailCosmetics) { item ->
+                        ResultCard(cosmeticItem = item, onEvent = {}, navTo = navTo)
+                    }
                 }
             }
         }
@@ -626,47 +644,57 @@ private fun ResultTabToggle(
     Surface(
         modifier = Modifier
             .width(64.dp)
-            .height(36.dp),
+            .height(100.dp),
         shape = RoundedCornerShape(18.dp),
         color = Color(0xFFF3F2F8)
     ) {
-        Row(
+        Column(
             modifier = Modifier.fillMaxSize().padding(2.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .clip(CircleShape)
-                    .background(if (selectedTab == ResultTab.FACE) Color.Black else Color.Transparent)
-                    .clickable { onTabSelected(ResultTab.FACE) },
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Face,
-                    contentDescription = "FACE",
-                    tint = if (selectedTab == ResultTab.FACE) Color.White else Color.Gray,
-                    modifier = Modifier.size(16.dp)
-                )
-            }
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .clip(CircleShape)
-                    .background(if (selectedTab == ResultTab.CLOTHES) Color.Black else Color.Transparent)
-                    .clickable { onTabSelected(ResultTab.CLOTHES) },
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Checkroom,
-                    contentDescription = "CLOTHES",
-                    tint = if (selectedTab == ResultTab.CLOTHES) Color.White else Color.Gray,
-                    modifier = Modifier.size(16.dp)
-                )
-            }
+            ResultTabIcon(
+                icon = Icons.Default.Face,
+                isSelected = selectedTab == ResultTab.FACE,
+                onClick = { onTabSelected(ResultTab.FACE) },
+                modifier = Modifier.weight(1f)
+            )
+            ResultTabIcon(
+                icon = Icons.Default.Checkroom,
+                isSelected = selectedTab == ResultTab.CLOTHES,
+                onClick = { onTabSelected(ResultTab.CLOTHES) },
+                modifier = Modifier.weight(1f)
+            )
+            ResultTabIcon(
+                icon = Icons.Default.PanTool,
+                isSelected = selectedTab == ResultTab.NAILS,
+                onClick = { onTabSelected(ResultTab.NAILS) },
+                modifier = Modifier.weight(1f)
+            )
         }
+    }
+}
+
+@Composable
+private fun ResultTabIcon(
+    icon: ImageVector,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(CircleShape)
+            .background(if (isSelected) Color.Black else Color.Transparent)
+            .clickable { onClick() },
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = if (isSelected) Color.White else Color.Gray,
+            modifier = Modifier.size(16.dp)
+        )
     }
 }
 
@@ -874,20 +902,11 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
                 end = Offset(center.x + 100.dp.toPx(), center.y + 160.dp.toPx()),
                 pathEffect = dashEffect, strokeWidth = 1.dp.toPx()
             )
-
-            // Nails (Bottom Right - Lower)
-            drawLine(
-                color = Color.LightGray,
-                start = Offset(center.x + 40.dp.toPx(), center.y + 80.dp.toPx()),
-                end = Offset(center.x + 120.dp.toPx(), center.y + 180.dp.toPx()),
-                pathEffect = dashEffect, strokeWidth = 1.dp.toPx()
-            )
         }
 
         val eyesItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.EYES }
         val cheeksItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.DIMENSION }
         val lipsItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.LIPS }
-        val nailsItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.NAILS }
 
         BlueprintCallout(
             label = "EYES",
@@ -907,14 +926,71 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
             label = "LIPS",
             productName = lipsItem?.name ?: "Pending...",
             colorHex = lipsItem?.colorHex,
-            modifier = Modifier.align(Alignment.BottomEnd).padding(bottom = 0.dp).offset(x = (-30).dp, y = blueprintOffset - 50.dp)
+            modifier = Modifier.align(Alignment.BottomEnd).padding(bottom = 0.dp).offset(y = blueprintOffset - 10.dp)
         )
+    }
+}
+
+@Composable
+fun HandBlueprintView(uiState: StyleSimulatorUiState) {
+    val blueprintOffset = (-30).dp
+    val horizontalShift = 10.dp
+    
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        // Central Hand Anchor
+        Box(
+            modifier = Modifier
+                .size(280.dp)
+                .offset(x = horizontalShift, y = blueprintOffset)
+                .clip(CircleShape)
+                .background(Color.White.copy(alpha = 0.5f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.PanTool,
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize().padding(60.dp).alpha(0.15f),
+                tint = Color.Black
+            )
+        }
+
+        // Callout Lines & Shades
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val center = Offset(size.width / 2 + horizontalShift.toPx(), size.height / 2 + blueprintOffset.toPx())
+            val dashEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
+
+            val nailsItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.NAILS }
+
+            // Nails Shade (Tips of fingers)
+            nailsItem?.colorHex?.let { hex ->
+                val pigment = parseColor(hex).copy(alpha = 0.6f)
+                drawCircle(pigment, radius = 8.dp.toPx(), center = Offset(center.x - 45.dp.toPx(), center.y - 70.dp.toPx()))
+                drawCircle(pigment, radius = 8.dp.toPx(), center = Offset(center.x - 15.dp.toPx(), center.y - 90.dp.toPx()))
+                drawCircle(pigment, radius = 8.dp.toPx(), center = Offset(center.x + 15.dp.toPx(), center.y - 90.dp.toPx()))
+                drawCircle(pigment, radius = 8.dp.toPx(), center = Offset(center.x + 45.dp.toPx(), center.y - 70.dp.toPx()))
+            }
+
+            // Callout Line
+            drawLine(
+                color = Color.LightGray,
+                start = Offset(center.x + 45.dp.toPx(), center.y - 70.dp.toPx()),
+                end = Offset(center.x + 120.dp.toPx(), center.y - 120.dp.toPx()),
+                pathEffect = dashEffect, strokeWidth = 1.dp.toPx()
+            )
+        }
+
+        val nailsItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.NAILS }
 
         BlueprintCallout(
             label = "NAILS",
             productName = nailsItem?.name ?: "Pending...",
             colorHex = nailsItem?.colorHex,
-            modifier = Modifier.align(Alignment.BottomEnd).padding(bottom = 0.dp).offset(y = blueprintOffset - 10.dp)
+            modifier = Modifier.align(Alignment.TopEnd).padding(top = 20.dp).offset(y = blueprintOffset)
         )
     }
 }
