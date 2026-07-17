@@ -942,20 +942,19 @@ fun HandBlueprintView(uiState: StyleSimulatorUiState) {
             .padding(16.dp),
         contentAlignment = Alignment.Center
     ) {
-        // Central Hand Anchor
+        // Central Hand Anchor (Always use Line-Art for Blueprint feel)
         Box(
             modifier = Modifier
                 .size(280.dp)
                 .offset(x = horizontalShift, y = blueprintOffset)
                 .clip(CircleShape)
-                .background(Color.White.copy(alpha = 0.5f)),
-            contentAlignment = Alignment.Center
+                .background(Color.White.copy(alpha = 0.5f))
         ) {
-            Icon(
-                imageVector = Icons.Default.PanTool,
+            Image(
+                painter = painterResource(id = R.drawable.applications_kocolor_features_analyzer_hand),
                 contentDescription = null,
-                modifier = Modifier.fillMaxSize().padding(60.dp).alpha(0.15f),
-                tint = Color.Black
+                modifier = Modifier.fillMaxSize().alpha(0.4f),
+                contentScale = ContentScale.Fit
             )
         }
 
@@ -966,19 +965,21 @@ fun HandBlueprintView(uiState: StyleSimulatorUiState) {
 
             val nailsItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.NAILS }
 
-            // Nails Shade (Tips of fingers)
+            // Nails Shade (Tips of fingers on the new line-art)
             nailsItem?.colorHex?.let { hex ->
                 val pigment = parseColor(hex).copy(alpha = 0.6f)
-                drawCircle(pigment, radius = 8.dp.toPx(), center = Offset(center.x - 45.dp.toPx(), center.y - 70.dp.toPx()))
-                drawCircle(pigment, radius = 8.dp.toPx(), center = Offset(center.x - 15.dp.toPx(), center.y - 90.dp.toPx()))
-                drawCircle(pigment, radius = 8.dp.toPx(), center = Offset(center.x + 15.dp.toPx(), center.y - 90.dp.toPx()))
-                drawCircle(pigment, radius = 8.dp.toPx(), center = Offset(center.x + 45.dp.toPx(), center.y - 70.dp.toPx()))
+                // Adjusting points for the specific hand.png line-art anatomy
+                drawCircle(pigment, radius = 6.dp.toPx(), center = Offset(center.x - 72.dp.toPx(), center.y - 42.dp.toPx())) // Pinky
+                drawCircle(pigment, radius = 7.dp.toPx(), center = Offset(center.x - 42.dp.toPx(), center.y - 78.dp.toPx())) // Ring
+                drawCircle(pigment, radius = 7.dp.toPx(), center = Offset(center.x + 4.dp.toPx(), center.y - 92.dp.toPx()))  // Middle
+                drawCircle(pigment, radius = 7.dp.toPx(), center = Offset(center.x + 52.dp.toPx(), center.y - 70.dp.toPx())) // Index
+                drawCircle(pigment, radius = 7.dp.toPx(), center = Offset(center.x + 85.dp.toPx(), center.y + 10.dp.toPx())) // Thumb
             }
 
             // Callout Line
             drawLine(
                 color = Color.LightGray,
-                start = Offset(center.x + 45.dp.toPx(), center.y - 70.dp.toPx()),
+                start = Offset(center.x + 52.dp.toPx(), center.y - 70.dp.toPx()),
                 end = Offset(center.x + 120.dp.toPx(), center.y - 120.dp.toPx()),
                 pathEffect = dashEffect, strokeWidth = 1.dp.toPx()
             )
