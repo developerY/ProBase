@@ -1033,21 +1033,15 @@ fun BlueprintCallout(
                     letterSpacing = 0.5.sp
                 )
 
-                Text(
-                    text = productName,
-                    style = MaterialTheme.typography.titleSmall.copy(fontSize = 13.sp),
-                    fontFamily = FontFamily.Serif,
-                    maxLines = 2,
-                    fontWeight = FontWeight.Medium,
-                    lineHeight = 15.sp,
-                    color = Color.Black
-                )
-
                 if (isExpanded) {
                     Text(
-                        text = "Detailed view active",
-                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
-                        color = Color.Gray,
+                        text = productName,
+                        style = MaterialTheme.typography.titleSmall.copy(fontSize = 13.sp),
+                        fontFamily = FontFamily.Serif,
+                        maxLines = 2,
+                        fontWeight = FontWeight.Medium,
+                        lineHeight = 15.sp,
+                        color = Color.Black,
                         modifier = Modifier.padding(top = 2.dp)
                     )
                 } else {
@@ -1056,7 +1050,7 @@ fun BlueprintCallout(
                         style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
                         color = Color.Gray,
                         textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline,
-                        modifier = Modifier.padding(top = 2.dp)
+                        modifier = Modifier.padding(top = 4.dp)
                     )
                 }
             }
