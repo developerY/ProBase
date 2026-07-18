@@ -514,25 +514,24 @@ fun ResultStep(
                     .background(Color.White.copy(alpha = 0.3f), RoundedCornerShape(32.dp))
                     .border(1.dp, Color(0xFFEEEEEE), RoundedCornerShape(32.dp))
             ) {
-                // Left Column: Chromatic Core & Toggle
+                // Left Column: KoColor Sidebar
                 Column(
                     modifier = Modifier
-                        .width(76.dp)
+                        .width(72.dp)
                         .fillMaxHeight()
-                        .padding(vertical = 16.dp, horizontal = 4.dp),
+                        .padding(vertical = 20.dp, horizontal = 4.dp),
                     verticalArrangement = Arrangement.SpaceBetween,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Column(
-                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalArrangement = Arrangement.spacedBy(14.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "CHRO-\nMATIC",
+                            text = "KoColor",
                             style = MaterialTheme.typography.labelSmall.copy(
-                                fontSize = 10.sp,
-                                lineHeight = 11.sp,
-                                letterSpacing = 1.sp
+                                fontSize = 12.sp,
+                                letterSpacing = 0.5.sp
                             ),
                             fontFamily = FontFamily.Serif,
                             fontWeight = FontWeight.Bold,
@@ -542,10 +541,10 @@ fun ResultStep(
                         uiState.recommendedPalette.forEach { hex ->
                             Box(
                                 modifier = Modifier
-                                    .size(width = 56.dp, height = 44.dp)
-                                    .clip(RoundedCornerShape(8.dp))
+                                    .size(52.dp)
+                                    .clip(RoundedCornerShape(14.dp))
                                     .background(parseColor(hex))
-                                    .border(1.dp, Color.Black.copy(alpha = 0.05f), RoundedCornerShape(8.dp))
+                                    .border(1.dp, Color.Black.copy(alpha = 0.05f), RoundedCornerShape(14.dp))
                             )
                         }
                     }
@@ -652,32 +651,29 @@ private fun ResultTabToggle(
 ) {
     Surface(
         modifier = Modifier
-            .width(60.dp)
-            .height(200.dp),
-        shape = RoundedCornerShape(30.dp),
+            .width(52.dp)
+            .height(180.dp),
+        shape = RoundedCornerShape(26.dp),
         color = Color.White,
-        shadowElevation = 6.dp
+        shadowElevation = 10.dp
     ) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(vertical = 8.dp),
-            verticalArrangement = Arrangement.SpaceAround,
+            modifier = Modifier.fillMaxSize().padding(vertical = 12.dp),
+            verticalArrangement = Arrangement.SpaceBetween,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             ResultTabItem(
                 icon = Icons.Default.Face,
-                label = "Face",
                 isSelected = selectedTab == ResultTab.FACE,
                 onClick = { onTabSelected(ResultTab.FACE) }
             )
             ResultTabItem(
                 icon = Icons.Default.Checkroom,
-                label = "Clothing",
                 isSelected = selectedTab == ResultTab.CLOTHES,
                 onClick = { onTabSelected(ResultTab.CLOTHES) }
             )
             ResultTabItem(
                 icon = Icons.Default.PanTool,
-                label = "Nails",
                 isSelected = selectedTab == ResultTab.NAILS,
                 onClick = { onTabSelected(ResultTab.NAILS) }
             )
@@ -688,34 +684,22 @@ private fun ResultTabToggle(
 @Composable
 private fun ResultTabItem(
     icon: ImageVector,
-    label: String,
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(1.dp),
-        modifier = Modifier.clickable { onClick() }
+    Box(
+        modifier = Modifier
+            .size(42.dp)
+            .clip(CircleShape)
+            .background(if (isSelected) Color.Black else Color.Transparent)
+            .clickable { onClick() },
+        contentAlignment = Alignment.Center
     ) {
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape)
-                .background(if (isSelected) Color.Black else Color.Transparent),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = label,
-                tint = if (isSelected) Color.White else Color.Black,
-                modifier = Modifier.size(20.dp)
-            )
-        }
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
-            color = Color.Black,
-            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = if (isSelected) Color.White else Color.Black,
+            modifier = Modifier.size(20.dp)
         )
     }
 }
