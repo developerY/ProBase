@@ -510,30 +510,39 @@ fun ResultStep(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(480.dp)
+                    .height(520.dp)
                     .background(Color.White.copy(alpha = 0.3f), RoundedCornerShape(32.dp))
                     .border(1.dp, Color(0xFFEEEEEE), RoundedCornerShape(32.dp))
             ) {
                 // Left Column: Chromatic Core & Toggle
                 Column(
                     modifier = Modifier
-                        .width(80.dp)
+                        .width(76.dp)
                         .fillMaxHeight()
-                        .padding(vertical = 16.dp, horizontal = 8.dp),
+                        .padding(vertical = 16.dp, horizontal = 4.dp),
                     verticalArrangement = Arrangement.SpaceBetween,
-                    horizontalAlignment = Alignment.Start
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
                         Text(
-                            text = "CHROMATIC",
-                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
-                            fontWeight = FontWeight.Black,
-                            color = MaterialTheme.colorScheme.primary
+                            text = "CHRO-\nMATIC",
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontSize = 10.sp,
+                                lineHeight = 11.sp,
+                                letterSpacing = 1.sp
+                            ),
+                            fontFamily = FontFamily.Serif,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black,
+                            textAlign = TextAlign.Center
                         )
                         uiState.recommendedPalette.forEach { hex ->
                             Box(
                                 modifier = Modifier
-                                    .size(width = 64.dp, height = 48.dp)
+                                    .size(width = 56.dp, height = 44.dp)
                                     .clip(RoundedCornerShape(8.dp))
                                     .background(parseColor(hex))
                                     .border(1.dp, Color.Black.copy(alpha = 0.05f), RoundedCornerShape(8.dp))
@@ -643,14 +652,14 @@ private fun ResultTabToggle(
 ) {
     Surface(
         modifier = Modifier
-            .width(72.dp)
-            .height(220.dp),
-        shape = RoundedCornerShape(36.dp),
+            .width(60.dp)
+            .height(200.dp),
+        shape = RoundedCornerShape(30.dp),
         color = Color.White,
-        shadowElevation = 8.dp
+        shadowElevation = 6.dp
     ) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(vertical = 12.dp),
+            modifier = Modifier.fillMaxSize().padding(vertical = 8.dp),
             verticalArrangement = Arrangement.SpaceAround,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -685,12 +694,12 @@ private fun ResultTabItem(
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+        verticalArrangement = Arrangement.spacedBy(1.dp),
         modifier = Modifier.clickable { onClick() }
     ) {
         Box(
             modifier = Modifier
-                .size(52.dp)
+                .size(40.dp)
                 .clip(CircleShape)
                 .background(if (isSelected) Color.Black else Color.Transparent),
             contentAlignment = Alignment.Center
@@ -699,12 +708,12 @@ private fun ResultTabItem(
                 imageVector = icon,
                 contentDescription = label,
                 tint = if (isSelected) Color.White else Color.Black,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(20.dp)
             )
         }
         Text(
             text = label,
-            style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+            style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
             color = Color.Black,
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
         )
@@ -778,21 +787,21 @@ fun ClothingBlueprintView(uiState: StyleSimulatorUiState) {
             label = "TOP",
             productName = topItem?.name ?: "Pending...",
             colorHex = topItem?.colorHex,
-            modifier = Modifier.align(Alignment.TopStart).padding(top = 20.dp).offset(y = blueprintOffset)
+            modifier = Modifier.align(Alignment.TopEnd).padding(top = 10.dp, end = 10.dp).offset(y = blueprintOffset)
         )
 
         BlueprintCallout(
             label = "BOTTOM",
             productName = bottomItem?.name ?: "Pending...",
             colorHex = bottomItem?.colorHex,
-            modifier = Modifier.align(Alignment.CenterEnd).padding(bottom = 40.dp).offset(y = blueprintOffset)
+            modifier = Modifier.align(Alignment.CenterEnd).padding(end = 5.dp).offset(y = blueprintOffset + 20.dp)
         )
 
         BlueprintCallout(
             label = "SHOES",
             productName = shoeItem?.name ?: "Pending...",
             colorHex = shoeItem?.colorHex,
-            modifier = Modifier.align(Alignment.BottomStart).padding(bottom = 20.dp).offset(y = blueprintOffset)
+            modifier = Modifier.align(Alignment.BottomEnd).padding(bottom = 10.dp, end = 10.dp).offset(y = blueprintOffset)
         )
     }
 }
@@ -925,21 +934,21 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
             label = "EYES",
             productName = eyesItem?.name ?: "Pending...",
             colorHex = eyesItem?.colorHex,
-            modifier = Modifier.align(Alignment.TopStart).padding(top = 10.dp).offset(y = blueprintOffset)
+            modifier = Modifier.align(Alignment.TopStart).padding(top = 10.dp, start = 5.dp).offset(y = blueprintOffset)
         )
 
         BlueprintCallout(
             label = "CHEEKS",
             productName = cheeksItem?.name ?: "Pending...",
             colorHex = cheeksItem?.colorHex,
-            modifier = Modifier.align(Alignment.CenterStart).padding(top = 260.dp).offset(y = blueprintOffset)
+            modifier = Modifier.align(Alignment.CenterStart).padding(top = 260.dp, start = 5.dp).offset(y = blueprintOffset)
         )
 
         BlueprintCallout(
             label = "LIPS",
             productName = lipsItem?.name ?: "Pending...",
             colorHex = lipsItem?.colorHex,
-            modifier = Modifier.align(Alignment.BottomEnd).padding(bottom = 0.dp).offset(y = blueprintOffset - 10.dp)
+            modifier = Modifier.align(Alignment.BottomEnd).padding(bottom = 0.dp, end = 5.dp).offset(y = blueprintOffset - 10.dp)
         )
     }
 }
@@ -1021,42 +1030,51 @@ fun BlueprintCallout(
     Box(modifier = modifier) {
         Card(
             modifier = Modifier
-                .width(if (isExpanded) 160.dp else 140.dp)
+                .width(if (isExpanded) 140.dp else 100.dp)
                 .clickable { isExpanded = !isExpanded },
-            shape = RoundedCornerShape(12.dp),
+            shape = RoundedCornerShape(10.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White),
-            elevation = CardDefaults.cardElevation(defaultElevation = 12.dp)
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
         ) {
             Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.padding(10.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
                 horizontalAlignment = Alignment.Start
             ) {
                 Text(
                     text = label.uppercase(),
-                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
                     fontWeight = FontWeight.Light,
                     color = Color.Gray,
-                    letterSpacing = 1.sp
+                    letterSpacing = 0.5.sp
                 )
 
                 Text(
                     text = productName,
-                    style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp),
+                    style = MaterialTheme.typography.titleSmall.copy(fontSize = 13.sp),
                     fontFamily = FontFamily.Serif,
                     maxLines = 2,
-                    fontWeight = FontWeight.Normal,
-                    lineHeight = 22.sp,
+                    fontWeight = FontWeight.Medium,
+                    lineHeight = 15.sp,
                     color = Color.Black
                 )
 
-                Text(
-                    text = "Details",
-                    style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp),
-                    color = Color.Gray,
-                    textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
+                if (isExpanded) {
+                    Text(
+                        text = "Detailed view active",
+                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
+                        color = Color.Gray,
+                        modifier = Modifier.padding(top = 2.dp)
+                    )
+                } else {
+                    Text(
+                        text = "Details",
+                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
+                        color = Color.Gray,
+                        textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline,
+                        modifier = Modifier.padding(top = 2.dp)
+                    )
+                }
             }
         }
 
@@ -1065,12 +1083,12 @@ fun BlueprintCallout(
             Box(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .offset(x = 8.dp, y = (-8).dp)
-                    .size(24.dp)
+                    .offset(x = 6.dp, y = (-6).dp)
+                    .size(20.dp)
                     .clip(CircleShape)
                     .background(parseColor(colorHex))
-                    .border(2.dp, Color.White, CircleShape)
-                    .shadow(4.dp, CircleShape)
+                    .border(1.5.dp, Color.White, CircleShape)
+                    .shadow(3.dp, CircleShape)
             )
         }
     }
