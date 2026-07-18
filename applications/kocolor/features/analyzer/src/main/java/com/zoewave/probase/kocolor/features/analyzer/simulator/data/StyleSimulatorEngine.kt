@@ -200,9 +200,9 @@ class StyleSimulatorEngine @Inject constructor(
             $minifiedManifest
             
             GOAL:
-            1. Select BEST 3 clothing items (Top, Bottom, Shoes) from the manifest. Prioritize user anchors.
-            2. Select exactly 4 PIGMENT makeup items (1 Eye, 1 Cheek, 1 Lip, 1 Nail) from the manifest. Prioritize user anchors.
-            3. Select 1-2 DEFENSIVE items (Complexion/Skincare) from the manifest based strictly on the WEATHER/ATMOSPHERIC data. 
+            1. Select BEST 3 clothing items (Top, Bottom, Shoes) from the wardrobe section of the manifest. Prioritize user anchors.
+            2. Select exactly 4 PIGMENT makeup items (1 Eye, 1 Cheek, 1 Lip, 1 Nail) strictly from the cosmetics section of the manifest. Prioritize user anchors.
+            3. Select 1-2 DEFENSIVE items (Complexion/Skincare) from the cosmetics section based strictly on the WEATHER/ATMOSPHERIC data. 
                - If UV is high, select an SPF product.
                - If humidity/heat is high, select a matte/long-wear foundation or primer.
             4. Create a 4-color Palette (HEX codes) harmonizing the whole look. The 4th color MUST be the selected Nail color.
@@ -212,8 +212,8 @@ class StyleSimulatorEngine @Inject constructor(
             Respond ONLY with a valid JSON object matching this schema:
             {
               "rationale": "string",
-              "selectedClothingIds": ["String", "String", "String"],
-              "selectedCosmeticIds": ["String", "String", "String", "String", ...],
+              "selectedClothingIds": ["w_id", "w_id", "w_id"],
+              "selectedCosmeticIds": ["c_id", "c_id", "c_id", "c_id", ...],
               "recommendedPalette": ["#HEX", "#HEX", "#HEX", "#HEX"]
             }
         """.trimIndent()

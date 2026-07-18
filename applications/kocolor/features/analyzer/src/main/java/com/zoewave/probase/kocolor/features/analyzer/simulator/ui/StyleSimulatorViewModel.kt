@@ -145,8 +145,14 @@ class StyleSimulatorViewModel @Inject constructor(
             simulationStep = step,
             rationale = result?.rationale,
             recommendedPalette = result?.recommendedPalette ?: emptyList(),
-            recommendedClothing = allClothing.filter { "w_${it.id}" in (result?.selectedClothingIds ?: emptyList()) },
-            recommendedCosmetics = allCosmetics.filter { "c_${it.id}" in (result?.selectedCosmeticIds ?: emptyList()) },
+            recommendedClothing = allClothing.filter { item ->
+                "w_${item.id}" in (result?.selectedClothingIds ?: emptyList()) ||
+                "w_${item.id}" in (result?.selectedCosmeticIds ?: emptyList())
+            },
+            recommendedCosmetics = allCosmetics.filter { item ->
+                "c_${item.id}" in (result?.selectedCosmeticIds ?: emptyList()) ||
+                "c_${item.id}" in (result?.selectedClothingIds ?: emptyList())
+            },
             isLocalResult = result?.rationale?.startsWith("Local Architect") ?: false,
             selectedResultTab = resultTab
         )

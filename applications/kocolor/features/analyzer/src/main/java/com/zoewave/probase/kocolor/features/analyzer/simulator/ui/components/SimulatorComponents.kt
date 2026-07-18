@@ -643,57 +643,70 @@ private fun ResultTabToggle(
 ) {
     Surface(
         modifier = Modifier
-            .width(64.dp)
-            .height(100.dp),
-        shape = RoundedCornerShape(18.dp),
-        color = Color(0xFFF3F2F8)
+            .width(72.dp)
+            .height(220.dp),
+        shape = RoundedCornerShape(36.dp),
+        color = Color.White,
+        shadowElevation = 8.dp
     ) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(2.dp),
-            verticalArrangement = Arrangement.spacedBy(2.dp)
+            modifier = Modifier.fillMaxSize().padding(vertical = 12.dp),
+            verticalArrangement = Arrangement.SpaceAround,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            ResultTabIcon(
+            ResultTabItem(
                 icon = Icons.Default.Face,
+                label = "Face",
                 isSelected = selectedTab == ResultTab.FACE,
-                onClick = { onTabSelected(ResultTab.FACE) },
-                modifier = Modifier.weight(1f)
+                onClick = { onTabSelected(ResultTab.FACE) }
             )
-            ResultTabIcon(
+            ResultTabItem(
                 icon = Icons.Default.Checkroom,
+                label = "Clothing",
                 isSelected = selectedTab == ResultTab.CLOTHES,
-                onClick = { onTabSelected(ResultTab.CLOTHES) },
-                modifier = Modifier.weight(1f)
+                onClick = { onTabSelected(ResultTab.CLOTHES) }
             )
-            ResultTabIcon(
+            ResultTabItem(
                 icon = Icons.Default.PanTool,
+                label = "Nails",
                 isSelected = selectedTab == ResultTab.NAILS,
-                onClick = { onTabSelected(ResultTab.NAILS) },
-                modifier = Modifier.weight(1f)
+                onClick = { onTabSelected(ResultTab.NAILS) }
             )
         }
     }
 }
 
 @Composable
-private fun ResultTabIcon(
+private fun ResultTabItem(
     icon: ImageVector,
+    label: String,
     isSelected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    onClick: () -> Unit
 ) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(CircleShape)
-            .background(if (isSelected) Color.Black else Color.Transparent)
-            .clickable { onClick() },
-        contentAlignment = Alignment.Center
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = Modifier.clickable { onClick() }
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = if (isSelected) Color.White else Color.Gray,
-            modifier = Modifier.size(16.dp)
+        Box(
+            modifier = Modifier
+                .size(52.dp)
+                .clip(CircleShape)
+                .background(if (isSelected) Color.Black else Color.Transparent),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = label,
+                tint = if (isSelected) Color.White else Color.Black,
+                modifier = Modifier.size(24.dp)
+            )
+        }
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+            color = Color.Black,
+            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
         )
     }
 }
@@ -1008,54 +1021,58 @@ fun BlueprintCallout(
     Box(modifier = modifier) {
         Card(
             modifier = Modifier
-                .width(if (isExpanded) 120.dp else 64.dp)
+                .width(if (isExpanded) 160.dp else 140.dp)
                 .clickable { isExpanded = !isExpanded },
-            shape = RoundedCornerShape(8.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.98f)),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            shape = RoundedCornerShape(12.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 12.dp)
         ) {
             Column(
-                modifier = Modifier.padding(6.dp),
-                verticalArrangement = Arrangement.spacedBy(1.dp),
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
                 horizontalAlignment = Alignment.Start
             ) {
                 Text(
-                    text = label,
-                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
-                    fontWeight = FontWeight.Black,
+                    text = label.uppercase(),
+                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                    fontWeight = FontWeight.Light,
                     color = Color.Gray,
-                    letterSpacing = 0.5.sp
+                    letterSpacing = 1.sp
                 )
 
-                if (isExpanded) {
-                    Text(
-                        text = productName,
-                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp),
-                        maxLines = 2,
-                        fontWeight = FontWeight.Medium,
-                        lineHeight = 11.sp
-                    )
-                } else {
-                    Text(
-                        text = "Details",
-                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
-                    )
-                }
+                Text(
+                    text = productName,
+                    style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp),
+                    fontFamily = FontFamily.Serif,
+                    maxLines = 2,
+                    fontWeight = FontWeight.Normal,
+                    lineHeight = 22.sp,
+                    color = Color.Black
+                )
+
+                Text(
+                    text = "Details",
+                    style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp),
+                    color = Color.Gray,
+                    textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
             }
         }
 
-        // Floating Color Indicator (The "Pin")
-        Box(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .offset(x = 6.dp, y = (-6).dp)
-                .size(20.dp)
-                .clip(CircleShape)
-                .background(if (colorHex != null) parseColor(colorHex) else Color(0xFFF3F2F8))
-                .border(1.5.dp, Color.White, CircleShape)
-                .shadow(2.dp, CircleShape)
-        )
+        // Color Indicator (The "Pin")
+        if (colorHex != null) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .offset(x = 8.dp, y = (-8).dp)
+                    .size(24.dp)
+                    .clip(CircleShape)
+                    .background(parseColor(colorHex))
+                    .border(2.dp, Color.White, CircleShape)
+                    .shadow(4.dp, CircleShape)
+            )
+        }
     }
 }
 
