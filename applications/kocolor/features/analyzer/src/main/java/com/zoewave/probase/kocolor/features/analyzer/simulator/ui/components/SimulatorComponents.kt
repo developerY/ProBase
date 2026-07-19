@@ -1,6 +1,8 @@
 package com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -550,6 +552,9 @@ fun ResultStep(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .verticalScroll(rememberScrollState()),
                         verticalArrangement = Arrangement.spacedBy(14.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
@@ -573,7 +578,10 @@ fun ResultStep(
                                     .border(1.dp, Color.Black.copy(alpha = 0.05f), RoundedCornerShape(14.dp))
                             )
                         }
+                        Spacer(Modifier.height(8.dp))
                     }
+
+                    Spacer(Modifier.height(16.dp))
 
                     ResultTabToggle(
                         selectedTab = uiState.selectedResultTab,
