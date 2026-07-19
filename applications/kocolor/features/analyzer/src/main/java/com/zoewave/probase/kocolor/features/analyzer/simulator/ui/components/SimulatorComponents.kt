@@ -507,6 +507,32 @@ fun ResultStep(
 
         // 2. The Visual Blueprint (Side-by-Side)
         item {
+            val displayPalette = remember(uiState.selectedResultTab, uiState.recommendedPalette) {
+                when (uiState.selectedResultTab) {
+                    ResultTab.FACE -> {
+                        val eyes = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.EYES }?.colorHex
+                        val cheeks = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.DIMENSION }?.colorHex
+                        val lips = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.LIPS }?.colorHex
+                        val neutral = uiState.recommendedPalette.getOrNull(0) ?: "#FFFFFF"
+                        listOfNotNull(eyes, cheeks, lips, neutral).distinct().take(4)
+                    }
+                    ResultTab.CLOTHES -> {
+                        val top = uiState.recommendedClothing.find { it.category == ClothingCategory.TOPS }?.colorHex
+                        val bottom = uiState.recommendedClothing.find { it.category == ClothingCategory.BOTTOMS }?.colorHex
+                        val shoes = uiState.recommendedClothing.find { it.category == ClothingCategory.SHOES }?.colorHex
+                        val accent = uiState.recommendedPalette.getOrNull(3) ?: "#000000"
+                        listOfNotNull(top, bottom, shoes, accent).distinct().take(4)
+                    }
+                    ResultTab.NAILS -> {
+                        val nail = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.NAILS }?.colorHex
+                        val lips = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.LIPS }?.colorHex
+                        val top = uiState.recommendedClothing.find { it.category == ClothingCategory.TOPS }?.colorHex
+                        val neutral = uiState.recommendedPalette.getOrNull(0) ?: "#FFFFFF"
+                        listOfNotNull(nail, lips, top, neutral).distinct().take(4)
+                    }
+                }
+            }
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -538,7 +564,7 @@ fun ResultStep(
                             color = Color.Black,
                             textAlign = TextAlign.Center
                         )
-                        uiState.recommendedPalette.forEach { hex ->
+                        displayPalette.forEach { hex ->
                             Box(
                                 modifier = Modifier
                                     .size(52.dp)
@@ -707,7 +733,7 @@ private fun ResultTabItem(
 @Composable
 fun ClothingBlueprintView(uiState: StyleSimulatorUiState) {
     val blueprintOffset = (-30).dp
-    val horizontalShift = 0.dp // Perfectly centered for maximum reach
+    val horizontalShift = 30.dp // Shifted right to balance with the bottoms card on the left
     
     Box(
         modifier = Modifier
@@ -715,10 +741,10 @@ fun ClothingBlueprintView(uiState: StyleSimulatorUiState) {
             .padding(16.dp),
         contentAlignment = Alignment.Center
     ) {
-        // Central Silhouette Anchor (Maximum Scale)
+        // Central Silhouette Anchor
         Box(
             modifier = Modifier
-                .width(420.dp)
+                .width(400.dp)
                 .fillMaxHeight()
                 .offset(x = horizontalShift, y = blueprintOffset)
                 .clip(RoundedCornerShape(32.dp))
@@ -738,27 +764,27 @@ fun ClothingBlueprintView(uiState: StyleSimulatorUiState) {
             val center = Offset(size.width / 2 + horizontalShift.toPx(), size.height / 2 + blueprintOffset.toPx())
             val dashEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
 
-            // TOP: Pointing from the Shoulder
+            // TOP (Right)
             drawLine(
                 color = Color.LightGray,
                 start = Offset(center.x + 10.dp.toPx(), center.y - 120.dp.toPx()),
-                end = Offset(center.x + 120.dp.toPx(), center.y - 140.dp.toPx()),
+                end = Offset(center.x + 110.dp.toPx(), center.y - 140.dp.toPx()),
                 pathEffect = dashEffect, strokeWidth = 1.2.dp.toPx()
             )
 
-            // BOTTOM: Pointing from the Waist
+            // BOTTOM (Left)
             drawLine(
                 color = Color.LightGray,
-                start = Offset(center.x + 10.dp.toPx(), center.y + 20.dp.toPx()),
-                end = Offset(center.x + 120.dp.toPx(), center.y + 60.dp.toPx()),
+                start = Offset(center.x - 10.dp.toPx(), center.y + 20.dp.toPx()),
+                end = Offset(center.x - 110.dp.toPx(), center.y + 60.dp.toPx()),
                 pathEffect = dashEffect, strokeWidth = 1.2.dp.toPx()
             )
 
-            // SHOES: Pointing from the Feet
+            // SHOES (Right)
             drawLine(
                 color = Color.LightGray,
                 start = Offset(center.x + 10.dp.toPx(), center.y + 180.dp.toPx()),
-                end = Offset(center.x + 120.dp.toPx(), center.y + 200.dp.toPx()),
+                end = Offset(center.x + 110.dp.toPx(), center.y + 200.dp.toPx()),
                 pathEffect = dashEffect, strokeWidth = 1.2.dp.toPx()
             )
         }
@@ -778,7 +804,7 @@ fun ClothingBlueprintView(uiState: StyleSimulatorUiState) {
             label = "BOTTOM",
             productName = bottomItem?.name ?: "Pending...",
             colorHex = bottomItem?.colorHex,
-            modifier = Modifier.align(Alignment.CenterEnd).padding(top = 80.dp).offset(y = blueprintOffset)
+            modifier = Modifier.align(Alignment.CenterStart).padding(top = 80.dp, start = 5.dp).offset(y = blueprintOffset)
         )
 
         BlueprintCallout(
