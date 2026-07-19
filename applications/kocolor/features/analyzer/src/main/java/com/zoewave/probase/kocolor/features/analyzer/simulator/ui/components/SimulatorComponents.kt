@@ -507,6 +507,32 @@ fun ResultStep(
 
         // 2. The Visual Blueprint (Side-by-Side)
         item {
+            val displayPalette = remember(uiState.selectedResultTab, uiState.recommendedPalette) {
+                when (uiState.selectedResultTab) {
+                    ResultTab.FACE -> {
+                        val eyes = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.EYES }?.colorHex
+                        val cheeks = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.DIMENSION }?.colorHex
+                        val lips = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.LIPS }?.colorHex
+                        val neutral = uiState.recommendedPalette.getOrNull(0) ?: "#FFFFFF"
+                        listOfNotNull(eyes, cheeks, lips, neutral).distinct().take(4)
+                    }
+                    ResultTab.CLOTHES -> {
+                        val top = uiState.recommendedClothing.find { it.category == ClothingCategory.TOPS }?.colorHex
+                        val bottom = uiState.recommendedClothing.find { it.category == ClothingCategory.BOTTOMS }?.colorHex
+                        val shoes = uiState.recommendedClothing.find { it.category == ClothingCategory.SHOES }?.colorHex
+                        val accent = uiState.recommendedPalette.getOrNull(3) ?: "#000000"
+                        listOfNotNull(top, bottom, shoes, accent).distinct().take(4)
+                    }
+                    ResultTab.NAILS -> {
+                        val nail = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.NAILS }?.colorHex
+                        val lips = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.LIPS }?.colorHex
+                        val top = uiState.recommendedClothing.find { it.category == ClothingCategory.TOPS }?.colorHex
+                        val neutral = uiState.recommendedPalette.getOrNull(0) ?: "#FFFFFF"
+                        listOfNotNull(nail, lips, top, neutral).distinct().take(4)
+                    }
+                }
+            }
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -538,7 +564,7 @@ fun ResultStep(
                             color = Color.Black,
                             textAlign = TextAlign.Center
                         )
-                        uiState.recommendedPalette.forEach { hex ->
+                        displayPalette.forEach { hex ->
                             Box(
                                 modifier = Modifier
                                     .size(52.dp)
