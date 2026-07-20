@@ -1,28 +1,71 @@
 package com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.animation.core.*
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Checkroom
+import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.FaceRetouchingNatural
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Grain
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Inventory2
+import androidx.compose.material.icons.filled.Layers
+import androidx.compose.material.icons.filled.PanTool
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -36,8 +79,8 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -45,17 +88,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
-import com.zoewave.probase.kocolor.features.analyzer.R
-import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.SimulatorEvent
-import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.SimulationStep
-import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorUiState
-import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.ResultTab
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
+import com.zoewave.probase.core.model.ritual.ColorFamily
 import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.core.model.ritual.MacroCategory
-import com.zoewave.probase.core.model.ritual.ColorFamily
+import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
+import com.zoewave.probase.kocolor.features.analyzer.R
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.ResultTab
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.SimulationStep
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.SimulatorEvent
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorUiState
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
 @Composable
@@ -748,10 +791,10 @@ fun ClothingBlueprintView(uiState: StyleSimulatorUiState) {
             .padding(16.dp),
         contentAlignment = Alignment.Center
     ) {
-        // Central Silhouette Anchor
+        // Central Silhouette Anchor (Maximum Scale)
         Box(
             modifier = Modifier
-                .width(360.dp)
+                .width(420.dp)
                 .fillMaxHeight()
                 .offset(x = horizontalShift, y = blueprintOffset)
                 .clip(RoundedCornerShape(32.dp))
@@ -769,31 +812,25 @@ fun ClothingBlueprintView(uiState: StyleSimulatorUiState) {
         // Callout Lines
         Canvas(modifier = Modifier.fillMaxSize()) {
             val center = Offset(size.width / 2 + horizontalShift.toPx(), size.height / 2 + blueprintOffset.toPx())
-            val dashEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
+            
+            val lineStroke = 0.8.dp.toPx()
+            val anchorRadius = 2.dp.toPx()
+            val lineColor = Color.DarkGray.copy(alpha = 0.4f)
 
             // TOP (Right)
-            drawLine(
-                color = Color.LightGray,
-                start = Offset(center.x + 10.dp.toPx(), center.y - 120.dp.toPx()),
-                end = Offset(center.x + 110.dp.toPx(), center.y - 100.dp.toPx()),
-                pathEffect = dashEffect, strokeWidth = 1.2.dp.toPx()
-            )
+            val topStart = Offset(center.x + 10.dp.toPx(), center.y - 120.dp.toPx())
+            drawLine(lineColor, topStart, Offset(center.x + 120.dp.toPx(), center.y - 140.dp.toPx()), lineStroke)
+            drawCircle(lineColor, anchorRadius, topStart)
 
             // BOTTOM (Left)
-            drawLine(
-                color = Color.LightGray,
-                start = Offset(center.x - 10.dp.toPx(), center.y + 20.dp.toPx()),
-                end = Offset(center.x - 110.dp.toPx(), center.y + 60.dp.toPx()),
-                pathEffect = dashEffect, strokeWidth = 1.2.dp.toPx()
-            )
+            val bottomStart = Offset(center.x - 10.dp.toPx(), center.y + 20.dp.toPx())
+            drawLine(lineColor, bottomStart, Offset(center.x - 120.dp.toPx(), center.y + 60.dp.toPx()), lineStroke)
+            drawCircle(lineColor, anchorRadius, bottomStart)
 
             // SHOES (Right)
-            drawLine(
-                color = Color.LightGray,
-                start = Offset(center.x + 10.dp.toPx(), center.y + 180.dp.toPx()),
-                end = Offset(center.x + 110.dp.toPx(), center.y + 200.dp.toPx()),
-                pathEffect = dashEffect, strokeWidth = 1.2.dp.toPx()
-            )
+            val shoesStart = Offset(center.x + 10.dp.toPx(), center.y + 180.dp.toPx())
+            drawLine(lineColor, shoesStart, Offset(center.x + 120.dp.toPx(), center.y + 200.dp.toPx()), lineStroke)
+            drawCircle(lineColor, anchorRadius, shoesStart)
         }
 
         val topItem = uiState.recommendedClothing.find { it.category == ClothingCategory.TOPS }
@@ -804,7 +841,7 @@ fun ClothingBlueprintView(uiState: StyleSimulatorUiState) {
             label = "TOP",
             productName = topItem?.name ?: "Pending...",
             colorHex = topItem?.colorHex,
-            modifier = Modifier.align(Alignment.TopEnd).padding(top = 60.dp).offset(y = blueprintOffset)
+            modifier = Modifier.align(Alignment.TopEnd).padding(top = 10.dp).offset(y = blueprintOffset)
         )
 
         BlueprintCallout(
@@ -853,13 +890,13 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
         // Callout Lines & Shades
         Canvas(modifier = Modifier.fillMaxSize()) {
             val center = Offset(size.width / 2 + horizontalShift.toPx(), size.height / 2 + blueprintOffset.toPx())
-            val dashEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
-
+            
             // 1. Draw "Shades" (Soft Glows on the face)
             val eyesItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.EYES }
             val cheeksItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.DIMENSION }
             val lipsItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.LIPS }
 
+            // ... (Shades drawing code remains same)
             // Eyes Shade
             eyesItem?.colorHex?.let { hex ->
                 drawCircle(
@@ -917,30 +954,25 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
                 )
             }
 
-            // 2. Draw Callout Lines
-            // Eyes (Top Left)
-            drawLine(
-                color = Color.LightGray,
-                start = Offset(center.x - 30.dp.toPx(), center.y - 45.dp.toPx()),
-                end = Offset(center.x - 120.dp.toPx(), center.y - 80.dp.toPx()),
-                pathEffect = dashEffect, strokeWidth = 1.dp.toPx()
-            )
+            // 2. Draw Callout Lines (Solid with anchor dots)
+            val lineStroke = 0.8.dp.toPx()
+            val anchorRadius = 2.dp.toPx()
+            val lineColor = Color.DarkGray.copy(alpha = 0.4f)
 
-            // Cheeks (Mid Left - Lowered)
-            drawLine(
-                color = Color.LightGray,
-                start = Offset(center.x - 45.dp.toPx(), center.y + 20.dp.toPx()),
-                end = Offset(center.x - 140.dp.toPx(), center.y + 110.dp.toPx()),
-                pathEffect = dashEffect, strokeWidth = 1.dp.toPx()
-            )
+            // Eyes (Top Left)
+            val eyesStart = Offset(center.x - 30.dp.toPx(), center.y - 45.dp.toPx())
+            drawLine(lineColor, eyesStart, Offset(center.x - 120.dp.toPx(), center.y - 80.dp.toPx()), lineStroke)
+            drawCircle(lineColor, anchorRadius, eyesStart)
+
+            // Cheeks (Mid Left)
+            val cheeksStart = Offset(center.x - 45.dp.toPx(), center.y + 20.dp.toPx())
+            drawLine(lineColor, cheeksStart, Offset(center.x - 140.dp.toPx(), center.y + 110.dp.toPx()), lineStroke)
+            drawCircle(lineColor, anchorRadius, cheeksStart)
 
             // Lips (Bottom Right)
-            drawLine(
-                color = Color.LightGray,
-                start = Offset(center.x, center.y + 70.dp.toPx()),
-                end = Offset(center.x + 100.dp.toPx(), center.y + 160.dp.toPx()),
-                pathEffect = dashEffect, strokeWidth = 1.dp.toPx()
-            )
+            val lipsStart = Offset(center.x, center.y + 70.dp.toPx())
+            drawLine(lineColor, lipsStart, Offset(center.x + 100.dp.toPx(), center.y + 160.dp.toPx()), lineStroke)
+            drawCircle(lineColor, anchorRadius, lipsStart)
         }
 
         val eyesItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.EYES }
@@ -1063,59 +1095,81 @@ fun BlueprintCallout(
     Box(modifier = modifier) {
         Card(
             modifier = Modifier
-                .width(if (isExpanded) 140.dp else 100.dp)
+                .width(if (isExpanded) 160.dp else 120.dp)
                 .clickable { isExpanded = !isExpanded },
-            shape = RoundedCornerShape(10.dp),
+            shape = RoundedCornerShape(12.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White),
-            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+            elevation = CardDefaults.cardElevation(defaultElevation = if (isExpanded) 12.dp else 4.dp)
         ) {
             Column(
-                modifier = Modifier.padding(10.dp),
-                verticalArrangement = Arrangement.spacedBy(2.dp),
+                modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
                 horizontalAlignment = Alignment.Start
             ) {
                 Text(
                     text = label.uppercase(),
-                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
-                    fontWeight = FontWeight.Light,
-                    color = Color.Gray,
-                    letterSpacing = 0.5.sp
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontSize = 8.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 2.sp
+                    ),
+                    color = Color.Gray.copy(alpha = 0.6f)
                 )
 
                 if (isExpanded) {
                     Text(
                         text = productName,
-                        style = MaterialTheme.typography.titleSmall.copy(fontSize = 13.sp),
-                        fontFamily = FontFamily.Serif,
-                        maxLines = 2,
-                        fontWeight = FontWeight.Medium,
-                        lineHeight = 15.sp,
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontSize = 14.sp,
+                            fontFamily = FontFamily.Serif,
+                            lineHeight = 16.sp
+                        ),
                         color = Color.Black,
-                        modifier = Modifier.padding(top = 2.dp)
+                        maxLines = 2
                     )
+
+                    // Color Ribbon (All about the color)
+                    if (colorHex != null) {
+                        Spacer(Modifier.height(2.dp))
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(22.dp)
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(
+                                    Brush.horizontalGradient(
+                                        colors = listOf(
+                                            parseColor(colorHex),
+                                            parseColor(colorHex).copy(alpha = 0.7f),
+                                            parseColor(colorHex).copy(alpha = 0.9f)
+                                        )
+                                    )
+                                )
+                                .border(1.dp, Color.Black.copy(alpha = 0.05f), RoundedCornerShape(4.dp))
+                        )
+                    }
                 } else {
                     Text(
                         text = "Details",
-                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
-                        color = Color.Gray,
-                        textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline,
-                        modifier = Modifier.padding(top = 4.dp)
+                        style = MaterialTheme.typography.labelMedium.copy(fontSize = 11.sp),
+                        color = Color.Black,
+                        textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline
                     )
                 }
             }
         }
 
-        // Color Indicator (The "Pin")
+        // Color Indicator (The "Anchor Dot")
         if (colorHex != null) {
             Box(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .offset(x = 6.dp, y = (-6).dp)
-                    .size(20.dp)
+                    .size(18.dp)
                     .clip(CircleShape)
                     .background(parseColor(colorHex))
-                    .border(1.5.dp, Color.White, CircleShape)
-                    .shadow(3.dp, CircleShape)
+                    .border(2.dp, Color.White, CircleShape)
+                    .shadow(4.dp, CircleShape)
             )
         }
     }
