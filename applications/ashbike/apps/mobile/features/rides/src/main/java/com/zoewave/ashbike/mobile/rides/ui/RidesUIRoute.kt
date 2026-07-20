@@ -33,6 +33,7 @@ fun RidesUIRoute(
     navTo: (String) -> Unit,
     ridesViewModel: RidesViewModel = hiltViewModel(),
     healthViewModel: HealthViewModel = hiltViewModel(),
+    selectedRideId: String? = null
 ) {
     // 1. Collect state from BOTH ViewModels
     val tripsUiState by ridesViewModel.uiState.collectAsState()
@@ -160,7 +161,8 @@ fun RidesUIRoute(
                     ridesViewModel.onEvent(RidesEvent.SyncRide(rideId))
                 },
                 healthUiState = healthUiState,
-                navTo = navTo
+                navTo = navTo,
+                selectedRideId = selectedRideId
             )
         }
     }

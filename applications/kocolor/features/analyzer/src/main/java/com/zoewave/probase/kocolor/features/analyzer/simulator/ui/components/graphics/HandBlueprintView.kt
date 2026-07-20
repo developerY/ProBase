@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.MacroCategory
@@ -102,4 +103,10 @@ fun HandBlueprintView(uiState: StyleSimulatorUiState) {
             modifier = Modifier.align(Alignment.TopEnd).padding(top = 80.dp).offset(y = (-40).dp)
         )
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun HandBlueprintViewPreview() {
+    HandBlueprintView(uiState = StyleSimulatorUiState())
 }

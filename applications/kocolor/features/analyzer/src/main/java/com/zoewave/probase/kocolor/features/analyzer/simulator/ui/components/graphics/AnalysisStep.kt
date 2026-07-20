@@ -30,6 +30,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.kocolor.features.analyzer.R
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.SimulationStep
@@ -98,6 +99,18 @@ fun AnalysisStep(
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
             modifier = Modifier.width(280.dp),
             textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun AnalysisStepPreview() {
+    MaterialTheme {
+        AnalysisStep(
+            uiState = StyleSimulatorUiState(simulationStep = SimulationStep.BIO_MARKERS),
+            onEvent = {},
+            navTo = {}
         )
     }
 }

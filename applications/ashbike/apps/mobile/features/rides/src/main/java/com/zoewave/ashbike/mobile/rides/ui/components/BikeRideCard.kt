@@ -35,15 +35,20 @@ fun BikeRideCard(
     ride: BikeRideUiModel,
     onDeleteClick: () -> Unit,
     onSyncClick: () -> Unit,
-    onNavigate: () -> Unit
+    onNavigate: () -> Unit,
+    selected: Boolean = false
 ) {
     Card(
         modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onNavigate),
         shape = RoundedCornerShape(8.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
-        elevation = CardDefaults.cardElevation(4.dp)
+        colors = CardDefaults.cardColors(
+            containerColor = if (selected) MaterialTheme.colorScheme.primaryContainer 
+                             else MaterialTheme.colorScheme.surfaceVariant
+        ),
+        border = if (selected) androidx.compose.foundation.BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
+        elevation = CardDefaults.cardElevation(if (selected) 8.dp else 4.dp)
     ) {
         Box {
             Box(
