@@ -548,7 +548,6 @@ fun ResultStep(
                         .width(72.dp)
                         .fillMaxHeight()
                         .padding(vertical = 20.dp, horizontal = 4.dp),
-                    verticalArrangement = Arrangement.SpaceBetween,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Column(
@@ -580,13 +579,6 @@ fun ResultStep(
                         }
                         Spacer(Modifier.height(8.dp))
                     }
-
-                    Spacer(Modifier.height(16.dp))
-
-                    ResultTabToggle(
-                        selectedTab = uiState.selectedResultTab,
-                        onTabSelected = { onEvent(SimulatorEvent.SelectResultTab(it)) }
-                    )
                 }
 
                 // Right Column: Blueprint View
@@ -596,6 +588,12 @@ fun ResultStep(
                         ResultTab.CLOTHES -> ClothingBlueprintView(uiState)
                         ResultTab.NAILS -> HandBlueprintView(uiState)
                     }
+
+                    ResultTabToggle(
+                        selectedTab = uiState.selectedResultTab,
+                        onTabSelected = { onEvent(SimulatorEvent.SelectResultTab(it)) },
+                        modifier = Modifier.align(Alignment.TopCenter).padding(top = 16.dp)
+                    )
                 }
             }
         }
@@ -681,20 +679,21 @@ fun ResultStep(
 @Composable
 private fun ResultTabToggle(
     selectedTab: ResultTab,
-    onTabSelected: (ResultTab) -> Unit
+    onTabSelected: (ResultTab) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Surface(
-        modifier = Modifier
-            .width(52.dp)
-            .height(180.dp),
+        modifier = modifier
+            .width(180.dp)
+            .height(52.dp),
         shape = RoundedCornerShape(26.dp),
         color = Color.White,
         shadowElevation = 10.dp
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize().padding(vertical = 12.dp),
-            verticalArrangement = Arrangement.SpaceBetween,
-            horizontalAlignment = Alignment.CenterHorizontally
+        Row(
+            modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             ResultTabItem(
                 icon = Icons.Default.Face,
@@ -740,8 +739,8 @@ private fun ResultTabItem(
 
 @Composable
 fun ClothingBlueprintView(uiState: StyleSimulatorUiState) {
-    val blueprintOffset = (-30).dp
-    val horizontalShift = 30.dp // Shifted right to balance with the bottoms card on the left
+    val blueprintOffset = 10.dp
+    val horizontalShift = 0.dp
     
     Box(
         modifier = Modifier
@@ -752,7 +751,7 @@ fun ClothingBlueprintView(uiState: StyleSimulatorUiState) {
         // Central Silhouette Anchor
         Box(
             modifier = Modifier
-                .width(400.dp)
+                .width(360.dp)
                 .fillMaxHeight()
                 .offset(x = horizontalShift, y = blueprintOffset)
                 .clip(RoundedCornerShape(32.dp))
@@ -776,7 +775,7 @@ fun ClothingBlueprintView(uiState: StyleSimulatorUiState) {
             drawLine(
                 color = Color.LightGray,
                 start = Offset(center.x + 10.dp.toPx(), center.y - 120.dp.toPx()),
-                end = Offset(center.x + 110.dp.toPx(), center.y - 140.dp.toPx()),
+                end = Offset(center.x + 110.dp.toPx(), center.y - 100.dp.toPx()),
                 pathEffect = dashEffect, strokeWidth = 1.2.dp.toPx()
             )
 
@@ -805,7 +804,7 @@ fun ClothingBlueprintView(uiState: StyleSimulatorUiState) {
             label = "TOP",
             productName = topItem?.name ?: "Pending...",
             colorHex = topItem?.colorHex,
-            modifier = Modifier.align(Alignment.TopEnd).padding(top = 10.dp).offset(y = blueprintOffset)
+            modifier = Modifier.align(Alignment.TopEnd).padding(top = 60.dp).offset(y = blueprintOffset)
         )
 
         BlueprintCallout(
@@ -826,8 +825,8 @@ fun ClothingBlueprintView(uiState: StyleSimulatorUiState) {
 
 @Composable
 fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
-    val blueprintOffset = (-30).dp
-    val horizontalShift = 30.dp
+    val blueprintOffset = 10.dp
+    val horizontalShift = 0.dp
     
     Box(
         modifier = Modifier
@@ -838,7 +837,7 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
         // Central Face Anchor (Always use Line-Art for Blueprint feel)
         Box(
             modifier = Modifier
-                .size(320.dp)
+                .size(280.dp)
                 .offset(x = horizontalShift, y = blueprintOffset)
                 .clip(CircleShape)
                 .background(Color.White.copy(alpha = 0.5f))
@@ -866,20 +865,20 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
                 drawCircle(
                     brush = Brush.radialGradient(
                         colors = listOf(parseColor(hex).copy(alpha = 0.35f), Color.Transparent),
-                        center = Offset(center.x - 40.dp.toPx(), center.y - 55.dp.toPx()),
-                        radius = 25.dp.toPx()
+                        center = Offset(center.x - 35.dp.toPx(), center.y - 45.dp.toPx()),
+                        radius = 20.dp.toPx()
                     ),
-                    radius = 25.dp.toPx(),
-                    center = Offset(center.x - 40.dp.toPx(), center.y - 55.dp.toPx())
+                    radius = 20.dp.toPx(),
+                    center = Offset(center.x - 35.dp.toPx(), center.y - 45.dp.toPx())
                 )
                 drawCircle(
                     brush = Brush.radialGradient(
                         colors = listOf(parseColor(hex).copy(alpha = 0.35f), Color.Transparent),
-                        center = Offset(center.x + 40.dp.toPx(), center.y - 55.dp.toPx()),
-                        radius = 25.dp.toPx()
+                        center = Offset(center.x + 35.dp.toPx(), center.y - 45.dp.toPx()),
+                        radius = 20.dp.toPx()
                     ),
-                    radius = 25.dp.toPx(),
-                    center = Offset(center.x + 40.dp.toPx(), center.y - 55.dp.toPx())
+                    radius = 20.dp.toPx(),
+                    center = Offset(center.x + 35.dp.toPx(), center.y - 45.dp.toPx())
                 )
             }
 
@@ -888,20 +887,20 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
                 drawCircle(
                     brush = Brush.radialGradient(
                         colors = listOf(parseColor(hex).copy(alpha = 0.3f), Color.Transparent),
-                        center = Offset(center.x - 55.dp.toPx(), center.y + 35.dp.toPx()),
-                        radius = 45.dp.toPx()
+                        center = Offset(center.x - 45.dp.toPx(), center.y + 25.dp.toPx()),
+                        radius = 35.dp.toPx()
                     ),
-                    radius = 45.dp.toPx(),
-                    center = Offset(center.x - 55.dp.toPx(), center.y + 35.dp.toPx())
+                    radius = 35.dp.toPx(),
+                    center = Offset(center.x - 45.dp.toPx(), center.y + 25.dp.toPx())
                 )
                 drawCircle(
                     brush = Brush.radialGradient(
                         colors = listOf(parseColor(hex).copy(alpha = 0.3f), Color.Transparent),
-                        center = Offset(center.x + 55.dp.toPx(), center.y + 35.dp.toPx()),
-                        radius = 45.dp.toPx()
+                        center = Offset(center.x + 45.dp.toPx(), center.y + 25.dp.toPx()),
+                        radius = 35.dp.toPx()
                     ),
-                    radius = 45.dp.toPx(),
-                    center = Offset(center.x + 55.dp.toPx(), center.y + 35.dp.toPx())
+                    radius = 35.dp.toPx(),
+                    center = Offset(center.x + 45.dp.toPx(), center.y + 25.dp.toPx())
                 )
             }
 
@@ -910,11 +909,11 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
                 drawCircle(
                     brush = Brush.radialGradient(
                         colors = listOf(parseColor(hex).copy(alpha = 0.4f), Color.Transparent),
-                        center = Offset(center.x, center.y + 85.dp.toPx()),
-                        radius = 35.dp.toPx()
+                        center = Offset(center.x, center.y + 75.dp.toPx()),
+                        radius = 25.dp.toPx()
                     ),
-                    radius = 35.dp.toPx(),
-                    center = Offset(center.x, center.y + 85.dp.toPx())
+                    radius = 25.dp.toPx(),
+                    center = Offset(center.x, center.y + 75.dp.toPx())
                 )
             }
 
@@ -922,24 +921,24 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
             // Eyes (Top Left)
             drawLine(
                 color = Color.LightGray,
-                start = Offset(center.x - 40.dp.toPx(), center.y - 55.dp.toPx()),
-                end = Offset(center.x - 140.dp.toPx(), center.y - 140.dp.toPx()),
+                start = Offset(center.x - 30.dp.toPx(), center.y - 45.dp.toPx()),
+                end = Offset(center.x - 120.dp.toPx(), center.y - 80.dp.toPx()),
                 pathEffect = dashEffect, strokeWidth = 1.dp.toPx()
             )
 
             // Cheeks (Mid Left - Lowered)
             drawLine(
                 color = Color.LightGray,
-                start = Offset(center.x - 55.dp.toPx(), center.y + 35.dp.toPx()),
-                end = Offset(center.x - 160.dp.toPx(), center.y + 120.dp.toPx()),
+                start = Offset(center.x - 45.dp.toPx(), center.y + 20.dp.toPx()),
+                end = Offset(center.x - 140.dp.toPx(), center.y + 110.dp.toPx()),
                 pathEffect = dashEffect, strokeWidth = 1.dp.toPx()
             )
 
             // Lips (Bottom Right)
             drawLine(
                 color = Color.LightGray,
-                start = Offset(center.x, center.y + 85.dp.toPx()),
-                end = Offset(center.x + 120.dp.toPx(), center.y + 180.dp.toPx()),
+                start = Offset(center.x, center.y + 70.dp.toPx()),
+                end = Offset(center.x + 100.dp.toPx(), center.y + 160.dp.toPx()),
                 pathEffect = dashEffect, strokeWidth = 1.dp.toPx()
             )
         }
@@ -952,14 +951,14 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
             label = "EYES",
             productName = eyesItem?.name ?: "Pending...",
             colorHex = eyesItem?.colorHex,
-            modifier = Modifier.align(Alignment.TopStart).padding(top = 10.dp, start = 5.dp).offset(y = blueprintOffset)
+            modifier = Modifier.align(Alignment.TopStart).padding(top = 80.dp).offset(y = blueprintOffset)
         )
 
         BlueprintCallout(
             label = "CHEEKS",
             productName = cheeksItem?.name ?: "Pending...",
             colorHex = cheeksItem?.colorHex,
-            modifier = Modifier.align(Alignment.CenterStart).padding(top = 280.dp, start = 5.dp).offset(y = blueprintOffset)
+            modifier = Modifier.align(Alignment.CenterStart).padding(top = 220.dp, start = 5.dp).offset(y = blueprintOffset)
         )
 
         BlueprintCallout(
@@ -973,8 +972,8 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
 
 @Composable
 fun HandBlueprintView(uiState: StyleSimulatorUiState) {
-    val blueprintOffset = (-30).dp
-    val horizontalShift = 30.dp
+    val blueprintOffset = 10.dp
+    val horizontalShift = 0.dp
     
     Box(
         modifier = Modifier
@@ -982,10 +981,10 @@ fun HandBlueprintView(uiState: StyleSimulatorUiState) {
             .padding(16.dp),
         contentAlignment = Alignment.Center
     ) {
-        // Central Hand Anchor (Always use Line-Art for Blueprint feel)
+        // Central Hand Anchor
         Box(
             modifier = Modifier
-                .size(320.dp)
+                .size(300.dp)
                 .offset(x = horizontalShift, y = blueprintOffset)
                 .clip(CircleShape)
                 .background(Color.White.copy(alpha = 0.5f))
@@ -1021,7 +1020,7 @@ fun HandBlueprintView(uiState: StyleSimulatorUiState) {
 
             // Elegant Curved Callout Line
             val start = Offset(center.x + 60.dp.toPx(), center.y - 80.dp.toPx())
-            val end = Offset(center.x + 140.dp.toPx(), center.y - 160.dp.toPx())
+            val end = Offset(center.x + 140.dp.toPx(), center.y - 120.dp.toPx())
             
             val path = androidx.compose.ui.graphics.Path().apply {
                 moveTo(start.x, start.y)
@@ -1047,7 +1046,7 @@ fun HandBlueprintView(uiState: StyleSimulatorUiState) {
             label = "NAILS",
             productName = nailsItem?.name ?: "Pending...",
             colorHex = nailsItem?.colorHex,
-            modifier = Modifier.align(Alignment.TopEnd).padding(top = 10.dp).offset(y = (-60).dp)
+            modifier = Modifier.align(Alignment.TopEnd).padding(top = 80.dp).offset(y = (-40).dp)
         )
     }
 }
