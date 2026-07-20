@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
@@ -161,4 +162,10 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
             modifier = Modifier.align(Alignment.BottomEnd).padding(bottom = 0.dp, end = 5.dp).offset(y = blueprintOffset - 10.dp)
         )
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun FaceBlueprintViewPreview() {
+    FaceBlueprintView(uiState = StyleSimulatorUiState())
 }

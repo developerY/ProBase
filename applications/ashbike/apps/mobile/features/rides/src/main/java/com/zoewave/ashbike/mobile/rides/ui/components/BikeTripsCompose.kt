@@ -31,7 +31,8 @@ fun BikeTripsCompose(
     onDeleteClick: (String) -> Unit,
     onSyncClick: (String) -> Unit,
     healthUiState: HealthUiState,
-    navTo: (String) -> Unit
+    navTo: (String) -> Unit,
+    selectedRideId: String? = null
 ) {
 
     // derive a simple “connected?” flag
@@ -77,6 +78,7 @@ fun BikeTripsCompose(
                         onDeleteClick = { onDeleteClick(rideModel.rideId) },
                         onSyncClick = { onSyncClick(rideModel.rideId) },
                         onNavigate = { navTo(rideModel.rideId) },
+                        selected = rideModel.rideId == selectedRideId
                     )
                 }
             }

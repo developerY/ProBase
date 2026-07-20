@@ -32,6 +32,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -59,7 +61,7 @@ import com.zoewave.probase.ashbike.mobile.ui.MainUiEvent
 import com.zoewave.probase.ashbike.mobile.ui.MainViewModel
 import com.zoewave.probase.ashbike.mobile.ui.navigation.ashBikeNavEntryProvider
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun AshBikeMainScreen(
     viewModel: MainViewModel = hiltViewModel(),
@@ -80,6 +82,8 @@ fun AshBikeMainScreen(
     val backStack = remember {
         mutableStateListOf<AshBikeDestination>(AshBikeDestination.Home)
     }
+
+    val listDetailSceneStrategy = rememberListDetailSceneStrategy<AshBikeDestination>()
 
     // Helper to push a new screen
     fun navigateTo(destination: AshBikeDestination) {
@@ -119,6 +123,13 @@ fun AshBikeMainScreen(
     // ✅ FIX: Use derivedStateOf to strictly observe the list changes
     val currentDestination by remember {
         derivedStateOf { backStack.lastOrNull() ?: AshBikeDestination.Home }
+    }
+
+    val selectedRideId by remember {
+        derivedStateOf {
+            val detail = backStack.filterIsInstance<AshBikeDestination.RideDetail>().lastOrNull()
+            detail?.rideId
+        }
     }
 
     // 2. In your MainScreen
@@ -217,6 +228,7 @@ fun AshBikeMainScreen(
                 backStack = backStack,
                 modifier = Modifier.padding(innerPadding),
                 onBack = { backStack.removeLastOrNull() }, // Default back action
+                sceneStrategies = listOf(listDetailSceneStrategy),
                 entryDecorators = listOf(
                     rememberSaveableStateHolderNavEntryDecorator(),
                     rememberViewModelStoreNavEntryDecorator()
@@ -228,6 +240,7 @@ fun AshBikeMainScreen(
                         key = key,
                         navigateTo = { dest -> navigateTo(dest) },
                         homeViewModel = homeViewModel,
+                        selectedRideId = selectedRideId
                     )
                 }
             )

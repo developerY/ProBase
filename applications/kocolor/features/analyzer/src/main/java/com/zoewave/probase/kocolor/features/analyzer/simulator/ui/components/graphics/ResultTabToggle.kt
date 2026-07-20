@@ -12,11 +12,14 @@ import androidx.compose.material.icons.filled.PanTool
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.ResultTab
 
@@ -79,4 +82,14 @@ private fun ResultTabItem(
             modifier = Modifier.size(20.dp)
         )
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ResultTabTogglePreview() {
+    val selectedTab = remember { mutableStateOf(ResultTab.FACE) }
+    ResultTabToggle(
+        selectedTab = selectedTab.value,
+        onTabSelected = { selectedTab.value = it }
+    )
 }

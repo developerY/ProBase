@@ -11,6 +11,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -32,4 +33,10 @@ fun MagicBackground() {
             )
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun MagicBackgroundPreview() {
+    MagicBackground()
 }

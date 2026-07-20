@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.kocolor.features.analyzer.R
@@ -98,4 +99,10 @@ fun ClothingBlueprintView(uiState: StyleSimulatorUiState) {
             modifier = Modifier.align(Alignment.BottomEnd).padding(bottom = 10.dp).offset(y = blueprintOffset)
         )
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ClothingBlueprintViewPreview() {
+    ClothingBlueprintView(uiState = StyleSimulatorUiState())
 }

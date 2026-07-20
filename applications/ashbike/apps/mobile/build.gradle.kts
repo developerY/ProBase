@@ -142,6 +142,9 @@ dependencies {
 
     // The library containing the Adaptive APIs
     implementation(libs.androidx.material3.adaptive.navigation3)
+    implementation(libs.androidx.compose.material3.adaptive)
+    implementation(libs.androidx.compose.material3.adaptive.layout)
+    implementation(libs.androidx.compose.material3.adaptive.navigation)
 
     // Maps
     implementation(libs.google.maps.compose)

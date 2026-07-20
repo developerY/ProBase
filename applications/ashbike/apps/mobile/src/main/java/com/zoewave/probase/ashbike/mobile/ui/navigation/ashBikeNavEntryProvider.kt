@@ -11,10 +11,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation3.runtime.NavEntry
 import com.zoewave.ashbike.mobile.home.ui.HomeViewModel
 import com.zoewave.ashbike.mobile.rides.ui.RidesUIRoute
+import com.zoewave.ashbike.mobile.rides.ui.components.details.RideDetailPlaceholder
 import com.zoewave.ashbike.mobile.rides.ui.components.details.RideDetailScreen
 import com.zoewave.ashbike.mobile.rides.ui.components.details.RideDetailViewModel
 import com.zoewave.ashbike.mobile.rides.ui.components.unused.haversineMeters
@@ -27,11 +30,13 @@ import com.zoewave.probase.feature.places.ui.CoffeeShopViewModel
 import com.zoewave.probaseapplications.bike.features.main.ui.HomeUiRoute
 
 
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @SuppressLint("MissingPermission") // <--- ADD THIS
 fun ashBikeNavEntryProvider(
     key: AshBikeDestination,
     navigateTo: (AshBikeDestination) -> Unit,
-    homeViewModel: HomeViewModel
+    homeViewModel: HomeViewModel,
+    selectedRideId: String? = null
 ): NavEntry<AshBikeDestination> {
 
     // NavEntry wraps the content and provides the scope for Hilt ViewModels
@@ -52,75 +57,88 @@ fun ashBikeNavEntryProvider(
             // 2. TRIPS TAB (List)
             // -----------------------------------------------------------------
             is AshBikeDestination.Trips -> {
-                RidesUIRoute(
-                    modifier = Modifier.fillMaxSize(),
-                    // The Trips screen emits a string ID when a row is clicked.
-                    // We wrap that String into our Type-Safe 'RideDetail' object.
-                    navTo = { rideId ->
-                        navigateTo(AshBikeDestination.RideDetail(rideId))
-                    }
-                )
+                NavEntry(
+                    key = key,
+                    metadata = ListDetailSceneStrategy.listPane(
+                        detailPlaceholder = { RideDetailPlaceholder() }
+                    )
+                ) {
+                    RidesUIRoute(
+                        modifier = Modifier.fillMaxSize(),
+                        // The Trips screen emits a string ID when a row is clicked.
+                        // We wrap that String into our Type-Safe 'RideDetail' object.
+                        navTo = { rideId ->
+                            navigateTo(AshBikeDestination.RideDetail(rideId))
+                        },
+                        selectedRideId = selectedRideId
+                    )
+                }
             }
 
             // -----------------------------------------------------------------
             // 3. RIDE DETAIL (Detail Screen)
             // -----------------------------------------------------------------
             is AshBikeDestination.RideDetail -> {
-                // A. Get ViewModels
-                // Hilt scopes these to this specific NavEntry (Screen)
-                val rideViewModel: RideDetailViewModel = hiltViewModel()
-                val cafeViewModel: CoffeeShopViewModel = hiltViewModel()
+                NavEntry(
+                    key = key,
+                    metadata = ListDetailSceneStrategy.detailPane()
+                ) {
+                    // A. Get ViewModels
+                    // Hilt scopes these to this specific NavEntry (Screen)
+                    val rideViewModel: RideDetailViewModel = hiltViewModel()
+                    val cafeViewModel: CoffeeShopViewModel = hiltViewModel()
 
-                // B. CRITICAL: Bridge Nav3 Key -> ViewModel
-                // Since Nav3 doesn't populate SavedStateHandle automatically yet,
-                // we manually pass the ID from the Key to the ViewModel.
-                LaunchedEffect(key.rideId) {
-                    rideViewModel.loadRide(key.rideId)
-                }
-
-                // C. Collect State
-                val rideWithLocs by rideViewModel.rideWithLocations.collectAsState()
-                val cafeUiState by cafeViewModel.uiState.collectAsState()
-
-                // D. Define Cafe Logic (Ported from legacy NavGraph)
-                // This calculates the center of the ride and a dynamic radius to find coffee shops.
-                val findCafesAction = {
-                    val locations = rideWithLocs?.locations
-                    if (!locations.isNullOrEmpty()) {
-                        val centerLat = locations.map { it.lat }.average()
-                        val centerLng = locations.map { it.lng }.average()
-
-                        // Calculate dynamic radius based on ride size
-                        val routeRadius = locations.maxOfOrNull { loc ->
-                            haversineMeters(centerLat, centerLng, loc.lat, loc.lng)
-                        } ?: 0.0
-
-                        // Search slightly wider than the route (min 200m, max 1.5km)
-                        val searchRadius = (routeRadius + 100.0).coerceIn(200.0, 1500.0)
-
-                        cafeViewModel.onEvent(
-                            CoffeeShopEvent.FindCafesInArea(
-                                latitude = centerLat,
-                                longitude = centerLng,
-                                radius = searchRadius
-                            )
-                        )
-                    } else {
-                        Logging.w("Nav3", "User requested cafes, but ride location data is empty.")
+                    // B. CRITICAL: Bridge Nav3 Key -> ViewModel
+                    // Since Nav3 doesn't populate SavedStateHandle automatically yet,
+                    // we manually pass the ID from the Key to the ViewModel.
+                    LaunchedEffect(key.rideId) {
+                        rideViewModel.loadRide(key.rideId)
                     }
+
+                    // C. Collect State
+                    val rideWithLocs by rideViewModel.rideWithLocations.collectAsState()
+                    val cafeUiState by cafeViewModel.uiState.collectAsState()
+
+                    // D. Define Cafe Logic (Ported from legacy NavGraph)
+                    // This calculates the center of the ride and a dynamic radius to find coffee shops.
+                    val findCafesAction = {
+                        val locations = rideWithLocs?.locations
+                        if (!locations.isNullOrEmpty()) {
+                            val centerLat = locations.map { it.lat }.average()
+                            val centerLng = locations.map { it.lng }.average()
+
+                            // Calculate dynamic radius based on ride size
+                            val routeRadius = locations.maxOfOrNull { loc ->
+                                haversineMeters(centerLat, centerLng, loc.lat, loc.lng)
+                            } ?: 0.0
+
+                            // Search slightly wider than the route (min 200m, max 1.5km)
+                            val searchRadius = (routeRadius + 100.0).coerceIn(200.0, 1500.0)
+
+                            cafeViewModel.onEvent(
+                                CoffeeShopEvent.FindCafesInArea(
+                                    latitude = centerLat,
+                                    longitude = centerLng,
+                                    radius = searchRadius
+                                )
+                            )
+                        } else {
+                            Logging.w("Nav3", "User requested cafes, but ride location data is empty.")
+                        }
+                    }
+
+                    // E. Extract Shop List safely
+                    val coffeeShops = (cafeUiState as? CoffeeShopUIState.Success)?.coffeeShops ?: emptyList()
+
+                    // F. Render the Screen
+                    RideDetailScreen(
+                        modifier = Modifier.fillMaxSize(),
+                        rideWithLocs = rideWithLocs,
+                        coffeeShops = coffeeShops,
+                        onFindCafes = findCafesAction,
+                        onEvent = { event -> rideViewModel.onEvent(event) }
+                    )
                 }
-
-                // E. Extract Shop List safely
-                val coffeeShops = (cafeUiState as? CoffeeShopUIState.Success)?.coffeeShops ?: emptyList()
-
-                // F. Render the Screen
-                RideDetailScreen(
-                    modifier = Modifier.fillMaxSize(),
-                    rideWithLocs = rideWithLocs,
-                    coffeeShops = coffeeShops,
-                    onFindCafes = findCafesAction,
-                    onEvent = { event -> rideViewModel.onEvent(event) }
-                )
             }
 
             // -----------------------------------------------------------------

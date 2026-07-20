@@ -23,7 +23,8 @@ fun RidesScreen(
     onDeleteClick: (String) -> Unit,
     onSyncClick: (String) -> Unit,
     onRetry: () -> Unit,
-    navTo: (String) -> Unit
+    navTo: (String) -> Unit,
+    selectedRideId: String? = null
 ) {
     Scaffold(
         modifier = modifier,
@@ -54,6 +55,7 @@ fun RidesScreen(
                     onDeleteClick = onDeleteClick,
                     onSyncClick = onSyncClick,
                     navTo = navTo,
+                    selectedRideId = selectedRideId,
                     bikeEvent = TODO(),
                     syncedIds = TODO(),
                     healthEvent = TODO(),
