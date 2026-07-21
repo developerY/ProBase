@@ -31,19 +31,21 @@ import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulator
 fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
 
 
-    // 1. Shift the entire face right to avoid the color palette
+// 1. Shift the entire face significantly right to clear the color palette
     val blueprintOffset = 10.dp
-    val horizontalShift = 20.dp // Added a 20dp shift away from the left edge
+    val horizontalShift = 45.dp // Increased to push everything away from the left edge
 
-    // 2. Tighten the Unified Offsets (Closer to the face)
+    // 2. Define tight, steep Line Targets
     val eyesAnchor = Offset(-35.dp.value, -45.dp.value)
-    val eyesCallout = Offset(-60.dp.value, -100.dp.value) // Brought in and pushed up
+    val eyesCallout = Offset(-30.dp.value, -100.dp.value)
 
     val cheeksAnchor = Offset(-45.dp.value, 25.dp.value)
-    val cheeksCallout = Offset(-70.dp.value, 90.dp.value) // Brought in and pushed down
+    val cheeksCallout = Offset(-45.dp.value, 75.dp.value)
 
     val lipsAnchor = Offset(0.dp.value, 75.dp.value)
-    val lipsCallout = Offset(60.dp.value, 150.dp.value) // Brought in and pushed down
+    val lipsCallout = Offset(10.dp.value, 140.dp.value)
+
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -205,19 +207,18 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
         val lipsItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.LIPS }
 
         // 3. Deterministic Alignment Math
-        // By locking the width of the callout, we force long text to wrap,
-        // preventing UI collisions. It also makes our offset math perfectly accurate.
-        val calloutWidth = 130.dp
+        val calloutWidth = 120.dp // Slightly narrower to prevent edge-bleed
         val calloutHalfWidth = calloutWidth / 2
-        val calloutHalfHeight = 24.dp // Estimated half-height for wrapping text
+        val calloutHalfHeight = 36.dp // Increased to properly center the dot vertically alongside the wrapping text
 
         BlueprintCallout(
             label = "EYES",
             productName = eyesItem?.name ?: "Pending...",
             colorHex = eyesItem?.colorHex,
             modifier = Modifier
-                .width(calloutWidth) // Strict constraint for text wrapping
+                .width(calloutWidth)
                 .offset(
+                    // Left callout: shift left by half-width, shift down by half-height
                     x = horizontalShift + eyesCallout.x.dp - calloutHalfWidth,
                     y = blueprintOffset + eyesCallout.y.dp + calloutHalfHeight
                 ),
@@ -231,6 +232,7 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
             modifier = Modifier
                 .width(calloutWidth)
                 .offset(
+                    // Left callout: shift left by half-width, shift down by half-height
                     x = horizontalShift + cheeksCallout.x.dp - calloutHalfWidth,
                     y = blueprintOffset + cheeksCallout.y.dp + calloutHalfHeight
                 ),
@@ -244,11 +246,13 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
             modifier = Modifier
                 .width(calloutWidth)
                 .offset(
+                    // Right callout: shift right by half-width, shift down by half-height
                     x = horizontalShift + lipsCallout.x.dp + calloutHalfWidth,
                     y = blueprintOffset + lipsCallout.y.dp + calloutHalfHeight
                 ),
             anchorAlignment = Alignment.TopStart
         )
+
 
     }
 }
