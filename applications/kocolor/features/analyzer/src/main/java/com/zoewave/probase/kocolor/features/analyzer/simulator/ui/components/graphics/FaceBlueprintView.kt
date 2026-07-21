@@ -30,16 +30,16 @@ import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulator
 fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
     val blueprintOffset = 10.dp
     val horizontalShift = 0.dp
-    
-    // Define Unified Offsets for Layout (Relative to Center)
+
+// Define Unified Offsets for Layout (Relative to Center)
     val eyesAnchor = Offset(-35.dp.value, -45.dp.value)
-    val eyesCallout = Offset(-140.dp.value, -120.dp.value)
-    
+    val eyesCallout = Offset(-80.dp.value, -100.dp.value) // Brought inward from -140
+
     val cheeksAnchor = Offset(-45.dp.value, 25.dp.value)
-    val cheeksCallout = Offset(-150.dp.value, 60.dp.value)
-    
+    val cheeksCallout = Offset(-90.dp.value, 60.dp.value) // Brought inward from -150
+
     val lipsAnchor = Offset(0.dp.value, 75.dp.value)
-    val lipsCallout = Offset(130.dp.value, 160.dp.value)
+    val lipsCallout = Offset(80.dp.value, 140.dp.value) // Brought inward from 130
 
     Box(
         modifier = Modifier
@@ -158,6 +158,12 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
         val cheeksItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.DIMENSION }
         val lipsItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.LIPS }
 
+        // 3. Alignment Math for the Callout Boxes
+        // By estimating the half-width and half-height of the BlueprintCallout,
+        // we can mathematically snap its corner dot exactly to the Canvas line end.
+        val calloutHalfWidth = 50.dp // Adjust this slightly if your callout is wider than 100dp
+        val calloutHalfHeight = 20.dp
+
         // Positioning Callouts such that their Anchor Dot matches the line end
         // For Left callouts (Eyes, Cheeks), dot is at TopEnd
         BlueprintCallout(
@@ -166,8 +172,10 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
             colorHex = eyesItem?.colorHex,
             modifier = Modifier
                 .offset(
-                    x = horizontalShift + eyesCallout.x.dp - 120.dp - 6.dp, // Include face offsets
-                    y = blueprintOffset + eyesCallout.y.dp + 6.dp
+                    // Shift left so the Right Edge (TopEnd) hits the line exactly
+                    x = horizontalShift + eyesCallout.x.dp - calloutHalfWidth,
+                    // Shift down so the Top Edge hits the line exactly
+                    y = blueprintOffset + eyesCallout.y.dp + calloutHalfHeight
                 ),
             anchorAlignment = Alignment.TopEnd
         )
@@ -178,8 +186,8 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
             colorHex = cheeksItem?.colorHex,
             modifier = Modifier
                 .offset(
-                    x = horizontalShift + cheeksCallout.x.dp - 120.dp - 6.dp,
-                    y = blueprintOffset + cheeksCallout.y.dp + 6.dp
+                    x = horizontalShift + cheeksCallout.x.dp - calloutHalfWidth,
+                    y = blueprintOffset + cheeksCallout.y.dp + calloutHalfHeight
                 ),
             anchorAlignment = Alignment.TopEnd
         )
@@ -191,8 +199,9 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
             colorHex = lipsItem?.colorHex,
             modifier = Modifier
                 .offset(
-                    x = horizontalShift + lipsCallout.x.dp + 6.dp,
-                    y = blueprintOffset + lipsCallout.y.dp + 6.dp
+                    // Shift right so the Left Edge (TopStart) hits the line exactly
+                    x = horizontalShift + lipsCallout.x.dp + calloutHalfWidth,
+                    y = blueprintOffset + lipsCallout.y.dp + calloutHalfHeight
                 ),
             anchorAlignment = Alignment.TopStart
         )
