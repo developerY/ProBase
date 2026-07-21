@@ -3,7 +3,11 @@ package com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.gr
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -11,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.layout.ContentScale
@@ -29,6 +32,10 @@ fun HandBlueprintView(uiState: StyleSimulatorUiState) {
     val blueprintOffset = 10.dp
     val horizontalShift = 0.dp
     
+    // Define Unified Offsets
+    val nailsAnchor = Offset(60.dp.value, -80.dp.value)
+    val nailsCallout = Offset(130.dp.value, -120.dp.value)
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -73,13 +80,13 @@ fun HandBlueprintView(uiState: StyleSimulatorUiState) {
             }
 
             // Elegant Curved Callout Line
-            val start = Offset(center.x + 60.dp.toPx(), center.y - 80.dp.toPx())
-            val end = Offset(center.x + 120.dp.toPx(), center.y - 80.dp.toPx())
+            val start = Offset(center.x + nailsAnchor.x.dp.toPx(), center.y + nailsAnchor.y.dp.toPx())
+            val end = Offset(center.x + nailsCallout.x.dp.toPx(), center.y + nailsCallout.y.dp.toPx())
             
             val path = androidx.compose.ui.graphics.Path().apply {
                 moveTo(start.x, start.y)
                 quadraticTo(
-                    center.x + 120.dp.toPx(), center.y - 80.dp.toPx(),
+                    center.x + nailsCallout.x.dp.toPx(), start.y, // Control point
                     end.x, end.y
                 )
             }
@@ -100,7 +107,12 @@ fun HandBlueprintView(uiState: StyleSimulatorUiState) {
             label = "NAILS",
             productName = nailsItem?.name ?: "Pending...",
             colorHex = nailsItem?.colorHex,
-            modifier = Modifier.align(Alignment.TopEnd).padding(top = 80.dp).offset(y = (-40).dp)
+            modifier = Modifier
+                .offset(
+                    x = horizontalShift + nailsCallout.x.dp + 7.dp,
+                    y = blueprintOffset + nailsCallout.y.dp + 7.dp
+                ),
+            anchorAlignment = Alignment.TopStart
         )
     }
 }

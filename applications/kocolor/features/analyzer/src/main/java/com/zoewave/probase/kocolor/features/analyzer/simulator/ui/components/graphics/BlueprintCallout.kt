@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
@@ -42,11 +43,20 @@ fun BlueprintCallout(
     label: String,
     productName: String,
     colorHex: String?,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    anchorAlignment: Alignment = Alignment.TopEnd
 ) {
     var isExpanded by remember { mutableStateOf(false) }
 
-    Box(modifier = modifier) {
+    Box(
+        modifier = modifier
+            .offset {
+                IntOffset(
+                    x = if (isExpanded && anchorAlignment == Alignment.TopEnd) (-40).dp.roundToPx() else 0,
+                    y = 0
+                )
+            }
+    ) {
         Card(
             modifier = Modifier
                 .width(if (isExpanded) 160.dp else 120.dp)
@@ -117,8 +127,11 @@ fun BlueprintCallout(
         if (colorHex != null) {
             Box(
                 modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .offset(x = 6.dp, y = (-6).dp)
+                    .align(anchorAlignment)
+                    .offset(
+                        x = if (anchorAlignment == Alignment.TopEnd) 6.dp else (-6).dp,
+                        y = (-6).dp
+                    )
                     .size(18.dp)
                     .clip(CircleShape)
                     .background(parseColor(colorHex))

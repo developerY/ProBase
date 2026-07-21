@@ -2,7 +2,14 @@ package com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.gr
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -31,15 +38,16 @@ fun ResultTabToggle(
 ) {
     Surface(
         modifier = modifier
-            .width(180.dp)
-            .height(52.dp),
-        shape = RoundedCornerShape(26.dp),
-        color = Color.White,
-        shadowElevation = 10.dp
+            .width(200.dp)
+            .height(64.dp), // Increased height for 3 tabs + padding
+        shape = RoundedCornerShape(32.dp),
+        color = Color.White.copy(alpha = 0.9f),
+        shadowElevation = 8.dp,
+        border = androidx.compose.foundation.BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))
     ) {
         Row(
-            modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxSize().padding(vertical = 12.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
             ResultTabItem(
@@ -69,7 +77,7 @@ private fun ResultTabItem(
 ) {
     Box(
         modifier = Modifier
-            .size(42.dp)
+            .size(48.dp)
             .clip(CircleShape)
             .background(if (isSelected) Color.Black else Color.Transparent)
             .clickable { onClick() },
@@ -78,8 +86,8 @@ private fun ResultTabItem(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = if (isSelected) Color.White else Color.Black,
-            modifier = Modifier.size(20.dp)
+            tint = if (isSelected) Color.White else Color.Black.copy(alpha = 0.6f),
+            modifier = Modifier.size(24.dp)
         )
     }
 }
