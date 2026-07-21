@@ -154,14 +154,17 @@ class SettingsViewModel @Inject constructor(
             val cheekColors = listOf("#FFB6C1", "#FFDAB9", "#CD7F32", "#BC8F8F", "#FF7F50", "#DB7093", "#E9967A", "#F08080")
             val eyeColors = listOf("#3E2723", "#F5DEB3", "#B87333", "#808080", "#2F4F4F", "#000080", "#556B2F", "#D2691E", "#A0522D")
             val complexColors = listOf("#F5F5DC", "#FFE4C4", "#DEB887", "#F3E5AB", "#ECE2C6", "#FDF5E6", "#FAEBD7")
+            val nailColors = listOf("#800000", "#FF1493", "#000000", "#FFFFFF", "#4B0082", "#228B22", "#DAA520", "#C0C0C0", "#E6E6FA")
             val neutralClothing = listOf("#000000", "#FFFFFF", "#000080", "#808080", "#B38B6D", "#F5F5DC", "#2F4F4F", "#355E3B")
             val classicClothing = listOf("#800000", "#50C878", "#FFD700", "#E1C16E", "#708090", "#4A2C2A", "#1E3A8A", "#B91C1C")
 
-            val cosmeticBrands = listOf("Chanel", "Dior", "Fenty Beauty", "Rare Beauty", "MAC", "Estée Lauder", "YSL", "NARS", "Guerlain", "Charlotte Tilbury", "Pat McGrath", "Hourglass")
+            val cosmeticBrands = listOf("Chanel", "Dior", "Fenty Beauty", "Rare Beauty", "MAC", "Estée Lauder", "YSL", "NARS", "Guerlain", "Charlotte Tilbury", "Pat McGrath", "Hourglass", "Essie", "OPI")
             
-            // 1. Generate 50 High-Fidelity Cosmetics
-            repeat(50) { i ->
-                val micro = MicroCategory.entries.toTypedArray().filter { it.macro in listOf(MacroCategory.LIPS, MacroCategory.EYES, MacroCategory.DIMENSION, MacroCategory.COMPLEXION) }.random()
+            // 1. Generate 60 High-Fidelity Cosmetics (Increased to ensure good variety)
+            repeat(60) { i ->
+                val micro = MicroCategory.entries.toTypedArray().filter { 
+                    it.macro in listOf(MacroCategory.LIPS, MacroCategory.EYES, MacroCategory.DIMENSION, MacroCategory.COMPLEXION, MacroCategory.NAILS) 
+                }.random()
                 val brand = cosmeticBrands.random()
                 val name = "$brand ${micro.displayName} Pro"
                 
@@ -170,6 +173,7 @@ class SettingsViewModel @Inject constructor(
                     MacroCategory.EYES -> eyeColors
                     MacroCategory.DIMENSION -> cheekColors
                     MacroCategory.COMPLEXION -> complexColors
+                    MacroCategory.NAILS -> nailColors
                     else -> complexColors
                 }
                 
@@ -190,10 +194,10 @@ class SettingsViewModel @Inject constructor(
                 )
             }
 
-            // 2. Generate 50 High-Fidelity Clothing Items
+            // 2. Generate 60 High-Fidelity Clothing Items
             val clothingBrands = listOf("Atelier", "Saint Laurent", "Celine", "Brunello Cucinelli", "Loro Piana", "Hermès", "The Row", "Prada", "Gucci", "Loewe", "Tom Ford", "Zegna")
             
-            repeat(50) { i ->
+            repeat(60) { i ->
                 val category = ClothingCategory.entries.toTypedArray().filter { it != ClothingCategory.OTHER }.random()
                 val brand = clothingBrands.random()
                 val formality = when {
