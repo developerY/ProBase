@@ -3,7 +3,11 @@ package com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.gr
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -13,7 +17,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -28,6 +31,16 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
     val blueprintOffset = 10.dp
     val horizontalShift = 0.dp
     
+    // Define Unified Offsets for Layout (Relative to Center)
+    val eyesAnchor = Offset(-35.dp.value, -45.dp.value)
+    val eyesCallout = Offset(-140.dp.value, -120.dp.value)
+    
+    val cheeksAnchor = Offset(-45.dp.value, 25.dp.value)
+    val cheeksCallout = Offset(-150.dp.value, 60.dp.value)
+    
+    val lipsAnchor = Offset(0.dp.value, 75.dp.value)
+    val lipsCallout = Offset(130.dp.value, 160.dp.value)
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -64,20 +77,21 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
                 drawCircle(
                     brush = Brush.radialGradient(
                         colors = listOf(parseColor(hex).copy(alpha = 0.35f), Color.Transparent),
-                        center = Offset(center.x - 35.dp.toPx(), center.y - 45.dp.toPx()),
+                        center = Offset(center.x + eyesAnchor.x.dp.toPx(), center.y + eyesAnchor.y.dp.toPx()),
                         radius = 20.dp.toPx()
                     ),
                     radius = 20.dp.toPx(),
-                    center = Offset(center.x - 35.dp.toPx(), center.y - 45.dp.toPx())
+                    center = Offset(center.x + eyesAnchor.x.dp.toPx(), center.y + eyesAnchor.y.dp.toPx())
                 )
+                // Right Eye
                 drawCircle(
                     brush = Brush.radialGradient(
                         colors = listOf(parseColor(hex).copy(alpha = 0.35f), Color.Transparent),
-                        center = Offset(center.x + 35.dp.toPx(), center.y - 45.dp.toPx()),
+                        center = Offset(center.x - eyesAnchor.x.dp.toPx(), center.y + eyesAnchor.y.dp.toPx()),
                         radius = 20.dp.toPx()
                     ),
                     radius = 20.dp.toPx(),
-                    center = Offset(center.x + 35.dp.toPx(), center.y - 45.dp.toPx())
+                    center = Offset(center.x - eyesAnchor.x.dp.toPx(), center.y + eyesAnchor.y.dp.toPx())
                 )
             }
 
@@ -86,20 +100,20 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
                 drawCircle(
                     brush = Brush.radialGradient(
                         colors = listOf(parseColor(hex).copy(alpha = 0.3f), Color.Transparent),
-                        center = Offset(center.x - 45.dp.toPx(), center.y + 25.dp.toPx()),
+                        center = Offset(center.x + cheeksAnchor.x.dp.toPx(), center.y + cheeksAnchor.y.dp.toPx()),
                         radius = 35.dp.toPx()
                     ),
                     radius = 35.dp.toPx(),
-                    center = Offset(center.x - 45.dp.toPx(), center.y + 25.dp.toPx())
+                    center = Offset(center.x + cheeksAnchor.x.dp.toPx(), center.y + cheeksAnchor.y.dp.toPx())
                 )
                 drawCircle(
                     brush = Brush.radialGradient(
                         colors = listOf(parseColor(hex).copy(alpha = 0.3f), Color.Transparent),
-                        center = Offset(center.x + 45.dp.toPx(), center.y + 25.dp.toPx()),
+                        center = Offset(center.x - cheeksAnchor.x.dp.toPx(), center.y + cheeksAnchor.y.dp.toPx()),
                         radius = 35.dp.toPx()
                     ),
                     radius = 35.dp.toPx(),
-                    center = Offset(center.x + 45.dp.toPx(), center.y + 25.dp.toPx())
+                    center = Offset(center.x - cheeksAnchor.x.dp.toPx(), center.y + cheeksAnchor.y.dp.toPx())
                 )
             }
 
@@ -108,11 +122,11 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
                 drawCircle(
                     brush = Brush.radialGradient(
                         colors = listOf(parseColor(hex).copy(alpha = 0.4f), Color.Transparent),
-                        center = Offset(center.x, center.y + 75.dp.toPx()),
+                        center = Offset(center.x + lipsAnchor.x.dp.toPx(), center.y + lipsAnchor.y.dp.toPx()),
                         radius = 25.dp.toPx()
                     ),
                     radius = 25.dp.toPx(),
-                    center = Offset(center.x, center.y + 75.dp.toPx())
+                    center = Offset(center.x + lipsAnchor.x.dp.toPx(), center.y + lipsAnchor.y.dp.toPx())
                 )
             }
 
@@ -122,18 +136,21 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
             val lineColor = Color.DarkGray.copy(alpha = 0.4f)
 
             // Eyes (Top Left)
-            val eyesStart = Offset(center.x - 30.dp.toPx(), center.y - 45.dp.toPx())
-            drawLine(lineColor, eyesStart, Offset(center.x - 120.dp.toPx(), center.y - 45.dp.toPx()), lineStroke)
+            val eyesStart = Offset(center.x + eyesAnchor.x.dp.toPx(), center.y + eyesAnchor.y.dp.toPx())
+            val eyesEnd = Offset(center.x + eyesCallout.x.dp.toPx(), center.y + eyesCallout.y.dp.toPx())
+            drawLine(lineColor, eyesStart, eyesEnd, lineStroke)
             drawCircle(lineColor, anchorRadius, eyesStart)
 
             // Cheeks (Mid Left)
-            val cheeksStart = Offset(center.x - 45.dp.toPx(), center.y + 20.dp.toPx())
-            drawLine(lineColor, cheeksStart, Offset(center.x - 140.dp.toPx(), center.y + 20.dp.toPx()), lineStroke)
+            val cheeksStart = Offset(center.x + cheeksAnchor.x.dp.toPx(), center.y + cheeksAnchor.y.dp.toPx())
+            val cheeksEnd = Offset(center.x + cheeksCallout.x.dp.toPx(), center.y + cheeksCallout.y.dp.toPx())
+            drawLine(lineColor, cheeksStart, cheeksEnd, lineStroke)
             drawCircle(lineColor, anchorRadius, cheeksStart)
 
             // Lips (Bottom Right)
-            val lipsStart = Offset(center.x, center.y + 70.dp.toPx())
-            drawLine(lineColor, lipsStart, Offset(center.x + 100.dp.toPx(), center.y + 160.dp.toPx()), lineStroke)
+            val lipsStart = Offset(center.x + lipsAnchor.x.dp.toPx(), center.y + lipsAnchor.y.dp.toPx())
+            val lipsEnd = Offset(center.x + lipsCallout.x.dp.toPx(), center.y + lipsCallout.y.dp.toPx())
+            drawLine(lineColor, lipsStart, lipsEnd, lineStroke)
             drawCircle(lineColor, anchorRadius, lipsStart)
         }
 
@@ -141,25 +158,43 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
         val cheeksItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.DIMENSION }
         val lipsItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.LIPS }
 
+        // Positioning Callouts such that their Anchor Dot matches the line end
+        // For Left callouts (Eyes, Cheeks), dot is at TopEnd
         BlueprintCallout(
             label = "EYES",
             productName = eyesItem?.name ?: "Pending...",
             colorHex = eyesItem?.colorHex,
-            modifier = Modifier.align(Alignment.TopStart).padding(top = 80.dp).offset(y = blueprintOffset)
+            modifier = Modifier
+                .offset(
+                    x = horizontalShift + eyesCallout.x.dp - 120.dp - 6.dp, // Include face offsets
+                    y = blueprintOffset + eyesCallout.y.dp + 6.dp
+                ),
+            anchorAlignment = Alignment.TopEnd
         )
 
         BlueprintCallout(
             label = "CHEEKS",
             productName = cheeksItem?.name ?: "Pending...",
             colorHex = cheeksItem?.colorHex,
-            modifier = Modifier.align(Alignment.CenterStart).padding(top = 220.dp, start = 5.dp).offset(y = blueprintOffset)
+            modifier = Modifier
+                .offset(
+                    x = horizontalShift + cheeksCallout.x.dp - 120.dp - 6.dp,
+                    y = blueprintOffset + cheeksCallout.y.dp + 6.dp
+                ),
+            anchorAlignment = Alignment.TopEnd
         )
 
+        // For Right callouts (Lips), dot is at TopStart
         BlueprintCallout(
             label = "LIPS",
             productName = lipsItem?.name ?: "Pending...",
             colorHex = lipsItem?.colorHex,
-            modifier = Modifier.align(Alignment.BottomEnd).padding(bottom = 0.dp, end = 5.dp).offset(y = blueprintOffset - 10.dp)
+            modifier = Modifier
+                .offset(
+                    x = horizontalShift + lipsCallout.x.dp + 6.dp,
+                    y = blueprintOffset + lipsCallout.y.dp + 6.dp
+                ),
+            anchorAlignment = Alignment.TopStart
         )
     }
 }
