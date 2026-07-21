@@ -31,19 +31,19 @@ import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulator
 fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
 
 
-// 1. Shift the entire face significantly right to clear the color palette
+    // 1. Center the face to protect the right margin
     val blueprintOffset = 10.dp
-    val horizontalShift = 45.dp // Increased to push everything away from the left edge
+    val horizontalShift = 0.dp
 
-    // 2. Define tight, steep Line Targets
+    // 2. Define angled, outward-reaching lines
     val eyesAnchor = Offset(-35.dp.value, -45.dp.value)
-    val eyesCallout = Offset(-30.dp.value, -100.dp.value)
+    val eyesCallout = Offset(-100.dp.value, -80.dp.value) // Reaches up and left
 
     val cheeksAnchor = Offset(-45.dp.value, 25.dp.value)
-    val cheeksCallout = Offset(-45.dp.value, 75.dp.value)
+    val cheeksCallout = Offset(-110.dp.value, 50.dp.value) // Reaches out to the left (fixes the vertical line)
 
     val lipsAnchor = Offset(0.dp.value, 75.dp.value)
-    val lipsCallout = Offset(10.dp.value, 140.dp.value)
+    val lipsCallout = Offset(60.dp.value, 130.dp.value) // Safely tucked on the right
 
 
     Box(
@@ -206,10 +206,10 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
             uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.DIMENSION }
         val lipsItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.LIPS }
 
-        // 3. Deterministic Alignment Math
-        val calloutWidth = 120.dp // Slightly narrower to prevent edge-bleed
+// 3. Deterministic Alignment Math for Collapsed State
+        val calloutWidth = 100.dp // Tighter base width for the unexpanded box
         val calloutHalfWidth = calloutWidth / 2
-        val calloutHalfHeight = 36.dp // Increased to properly center the dot vertically alongside the wrapping text
+        val calloutHalfHeight = 28.dp // Calibrated for the height of the "Details" state
 
         BlueprintCallout(
             label = "EYES",
@@ -218,7 +218,6 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
             modifier = Modifier
                 .width(calloutWidth)
                 .offset(
-                    // Left callout: shift left by half-width, shift down by half-height
                     x = horizontalShift + eyesCallout.x.dp - calloutHalfWidth,
                     y = blueprintOffset + eyesCallout.y.dp + calloutHalfHeight
                 ),
@@ -232,7 +231,6 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
             modifier = Modifier
                 .width(calloutWidth)
                 .offset(
-                    // Left callout: shift left by half-width, shift down by half-height
                     x = horizontalShift + cheeksCallout.x.dp - calloutHalfWidth,
                     y = blueprintOffset + cheeksCallout.y.dp + calloutHalfHeight
                 ),
@@ -246,16 +244,14 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
             modifier = Modifier
                 .width(calloutWidth)
                 .offset(
-                    // Right callout: shift right by half-width, shift down by half-height
                     x = horizontalShift + lipsCallout.x.dp + calloutHalfWidth,
                     y = blueprintOffset + lipsCallout.y.dp + calloutHalfHeight
                 ),
             anchorAlignment = Alignment.TopStart
         )
-
-
     }
 }
+
 @Preview(showBackground = true)
 @Composable
 fun FaceBlueprintViewPreview() {
