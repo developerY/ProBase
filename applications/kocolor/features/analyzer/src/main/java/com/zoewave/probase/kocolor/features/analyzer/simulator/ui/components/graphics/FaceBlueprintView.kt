@@ -3,6 +3,7 @@ package com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.gr
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
@@ -11,6 +12,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -22,6 +27,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import com.zoewave.probase.kocolor.features.analyzer.R
@@ -29,18 +35,19 @@ import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulator
 
 @Composable
 fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
+    // SINGLE SOURCE OF TRUTH: Tracks the currently expanded card (null = all closed)
+    var expandedCategory by remember { mutableStateOf<String?>(null) }
 
-
-    // 1. Slight shift right to balance the new layout
+    // 1. Layout Shifts
     val blueprintOffset = 10.dp
     val horizontalShift = 15.dp
 
     // 2. Define Rebalanced Line Targets
-    // EYES: Flipped to Upper Right (Positive X)
-    val eyesAnchor = Offset(35.dp.value, -45.dp.value) // Anchored to the right eye
+    // EYES: Upper Right
+    val eyesAnchor = Offset(35.dp.value, -45.dp.value)
     val eyesCallout = Offset(100.dp.value, -90.dp.value)
 
-    // CHEEKS: Pushed to Lower Left (Safely below the color palette)
+    // CHEEKS: Lower Left (Below palette)
     val cheeksAnchor = Offset(-45.dp.value, 25.dp.value)
     val cheeksCallout = Offset(-90.dp.value, 120.dp.value)
 
@@ -48,14 +55,13 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
     val lipsAnchor = Offset(0.dp.value, 75.dp.value)
     val lipsCallout = Offset(90.dp.value, 150.dp.value)
 
-
     Box(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
         contentAlignment = Alignment.Center
     ) {
-        // Central Face Anchor (Always use Line-Art for Blueprint feel)
+        // Central Face Anchor
         Box(
             modifier = Modifier
                 .size(280.dp)
@@ -73,51 +79,33 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
 
         // Callout Lines & Shades
         Canvas(modifier = Modifier.fillMaxSize()) {
-            val center = Offset(
-                size.width / 2 + horizontalShift.toPx(),
-                size.height / 2 + blueprintOffset.toPx()
-            )
+            val center = Offset(size.width / 2 + horizontalShift.toPx(), size.height / 2 + blueprintOffset.toPx())
 
             // 1. Draw "Shades" (Soft Glows on the face)
-            val eyesItem =
-                uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.EYES }
-            val cheeksItem =
-                uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.DIMENSION }
-            val lipsItem =
-                uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.LIPS }
+            val eyesItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.EYES }
+            val cheeksItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.DIMENSION }
+            val lipsItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.LIPS }
 
             // Eyes Shade
             eyesItem?.colorHex?.let { hex ->
                 drawCircle(
                     brush = Brush.radialGradient(
                         colors = listOf(parseColor(hex).copy(alpha = 0.35f), Color.Transparent),
-                        center = Offset(
-                            center.x + eyesAnchor.x.dp.toPx(),
-                            center.y + eyesAnchor.y.dp.toPx()
-                        ),
+                        center = Offset(center.x + eyesAnchor.x.dp.toPx(), center.y + eyesAnchor.y.dp.toPx()),
                         radius = 20.dp.toPx()
                     ),
                     radius = 20.dp.toPx(),
-                    center = Offset(
-                        center.x + eyesAnchor.x.dp.toPx(),
-                        center.y + eyesAnchor.y.dp.toPx()
-                    )
+                    center = Offset(center.x + eyesAnchor.x.dp.toPx(), center.y + eyesAnchor.y.dp.toPx())
                 )
-                // Right Eye
+                // Left Eye (Mirrored for the shade effect)
                 drawCircle(
                     brush = Brush.radialGradient(
                         colors = listOf(parseColor(hex).copy(alpha = 0.35f), Color.Transparent),
-                        center = Offset(
-                            center.x - eyesAnchor.x.dp.toPx(),
-                            center.y + eyesAnchor.y.dp.toPx()
-                        ),
+                        center = Offset(center.x - eyesAnchor.x.dp.toPx(), center.y + eyesAnchor.y.dp.toPx()),
                         radius = 20.dp.toPx()
                     ),
                     radius = 20.dp.toPx(),
-                    center = Offset(
-                        center.x - eyesAnchor.x.dp.toPx(),
-                        center.y + eyesAnchor.y.dp.toPx()
-                    )
+                    center = Offset(center.x - eyesAnchor.x.dp.toPx(), center.y + eyesAnchor.y.dp.toPx())
                 )
             }
 
@@ -126,32 +114,21 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
                 drawCircle(
                     brush = Brush.radialGradient(
                         colors = listOf(parseColor(hex).copy(alpha = 0.3f), Color.Transparent),
-                        center = Offset(
-                            center.x + cheeksAnchor.x.dp.toPx(),
-                            center.y + cheeksAnchor.y.dp.toPx()
-                        ),
+                        center = Offset(center.x + cheeksAnchor.x.dp.toPx(), center.y + cheeksAnchor.y.dp.toPx()),
                         radius = 35.dp.toPx()
                     ),
                     radius = 35.dp.toPx(),
-                    center = Offset(
-                        center.x + cheeksAnchor.x.dp.toPx(),
-                        center.y + cheeksAnchor.y.dp.toPx()
-                    )
+                    center = Offset(center.x + cheeksAnchor.x.dp.toPx(), center.y + cheeksAnchor.y.dp.toPx())
                 )
+                // Right Cheek (Mirrored)
                 drawCircle(
                     brush = Brush.radialGradient(
                         colors = listOf(parseColor(hex).copy(alpha = 0.3f), Color.Transparent),
-                        center = Offset(
-                            center.x - cheeksAnchor.x.dp.toPx(),
-                            center.y + cheeksAnchor.y.dp.toPx()
-                        ),
+                        center = Offset(center.x - cheeksAnchor.x.dp.toPx(), center.y + cheeksAnchor.y.dp.toPx()),
                         radius = 35.dp.toPx()
                     ),
                     radius = 35.dp.toPx(),
-                    center = Offset(
-                        center.x - cheeksAnchor.x.dp.toPx(),
-                        center.y + cheeksAnchor.y.dp.toPx()
-                    )
+                    center = Offset(center.x - cheeksAnchor.x.dp.toPx(), center.y + cheeksAnchor.y.dp.toPx())
                 )
             }
 
@@ -160,53 +137,43 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
                 drawCircle(
                     brush = Brush.radialGradient(
                         colors = listOf(parseColor(hex).copy(alpha = 0.4f), Color.Transparent),
-                        center = Offset(
-                            center.x + lipsAnchor.x.dp.toPx(),
-                            center.y + lipsAnchor.y.dp.toPx()
-                        ),
+                        center = Offset(center.x + lipsAnchor.x.dp.toPx(), center.y + lipsAnchor.y.dp.toPx()),
                         radius = 25.dp.toPx()
                     ),
                     radius = 25.dp.toPx(),
-                    center = Offset(
-                        center.x + lipsAnchor.x.dp.toPx(),
-                        center.y + lipsAnchor.y.dp.toPx()
-                    )
+                    center = Offset(center.x + lipsAnchor.x.dp.toPx(), center.y + lipsAnchor.y.dp.toPx())
                 )
             }
 
-            // 2. Draw Callout Lines (Solid with anchor dots)
+            // 2. Draw Callout Lines (Only if NOT expanded)
             val lineStroke = 0.8.dp.toPx()
             val anchorRadius = 2.dp.toPx()
             val lineColor = Color.DarkGray.copy(alpha = 0.4f)
 
-            // Eyes (Top Left)
-            val eyesStart =
-                Offset(center.x + eyesAnchor.x.dp.toPx(), center.y + eyesAnchor.y.dp.toPx())
-            val eyesEnd =
-                Offset(center.x + eyesCallout.x.dp.toPx(), center.y + eyesCallout.y.dp.toPx())
-            drawLine(lineColor, eyesStart, eyesEnd, lineStroke)
-            drawCircle(lineColor, anchorRadius, eyesStart)
+            if (expandedCategory != "EYES") {
+                val eyesStart = Offset(center.x + eyesAnchor.x.dp.toPx(), center.y + eyesAnchor.y.dp.toPx())
+                val eyesEnd = Offset(center.x + eyesCallout.x.dp.toPx(), center.y + eyesCallout.y.dp.toPx())
+                drawLine(lineColor, eyesStart, eyesEnd, lineStroke)
+                drawCircle(lineColor, anchorRadius, eyesStart)
+            }
 
-            // Cheeks (Mid Left)
-            val cheeksStart =
-                Offset(center.x + cheeksAnchor.x.dp.toPx(), center.y + cheeksAnchor.y.dp.toPx())
-            val cheeksEnd =
-                Offset(center.x + cheeksCallout.x.dp.toPx(), center.y + cheeksCallout.y.dp.toPx())
-            drawLine(lineColor, cheeksStart, cheeksEnd, lineStroke)
-            drawCircle(lineColor, anchorRadius, cheeksStart)
+            if (expandedCategory != "CHEEKS") {
+                val cheeksStart = Offset(center.x + cheeksAnchor.x.dp.toPx(), center.y + cheeksAnchor.y.dp.toPx())
+                val cheeksEnd = Offset(center.x + cheeksCallout.x.dp.toPx(), center.y + cheeksCallout.y.dp.toPx())
+                drawLine(lineColor, cheeksStart, cheeksEnd, lineStroke)
+                drawCircle(lineColor, anchorRadius, cheeksStart)
+            }
 
-            // Lips (Bottom Right)
-            val lipsStart =
-                Offset(center.x + lipsAnchor.x.dp.toPx(), center.y + lipsAnchor.y.dp.toPx())
-            val lipsEnd =
-                Offset(center.x + lipsCallout.x.dp.toPx(), center.y + lipsCallout.y.dp.toPx())
-            drawLine(lineColor, lipsStart, lipsEnd, lineStroke)
-            drawCircle(lineColor, anchorRadius, lipsStart)
+            if (expandedCategory != "LIPS") {
+                val lipsStart = Offset(center.x + lipsAnchor.x.dp.toPx(), center.y + lipsAnchor.y.dp.toPx())
+                val lipsEnd = Offset(center.x + lipsCallout.x.dp.toPx(), center.y + lipsCallout.y.dp.toPx())
+                drawLine(lineColor, lipsStart, lipsEnd, lineStroke)
+                drawCircle(lineColor, anchorRadius, lipsStart)
+            }
         }
 
         val eyesItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.EYES }
-        val cheeksItem =
-            uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.DIMENSION }
+        val cheeksItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.DIMENSION }
         val lipsItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.LIPS }
 
         // 3. Deterministic Alignment Math for Collapsed State
@@ -214,48 +181,62 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
         val calloutHalfWidth = calloutWidth / 2
         val calloutHalfHeight = 28.dp
 
-        // EYES is now on the RIGHT -> Add half-width, Anchor at TopStart
+        // --- EYES CALLOUT ---
+        val isEyesExpanded = expandedCategory == "EYES"
         BlueprintCallout(
             label = "EYES",
             productName = eyesItem?.name ?: "Pending...",
             colorHex = eyesItem?.colorHex,
             modifier = Modifier
-                .width(calloutWidth)
-                .offset(
-                    x = horizontalShift + eyesCallout.x.dp + calloutHalfWidth,
-                    y = blueprintOffset + eyesCallout.y.dp + calloutHalfHeight
+                .clickable { expandedCategory = if (isEyesExpanded) null else "EYES" }
+                .zIndex(if (isEyesExpanded) 10f else 1f)
+                .then(
+                    if (isEyesExpanded) Modifier
+                    else Modifier.width(calloutWidth).offset(
+                        x = horizontalShift + eyesCallout.x.dp + calloutHalfWidth,
+                        y = blueprintOffset + eyesCallout.y.dp + calloutHalfHeight
+                    )
                 ),
-            anchorAlignment = Alignment.TopStart
+            anchorAlignment = if (isEyesExpanded) Alignment.Center else Alignment.TopStart
         )
 
-        // CHEEKS is on the LEFT -> Subtract half-width, Anchor at TopEnd
+        // --- CHEEKS CALLOUT ---
+        val isCheeksExpanded = expandedCategory == "CHEEKS"
         BlueprintCallout(
             label = "CHEEKS",
             productName = cheeksItem?.name ?: "Pending...",
             colorHex = cheeksItem?.colorHex,
             modifier = Modifier
-                .width(calloutWidth)
-                .offset(
-                    x = horizontalShift + cheeksCallout.x.dp - calloutHalfWidth,
-                    y = blueprintOffset + cheeksCallout.y.dp + calloutHalfHeight
+                .clickable { expandedCategory = if (isCheeksExpanded) null else "CHEEKS" }
+                .zIndex(if (isCheeksExpanded) 10f else 1f)
+                .then(
+                    if (isCheeksExpanded) Modifier
+                    else Modifier.width(calloutWidth).offset(
+                        x = horizontalShift + cheeksCallout.x.dp - calloutHalfWidth,
+                        y = blueprintOffset + cheeksCallout.y.dp + calloutHalfHeight
+                    )
                 ),
-            anchorAlignment = Alignment.TopEnd
+            anchorAlignment = if (isCheeksExpanded) Alignment.Center else Alignment.TopEnd
         )
 
-        // LIPS is on the RIGHT -> Add half-width, Anchor at TopStart
+        // --- LIPS CALLOUT ---
+        val isLipsExpanded = expandedCategory == "LIPS"
         BlueprintCallout(
             label = "LIPS",
             productName = lipsItem?.name ?: "Pending...",
             colorHex = lipsItem?.colorHex,
             modifier = Modifier
-                .width(calloutWidth)
-                .offset(
-                    x = horizontalShift + lipsCallout.x.dp + calloutHalfWidth,
-                    y = blueprintOffset + lipsCallout.y.dp + calloutHalfHeight
+                .clickable { expandedCategory = if (isLipsExpanded) null else "LIPS" }
+                .zIndex(if (isLipsExpanded) 10f else 1f)
+                .then(
+                    if (isLipsExpanded) Modifier
+                    else Modifier.width(calloutWidth).offset(
+                        x = horizontalShift + lipsCallout.x.dp + calloutHalfWidth,
+                        y = blueprintOffset + lipsCallout.y.dp + calloutHalfHeight
+                    )
                 ),
-            anchorAlignment = Alignment.TopStart
+            anchorAlignment = if (isLipsExpanded) Alignment.Center else Alignment.TopStart
         )
-
     }
 }
 
