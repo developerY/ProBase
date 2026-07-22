@@ -31,19 +31,22 @@ import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulator
 fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
 
 
-    // 1. Center the face to protect the right margin
+    // 1. Slight shift right to balance the new layout
     val blueprintOffset = 10.dp
-    val horizontalShift = 0.dp
+    val horizontalShift = 15.dp
 
-    // 2. Define angled, outward-reaching lines
-    val eyesAnchor = Offset(-35.dp.value, -45.dp.value)
-    val eyesCallout = Offset(-100.dp.value, -80.dp.value) // Reaches up and left
+    // 2. Define Rebalanced Line Targets
+    // EYES: Flipped to Upper Right (Positive X)
+    val eyesAnchor = Offset(35.dp.value, -45.dp.value) // Anchored to the right eye
+    val eyesCallout = Offset(100.dp.value, -90.dp.value)
 
+    // CHEEKS: Pushed to Lower Left (Safely below the color palette)
     val cheeksAnchor = Offset(-45.dp.value, 25.dp.value)
-    val cheeksCallout = Offset(-110.dp.value, 50.dp.value) // Reaches out to the left (fixes the vertical line)
+    val cheeksCallout = Offset(-90.dp.value, 120.dp.value)
 
+    // LIPS: Bottom Right
     val lipsAnchor = Offset(0.dp.value, 75.dp.value)
-    val lipsCallout = Offset(60.dp.value, 130.dp.value) // Safely tucked on the right
+    val lipsCallout = Offset(90.dp.value, 150.dp.value)
 
 
     Box(
@@ -206,11 +209,12 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
             uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.DIMENSION }
         val lipsItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.LIPS }
 
-// 3. Deterministic Alignment Math for Collapsed State
-        val calloutWidth = 100.dp // Tighter base width for the unexpanded box
+        // 3. Deterministic Alignment Math for Collapsed State
+        val calloutWidth = 100.dp
         val calloutHalfWidth = calloutWidth / 2
-        val calloutHalfHeight = 28.dp // Calibrated for the height of the "Details" state
+        val calloutHalfHeight = 28.dp
 
+        // EYES is now on the RIGHT -> Add half-width, Anchor at TopStart
         BlueprintCallout(
             label = "EYES",
             productName = eyesItem?.name ?: "Pending...",
@@ -218,12 +222,13 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
             modifier = Modifier
                 .width(calloutWidth)
                 .offset(
-                    x = horizontalShift + eyesCallout.x.dp - calloutHalfWidth,
+                    x = horizontalShift + eyesCallout.x.dp + calloutHalfWidth,
                     y = blueprintOffset + eyesCallout.y.dp + calloutHalfHeight
                 ),
-            anchorAlignment = Alignment.TopEnd
+            anchorAlignment = Alignment.TopStart
         )
 
+        // CHEEKS is on the LEFT -> Subtract half-width, Anchor at TopEnd
         BlueprintCallout(
             label = "CHEEKS",
             productName = cheeksItem?.name ?: "Pending...",
@@ -237,6 +242,7 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
             anchorAlignment = Alignment.TopEnd
         )
 
+        // LIPS is on the RIGHT -> Add half-width, Anchor at TopStart
         BlueprintCallout(
             label = "LIPS",
             productName = lipsItem?.name ?: "Pending...",
@@ -249,6 +255,7 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
                 ),
             anchorAlignment = Alignment.TopStart
         )
+
     }
 }
 
