@@ -70,9 +70,9 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.tooling.preview.Preview
 import com.zoewave.probase.gotmind.features.mindwave.HapticSignal
 import com.zoewave.probase.gotmind.features.mindwave.MindWaveEvent
 import com.zoewave.probase.gotmind.features.mindwave.MindWaveState
@@ -332,9 +332,9 @@ fun MindWaveScreen(
             Spacer(modifier = Modifier.height(32.dp))
 
             // Feedback Message
-            uiState.feedbackMessageResId?.let {
+            uiState.feedbackMessageResId?.let { id: Int ->
                 Text(
-                    text = stringResource(it),
+                    text = stringResource(id),
                     color = if (uiState.isGameOver) Color.Red else Color.Green,
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp
@@ -387,7 +387,11 @@ fun MindWaveScreen(
 private fun MindWaveScreenPreview() {
     MaterialTheme {
         MindWaveScreen(
-            uiState = MindWaveState(),
+            uiState = MindWaveState(
+                isStarted = true,
+                score = 1250,
+                level = 4
+            ),
             onEvent = {},
             navTo = {}
         )
