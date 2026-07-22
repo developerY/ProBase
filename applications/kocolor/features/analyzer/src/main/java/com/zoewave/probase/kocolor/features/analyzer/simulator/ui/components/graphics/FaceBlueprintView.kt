@@ -3,13 +3,11 @@ package com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.gr
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -35,23 +33,20 @@ import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulator
 
 @Composable
 fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
-    // SINGLE SOURCE OF TRUTH: Tracks the currently expanded card (null = all closed)
+    // SINGLE SOURCE OF TRUTH: Tracks the currently expanded card
     var expandedCategory by remember { mutableStateOf<String?>(null) }
 
     // 1. Layout Shifts
     val blueprintOffset = 10.dp
     val horizontalShift = 15.dp
 
-    // 2. Define Rebalanced Line Targets
-    // EYES: Upper Right
+    // 2. Define Static Line Targets (Center of the features)
     val eyesAnchor = Offset(35.dp.value, -45.dp.value)
     val eyesCallout = Offset(100.dp.value, -90.dp.value)
 
-    // CHEEKS: Lower Left (Below palette)
     val cheeksAnchor = Offset(-45.dp.value, 25.dp.value)
     val cheeksCallout = Offset(-90.dp.value, 120.dp.value)
 
-    // LIPS: Bottom Right
     val lipsAnchor = Offset(0.dp.value, 75.dp.value)
     val lipsCallout = Offset(90.dp.value, 150.dp.value)
 
@@ -81,12 +76,13 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             val center = Offset(size.width / 2 + horizontalShift.toPx(), size.height / 2 + blueprintOffset.toPx())
 
-            // 1. Draw "Shades" (Soft Glows on the face)
+            // Extract Items
             val eyesItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.EYES }
             val cheeksItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.DIMENSION }
             val lipsItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.LIPS }
 
-            // Eyes Shade
+            // 1. Draw "Shades" (Soft Glows on the face)
+            // ... (rest of shades logic remains the same)
             eyesItem?.colorHex?.let { hex ->
                 drawCircle(
                     brush = Brush.radialGradient(
@@ -97,7 +93,6 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
                     radius = 20.dp.toPx(),
                     center = Offset(center.x + eyesAnchor.x.dp.toPx(), center.y + eyesAnchor.y.dp.toPx())
                 )
-                // Left Eye (Mirrored for the shade effect)
                 drawCircle(
                     brush = Brush.radialGradient(
                         colors = listOf(parseColor(hex).copy(alpha = 0.35f), Color.Transparent),
@@ -108,8 +103,6 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
                     center = Offset(center.x - eyesAnchor.x.dp.toPx(), center.y + eyesAnchor.y.dp.toPx())
                 )
             }
-
-            // Cheeks Shade
             cheeksItem?.colorHex?.let { hex ->
                 drawCircle(
                     brush = Brush.radialGradient(
@@ -120,7 +113,6 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
                     radius = 35.dp.toPx(),
                     center = Offset(center.x + cheeksAnchor.x.dp.toPx(), center.y + cheeksAnchor.y.dp.toPx())
                 )
-                // Right Cheek (Mirrored)
                 drawCircle(
                     brush = Brush.radialGradient(
                         colors = listOf(parseColor(hex).copy(alpha = 0.3f), Color.Transparent),
@@ -131,8 +123,6 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
                     center = Offset(center.x - cheeksAnchor.x.dp.toPx(), center.y + cheeksAnchor.y.dp.toPx())
                 )
             }
-
-            // Lips Shade
             lipsItem?.colorHex?.let { hex ->
                 drawCircle(
                     brush = Brush.radialGradient(
@@ -145,97 +135,72 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
                 )
             }
 
-            // 2. Draw Callout Lines (Only if NOT expanded)
+            // 4. Draw Static Callout Lines
             val lineStroke = 0.8.dp.toPx()
             val anchorRadius = 2.dp.toPx()
             val lineColor = Color.DarkGray.copy(alpha = 0.4f)
 
-            if (expandedCategory != "EYES") {
-                val eyesStart = Offset(center.x + eyesAnchor.x.dp.toPx(), center.y + eyesAnchor.y.dp.toPx())
-                val eyesEnd = Offset(center.x + eyesCallout.x.dp.toPx(), center.y + eyesCallout.y.dp.toPx())
-                drawLine(lineColor, eyesStart, eyesEnd, lineStroke)
-                drawCircle(lineColor, anchorRadius, eyesStart)
-            }
+            drawLine(lineColor, Offset(center.x + eyesAnchor.x.dp.toPx(), center.y + eyesAnchor.y.dp.toPx()), Offset(center.x + eyesCallout.x.dp.toPx(), center.y + eyesCallout.y.dp.toPx()), lineStroke)
+            drawCircle(lineColor, anchorRadius, Offset(center.x + eyesAnchor.x.dp.toPx(), center.y + eyesAnchor.y.dp.toPx()))
 
-            if (expandedCategory != "CHEEKS") {
-                val cheeksStart = Offset(center.x + cheeksAnchor.x.dp.toPx(), center.y + cheeksAnchor.y.dp.toPx())
-                val cheeksEnd = Offset(center.x + cheeksCallout.x.dp.toPx(), center.y + cheeksCallout.y.dp.toPx())
-                drawLine(lineColor, cheeksStart, cheeksEnd, lineStroke)
-                drawCircle(lineColor, anchorRadius, cheeksStart)
-            }
+            drawLine(lineColor, Offset(center.x + cheeksAnchor.x.dp.toPx(), center.y + cheeksAnchor.y.dp.toPx()), Offset(center.x + cheeksCallout.x.dp.toPx(), center.y + cheeksCallout.y.dp.toPx()), lineStroke)
+            drawCircle(lineColor, anchorRadius, Offset(center.x + cheeksAnchor.x.dp.toPx(), center.y + cheeksAnchor.y.dp.toPx()))
 
-            if (expandedCategory != "LIPS") {
-                val lipsStart = Offset(center.x + lipsAnchor.x.dp.toPx(), center.y + lipsAnchor.y.dp.toPx())
-                val lipsEnd = Offset(center.x + lipsCallout.x.dp.toPx(), center.y + lipsCallout.y.dp.toPx())
-                drawLine(lineColor, lipsStart, lipsEnd, lineStroke)
-                drawCircle(lineColor, anchorRadius, lipsStart)
-            }
+            drawLine(lineColor, Offset(center.x + lipsAnchor.x.dp.toPx(), center.y + lipsAnchor.y.dp.toPx()), Offset(center.x + lipsCallout.x.dp.toPx(), center.y + lipsCallout.y.dp.toPx()), lineStroke)
+            drawCircle(lineColor, anchorRadius, Offset(center.x + lipsAnchor.x.dp.toPx(), center.y + lipsAnchor.y.dp.toPx()))
         }
 
         val eyesItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.EYES }
         val cheeksItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.DIMENSION }
         val lipsItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.LIPS }
 
-        // 3. Deterministic Alignment Math for Collapsed State
-        val calloutWidth = 100.dp
-        val calloutHalfWidth = calloutWidth / 2
-        val calloutHalfHeight = 28.dp
-
-        // --- EYES CALLOUT ---
-        val isEyesExpanded = expandedCategory == "EYES"
+        // 5. Render the Callouts
+        // --- EYES CALLOUT (Right Side) ---
         BlueprintCallout(
             label = "EYES",
             productName = eyesItem?.name ?: "Pending...",
             colorHex = eyesItem?.colorHex,
+            isExpanded = expandedCategory == "EYES",
+            onExpandToggle = { expandedCategory = if (expandedCategory == "EYES") null else "EYES" },
             modifier = Modifier
-                .clickable { expandedCategory = if (isEyesExpanded) null else "EYES" }
-                .zIndex(if (isEyesExpanded) 10f else 1f)
-                .then(
-                    if (isEyesExpanded) Modifier
-                    else Modifier.width(calloutWidth).offset(
-                        x = horizontalShift + eyesCallout.x.dp + calloutHalfWidth,
-                        y = blueprintOffset + eyesCallout.y.dp + calloutHalfHeight
-                    )
+                .zIndex(if (expandedCategory == "EYES") 10f else 1f)
+                .offset(
+                    x = horizontalShift + eyesCallout.x.dp,
+                    y = blueprintOffset + eyesCallout.y.dp
                 ),
-            anchorAlignment = if (isEyesExpanded) Alignment.Center else Alignment.TopStart
+            anchorAlignment = Alignment.TopStart
         )
 
-        // --- CHEEKS CALLOUT ---
-        val isCheeksExpanded = expandedCategory == "CHEEKS"
+        // --- CHEEKS CALLOUT (Left Side) ---
         BlueprintCallout(
             label = "CHEEKS",
             productName = cheeksItem?.name ?: "Pending...",
             colorHex = cheeksItem?.colorHex,
+            isExpanded = expandedCategory == "CHEEKS",
+            onExpandToggle = { expandedCategory = if (expandedCategory == "CHEEKS") null else "CHEEKS" },
             modifier = Modifier
-                .clickable { expandedCategory = if (isCheeksExpanded) null else "CHEEKS" }
-                .zIndex(if (isCheeksExpanded) 10f else 1f)
-                .then(
-                    if (isCheeksExpanded) Modifier
-                    else Modifier.width(calloutWidth).offset(
-                        x = horizontalShift + cheeksCallout.x.dp - calloutHalfWidth,
-                        y = blueprintOffset + cheeksCallout.y.dp + calloutHalfHeight
-                    )
+                .zIndex(if (expandedCategory == "CHEEKS") 10f else 1f)
+                .offset(
+                    x = horizontalShift + cheeksCallout.x.dp,
+                    y = blueprintOffset + cheeksCallout.y.dp
                 ),
-            anchorAlignment = if (isCheeksExpanded) Alignment.Center else Alignment.TopEnd
+            anchorAlignment = Alignment.TopEnd
         )
 
-        // --- LIPS CALLOUT ---
-        val isLipsExpanded = expandedCategory == "LIPS"
+        // --- LIPS CALLOUT (Right Side) ---
         BlueprintCallout(
             label = "LIPS",
             productName = lipsItem?.name ?: "Pending...",
             colorHex = lipsItem?.colorHex,
+            isExpanded = expandedCategory == "LIPS",
+            onExpandToggle = { expandedCategory = if (expandedCategory == "LIPS") null else "LIPS" },
             modifier = Modifier
-                .clickable { expandedCategory = if (isLipsExpanded) null else "LIPS" }
-                .zIndex(if (isLipsExpanded) 10f else 1f)
-                .then(
-                    if (isLipsExpanded) Modifier
-                    else Modifier.width(calloutWidth).offset(
-                        x = horizontalShift + lipsCallout.x.dp + calloutHalfWidth,
-                        y = blueprintOffset + lipsCallout.y.dp + calloutHalfHeight
-                    )
+                .zIndex(if (expandedCategory == "LIPS") 10f else 1f)
+                .offset(
+                    x = horizontalShift + lipsCallout.x.dp,
+                    y = blueprintOffset + lipsCallout.y.dp
                 ),
-            anchorAlignment = if (isLipsExpanded) Alignment.Center else Alignment.TopStart
+            anchorAlignment = Alignment.TopStart
         )
     }
 }
