@@ -9,11 +9,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -27,13 +24,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
@@ -48,18 +43,7 @@ fun BlueprintCallout(
     modifier: Modifier = Modifier,
     anchorAlignment: Alignment = Alignment.TopEnd
 ) {
-    Box(
-        modifier = modifier
-            .offset {
-                // Shift toward center logic: 
-                // TopEnd anchor (Left-side box) shifts RIGHT (Positive X)
-                // TopStart anchor (Right-side box) shifts LEFT (Negative X)
-                val shift = if (isExpanded) {
-                    if (anchorAlignment == Alignment.TopEnd) 40.dp.roundToPx() else (-40).dp.roundToPx()
-                } else 0
-                IntOffset(x = shift, y = 0)
-            }
-    ) {
+    Box(modifier = modifier) {
         Card(
             modifier = Modifier
                 .width(if (isExpanded) 160.dp else 120.dp)
@@ -127,21 +111,12 @@ fun BlueprintCallout(
         }
 
         // Color Indicator (The "Anchor Dot")
-        if (colorHex != null) {
-            Box(
-                modifier = Modifier
-                    .align(anchorAlignment)
-                    .offset(
-                        x = if (anchorAlignment == Alignment.TopEnd) 6.dp else (-6).dp,
-                        y = (-6).dp
-                    )
-                    .size(18.dp)
-                    .clip(CircleShape)
-                    .background(parseColor(colorHex))
-                    .border(2.dp, Color.White, CircleShape)
-                    .shadow(4.dp, CircleShape)
-            )
-        }
+        AnchorDot(
+            colorHex = colorHex,
+            isExpanded = isExpanded,
+            anchorAlignment = anchorAlignment,
+            modifier = Modifier.align(anchorAlignment) // Uses the BoxScope from BlueprintCallout
+        )
     }
 }
 
