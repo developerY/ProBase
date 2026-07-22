@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -21,6 +21,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
@@ -29,6 +30,9 @@ import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulator
 
 @Composable
 fun HandBlueprintView(uiState: StyleSimulatorUiState) {
+    // SINGLE SOURCE OF TRUTH: Tracks the currently expanded card
+    var expandedCategory by remember { mutableStateOf<String?>(null) }
+
     val blueprintOffset = 10.dp
     val horizontalShift = 0.dp
     
@@ -107,10 +111,13 @@ fun HandBlueprintView(uiState: StyleSimulatorUiState) {
             label = "NAILS",
             productName = nailsItem?.name ?: "Pending...",
             colorHex = nailsItem?.colorHex,
+            isExpanded = expandedCategory == "NAILS",
+            onExpandToggle = { expandedCategory = if (expandedCategory == "NAILS") null else "NAILS" },
             modifier = Modifier
+                .zIndex(if (expandedCategory == "NAILS") 10f else 1f)
                 .offset(
-                    x = horizontalShift + nailsCallout.x.dp + 7.dp,
-                    y = blueprintOffset + nailsCallout.y.dp + 7.dp
+                    x = horizontalShift + nailsCallout.x.dp,
+                    y = blueprintOffset + nailsCallout.y.dp
                 ),
             anchorAlignment = Alignment.TopStart
         )

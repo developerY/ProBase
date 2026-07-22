@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -20,12 +20,16 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.kocolor.features.analyzer.R
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorUiState
 
 @Composable
 fun ClothingBlueprintView(uiState: StyleSimulatorUiState) {
+    // SINGLE SOURCE OF TRUTH: Tracks the currently expanded card
+    var expandedCategory by remember { mutableStateOf<String?>(null) }
+
     val blueprintOffset = 10.dp
     val horizontalShift = 0.dp
     
@@ -98,10 +102,13 @@ fun ClothingBlueprintView(uiState: StyleSimulatorUiState) {
             label = "TOP",
             productName = topItem?.name ?: "Pending...",
             colorHex = topItem?.colorHex,
+            isExpanded = expandedCategory == "TOP",
+            onExpandToggle = { expandedCategory = if (expandedCategory == "TOP") null else "TOP" },
             modifier = Modifier
+                .zIndex(if (expandedCategory == "TOP") 10f else 1f)
                 .offset(
-                    x = horizontalShift + topCallout.x.dp + 6.dp,
-                    y = blueprintOffset + topCallout.y.dp + 6.dp
+                    x = horizontalShift + topCallout.x.dp,
+                    y = blueprintOffset + topCallout.y.dp
                 ),
             anchorAlignment = Alignment.TopStart
         )
@@ -110,10 +117,13 @@ fun ClothingBlueprintView(uiState: StyleSimulatorUiState) {
             label = "BOTTOM",
             productName = bottomItem?.name ?: "Pending...",
             colorHex = bottomItem?.colorHex,
+            isExpanded = expandedCategory == "BOTTOM",
+            onExpandToggle = { expandedCategory = if (expandedCategory == "BOTTOM") null else "BOTTOM" },
             modifier = Modifier
+                .zIndex(if (expandedCategory == "BOTTOM") 10f else 1f)
                 .offset(
-                    x = horizontalShift + bottomCallout.x.dp - 120.dp - 6.dp,
-                    y = blueprintOffset + bottomCallout.y.dp + 6.dp
+                    x = horizontalShift + bottomCallout.x.dp,
+                    y = blueprintOffset + bottomCallout.y.dp
                 ),
             anchorAlignment = Alignment.TopEnd
         )
@@ -122,10 +132,13 @@ fun ClothingBlueprintView(uiState: StyleSimulatorUiState) {
             label = "SHOES",
             productName = shoeItem?.name ?: "Pending...",
             colorHex = shoeItem?.colorHex,
+            isExpanded = expandedCategory == "SHOES",
+            onExpandToggle = { expandedCategory = if (expandedCategory == "SHOES") null else "SHOES" },
             modifier = Modifier
+                .zIndex(if (expandedCategory == "SHOES") 10f else 1f)
                 .offset(
-                    x = horizontalShift + shoesCallout.x.dp + 6.dp,
-                    y = blueprintOffset + shoesCallout.y.dp + 6.dp
+                    x = horizontalShift + shoesCallout.x.dp,
+                    y = blueprintOffset + shoesCallout.y.dp
                 ),
             anchorAlignment = Alignment.TopStart
         )

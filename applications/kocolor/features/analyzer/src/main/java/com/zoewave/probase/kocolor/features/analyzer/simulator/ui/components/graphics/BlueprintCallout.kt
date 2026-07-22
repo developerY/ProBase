@@ -43,24 +43,27 @@ fun BlueprintCallout(
     label: String,
     productName: String,
     colorHex: String?,
+    isExpanded: Boolean,
+    onExpandToggle: () -> Unit,
     modifier: Modifier = Modifier,
     anchorAlignment: Alignment = Alignment.TopEnd
 ) {
-    var isExpanded by remember { mutableStateOf(false) }
-
     Box(
         modifier = modifier
             .offset {
-                IntOffset(
-                    x = if (isExpanded && anchorAlignment == Alignment.TopEnd) (-40).dp.roundToPx() else 0,
-                    y = 0
-                )
+                // Shift toward center logic: 
+                // TopEnd anchor (Left-side box) shifts RIGHT (Positive X)
+                // TopStart anchor (Right-side box) shifts LEFT (Negative X)
+                val shift = if (isExpanded) {
+                    if (anchorAlignment == Alignment.TopEnd) 40.dp.roundToPx() else (-40).dp.roundToPx()
+                } else 0
+                IntOffset(x = shift, y = 0)
             }
     ) {
         Card(
             modifier = Modifier
                 .width(if (isExpanded) 160.dp else 120.dp)
-                .clickable { isExpanded = !isExpanded },
+                .clickable { onExpandToggle() },
             shape = RoundedCornerShape(12.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White),
             elevation = CardDefaults.cardElevation(defaultElevation = if (isExpanded) 12.dp else 4.dp)
@@ -145,9 +148,12 @@ fun BlueprintCallout(
 @Preview(showBackground = true)
 @Composable
 fun BlueprintCalloutPreview() {
+    var expanded by remember { mutableStateOf(false) }
     BlueprintCallout(
         label = "EYES",
         productName = "Midnight Mascara",
-        colorHex = "#2C3E50"
+        colorHex = "#2C3E50",
+        isExpanded = expanded,
+        onExpandToggle = { expanded = !expanded }
     )
 }
