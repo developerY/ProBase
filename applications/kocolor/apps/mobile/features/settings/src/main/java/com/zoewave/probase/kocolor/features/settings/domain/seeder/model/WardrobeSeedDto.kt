@@ -31,7 +31,7 @@ data class WardrobeSeedDto(
             category = category,
             colorHex = colorHex,
             colorFamily = colorHex?.let { ColorQuantizer.snapToFamily(it) } ?: ColorFamily.UNKNOWN,
-            imageUrl = imageUrl,
+            imageUrl = imageUrl?.let { if (it.startsWith("//")) "https:$it" else it },
             price = price,
             timestamp = System.currentTimeMillis()
         )
