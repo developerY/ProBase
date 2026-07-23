@@ -3,11 +3,11 @@ package com.zoewave.probase.features.compliance
 import android.content.Context
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.CommonStatusCodes
-import com.google.android.play.agesignals.model.AgeSignalsErrorCode
 import com.google.android.play.agesignals.AgeSignalsException
 import com.google.android.play.agesignals.AgeSignalsManagerFactory
 import com.google.android.play.agesignals.AgeSignalsRequest
 import com.google.android.play.agesignals.AgeSignalsResult
+import com.google.android.play.agesignals.model.AgeSignalsErrorCode
 import com.google.android.play.agesignals.model.AgeSignalsVerificationStatus
 import com.zoewave.probase.features.compliance.model.AgeRange
 import com.zoewave.probase.features.compliance.model.AgeSignal
@@ -38,8 +38,8 @@ internal class AgeSignalsManagerImpl @Inject constructor(
     private fun mapToAgeSignal(result: AgeSignalsResult): AgeSignal {
         return AgeSignal(
             ageRange = mapAgeRange(result.ageLower(), result.ageUpper()),
-            verificationStatus = mapVerificationStatus(result.userStatus()),
-            mostRecentApprovalDate = result.mostRecentApprovalDate()
+            verificationStatus = mapVerificationStatus(result.significantChangeStatus() ?: result.ageRangeSource()),
+            mostRecentApprovalDate = result.significantChangeApprovalDate()
         )
     }
 
