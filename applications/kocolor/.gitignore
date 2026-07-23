@@ -1,0 +1,14 @@
+# =========================
+# KoColor Seed Data & Assets
+# =========================
+
+# Ignore the generated JSON seed files
+apps/mobile/src/main/assets/seed_cosmetics.json
+apps/mobile/src/main/assets/seed_wardrobe.json
+
+# If you later update the script to download actual image files locally, ignore the folder:
+apps/mobile/src/main/assets/images/
+apps/mobile/src/main/assets/downloads/
+
+# Note: We do NOT ignore the script itself
+# !generate_seeds.py (This is implicitly tracked, but listed here for clarity)
