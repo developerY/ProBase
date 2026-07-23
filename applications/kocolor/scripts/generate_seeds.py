@@ -101,7 +101,7 @@ def generate_wardrobe():
             "macroCategory": "OUTERWEAR",
             "microCategory": "Coat",
             "colorHex": "#D2B48C",
-            "imageUrl": "https://images.unsplash.com/photo-1539533113208-f6df8cc8b543?auto=format&fit=crop&w=800&q=80",
+            "imageUrl": fix_url("https://images.unsplash.com/photo-1539533113208-f6df8cc8b543?auto=format&fit=crop&w=800&q=80"),
             "price": 850.00
         },
         {
@@ -110,7 +110,7 @@ def generate_wardrobe():
             "macroCategory": "TOPS",
             "microCategory": "Sweater",
             "colorHex": "#2F4F4F",
-            "imageUrl": "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?auto=format&fit=crop&w=800&q=80",
+            "imageUrl": fix_url("https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?auto=format&fit=crop&w=800&q=80"),
             "price": 320.00
         },
         {
@@ -119,7 +119,7 @@ def generate_wardrobe():
             "macroCategory": "BOTTOMS",
             "microCategory": "Denim",
             "colorHex": "#4169E1",
-            "imageUrl": "https://images.unsplash.com/photo-1542272604-780c8e50c37?auto=format&fit=crop&w=800&q=80",
+            "imageUrl": fix_url("https://images.unsplash.com/photo-1542272604-780c8e50c37?auto=format&fit=crop&w=800&q=80"),
             "price": 490.00
         },
         {
@@ -128,7 +128,7 @@ def generate_wardrobe():
             "macroCategory": "OUTERWEAR",
             "microCategory": "Jacket",
             "colorHex": "#1C1C1C",
-            "imageUrl": "https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=800&q=80",
+            "imageUrl": fix_url("https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=800&q=80"),
             "price": 2100.00
         },
         {
@@ -137,7 +137,7 @@ def generate_wardrobe():
             "macroCategory": "ACCESSORIES",
             "microCategory": "Scarf",
             "colorHex": "#800020",
-            "imageUrl": "https://images.unsplash.com/photo-1572804013309-82a89b436c64?auto=format&fit=crop&w=800&q=80",
+            "imageUrl": fix_url("https://images.unsplash.com/photo-1572804013309-82a89b436c64?auto=format&fit=crop&w=800&q=80"),
             "price": 425.00
         },
         {
@@ -146,7 +146,7 @@ def generate_wardrobe():
             "macroCategory": "TOPS",
             "microCategory": "Blazer",
             "colorHex": "#808080",
-            "imageUrl": "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&w=800&q=80",
+            "imageUrl": fix_url("https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&w=800&q=80"),
             "price": 1250.00
         },
         {
@@ -155,7 +155,7 @@ def generate_wardrobe():
             "macroCategory": "TOPS",
             "microCategory": "Shirt",
             "colorHex": "#FFFFFF",
-            "imageUrl": "https://images.unsplash.com/photo-1598033129183-c4f50c717658?auto=format&fit=crop&w=800&q=80",
+            "imageUrl": fix_url("https://images.unsplash.com/photo-1598033129183-c4f50c717658?auto=format&fit=crop&w=800&q=80"),
             "price": 285.00
         },
         {
@@ -164,7 +164,7 @@ def generate_wardrobe():
             "macroCategory": "BOTTOMS",
             "microCategory": "Shorts",
             "colorHex": "#F5F5DC",
-            "imageUrl": "https://images.unsplash.com/photo-1591195853828-11db59a44f6b?auto=format&fit=crop&w=800&q=80",
+            "imageUrl": fix_url("https://images.unsplash.com/photo-1591195853828-11db59a44f6b?auto=format&fit=crop&w=800&q=80"),
             "price": 550.00
         },
         {
@@ -173,7 +173,7 @@ def generate_wardrobe():
             "macroCategory": "SHOES",
             "microCategory": "Shoes",
             "colorHex": "#000000",
-            "imageUrl": "https://images.unsplash.com/photo-1614252329392-74895698b64a?auto=format&fit=crop&w=800&q=80",
+            "imageUrl": fix_url("https://images.unsplash.com/photo-1614252329392-74895698b64a?auto=format&fit=crop&w=800&q=80"),
             "price": 890.00
         }
     ]
