@@ -2,6 +2,7 @@ import os
 import json
 import urllib.request
 import ssl
+import random
 
 # Define the target Android assets directory based on your monorepo structure
 ASSETS_DIR = "applications/kocolor/apps/mobile/src/main/assets"
@@ -12,13 +13,32 @@ WARDROBE_FILE = os.path.join(ASSETS_DIR, "seed_wardrobe.json")
 CATEGORY_MAP = {
     "blush": "DIMENSION",
     "lipstick": "LIPS",
-    "eyeshadow": "EYES"
+    "eyeshadow": "EYES",
+    "nail_polish": "NAILS"
 }
 
 def ensure_directory():
     """Creates the assets directory if it does not exist."""
     os.makedirs(ASSETS_DIR, exist_ok=True)
     print(f"Directory verified: {ASSETS_DIR}")
+
+def fix_url(url):
+    """Ensures URLs have a proper https protocol."""
+    if not url:
+        return url
+    if url.startswith("//"):
+        return f"https:{url}"
+    return url
+
+def get_price(price_str):
+    """Safely converts price string to float or returns a reasonable guess."""
+    try:
+        if price_str:
+            return float(price_str)
+    except (ValueError, TypeError):
+        pass
+    # Return a random "best guess" if price is missing (e.g., $18 to $45 for mid-range cosmetics)
+    return float(random.randint(18, 45))
 
 def fetch_cosmetics():
     """Fetches real data from the Makeup API and maps it to CosmeticSeedDto."""
@@ -38,8 +58,12 @@ def fetch_cosmetics():
             with urllib.request.urlopen(url, context=context) as response:
                 data = json.loads(response.read().decode())
 
-                # Take up to 20 items per category to keep the file lightweight
-                for item in data[:20]:
+                # Take up to 25 items per category to keep the file lightweight
+                count = 0
+                for item in data:
+                    if count >= 25:
+                        break
+
                     colors = item.get("product_colors", [])
                     if not colors:
                         continue # Skip products without color hexes
@@ -53,10 +77,12 @@ def fetch_cosmetics():
                             "brand": item.get("brand") or "Generic",
                             "name": item.get("name") or "Unknown Product",
                             "macroCategory": macro_category,
-                            "microCategory": api_type.capitalize(),
+                            "microCategory": api_type.replace("_", " ").capitalize(),
                             "colorHex": color_hex,
-                            "imageUrl": item.get("api_featured_image", "")
+                            "imageUrl": fix_url(item.get("api_featured_image", "")),
+                            "price": get_price(item.get("price"))
                         })
+                        count += 1
         except Exception as e:
             print(f"Failed to fetch {api_type}: {e}")
 
@@ -65,49 +91,90 @@ def fetch_cosmetics():
     print(f"Generated {len(seed_data)} cosmetic items at {COSMETICS_FILE}")
 
 def generate_wardrobe():
-    """Generates synthetic wardrobe data with visually accurate Unsplash images."""
+    """Generates synthetic wardrobe data with visually accurate Unsplash images and prices."""
     print("Generating synthetic wardrobe data...")
 
     wardrobe_data = [
         {
-            "brand": "Zara",
-            "name": "Oversized Wool Coat",
+            "brand": "Atelier",
+            "name": "Oversized Cashmere Coat",
             "macroCategory": "OUTERWEAR",
             "microCategory": "Coat",
-            "colorHex": "#D2B48C", # Tan
-            "imageUrl": "https://images.unsplash.com/photo-1539533113208-f6df8cc8b543?auto=format&fit=crop&w=800&q=80"
+            "colorHex": "#D2B48C",
+            "imageUrl": "https://images.unsplash.com/photo-1539533113208-f6df8cc8b543?auto=format&fit=crop&w=800&q=80",
+            "price": 850.00
         },
         {
-            "brand": "H&M",
-            "name": "Rib-knit Turtleneck",
+            "brand": "Saint Laurent",
+            "name": "Silk Turtleneck",
             "macroCategory": "TOPS",
             "microCategory": "Sweater",
-            "colorHex": "#2F4F4F", # Dark Slate Gray
-            "imageUrl": "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?auto=format&fit=crop&w=800&q=80"
+            "colorHex": "#2F4F4F",
+            "imageUrl": "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?auto=format&fit=crop&w=800&q=80",
+            "price": 320.00
         },
         {
-            "brand": "Levis",
-            "name": "501 Original Fit Jeans",
+            "brand": "The Row",
+            "name": "Relaxed Tailored Trousers",
             "macroCategory": "BOTTOMS",
             "microCategory": "Denim",
-            "colorHex": "#4169E1", # Royal Blue
-            "imageUrl": "https://images.unsplash.com/photo-1542272604-780c8e50c37?auto=format&fit=crop&w=800&q=80"
+            "colorHex": "#4169E1",
+            "imageUrl": "https://images.unsplash.com/photo-1542272604-780c8e50c37?auto=format&fit=crop&w=800&q=80",
+            "price": 490.00
         },
         {
-            "brand": "AllSaints",
-            "name": "Balfern Leather Biker Jacket",
+            "brand": "Prada",
+            "name": "Nappa Leather Biker Jacket",
             "macroCategory": "OUTERWEAR",
             "microCategory": "Jacket",
-            "colorHex": "#1C1C1C", # Almost Black
-            "imageUrl": "https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=800&q=80"
+            "colorHex": "#1C1C1C",
+            "imageUrl": "https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=800&q=80",
+            "price": 2100.00
         },
         {
-            "brand": "Reformation",
-            "name": "Juliette Silk Dress",
-            "macroCategory": "DRESSES",
-            "microCategory": "Midi Dress",
-            "colorHex": "#800020", # Burgundy
-            "imageUrl": "https://images.unsplash.com/photo-1572804013309-82a89b436c64?auto=format&fit=crop&w=800&q=80"
+            "brand": "Hermès",
+            "name": "Silk Scarf Wrap",
+            "macroCategory": "ACCESSORIES",
+            "microCategory": "Scarf",
+            "colorHex": "#800020",
+            "imageUrl": "https://images.unsplash.com/photo-1572804013309-82a89b436c64?auto=format&fit=crop&w=800&q=80",
+            "price": 425.00
+        },
+        {
+            "brand": "Celine",
+            "name": "Wool Blend Blazer",
+            "macroCategory": "TOPS",
+            "microCategory": "Blazer",
+            "colorHex": "#808080",
+            "imageUrl": "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&w=800&q=80",
+            "price": 1250.00
+        },
+        {
+            "brand": "Loewe",
+            "name": "Cotton Poplin Shirt",
+            "macroCategory": "TOPS",
+            "microCategory": "Shirt",
+            "colorHex": "#FFFFFF",
+            "imageUrl": "https://images.unsplash.com/photo-1598033129183-c4f50c717658?auto=format&fit=crop&w=800&q=80",
+            "price": 285.00
+        },
+        {
+            "brand": "Brunello Cucinelli",
+            "name": "Linen Shorts",
+            "macroCategory": "BOTTOMS",
+            "microCategory": "Shorts",
+            "colorHex": "#F5F5DC",
+            "imageUrl": "https://images.unsplash.com/photo-1591195853828-11db59a44f6b?auto=format&fit=crop&w=800&q=80",
+            "price": 550.00
+        },
+        {
+            "brand": "Gucci",
+            "name": "Horsebit Loafers",
+            "macroCategory": "SHOES",
+            "microCategory": "Shoes",
+            "colorHex": "#000000",
+            "imageUrl": "https://images.unsplash.com/photo-1614252329392-74895698b64a?auto=format&fit=crop&w=800&q=80",
+            "price": 890.00
         }
     ]
 
