@@ -5,8 +5,8 @@ import androidx.room3.Insert
 import androidx.room3.OnConflictStrategy
 import androidx.room3.Query
 import androidx.room3.Update
-import com.zoewave.probase.kocolor.db.entity.ClothingItemEntity
 import com.zoewave.probase.core.model.ritual.Formality
+import com.zoewave.probase.kocolor.db.entity.ClothingItemEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -31,4 +31,7 @@ interface ClothingDao {
 
     @Query("DELETE FROM clothing_items WHERE id = :id")
     suspend fun deleteClothing(id: Long)
+
+    @Query("DELETE FROM clothing_items")
+    suspend fun deleteAllClothing()
 }
