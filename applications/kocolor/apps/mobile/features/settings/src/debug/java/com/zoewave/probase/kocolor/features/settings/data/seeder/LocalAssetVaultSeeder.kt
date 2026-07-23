@@ -37,7 +37,7 @@ class LocalAssetVaultSeeder @Inject constructor(
             cosmeticDao.deleteAllCosmetics()
             clothingDao.deleteAllClothing()
 
-            // 4. Insert new data
+            // 4. Insert new data (Mapping to Entity handles URL fixing and color quantization)
             cosmeticDtos.forEach { cosmeticDao.insertCosmetic(it.toEntity()) }
             wardrobeDtos.forEach { clothingDao.insertClothing(it.toEntity()) }
         }
