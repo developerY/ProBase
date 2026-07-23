@@ -103,6 +103,8 @@ abstract class BaseMindWaveEngine(
         if (state.isPlayingSequence || state.isGameOver || state.isPaused || !state.isStarted) return
 
         val currentStep = state.userInput.size
+        if (currentStep >= state.sequence.size) return
+        
         val expectedNodeId = state.sequence[currentStep]
 
         if (nodeId == expectedNodeId) {

@@ -15,10 +15,6 @@ android {
         versionName = "0.0.7"
         minSdk = 34
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        proguardFiles(
-            getDefaultProguardFile("proguard-android-optimize.txt"),
-            "proguard-rules.pro"
-        )
     }
 
     buildFeatures {
@@ -65,7 +61,6 @@ android {
     buildTypes {
         getByName("release") {
             signingConfig = signingConfigs.getByName("release")
-            isShrinkResources = providers.gradleProperty("isShrinkResources").getOrElse("false").toBoolean()
         }
     }
 }

@@ -11,13 +11,9 @@ android {
 
     defaultConfig {
         applicationId = "com.zoewave.probase.gotmind"
-        versionCode = 100
-        versionName = "1.0.0"
+        versionCode = 7
+        versionName = "0.0.7"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        proguardFiles(
-            getDefaultProguardFile("proguard-android-optimize.txt"),
-            "proguard-rules.pro"
-        )
     }
 
     buildFeatures {

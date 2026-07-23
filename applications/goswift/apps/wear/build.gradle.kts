@@ -14,10 +14,6 @@ android {
         versionName = "0.0.1"
         minSdk = 35
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        proguardFiles(
-            getDefaultProguardFile("proguard-android-optimize.txt"),
-            "proguard-rules.pro"
-        )
     }
 
     buildFeatures {

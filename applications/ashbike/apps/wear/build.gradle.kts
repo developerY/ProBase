@@ -45,9 +45,6 @@ android {
     buildTypes {
         getByName("release") {
             signingConfig = signingConfigs.getByName("release")
-
-            // App-specific resource shrinking (not in common convention)
-            isShrinkResources = providers.gradleProperty("isShrinkResources").getOrElse("false").toBoolean()
         }
     }
 

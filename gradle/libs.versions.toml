@@ -2,10 +2,10 @@
 # -- Project Configuration --
 android-compileSdk = "37"
 android-minSdk = "34"
-android-targetSdk = "35"
+android-targetSdk = "37"
 
 # -- Build Tools --
-agp = "9.4.0-alpha05"
+agp = "9.4.0-alpha06"
 kotlin = "2.4.0"
 # KSP version must match Kotlin version exactly
 ksp = "2.3.9"
@@ -67,7 +67,7 @@ accompanistPermissions = "0.37.3"
 cameraX = "1.6.1"
 
 # -- Maps & Location --
-mapsCompose = "8.3.0"
+mapsCompose = "8.4.0"
 mapsplatformSecretsPlugin = "2.0.1"
 playServicesMaps = "20.0.0"
 playServicesLocation = "21.4.0"
@@ -87,26 +87,26 @@ watchfaceComplicationsDataSourceKtx = "1.3.0"
 
 # -- XR & Glass --
 glimmer = "1.0.0-alpha15"
-projectedXR = "1.0.0-alpha09"
-xrRuntime = "1.0.0-alpha15"
-arcore = "1.0.0-alpha15"
-xrCompose = "1.0.0-alpha15"
-xrScenecore = "1.0.0-alpha16"
+projectedXR = "1.0.0-alpha10"
+xrRuntime = "1.0.0-beta01"
+arcore = "1.0.0-beta01"
+xrCompose = "1.0.0-alpha16"
+xrScenecore = "1.0.0-beta01"
 
 # -- Google Services & Firebase --
-playAgeSignals = "0.0.3"
+playAgeSignals = "0.0.4"
 playServicesCoroutines = "1.11.0"
 mlkitTextRecognition = "16.0.1"
 googleAiEdgeAicore = "0.0.1-exp02"
 playServicesMlkitTextRecognition = "19.0.1"
-mlkitGenAiPrompt = "1.0.0-beta2"
+mlkitGenAiPrompt = "1.0.0-beta4"
 googleGenerativeAi = "0.9.0"
 mediaPipe = "0.20230731"
 playServicesCodeScanner = "16.1.0"
 playServicesWallet = "20.0.0"
-stripe = "23.11.0"
+stripe = "23.12.0"
 composePayButton = "1.2.0"
-firebaseBom = "34.15.0"
+firebaseBom = "34.16.0"
 googleGmsGoogleServices = "4.5.0"
 googleFirebaseCrashlytics = "3.0.7"
 
@@ -120,8 +120,8 @@ runner = "1.7.0"
 composeMaterialVersion = "1.6.2"
 truth = "1.4.5"
 mockk = "1.14.11"
-junitPlatformLauncher = "1.13.4"
-junitPlatformEngine = "1.13.4"
+junitPlatformLauncher = "6.1.2"
+junitPlatformEngine = "6.1.2"
 journeysJunitEngine = "0.3.0"
 
 

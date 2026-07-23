@@ -28,17 +28,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }
-    }
-
-    // 'compileOptions' and 'buildFeatures { compose = true }'
+    // 'compileOptions', 'buildTypes', and 'buildFeatures { compose = true }'
     // are now removed because the Convention Plugins handle them.
 }
 

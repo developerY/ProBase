@@ -16,8 +16,8 @@ android {
 
     defaultConfig {
         applicationId = "com.zoewave.probase.photodo"
-        versionCode = 16
-        versionName = "0.1.0"
+        versionCode = 18
+        versionName = "0.1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -47,14 +47,6 @@ android {
     buildTypes {
         getByName("release") {
             signingConfig = signingConfigs.getByName("release")
-            isMinifyEnabled = true
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-
-            // App-specific resource shrinking (not in common convention)
-            isShrinkResources = providers.gradleProperty("isShrinkResources").getOrElse("false").toBoolean()
         }
     }
 
