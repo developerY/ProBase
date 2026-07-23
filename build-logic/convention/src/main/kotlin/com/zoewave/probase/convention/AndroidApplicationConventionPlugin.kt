@@ -28,7 +28,7 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                 // Application-specific build type settings
                 val release = buildTypes.getByName("release")
                 release.isShrinkResources = providers.gradleProperty("isShrinkResources")
-                    .getOrElse("false")
+                    .getOrElse("true")
                     .toBoolean()
 
                 // Standard packaging exclusions for clean release builds

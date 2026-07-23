@@ -39,7 +39,7 @@ internal fun Project.configureBuildTypes(
 
     // Use a project property to toggle minification for release builds safely
     release.isMinifyEnabled = providers.gradleProperty("isMinifyForRelease")
-        .getOrElse("false")
+        .getOrElse("true")
         .toBoolean()
 
     // ProGuard optimization rules for release builds
