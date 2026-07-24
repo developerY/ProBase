@@ -5,9 +5,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -62,6 +63,21 @@ fun VanityCategoryCard(
         java.text.NumberFormat.getCurrencyInstance(java.util.Locale.US)
     }
 
+    var showExplanation by remember { mutableStateOf(false) }
+
+    if (showExplanation) {
+        AlertDialog(
+            onDismissRequest = { showExplanation = false },
+            title = { Text(text = name, fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold) },
+            text = { Text(text = description) },
+            confirmButton = {
+                TextButton(onClick = { showExplanation = false }) {
+                    Text(stringResource(android.R.string.ok))
+                }
+            }
+        )
+    }
+
     Card(
         onClick = { navTo(KoColorRoute.CosmeticCategoryCover(name)) },
         modifier = modifier.height(200.dp),
@@ -102,13 +118,26 @@ fun VanityCategoryCard(
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         val displayName = if (name.contains("&")) name.substringBefore("&").trim() else name
-                        Text(
-                            text = displayName,
-                            style = MaterialTheme.typography.displaySmall.copy(fontSize = 34.sp, lineHeight = 38.sp),
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = FontFamily.Serif,
-                            color = Color.Black
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = displayName,
+                                style = MaterialTheme.typography.displaySmall.copy(fontSize = 34.sp, lineHeight = 38.sp),
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = FontFamily.Serif,
+                                color = Color.Black
+                            )
+                            IconButton(
+                                onClick = { showExplanation = true },
+                                modifier = Modifier.size(40.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Info,
+                                    contentDescription = "Category Info",
+                                    modifier = Modifier.size(20.dp),
+                                    tint = Color.Black.copy(alpha = 0.3f)
+                                )
+                            }
+                        }
                         Spacer(Modifier.height(4.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             val itemsText = if (count == 1) stringResource(R.string.applications_kocolor_features_cosmetics_item_singular) else stringResource(R.string.applications_kocolor_features_cosmetics_items_plural_format, count)
@@ -117,19 +146,6 @@ fun VanityCategoryCard(
                                 style = MaterialTheme.typography.bodyLarge,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.alpha(0.9f)
-                            )
-                            Text(
-                                text = "  |  ",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = Color.Black.copy(alpha = 0.3f)
-                            )
-                            Text(
-                                text = description,
-                                style = MaterialTheme.typography.bodySmall,
-                                fontWeight = FontWeight.Medium,
-                                modifier = Modifier.alpha(0.6f),
-                                maxLines = 1,
-                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                             )
                         }
                     }
