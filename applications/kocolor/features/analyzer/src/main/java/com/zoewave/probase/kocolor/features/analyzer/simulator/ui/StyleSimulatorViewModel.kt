@@ -354,9 +354,20 @@ class StyleSimulatorViewModel @Inject constructor(
     private fun saveSelectionToColorTab() {
         viewModelScope.launch {
             val state = uiState.value
+            
+            // Fix: Pass imageUrl and use proper category mapping
             val recommendations = state.recommendedClothing + state.recommendedCosmetics.map {
-                ClothingItem(id = it.id, name = it.name, brand = it.brand, category = ClothingCategory.OTHER, colorHex = it.colorHex)
+                ClothingItem(
+                    id = it.id, 
+                    name = it.name, 
+                    brand = it.brand, 
+                    category = ClothingCategory.ACCESSORIES, // Better fallback for list display
+                    colorHex = it.colorHex,
+                    imageUrl = it.imageUrl,
+                    notes = it.notes
+                )
             }
+
             val outfitSuggestion = OutfitSuggestion(
                 occasion = state.userMessage,
                 advice = state.rationale ?: "",
@@ -368,7 +379,7 @@ class StyleSimulatorViewModel @Inject constructor(
                         name = item.name,
                         category = item.category.name,
                         imageUrl = item.imageUrl,
-                        description = item.notes,
+                        description = item.notes ?: "AI architected selection.",
                         isOwned = true
                     )
                 } + listOf(
@@ -381,22 +392,29 @@ class StyleSimulatorViewModel @Inject constructor(
                 )
             )
 
+            // Fix: Map recommended cosmetics to real MakeupSuggestions instead of hardcoding
+            val makeupSuggestions = state.recommendedCosmetics.map { cosmetic ->
+                MakeupSuggestion(
+                    category = cosmetic.macroCategory.displayName,
+                    advice = "Strategically selected to harmonize with your ${state.recommendedPalette.getOrNull(0) ?: "look"}.",
+                    recommendedColors = cosmetic.colorHex?.let { listOf(it) } ?: emptyList(),
+                    suggestedProductName = cosmetic.name,
+                    suggestedProductImageUrl = cosmetic.imageUrl,
+                    productId = cosmetic.id
+                )
+            }
+
             val advice = FashionAdvice(
-                title = "The ${state.userMessage.take(15)} Collection",
+                title = "The ${state.userMessage.take(15).ifBlank { "Personal" }} Collection",
                 summary = state.rationale ?: "AI optimized style blueprint.",
                 seasonalType = (fashionRepository.getProfile().first()?.seasonalType) ?: SeasonalType.WINTER,
                 undertone = (fashionRepository.getProfile().first()?.undertone) ?: Undertone.COOL,
-                makeupSuggestions = listOf(
-                    MakeupSuggestion(
-                        category = "Lips",
-                        advice = "A bold brick red to anchor the look.",
-                        recommendedColors = listOf("#8B0000"),
-                        suggestedProductName = "Terracotta Velvet Stain"
-                    )
-                ),
+                makeupSuggestions = makeupSuggestions,
                 outfitSuggestions = listOf(outfitSuggestion),
                 recommendedPalette = state.recommendedPalette,
-                clothesUri = state.recommendedClothing.firstOrNull()?.imageUrl
+                // Fix: Fallback to first recommendation image if clothing is empty
+                clothesUri = state.recommendedClothing.firstOrNull()?.imageUrl 
+                    ?: state.recommendedCosmetics.firstOrNull()?.imageUrl
             )
             fashionRepository.saveSuggestion(advice)
             _effect.send(SimulatorEffect.NavigateToHistory)

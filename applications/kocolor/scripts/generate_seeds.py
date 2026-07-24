@@ -173,7 +173,7 @@ def generate_wardrobe():
             "macroCategory": "SHOES",
             "microCategory": "Shoes",
             "colorHex": "#000000",
-            "imageUrl": fix_url("https://images.unsplash.com/photo-1614252329392-74895698b64a?auto=format&fit=crop&w=800&q=80"),
+            "imageUrl": fix_url("https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?auto=format&fit=crop&w=800&q=80"),
             "price": 890.00
         }
     ]

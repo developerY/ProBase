@@ -37,7 +37,13 @@ data class CosmeticSeedDto(
             microCategory = micro,
             colorHex = colorHex,
             colorFamily = colorHex?.let { ColorQuantizer.snapToFamily(it) } ?: ColorFamily.UNKNOWN,
-            imageUrl = imageUrl?.let { if (it.startsWith("//")) "https:$it" else it },
+            imageUrl = imageUrl?.let { 
+                when {
+                    it.startsWith("//") -> "https:$it"
+                    it.startsWith("http://") -> it.replace("http://", "https://")
+                    else -> it
+                }
+            },
             price = price,
             timestamp = System.currentTimeMillis()
         )
