@@ -48,14 +48,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.zoewave.probase.kocolor.mobile.features.home.R
 import com.zoewave.probase.core.model.ritual.FashionAdvice
-import com.zoewave.probase.kocolor.model.KoColorRoute
 import com.zoewave.probase.core.model.ritual.MakeupSuggestion
 import com.zoewave.probase.core.model.ritual.OutfitSuggestion
 import com.zoewave.probase.core.model.ritual.SavedAnalysis
 import com.zoewave.probase.core.model.ritual.SeasonalType
 import com.zoewave.probase.core.model.ritual.Undertone
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.VisualBlueprintSection
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.toVisualBlueprintData
+import com.zoewave.probase.kocolor.mobile.features.home.R
+import com.zoewave.probase.kocolor.model.KoColorRoute
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -65,6 +67,16 @@ fun CollectionDetailScreen(
 ) {
     val advice = analysis.advice
     
+    // Dynamic Hero Image selection: 
+    // 1. Primary clothesUri
+    // 2. First image found in outfit suggestions
+    // 3. First image found in makeup suggestions
+    // 4. Fallback drawable
+    val heroImage = advice.clothesUri 
+        ?: advice.outfitSuggestions.flatMap { it.suggestedItems }.firstOrNull { it.imageUrl != null }?.imageUrl
+        ?: advice.makeupSuggestions.firstOrNull { it.suggestedProductImageUrl != null }?.suggestedProductImageUrl
+        ?: R.drawable.advice_clothes_fallback
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -132,7 +144,7 @@ fun CollectionDetailScreen(
                     elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                 ) {
                     AsyncImage(
-                        model = advice.clothesUri ?: R.drawable.advice_clothes_fallback,
+                        model = heroImage,
                         contentDescription = "Hero Image",
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
@@ -172,6 +184,30 @@ fun CollectionDetailScreen(
                             )
                         }
                     }
+                }
+            }
+
+            // 3.5 Visual Blueprint Section (Reused from Simulator)
+            item {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = "Visual Blueprint",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontFamily = FontFamily.Serif,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "EXPLORE DETAILS",
+                        style = MaterialTheme.typography.labelSmall,
+                        letterSpacing = 2.sp,
+                        modifier = Modifier.alpha(0.6f)
+                    )
+                    
+                    Spacer(Modifier.height(24.dp))
+                    
+                    VisualBlueprintSection(
+                        data = advice.toVisualBlueprintData()
+                    )
                 }
             }
 

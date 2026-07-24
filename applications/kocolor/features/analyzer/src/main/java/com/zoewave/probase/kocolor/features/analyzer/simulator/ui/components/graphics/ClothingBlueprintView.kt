@@ -21,12 +21,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.kocolor.features.analyzer.R
-import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorUiState
 
 @Composable
-fun ClothingBlueprintView(uiState: StyleSimulatorUiState) {
+fun ClothingBlueprintView(
+    data: VisualBlueprintData,
+    modifier: Modifier = Modifier
+) {
     // SINGLE SOURCE OF TRUTH: Tracks the currently expanded card
     var expandedCategory by remember { mutableStateOf<String?>(null) }
 
@@ -44,7 +45,7 @@ fun ClothingBlueprintView(uiState: StyleSimulatorUiState) {
     val shoesCallout = Offset(130.dp.value, 200.dp.value)
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(16.dp),
         contentAlignment = Alignment.Center
@@ -94,14 +95,10 @@ fun ClothingBlueprintView(uiState: StyleSimulatorUiState) {
             drawCircle(lineColor, anchorRadius, shoesStart)
         }
 
-        val topItem = uiState.recommendedClothing.find { it.category == ClothingCategory.TOPS }
-        val bottomItem = uiState.recommendedClothing.find { it.category == ClothingCategory.BOTTOMS }
-        val shoeItem = uiState.recommendedClothing.find { it.category == ClothingCategory.SHOES }
-
         BlueprintCallout(
             label = "TOP",
-            productName = topItem?.name ?: "Pending...",
-            colorHex = topItem?.colorHex,
+            productName = data.topItem?.name ?: "Pending...",
+            colorHex = data.topItem?.colorHex,
             isExpanded = expandedCategory == "TOP",
             onExpandToggle = { expandedCategory = if (expandedCategory == "TOP") null else "TOP" },
             modifier = Modifier
@@ -115,23 +112,23 @@ fun ClothingBlueprintView(uiState: StyleSimulatorUiState) {
 
         BlueprintCallout(
             label = "BOTTOM",
-            productName = bottomItem?.name ?: "Pending...",
-            colorHex = bottomItem?.colorHex,
+            productName = data.bottomItem?.name ?: "Pending...",
+            colorHex = data.bottomItem?.colorHex,
             isExpanded = expandedCategory == "BOTTOM",
             onExpandToggle = { expandedCategory = if (expandedCategory == "BOTTOM") null else "BOTTOM" },
             modifier = Modifier
                 .zIndex(if (expandedCategory == "BOTTOM") 10f else 1f)
                 .offset(
-                    x = horizontalShift + bottomCallout.x.dp,
-                    y = blueprintOffset + bottomCallout.y.dp
+                    x = horizontalShift + bottomCallout.x.dp - 120.dp - 6.dp,
+                    y = blueprintOffset + bottomCallout.y.dp + 6.dp
                 ),
             anchorAlignment = Alignment.TopEnd
         )
 
         BlueprintCallout(
             label = "SHOES",
-            productName = shoeItem?.name ?: "Pending...",
-            colorHex = shoeItem?.colorHex,
+            productName = data.shoeItem?.name ?: "Pending...",
+            colorHex = data.shoeItem?.colorHex,
             isExpanded = expandedCategory == "SHOES",
             onExpandToggle = { expandedCategory = if (expandedCategory == "SHOES") null else "SHOES" },
             modifier = Modifier
@@ -147,6 +144,6 @@ fun ClothingBlueprintView(uiState: StyleSimulatorUiState) {
 
 @Preview(showBackground = true)
 @Composable
-fun ClothingBlueprintViewPreview() {
-    ClothingBlueprintView(uiState = StyleSimulatorUiState())
+private fun ClothingBlueprintViewPreview() {
+    ClothingBlueprintView(data = VisualBlueprintData())
 }

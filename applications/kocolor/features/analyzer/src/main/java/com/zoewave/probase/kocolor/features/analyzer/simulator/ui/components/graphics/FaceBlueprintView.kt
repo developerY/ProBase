@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -29,13 +30,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import com.zoewave.probase.kocolor.features.analyzer.R
-import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorUiState
 
 @Composable
-fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
+fun FaceBlueprintView(
+    data: VisualBlueprintData,
+    modifier: Modifier = Modifier
+) {
     // SINGLE SOURCE OF TRUTH: Tracks the currently expanded card
     var expandedCategory by remember { mutableStateOf<String?>(null) }
 
@@ -43,7 +45,12 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
     val blueprintOffset = 10.dp
     val horizontalShift = 15.dp
 
-    // 2. Define Dynamic Callout Targets (End of the lines)
+    // 2. Define Feature Anchor Points (Start of the lines)
+    val eyesAnchor = Offset(35.dp.value, -45.dp.value)
+    val cheeksAnchor = Offset(-45.dp.value, 25.dp.value)
+    val lipsAnchor = Offset(0.dp.value, 75.dp.value)
+
+    // 3. Define Dynamic Callout Targets (End of the lines)
     // Eyes and Lips move TOWARD center when expanded so they remain fully visible.
     val eyesTarget by animateOffsetAsState(
         if (expandedCategory == "EYES") Offset(60f, -100f) else Offset(90f, -90f),
@@ -59,18 +66,13 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
         label = "lipsTarget"
     )
 
-    // 3. Animate Width
+    // 4. Animate Width
     val eyesWidth by animateDpAsState(if (expandedCategory == "EYES") 160.dp else 120.dp, label = "eyesWidth")
     val cheeksWidth by animateDpAsState(if (expandedCategory == "CHEEKS") 160.dp else 120.dp, label = "cheeksWidth")
     val lipsWidth by animateDpAsState(if (expandedCategory == "LIPS") 160.dp else 120.dp, label = "lipsWidth")
 
-    // Feature Anchor Points (Start of the lines)
-    val eyesAnchor = Offset(35.dp.value, -45.dp.value)
-    val cheeksAnchor = Offset(-45.dp.value, 25.dp.value)
-    val lipsAnchor = Offset(0.dp.value, 75.dp.value)
-
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(16.dp),
         contentAlignment = Alignment.Center
@@ -95,23 +97,18 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             val center = Offset(size.width / 2 + horizontalShift.toPx(), size.height / 2 + blueprintOffset.toPx())
 
-            // Extract Items
-            val eyesItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.EYES }
-            val cheeksItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.DIMENSION }
-            val lipsItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.LIPS }
-
             // 1. Draw "Shades" (Soft Glows on the face)
-            eyesItem?.colorHex?.let { hex ->
+            data.eyesItem?.colorHex?.let { hex ->
                 val pigment = parseColor(hex).copy(alpha = 0.35f)
                 drawCircle(Brush.radialGradient(listOf(pigment, Color.Transparent), center = Offset(center.x + eyesAnchor.x.dp.toPx(), center.y + eyesAnchor.y.dp.toPx()), radius = 20.dp.toPx()), radius = 20.dp.toPx(), center = Offset(center.x + eyesAnchor.x.dp.toPx(), center.y + eyesAnchor.y.dp.toPx()))
                 drawCircle(Brush.radialGradient(listOf(pigment, Color.Transparent), center = Offset(center.x - eyesAnchor.x.dp.toPx(), center.y + eyesAnchor.y.dp.toPx()), radius = 20.dp.toPx()), radius = 20.dp.toPx(), center = Offset(center.x - eyesAnchor.x.dp.toPx(), center.y + eyesAnchor.y.dp.toPx()))
             }
-            cheeksItem?.colorHex?.let { hex ->
+            data.cheeksItem?.colorHex?.let { hex ->
                 val pigment = parseColor(hex).copy(alpha = 0.3f)
                 drawCircle(Brush.radialGradient(listOf(pigment, Color.Transparent), center = Offset(center.x + cheeksAnchor.x.dp.toPx(), center.y + cheeksAnchor.y.dp.toPx()), radius = 35.dp.toPx()), radius = 35.dp.toPx(), center = Offset(center.x + cheeksAnchor.x.dp.toPx(), center.y + cheeksAnchor.y.dp.toPx()))
                 drawCircle(Brush.radialGradient(listOf(pigment, Color.Transparent), center = Offset(center.x - cheeksAnchor.x.dp.toPx(), center.y + cheeksAnchor.y.dp.toPx()), radius = 35.dp.toPx()), radius = 35.dp.toPx(), center = Offset(center.x - cheeksAnchor.x.dp.toPx(), center.y + cheeksAnchor.y.dp.toPx()))
             }
-            lipsItem?.colorHex?.let { hex ->
+            data.lipsItem?.colorHex?.let { hex ->
                 val pigment = parseColor(hex).copy(alpha = 0.4f)
                 drawCircle(Brush.radialGradient(listOf(pigment, Color.Transparent), center = Offset(center.x + lipsAnchor.x.dp.toPx(), center.y + lipsAnchor.y.dp.toPx()), radius = 25.dp.toPx()), radius = 25.dp.toPx(), center = Offset(center.x + lipsAnchor.x.dp.toPx(), center.y + lipsAnchor.y.dp.toPx()))
             }
@@ -134,18 +131,14 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
             drawCircle(lineColor, anchorRadius, Offset(center.x + lipsAnchor.x.dp.toPx(), center.y + lipsAnchor.y.dp.toPx()))
         }
 
-        val eyesItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.EYES }
-        val cheeksItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.DIMENSION }
-        val lipsItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.LIPS }
-
         // 5. Render the Callouts
         val calloutHalfHeight = 24.dp // Pushes the card down so the top-corner dot hits the line
 
         // --- EYES CALLOUT (Right Side) ---
         BlueprintCallout(
             label = "EYES",
-            productName = eyesItem?.name ?: "Pending...",
-            colorHex = eyesItem?.colorHex,
+            productName = data.eyesItem?.name ?: "Pending...",
+            colorHex = data.eyesItem?.colorHex,
             isExpanded = expandedCategory == "EYES",
             onExpandToggle = { expandedCategory = if (expandedCategory == "EYES") null else "EYES" },
             modifier = Modifier
@@ -162,8 +155,8 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
         // --- CHEEKS CALLOUT (Left Side) ---
         BlueprintCallout(
             label = "CHEEKS",
-            productName = cheeksItem?.name ?: "Pending...",
-            colorHex = cheeksItem?.colorHex,
+            productName = data.cheeksItem?.name ?: "Pending...",
+            colorHex = data.cheeksItem?.colorHex,
             isExpanded = expandedCategory == "CHEEKS",
             onExpandToggle = { expandedCategory = if (expandedCategory == "CHEEKS") null else "CHEEKS" },
             modifier = Modifier
@@ -180,8 +173,8 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
         // --- LIPS CALLOUT (Right Side) ---
         BlueprintCallout(
             label = "LIPS",
-            productName = lipsItem?.name ?: "Pending...",
-            colorHex = lipsItem?.colorHex,
+            productName = data.lipsItem?.name ?: "Pending...",
+            colorHex = data.lipsItem?.colorHex,
             isExpanded = expandedCategory == "LIPS",
             onExpandToggle = { expandedCategory = if (expandedCategory == "LIPS") null else "LIPS" },
             modifier = Modifier
@@ -199,6 +192,6 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
 
 @Preview(showBackground = true)
 @Composable
-fun FaceBlueprintViewPreview() {
-    FaceBlueprintView(uiState = StyleSimulatorUiState())
+private fun FaceBlueprintViewPreview() {
+    FaceBlueprintView(data = VisualBlueprintData())
 }

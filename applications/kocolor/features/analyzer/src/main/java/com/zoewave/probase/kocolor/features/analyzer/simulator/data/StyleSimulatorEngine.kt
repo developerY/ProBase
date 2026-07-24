@@ -240,6 +240,7 @@ class StyleSimulatorEngine @Inject constructor(
         val tops = availableWardrobe.filter { it.category == ClothingCategory.TOPS }
         val bottoms = availableWardrobe.filter { it.category == ClothingCategory.BOTTOMS }
         val shoes = availableWardrobe.filter { it.category == ClothingCategory.SHOES }
+        val accessories = availableWardrobe.filter { it.category == ClothingCategory.ACCESSORIES }
         
         fun <T> List<T>.smartPick(nameSelector: (T) -> String, notesSelector: (T) -> String?): T? {
             if (this.isEmpty()) return null
@@ -255,6 +256,11 @@ class StyleSimulatorEngine @Inject constructor(
         tops.smartPick({it.name}, {it.notes})?.let { selectedItems.add(it) }
         bottoms.smartPick({it.name}, {it.notes})?.let { selectedItems.add(it) }
         shoes.smartPick({it.name}, {it.notes})?.let { selectedItems.add(it) }
+
+        // Fallback: If we still don't have enough items, grab accessories
+        if (selectedItems.isEmpty() && accessories.isNotEmpty()) {
+            accessories.smartPick({it.name}, {it.notes})?.let { selectedItems.add(it) }
+        }
         
         // 2. Pick Cosmetics (Trinity: Eyes, Cheeks, Lips, Nails)
         val eyes = availableCosmetics.filter { it.macroCategory == MacroCategory.EYES }

@@ -353,11 +353,18 @@ class HomeViewModel @Inject constructor(
         name = name,
         brand = brand,
         category = category,
+        formality = formality,
         colorHex = colorHex,
+        colorFamily = colorFamily,
         size = size,
         material = material,
+        price = price,
         imageUrl = imageUrl,
         notes = notes,
-        timestamp = timestamp
+        timestamp = timestamp,
+        dominantHex = dominantHex,
+        vibrantHex = vibrantHex,
+        mutedHex = mutedHex,
+        usageCount = usageCount
     )
 }
