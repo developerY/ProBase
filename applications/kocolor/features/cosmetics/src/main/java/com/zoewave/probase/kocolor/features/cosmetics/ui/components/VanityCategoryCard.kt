@@ -2,13 +2,35 @@ package com.zoewave.probase.kocolor.features.cosmetics.ui.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -27,6 +49,8 @@ import coil.compose.AsyncImage
 import com.zoewave.probase.kocolor.features.cosmetics.R
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CategoryMetadata
 import com.zoewave.probase.kocolor.model.KoColorRoute
+import java.text.NumberFormat
+import java.util.Locale
 
 data class VanityCategoryUiState(
     val name: String,
@@ -61,7 +85,7 @@ fun VanityCategoryCard(
     }
     
     val currencyFormatter = remember { 
-        java.text.NumberFormat.getCurrencyInstance(java.util.Locale.US)
+        NumberFormat.getCurrencyInstance(Locale.US)
     }
 
     var showExplanation by remember { mutableStateOf(false) }
@@ -160,9 +184,10 @@ fun VanityCategoryCard(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(20.dp), // Slightly reduced padding to fit content
-                verticalArrangement = Arrangement.SpaceBetween
+                    .padding(18.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+                // Header Row
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -175,7 +200,7 @@ fun VanityCategoryCard(
                                 text = displayName,
                                 style = MaterialTheme.typography.displaySmall.copy(
                                     fontSize = 32.sp, 
-                                    lineHeight = 36.sp,
+                                    lineHeight = 34.sp,
                                     fontWeight = FontWeight.Bold
                                 ),
                                 fontFamily = FontFamily.Serif,
@@ -183,83 +208,87 @@ fun VanityCategoryCard(
                             )
                             IconButton(
                                 onClick = { showExplanation = true },
-                                modifier = Modifier.size(36.dp)
+                                modifier = Modifier.size(32.dp)
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Info,
                                     contentDescription = "Category Info",
-                                    modifier = Modifier.size(18.dp),
+                                    modifier = Modifier.size(16.dp),
                                     tint = Color.Black.copy(alpha = 0.2f)
                                 )
                             }
                         }
-                        Text(
-                            text = if (count == 1) stringResource(R.string.applications_kocolor_features_cosmetics_item_singular) else stringResource(R.string.applications_kocolor_features_cosmetics_items_plural_format, count),
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.SemiBold,
-                            modifier = Modifier.alpha(0.7f)
-                        )
-                    }
-
-                    Column(horizontalAlignment = Alignment.End) {
-                        Text(
-                            text = currencyFormatter.format(totalValue),
-                            style = MaterialTheme.typography.titleLarge.copy(fontSize = 26.sp),
-                            fontWeight = FontWeight.Black,
-                            fontFamily = FontFamily.Serif,
-                            color = Color.Black
-                        )
-                        Text(
-                            text = stringResource(R.string.applications_kocolor_features_cosmetics_total_value),
-                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp, letterSpacing = 0.5.sp),
-                            fontWeight = FontWeight.Black,
-                            modifier = Modifier.alpha(0.4f)
-                        )
-                    }
-                }
-
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    // Glassy Stock Status Container
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
-                        color = Color.White.copy(alpha = 0.4f),
-                        border = BorderStroke(0.5.dp, Color.White.copy(alpha = 0.5f))
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                            verticalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            val itemsText = if (count == 1) stringResource(R.string.applications_kocolor_features_cosmetics_item_singular) else stringResource(R.string.applications_kocolor_features_cosmetics_items_plural_format, count)
                             Text(
-                                text = stringResource(R.string.applications_kocolor_features_cosmetics_stock_status),
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    fontSize = 9.sp,
-                                    letterSpacing = 0.8.sp,
-                                    fontWeight = FontWeight.ExtraBold
-                                ),
-                                color = Color.Black.copy(alpha = 0.5f)
+                                text = itemsText,
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = Modifier.alpha(0.7f)
                             )
-                            
-                            LinearProgressIndicator(
-                                progress = { averageFill.toFloat() },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(4.dp)
-                                    .clip(CircleShape),
-                                color = Color(0xFF7A6F5D), // Slightly darker for contrast
-                                trackColor = Color.Black.copy(alpha = 0.05f),
-                                strokeCap = StrokeCap.Round
-                            )
-
                             Text(
-                                text = "${(averageFill * 100).toInt()}%",
-                                style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
+                                text = "  |  ",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.Black.copy(alpha = 0.2f)
+                            )
+                            Text(
+                                text = currencyFormatter.format(totalValue),
+                                style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = Color.Black.copy(alpha = 0.4f)
+                                color = Color.Black.copy(alpha = 0.9f)
                             )
                         }
                     }
-                    
+                }
+
+                Spacer(Modifier.weight(1f))
+
+                // Glassy Stock Status Container
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    color = Color.White.copy(alpha = 0.4f),
+                    border = BorderStroke(0.5.dp, Color.White.copy(alpha = 0.5f))
+                ) {
+                    Column(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.applications_kocolor_features_cosmetics_stock_status),
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontSize = 9.sp,
+                                letterSpacing = 0.8.sp,
+                                fontWeight = FontWeight.ExtraBold
+                            ),
+                            color = Color.Black.copy(alpha = 0.5f)
+                        )
+                        
+                        LinearProgressIndicator(
+                            progress = { averageFill.toFloat() },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(4.dp)
+                                .clip(CircleShape),
+                            color = Color(0xFF7A6F5D),
+                            trackColor = Color.Black.copy(alpha = 0.05f),
+                            strokeCap = StrokeCap.Round
+                        )
+
+                        Text(
+                            text = "${(averageFill * 100).toInt()}%",
+                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black.copy(alpha = 0.4f)
+                        )
+                    }
+                }
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Bottom
+                ) {
                     // Leading Brand
                     Text(
                         text = stringResource(
@@ -271,7 +300,7 @@ fun VanityCategoryCard(
                             letterSpacing = 1.2.sp,
                             fontWeight = FontWeight.Bold
                         ),
-                        modifier = Modifier.padding(start = 4.dp).alpha(0.7f),
+                        modifier = Modifier.alpha(0.7f),
                         color = Color.Black
                     )
                 }
