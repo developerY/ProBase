@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "com.zoewave.probase.seaweed"
-        versionCode = 8
+        versionCode = 4
         versionName = "0.0.1"
         minSdk = 34
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

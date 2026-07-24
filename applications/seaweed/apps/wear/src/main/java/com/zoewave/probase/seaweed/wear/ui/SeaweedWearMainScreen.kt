@@ -6,9 +6,7 @@ import androidx.compose.runtime.remember
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import androidx.wear.compose.foundation.rememberSwipeToDismissBoxState
 import androidx.wear.compose.material3.AppScaffold
-import androidx.wear.compose.material3.SwipeToDismissBox
 import androidx.wear.compose.navigation3.SwipeDismissableSceneStrategy
 import androidx.compose.ui.tooling.preview.Preview
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
@@ -38,29 +36,22 @@ fun SeaweedWearMainScreen() {
 
     SeaweedWearTheme {
         AppScaffold {
-            SwipeToDismissBox(
-                onDismissed = { navigateBack() },
-                state = rememberSwipeToDismissBoxState(),
-                backgroundKey = backStack.getOrNull(backStack.size - 2) ?: SeaweedDestination.Home,
-                contentKey = backStack.lastOrNull() ?: SeaweedDestination.Home
-            ) { key ->
-                NavDisplay(
-                    backStack = backStack,
-                    sceneStrategy = SwipeDismissableSceneStrategy(),
-                    onBack = { navigateBack() },
-                    entryDecorators = listOf(
-                        rememberSaveableStateHolderNavEntryDecorator(),
-                        rememberViewModelStoreNavEntryDecorator()
-                    ),
-                    entryProvider = { dest: SeaweedDestination ->
-                        seaweedWearNavEntryProvider(
-                            key = dest,
-                            navigateTo = ::navigateTo,
-                            onBack = ::navigateBack
-                        )
-                    }
-                )
-            }
+            NavDisplay(
+                backStack = backStack,
+                sceneStrategies = listOf(SwipeDismissableSceneStrategy()),
+                onBack = { navigateBack() },
+                entryDecorators = listOf(
+                    rememberSaveableStateHolderNavEntryDecorator(),
+                    rememberViewModelStoreNavEntryDecorator()
+                ),
+                entryProvider = { dest: SeaweedDestination ->
+                    seaweedWearNavEntryProvider(
+                        key = dest,
+                        navigateTo = ::navigateTo,
+                        onBack = ::navigateBack
+                    )
+                }
+            )
         }
     }
 }

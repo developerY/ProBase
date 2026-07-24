@@ -6,9 +6,7 @@ import androidx.compose.runtime.remember
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import androidx.wear.compose.foundation.rememberSwipeToDismissBoxState
 import androidx.wear.compose.material3.AppScaffold
-import androidx.wear.compose.material3.SwipeToDismissBox
 import androidx.wear.compose.navigation3.SwipeDismissableSceneStrategy
 import com.zoewave.probase.goswift.features.main.navigation.GoSwiftDestination
 import com.zoewave.probase.goswift.wear.ui.navigation.goSwiftWearNavEntryProvider
@@ -37,29 +35,22 @@ fun GoSwiftWearMainScreen() {
 
     GoSwiftWearTheme {
         AppScaffold {
-            SwipeToDismissBox(
-                onDismissed = { navigateBack() },
-                state = rememberSwipeToDismissBoxState(),
-                backgroundKey = backStack.getOrNull(backStack.size - 2) ?: GoSwiftDestination.Home,
-                contentKey = backStack.lastOrNull() ?: GoSwiftDestination.Home
-            ) { key ->
-                NavDisplay(
-                    backStack = backStack,
-                    sceneStrategy = SwipeDismissableSceneStrategy(),
-                    onBack = { navigateBack() },
-                    entryDecorators = listOf(
-                        rememberSaveableStateHolderNavEntryDecorator(),
-                        rememberViewModelStoreNavEntryDecorator()
-                    ),
-                    entryProvider = { dest: GoSwiftDestination ->
-                        goSwiftWearNavEntryProvider(
-                            key = dest,
-                            navigateTo = ::navigateTo,
-                            onBack = ::navigateBack
-                        )
-                    }
-                )
-            }
+            NavDisplay(
+                backStack = backStack,
+                sceneStrategies = listOf(SwipeDismissableSceneStrategy()),
+                onBack = { navigateBack() },
+                entryDecorators = listOf(
+                    rememberSaveableStateHolderNavEntryDecorator(),
+                    rememberViewModelStoreNavEntryDecorator()
+                ),
+                entryProvider = { dest: GoSwiftDestination ->
+                    goSwiftWearNavEntryProvider(
+                        key = dest,
+                        navigateTo = ::navigateTo,
+                        onBack = ::navigateBack
+                    )
+                }
+            )
         }
     }
 }

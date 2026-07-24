@@ -6,9 +6,7 @@ import androidx.compose.runtime.remember
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import androidx.wear.compose.foundation.rememberSwipeToDismissBoxState
 import androidx.wear.compose.material3.AppScaffold
-import androidx.wear.compose.material3.SwipeToDismissBox
 import androidx.wear.compose.navigation3.SwipeDismissableSceneStrategy
 import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
 import com.zoewave.probase.photodo.wear.ui.navigation.photoDoWearNavEntryProvider
@@ -37,29 +35,22 @@ fun PhotoDoWearMainScreen() {
 
     PhotoDoWearTheme {
         AppScaffold {
-            SwipeToDismissBox(
-                onDismissed = { navigateBack() },
-                state = rememberSwipeToDismissBoxState(),
-                backgroundKey = backStack.getOrNull(backStack.size - 2) ?: PhotoTodoRoute.Home,
-                contentKey = backStack.lastOrNull() ?: PhotoTodoRoute.Home
-            ) { key ->
-                NavDisplay(
-                    backStack = backStack,
-                    sceneStrategy = SwipeDismissableSceneStrategy(),
-                    onBack = { navigateBack() },
-                    entryDecorators = listOf(
-                        rememberSaveableStateHolderNavEntryDecorator(),
-                        rememberViewModelStoreNavEntryDecorator()
-                    ),
-                    entryProvider = { dest: PhotoTodoRoute ->
-                        photoDoWearNavEntryProvider(
-                            key = dest,
-                            navigateTo = ::navigateTo,
-                            onBack = ::navigateBack
-                        )
-                    }
-                )
-            }
+            NavDisplay(
+                backStack = backStack,
+                sceneStrategies = listOf(SwipeDismissableSceneStrategy()),
+                onBack = { navigateBack() },
+                entryDecorators = listOf(
+                    rememberSaveableStateHolderNavEntryDecorator(),
+                    rememberViewModelStoreNavEntryDecorator()
+                ),
+                entryProvider = { dest: PhotoTodoRoute ->
+                    photoDoWearNavEntryProvider(
+                        key = dest,
+                        navigateTo = ::navigateTo,
+                        onBack = ::navigateBack
+                    )
+                }
+            )
         }
     }
 }
