@@ -13,6 +13,9 @@ import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
 import com.zoewave.probase.core.data.repository.weather.AtmosphericRepository
 import com.zoewave.probase.kocolor.features.analyzer.simulator.data.StyleSimulatorEngine
 import com.zoewave.probase.kocolor.features.analyzer.simulator.data.StyleBlueprint
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.ResultTab
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.VisualBlueprintData
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.mapToVisualBlueprintData
 import com.zoewave.probase.core.model.ritual.*
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,7 +25,6 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-enum class ResultTab { FACE, CLOTHES, NAILS }
 
 data class StyleSimulatorUiState(
     val morningRoutineCompleted: Boolean = false,
@@ -50,7 +52,8 @@ data class StyleSimulatorUiState(
     val anchoredClothingFamilies: Map<ClothingCategory, ColorFamily> = emptyMap(),
     val anchoredCosmeticFamilies: Map<MacroCategory, ColorFamily> = emptyMap(),
     
-    val selectedResultTab: ResultTab = ResultTab.CLOTHES
+    val selectedResultTab: ResultTab = ResultTab.CLOTHES,
+    val visualBlueprintData: VisualBlueprintData = VisualBlueprintData()
 )
 
 enum class SimulationStep {
@@ -131,6 +134,15 @@ class StyleSimulatorViewModel @Inject constructor(
         val cosmeticFamilies = allCosmetics.filter { it.macroCategory == selectedCosmeticCat }
             .groupBy { it.colorFamily }
 
+        val recommendedClothing = allClothing.filter { item ->
+            "w_${item.id}" in (result?.selectedClothingIds ?: emptyList()) ||
+            "w_${item.id}" in (result?.selectedCosmeticIds ?: emptyList())
+        }
+        val recommendedCosmetics = allCosmetics.filter { item ->
+            "c_${item.id}" in (result?.selectedCosmeticIds ?: emptyList()) ||
+            "c_${item.id}" in (result?.selectedClothingIds ?: emptyList())
+        }
+
         StyleSimulatorUiState(
             userPortraitUri = faceUri,
             fullClothingInventory = allClothing,
@@ -145,16 +157,15 @@ class StyleSimulatorViewModel @Inject constructor(
             simulationStep = step,
             rationale = result?.rationale,
             recommendedPalette = result?.recommendedPalette ?: emptyList(),
-            recommendedClothing = allClothing.filter { item ->
-                "w_${item.id}" in (result?.selectedClothingIds ?: emptyList()) ||
-                "w_${item.id}" in (result?.selectedCosmeticIds ?: emptyList())
-            },
-            recommendedCosmetics = allCosmetics.filter { item ->
-                "c_${item.id}" in (result?.selectedCosmeticIds ?: emptyList()) ||
-                "c_${item.id}" in (result?.selectedClothingIds ?: emptyList())
-            },
+            recommendedClothing = recommendedClothing,
+            recommendedCosmetics = recommendedCosmetics,
             isLocalResult = result?.rationale?.startsWith("Local Architect") ?: false,
-            selectedResultTab = resultTab
+            selectedResultTab = resultTab,
+            visualBlueprintData = mapToVisualBlueprintData(
+                cosmetics = recommendedCosmetics,
+                clothing = recommendedClothing,
+                palette = result?.recommendedPalette ?: emptyList()
+            )
         )
     }.stateIn(
         scope = viewModelScope,

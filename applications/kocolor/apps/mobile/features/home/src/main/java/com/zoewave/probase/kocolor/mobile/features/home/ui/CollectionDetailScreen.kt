@@ -54,6 +54,8 @@ import com.zoewave.probase.core.model.ritual.OutfitSuggestion
 import com.zoewave.probase.core.model.ritual.SavedAnalysis
 import com.zoewave.probase.core.model.ritual.SeasonalType
 import com.zoewave.probase.core.model.ritual.Undertone
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.VisualBlueprintSection
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.toVisualBlueprintData
 import com.zoewave.probase.kocolor.mobile.features.home.R
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
@@ -182,6 +184,30 @@ fun CollectionDetailScreen(
                             )
                         }
                     }
+                }
+            }
+
+            // 3.5 Visual Blueprint Section (Reused from Simulator)
+            item {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = "Visual Blueprint",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontFamily = FontFamily.Serif,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "EXPLORE DETAILS",
+                        style = MaterialTheme.typography.labelSmall,
+                        letterSpacing = 2.sp,
+                        modifier = Modifier.alpha(0.6f)
+                    )
+                    
+                    Spacer(Modifier.height(24.dp))
+                    
+                    VisualBlueprintSection(
+                        data = advice.toVisualBlueprintData()
+                    )
                 }
             }
 

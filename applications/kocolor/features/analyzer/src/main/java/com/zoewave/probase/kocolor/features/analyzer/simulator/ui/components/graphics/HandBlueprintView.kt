@@ -16,20 +16,22 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import com.zoewave.probase.core.model.ritual.ClothingCategory
-import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import com.zoewave.probase.kocolor.features.analyzer.R
-import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorUiState
 
 @Composable
-fun HandBlueprintView(uiState: StyleSimulatorUiState) {
+fun HandBlueprintView(
+    data: VisualBlueprintData,
+    modifier: Modifier = Modifier
+) {
     // SINGLE SOURCE OF TRUTH: Tracks the currently expanded card
     var expandedCategory by remember { mutableStateOf<String?>(null) }
 
@@ -41,7 +43,7 @@ fun HandBlueprintView(uiState: StyleSimulatorUiState) {
     val nailsCallout = Offset(130.dp.value, -120.dp.value)
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(16.dp),
         contentAlignment = Alignment.Center
@@ -67,11 +69,7 @@ fun HandBlueprintView(uiState: StyleSimulatorUiState) {
             val center = Offset(size.width / 2 + horizontalShift.toPx(), size.height / 2 + blueprintOffset.toPx())
             val dashEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
 
-            // Look in both lists for the "Nail" anchor (Allowing AI creativity)
-            val nailsCosmetic = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.NAILS }
-            val nailsClothing = uiState.recommendedClothing.find { it.category == ClothingCategory.ACCESSORIES && it.name.contains("nail", ignoreCase = true) }
-            
-            val nailsHex = nailsCosmetic?.colorHex ?: nailsClothing?.colorHex
+            val nailsHex = data.nailsItem?.colorHex
 
             // Nails Shade
             nailsHex?.let { hex ->
@@ -87,7 +85,7 @@ fun HandBlueprintView(uiState: StyleSimulatorUiState) {
             val start = Offset(center.x + nailsAnchor.x.dp.toPx(), center.y + nailsAnchor.y.dp.toPx())
             val end = Offset(center.x + nailsCallout.x.dp.toPx(), center.y + nailsCallout.y.dp.toPx())
             
-            val path = androidx.compose.ui.graphics.Path().apply {
+            val path = Path().apply {
                 moveTo(start.x, start.y)
                 quadraticTo(
                     center.x + nailsCallout.x.dp.toPx(), start.y, // Control point
@@ -98,26 +96,24 @@ fun HandBlueprintView(uiState: StyleSimulatorUiState) {
             drawPath(
                 path = path,
                 color = Color.LightGray,
-                style = androidx.compose.ui.graphics.drawscope.Stroke(
+                style = Stroke(
                     width = 1.dp.toPx(),
                     pathEffect = dashEffect
                 )
             )
         }
 
-        val nailsItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.NAILS }
-
         BlueprintCallout(
             label = "NAILS",
-            productName = nailsItem?.name ?: "Pending...",
-            colorHex = nailsItem?.colorHex,
+            productName = data.nailsItem?.name ?: "Pending...",
+            colorHex = data.nailsItem?.colorHex,
             isExpanded = expandedCategory == "NAILS",
             onExpandToggle = { expandedCategory = if (expandedCategory == "NAILS") null else "NAILS" },
             modifier = Modifier
                 .zIndex(if (expandedCategory == "NAILS") 10f else 1f)
                 .offset(
-                    x = horizontalShift + nailsCallout.x.dp,
-                    y = blueprintOffset + nailsCallout.y.dp
+                    x = horizontalShift + nailsCallout.x.dp + 7.dp,
+                    y = blueprintOffset + nailsCallout.y.dp + 7.dp
                 ),
             anchorAlignment = Alignment.TopStart
         )
@@ -126,6 +122,6 @@ fun HandBlueprintView(uiState: StyleSimulatorUiState) {
 
 @Preview(showBackground = true)
 @Composable
-fun HandBlueprintViewPreview() {
-    HandBlueprintView(uiState = StyleSimulatorUiState())
+private fun HandBlueprintViewPreview() {
+    HandBlueprintView(data = VisualBlueprintData())
 }
