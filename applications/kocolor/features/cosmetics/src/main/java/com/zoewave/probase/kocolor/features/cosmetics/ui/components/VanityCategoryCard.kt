@@ -67,10 +67,59 @@ fun VanityCategoryCard(
     var showExplanation by remember { mutableStateOf(false) }
 
     if (showExplanation) {
+        val (fullDesc, examples) = when {
+            name.contains("Skincare", ignoreCase = true) -> 
+                "The essential foundation for any routine. These products focus on cleaning, nourishing, and preparing the skin's surface before any color is applied." to 
+                "Cleanser, Toner, Serum, Moisturizer, SPF, Primer, Face Mask, Exfoliant, Eye Care."
+            name.contains("Complexion", ignoreCase = true) -> 
+                "Architectural products designed to unify the skin tone, blur imperfections, and create a smooth, even canvas." to 
+                "Foundation, BB/CC Cream, Concealer, Color Corrector, Setting Powder, Face Powder, Setting Spray."
+            name.contains("Dimension", ignoreCase = true) -> 
+                "Sculptural products that bring life, shadow, and light back to the face. These define your bone structure and add a natural-looking flush or glow." to 
+                "Blush, Bronzer, Contour, Highlighter, Freckle Tint."
+            name.contains("Eyes", ignoreCase = true) -> 
+                "The focal point of visual communication. This category covers brow structure, lash enhancement, and artistic lid pigment." to 
+                "Eyeshadow, Eyeliner, Mascara, Lash Primer, Brow Pencil, Brow Gel, False Lashes."
+            name.contains("Lips", ignoreCase = true) -> 
+                "Color and care for the mouth. Products range from hydrating treatments to high-impact pigments that define the final mood." to 
+                "Lipstick, Lip Gloss, Lip Liner, Lip Tint/Stain, Lip Balm, Lip Plumper."
+            name.contains("Nails", ignoreCase = true) -> 
+                "Architectural enhancements for the hands. This includes color, protection, and structural care for the nails." to 
+                "Nail Polish, Base Coat, Top Coat, Nail Treatment."
+            else -> description to ""
+        }
+
         AlertDialog(
             onDismissRequest = { showExplanation = false },
             title = { Text(text = name, fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold) },
-            text = { Text(text = description) },
+            text = { 
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Text(
+                        text = fullDesc, 
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.Black.copy(alpha = 0.8f),
+                        lineHeight = 20.sp
+                    )
+                    if (examples.isNotEmpty()) {
+                        Column {
+                            Text(
+                                text = "INCLUDES:", 
+                                style = MaterialTheme.typography.labelSmall, 
+                                fontWeight = FontWeight.Black, 
+                                color = Color.Black.copy(alpha = 0.4f),
+                                letterSpacing = 1.sp
+                            )
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                text = examples, 
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.Black.copy(alpha = 0.7f),
+                                lineHeight = 18.sp
+                            )
+                        }
+                    }
+                }
+            },
             confirmButton = {
                 TextButton(onClick = { showExplanation = false }) {
                     Text(stringResource(android.R.string.ok))
