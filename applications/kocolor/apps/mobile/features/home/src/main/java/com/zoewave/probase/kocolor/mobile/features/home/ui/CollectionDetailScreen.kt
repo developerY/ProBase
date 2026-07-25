@@ -132,81 +132,80 @@ fun CollectionDetailScreen(
             verticalArrangement = Arrangement.spacedBy(32.dp)
         ) {
             item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(640.dp)
-                        .clip(RoundedCornerShape(32.dp)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    // 1. Clear Backdrop (The dynamic hero image)
-                    AsyncImage(
-                        model = heroImage,
-                        contentDescription = "Hero Image",
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = (advice.title ?: "Personal Collection").uppercase(),
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            letterSpacing = 3.sp,
+                            fontWeight = FontWeight.Black
+                        ),
+                        color = Color.Black.copy(alpha = 0.5f),
+                        textAlign = TextAlign.Center
                     )
-
-                    // 2. The Frosted "Glass" Card
-                    Surface(
+                    Spacer(Modifier.height(16.dp))
+                    Box(
                         modifier = Modifier
-                            .fillMaxSize(0.85f)
-                            .padding(16.dp),
-                        shape = RoundedCornerShape(24.dp),
-                        color = Color.White.copy(alpha = 0.1f), 
-                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.4f))
+                            .fillMaxWidth()
+                            .height(540.dp)
+                            .clip(RoundedCornerShape(32.dp)),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Box(modifier = Modifier.fillMaxSize()) {
-                            // Blurring the same dynamic image just within the card area
-                            AsyncImage(
-                                model = heroImage,
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .blur(40.dp),
-                                contentScale = ContentScale.Crop
-                            )
-                            
-                            // Translucent wash to unify the look and improve text contrast
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(Color.White.copy(alpha = 0.35f))
-                            )
+                        // 1. Clear Backdrop (The dynamic hero image)
+                        AsyncImage(
+                            model = heroImage,
+                            contentDescription = "Hero Image",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
 
-                            // 3. Editorial Content
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(24.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center
-                            ) {
-                                Text(
-                                    text = advice.title ?: "The Personal\nCollection",
-                                    style = MaterialTheme.typography.displayMedium.copy(
-                                        fontSize = 42.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        lineHeight = 48.sp
-                                    ),
-                                    fontFamily = FontFamily.Serif,
-                                    textAlign = TextAlign.Center,
-                                    color = Color.Black
+                        // 2. The Frosted "Glass" Card
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxSize(0.85f)
+                                .padding(16.dp),
+                            shape = RoundedCornerShape(24.dp),
+                            color = Color.White.copy(alpha = 0.1f), 
+                            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.4f))
+                        ) {
+                            Box(modifier = Modifier.fillMaxSize()) {
+                                // Blurring the same dynamic image just within the card area
+                                AsyncImage(
+                                    model = heroImage,
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .blur(40.dp),
+                                    contentScale = ContentScale.Crop
                                 )
-                                Spacer(Modifier.height(28.dp))
-                                Text(
-                                    text = advice.summary,
-                                    style = MaterialTheme.typography.bodyLarge.copy(
-                                        fontSize = 18.sp,
-                                        lineHeight = 28.sp,
-                                        fontWeight = FontWeight.Medium
-                                    ),
-                                    textAlign = TextAlign.Center,
-                                    color = Color.Black.copy(alpha = 0.85f),
-                                    maxLines = 12,
-                                    overflow = TextOverflow.Ellipsis,
-                                    modifier = Modifier.padding(horizontal = 8.dp)
+                                
+                                // Translucent wash to unify the look and improve text contrast
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(Color.White.copy(alpha = 0.35f))
                                 )
+
+                                // 3. Editorial Content (Rationale only)
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(24.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = advice.summary,
+                                        style = MaterialTheme.typography.bodyLarge.copy(
+                                            fontSize = 18.sp,
+                                            lineHeight = 28.sp,
+                                            fontWeight = FontWeight.Medium
+                                        ),
+                                        textAlign = TextAlign.Center,
+                                        color = Color.Black.copy(alpha = 0.85f),
+                                        maxLines = 15,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.padding(horizontal = 8.dp)
+                                    )
+                                }
                             }
                         }
                     }
