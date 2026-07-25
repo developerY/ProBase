@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -49,7 +48,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -76,7 +74,8 @@ fun CollectionDetailScreen(
     navTo: (KoColorRoute) -> Unit
 ) {
     val advice = analysis.advice
-    var expandedSections by remember { mutableStateOf(setOf("STORY", "BLUEPRINT", "WARDROBE", "VANITY")) }
+    var expandedSections by remember { mutableStateOf(setOf("STORY", "BLUEPRINT")) }
+    //     var expandedSections by remember { mutableStateOf(emptySet<String>()) }
 
     fun toggleSection(section: String) {
         expandedSections = if (expandedSections.contains(section)) {
