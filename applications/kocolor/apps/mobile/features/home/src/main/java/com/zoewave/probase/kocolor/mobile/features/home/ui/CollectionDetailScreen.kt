@@ -1,5 +1,6 @@
 package com.zoewave.probase.kocolor.mobile.features.home.ui
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -18,14 +19,17 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -46,12 +50,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -76,6 +82,7 @@ fun CollectionDetailScreen(
 ) {
     val advice = analysis.advice
     var expandedSections by remember { mutableStateOf(setOf("STORY", "BLUEPRINT")) }
+    var isMagnified by remember { mutableStateOf(false) }
     //     var expandedSections by remember { mutableStateOf(emptySet<String>()) }
 
     fun toggleSection(section: String) {
@@ -158,11 +165,25 @@ fun CollectionDetailScreen(
                             contentScale = ContentScale.Crop
                         )
 
-                        // 2. The Frosted "Glass" Card
+                        // Magnifying Glass Toggle (Outside Glass Area)
+                        IconButton(
+                            onClick = { isMagnified = !isMagnified },
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .padding(16.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = "Toggle Magnification",
+                                tint = Color.White
+                            )
+                        }
+
+                            // 2. The Frosted "Glass" Card
                         Surface(
                             modifier = Modifier
-                                .fillMaxSize(0.85f)
-                                .padding(16.dp),
+                                .fillMaxSize(0.95f)
+                                .padding(9.dp),
                             shape = RoundedCornerShape(24.dp),
                             color = Color.White.copy(alpha = 0.1f), 
                             border = BorderStroke(1.dp, Color.White.copy(alpha = 0.4f))
@@ -178,32 +199,46 @@ fun CollectionDetailScreen(
                                     contentScale = ContentScale.Crop
                                 )
                                 
-                                // Translucent wash to unify the look and improve text contrast
                                 Box(
                                     modifier = Modifier
                                         .fillMaxSize()
                                         .background(Color.White.copy(alpha = 0.35f))
                                 )
 
-                                // 3. Editorial Content (Rationale only)
+                                // 3. Editorial Content (Rationale with scrolling support & indicator)
+                                val scrollState = rememberScrollState()
+                                val fontSize by animateFloatAsState(if (isMagnified) 22f else 14f)
+                                val lineHeight by animateFloatAsState(if (isMagnified) 32f else 23f)
                                 Box(
                                     modifier = Modifier
                                         .fillMaxSize()
-                                        .padding(24.dp),
+                                        .drawWithContent {
+                                            drawContent()
+                                            // Simple Scroll Indicator
+                                            if (scrollState.maxValue > 0) {
+                                                val scrollbarHeight = size.height * (size.height / (scrollState.maxValue + size.height))
+                                                val scrollbarOffset = scrollState.value * (size.height / (scrollState.maxValue + size.height))
+                                                drawRect(
+                                                    color = Color.Black.copy(alpha = 0.15f),
+                                                    topLeft = Offset(size.width - 6.dp.toPx(), scrollbarOffset),
+                                                    size = Size(3.dp.toPx(), scrollbarHeight)
+                                                )
+                                            }
+                                        }
+                                        .padding(horizontal = 28.dp, vertical = 32.dp)
+                                        .verticalScroll(scrollState),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
                                         text = advice.summary,
                                         style = MaterialTheme.typography.bodyLarge.copy(
-                                            fontSize = 18.sp,
-                                            lineHeight = 28.sp,
+                                            fontSize = fontSize.sp,
+                                            lineHeight = lineHeight.sp,
                                             fontWeight = FontWeight.Medium
                                         ),
                                         textAlign = TextAlign.Center,
                                         color = Color.Black.copy(alpha = 0.85f),
-                                        maxLines = 15,
-                                        overflow = TextOverflow.Ellipsis,
-                                        modifier = Modifier.padding(horizontal = 8.dp)
+                                        modifier = Modifier.padding(horizontal = 4.dp)
                                     )
                                 }
                             }
