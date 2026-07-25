@@ -1,10 +1,8 @@
 package com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics
 
-import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
@@ -25,9 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -47,8 +43,8 @@ fun HandBlueprintView(
     val horizontalShift = 0.dp
     
     // Define Unified Offsets
-    val nailsAnchor = Offset(40.dp.value, -35.dp.value)
-    val nailsCallout = Offset(130.dp.value, -120.dp.value)
+    val nailsAnchor = Offset(-19.dp.value, -61.dp.value)
+    val nailsCallout = Offset(-105.dp.value, 119.dp.value)
 
     Box(
         modifier = modifier
@@ -73,25 +69,7 @@ fun HandBlueprintView(
         }
 
         // Callout Lines & Shades
-        val localDensity = LocalDensity.current
-        Canvas(
-            modifier = Modifier
-                .fillMaxSize()
-                .pointerInput(Unit) {
-                    detectTapGestures { tapOffset ->
-                        val centerX = size.width / 2f
-                        val centerY = size.height / 2f
-                        with(localDensity) {
-                            val dpX = (tapOffset.x - centerX).toDp().value.toInt()
-                            val dpY = (tapOffset.y - centerY).toDp().value.toInt()
-                            Log.d(
-                                "BlueprintCalibration",
-                                "drawCircle(pigment, radius = 7.dp.toPx(), center = Offset(center.x + ($dpX).dp.toPx(), center.y + ($dpY).dp.toPx()))"
-                            )
-                        }
-                    }
-                }
-        ) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
             val center = Offset(size.width / 2 + horizontalShift.toPx(), size.height / 2 + blueprintOffset.toPx())
             val dashEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
 
@@ -100,10 +78,9 @@ fun HandBlueprintView(
             // Calibrated Nail Coordinates
             nailsHex?.let { hex ->
                 val pigment = parseColor(hex).copy(alpha = 0.5f)
-                // lower y moves down.
+                
                 // Leftmost finger (Thumb)
-                //drawCircle(pigment, radius = 7.dp.toPx(), center = Offset(center.x + (-20).dp.toPx(), center.y + (-79).dp.toPx()))
-                drawCircle(pigment, radius = 9.dp.toPx(), center = Offset(center.x + (-20).dp.toPx(), center.y + (-74).dp.toPx())) // 77 is too high | high 79 too high
+                drawCircle(pigment, radius = 9.dp.toPx(), center = Offset(center.x + (-20).dp.toPx(), center.y + (-74).dp.toPx()))
 
                 // Mid-Left finger (Index)
                 drawCircle(pigment, radius = 7.dp.toPx(), center = Offset(center.x + (12).dp.toPx(), center.y + (-131).dp.toPx()))
@@ -111,15 +88,11 @@ fun HandBlueprintView(
                 // Top finger (Middle)
                 drawCircle(pigment, radius = 7.dp.toPx(), center = Offset(center.x + (-31).dp.toPx(), center.y + (-110).dp.toPx()))
 
-                //drawCircle(pigment, radius = 7.dp.toPx(), center = Offset(center.x + 18.dp.toPx(), center.y - 80.dp.toPx()))
-
-                // Mid-Right finger (Ring) -> The Anchor Dot
+                // Mid-Right finger (Ring)
                 drawCircle(pigment, radius = 7.dp.toPx(), center = Offset(center.x + (-49).dp.toPx(), center.y + (-59).dp.toPx()))
-                //drawCircle(pigment, radius = 7.dp.toPx(), center = Offset(center.x + (-46).dp.toPx(), center.y + (-25).dp.toPx()))
 
                 // Bottom-Right edge (Pinky)
                 drawCircle(pigment, radius = 7.dp.toPx(), center = Offset(center.x + (-44).dp.toPx(), center.y + (-29).dp.toPx()))
-                // drawCircle(pigment, radius = 7.dp.toPx(), center = Offset(center.x + 55.dp.toPx(), center.y + 10.dp.toPx()))
             }
 
             // Elegant Curved Callout Line
