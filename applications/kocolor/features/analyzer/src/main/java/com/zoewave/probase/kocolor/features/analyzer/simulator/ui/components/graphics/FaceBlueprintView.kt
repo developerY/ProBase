@@ -71,8 +71,7 @@ fun FaceBlueprintView(
     val eyeRightLidMid = Offset(46.dp.value, -62.dp.value)   // Arch over pupil
     val eyeRightLidEnd = Offset(62.dp.value, -50.dp.value)   // Outer corner
 
-    // 🛠️ Cheeks (Centered on the apples of the cheeks)
-    val cheekLeftAnchor = Offset(-50.dp.value, 18.dp.value)
+    // 🛠 ... Cheeks (Centered on the apples of the cheeks)
     val cheekRightAnchor = Offset(44.dp.value, 18.dp.value)
 
     // 🛠️ Lips (Perfectly centered and reshaped to the line art)
@@ -84,16 +83,15 @@ fun FaceBlueprintView(
     // 3. Define Dynamic Callout Targets (End of the lines)
     // Eyes and Lips move TOWARD center when expanded so they remain fully visible.
     val eyesTarget by animateOffsetAsState(
-        if (expandedCategory == "EYES") Offset(60f, -100f) else Offset(90f, -90f),
+        if (expandedCategory == "EYES") Offset(80f, -95f) else Offset(110f, -85f),
         label = "eyesTarget"
     )
     val cheeksTarget by animateOffsetAsState(
-        // Cheeks move slight UP and LEFT when open.
-        if (expandedCategory == "CHEEKS") Offset(-100f, 80f) else Offset(-80f, 120f),
+        if (expandedCategory == "CHEEKS") Offset(-90f, 130f) else Offset(-110f, 160f),
         label = "cheeksTarget"
     )
     val lipsTarget by animateOffsetAsState(
-        if (expandedCategory == "LIPS") Offset(50f, 170f) else Offset(80f, 150f),
+        if (expandedCategory == "LIPS") Offset(70f, 140f) else Offset(100f, 160f),
         label = "lipsTarget"
     )
 
@@ -141,8 +139,8 @@ fun FaceBlueprintView(
                             lastTapCoords = "X: $dpX, Y: $dpY"
 
                             Log.d("BlueprintCalibration", "--- FACE TAP DETECTED ---")
-                            Log.d("BlueprintCalibration", "Generic Offset: Offset(${dpX}.dp.value, ${dpY}.dp.value)")
-                            Log.d("BlueprintCalibration", "Target Point: Offset(${dpX}f, ${dpY}f)")
+                            Log.d("BlueprintCalibration", "For Anchors: Offset(${dpX}.dp.value, ${dpY}.dp.value)")
+                            Log.d("BlueprintCalibration", "For Targets: Offset(${dpX}f, ${dpY}f)")
                         }
                     }
                 }
@@ -204,7 +202,6 @@ fun FaceBlueprintView(
                     }
                 }
 
-                drawCheekBlush(cheekLeftAnchor)
                 drawCheekBlush(cheekRightAnchor)
             }
 
@@ -246,8 +243,8 @@ fun FaceBlueprintView(
             drawCircle(lineColor, anchorRadius, Offset(center.x + eyeRightAnchor.x.dp.toPx(), center.y + eyeRightAnchor.y.dp.toPx()))
 
             // CHEEKS Line (Attaches to Left Cheek)
-            drawLine(lineColor, Offset(center.x + cheekLeftAnchor.x.dp.toPx(), center.y + cheekLeftAnchor.y.dp.toPx()), Offset(center.x + cheeksTarget.x.dp.toPx(), center.y + cheeksTarget.y.dp.toPx()), lineStroke)
-            drawCircle(lineColor, anchorRadius, Offset(center.x + cheekLeftAnchor.x.dp.toPx(), center.y + cheekLeftAnchor.y.dp.toPx()))
+            drawLine(lineColor, Offset(center.x + cheekRightAnchor.x.dp.toPx(), center.y + cheekRightAnchor.y.dp.toPx()), Offset(center.x + cheeksTarget.x.dp.toPx(), center.y + cheeksTarget.y.dp.toPx()), lineStroke)
+            drawCircle(lineColor, anchorRadius, Offset(center.x + cheekRightAnchor.x.dp.toPx(), center.y + cheekRightAnchor.y.dp.toPx()))
 
             // LIPS Line (Attaches to Lower Lip)
             drawLine(lineColor, Offset(center.x + lipLowerAnchor.x.dp.toPx(), center.y + lipLowerAnchor.y.dp.toPx()), Offset(center.x + lipsTarget.x.dp.toPx(), center.y + lipsTarget.y.dp.toPx()), lineStroke)
