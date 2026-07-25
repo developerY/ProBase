@@ -71,7 +71,7 @@ fun FaceBlueprintView(
     val eyeRightLidMid = Offset(46.dp.value, -62.dp.value)   // Arch over pupil
     val eyeRightLidEnd = Offset(62.dp.value, -50.dp.value)   // Outer corner
 
-    // 🛠 ... Cheeks (Centered on the apples of the cheeks)
+    // 🛠️ Cheeks (Centered on the apple of the right cheek)
     val cheekRightAnchor = Offset(44.dp.value, 18.dp.value)
 
     // 🛠️ Lips (Perfectly centered and reshaped to the line art)
@@ -81,17 +81,16 @@ fun FaceBlueprintView(
     val lipLowerAnchor = Offset(-3.dp.value, 74.dp.value)
 
     // 3. Define Dynamic Callout Targets (End of the lines)
-    // Eyes and Lips move TOWARD center when expanded so they remain fully visible.
     val eyesTarget by animateOffsetAsState(
-        if (expandedCategory == "EYES") Offset(80f, -95f) else Offset(110f, -85f),
+        if (expandedCategory == "EYES") Offset(90f, -197f) else Offset(90f, -151f),
         label = "eyesTarget"
     )
     val cheeksTarget by animateOffsetAsState(
-        if (expandedCategory == "CHEEKS") Offset(-90f, 130f) else Offset(-110f, 160f),
+        if (expandedCategory == "CHEEKS") Offset(0f, 140f) else Offset(20f, 150f),
         label = "cheeksTarget"
     )
     val lipsTarget by animateOffsetAsState(
-        if (expandedCategory == "LIPS") Offset(70f, 140f) else Offset(100f, 160f),
+        if (expandedCategory == "LIPS") Offset(-25f, 94f) else Offset(-40f, 95f),
         label = "lipsTarget"
     )
 
@@ -138,9 +137,10 @@ fun FaceBlueprintView(
 
                             lastTapCoords = "X: $dpX, Y: $dpY"
 
-                            Log.d("BlueprintCalibration", "--- FACE TAP DETECTED ---")
-                            Log.d("BlueprintCalibration", "For Anchors: Offset(${dpX}.dp.value, ${dpY}.dp.value)")
-                            Log.d("BlueprintCalibration", "For Targets: Offset(${dpX}f, ${dpY}f)")
+                            Log.d("BlueprintCalibration", "--- TARGET CALIBRATION ---")
+                            Log.d("BlueprintCalibration", "If tapping for EYES box: Offset(${dpX}f, ${dpY}f)")
+                            Log.d("BlueprintCalibration", "If tapping for LIPS box: Offset(${dpX}f, ${dpY}f)")
+                            Log.d("BlueprintCalibration", "If tapping for CHEEKS box: Offset(${dpX}f, ${dpY}f)")
                         }
                     }
                 }
@@ -238,11 +238,11 @@ fun FaceBlueprintView(
             val anchorRadius = 2.dp.toPx()
             val lineColor = Color.DarkGray.copy(alpha = 0.4f)
 
-            // EYES Line (Attaches to Right Eye)
-            drawLine(lineColor, Offset(center.x + eyeRightAnchor.x.dp.toPx(), center.y + eyeRightAnchor.y.dp.toPx()), Offset(center.x + eyesTarget.x.dp.toPx(), center.y + eyesTarget.y.dp.toPx()), lineStroke)
-            drawCircle(lineColor, anchorRadius, Offset(center.x + eyeRightAnchor.x.dp.toPx(), center.y + eyeRightAnchor.y.dp.toPx()))
+            // EYES Line (Attaches to Left Eye)
+            drawLine(lineColor, Offset(center.x + eyeLeftAnchor.x.dp.toPx(), center.y + eyeLeftAnchor.y.dp.toPx()), Offset(center.x + eyesTarget.x.dp.toPx(), center.y + eyesTarget.y.dp.toPx()), lineStroke)
+            drawCircle(lineColor, anchorRadius, Offset(center.x + eyeLeftAnchor.x.dp.toPx(), center.y + eyeLeftAnchor.y.dp.toPx()))
 
-            // CHEEKS Line (Attaches to Left Cheek)
+            // CHEEKS Line (Attaches to Right Cheek)
             drawLine(lineColor, Offset(center.x + cheekRightAnchor.x.dp.toPx(), center.y + cheekRightAnchor.y.dp.toPx()), Offset(center.x + cheeksTarget.x.dp.toPx(), center.y + cheeksTarget.y.dp.toPx()), lineStroke)
             drawCircle(lineColor, anchorRadius, Offset(center.x + cheekRightAnchor.x.dp.toPx(), center.y + cheekRightAnchor.y.dp.toPx()))
 
@@ -254,7 +254,7 @@ fun FaceBlueprintView(
         // 5. Render the Callouts
         val calloutHalfHeight = 24.dp // Pushes the card down so the top-corner dot hits the line
 
-        // --- EYES CALLOUT (Right Side) ---
+        // --- EYES CALLOUT (Left Side) ---
         BlueprintCallout(
             label = "EYES",
             productName = data.eyesItem?.name ?: "Pending...",
@@ -265,14 +265,13 @@ fun FaceBlueprintView(
                 .zIndex(if (expandedCategory == "EYES") 10f else 1f)
                 .width(eyesWidth)
                 .offset(
-                    // Add half-width to pin the TopStart (Left) corner dot to the line
-                    x = horizontalShift + eyesTarget.x.dp + (eyesWidth / 2),
+                    x = horizontalShift + eyesTarget.x.dp - (eyesWidth / 2),
                     y = blueprintOffset + eyesTarget.y.dp + calloutHalfHeight
                 ),
-            anchorAlignment = Alignment.TopStart
+            anchorAlignment = Alignment.TopEnd
         )
 
-        // --- CHEEKS CALLOUT (Left Side) ---
+        // --- CHEEKS CALLOUT (Right Side) ---
         BlueprintCallout(
             label = "CHEEKS",
             productName = data.cheeksItem?.name ?: "Pending...",
@@ -283,14 +282,13 @@ fun FaceBlueprintView(
                 .zIndex(if (expandedCategory == "CHEEKS") 10f else 1f)
                 .width(cheeksWidth)
                 .offset(
-                    // Subtract half-width to pin the TopEnd (Right) corner dot to the line
-                    x = horizontalShift + cheeksTarget.x.dp - (cheeksWidth / 2),
+                    x = horizontalShift + cheeksTarget.x.dp + (cheeksWidth / 2),
                     y = blueprintOffset + cheeksTarget.y.dp + calloutHalfHeight
                 ),
-            anchorAlignment = Alignment.TopEnd
+            anchorAlignment = Alignment.TopStart
         )
 
-        // --- LIPS CALLOUT (Right Side) ---
+        // --- LIPS CALLOUT (Left Side) ---
         BlueprintCallout(
             label = "LIPS",
             productName = data.lipsItem?.name ?: "Pending...",
@@ -301,11 +299,10 @@ fun FaceBlueprintView(
                 .zIndex(if (expandedCategory == "LIPS") 10f else 1f)
                 .width(lipsWidth)
                 .offset(
-                    // Add half-width to pin the TopStart (Left) corner dot to the line
-                    x = horizontalShift + lipsTarget.x.dp + (lipsWidth / 2),
+                    x = horizontalShift + lipsTarget.x.dp - (lipsWidth / 2),
                     y = blueprintOffset + lipsTarget.y.dp + calloutHalfHeight
                 ),
-            anchorAlignment = Alignment.TopStart
+            anchorAlignment = Alignment.TopEnd
         )
 
         // Live Coordinate Overlay (Visible in Interactive Preview)
