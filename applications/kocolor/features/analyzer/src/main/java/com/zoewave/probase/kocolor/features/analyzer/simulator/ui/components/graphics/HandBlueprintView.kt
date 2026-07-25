@@ -1,15 +1,21 @@
 package com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics
 
+import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -19,7 +25,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -39,7 +47,7 @@ fun HandBlueprintView(
     val horizontalShift = 0.dp
     
     // Define Unified Offsets
-    val nailsAnchor = Offset(60.dp.value, -80.dp.value)
+    val nailsAnchor = Offset(40.dp.value, -35.dp.value)
     val nailsCallout = Offset(130.dp.value, -120.dp.value)
 
     Box(
@@ -65,20 +73,53 @@ fun HandBlueprintView(
         }
 
         // Callout Lines & Shades
-        Canvas(modifier = Modifier.fillMaxSize()) {
+        val localDensity = LocalDensity.current
+        Canvas(
+            modifier = Modifier
+                .fillMaxSize()
+                .pointerInput(Unit) {
+                    detectTapGestures { tapOffset ->
+                        val centerX = size.width / 2f
+                        val centerY = size.height / 2f
+                        with(localDensity) {
+                            val dpX = (tapOffset.x - centerX).toDp().value.toInt()
+                            val dpY = (tapOffset.y - centerY).toDp().value.toInt()
+                            Log.d(
+                                "BlueprintCalibration",
+                                "drawCircle(pigment, radius = 7.dp.toPx(), center = Offset(center.x + ($dpX).dp.toPx(), center.y + ($dpY).dp.toPx()))"
+                            )
+                        }
+                    }
+                }
+        ) {
             val center = Offset(size.width / 2 + horizontalShift.toPx(), size.height / 2 + blueprintOffset.toPx())
             val dashEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
 
             val nailsHex = data.nailsItem?.colorHex
 
-            // Nails Shade
+            // Calibrated Nail Coordinates
             nailsHex?.let { hex ->
                 val pigment = parseColor(hex).copy(alpha = 0.5f)
-                drawCircle(pigment, radius = 6.dp.toPx(), center = Offset(center.x - 85.dp.toPx(), center.y - 48.dp.toPx())) 
-                drawCircle(pigment, radius = 7.dp.toPx(), center = Offset(center.x - 48.dp.toPx(), center.y - 88.dp.toPx())) 
-                drawCircle(pigment, radius = 7.dp.toPx(), center = Offset(center.x + 5.dp.toPx(), center.y - 105.dp.toPx()))  
-                drawCircle(pigment, radius = 7.dp.toPx(), center = Offset(center.x + 60.dp.toPx(), center.y - 80.dp.toPx())) 
-                drawCircle(pigment, radius = 7.dp.toPx(), center = Offset(center.x + 95.dp.toPx(), center.y + 12.dp.toPx())) 
+                // lower y moves down.
+                // Leftmost finger (Thumb)
+                //drawCircle(pigment, radius = 7.dp.toPx(), center = Offset(center.x + (-20).dp.toPx(), center.y + (-79).dp.toPx()))
+                drawCircle(pigment, radius = 9.dp.toPx(), center = Offset(center.x + (-20).dp.toPx(), center.y + (-74).dp.toPx())) // 77 is too high | high 79 too high
+
+                // Mid-Left finger (Index)
+                drawCircle(pigment, radius = 7.dp.toPx(), center = Offset(center.x + (12).dp.toPx(), center.y + (-131).dp.toPx()))
+
+                // Top finger (Middle)
+                drawCircle(pigment, radius = 7.dp.toPx(), center = Offset(center.x + (-31).dp.toPx(), center.y + (-110).dp.toPx()))
+
+                //drawCircle(pigment, radius = 7.dp.toPx(), center = Offset(center.x + 18.dp.toPx(), center.y - 80.dp.toPx()))
+
+                // Mid-Right finger (Ring) -> The Anchor Dot
+                drawCircle(pigment, radius = 7.dp.toPx(), center = Offset(center.x + (-49).dp.toPx(), center.y + (-59).dp.toPx()))
+                //drawCircle(pigment, radius = 7.dp.toPx(), center = Offset(center.x + (-46).dp.toPx(), center.y + (-25).dp.toPx()))
+
+                // Bottom-Right edge (Pinky)
+                drawCircle(pigment, radius = 7.dp.toPx(), center = Offset(center.x + (-44).dp.toPx(), center.y + (-29).dp.toPx()))
+                // drawCircle(pigment, radius = 7.dp.toPx(), center = Offset(center.x + 55.dp.toPx(), center.y + 10.dp.toPx()))
             }
 
             // Elegant Curved Callout Line
