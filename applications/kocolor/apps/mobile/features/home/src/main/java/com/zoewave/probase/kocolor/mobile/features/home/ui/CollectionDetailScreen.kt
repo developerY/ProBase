@@ -1,5 +1,6 @@
 package com.zoewave.probase.kocolor.mobile.features.home.ui
 
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -59,6 +60,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -84,6 +86,7 @@ fun CollectionDetailScreen(
     val advice = analysis.advice
     var expandedSections by remember { mutableStateOf(setOf("STORY", "BLUEPRINT")) }
     var isMagnified by remember { mutableStateOf(false) }
+    var isCollapsed by remember { mutableStateOf(false) }
     //     var expandedSections by remember { mutableStateOf(emptySet<String>()) }
 
     fun toggleSection(section: String) {
@@ -151,10 +154,11 @@ fun CollectionDetailScreen(
                         textAlign = TextAlign.Center
                     )
                     Spacer(Modifier.height(16.dp))
+                    val containerHeight by animateDpAsState(if (isCollapsed) 80.dp else 540.dp)
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(540.dp)
+                            .height(containerHeight)
                             .clip(RoundedCornerShape(32.dp)),
                         contentAlignment = Alignment.Center
                     ) {
@@ -192,6 +196,20 @@ fun CollectionDetailScreen(
                                         .background(Color.White.copy(alpha = 0.35f))
                                 )
 
+                                // Collapse Toggle (Left)
+                                IconButton(
+                                    onClick = { isCollapsed = !isCollapsed },
+                                    modifier = Modifier
+                                        .align(Alignment.TopStart)
+                                        .padding(4.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = if (isCollapsed) Icons.Default.KeyboardArrowDown else Icons.Default.KeyboardArrowUp,
+                                        contentDescription = "Toggle Collapse",
+                                        tint = Color.Black.copy(alpha = 0.4f)
+                                    )
+                                }
+
                                 // 3. Editorial Content (Rationale with scrolling support & indicator)
                                 val scrollState = rememberScrollState()
                                 val fontSize by animateFloatAsState(if (isMagnified) 22f else 14f)
@@ -202,7 +220,7 @@ fun CollectionDetailScreen(
                                         .drawWithContent {
                                             drawContent()
                                             // Simple Scroll Indicator
-                                            if (scrollState.maxValue > 0) {
+                                            if (!isCollapsed && scrollState.maxValue > 0) {
                                                 val scrollbarHeight = size.height * (size.height / (scrollState.maxValue + size.height))
                                                 val scrollbarOffset = scrollState.value * (size.height / (scrollState.maxValue + size.height))
                                                 drawRect(
@@ -212,8 +230,8 @@ fun CollectionDetailScreen(
                                                 )
                                             }
                                         }
-                                        .padding(horizontal = 28.dp, vertical = 32.dp)
-                                        .verticalScroll(scrollState),
+                                        .padding(horizontal = 40.dp, vertical = if (isCollapsed) 12.dp else 32.dp)
+                                        .then(if (isCollapsed) Modifier else Modifier.verticalScroll(scrollState)),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
@@ -225,6 +243,8 @@ fun CollectionDetailScreen(
                                         ),
                                         textAlign = TextAlign.Center,
                                         color = Color.Black.copy(alpha = 0.85f),
+                                        maxLines = if (isCollapsed) 1 else Int.MAX_VALUE,
+                                        overflow = if (isCollapsed) TextOverflow.Ellipsis else TextOverflow.Clip,
                                         modifier = Modifier.padding(horizontal = 4.dp)
                                     )
                                 }
@@ -232,18 +252,20 @@ fun CollectionDetailScreen(
                         }
 
                         // Magnifying Glass Toggle (Outside Glass Area, drawn on top)
-                        IconButton(
-                            onClick = { isMagnified = !isMagnified },
-                            modifier = Modifier
-                                .align(Alignment.TopEnd)
-                                .padding(16.dp)
-                                .zIndex(1f)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Search,
-                                contentDescription = "Toggle Magnification",
-                                tint = Color.Black.copy(alpha = 0.4f)
-                            )
+                        if (!isCollapsed) {
+                            IconButton(
+                                onClick = { isMagnified = !isMagnified },
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .padding(16.dp)
+                                    .zIndex(1f)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Search,
+                                    contentDescription = "Toggle Magnification",
+                                    tint = Color.Black.copy(alpha = 0.4f)
+                                )
+                            }
                         }
                     }
                 }
