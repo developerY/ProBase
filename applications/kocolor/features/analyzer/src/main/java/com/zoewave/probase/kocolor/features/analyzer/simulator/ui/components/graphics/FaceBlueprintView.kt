@@ -1,10 +1,12 @@
 package com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics
 
+import android.util.Log
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateOffsetAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
@@ -12,7 +14,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -25,7 +29,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -40,15 +49,29 @@ fun FaceBlueprintView(
 ) {
     // SINGLE SOURCE OF TRUTH: Tracks the currently expanded card
     var expandedCategory by remember { mutableStateOf<String?>(null) }
+    var lastTapCoords by remember { mutableStateOf<String?>(null) }
 
     // 1. Global Layout Shifts
     val blueprintOffset = 10.dp
     val horizontalShift = 15.dp
 
     // 2. Define Feature Anchor Points (Start of the lines)
-    val eyesAnchor = Offset(35.dp.value, -45.dp.value)
-    val cheeksAnchor = Offset(-45.dp.value, 25.dp.value)
-    val lipsAnchor = Offset(0.dp.value, 75.dp.value)
+    val eyeLeftAnchor = Offset(-52.dp.value, -54.dp.value)
+    val eyeRightAnchor = Offset(46.dp.value, -54.dp.value)
+
+    // Brow Path Points (Start, Arch, Tail)
+    val eyeLeftBrowStart = Offset(-70.dp.value, -42.dp.value) // 50 to 70
+    val eyeLeftBrowMid = Offset(-52.dp.value, -65.dp.value)
+    val eyeLeftBrowEnd = Offset(-35.dp.value, -50.dp.value) // 50 to 70
+
+    val eyeRightBrowStart = Offset(35.dp.value, -50.dp.value)
+    val eyeRightBrowMid = Offset(46.dp.value, -65.dp.value)
+    val eyeRightBrowEnd = Offset(65.dp.value, -50.dp.value)
+
+    val cheekLeftAnchor = Offset(-45.dp.value, 25.dp.value)
+    val cheekRightAnchor = Offset(45.dp.value, 25.dp.value)
+    val lipUpperAnchor = Offset(0.dp.value, 65.dp.value)
+    val lipLowerAnchor = Offset(0.dp.value, 85.dp.value)
 
     // 3. Define Dynamic Callout Targets (End of the lines)
     // Eyes and Lips move TOWARD center when expanded so they remain fully visible.
@@ -94,23 +117,67 @@ fun FaceBlueprintView(
         }
 
         // Callout Lines & Shades
-        Canvas(modifier = Modifier.fillMaxSize()) {
+        val localDensity = LocalDensity.current
+        Canvas(
+            modifier = Modifier
+                .fillMaxSize()
+                .pointerInput(Unit) {
+                    detectTapGestures { tapOffset ->
+                        val centerX = size.width / 2f
+                        val centerY = size.height / 2f
+                        with(localDensity) {
+                            val dpX = (tapOffset.x - centerX).toDp().value.toInt()
+                            val dpY = (tapOffset.y - centerY).toDp().value.toInt()
+                            
+                            lastTapCoords = "X: $dpX, Y: $dpY"
+                            
+                            Log.d("BlueprintCalibration", "--- FACE TAP DETECTED ---")
+                            Log.d("BlueprintCalibration", "Generic Offset: Offset(${dpX}.dp.value, ${dpY}.dp.value)")
+                            Log.d("BlueprintCalibration", "Brow Start: val eyeLeftBrowStart = Offset(${dpX}.dp.value, ${dpY}.dp.value)")
+                            Log.d("BlueprintCalibration", "Brow Mid: val eyeLeftBrowMid = Offset(${dpX}.dp.value, ${dpY}.dp.value)")
+                            Log.d("BlueprintCalibration", "Brow End: val eyeLeftBrowEnd = Offset(${dpX}.dp.value, ${dpY}.dp.value)")
+                            Log.d("BlueprintCalibration", "Target Point: Offset(${dpX}f, ${dpY}f)")
+                        }
+                    }
+                }
+        ) {
             val center = Offset(size.width / 2 + horizontalShift.toPx(), size.height / 2 + blueprintOffset.toPx())
 
             // 1. Draw "Shades" (Soft Glows on the face)
             data.eyesItem?.colorHex?.let { hex ->
-                val pigment = parseColor(hex).copy(alpha = 0.35f)
-                drawCircle(Brush.radialGradient(listOf(pigment, Color.Transparent), center = Offset(center.x + eyesAnchor.x.dp.toPx(), center.y + eyesAnchor.y.dp.toPx()), radius = 20.dp.toPx()), radius = 20.dp.toPx(), center = Offset(center.x + eyesAnchor.x.dp.toPx(), center.y + eyesAnchor.y.dp.toPx()))
-                drawCircle(Brush.radialGradient(listOf(pigment, Color.Transparent), center = Offset(center.x - eyesAnchor.x.dp.toPx(), center.y + eyesAnchor.y.dp.toPx()), radius = 20.dp.toPx()), radius = 20.dp.toPx(), center = Offset(center.x - eyesAnchor.x.dp.toPx(), center.y + eyesAnchor.y.dp.toPx()))
+                val pigment = parseColor(hex).copy(alpha = 0.15f)
+                
+                // Helper to draw a soft brow glow
+                fun drawBrowGlow(start: Offset, control: Offset, end: Offset) {
+                    val path = Path().apply {
+                        moveTo(center.x + start.x.dp.toPx(), center.y + start.y.dp.toPx())
+                        quadraticTo(
+                            center.x + control.x.dp.toPx(), center.y + control.y.dp.toPx(),
+                            center.x + end.x.dp.toPx(), center.y + end.y.dp.toPx()
+                        )
+                    }
+                    // Layer multiple strokes for feathered "shimmer" effect
+                    for (i in 1..4) {
+                        drawPath(
+                            path = path,
+                            color = pigment.copy(alpha = pigment.alpha / i),
+                            style = Stroke(width = (i * 10).dp.toPx(), cap = StrokeCap.Round)
+                        )
+                    }
+                }
+
+                drawBrowGlow(eyeLeftBrowStart, eyeLeftBrowMid, eyeLeftBrowEnd)
+                drawBrowGlow(eyeRightBrowStart, eyeRightBrowMid, eyeRightBrowEnd)
             }
             data.cheeksItem?.colorHex?.let { hex ->
                 val pigment = parseColor(hex).copy(alpha = 0.3f)
-                drawCircle(Brush.radialGradient(listOf(pigment, Color.Transparent), center = Offset(center.x + cheeksAnchor.x.dp.toPx(), center.y + cheeksAnchor.y.dp.toPx()), radius = 35.dp.toPx()), radius = 35.dp.toPx(), center = Offset(center.x + cheeksAnchor.x.dp.toPx(), center.y + cheeksAnchor.y.dp.toPx()))
-                drawCircle(Brush.radialGradient(listOf(pigment, Color.Transparent), center = Offset(center.x - cheeksAnchor.x.dp.toPx(), center.y + cheeksAnchor.y.dp.toPx()), radius = 35.dp.toPx()), radius = 35.dp.toPx(), center = Offset(center.x - cheeksAnchor.x.dp.toPx(), center.y + cheeksAnchor.y.dp.toPx()))
+                drawCircle(Brush.radialGradient(listOf(pigment, Color.Transparent), center = Offset(center.x + cheekLeftAnchor.x.dp.toPx(), center.y + cheekLeftAnchor.y.dp.toPx()), radius = 35.dp.toPx()), radius = 35.dp.toPx(), center = Offset(center.x + cheekLeftAnchor.x.dp.toPx(), center.y + cheekLeftAnchor.y.dp.toPx()))
+                drawCircle(Brush.radialGradient(listOf(pigment, Color.Transparent), center = Offset(center.x + cheekRightAnchor.x.dp.toPx(), center.y + cheekRightAnchor.y.dp.toPx()), radius = 35.dp.toPx()), radius = 35.dp.toPx(), center = Offset(center.x + cheekRightAnchor.x.dp.toPx(), center.y + cheekRightAnchor.y.dp.toPx()))
             }
             data.lipsItem?.colorHex?.let { hex ->
                 val pigment = parseColor(hex).copy(alpha = 0.4f)
-                drawCircle(Brush.radialGradient(listOf(pigment, Color.Transparent), center = Offset(center.x + lipsAnchor.x.dp.toPx(), center.y + lipsAnchor.y.dp.toPx()), radius = 25.dp.toPx()), radius = 25.dp.toPx(), center = Offset(center.x + lipsAnchor.x.dp.toPx(), center.y + lipsAnchor.y.dp.toPx()))
+                drawCircle(Brush.radialGradient(listOf(pigment, Color.Transparent), center = Offset(center.x + lipUpperAnchor.x.dp.toPx(), center.y + lipUpperAnchor.y.dp.toPx()), radius = 25.dp.toPx()), radius = 25.dp.toPx(), center = Offset(center.x + lipUpperAnchor.x.dp.toPx(), center.y + lipUpperAnchor.y.dp.toPx()))
+                drawCircle(Brush.radialGradient(listOf(pigment, Color.Transparent), center = Offset(center.x + lipLowerAnchor.x.dp.toPx(), center.y + lipLowerAnchor.y.dp.toPx()), radius = 25.dp.toPx()), radius = 25.dp.toPx(), center = Offset(center.x + lipLowerAnchor.x.dp.toPx(), center.y + lipLowerAnchor.y.dp.toPx()))
             }
 
             // 2. Draw Callout Lines (Using animated targets)
@@ -118,17 +185,17 @@ fun FaceBlueprintView(
             val anchorRadius = 2.dp.toPx()
             val lineColor = Color.DarkGray.copy(alpha = 0.4f)
 
-            // EYES Line
-            drawLine(lineColor, Offset(center.x + eyesAnchor.x.dp.toPx(), center.y + eyesAnchor.y.dp.toPx()), Offset(center.x + eyesTarget.x.dp.toPx(), center.y + eyesTarget.y.dp.toPx()), lineStroke)
-            drawCircle(lineColor, anchorRadius, Offset(center.x + eyesAnchor.x.dp.toPx(), center.y + eyesAnchor.y.dp.toPx()))
+            // EYES Line (Attaches to Right Eye)
+            drawLine(lineColor, Offset(center.x + eyeRightAnchor.x.dp.toPx(), center.y + eyeRightAnchor.y.dp.toPx()), Offset(center.x + eyesTarget.x.dp.toPx(), center.y + eyesTarget.y.dp.toPx()), lineStroke)
+            drawCircle(lineColor, anchorRadius, Offset(center.x + eyeRightAnchor.x.dp.toPx(), center.y + eyeRightAnchor.y.dp.toPx()))
 
-            // CHEEKS Line
-            drawLine(lineColor, Offset(center.x + cheeksAnchor.x.dp.toPx(), center.y + cheeksAnchor.y.dp.toPx()), Offset(center.x + cheeksTarget.x.dp.toPx(), center.y + cheeksTarget.y.dp.toPx()), lineStroke)
-            drawCircle(lineColor, anchorRadius, Offset(center.x + cheeksAnchor.x.dp.toPx(), center.y + cheeksAnchor.y.dp.toPx()))
+            // CHEEKS Line (Attaches to Left Cheek)
+            drawLine(lineColor, Offset(center.x + cheekLeftAnchor.x.dp.toPx(), center.y + cheekLeftAnchor.y.dp.toPx()), Offset(center.x + cheeksTarget.x.dp.toPx(), center.y + cheeksTarget.y.dp.toPx()), lineStroke)
+            drawCircle(lineColor, anchorRadius, Offset(center.x + cheekLeftAnchor.x.dp.toPx(), center.y + cheekLeftAnchor.y.dp.toPx()))
 
-            // LIPS Line
-            drawLine(lineColor, Offset(center.x + lipsAnchor.x.dp.toPx(), center.y + lipsAnchor.y.dp.toPx()), Offset(center.x + lipsTarget.x.dp.toPx(), center.y + lipsTarget.y.dp.toPx()), lineStroke)
-            drawCircle(lineColor, anchorRadius, Offset(center.x + lipsAnchor.x.dp.toPx(), center.y + lipsAnchor.y.dp.toPx()))
+            // LIPS Line (Attaches to Lower Lip)
+            drawLine(lineColor, Offset(center.x + lipLowerAnchor.x.dp.toPx(), center.y + lipLowerAnchor.y.dp.toPx()), Offset(center.x + lipsTarget.x.dp.toPx(), center.y + lipsTarget.y.dp.toPx()), lineStroke)
+            drawCircle(lineColor, anchorRadius, Offset(center.x + lipLowerAnchor.x.dp.toPx(), center.y + lipLowerAnchor.y.dp.toPx()))
         }
 
         // 5. Render the Callouts
@@ -187,6 +254,23 @@ fun FaceBlueprintView(
                 ),
             anchorAlignment = Alignment.TopStart
         )
+
+        // Live Coordinate Overlay (Visible in Interactive Preview)
+        lastTapCoords?.let { coords ->
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 80.dp)
+                    .background(Color.Black.copy(alpha = 0.7f), RoundedCornerShape(8.dp))
+                    .padding(horizontal = 12.dp, vertical = 6.dp)
+            ) {
+                Text(
+                    text = coords,
+                    color = Color.White,
+                    style = MaterialTheme.typography.labelMedium
+                )
+            }
+        }
     }
 }
 
