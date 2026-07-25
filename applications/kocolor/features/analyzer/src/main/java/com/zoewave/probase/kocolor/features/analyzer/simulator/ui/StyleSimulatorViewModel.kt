@@ -135,12 +135,10 @@ class StyleSimulatorViewModel @Inject constructor(
             .groupBy { it.colorFamily }
 
         val recommendedClothing = allClothing.filter { item ->
-            "w_${item.id}" in (result?.selectedClothingIds ?: emptyList()) ||
-            "w_${item.id}" in (result?.selectedCosmeticIds ?: emptyList())
+            "w_${item.id}" in (result?.selectedClothingIds ?: emptyList())
         }
         val recommendedCosmetics = allCosmetics.filter { item ->
-            "c_${item.id}" in (result?.selectedCosmeticIds ?: emptyList()) ||
-            "c_${item.id}" in (result?.selectedClothingIds ?: emptyList())
+            "c_${item.id}" in (result?.selectedCosmeticIds ?: emptyList())
         }
 
         StyleSimulatorUiState(
@@ -366,26 +364,14 @@ class StyleSimulatorViewModel @Inject constructor(
         viewModelScope.launch {
             val state = uiState.value
             
-            // Fix: Pass imageUrl and use proper category mapping
-            val recommendations = state.recommendedClothing + state.recommendedCosmetics.map {
-                ClothingItem(
-                    id = it.id, 
-                    name = it.name, 
-                    brand = it.brand, 
-                    category = ClothingCategory.ACCESSORIES, // Better fallback for list display
-                    colorHex = it.colorHex,
-                    imageUrl = it.imageUrl,
-                    notes = it.notes
-                )
-            }
-
+            // Fix: Wardrobe should ONLY contain clothing items
             val outfitSuggestion = OutfitSuggestion(
                 occasion = state.userMessage,
                 advice = state.rationale ?: "",
-                keyPieces = recommendations.map { it.name },
+                keyPieces = state.recommendedClothing.map { it.name },
                 colorCombinations = state.recommendedPalette,
-                wardrobeItemIds = recommendations.map { it.id },
-                suggestedItems = recommendations.map { item ->
+                wardrobeItemIds = state.recommendedClothing.map { it.id },
+                suggestedItems = state.recommendedClothing.map { item ->
                     SuggestedPiece(
                         name = item.name,
                         category = item.category.name,
@@ -403,7 +389,7 @@ class StyleSimulatorViewModel @Inject constructor(
                 )
             )
 
-            // Fix: Map recommended cosmetics to real MakeupSuggestions instead of hardcoding
+            // Fix: Vanity should ONLY contain cosmetic items
             val makeupSuggestions = state.recommendedCosmetics.map { cosmetic ->
                 MakeupSuggestion(
                     category = cosmetic.macroCategory.displayName,
@@ -423,7 +409,6 @@ class StyleSimulatorViewModel @Inject constructor(
                 makeupSuggestions = makeupSuggestions,
                 outfitSuggestions = listOf(outfitSuggestion),
                 recommendedPalette = state.recommendedPalette,
-                // Fix: Fallback to first recommendation image if clothing is empty
                 clothesUri = state.recommendedClothing.firstOrNull()?.imageUrl 
                     ?: state.recommendedCosmetics.firstOrNull()?.imageUrl
             )
