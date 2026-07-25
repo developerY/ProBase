@@ -62,23 +62,24 @@ fun FaceBlueprintView(
     val eyeLeftAnchor = Offset(-52.dp.value, -54.dp.value)
     val eyeRightAnchor = Offset(46.dp.value, -54.dp.value)
 
-    // Brow Path Points (Start, Arch, Tail)
-    val eyeLeftBrowStart = Offset(-74.dp.value, -49.dp.value) // 50 to 70
-    val eyeLeftBrowMid = Offset(-57.dp.value, -58.dp.value)
-    val eyeLeftBrowEnd = Offset(-34.dp.value, -52.dp.value) // 50 to 70
+    // 🛠️ Eyelid Path Points (Moved down from the brows to the lash line)
+    val eyeLeftLidStart = Offset(-35.dp.value, -52.dp.value) // Inner corner
+    val eyeLeftLidMid = Offset(-52.dp.value, -62.dp.value)   // Arch over pupil
+    val eyeLeftLidEnd = Offset(-68.dp.value, -50.dp.value)   // Outer corner
 
-    val eyeRightBrowStart = Offset(18.dp.value, -54.dp.value)
-    val eyeRightBrowMid = Offset(46.dp.value, -65.dp.value)
-    val eyeRightBrowEnd = Offset(70.dp.value, -57.dp.value)
+    val eyeRightLidStart = Offset(28.dp.value, -52.dp.value) // Inner corner
+    val eyeRightLidMid = Offset(46.dp.value, -62.dp.value)   // Arch over pupil
+    val eyeRightLidEnd = Offset(62.dp.value, -50.dp.value)   // Outer corner
 
-    val cheekLeftAnchor = Offset(-52.dp.value, 7.dp.value)
-    val cheekRightAnchor = Offset(39.dp.value, 7.dp.value)
+    // 🛠️ Cheeks (Centered on the apples of the cheeks)
+    val cheekLeftAnchor = Offset(-50.dp.value, 18.dp.value)
+    val cheekRightAnchor = Offset(44.dp.value, 18.dp.value)
 
-    // Lip Path Points
-    val lipLeftCorner = Offset(-30.dp.value, 62.dp.value)
-    val lipRightCorner = Offset(6.dp.value, 62.dp.value)
-    val lipUpperAnchor = Offset(-15.dp.value, 54.dp.value)
-    val lipLowerAnchor = Offset(-12.dp.value, 70.dp.value)
+    // 🛠️ Lips (Perfectly centered and reshaped to the line art)
+    val lipLeftCorner = Offset(-23.dp.value, 62.dp.value)
+    val lipRightCorner = Offset(17.dp.value, 62.dp.value)
+    val lipUpperAnchor = Offset(-3.dp.value, 53.dp.value)
+    val lipLowerAnchor = Offset(-3.dp.value, 74.dp.value)
 
     // 3. Define Dynamic Callout Targets (End of the lines)
     // Eyes and Lips move TOWARD center when expanded so they remain fully visible.
@@ -150,7 +151,7 @@ fun FaceBlueprintView(
 
             // 1. Draw "Shades" (Soft Cosmetics - No Multiply)
             data.eyesItem?.colorHex?.let { hex ->
-                // Dropped alpha to 0.2f for a soft wash of color
+                // 🛠️ Bumped alpha to 0.4f so the eyeshadow pops
                 val pigment = parseColor(hex).copy(alpha = 0.4f)
 
                 fun drawBlurredCurve(start: Offset, control: Offset, end: Offset, thickness: Float = 14f) {
@@ -170,18 +171,18 @@ fun FaceBlueprintView(
                             strokeWidth = thickness.dp.toPx()
                             strokeCap = android.graphics.Paint.Cap.ROUND
                             maskFilter = BlurMaskFilter(15f.dp.toPx(), BlurMaskFilter.Blur.NORMAL)
-                            // 🛠️ REMOVED: xfermode = PorterDuffXfermode...
                         }
                         canvas.nativeCanvas.drawPath(path.asAndroidPath(), paint)
                     }
                 }
 
-                drawBlurredCurve(eyeLeftBrowStart, eyeLeftBrowMid, eyeLeftBrowEnd)
-                drawBlurredCurve(eyeRightBrowStart, eyeRightBrowMid, eyeRightBrowEnd)
+                // 🛠️ Using the new Eyelid coordinates
+                drawBlurredCurve(eyeLeftLidStart, eyeLeftLidMid, eyeLeftLidEnd)
+                drawBlurredCurve(eyeRightLidStart, eyeRightLidMid, eyeRightLidEnd)
             }
 
             data.cheeksItem?.colorHex?.let { hex ->
-                // Dropped alpha to 0.25f for a natural blush
+                // 🛠️ Bumped alpha to 0.45f to survive the massive blur
                 val pigment = parseColor(hex).copy(alpha = 0.45f)
 
                 fun drawCheekBlush(anchor: Offset) {
@@ -197,7 +198,6 @@ fun FaceBlueprintView(
                             isAntiAlias = true
                             color = pigment.toArgb()
                             style = android.graphics.Paint.Style.FILL
-                            // 🛠️ Increased blur to 35f for an ultra-soft edge fade
                             maskFilter = BlurMaskFilter(35f.dp.toPx(), BlurMaskFilter.Blur.NORMAL)
                         }
                         canvas.nativeCanvas.drawOval(cheekRect, paint)
@@ -209,7 +209,7 @@ fun FaceBlueprintView(
             }
 
             data.lipsItem?.colorHex?.let { hex ->
-                // Dropped alpha to 0.35f so it tints the lips instead of painting over them
+                // 🛠️ Bumped alpha to 0.65f for rich, full lip coverage
                 val pigment = parseColor(hex).copy(alpha = 0.65f)
 
                 val lipPath = Path().apply {
