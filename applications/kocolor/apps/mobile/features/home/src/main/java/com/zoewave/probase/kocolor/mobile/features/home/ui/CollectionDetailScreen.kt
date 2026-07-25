@@ -1,5 +1,6 @@
 package com.zoewave.probase.kocolor.mobile.features.home.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -25,8 +26,6 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -45,12 +44,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -131,42 +132,84 @@ fun CollectionDetailScreen(
             verticalArrangement = Arrangement.spacedBy(32.dp)
         ) {
             item {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = advice.title ?: "The Silk Gala\nCollection",
-                        style = MaterialTheme.typography.displayMedium,
-                        fontFamily = FontFamily.Serif,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center,
-                        lineHeight = 44.sp
-                    )
-                    Spacer(Modifier.height(16.dp))
-                    Text(
-                        text = advice.summary,
-                        style = MaterialTheme.typography.bodyLarge,
-                        textAlign = TextAlign.Center,
-                        color = Color.Gray,
-                        lineHeight = 24.sp,
-                        modifier = Modifier.padding(horizontal = 16.dp)
-                    )
-                }
-            }
-
-            // 2. Hero Image
-            item {
-                Card(
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(400.dp),
-                    shape = RoundedCornerShape(24.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                        .height(640.dp)
+                        .clip(RoundedCornerShape(32.dp)),
+                    contentAlignment = Alignment.Center
                 ) {
+                    // 1. Clear Backdrop (The dynamic hero image)
                     AsyncImage(
                         model = heroImage,
                         contentDescription = "Hero Image",
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
                     )
+
+                    // 2. The Frosted "Glass" Card
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxSize(0.85f)
+                            .padding(16.dp),
+                        shape = RoundedCornerShape(24.dp),
+                        color = Color.White.copy(alpha = 0.1f), 
+                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.4f))
+                    ) {
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            // Blurring the same dynamic image just within the card area
+                            AsyncImage(
+                                model = heroImage,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .blur(40.dp),
+                                contentScale = ContentScale.Crop
+                            )
+                            
+                            // Translucent wash to unify the look and improve text contrast
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color.White.copy(alpha = 0.35f))
+                            )
+
+                            // 3. Editorial Content
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(24.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Text(
+                                    text = advice.title ?: "The Personal\nCollection",
+                                    style = MaterialTheme.typography.displayMedium.copy(
+                                        fontSize = 42.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        lineHeight = 48.sp
+                                    ),
+                                    fontFamily = FontFamily.Serif,
+                                    textAlign = TextAlign.Center,
+                                    color = Color.Black
+                                )
+                                Spacer(Modifier.height(28.dp))
+                                Text(
+                                    text = advice.summary,
+                                    style = MaterialTheme.typography.bodyLarge.copy(
+                                        fontSize = 18.sp,
+                                        lineHeight = 28.sp,
+                                        fontWeight = FontWeight.Medium
+                                    ),
+                                    textAlign = TextAlign.Center,
+                                    color = Color.Black.copy(alpha = 0.85f),
+                                    maxLines = 12,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.padding(horizontal = 8.dp)
+                                )
+                            }
+                        }
+                    }
                 }
             }
 
