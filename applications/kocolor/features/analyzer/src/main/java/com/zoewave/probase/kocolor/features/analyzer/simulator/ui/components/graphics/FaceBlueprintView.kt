@@ -151,7 +151,7 @@ fun FaceBlueprintView(
             // 1. Draw "Shades" (Soft Cosmetics - No Multiply)
             data.eyesItem?.colorHex?.let { hex ->
                 // Dropped alpha to 0.2f for a soft wash of color
-                val pigment = parseColor(hex).copy(alpha = 0.2f)
+                val pigment = parseColor(hex).copy(alpha = 0.4f)
 
                 fun drawBlurredCurve(start: Offset, control: Offset, end: Offset, thickness: Float = 14f) {
                     val path = Path().apply {
@@ -182,7 +182,7 @@ fun FaceBlueprintView(
 
             data.cheeksItem?.colorHex?.let { hex ->
                 // Dropped alpha to 0.25f for a natural blush
-                val pigment = parseColor(hex).copy(alpha = 0.25f)
+                val pigment = parseColor(hex).copy(alpha = 0.45f)
 
                 fun drawCheekBlush(anchor: Offset) {
                     val cheekRect = android.graphics.RectF(
@@ -210,7 +210,7 @@ fun FaceBlueprintView(
 
             data.lipsItem?.colorHex?.let { hex ->
                 // Dropped alpha to 0.35f so it tints the lips instead of painting over them
-                val pigment = parseColor(hex).copy(alpha = 0.35f)
+                val pigment = parseColor(hex).copy(alpha = 0.65f)
 
                 val lipPath = Path().apply {
                     moveTo(center.x + lipLeftCorner.x.dp.toPx(), center.y + lipLeftCorner.y.dp.toPx())
