@@ -48,6 +48,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.zIndex
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
@@ -165,21 +166,7 @@ fun CollectionDetailScreen(
                             contentScale = ContentScale.Crop
                         )
 
-                        // Magnifying Glass Toggle (Outside Glass Area)
-                        IconButton(
-                            onClick = { isMagnified = !isMagnified },
-                            modifier = Modifier
-                                .align(Alignment.TopEnd)
-                                .padding(16.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Search,
-                                contentDescription = "Toggle Magnification",
-                                tint = Color.White
-                            )
-                        }
-
-                            // 2. The Frosted "Glass" Card
+                        // 2. The Frosted "Glass" Card
                         Surface(
                             modifier = Modifier
                                 .fillMaxSize(0.95f)
@@ -242,6 +229,21 @@ fun CollectionDetailScreen(
                                     )
                                 }
                             }
+                        }
+
+                        // Magnifying Glass Toggle (Outside Glass Area, drawn on top)
+                        IconButton(
+                            onClick = { isMagnified = !isMagnified },
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .padding(16.dp)
+                                .zIndex(1f)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = "Toggle Magnification",
+                                tint = Color.Black.copy(alpha = 0.4f)
+                            )
                         }
                     }
                 }
