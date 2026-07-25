@@ -14,7 +14,9 @@ CATEGORY_MAP = {
     "blush": "DIMENSION",
     "lipstick": "LIPS",
     "eyeshadow": "EYES",
-    "nail_polish": "NAILS"
+    "nail_polish": "NAILS",
+    "foundation": "COMPLEXION",
+    "concealer": "COMPLEXION"
 }
 
 def ensure_directory():
@@ -65,11 +67,15 @@ def fetch_cosmetics():
                         break
 
                     colors = item.get("product_colors", [])
-                    if not colors:
-                        continue # Skip products without color hexes
+                    color_hex = colors[0].get("hex_value") if colors else None
 
-                    # Grab the first available color hex
-                    color_hex = colors[0].get("hex_value")
+                    # For complexion, we might not always have specific hexes in the API response
+                    # If missing, provide a neutral fallback hex
+                    if not color_hex:
+                        if macro_category == "COMPLEXION":
+                            color_hex = "#EBC7B3" # Neutral Beige
+                        else:
+                            continue
 
                     # Ensure the hex is valid for Compose UI parsing
                     if color_hex and color_hex.startswith("#") and len(color_hex) in [7, 9]:
@@ -85,6 +91,39 @@ def fetch_cosmetics():
                         count += 1
         except Exception as e:
             print(f"Failed to fetch {api_type}: {e}")
+
+    # Add synthetic Skincare (PREP) data since the API is focused on color cosmetics
+    print("Adding synthetic skincare (PREP) data...")
+    skincare_items = [
+        {
+            "brand": "La Roche-Posay",
+            "name": "Anthelios Melt-in Milk Sunscreen",
+            "macroCategory": "PREP",
+            "microCategory": "Spf",
+            "colorHex": "#FFFFFF",
+            "imageUrl": "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=300&q=80",
+            "price": 35.00
+        },
+        {
+            "brand": "The Ordinary",
+            "name": "Hyaluronic Acid 2% + B5",
+            "macroCategory": "PREP",
+            "microCategory": "Serum",
+            "colorHex": "#FDFDFD",
+            "imageUrl": "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=300&q=80",
+            "price": 10.00
+        },
+        {
+            "brand": "Caudalie",
+            "name": "Vinoperfect Brightening Serum",
+            "macroCategory": "PREP",
+            "microCategory": "Serum",
+            "colorHex": "#F9F9F9",
+            "imageUrl": "https://images.unsplash.com/photo-1608248597279-f99d160bfbcc?auto=format&fit=crop&w=300&q=80",
+            "price": 79.00
+        }
+    ]
+    seed_data.extend(skincare_items)
 
     with open(COSMETICS_FILE, "w") as f:
         json.dump(seed_data, f, indent=2)
@@ -173,7 +212,7 @@ def generate_wardrobe():
             "macroCategory": "SHOES",
             "microCategory": "Shoes",
             "colorHex": "#000000",
-            "imageUrl": fix_url("https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?auto=format&fit=crop&w=800&q=80"),
+            "imageUrl": fix_url("https://images.unsplash.com/photo-1535043934128-cf0b28d52f95?auto=format&fit=crop&w=800&q=80"),
             "price": 890.00
         }
     ]

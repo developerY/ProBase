@@ -2,18 +2,42 @@ package com.zoewave.probase.kocolor.features.cosmetics.ui.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
@@ -25,6 +49,8 @@ import coil.compose.AsyncImage
 import com.zoewave.probase.kocolor.features.cosmetics.R
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CategoryMetadata
 import com.zoewave.probase.kocolor.model.KoColorRoute
+import java.text.NumberFormat
+import java.util.Locale
 
 data class VanityCategoryUiState(
     val name: String,
@@ -59,7 +85,71 @@ fun VanityCategoryCard(
     }
     
     val currencyFormatter = remember { 
-        java.text.NumberFormat.getCurrencyInstance(java.util.Locale.US)
+        NumberFormat.getCurrencyInstance(Locale.US)
+    }
+
+    var showExplanation by remember { mutableStateOf(false) }
+
+    if (showExplanation) {
+        val (fullDesc, examples) = when {
+            name.contains("Skincare", ignoreCase = true) -> 
+                "The essential foundation for any routine. These products focus on cleaning, nourishing, and preparing the skin's surface before any color is applied." to 
+                "Cleanser, Toner, Serum, Moisturizer, SPF, Primer, Face Mask, Exfoliant, Eye Care."
+            name.contains("Complexion", ignoreCase = true) -> 
+                "Architectural products designed to unify the skin tone, blur imperfections, and create a smooth, even canvas." to 
+                "Foundation, BB/CC Cream, Concealer, Color Corrector, Setting Powder, Face Powder, Setting Spray."
+            name.contains("Dimension", ignoreCase = true) -> 
+                "Sculptural products that bring life, shadow, and light back to the face. These define your bone structure and add a natural-looking flush or glow." to 
+                "Blush, Bronzer, Contour, Highlighter, Freckle Tint."
+            name.contains("Eyes", ignoreCase = true) -> 
+                "The focal point of visual communication. This category covers brow structure, lash enhancement, and artistic lid pigment." to 
+                "Eyeshadow, Eyeliner, Mascara, Lash Primer, Brow Pencil, Brow Gel, False Lashes."
+            name.contains("Lips", ignoreCase = true) -> 
+                "Color and care for the mouth. Products range from hydrating treatments to high-impact pigments that define the final mood." to 
+                "Lipstick, Lip Gloss, Lip Liner, Lip Tint/Stain, Lip Balm, Lip Plumper."
+            name.contains("Nails", ignoreCase = true) -> 
+                "Architectural enhancements for the hands. This includes color, protection, and structural care for the nails." to 
+                "Nail Polish, Base Coat, Top Coat, Nail Treatment."
+            else -> description to ""
+        }
+
+        AlertDialog(
+            onDismissRequest = { showExplanation = false },
+            title = { Text(text = name, fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold) },
+            text = { 
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Text(
+                        text = fullDesc, 
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.Black.copy(alpha = 0.8f),
+                        lineHeight = 20.sp
+                    )
+                    if (examples.isNotEmpty()) {
+                        Column {
+                            Text(
+                                text = "INCLUDES:", 
+                                style = MaterialTheme.typography.labelSmall, 
+                                fontWeight = FontWeight.Black, 
+                                color = Color.Black.copy(alpha = 0.4f),
+                                letterSpacing = 1.sp
+                            )
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                text = examples, 
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.Black.copy(alpha = 0.7f),
+                                lineHeight = 18.sp
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showExplanation = false }) {
+                    Text(stringResource(android.R.string.ok))
+                }
+            }
+        )
     }
 
     Card(
@@ -81,10 +171,12 @@ fun VanityCategoryCard(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(
-                        Brush.horizontalGradient(
-                            colors = listOf(baseColor, baseColor.copy(alpha = 0.9f), Color.Transparent),
-                            startX = 0f,
-                            endX = 1000f
+                        Brush.linearGradient(
+                            colors = listOf(
+                                baseColor.copy(alpha = 0.95f),
+                                baseColor.copy(alpha = 0.8f),
+                                Color.White.copy(alpha = 0.4f)
+                            )
                         )
                     )
             )
@@ -92,9 +184,10 @@ fun VanityCategoryCard(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(24.dp),
-                verticalArrangement = Arrangement.SpaceBetween
+                    .padding(18.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+                // Header Row
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -102,93 +195,114 @@ fun VanityCategoryCard(
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         val displayName = if (name.contains("&")) name.substringBefore("&").trim() else name
-                        Text(
-                            text = displayName,
-                            style = MaterialTheme.typography.displaySmall.copy(fontSize = 34.sp, lineHeight = 38.sp),
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = FontFamily.Serif,
-                            color = Color.Black
-                        )
-                        Spacer(Modifier.height(4.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = displayName,
+                                style = MaterialTheme.typography.displaySmall.copy(
+                                    fontSize = 32.sp, 
+                                    lineHeight = 34.sp,
+                                    fontWeight = FontWeight.Bold
+                                ),
+                                fontFamily = FontFamily.Serif,
+                                color = Color.Black
+                            )
+                            IconButton(
+                                onClick = { showExplanation = true },
+                                modifier = Modifier.size(32.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Info,
+                                    contentDescription = "Category Info",
+                                    modifier = Modifier.size(16.dp),
+                                    tint = Color.Black.copy(alpha = 0.2f)
+                                )
+                            }
+                        }
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             val itemsText = if (count == 1) stringResource(R.string.applications_kocolor_features_cosmetics_item_singular) else stringResource(R.string.applications_kocolor_features_cosmetics_items_plural_format, count)
                             Text(
                                 text = itemsText,
-                                style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.alpha(0.9f)
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = Modifier.alpha(0.7f)
                             )
                             Text(
                                 text = "  |  ",
                                 style = MaterialTheme.typography.bodySmall,
-                                color = Color.Black.copy(alpha = 0.3f)
+                                color = Color.Black.copy(alpha = 0.2f)
                             )
                             Text(
-                                text = description,
-                                style = MaterialTheme.typography.bodySmall,
-                                fontWeight = FontWeight.Medium,
-                                modifier = Modifier.alpha(0.6f),
-                                maxLines = 1,
-                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                text = currencyFormatter.format(totalValue),
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Black.copy(alpha = 0.9f)
                             )
                         }
                     }
+                }
 
-                    Column(horizontalAlignment = Alignment.End) {
+                Spacer(Modifier.weight(1f))
+
+                // Glassy Stock Status Container
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    color = Color.White.copy(alpha = 0.4f),
+                    border = BorderStroke(0.5.dp, Color.White.copy(alpha = 0.5f))
+                ) {
+                    Column(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
                         Text(
-                            text = currencyFormatter.format(totalValue),
-                            style = MaterialTheme.typography.titleLarge.copy(fontSize = 28.sp),
-                            fontWeight = FontWeight.Black,
-                            fontFamily = FontFamily.Serif,
-                            color = Color.Black
+                            text = stringResource(R.string.applications_kocolor_features_cosmetics_stock_status),
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontSize = 9.sp,
+                                letterSpacing = 0.8.sp,
+                                fontWeight = FontWeight.ExtraBold
+                            ),
+                            color = Color.Black.copy(alpha = 0.5f)
                         )
+                        
+                        LinearProgressIndicator(
+                            progress = { averageFill.toFloat() },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(4.dp)
+                                .clip(CircleShape),
+                            color = Color(0xFF7A6F5D),
+                            trackColor = Color.Black.copy(alpha = 0.05f),
+                            strokeCap = StrokeCap.Round
+                        )
+
                         Text(
-                            text = stringResource(R.string.applications_kocolor_features_cosmetics_total_value),
-                            style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 0.5.sp),
-                            fontWeight = FontWeight.Black,
-                            modifier = Modifier.alpha(0.4f)
+                            text = "${(averageFill * 100).toInt()}%",
+                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black.copy(alpha = 0.4f)
                         )
                     }
                 }
-
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(), 
-                        horizontalArrangement = Arrangement.SpaceBetween, 
-                        verticalAlignment = Alignment.Bottom
-                    ) {
-                        Text(
-                            text = stringResource(R.string.applications_kocolor_features_cosmetics_stock_status), 
-                            style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 0.5.sp), 
-                            fontWeight = FontWeight.Black, 
-                            modifier = Modifier.alpha(0.6f)
-                        )
-                        Text(
-                            text = "${(averageFill * 100).toInt()}%", 
-                            style = MaterialTheme.typography.labelSmall, 
-                            fontWeight = FontWeight.Black, 
-                            color = Color(0xFF6B705C)
-                        )
-                    }
-                    
-                    val statusColor = Color(0xFF6B705C) 
-
-                    LinearProgressIndicator(
-                        progress = { averageFill.toFloat() },
-                        modifier = Modifier.fillMaxWidth().height(8.dp).clip(CircleShape),
-                        color = statusColor,
-                        trackColor = Color.Black.copy(alpha = 0.05f),
-                        strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Bottom
+                ) {
+                    // Leading Brand
+                    Text(
+                        text = stringResource(
+                            R.string.applications_kocolor_features_cosmetics_leading_brand_format, 
+                            (leadingBrand ?: "Atelier").uppercase()
+                        ),
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontSize = 9.sp,
+                            letterSpacing = 1.2.sp,
+                            fontWeight = FontWeight.Bold
+                        ),
+                        modifier = Modifier.alpha(0.7f),
+                        color = Color.Black
                     )
-                    
-                    if (leadingBrand != null) {
-                        Text(
-                            text = stringResource(R.string.applications_kocolor_features_cosmetics_leading_brand_format, leadingBrand.uppercase()),
-                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.alpha(0.6f)
-                        )
-                    }
                 }
             }
         }
