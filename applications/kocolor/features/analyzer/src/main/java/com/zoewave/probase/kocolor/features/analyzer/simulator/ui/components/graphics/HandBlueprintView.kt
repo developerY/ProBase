@@ -9,7 +9,11 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -39,8 +43,8 @@ fun HandBlueprintView(
     val horizontalShift = 0.dp
     
     // Define Unified Offsets
-    val nailsAnchor = Offset(60.dp.value, -80.dp.value)
-    val nailsCallout = Offset(130.dp.value, -120.dp.value)
+    val nailsAnchor = Offset(-19.dp.value, -61.dp.value)
+    val nailsCallout = Offset(-105.dp.value, 119.dp.value)
 
     Box(
         modifier = modifier
@@ -71,14 +75,24 @@ fun HandBlueprintView(
 
             val nailsHex = data.nailsItem?.colorHex
 
-            // Nails Shade
+            // Calibrated Nail Coordinates
             nailsHex?.let { hex ->
                 val pigment = parseColor(hex).copy(alpha = 0.5f)
-                drawCircle(pigment, radius = 6.dp.toPx(), center = Offset(center.x - 85.dp.toPx(), center.y - 48.dp.toPx())) 
-                drawCircle(pigment, radius = 7.dp.toPx(), center = Offset(center.x - 48.dp.toPx(), center.y - 88.dp.toPx())) 
-                drawCircle(pigment, radius = 7.dp.toPx(), center = Offset(center.x + 5.dp.toPx(), center.y - 105.dp.toPx()))  
-                drawCircle(pigment, radius = 7.dp.toPx(), center = Offset(center.x + 60.dp.toPx(), center.y - 80.dp.toPx())) 
-                drawCircle(pigment, radius = 7.dp.toPx(), center = Offset(center.x + 95.dp.toPx(), center.y + 12.dp.toPx())) 
+                
+                // Leftmost finger (Thumb)
+                drawCircle(pigment, radius = 9.dp.toPx(), center = Offset(center.x + (-20).dp.toPx(), center.y + (-74).dp.toPx()))
+
+                // Mid-Left finger (Index)
+                drawCircle(pigment, radius = 7.dp.toPx(), center = Offset(center.x + (12).dp.toPx(), center.y + (-131).dp.toPx()))
+
+                // Top finger (Middle)
+                drawCircle(pigment, radius = 7.dp.toPx(), center = Offset(center.x + (-31).dp.toPx(), center.y + (-110).dp.toPx()))
+
+                // Mid-Right finger (Ring)
+                drawCircle(pigment, radius = 7.dp.toPx(), center = Offset(center.x + (-49).dp.toPx(), center.y + (-59).dp.toPx()))
+
+                // Bottom-Right edge (Pinky)
+                drawCircle(pigment, radius = 7.dp.toPx(), center = Offset(center.x + (-44).dp.toPx(), center.y + (-29).dp.toPx()))
             }
 
             // Elegant Curved Callout Line

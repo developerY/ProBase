@@ -1,5 +1,6 @@
 package com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics
 
+import android.graphics.BlurMaskFilter
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -13,10 +14,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
+
+// Assuming this is your project's custom color parser
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 
 /*
@@ -37,10 +45,16 @@ fun AnchorDot(
     anchorAlignment: Alignment,
     modifier: Modifier = Modifier
 ) {
-    // Dynamic Size: Grows from 18dp to 24dp when expanded
+    // 🛠️ 1. Dynamic Size: Bumps up to 32.dp for a distinct "selected" state
     val dotSize by animateDpAsState(
-        targetValue = if (isExpanded) 24.dp else 18.dp,
+        targetValue = if (isExpanded) 32.dp else 18.dp,
         label = "dotSize"
+    )
+
+    // 🛠️ 2. Dynamic Glow: Animates a wide blur radius when expanded
+    val glowRadius by animateDpAsState(
+        targetValue = if (isExpanded) 16.dp else 0.dp,
+        label = "glowRadius"
     )
 
     val hasColor = !colorHex.isNullOrBlank()
@@ -49,49 +63,77 @@ fun AnchorDot(
 
     Box(
         modifier = modifier
-            // 1. Proportional Offset (Keeps the center pinned during animation)
+            // Proportional Offset (Keeps the center pinned during animation)
             .offset(
-                x = if (anchorAlignment == Alignment.TopEnd) (dotSize / 3) else -(dotSize / 3),
-                y = -(dotSize / 3)
+                x = when (anchorAlignment) {
+                    Alignment.TopEnd -> (dotSize / 3)
+                    Alignment.TopStart -> -(dotSize / 3)
+                    Alignment.BottomEnd -> (dotSize / 3)
+                    Alignment.BottomStart -> -(dotSize / 3)
+                    else -> 0.dp
+                },
+                y = if (anchorAlignment == Alignment.TopStart || anchorAlignment == Alignment.TopEnd || anchorAlignment == Alignment.TopCenter)
+                    -(dotSize / 3) else (dotSize / 3)
             )
             .size(dotSize)
-            // 2. Outer Drop Shadow (Lifts the well off the Canvas line)
+            // 🛠️ 3. The Glowing Halo Effect (MUST be placed before .clip!)
+            .drawBehind {
+                if (hasColor && glowRadius > 0.dp) {
+                    drawIntoCanvas { canvas ->
+                        val paint = Paint().asFrameworkPaint().apply {
+                            isAntiAlias = true
+                            color = baseColor.toArgb()
+                            // Set alpha to ~60% opacity so it looks like radiant light, not solid paint
+                            alpha = 150
+                            maskFilter =
+                                BlurMaskFilter(glowRadius.toPx(), BlurMaskFilter.Blur.NORMAL)
+                        }
+                        // Draw the glow slightly larger than the dot itself
+                        canvas.nativeCanvas.drawCircle(
+                            center.x,
+                            center.y,
+                            (size.width / 2f) + 2.dp.toPx(),
+                            paint
+                        )
+                    }
+                }
+            }
+            // Outer Drop Shadow (Lifts the well off the Canvas line)
             .shadow(if (hasColor) 4.dp else 0.dp, CircleShape)
+            // The hard clip for the physical dot
             .clip(CircleShape)
-            // 3. The Base Pigment Fill
+            // The Base Pigment Fill
             .background(baseColor)
-            // 4. The "Depth" Illusion (Dark inner shadow cascading from the top)
+            // The "Depth" Illusion (Dark inner shadow cascading from the top)
             .background(
                 if (hasColor) {
                     Brush.verticalGradient(
                         colors = listOf(
-                            Color.Black.copy(alpha = 0.35f), // Shadows the top edge
-                            Color.Transparent // Fades to pure base color at the bottom
+                            Color.Black.copy(alpha = 0.35f),
+                            Color.Transparent
                         )
                     )
                 } else {
                     Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent))
                 }
             )
-            // 5. The Crisp Outer Ring
+            // The Crisp Outer Ring
             .border(2.dp, dotBorder, CircleShape),
         contentAlignment = Alignment.BottomCenter // Aligns the inner highlight to the bottom
     ) {
-        // 6. The "Meniscus / Liquid Bubble" Highlight
+        // The "Meniscus / Liquid Bubble" Highlight
         if (hasColor) {
             Box(
                 modifier = Modifier
-                    .padding(bottom = 2.dp) // Pushes it slightly up from the white border
+                    .padding(bottom = 2.dp)
                     // Proportional sizing so the bubble scales naturally with the outer dot
                     .size(dotSize / 3.5f)
                     .clip(CircleShape)
-                    // Semi-transparent white perfectly lightens whatever the base pigment is
                     .background(Color.White.copy(alpha = 0.55f))
             )
         }
     }
 }
-
 
 /*
 In Jetpack Compose, the order of modifiers strictly dictates the rendering layers. By moving .shadow()

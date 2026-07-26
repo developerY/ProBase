@@ -1,5 +1,6 @@
 package com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics
 
+import android.graphics.BlurMaskFilter
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateOffsetAsState
 import androidx.compose.foundation.Canvas
@@ -12,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -23,8 +23,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.asAndroidPath
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -46,23 +51,38 @@ fun FaceBlueprintView(
     val horizontalShift = 15.dp
 
     // 2. Define Feature Anchor Points (Start of the lines)
-    val eyesAnchor = Offset(35.dp.value, -45.dp.value)
-    val cheeksAnchor = Offset(-45.dp.value, 25.dp.value)
-    val lipsAnchor = Offset(0.dp.value, 75.dp.value)
+    val eyeLeftAnchor = Offset(-52.dp.value, -54.dp.value)
+    val eyeRightAnchor = Offset(46.dp.value, -54.dp.value)
+
+    // 🛠️ Eyelid Path Points (Moved down from the brows to the lash line)
+    val eyeLeftLidStart = Offset(-35.dp.value, -52.dp.value) // Inner corner
+    val eyeLeftLidMid = Offset(-52.dp.value, -62.dp.value)   // Arch over pupil
+    val eyeLeftLidEnd = Offset(-68.dp.value, -50.dp.value)   // Outer corner
+
+    val eyeRightLidStart = Offset(28.dp.value, -52.dp.value) // Inner corner
+    val eyeRightLidMid = Offset(46.dp.value, -62.dp.value)   // Arch over pupil
+    val eyeRightLidEnd = Offset(62.dp.value, -50.dp.value)   // Outer corner
+
+    // 🛠️ Cheeks (Centered on the apple of the right cheek)
+    val cheekRightAnchor = Offset(44.dp.value, 18.dp.value)
+
+    // 🛠️ Lips (Perfectly centered and reshaped to the line art)
+    val lipLeftCorner = Offset(-23.dp.value, 62.dp.value)
+    val lipRightCorner = Offset(17.dp.value, 62.dp.value)
+    val lipUpperAnchor = Offset(-3.dp.value, 53.dp.value)
+    val lipLowerAnchor = Offset(-3.dp.value, 74.dp.value)
 
     // 3. Define Dynamic Callout Targets (End of the lines)
-    // Eyes and Lips move TOWARD center when expanded so they remain fully visible.
     val eyesTarget by animateOffsetAsState(
-        if (expandedCategory == "EYES") Offset(60f, -100f) else Offset(90f, -90f),
+        if (expandedCategory == "EYES") Offset(50f, -92f) else Offset(90f, -90f),
         label = "eyesTarget"
     )
     val cheeksTarget by animateOffsetAsState(
-        // Cheeks move slight UP and LEFT when open.
-        if (expandedCategory == "CHEEKS") Offset(-100f, 80f) else Offset(-80f, 120f),
+        if (expandedCategory == "CHEEKS") Offset(0f, 120f) else Offset(20f, 150f),
         label = "cheeksTarget"
     )
     val lipsTarget by animateOffsetAsState(
-        if (expandedCategory == "LIPS") Offset(50f, 170f) else Offset(80f, 150f),
+        if (expandedCategory == "LIPS") Offset(7f, 97f) else Offset(-40f, 95f),
         label = "lipsTarget"
     )
 
@@ -94,23 +114,96 @@ fun FaceBlueprintView(
         }
 
         // Callout Lines & Shades
-        Canvas(modifier = Modifier.fillMaxSize()) {
+        Canvas(
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
             val center = Offset(size.width / 2 + horizontalShift.toPx(), size.height / 2 + blueprintOffset.toPx())
 
-            // 1. Draw "Shades" (Soft Glows on the face)
+            // 1. Draw "Shades" (Soft Cosmetics - No Multiply)
             data.eyesItem?.colorHex?.let { hex ->
-                val pigment = parseColor(hex).copy(alpha = 0.35f)
-                drawCircle(Brush.radialGradient(listOf(pigment, Color.Transparent), center = Offset(center.x + eyesAnchor.x.dp.toPx(), center.y + eyesAnchor.y.dp.toPx()), radius = 20.dp.toPx()), radius = 20.dp.toPx(), center = Offset(center.x + eyesAnchor.x.dp.toPx(), center.y + eyesAnchor.y.dp.toPx()))
-                drawCircle(Brush.radialGradient(listOf(pigment, Color.Transparent), center = Offset(center.x - eyesAnchor.x.dp.toPx(), center.y + eyesAnchor.y.dp.toPx()), radius = 20.dp.toPx()), radius = 20.dp.toPx(), center = Offset(center.x - eyesAnchor.x.dp.toPx(), center.y + eyesAnchor.y.dp.toPx()))
-            }
-            data.cheeksItem?.colorHex?.let { hex ->
-                val pigment = parseColor(hex).copy(alpha = 0.3f)
-                drawCircle(Brush.radialGradient(listOf(pigment, Color.Transparent), center = Offset(center.x + cheeksAnchor.x.dp.toPx(), center.y + cheeksAnchor.y.dp.toPx()), radius = 35.dp.toPx()), radius = 35.dp.toPx(), center = Offset(center.x + cheeksAnchor.x.dp.toPx(), center.y + cheeksAnchor.y.dp.toPx()))
-                drawCircle(Brush.radialGradient(listOf(pigment, Color.Transparent), center = Offset(center.x - cheeksAnchor.x.dp.toPx(), center.y + cheeksAnchor.y.dp.toPx()), radius = 35.dp.toPx()), radius = 35.dp.toPx(), center = Offset(center.x - cheeksAnchor.x.dp.toPx(), center.y + cheeksAnchor.y.dp.toPx()))
-            }
-            data.lipsItem?.colorHex?.let { hex ->
+                // 🛠️ Bumped alpha to 0.4f so the eyeshadow pops
                 val pigment = parseColor(hex).copy(alpha = 0.4f)
-                drawCircle(Brush.radialGradient(listOf(pigment, Color.Transparent), center = Offset(center.x + lipsAnchor.x.dp.toPx(), center.y + lipsAnchor.y.dp.toPx()), radius = 25.dp.toPx()), radius = 25.dp.toPx(), center = Offset(center.x + lipsAnchor.x.dp.toPx(), center.y + lipsAnchor.y.dp.toPx()))
+
+                fun drawBlurredCurve(start: Offset, control: Offset, end: Offset, thickness: Float = 14f) {
+                    val path = Path().apply {
+                        moveTo(center.x + start.x.dp.toPx(), center.y + start.y.dp.toPx())
+                        quadraticTo(
+                            center.x + control.x.dp.toPx(), center.y + control.y.dp.toPx(),
+                            center.x + end.x.dp.toPx(), center.y + end.y.dp.toPx()
+                        )
+                    }
+
+                    drawIntoCanvas { canvas ->
+                        val paint = Paint().asFrameworkPaint().apply {
+                            isAntiAlias = true
+                            color = pigment.toArgb()
+                            style = android.graphics.Paint.Style.STROKE
+                            strokeWidth = thickness.dp.toPx()
+                            strokeCap = android.graphics.Paint.Cap.ROUND
+                            maskFilter = BlurMaskFilter(15f.dp.toPx(), BlurMaskFilter.Blur.NORMAL)
+                        }
+                        canvas.nativeCanvas.drawPath(path.asAndroidPath(), paint)
+                    }
+                }
+
+                // 🛠️ Using the new Eyelid coordinates
+                drawBlurredCurve(eyeLeftLidStart, eyeLeftLidMid, eyeLeftLidEnd)
+                drawBlurredCurve(eyeRightLidStart, eyeRightLidMid, eyeRightLidEnd)
+            }
+
+            data.cheeksItem?.colorHex?.let { hex ->
+                // 🛠️ Bumped alpha to 0.45f to survive the massive blur
+                val pigment = parseColor(hex).copy(alpha = 0.45f)
+
+                fun drawCheekBlush(anchor: Offset) {
+                    val cheekRect = android.graphics.RectF(
+                        center.x + anchor.x.dp.toPx() - 35.dp.toPx(),
+                        center.y + anchor.y.dp.toPx() - 15.dp.toPx(),
+                        center.x + anchor.x.dp.toPx() + 35.dp.toPx(),
+                        center.y + anchor.y.dp.toPx() + 15.dp.toPx()
+                    )
+
+                    drawIntoCanvas { canvas ->
+                        val paint = Paint().asFrameworkPaint().apply {
+                            isAntiAlias = true
+                            color = pigment.toArgb()
+                            style = android.graphics.Paint.Style.FILL
+                            maskFilter = BlurMaskFilter(35f.dp.toPx(), BlurMaskFilter.Blur.NORMAL)
+                        }
+                        canvas.nativeCanvas.drawOval(cheekRect, paint)
+                    }
+                }
+
+                drawCheekBlush(cheekRightAnchor)
+            }
+
+            data.lipsItem?.colorHex?.let { hex ->
+                // 🛠️ Bumped alpha to 0.65f for rich, full lip coverage
+                val pigment = parseColor(hex).copy(alpha = 0.65f)
+
+                val lipPath = Path().apply {
+                    moveTo(center.x + lipLeftCorner.x.dp.toPx(), center.y + lipLeftCorner.y.dp.toPx())
+                    quadraticTo(
+                        center.x + lipUpperAnchor.x.dp.toPx(), center.y + lipUpperAnchor.y.dp.toPx(),
+                        center.x + lipRightCorner.x.dp.toPx(), center.y + lipRightCorner.y.dp.toPx()
+                    )
+                    quadraticTo(
+                        center.x + lipLowerAnchor.x.dp.toPx(), center.y + lipLowerAnchor.y.dp.toPx(),
+                        center.x + lipLeftCorner.x.dp.toPx(), center.y + lipLeftCorner.y.dp.toPx()
+                    )
+                    close()
+                }
+
+                drawIntoCanvas { canvas ->
+                    val paint = Paint().asFrameworkPaint().apply {
+                        isAntiAlias = true
+                        color = pigment.toArgb()
+                        style = android.graphics.Paint.Style.FILL
+                        maskFilter = BlurMaskFilter(6f.dp.toPx(), BlurMaskFilter.Blur.NORMAL)
+                    }
+                    canvas.nativeCanvas.drawPath(lipPath.asAndroidPath(), paint)
+                }
             }
 
             // 2. Draw Callout Lines (Using animated targets)
@@ -118,23 +211,23 @@ fun FaceBlueprintView(
             val anchorRadius = 2.dp.toPx()
             val lineColor = Color.DarkGray.copy(alpha = 0.4f)
 
-            // EYES Line
-            drawLine(lineColor, Offset(center.x + eyesAnchor.x.dp.toPx(), center.y + eyesAnchor.y.dp.toPx()), Offset(center.x + eyesTarget.x.dp.toPx(), center.y + eyesTarget.y.dp.toPx()), lineStroke)
-            drawCircle(lineColor, anchorRadius, Offset(center.x + eyesAnchor.x.dp.toPx(), center.y + eyesAnchor.y.dp.toPx()))
+            // EYES Line (Attaches to Right Eye)
+            drawLine(lineColor, Offset(center.x + eyeRightAnchor.x.dp.toPx(), center.y + eyeRightAnchor.y.dp.toPx()), Offset(center.x + eyesTarget.x.dp.toPx(), center.y + eyesTarget.y.dp.toPx()), lineStroke)
+            drawCircle(lineColor, anchorRadius, Offset(center.x + eyeRightAnchor.x.dp.toPx(), center.y + eyeRightAnchor.y.dp.toPx()))
 
-            // CHEEKS Line
-            drawLine(lineColor, Offset(center.x + cheeksAnchor.x.dp.toPx(), center.y + cheeksAnchor.y.dp.toPx()), Offset(center.x + cheeksTarget.x.dp.toPx(), center.y + cheeksTarget.y.dp.toPx()), lineStroke)
-            drawCircle(lineColor, anchorRadius, Offset(center.x + cheeksAnchor.x.dp.toPx(), center.y + cheeksAnchor.y.dp.toPx()))
+            // CHEEKS Line (Attaches to Right Cheek)
+            drawLine(lineColor, Offset(center.x + cheekRightAnchor.x.dp.toPx(), center.y + cheekRightAnchor.y.dp.toPx()), Offset(center.x + cheeksTarget.x.dp.toPx(), center.y + cheeksTarget.y.dp.toPx()), lineStroke)
+            drawCircle(lineColor, anchorRadius, Offset(center.x + cheekRightAnchor.x.dp.toPx(), center.y + cheekRightAnchor.y.dp.toPx()))
 
-            // LIPS Line
-            drawLine(lineColor, Offset(center.x + lipsAnchor.x.dp.toPx(), center.y + lipsAnchor.y.dp.toPx()), Offset(center.x + lipsTarget.x.dp.toPx(), center.y + lipsTarget.y.dp.toPx()), lineStroke)
-            drawCircle(lineColor, anchorRadius, Offset(center.x + lipsAnchor.x.dp.toPx(), center.y + lipsAnchor.y.dp.toPx()))
+            // LIPS Line (Attaches to Lower Lip)
+            drawLine(lineColor, Offset(center.x + lipLowerAnchor.x.dp.toPx(), center.y + lipLowerAnchor.y.dp.toPx()), Offset(center.x + lipsTarget.x.dp.toPx(), center.y + lipsTarget.y.dp.toPx()), lineStroke)
+            drawCircle(lineColor, anchorRadius, Offset(center.x + lipLowerAnchor.x.dp.toPx(), center.y + lipLowerAnchor.y.dp.toPx()))
         }
 
         // 5. Render the Callouts
         val calloutHalfHeight = 24.dp // Pushes the card down so the top-corner dot hits the line
 
-        // --- EYES CALLOUT (Right Side) ---
+        // --- EYES CALLOUT (Center/Top) ---
         BlueprintCallout(
             label = "EYES",
             productName = data.eyesItem?.name ?: "Pending...",
@@ -145,14 +238,15 @@ fun FaceBlueprintView(
                 .zIndex(if (expandedCategory == "EYES") 10f else 1f)
                 .width(eyesWidth)
                 .offset(
-                    // Add half-width to pin the TopStart (Left) corner dot to the line
-                    x = horizontalShift + eyesTarget.x.dp + (eyesWidth / 2),
-                    y = blueprintOffset + eyesTarget.y.dp + calloutHalfHeight
+                    // Subtract half-width to pin the BottomEnd (Right) corner dot to the line
+                    x = horizontalShift + eyesTarget.x.dp - (eyesWidth / 2),
+                    // Subtract half-height to pin the BottomEnd (Bottom) corner dot to the line
+                    y = blueprintOffset + eyesTarget.y.dp - calloutHalfHeight
                 ),
-            anchorAlignment = Alignment.TopStart
+            anchorAlignment = Alignment.BottomEnd
         )
 
-        // --- CHEEKS CALLOUT (Left Side) ---
+        // --- CHEEKS CALLOUT (Right Side) ---
         BlueprintCallout(
             label = "CHEEKS",
             productName = data.cheeksItem?.name ?: "Pending...",
@@ -163,14 +257,13 @@ fun FaceBlueprintView(
                 .zIndex(if (expandedCategory == "CHEEKS") 10f else 1f)
                 .width(cheeksWidth)
                 .offset(
-                    // Subtract half-width to pin the TopEnd (Right) corner dot to the line
-                    x = horizontalShift + cheeksTarget.x.dp - (cheeksWidth / 2), 
+                    x = horizontalShift + cheeksTarget.x.dp + (cheeksWidth / 2),
                     y = blueprintOffset + cheeksTarget.y.dp + calloutHalfHeight
                 ),
-            anchorAlignment = Alignment.TopEnd
+            anchorAlignment = Alignment.TopStart
         )
 
-        // --- LIPS CALLOUT (Right Side) ---
+        // --- LIPS CALLOUT (Left Side) ---
         BlueprintCallout(
             label = "LIPS",
             productName = data.lipsItem?.name ?: "Pending...",
@@ -181,11 +274,10 @@ fun FaceBlueprintView(
                 .zIndex(if (expandedCategory == "LIPS") 10f else 1f)
                 .width(lipsWidth)
                 .offset(
-                    // Add half-width to pin the TopStart (Left) corner dot to the line
-                    x = horizontalShift + lipsTarget.x.dp + (lipsWidth / 2),
+                    x = horizontalShift + lipsTarget.x.dp - (lipsWidth / 2),
                     y = blueprintOffset + lipsTarget.y.dp + calloutHalfHeight
                 ),
-            anchorAlignment = Alignment.TopStart
+            anchorAlignment = Alignment.TopEnd
         )
     }
 }
