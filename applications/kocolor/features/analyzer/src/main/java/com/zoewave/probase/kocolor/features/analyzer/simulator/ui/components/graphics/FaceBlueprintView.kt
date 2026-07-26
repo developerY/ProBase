@@ -1,13 +1,11 @@
 package com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics
 
 import android.graphics.BlurMaskFilter
-import android.util.Log
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateOffsetAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
@@ -15,9 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,9 +30,7 @@ import androidx.compose.ui.graphics.asAndroidPath
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -52,7 +45,6 @@ fun FaceBlueprintView(
 ) {
     // SINGLE SOURCE OF TRUTH: Tracks the currently expanded card
     var expandedCategory by remember { mutableStateOf<String?>(null) }
-    var lastTapCoords by remember { mutableStateOf<String?>(null) }
 
     // 1. Global Layout Shifts
     val blueprintOffset = 10.dp
@@ -122,28 +114,9 @@ fun FaceBlueprintView(
         }
 
         // Callout Lines & Shades
-        val localDensity = LocalDensity.current
         Canvas(
             modifier = Modifier
                 .fillMaxSize()
-                .pointerInput(Unit) {
-                    detectTapGestures { tapOffset ->
-                        // 🛠️ Shift-Aware Tap Detector
-                        val centerX = size.width / 2f + horizontalShift.toPx()
-                        val centerY = size.height / 2f + blueprintOffset.toPx()
-                        with(localDensity) {
-                            val dpX = (tapOffset.x - centerX).toDp().value.toInt()
-                            val dpY = (tapOffset.y - centerY).toDp().value.toInt()
-
-                            lastTapCoords = "X: $dpX, Y: $dpY"
-
-                            Log.d("BlueprintCalibration", "--- TARGET CALIBRATION ---")
-                            Log.d("BlueprintCalibration", "If tapping for EYES box: Offset(${dpX}f, ${dpY}f)")
-                            Log.d("BlueprintCalibration", "If tapping for LIPS box: Offset(${dpX}f, ${dpY}f)")
-                            Log.d("BlueprintCalibration", "If tapping for CHEEKS box: Offset(${dpX}f, ${dpY}f)")
-                        }
-                    }
-                }
         ) {
             val center = Offset(size.width / 2 + horizontalShift.toPx(), size.height / 2 + blueprintOffset.toPx())
 
@@ -306,23 +279,6 @@ fun FaceBlueprintView(
                 ),
             anchorAlignment = Alignment.TopEnd
         )
-
-        // Live Coordinate Overlay (Visible in Interactive Preview)
-        lastTapCoords?.let { coords ->
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 80.dp)
-                    .background(Color.Black.copy(alpha = 0.7f), RoundedCornerShape(8.dp))
-                    .padding(horizontal = 12.dp, vertical = 6.dp)
-            ) {
-                Text(
-                    text = coords,
-                    color = Color.White,
-                    style = MaterialTheme.typography.labelMedium
-                )
-            }
-        }
     }
 }
 
