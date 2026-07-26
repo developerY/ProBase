@@ -58,6 +58,13 @@ include(":features:xr:xrglasses")
 include(":features:payment:googlepay")
 include(":features:payment:stripe")
 
+// --- Journal Application ---
+include(":applications:journal:model")
+include(":applications:journal:database")
+include(":applications:journal:data")
+include(":applications:journal:features:main")
+include(":applications:journal:apps:mobile")
+
 // --- AshBike Product Line ---
 include(":applications:ashbike:database")
 include(":applications:ashbike:apps:mobile")
