@@ -214,6 +214,24 @@ def generate_wardrobe():
             "colorHex": "#000000",
             "imageUrl": fix_url("https://images.unsplash.com/photo-1535043934128-cf0b28d52f95?auto=format&fit=crop&w=800&q=80"),
             "price": 890.00
+        },
+        {
+            "brand": "Saint Laurent",
+            "name": "Teddy Jacket",
+            "macroCategory": "OUTERWEAR",
+            "microCategory": "Jacket",
+            "colorHex": "#1A1A1A",
+            "imageUrl": fix_url("https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=800&q=80"),
+            "price": 2500.00
+        },
+        {
+            "brand": "The Row",
+            "name": "Cashmere Crewneck",
+            "macroCategory": "TOPS",
+            "microCategory": "Sweater",
+            "colorHex": "#F5F5DC",
+            "imageUrl": fix_url("https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&w=800&q=80"),
+            "price": 1200.00
         }
     ]
 

@@ -1,7 +1,6 @@
 package com.zoewave.probase.kocolor.features.settings.domain.seeder.model
 
 import com.zoewave.probase.core.model.ritual.ClothingCategory
-import com.zoewave.probase.core.model.ritual.ColorFamily
 import com.zoewave.probase.core.util.color.ColorQuantizer
 import com.zoewave.probase.kocolor.db.entity.ClothingItemEntity
 import kotlinx.serialization.Serializable
@@ -12,7 +11,7 @@ data class WardrobeSeedDto(
     val name: String,
     val macroCategory: String,
     val microCategory: String,
-    val colorHex: String?,
+    val colorHex: String,
     val imageUrl: String? = null,
     val price: Double? = null
 ) {
@@ -30,7 +29,7 @@ data class WardrobeSeedDto(
             brand = brand,
             category = category,
             colorHex = colorHex,
-            colorFamily = colorHex?.let { ColorQuantizer.snapToFamily(it) } ?: ColorFamily.UNKNOWN,
+            colorFamily = ColorQuantizer.snapToFamily(colorHex),
             dominantHex = colorHex,
             imageUrl = imageUrl?.let { 
                 when {
