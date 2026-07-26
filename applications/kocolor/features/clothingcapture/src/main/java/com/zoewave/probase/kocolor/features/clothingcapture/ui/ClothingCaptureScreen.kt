@@ -2,6 +2,7 @@ package com.zoewave.probase.kocolor.features.clothingcapture.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,7 +35,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -57,7 +61,9 @@ import com.zoewave.probase.features.camera.productcapture.ui.PriceConfirmationUi
 import com.zoewave.probase.features.camera.productcapture.ui.PriceConfirmationView
 import com.zoewave.probase.features.camera.productcapture.ui.ProductCaptureSessionConfig
 import com.zoewave.probase.features.camera.productcapture.ui.ProductCaptureUiEvent
+import com.zoewave.probase.features.graphics.colorpicker.ui.ColorPickerDialog
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
+import com.zoewave.probase.features.graphics.colorpicker.util.toHex
 import com.zoewave.probase.kocolor.features.clothingcapture.ui.state.ClothingCaptureStep
 import com.zoewave.probase.kocolor.features.clothingcapture.ui.state.ClothingCaptureUiState
 import com.zoewave.probase.kocolor.model.KoColorRoute
@@ -73,6 +79,7 @@ sealed interface ClothingCaptureEvent {
     data object ContinueToReview : ClothingCaptureEvent
     data object FinalizeProduct : ClothingCaptureEvent
     data object SaveProduct : ClothingCaptureEvent
+    data class FinalReviewColorChanged(val hex: String) : ClothingCaptureEvent
     data class OnColorSelected(val hex: String) : ClothingCaptureEvent
     data object ConfirmColor : ClothingCaptureEvent
     data object ClearColor : ClothingCaptureEvent
@@ -218,6 +225,7 @@ internal fun ClothingCaptureScreen(
         is ClothingCaptureUiState.FinalReview -> {
             FinalClothingValidationView(
                 item = uiState.item,
+                onColorChanged = { onEvent(ClothingCaptureEvent.FinalReviewColorChanged(it)) },
                 onSave = { onEvent(ClothingCaptureEvent.SaveProduct) },
                 onCancel = { onEvent(ClothingCaptureEvent.Dismiss) }
             )
@@ -229,9 +237,12 @@ internal fun ClothingCaptureScreen(
 @Composable
 private fun FinalClothingValidationView(
     item: com.zoewave.probase.core.model.ritual.ClothingItem,
+    onColorChanged: (String) -> Unit,
     onSave: () -> Unit,
     onCancel: () -> Unit
 ) {
+    var showColorPicker by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -267,17 +278,31 @@ private fun FinalClothingValidationView(
                 
                 Spacer(Modifier.height(16.dp))
                 
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable { showColorPicker = true }
+                        .padding(vertical = 4.dp)
+                ) {
                     Box(
                         modifier = Modifier
                             .size(24.dp)
-                            .background(parseColor(item.colorHex ?: "#FFFFFF"), CircleShape)
+                            .background(parseColor(item.colorHex), CircleShape)
                             .border(1.dp, Color.White.copy(alpha = 0.2f), CircleShape)
                     )
                     Spacer(Modifier.width(12.dp))
                     Text("Verified Color", color = Color.White, style = MaterialTheme.typography.bodyLarge)
                 }
             }
+        }
+
+        if (showColorPicker) {
+            ColorPickerDialog(
+                initialColor = parseColor(item.colorHex),
+                onColorSelected = { onColorChanged(it.toHex()) },
+                onDismissRequest = { showColorPicker = false }
+            )
         }
         
         Spacer(Modifier.height(48.dp))

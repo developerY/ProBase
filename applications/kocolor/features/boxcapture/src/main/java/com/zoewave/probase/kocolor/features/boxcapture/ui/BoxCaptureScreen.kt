@@ -2,6 +2,7 @@ package com.zoewave.probase.kocolor.features.boxcapture.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,7 +37,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -62,7 +66,9 @@ import com.zoewave.probase.features.camera.productcapture.ui.PriceConfirmationUi
 import com.zoewave.probase.features.camera.productcapture.ui.PriceConfirmationView
 import com.zoewave.probase.features.camera.productcapture.ui.ProductCaptureSessionConfig
 import com.zoewave.probase.features.camera.productcapture.ui.ProductCaptureUiEvent
+import com.zoewave.probase.features.graphics.colorpicker.ui.ColorPickerDialog
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
+import com.zoewave.probase.features.graphics.colorpicker.util.toHex
 import com.zoewave.probase.kocolor.features.boxcapture.ui.state.BoxCaptureUiState
 import com.zoewave.probase.kocolor.features.boxcapture.ui.state.CaptureMode
 import com.zoewave.probase.kocolor.features.boxcapture.ui.state.CaptureStep
@@ -82,6 +88,7 @@ sealed interface BoxCaptureEvent {
     data object ContinueToReview : BoxCaptureEvent
     data object FinalizeProduct : BoxCaptureEvent
     data object SaveProduct : BoxCaptureEvent
+    data class FinalReviewColorChanged(val hex: String) : BoxCaptureEvent
     data class OnColorSelected(val hex: String) : BoxCaptureEvent
     data object ConfirmColor : BoxCaptureEvent
     data object ClearColor : BoxCaptureEvent
@@ -234,6 +241,7 @@ internal fun BoxCaptureScreen(
             // For now, we'll show a finalized summary
             FinalValidationView(
                 item = uiState.item,
+                onColorChanged = { onEvent(BoxCaptureEvent.FinalReviewColorChanged(it)) },
                 onSave = { onEvent(BoxCaptureEvent.SaveProduct) },
                 onCancel = { onEvent(BoxCaptureEvent.Dismiss) }
             )
@@ -245,9 +253,12 @@ internal fun BoxCaptureScreen(
 @Composable
 private fun FinalValidationView(
     item: ProductEntity,
+    onColorChanged: (String) -> Unit,
     onSave: () -> Unit,
     onCancel: () -> Unit
 ) {
+    var showColorPicker by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -283,7 +294,13 @@ private fun FinalValidationView(
                 
                 Spacer(Modifier.height(16.dp))
                 
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable { showColorPicker = true }
+                        .padding(vertical = 4.dp)
+                ) {
                     Box(
                         modifier = Modifier
                             .size(24.dp)
@@ -294,6 +311,14 @@ private fun FinalValidationView(
                     Text(item.shadeName ?: "Unknown Shade", color = Color.White, style = MaterialTheme.typography.bodyLarge)
                 }
             }
+        }
+
+        if (showColorPicker) {
+            ColorPickerDialog(
+                initialColor = item.colorHex?.let { parseColor(it) } ?: Color.White,
+                onColorSelected = { onColorChanged(it.toHex()) },
+                onDismissRequest = { showColorPicker = false }
+            )
         }
         
         Spacer(Modifier.height(48.dp))
