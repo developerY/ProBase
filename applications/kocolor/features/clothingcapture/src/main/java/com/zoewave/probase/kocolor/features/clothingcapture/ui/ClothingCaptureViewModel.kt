@@ -15,8 +15,8 @@ import com.zoewave.probase.core.model.network.DiscoveryStatus
 import com.zoewave.probase.core.model.network.ServiceStatus
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
-import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
 import com.zoewave.probase.features.ai.local.data.LocalAiEngine
+import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
 import com.zoewave.probase.kocolor.features.analyzer.data.LocalProductAnalyzer
 import com.zoewave.probase.kocolor.features.clothingcapture.ui.state.ClothingCaptureStep
 import com.zoewave.probase.kocolor.features.clothingcapture.ui.state.ClothingCaptureUiState
@@ -82,6 +82,12 @@ class ClothingCaptureViewModel @Inject constructor(
             ClothingCaptureEvent.ContinueToReview -> prepareReview()
             ClothingCaptureEvent.FinalizeProduct -> finalizeProduct()
             ClothingCaptureEvent.SaveProduct -> saveAndFinish()
+            is ClothingCaptureEvent.FinalReviewColorChanged -> {
+                val current = (uiState.value as? ClothingCaptureUiState.FinalReview) ?: return
+                val updatedItem = current.item.copy(colorHex = event.hex)
+                _uiState.value = current.copy(item = updatedItem)
+                sessionRepository.setClothingDraft(updatedItem)
+            }
             ClothingCaptureEvent.SkipStep -> skipStep()
             is ClothingCaptureEvent.OnColorSelected -> {
                 sessionManualColor = event.hex
@@ -312,11 +318,13 @@ class ClothingCaptureViewModel @Inject constructor(
                 
                 if (jsonText != null) {
                     sessionRepository.updateServiceStatus("gemini", ServiceStatus.SUCCESS, "Fashion analysis complete.")
-                    var item = parseJsonToClothingItem(jsonText).copy(
+                    val item = parseJsonToClothingItem(jsonText).copy(
                         imageUrl = capturedUris.firstOrNull { it.isNotBlank() },
                         colorHex = manualColor ?: "#FFFFFF",
                         price = capturedPrice
                     )
+                    
+                    sessionRepository.setClothingDraft(item)
                     
                     // --- Color API Enrichment (Post-Gemini) ---
                     val colorToIdentify = manualColor ?: item.colorHex
@@ -394,11 +402,12 @@ class ClothingCaptureViewModel @Inject constructor(
     }
 
     private fun finalizeProduct() {
-        val current = sessionRepository.cosmeticDraft.value // We'll assume Clothing uses this too or I need to check
-        // Actually, we'll just transition to FinalReview with the last known state
-        // I'll need to store the interim ClothingItem somewhere.
-        // For now, let's just use a dummy to ensure the screen appears.
-        _uiState.value = ClothingCaptureUiState.FinalReview(ClothingItem(name = "Review Item", category = ClothingCategory.OTHER, colorHex = "#FFFFFF"))
+        val draft = sessionRepository.clothingDraft.value
+        if (draft != null) {
+            _uiState.value = ClothingCaptureUiState.FinalReview(draft)
+        } else {
+            _uiState.value = ClothingCaptureUiState.FinalReview(ClothingItem(name = "Extracted Garment", category = ClothingCategory.OTHER, colorHex = "#FFFFFF"))
+        }
     }
 
     fun saveAndFinish() {

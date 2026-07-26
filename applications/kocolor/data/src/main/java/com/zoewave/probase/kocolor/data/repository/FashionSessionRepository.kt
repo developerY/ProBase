@@ -4,6 +4,7 @@ import android.util.Log
 import com.zoewave.probase.core.model.network.DiscoveryStatus
 import com.zoewave.probase.core.model.network.ServiceHealth
 import com.zoewave.probase.core.model.network.ServiceStatus
+import com.zoewave.probase.core.model.ritual.ClothingItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -46,6 +47,9 @@ class FashionSessionRepository @Inject constructor() {
 
     private val _cosmeticDraft = MutableStateFlow<com.zoewave.probase.core.model.ritual.CosmeticItem?>(null)
     val cosmeticDraft: StateFlow<com.zoewave.probase.core.model.ritual.CosmeticItem?> = _cosmeticDraft.asStateFlow()
+
+    private val _clothingDraft = MutableStateFlow<ClothingItem?>(null)
+    val clothingDraft: StateFlow<ClothingItem?> = _clothingDraft.asStateFlow()
 
     private val _productDraft = MutableStateFlow<com.zoewave.probase.kocolor.db.entity.ProductEntity?>(null)
     val productDraft: StateFlow<com.zoewave.probase.kocolor.db.entity.ProductEntity?> = _productDraft.asStateFlow()
@@ -110,6 +114,11 @@ class FashionSessionRepository @Inject constructor() {
         _cosmeticDraft.value = item
     }
 
+    fun setClothingDraft(item: ClothingItem?) {
+        Log.d("KoColorSession", "Setting Clothing Draft: ${item?.name}")
+        _clothingDraft.value = item
+    }
+
     fun setProductDraft(product: com.zoewave.probase.kocolor.db.entity.ProductEntity?) {
         Log.d("KoColorSession", "Setting Product Draft: ${product?.productName}")
         _productDraft.value = product
@@ -124,6 +133,7 @@ class FashionSessionRepository @Inject constructor() {
         _capturedItemUri.value = null
         _lastScannedCode.value = null
         _cosmeticDraft.value = null
+        _clothingDraft.value = null
         _scanState.value = ScanStatus.IDLE
     }
 }

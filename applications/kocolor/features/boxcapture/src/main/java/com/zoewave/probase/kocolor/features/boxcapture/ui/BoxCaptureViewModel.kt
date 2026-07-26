@@ -8,13 +8,12 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.BackoffPolicy
-import androidx.work.Data
 import androidx.work.Constraints
+import androidx.work.Data
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkRequest
 import androidx.work.WorkManager
-import java.util.concurrent.TimeUnit
+import androidx.work.WorkRequest
 import com.zoewave.probase.core.data.repository.AiConfigurationSettings
 import com.zoewave.probase.core.model.network.DiscoveryStatus
 import com.zoewave.probase.core.model.network.ServiceStatus
@@ -31,12 +30,11 @@ import com.zoewave.probase.kocolor.data.usecase.DeterministicApiMetadata
 import com.zoewave.probase.kocolor.data.usecase.ResolveProductUseCase
 import com.zoewave.probase.kocolor.data.worker.EnrichmentWorker
 import com.zoewave.probase.kocolor.db.dao.ProductDao
-import com.zoewave.probase.kocolor.db.entity.EnrichmentStatus
-import com.zoewave.probase.kocolor.db.entity.ProductEntity
-import com.zoewave.probase.core.util.SurgicalCropper
 import com.zoewave.probase.kocolor.features.analyzer.data.LocalProductAnalyzer
-import com.zoewave.probase.features.camera.productcapture.ui.ScannerOverlay
-import com.zoewave.probase.kocolor.features.boxcapture.ui.state.*
+import com.zoewave.probase.kocolor.features.boxcapture.ui.state.BoxCaptureUiState
+import com.zoewave.probase.kocolor.features.boxcapture.ui.state.CaptureMode
+import com.zoewave.probase.kocolor.features.boxcapture.ui.state.CaptureStep
+import com.zoewave.probase.kocolor.features.boxcapture.ui.state.DiscoveryState
 import com.zoewave.probase.kocolor.features.chemicals.domain.repository.ChemicalRepository
 import com.zoewave.probase.kocolor.features.colors.domain.repository.ColorRepository
 import com.zoewave.probase.kocolor.features.fda.data.repository.FdaRepository
@@ -49,6 +47,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @HiltViewModel
@@ -122,6 +121,10 @@ class BoxCaptureViewModel @Inject constructor(
             BoxCaptureEvent.SkipStep -> skipStep()
             BoxCaptureEvent.ContinueToReview -> {
                 viewModelScope.launch { resolveAndSave() }
+            }
+            is BoxCaptureEvent.FinalReviewColorChanged -> {
+                val current = (uiState.value as? BoxCaptureUiState.FinalReview) ?: return
+                _uiState.value = current.copy(item = current.item.copy(colorHex = event.hex))
             }
             BoxCaptureEvent.FinalizeProduct -> { /* Handled by resolveAndSave */ }
             BoxCaptureEvent.SaveProduct -> saveAndFinish()
