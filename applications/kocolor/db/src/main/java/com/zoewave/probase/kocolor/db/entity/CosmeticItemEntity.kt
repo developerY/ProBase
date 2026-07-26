@@ -18,7 +18,7 @@ data class CosmeticItemEntity(
     val finish: Finish = Finish.UNKNOWN,
     val coverage: Coverage = Coverage.NOT_APPLICABLE,
     
-    val colorHex: String? = null,
+    val colorHex: String,
     val colorFamily: ColorFamily = ColorFamily.UNKNOWN,
     val shadeName: String? = null,
     val imageUrl: String? = null,

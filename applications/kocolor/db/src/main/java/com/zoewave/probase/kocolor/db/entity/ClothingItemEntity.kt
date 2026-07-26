@@ -13,7 +13,7 @@ data class ClothingItemEntity(
     val brand: String? = null,
     val category: ClothingCategory,
     val formality: Formality = Formality.CASUAL,
-    val colorHex: String? = null,
+    val colorHex: String,
     val colorFamily: ColorFamily = ColorFamily.UNKNOWN,
     val size: String? = null,
     val material: String? = null,
