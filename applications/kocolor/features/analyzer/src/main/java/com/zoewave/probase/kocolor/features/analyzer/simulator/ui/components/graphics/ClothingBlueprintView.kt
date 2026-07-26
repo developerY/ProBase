@@ -47,23 +47,26 @@ fun ClothingBlueprintView(
 
     val blueprintOffset = 10.dp
     val horizontalShift = 0.dp
-    
-    // 2. Define Feature Anchor Points (Start of the lines)
-    val topAnchor = Offset(10.dp.value, -120.dp.value)
-    val bottomAnchor = Offset(-10.dp.value, 20.dp.value)
-    val shoesAnchor = Offset(10.dp.value, 180.dp.value)
+
+    // 🛠️ 2. Corrected Body Anchors (Chest, Thigh, and Feet)
+    val topAnchor = Offset(0.dp.value, -60.dp.value)
+    val bottomAnchor = Offset(0.dp.value, 30.dp.value)
+    val shoesAnchor = Offset(0.dp.value, 145.dp.value)
 
     // 3. Define Dynamic Callout Targets (End of the lines)
     val topTarget by animateOffsetAsState(
-        if (expandedCategory == "TOP") Offset(70f, -170f) else Offset(90f, -150f),
+        // Pulls inward to 15f when expanded, rests at 60f when collapsed
+        if (expandedCategory == "TOP") Offset(7f, -120f) else Offset(50f, -125f),
         label = "topTarget"
     )
     val bottomTarget by animateOffsetAsState(
-        if (expandedCategory == "BOTTOM") Offset(-80f, 40f) else Offset(-100f, 60f),
+        // Pulls inward to -15f when expanded, rests at -60f when collapsed
+        if (expandedCategory == "BOTTOM") Offset(-15f, 50f) else Offset(-60f, 60f),
         label = "bottomTarget"
     )
     val shoesTarget by animateOffsetAsState(
-        if (expandedCategory == "SHOES") Offset(80f, 180f) else Offset(100f, 200f),
+        // Pulls inward to 15f when expanded, rests at 60f when collapsed
+        if (expandedCategory == "SHOES") Offset(15f, 170f) else Offset(60f, 180f),
         label = "shoesTarget"
     )
 
@@ -108,9 +111,9 @@ fun ClothingBlueprintView(
                         with(localDensity) {
                             val dpX = (tapOffset.x - centerX).toDp().value.toInt()
                             val dpY = (tapOffset.y - centerY).toDp().value.toInt()
-                            
+
                             lastTapCoords = "X: $dpX, Y: $dpY"
-                            
+
                             Log.d("BlueprintCalibration", "--- BODY TAP DETECTED ---")
                             Log.d("BlueprintCalibration", "Anchor Point: Offset(${dpX}.dp.value, ${dpY}.dp.value)")
                             Log.d("BlueprintCalibration", "Target Point: Offset(${dpX}f, ${dpY}f)")
@@ -119,7 +122,7 @@ fun ClothingBlueprintView(
                 }
         ) {
             val center = Offset(size.width / 2 + horizontalShift.toPx(), size.height / 2 + blueprintOffset.toPx())
-            
+
             val lineStroke = 0.8.dp.toPx()
             val anchorRadius = 2.dp.toPx()
             val lineColor = Color.DarkGray.copy(alpha = 0.4f)
@@ -136,7 +139,7 @@ fun ClothingBlueprintView(
             drawLine(lineColor, Offset(center.x + shoesAnchor.x.dp.toPx(), center.y + shoesAnchor.y.dp.toPx()), Offset(center.x + shoesTarget.x.dp.toPx(), center.y + shoesTarget.y.dp.toPx()), lineStroke)
             drawCircle(lineColor, anchorRadius, Offset(center.x + shoesAnchor.x.dp.toPx(), center.y + shoesAnchor.y.dp.toPx()))
 
-            // Debug Markers
+            // Debug Markers (Comment out or remove when finished calibrating)
             val markerColor = Color.Red.copy(alpha = 0.5f)
             val markerRadius = 3.dp.toPx()
             listOf(topAnchor, bottomAnchor, shoesAnchor).forEach { point ->
@@ -144,6 +147,7 @@ fun ClothingBlueprintView(
             }
         }
 
+        // 🛠️ The established standard half-height from the Face Blueprint
         val calloutHalfHeight = 24.dp
 
         // --- TOP CALLOUT (Pinned at BottomStart) ---
@@ -157,8 +161,9 @@ fun ClothingBlueprintView(
                 .zIndex(if (expandedCategory == "TOP") 10f else 1f)
                 .width(topWidth)
                 .offset(
-                    x = horizontalShift + topTarget.x.dp + 6.dp,
-                    y = blueprintOffset + topTarget.y.dp - (if (expandedCategory == "TOP") 80.dp else 48.dp) - 6.dp
+                    // 🛠️ Fixed: Uses standard Half-Width and Half-Height logic
+                    x = horizontalShift + topTarget.x.dp + (topWidth / 2),
+                    y = blueprintOffset + topTarget.y.dp - calloutHalfHeight
                 ),
             anchorAlignment = Alignment.BottomStart
         )
@@ -174,8 +179,9 @@ fun ClothingBlueprintView(
                 .zIndex(if (expandedCategory == "BOTTOM") 10f else 1f)
                 .width(bottomWidth)
                 .offset(
-                    x = horizontalShift + bottomTarget.x.dp - bottomWidth - 6.dp,
-                    y = blueprintOffset + bottomTarget.y.dp + 6.dp
+                    // 🛠️ Fixed: Subtract HALF the width so it stays on screen
+                    x = horizontalShift + bottomTarget.x.dp - (bottomWidth / 2),
+                    y = blueprintOffset + bottomTarget.y.dp + calloutHalfHeight
                 ),
             anchorAlignment = Alignment.TopEnd
         )
@@ -191,8 +197,9 @@ fun ClothingBlueprintView(
                 .zIndex(if (expandedCategory == "SHOES") 10f else 1f)
                 .width(shoesWidth)
                 .offset(
-                    x = horizontalShift + shoesTarget.x.dp + 6.dp,
-                    y = blueprintOffset + shoesTarget.y.dp + 6.dp
+                    // 🛠️ Fixed: Standard Half-Width and Half-Height logic
+                    x = horizontalShift + shoesTarget.x.dp + (shoesWidth / 2),
+                    y = blueprintOffset + shoesTarget.y.dp + calloutHalfHeight
                 ),
             anchorAlignment = Alignment.TopStart
         )
