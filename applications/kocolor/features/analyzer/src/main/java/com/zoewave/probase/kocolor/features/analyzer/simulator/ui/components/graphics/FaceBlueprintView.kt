@@ -82,15 +82,15 @@ fun FaceBlueprintView(
 
     // 3. Define Dynamic Callout Targets (End of the lines)
     val eyesTarget by animateOffsetAsState(
-        if (expandedCategory == "EYES") Offset(90f, -197f) else Offset(90f, -151f),
+        if (expandedCategory == "EYES") Offset(50f, -92f) else Offset(90f, -90f),
         label = "eyesTarget"
     )
     val cheeksTarget by animateOffsetAsState(
-        if (expandedCategory == "CHEEKS") Offset(0f, 140f) else Offset(20f, 150f),
+        if (expandedCategory == "CHEEKS") Offset(0f, 120f) else Offset(20f, 150f),
         label = "cheeksTarget"
     )
     val lipsTarget by animateOffsetAsState(
-        if (expandedCategory == "LIPS") Offset(-25f, 94f) else Offset(-40f, 95f),
+        if (expandedCategory == "LIPS") Offset(7f, 97f) else Offset(-40f, 95f),
         label = "lipsTarget"
     )
 
@@ -265,8 +265,10 @@ fun FaceBlueprintView(
                 .zIndex(if (expandedCategory == "EYES") 10f else 1f)
                 .width(eyesWidth)
                 .offset(
+                    // Subtract half-width to pin the BottomEnd (Right) corner dot to the line
                     x = horizontalShift + eyesTarget.x.dp - (eyesWidth / 2),
-                    y = blueprintOffset + eyesTarget.y.dp - (if (expandedCategory == "EYES") 80.dp else 48.dp)
+                    // Subtract half-height to pin the BottomEnd (Bottom) corner dot to the line
+                    y = blueprintOffset + eyesTarget.y.dp - calloutHalfHeight
                 ),
             anchorAlignment = Alignment.BottomEnd
         )
