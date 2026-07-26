@@ -238,9 +238,9 @@ fun FaceBlueprintView(
             val anchorRadius = 2.dp.toPx()
             val lineColor = Color.DarkGray.copy(alpha = 0.4f)
 
-            // EYES Line (Attaches to Left Eye)
-            drawLine(lineColor, Offset(center.x + eyeLeftAnchor.x.dp.toPx(), center.y + eyeLeftAnchor.y.dp.toPx()), Offset(center.x + eyesTarget.x.dp.toPx(), center.y + eyesTarget.y.dp.toPx()), lineStroke)
-            drawCircle(lineColor, anchorRadius, Offset(center.x + eyeLeftAnchor.x.dp.toPx(), center.y + eyeLeftAnchor.y.dp.toPx()))
+            // EYES Line (Attaches to Right Eye)
+            drawLine(lineColor, Offset(center.x + eyeRightAnchor.x.dp.toPx(), center.y + eyeRightAnchor.y.dp.toPx()), Offset(center.x + eyesTarget.x.dp.toPx(), center.y + eyesTarget.y.dp.toPx()), lineStroke)
+            drawCircle(lineColor, anchorRadius, Offset(center.x + eyeRightAnchor.x.dp.toPx(), center.y + eyeRightAnchor.y.dp.toPx()))
 
             // CHEEKS Line (Attaches to Right Cheek)
             drawLine(lineColor, Offset(center.x + cheekRightAnchor.x.dp.toPx(), center.y + cheekRightAnchor.y.dp.toPx()), Offset(center.x + cheeksTarget.x.dp.toPx(), center.y + cheeksTarget.y.dp.toPx()), lineStroke)
@@ -254,7 +254,7 @@ fun FaceBlueprintView(
         // 5. Render the Callouts
         val calloutHalfHeight = 24.dp // Pushes the card down so the top-corner dot hits the line
 
-        // --- EYES CALLOUT (Left Side) ---
+        // --- EYES CALLOUT (Center/Top) ---
         BlueprintCallout(
             label = "EYES",
             productName = data.eyesItem?.name ?: "Pending...",
@@ -266,9 +266,9 @@ fun FaceBlueprintView(
                 .width(eyesWidth)
                 .offset(
                     x = horizontalShift + eyesTarget.x.dp - (eyesWidth / 2),
-                    y = blueprintOffset + eyesTarget.y.dp + calloutHalfHeight
+                    y = blueprintOffset + eyesTarget.y.dp - (if (expandedCategory == "EYES") 80.dp else 48.dp)
                 ),
-            anchorAlignment = Alignment.TopEnd
+            anchorAlignment = Alignment.BottomEnd
         )
 
         // --- CHEEKS CALLOUT (Right Side) ---

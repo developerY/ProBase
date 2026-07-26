@@ -51,8 +51,15 @@ fun AnchorDot(
         modifier = modifier
             // 1. Proportional Offset (Keeps the center pinned during animation)
             .offset(
-                x = if (anchorAlignment == Alignment.TopEnd) (dotSize / 3) else -(dotSize / 3),
-                y = -(dotSize / 3)
+                x = when (anchorAlignment) {
+                    Alignment.TopEnd -> (dotSize / 3)
+                    Alignment.TopStart -> -(dotSize / 3)
+                    Alignment.BottomEnd -> (dotSize / 3)
+                    Alignment.BottomStart -> -(dotSize / 3)
+                    else -> 0.dp // Center alignments
+                },
+                y = if (anchorAlignment == Alignment.TopStart || anchorAlignment == Alignment.TopEnd || anchorAlignment == Alignment.TopCenter) 
+                    -(dotSize / 3) else (dotSize / 3)
             )
             .size(dotSize)
             // 2. Outer Drop Shadow (Lifts the well off the Canvas line)
