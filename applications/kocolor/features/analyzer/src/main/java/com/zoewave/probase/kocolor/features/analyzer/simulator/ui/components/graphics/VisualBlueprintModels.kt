@@ -28,7 +28,7 @@ data class VisualBlueprintData(
 data class BlueprintItem(
     val id: Long?,
     val name: String,
-    val colorHex: String?,
+    val colorHex: String,
     val imageUrl: String? = null
 )
 
@@ -54,14 +54,14 @@ fun FashionAdvice.toVisualBlueprintData(): VisualBlueprintData {
 private fun MakeupSuggestion.toBlueprintItem() = BlueprintItem(
     id = productId,
     name = suggestedProductName ?: category,
-    colorHex = recommendedColors.firstOrNull(),
+    colorHex = recommendedColors.firstOrNull() ?: "#FFFFFF", // Standard fallback for invalid suggestions
     imageUrl = suggestedProductImageUrl
 )
 
 private fun SuggestedPiece.toBlueprintItem() = BlueprintItem(
-    id = null, // SuggestedPiece doesn't have an ID in the model
+    id = null,
     name = name,
-    colorHex = null, // SuggestedPiece doesn't have a color hex in the model, though it might be in description or we could infer it
+    colorHex = colorHex, // Now mandatory in the model
     imageUrl = imageUrl
 )
 

@@ -26,6 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.kocolor.features.inventory.R
 import com.zoewave.probase.kocolor.features.inventory.ui.components.*
 import com.zoewave.probase.core.model.ritual.ClothingItem
@@ -42,7 +43,7 @@ private fun WardrobeLandingScreenPreview() {
                 totalItems = 9,
                 totalInvestment = 1615.0,
                 items = listOf(
-                    ClothingItem(id = 1, name = "Blouse", category = com.zoewave.probase.core.model.ritual.ClothingCategory.TOPS)
+                    ClothingItem(id = 1, name = "Blouse", category = ClothingCategory.TOPS, colorHex = "#FFFFFF")
                 )
             ),
             onEvent = {},

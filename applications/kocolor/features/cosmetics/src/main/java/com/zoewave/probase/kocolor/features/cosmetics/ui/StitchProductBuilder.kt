@@ -111,7 +111,8 @@ private fun StitchProductBuilderEditPreview() {
                     name = "Luminous Silk Foundation",
                     brand = "Armani",
                     macroCategory = MacroCategory.COMPLEXION,
-                    microCategory = MicroCategory.FOUNDATION
+                    microCategory = MicroCategory.FOUNDATION,
+                    colorHex = "#FFFFFF"
                 )
             ),
             onEvent = {},

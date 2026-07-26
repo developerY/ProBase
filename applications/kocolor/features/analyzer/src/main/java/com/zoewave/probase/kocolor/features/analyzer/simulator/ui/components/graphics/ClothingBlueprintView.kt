@@ -1,12 +1,11 @@
 package com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics
 
-import android.util.Log
+import android.graphics.BlurMaskFilter
+import android.graphics.RectF
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateOffsetAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,8 +13,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,13 +24,16 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import com.zoewave.probase.kocolor.features.analyzer.R
 
 @Composable
@@ -43,7 +43,6 @@ fun ClothingBlueprintView(
 ) {
     // SINGLE SOURCE OF TRUTH: Tracks the currently expanded card
     var expandedCategory by remember { mutableStateOf<String?>(null) }
-    var lastTapCoords by remember { mutableStateOf<String?>(null) }
 
     val blueprintOffset = 10.dp
     val horizontalShift = 0.dp
@@ -99,30 +98,52 @@ fun ClothingBlueprintView(
             )
         }
 
-        // Callout Lines
-        val localDensity = LocalDensity.current
+        // Callout Lines & Shades
         Canvas(
-            modifier = Modifier
-                .fillMaxSize()
-                .pointerInput(Unit) {
-                    detectTapGestures { tapOffset ->
-                        val centerX = size.width / 2f + horizontalShift.toPx()
-                        val centerY = size.height / 2f + blueprintOffset.toPx()
-                        with(localDensity) {
-                            val dpX = (tapOffset.x - centerX).toDp().value.toInt()
-                            val dpY = (tapOffset.y - centerY).toDp().value.toInt()
-
-                            lastTapCoords = "X: $dpX, Y: $dpY"
-
-                            Log.d("BlueprintCalibration", "--- BODY TAP DETECTED ---")
-                            Log.d("BlueprintCalibration", "Anchor Point: Offset(${dpX}.dp.value, ${dpY}.dp.value)")
-                            Log.d("BlueprintCalibration", "Target Point: Offset(${dpX}f, ${dpY}f)")
-                        }
-                    }
-                }
+            modifier = Modifier.fillMaxSize()
         ) {
             val center = Offset(size.width / 2 + horizontalShift.toPx(), size.height / 2 + blueprintOffset.toPx())
 
+            // 1. Draw "Shades" (Soft Editorial Tints)
+            data.topItem?.let { item ->
+                val pigment = parseColor(item.colorHex).copy(alpha = 0.22f)
+                val topRect = RectF(
+                    center.x - 45.dp.toPx(), center.y - 100.dp.toPx(),
+                    center.x + 45.dp.toPx(), center.y - 20.dp.toPx()
+                )
+                drawIntoCanvas { canvas ->
+                    val paint = Paint().asFrameworkPaint().apply {
+                        isAntiAlias = true
+                        color = pigment.toArgb()
+                        maskFilter = BlurMaskFilter(25f.dp.toPx(), BlurMaskFilter.Blur.NORMAL)
+                    }
+                    canvas.nativeCanvas.drawOval(topRect, paint)
+                }
+            }
+
+            data.bottomItem?.let { item ->
+                val pigment = parseColor(item.colorHex).copy(alpha = 0.2f)
+                val bottomRect = RectF(
+                    center.x - 35.dp.toPx(), center.y + 0.dp.toPx(),
+                    center.x + 35.dp.toPx(), center.y + 120.dp.toPx()
+                )
+                drawIntoCanvas { canvas ->
+                    val paint = Paint().asFrameworkPaint().apply {
+                        isAntiAlias = true
+                        color = pigment.toArgb()
+                        maskFilter = BlurMaskFilter(30f.dp.toPx(), BlurMaskFilter.Blur.NORMAL)
+                    }
+                    canvas.nativeCanvas.drawOval(bottomRect, paint)
+                }
+            }
+
+            data.shoeItem?.let { item ->
+                val pigment = parseColor(item.colorHex).copy(alpha = 0.25f)
+                drawCircle(pigment, radius = 12.dp.toPx(), center = Offset(center.x - 12.dp.toPx(), center.y + 145.dp.toPx()))
+                drawCircle(pigment, radius = 12.dp.toPx(), center = Offset(center.x + 12.dp.toPx(), center.y + 145.dp.toPx()))
+            }
+
+            // 2. Draw Callout Lines (Using animated targets)
             val lineStroke = 0.8.dp.toPx()
             val anchorRadius = 2.dp.toPx()
             val lineColor = Color.DarkGray.copy(alpha = 0.4f)
@@ -138,13 +159,6 @@ fun ClothingBlueprintView(
             // SHOES Line
             drawLine(lineColor, Offset(center.x + shoesAnchor.x.dp.toPx(), center.y + shoesAnchor.y.dp.toPx()), Offset(center.x + shoesTarget.x.dp.toPx(), center.y + shoesTarget.y.dp.toPx()), lineStroke)
             drawCircle(lineColor, anchorRadius, Offset(center.x + shoesAnchor.x.dp.toPx(), center.y + shoesAnchor.y.dp.toPx()))
-
-            // Debug Markers (Comment out or remove when finished calibrating)
-            val markerColor = Color.Red.copy(alpha = 0.5f)
-            val markerRadius = 3.dp.toPx()
-            listOf(topAnchor, bottomAnchor, shoesAnchor).forEach { point ->
-                drawCircle(markerColor, markerRadius, Offset(center.x + point.x.dp.toPx(), center.y + point.y.dp.toPx()))
-            }
         }
 
         // 🛠️ The established standard half-height from the Face Blueprint
@@ -203,23 +217,6 @@ fun ClothingBlueprintView(
                 ),
             anchorAlignment = Alignment.TopStart
         )
-
-        // Live Coordinate Overlay
-        lastTapCoords?.let { coords ->
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 80.dp)
-                    .background(Color.Black.copy(alpha = 0.7f), RoundedCornerShape(8.dp))
-                    .padding(horizontal = 12.dp, vertical = 6.dp)
-            ) {
-                Text(
-                    text = coords,
-                    color = Color.White,
-                    style = MaterialTheme.typography.labelMedium
-                )
-            }
-        }
     }
 }
 

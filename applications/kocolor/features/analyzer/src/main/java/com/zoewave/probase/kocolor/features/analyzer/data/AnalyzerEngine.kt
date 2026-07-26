@@ -152,7 +152,7 @@ class AnalyzerEngine @Inject constructor() {
                 brand = result.brand,
                 macroCategory = micro.macro,
                 microCategory = micro,
-                colorHex = result.colorHex,
+                colorHex = result.colorHex ?: "#FFFFFF",
                 shadeName = result.shadeName,
                 notes = result.notes
             )

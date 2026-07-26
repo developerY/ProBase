@@ -1,6 +1,5 @@
 package com.zoewave.probase.kocolor.features.settings.domain.seeder.model
 
-import com.zoewave.probase.core.model.ritual.ColorFamily
 import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.core.model.ritual.MicroCategory
 import com.zoewave.probase.core.util.color.ColorQuantizer
@@ -13,7 +12,7 @@ data class CosmeticSeedDto(
     val name: String,
     val macroCategory: String,
     val microCategory: String,
-    val colorHex: String?,
+    val colorHex: String,
     val imageUrl: String? = null,
     val price: Double? = null
 ) {
@@ -36,7 +35,7 @@ data class CosmeticSeedDto(
             macroCategory = macro,
             microCategory = micro,
             colorHex = colorHex,
-            colorFamily = colorHex?.let { ColorQuantizer.snapToFamily(it) } ?: ColorFamily.UNKNOWN,
+            colorFamily = ColorQuantizer.snapToFamily(colorHex),
             imageUrl = imageUrl?.let { 
                 when {
                     it.startsWith("//") -> "https:$it"

@@ -1,5 +1,6 @@
 package com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics
 
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -42,9 +44,14 @@ fun HandBlueprintView(
     val blueprintOffset = 10.dp
     val horizontalShift = 0.dp
     
-    // Define Unified Offsets
-    val nailsAnchor = Offset(-19.dp.value, -61.dp.value)
+    // 2. Define Feature Anchor Points (Start of the lines)
+    val nailsAnchor = Offset(-19.dp.value, -61.dp.value) // Ring finger
     val nailsCallout = Offset(-105.dp.value, 119.dp.value)
+
+    // 4. Animate Width
+    val nailsWidth by animateDpAsState(if (expandedCategory == "NAILS") 160.dp else 120.dp, label = "nailsWidth")
+    val calloutHalfHeight = 24.dp
+    val dotCenterOffset = 3.dp // Dot center is 3dp inside the card corner
 
     Box(
         modifier = modifier
@@ -125,9 +132,11 @@ fun HandBlueprintView(
             onExpandToggle = { expandedCategory = if (expandedCategory == "NAILS") null else "NAILS" },
             modifier = Modifier
                 .zIndex(if (expandedCategory == "NAILS") 10f else 1f)
+                .width(nailsWidth)
                 .offset(
-                    x = horizontalShift + nailsCallout.x.dp + 7.dp,
-                    y = blueprintOffset + nailsCallout.y.dp + 7.dp
+                    // Pin TopStart (Top-Left) dot to the line
+                    x = horizontalShift + nailsCallout.x.dp + (nailsWidth / 2) - dotCenterOffset,
+                    y = blueprintOffset + nailsCallout.y.dp + calloutHalfHeight - dotCenterOffset
                 ),
             anchorAlignment = Alignment.TopStart
         )

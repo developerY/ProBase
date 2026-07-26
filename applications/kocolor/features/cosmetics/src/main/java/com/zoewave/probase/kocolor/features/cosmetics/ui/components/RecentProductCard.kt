@@ -21,6 +21,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.zoewave.probase.core.model.ritual.CosmeticItem
+import com.zoewave.probase.core.model.ritual.MacroCategory
+import com.zoewave.probase.core.model.ritual.MicroCategory
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
 @Composable
@@ -58,7 +60,7 @@ fun RecentProductCard(
 private fun RecentProductCardPreview() {
     MaterialTheme {
         RecentProductCard(
-            uiState = CosmeticItem(name = "Sample", brand = "Brand", macroCategory = com.zoewave.probase.core.model.ritual.MacroCategory.COMPLEXION, microCategory = com.zoewave.probase.core.model.ritual.MicroCategory.FOUNDATION),
+            uiState = CosmeticItem(name = "Sample", brand = "Brand", macroCategory = MacroCategory.COMPLEXION, microCategory = MicroCategory.FOUNDATION, colorHex = "#FFFFFF"),
             onEvent = {},
             navTo = {}
         )

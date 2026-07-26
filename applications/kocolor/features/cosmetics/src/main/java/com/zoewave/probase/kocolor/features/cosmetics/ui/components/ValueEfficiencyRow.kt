@@ -72,7 +72,7 @@ private fun ValueEfficiencyRowPreview() {
     MaterialTheme {
         ValueEfficiencyRow(
             uiState = ValueEfficiencyUiState(
-                item = CosmeticItem(name = "Product", brand = "Brand", macroCategory = MacroCategory.COMPLEXION, microCategory = MicroCategory.FOUNDATION, price = 42.0),
+                item = CosmeticItem(name = "Product", brand = "Brand", macroCategory = MacroCategory.COMPLEXION, microCategory = MicroCategory.FOUNDATION, colorHex = "#FFFFFF", price = 42.0),
                 label = "PER USE"
             )
         )

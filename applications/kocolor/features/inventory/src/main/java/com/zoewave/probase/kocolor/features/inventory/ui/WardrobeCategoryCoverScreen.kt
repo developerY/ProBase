@@ -40,6 +40,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.kocolor.features.inventory.ui.components.CategoryStatCard
 import com.zoewave.probase.kocolor.features.inventory.ui.components.CategoryStatUiState
@@ -64,8 +65,8 @@ private fun WardrobeCategoryCoverScreenPreview() {
                 categoryName = "Tops",
                 wardrobeUiState = WardrobeUiState(
                     items = listOf(
-                        ClothingItem(id = 1, name = "Silk Shirt", brand = "Luxury", category = com.zoewave.probase.core.model.ritual.ClothingCategory.TOPS, price = 85.0, usageCount = 12),
-                        ClothingItem(id = 2, name = "Cashmere Sweater", brand = "Premium", category = com.zoewave.probase.core.model.ritual.ClothingCategory.TOPS, price = 250.0, usageCount = 3)
+                        ClothingItem(id = 1, name = "Silk Shirt", brand = "Luxury", category = ClothingCategory.TOPS, price = 85.0, usageCount = 12, colorHex = "#FFFFFF"),
+                        ClothingItem(id = 2, name = "Cashmere Sweater", brand = "Premium", category = ClothingCategory.TOPS, price = 250.0, usageCount = 3, colorHex = "#FFFFFF")
                     )
                 )
             ),

@@ -120,7 +120,7 @@ fun ColorVerificationItem(
 private fun ColorVerificationItemPreview() {
     MaterialTheme {
         ColorVerificationItem(
-            uiState = ClothingItem(name = "Item", category = ClothingCategory.TOPS),
+            uiState = ClothingItem(name = "Item", category = ClothingCategory.TOPS, colorHex = "#FFFFFF"),
             onEvent = {},
             navTo = {}
         )

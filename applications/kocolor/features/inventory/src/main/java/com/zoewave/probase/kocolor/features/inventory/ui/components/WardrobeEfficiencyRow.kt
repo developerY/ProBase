@@ -71,7 +71,7 @@ private fun WardrobeEfficiencyRowPreview() {
     MaterialTheme {
         WardrobeEfficiencyRow(
             uiState = WardrobeEfficiencyUiState(
-                item = ClothingItem(name = "Jeans", category = ClothingCategory.BOTTOMS, price = 120.0),
+                item = ClothingItem(name = "Jeans", category = ClothingCategory.BOTTOMS, price = 120.0, colorHex = "#000080"),
                 label = "PER WEAR"
             )
         )

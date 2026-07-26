@@ -28,7 +28,8 @@ class WardrobeColorEngineTest {
         val bitmap = mockk<Bitmap>()
         val baseItem = ClothingItem(
             name = "Test Item",
-            category = ClothingCategory.TOPS
+            category = ClothingCategory.TOPS,
+            colorHex = "#FF0000"
         )
         
         val signature = GarmentColorSignature(
@@ -57,7 +58,7 @@ class WardrobeColorEngineTest {
     fun `processGarment should handle neutral colors correctly`() {
         // Arrange
         val bitmap = mockk<Bitmap>()
-        val baseItem = ClothingItem(name = "Neutral Item", category = ClothingCategory.OTHER)
+        val baseItem = ClothingItem(name = "Neutral Item", category = ClothingCategory.OTHER, colorHex = "#808080")
         
         val signature = GarmentColorSignature(
             dominantHex = "#808080", // Gray

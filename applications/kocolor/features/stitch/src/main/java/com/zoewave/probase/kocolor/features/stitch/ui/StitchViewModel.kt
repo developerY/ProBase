@@ -156,6 +156,7 @@ class StitchViewModel @Inject constructor(
                     suggestedItems[itemIndex] = SuggestedPiece(
                         name = item.name,
                         category = item.category.name,
+                        colorHex = item.colorHex,
                         imageUrl = item.imageUrl,
                         description = item.notes,
                         isOwned = true
@@ -165,6 +166,7 @@ class StitchViewModel @Inject constructor(
                     suggestedItems.add(SuggestedPiece(
                         name = item.name,
                         category = item.category.name,
+                        colorHex = item.colorHex,
                         imageUrl = item.imageUrl,
                         description = item.notes,
                         isOwned = true
@@ -226,7 +228,7 @@ class StitchViewModel @Inject constructor(
             }
             val firstOutfit = outfits[0]
             val suggestedItems = firstOutfit.suggestedItems.toMutableList()
-            suggestedItems.add(SuggestedPiece(name = "New Item", category = "TOPS", isOwned = false))
+            suggestedItems.add(SuggestedPiece(name = "New Item", category = "TOPS", colorHex = "#FFFFFF", isOwned = false))
             outfits[0] = firstOutfit.copy(suggestedItems = suggestedItems)
             advice.copy(outfitSuggestions = outfits)
         }

@@ -59,6 +59,7 @@ data class OutfitSuggestion(
 data class SuggestedPiece(
     val name: String,
     val category: String,
+    val colorHex: String, // Enforce color for all suggestions
     val imageUrl: String? = null,
     val description: String? = null,
     val isOwned: Boolean = false

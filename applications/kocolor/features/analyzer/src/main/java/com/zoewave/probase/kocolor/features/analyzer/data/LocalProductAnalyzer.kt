@@ -101,6 +101,7 @@ class LocalProductAnalyzer @Inject constructor(
             brand = brand ?: "Detected Brand",
             macroCategory = micro.macro,
             microCategory = micro,
+            colorHex = "#FFFFFF",
             volume = volume,
             timestamp = System.currentTimeMillis()
         )

@@ -67,7 +67,8 @@ class ObfRepository @Inject constructor(
                     isVegan = ObfTaxonomyMapper.isVegan(obfProduct.analysisTags),
                     isCrueltyFree = ObfTaxonomyMapper.isCrueltyFree(obfProduct.keywords),
                     imageUrl = obfProduct.imageUrl,
-                    volume = obfProduct.volume
+                    volume = obfProduct.volume,
+                    colorHex = "#FFFFFF"
                 )
                 
                 Result.success(draftItem)

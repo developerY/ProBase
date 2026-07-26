@@ -14,9 +14,9 @@ class StyleSimulatorEngineTest {
     @Test
     fun `architectLocalBlueprint should select at least one item and generate palette`() {
         val wardrobe = listOf(
-            ClothingItem(id = 1, name = "Silk Top", category = ClothingCategory.TOPS, dominantHex = "#FF0000"),
-            ClothingItem(id = 2, name = "Jeans", category = ClothingCategory.BOTTOMS, dominantHex = "#0000FF"),
-            ClothingItem(id = 3, name = "Sneakers", category = ClothingCategory.SHOES, dominantHex = "#000000")
+            ClothingItem(id = 1, name = "Silk Top", category = ClothingCategory.TOPS, colorHex = "#FF0000", dominantHex = "#FF0000"),
+            ClothingItem(id = 2, name = "Jeans", category = ClothingCategory.BOTTOMS, colorHex = "#0000FF", dominantHex = "#0000FF"),
+            ClothingItem(id = 3, name = "Sneakers", category = ClothingCategory.SHOES, colorHex = "#000000", dominantHex = "#000000")
         )
 
         val blueprint = engine.architectLocalBlueprint("fancy night", wardrobe)
@@ -29,9 +29,9 @@ class StyleSimulatorEngineTest {
     @Test
     fun `architectLocalBlueprint should match keywords in user intent`() {
         val wardrobe = listOf(
-            ClothingItem(id = 1, name = "Business Shirt", category = ClothingCategory.TOPS),
-            ClothingItem(id = 2, name = "Casual Tee", category = ClothingCategory.TOPS),
-            ClothingItem(id = 3, name = "Dress Pants", category = ClothingCategory.BOTTOMS)
+            ClothingItem(id = 1, name = "Business Shirt", category = ClothingCategory.TOPS, colorHex = "#FFFFFF"),
+            ClothingItem(id = 2, name = "Casual Tee", category = ClothingCategory.TOPS, colorHex = "#FFFFFF"),
+            ClothingItem(id = 3, name = "Dress Pants", category = ClothingCategory.BOTTOMS, colorHex = "#000000")
         )
 
         val blueprint = engine.architectLocalBlueprint("business formal", wardrobe)
