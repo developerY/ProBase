@@ -238,10 +238,9 @@ fun FaceBlueprintView(
                 .zIndex(if (expandedCategory == "EYES") 10f else 1f)
                 .width(eyesWidth)
                 .offset(
-                    // Subtract half-width to pin the BottomEnd (Right) corner dot to the line
-                    x = horizontalShift + eyesTarget.x.dp - (eyesWidth / 2),
-                    // Subtract half-height to pin the BottomEnd (Bottom) corner dot to the line
-                    y = blueprintOffset + eyesTarget.y.dp - calloutHalfHeight
+                    // Subtract half-width and half-height to pin the BottomEnd (Right) corner dot to the line
+                    x = horizontalShift + eyesTarget.x.dp - (eyesWidth / 2) + 3.dp,
+                    y = blueprintOffset + eyesTarget.y.dp - calloutHalfHeight + 3.dp
                 ),
             anchorAlignment = Alignment.BottomEnd
         )
@@ -257,8 +256,8 @@ fun FaceBlueprintView(
                 .zIndex(if (expandedCategory == "CHEEKS") 10f else 1f)
                 .width(cheeksWidth)
                 .offset(
-                    x = horizontalShift + cheeksTarget.x.dp + (cheeksWidth / 2),
-                    y = blueprintOffset + cheeksTarget.y.dp + calloutHalfHeight
+                    x = horizontalShift + cheeksTarget.x.dp + (cheeksWidth / 2) - 3.dp,
+                    y = blueprintOffset + cheeksTarget.y.dp + calloutHalfHeight - 3.dp
                 ),
             anchorAlignment = Alignment.TopStart
         )
@@ -274,8 +273,8 @@ fun FaceBlueprintView(
                 .zIndex(if (expandedCategory == "LIPS") 10f else 1f)
                 .width(lipsWidth)
                 .offset(
-                    x = horizontalShift + lipsTarget.x.dp - (lipsWidth / 2),
-                    y = blueprintOffset + lipsTarget.y.dp + calloutHalfHeight
+                    x = horizontalShift + lipsTarget.x.dp - (lipsWidth / 2) + 3.dp,
+                    y = blueprintOffset + lipsTarget.y.dp + calloutHalfHeight - 3.dp
                 ),
             anchorAlignment = Alignment.TopEnd
         )
