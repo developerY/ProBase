@@ -73,7 +73,7 @@ private fun WearRankingRowPreview() {
     MaterialTheme {
         WearRankingRow(
             uiState = WearRankingUiState(
-                item = ClothingItem(name = "Blazer", category = ClothingCategory.TOPS, usageCount = 12),
+                item = ClothingItem(name = "Blazer", category = ClothingCategory.TOPS, usageCount = 12, colorHex = "#000000"),
                 rank = 1,
                 maxUsage = 100
             )

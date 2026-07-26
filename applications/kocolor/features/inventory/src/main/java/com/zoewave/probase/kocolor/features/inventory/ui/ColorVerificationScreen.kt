@@ -40,7 +40,7 @@ private fun ColorVerificationScreenPreview() {
     MaterialTheme {
         ColorVerificationScreen(
             uiState = ColorVerificationUiState(
-                items = listOf(ClothingItem(name = "Item", category = ClothingCategory.TOPS))
+                items = listOf(ClothingItem(name = "Item", category = ClothingCategory.TOPS, colorHex = "#FFFFFF"))
             ),
             onEvent = {},
             navTo = {}

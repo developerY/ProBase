@@ -25,6 +25,8 @@ import coil.compose.AsyncImage
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import com.zoewave.probase.kocolor.features.cosmetics.R
 import com.zoewave.probase.core.model.ritual.CosmeticItem
+import com.zoewave.probase.core.model.ritual.MacroCategory
+import com.zoewave.probase.core.model.ritual.MicroCategory
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import java.text.NumberFormat
 import java.util.*
@@ -184,7 +186,7 @@ private fun FooterDetail(item: CosmeticItem) {
 private fun InventoryProductCardPreview() {
     MaterialTheme {
         InventoryProductCard(
-            uiState = CosmeticItem(name = "Sample Product", brand = "Brand", macroCategory = com.zoewave.probase.core.model.ritual.MacroCategory.COMPLEXION, microCategory = com.zoewave.probase.core.model.ritual.MicroCategory.FOUNDATION),
+            uiState = CosmeticItem(name = "Sample Product", brand = "Brand", macroCategory = MacroCategory.COMPLEXION, microCategory = MicroCategory.FOUNDATION, colorHex = "#FFFFFF"),
             onEvent = {},
             navTo = {}
         )

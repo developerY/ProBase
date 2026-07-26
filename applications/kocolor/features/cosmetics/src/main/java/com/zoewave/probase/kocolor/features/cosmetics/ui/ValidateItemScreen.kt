@@ -39,7 +39,8 @@ private fun ValidateItemScreenPreview() {
                     name = "SuperStay Matte Ink",
                     brand = "Maybelline",
                     macroCategory = MacroCategory.LIPS,
-                    microCategory = MicroCategory.LIPSTICK
+                    microCategory = MicroCategory.LIPSTICK,
+                    colorHex = "#FF0000"
                 )
             ),
             onEvent = {},

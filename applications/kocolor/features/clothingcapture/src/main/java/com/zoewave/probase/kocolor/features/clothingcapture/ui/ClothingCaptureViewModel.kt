@@ -387,6 +387,7 @@ class ClothingCaptureViewModel @Inject constructor(
             ClothingItem(
                 name = "Extracted Garment",
                 category = ClothingCategory.OTHER,
+                colorHex = "#FFFFFF",
                 timestamp = System.currentTimeMillis()
             )
         }
@@ -397,7 +398,7 @@ class ClothingCaptureViewModel @Inject constructor(
         // Actually, we'll just transition to FinalReview with the last known state
         // I'll need to store the interim ClothingItem somewhere.
         // For now, let's just use a dummy to ensure the screen appears.
-        _uiState.value = ClothingCaptureUiState.FinalReview(ClothingItem(name = "Review Item", category = ClothingCategory.OTHER))
+        _uiState.value = ClothingCaptureUiState.FinalReview(ClothingItem(name = "Review Item", category = ClothingCategory.OTHER, colorHex = "#FFFFFF"))
     }
 
     fun saveAndFinish() {

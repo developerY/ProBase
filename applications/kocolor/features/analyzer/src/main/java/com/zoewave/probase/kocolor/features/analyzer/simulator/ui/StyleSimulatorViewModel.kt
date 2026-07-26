@@ -370,11 +370,12 @@ class StyleSimulatorViewModel @Inject constructor(
                 advice = state.rationale ?: "",
                 keyPieces = state.recommendedClothing.map { it.name },
                 colorCombinations = state.recommendedPalette,
-                wardrobeItemIds = state.recommendedClothing.map { it.id },
+                wardrobeItemIds = state.recommendedClothing.map { it.id                },
                 suggestedItems = state.recommendedClothing.map { item ->
                     SuggestedPiece(
                         name = item.name,
                         category = item.category.name,
+                        colorHex = item.colorHex,
                         imageUrl = item.imageUrl,
                         description = item.notes ?: "AI architected selection.",
                         isOwned = true
@@ -383,6 +384,7 @@ class StyleSimulatorViewModel @Inject constructor(
                     SuggestedPiece(
                         name = "Atelier Silk Scarf",
                         category = "ACCESSORIES",
+                        colorHex = "#8B4513",
                         description = "A limited edition pure silk scarf from the Atelier line.",
                         isOwned = false
                     )

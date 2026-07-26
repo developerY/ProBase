@@ -54,6 +54,7 @@ private fun CosmeticDetailScreenPreview() {
                     chemistryBase = ChemistryBase.WATER,
                     finish = Finish.NATURAL,
                     coverage = Coverage.MEDIUM,
+                    colorHex = "#FAD4D4",
                     price = 42.0,
                     volume = "30ml",
                     amountRemaining = 5.0,

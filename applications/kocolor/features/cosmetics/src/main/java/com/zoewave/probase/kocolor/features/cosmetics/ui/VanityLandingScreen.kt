@@ -44,7 +44,7 @@ private fun VanityLandingScreenPreview() {
         VanityLandingScreen(
             uiState = CosmeticsUiState(
                 totalCosmetics = 34,
-                items = listOf(CosmeticItem(name = "Sample", brand = "Brand", macroCategory = MacroCategory.COMPLEXION, microCategory = MicroCategory.FOUNDATION))
+                items = listOf(CosmeticItem(name = "Sample", brand = "Brand", macroCategory = MacroCategory.COMPLEXION, microCategory = MicroCategory.FOUNDATION, colorHex = "#FFFFFF"))
             ),
             onEvent = {},
             navTo = {}

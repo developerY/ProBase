@@ -34,10 +34,10 @@ import androidx.compose.ui.unit.sp
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.kocolor.features.analyzer.R
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.ResultStep
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.AnalysisStep
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.MagicBackground
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.list.MessagingStep
-import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.ResultStep
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -129,7 +129,7 @@ private fun StyleSimulatorScreenPreview() {
             uiState = StyleSimulatorUiState(
                 simulationStep = SimulationStep.RESULT,
                 recommendedPalette = listOf("#F4D03F", "#16A085", "#2C3E50"),
-                recommendedClothing = listOf(ClothingItem(name = "Silk Evening Shirt", category = ClothingCategory.TOPS, brand = "ZoeWave"))
+                recommendedClothing = listOf(ClothingItem(name = "Silk Evening Shirt", category = ClothingCategory.TOPS, brand = "ZoeWave", colorHex = "#FFFFFF"))
             ),
             effect = null,
             onEvent = {},

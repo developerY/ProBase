@@ -42,7 +42,7 @@ private fun WardrobeScreenPreview() {
     MaterialTheme {
         WardrobeScreen(
             uiState = WardrobeUiState(
-                items = listOf(ClothingItem(name = "T-Shirt", category = ClothingCategory.TOPS)),
+                items = listOf(ClothingItem(name = "T-Shirt", category = ClothingCategory.TOPS, colorHex = "#FFFFFF")),
                 isLoading = false
             ),
             onEvent = {},

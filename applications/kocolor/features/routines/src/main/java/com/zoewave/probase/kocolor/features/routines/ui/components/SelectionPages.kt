@@ -62,8 +62,8 @@ private fun ItemSelectionPagePreview() {
         ItemSelectionPage(
             uiState = ItemSelectionUiState(
                 items = listOf(
-                    CosmeticItem(id = 1, name = "Product 1", brand = "Brand A", macroCategory = MacroCategory.PREP, microCategory = MicroCategory.CLEANSER),
-                    CosmeticItem(id = 2, name = "Product 2", brand = "Brand B", macroCategory = MacroCategory.PREP, microCategory = MicroCategory.TONER)
+                    CosmeticItem(id = 1, name = "Product 1", brand = "Brand A", macroCategory = MacroCategory.PREP, microCategory = MicroCategory.CLEANSER, colorHex = "#FFFFFF"),
+                    CosmeticItem(id = 2, name = "Product 2", brand = "Brand B", macroCategory = MacroCategory.PREP, microCategory = MicroCategory.TONER, colorHex = "#FFFFFF")
                 ),
                 selectedIds = listOf(1)
             ),

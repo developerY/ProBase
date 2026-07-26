@@ -33,6 +33,7 @@ private fun ExpiringCosmeticsScreenPreview() {
                         brand = "Brand", 
                         macroCategory = MacroCategory.COMPLEXION, 
                         microCategory = MicroCategory.FOUNDATION,
+                        colorHex = "#FFFFFF",
                         expiryDate = System.currentTimeMillis() + 10L * 24 * 60 * 60 * 1000
                     )
                 )

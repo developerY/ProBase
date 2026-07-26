@@ -358,7 +358,8 @@ class BoxCaptureViewModel @Inject constructor(
                 name = current.item.productName,
                 brand = current.item.brand,
                 macroCategory = MacroCategory.COMPLEXION,
-                microCategory = MicroCategory.FOUNDATION
+                microCategory = MicroCategory.FOUNDATION,
+                colorHex = sessionManualColor ?: "#FFFFFF"
             ))
         }
     }

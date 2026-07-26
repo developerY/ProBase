@@ -35,11 +35,11 @@ class StyleSimulatorIntegrationTest {
     }
 
     private val sampleWardrobe = listOf(
-        ClothingItem(id = 1, name = "Power Suit", category = ClothingCategory.TOPS, formality = Formality.PROFESSIONAL, dominantHex = "#222222"),
-        ClothingItem(id = 2, name = "Office Trousers", category = ClothingCategory.BOTTOMS, formality = Formality.PROFESSIONAL, dominantHex = "#333333"),
-        ClothingItem(id = 3, name = "Oxfords", category = ClothingCategory.SHOES, formality = Formality.PROFESSIONAL, dominantHex = "#111111"),
-        ClothingItem(id = 4, name = "Pajama Top", category = ClothingCategory.TOPS, formality = Formality.LOUNGE),
-        ClothingItem(id = 5, name = "Joggers", category = ClothingCategory.BOTTOMS, formality = Formality.LOUNGE)
+        ClothingItem(id = 1, name = "Power Suit", category = ClothingCategory.TOPS, formality = Formality.PROFESSIONAL, colorHex = "#222222", dominantHex = "#222222"),
+        ClothingItem(id = 2, name = "Office Trousers", category = ClothingCategory.BOTTOMS, formality = Formality.PROFESSIONAL, colorHex = "#333333", dominantHex = "#333333"),
+        ClothingItem(id = 3, name = "Oxfords", category = ClothingCategory.SHOES, formality = Formality.PROFESSIONAL, colorHex = "#111111", dominantHex = "#111111"),
+        ClothingItem(id = 4, name = "Pajama Top", category = ClothingCategory.TOPS, formality = Formality.LOUNGE, colorHex = "#FFFFFF"),
+        ClothingItem(id = 5, name = "Joggers", category = ClothingCategory.BOTTOMS, formality = Formality.LOUNGE, colorHex = "#808080")
     )
 
     @Test

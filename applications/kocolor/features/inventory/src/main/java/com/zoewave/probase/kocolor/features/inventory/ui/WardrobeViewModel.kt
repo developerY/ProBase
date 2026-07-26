@@ -25,7 +25,7 @@ data class CategoryMetadata(
 data class WardrobeUiState(
     val items: List<ClothingItem> = emptyList(),
     val isLoading: Boolean = true,
-    val draftItem: ClothingItem = ClothingItem(name = "", category = ClothingCategory.TOPS),
+    val draftItem: ClothingItem = ClothingItem(name = "", category = ClothingCategory.TOPS, colorHex = "#FFFFFF"),
     val totalInvestment: Double = 0.0,
     val totalItems: Int = 0,
     val itemsByCategory: Map<String, Int> = emptyMap(),
@@ -48,7 +48,7 @@ class WardrobeViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val _draftItem = MutableStateFlow(ClothingItem(name = "", category = ClothingCategory.TOPS))
+    private val _draftItem = MutableStateFlow(ClothingItem(name = "", category = ClothingCategory.TOPS, colorHex = "#FFFFFF"))
 
     private var lastProcessedUri: String? = null
 

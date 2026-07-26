@@ -76,7 +76,7 @@ private fun UsageRankingRowPreview() {
     MaterialTheme {
         UsageRankingRow(
             uiState = UsageRankingUiState(
-                item = CosmeticItem(name = "Product", brand = "Brand", macroCategory = MacroCategory.COMPLEXION, microCategory = MicroCategory.FOUNDATION, usageCount = 42),
+                item = CosmeticItem(name = "Product", brand = "Brand", macroCategory = MacroCategory.COMPLEXION, microCategory = MicroCategory.FOUNDATION, colorHex = "#FFFFFF", usageCount = 42),
                 rank = 1,
                 maxUsage = 100
             )
