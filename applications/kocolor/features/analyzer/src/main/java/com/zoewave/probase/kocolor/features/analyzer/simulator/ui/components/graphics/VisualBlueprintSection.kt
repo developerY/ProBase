@@ -43,31 +43,26 @@ fun VisualBlueprintSection(
 ) {
     var selectedTab by remember { mutableStateOf(initialTab) }
     
-    val displayPalette = remember(selectedTab, data.recommendedPalette) {
+    val displayPalette = remember(selectedTab, data) {
         when (selectedTab) {
             ResultTab.FACE -> {
                 listOfNotNull(
                     data.eyesItem?.colorHex,
                     data.cheeksItem?.colorHex,
-                    data.lipsItem?.colorHex,
-                    data.recommendedPalette.getOrNull(0) ?: "#FFFFFF"
-                ).distinct().take(4)
+                    data.lipsItem?.colorHex
+                ).distinct()
             }
             ResultTab.CLOTHES -> {
                 listOfNotNull(
                     data.topItem?.colorHex,
                     data.bottomItem?.colorHex,
-                    data.shoeItem?.colorHex,
-                    data.recommendedPalette.getOrNull(3) ?: "#000000"
-                ).distinct().take(4)
+                    data.shoeItem?.colorHex
+                ).distinct()
             }
             ResultTab.NAILS -> {
                 listOfNotNull(
-                    data.nailsItem?.colorHex,
-                    data.lipsItem?.colorHex,
-                    data.topItem?.colorHex,
-                    data.recommendedPalette.getOrNull(0) ?: "#FFFFFF"
-                ).distinct().take(4)
+                    data.nailsItem?.colorHex
+                ).distinct()
             }
         }
     }
