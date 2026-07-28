@@ -180,21 +180,24 @@ fun CosmeticAnalyticsScreen(
                                     val hsv = FloatArray(3)
                                     try {
                                         AndroidColor.colorToHSV(AndroidColor.parseColor(hex), hsv)
-                                        hsv[0] // 1. Hue (Rainbow order)
+                                        // 🛠️ SPECTRAL HIERARCHY:
+                                        // If saturation is very low (< 10%), it's a neutral.
+                                        // We move neutrals to the end (priority 1) so the rainbow (priority 0) stays clean.
+                                        if (hsv[1] < 0.1f) 1 else 0 
+                                    } catch (e: Exception) { 1 }
+                                },
+                                { (hex, _) ->
+                                    val hsv = FloatArray(3)
+                                    try {
+                                        AndroidColor.colorToHSV(AndroidColor.parseColor(hex), hsv)
+                                        hsv[0] // 2. Hue (Rainbow order: 0-360)
                                     } catch (e: Exception) { 0f }
                                 },
                                 { (hex, _) ->
                                     val hsv = FloatArray(3)
                                     try {
                                         AndroidColor.colorToHSV(AndroidColor.parseColor(hex), hsv)
-                                        hsv[1] // 2. Saturation (Muted to Vibrant)
-                                    } catch (e: Exception) { 0f }
-                                },
-                                { (hex, _) ->
-                                    val hsv = FloatArray(3)
-                                    try {
-                                        AndroidColor.colorToHSV(AndroidColor.parseColor(hex), hsv)
-                                        hsv[2] // 3. Value (Dark to Light)
+                                        hsv[2] // 3. Brightness (Dark to Light)
                                     } catch (e: Exception) { 0f }
                                 }
                             ))

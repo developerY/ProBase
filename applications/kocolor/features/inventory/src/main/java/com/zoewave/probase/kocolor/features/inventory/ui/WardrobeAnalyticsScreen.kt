@@ -176,21 +176,22 @@ fun WardrobeAnalyticsScreen(
                                     val hsv = FloatArray(3)
                                     try {
                                         AndroidColor.colorToHSV(AndroidColor.parseColor(hex), hsv)
-                                        hsv[0] // 1. Hue (Rainbow order)
+                                        // 🛠️ SPECTRAL HIERARCHY: Move neutrals to the end
+                                        if (hsv[1] < 0.1f) 1 else 0 
+                                    } catch (e: Exception) { 1 }
+                                },
+                                { (hex, _) ->
+                                    val hsv = FloatArray(3)
+                                    try {
+                                        AndroidColor.colorToHSV(AndroidColor.parseColor(hex), hsv)
+                                        hsv[0] // 2. Hue
                                     } catch (e: Exception) { 0f }
                                 },
                                 { (hex, _) ->
                                     val hsv = FloatArray(3)
                                     try {
                                         AndroidColor.colorToHSV(AndroidColor.parseColor(hex), hsv)
-                                        hsv[1] // 2. Saturation (Muted to Vibrant)
-                                    } catch (e: Exception) { 0f }
-                                },
-                                { (hex, _) ->
-                                    val hsv = FloatArray(3)
-                                    try {
-                                        AndroidColor.colorToHSV(AndroidColor.parseColor(hex), hsv)
-                                        hsv[2] // 3. Value (Dark to Light)
+                                        hsv[2] // 3. Value
                                     } catch (e: Exception) { 0f }
                                 }
                             ))
