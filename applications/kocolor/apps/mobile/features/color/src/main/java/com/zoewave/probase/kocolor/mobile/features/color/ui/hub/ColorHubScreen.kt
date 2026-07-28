@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -42,6 +43,8 @@ fun ColorHubScreen(
     onEvent: (Unit) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
+    var selectedGroup by remember { mutableStateOf<Pair<String, List<ColorSignature>>?>(null) }
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -63,10 +66,32 @@ fun ColorHubScreen(
         ) {
             // 1. Chromatic DNA (The Inventory Visualization)
             item {
-                Text("Chromatic DNA", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Chromatic DNA", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    
+                    if (selectedGroup != null) {
+                        IconButton(
+                            onClick = { selectedGroup = null },
+                            modifier = Modifier.size(24.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Collapse spectrum",
+                                modifier = Modifier.size(16.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
                 Spacer(Modifier.height(16.dp))
                 ChromaticDnaBar(
                     colors = uiState.inventoryColors,
+                    selectedGroup = selectedGroup,
+                    onGroupSelected = { selectedGroup = it },
                     navTo = navTo
                 )
             }
@@ -116,6 +141,8 @@ fun ColorHubScreen(
 @Composable
 fun ChromaticDnaBar(
     colors: List<ColorSignature>,
+    selectedGroup: Pair<String, List<ColorSignature>>?,
+    onGroupSelected: (Pair<String, List<ColorSignature>>?) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     val colorGroups = remember(colors) {
@@ -149,7 +176,6 @@ fun ChromaticDnaBar(
             ))
     }
 
-    var selectedGroup by remember { mutableStateOf<Pair<String, List<ColorSignature>>?>(null) }
     val lazyListState = rememberLazyListState()
     val scope = rememberCoroutineScope()
 
@@ -199,9 +225,9 @@ fun ChromaticDnaBar(
                             )
                             .clickable { 
                                 if (isSelected) {
-                                    selectedGroup = null
+                                    onGroupSelected(null)
                                 } else {
-                                    selectedGroup = group 
+                                    onGroupSelected(group)
                                     scope.launch {
                                         // Center the clicked item
                                         lazyListState.animateScrollToItem(index)

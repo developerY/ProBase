@@ -7,7 +7,7 @@ I have successfully implemented the **Color Hub**, a centralized engine that tra
 ### 1. The Chromatic DNA Bar (Rainbow Sorted & Interactive)
 The "Color Hub" has been promoted to the most prominent position on the **Glow Archive** dashboard.
 - **Perceptual Sorting**: The Chromatic DNA bar now uses a **perceptual hue rotation** algorithm. This ensures that pinks and magentas sit adjacent to reds, creating a continuous, professional-grade rainbow gradient.
-- **Harmonica Expansion Effect**: Tapping a color segment triggers a smooth **harmonica expansion**. The selected color grows while others compress, and the bar transitions into a scrollable ribbon, allowing for deep exploration of even the thinnest spectral lines.
+- **Harmonica Expansion Effect**: Tapping a color segment triggers a smooth **harmonica expansion**. The selected color grows while others compress, and the bar transitions into a scrollable ribbon. Users can collapse the view by tapping the same segment again or using the new **explicit "X" button** in the details panel.
 - **Inventory Drill-Down**: Tapping any color segment reveals the specific items (from both Wardrobe and Vanity) that contribute to that color, allowing users to trace their spectral fingerprint back to physical products.
 - **Aggregation**: It merges every color from your Wardrobe and Vanity into a single spectral fingerprint.
 
