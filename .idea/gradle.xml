@@ -81,6 +81,14 @@
             <option value="$PROJECT_DIR$/applications/gotmind/features/mindwave" />
             <option value="$PROJECT_DIR$/applications/gotmind/features/settings" />
             <option value="$PROJECT_DIR$/applications/gotmind/model" />
+            <option value="$PROJECT_DIR$/applications/journal" />
+            <option value="$PROJECT_DIR$/applications/journal/apps" />
+            <option value="$PROJECT_DIR$/applications/journal/apps/mobile" />
+            <option value="$PROJECT_DIR$/applications/journal/data" />
+            <option value="$PROJECT_DIR$/applications/journal/database" />
+            <option value="$PROJECT_DIR$/applications/journal/features" />
+            <option value="$PROJECT_DIR$/applications/journal/features/main" />
+            <option value="$PROJECT_DIR$/applications/journal/model" />
             <option value="$PROJECT_DIR$/applications/kocolor" />
             <option value="$PROJECT_DIR$/applications/kocolor/apps" />
             <option value="$PROJECT_DIR$/applications/kocolor/apps/mobile" />
