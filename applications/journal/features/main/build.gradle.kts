@@ -11,6 +11,7 @@ android {
 dependencies {
     implementation(project(":applications:journal:model"))
     implementation(project(":applications:journal:data"))
+    implementation(project(":features:camera"))
 
     // --- Shared Core Projects ---
     implementation(project(":core:model"))
@@ -22,4 +23,5 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
+    implementation(libs.coil.compose)
 }

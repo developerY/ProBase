@@ -189,7 +189,7 @@
         </DropdownSelection>
         <DialogSelection />
       </SelectionState>
-      <SelectionState runConfigName="Journal">
+      <SelectionState runConfigName="applications.journal.apps.mobile">
         <option name="selectionMode" value="DROPDOWN" />
         <DropdownSelection timestamp="2026-07-16T20:59:29.559988Z">
           <Target type="DEFAULT_BOOT">
