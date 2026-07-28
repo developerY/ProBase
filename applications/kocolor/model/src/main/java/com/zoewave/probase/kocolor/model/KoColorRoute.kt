@@ -37,6 +37,9 @@ sealed class KoColorRoute {
     data object ColorSearch : KoColorRoute()
 
     @Serializable
+    data object ColorHub : KoColorRoute()
+
+    @Serializable
     data object WardrobeLanding : KoColorRoute()
 
     @Serializable
