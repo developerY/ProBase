@@ -12,6 +12,8 @@ dependencies {
     implementation(project(":core:model"))
     implementation(project(":core:network"))
     implementation(project(":core:util"))
+    implementation(project(":applications:kocolor:data"))
+    implementation(project(":applications:kocolor:model"))
 
     implementation(libs.squareup.retrofit)
     implementation(libs.kotlinx.serialization.json)
