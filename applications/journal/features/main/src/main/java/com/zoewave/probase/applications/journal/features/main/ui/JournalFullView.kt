@@ -14,8 +14,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.zoewave.probase.applications.journal.model.JournalEntry
 import java.text.SimpleDateFormat
 import java.util.*
@@ -90,12 +93,15 @@ fun JournalItem(
                 if (entry.images.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(8.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        entry.images.take(5).forEach { _ ->
-                            Surface(
-                                modifier = Modifier.size(24.dp),
-                                color = MaterialTheme.colorScheme.primaryContainer,
-                                shape = MaterialTheme.shapes.extraSmall
-                            ) {}
+                        entry.images.take(5).forEach { uri ->
+                            AsyncImage(
+                                model = uri,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .clip(MaterialTheme.shapes.extraSmall),
+                                contentScale = ContentScale.Crop
+                            )
                         }
                         if (entry.images.size > 5) {
                             Text(text = "+${entry.images.size - 5}", style = MaterialTheme.typography.bodySmall)
