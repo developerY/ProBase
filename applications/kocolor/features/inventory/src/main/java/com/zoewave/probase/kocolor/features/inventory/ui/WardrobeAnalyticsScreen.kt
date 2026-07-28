@@ -171,15 +171,29 @@ fun WardrobeAnalyticsScreen(
                             .filter { it.colorHex.isNotBlank() }
                             .groupBy { it.colorHex }
                             .toList()
-                            .sortedBy { (hex, _) ->
-                                val hsv = FloatArray(3)
-                                try {
-                                    AndroidColor.colorToHSV(AndroidColor.parseColor(hex), hsv)
-                                    hsv[0] // Sort primarily by Hue
-                                } catch (e: Exception) {
-                                    0f
+                            .sortedWith(compareBy(
+                                { (hex, _) ->
+                                    val hsv = FloatArray(3)
+                                    try {
+                                        AndroidColor.colorToHSV(AndroidColor.parseColor(hex), hsv)
+                                        hsv[0] // 1. Hue (Rainbow order)
+                                    } catch (e: Exception) { 0f }
+                                },
+                                { (hex, _) ->
+                                    val hsv = FloatArray(3)
+                                    try {
+                                        AndroidColor.colorToHSV(AndroidColor.parseColor(hex), hsv)
+                                        hsv[1] // 2. Saturation (Muted to Vibrant)
+                                    } catch (e: Exception) { 0f }
+                                },
+                                { (hex, _) ->
+                                    val hsv = FloatArray(3)
+                                    try {
+                                        AndroidColor.colorToHSV(AndroidColor.parseColor(hex), hsv)
+                                        hsv[2] // 3. Value (Dark to Light)
+                                    } catch (e: Exception) { 0f }
                                 }
-                            }
+                            ))
                     }
 
                     var selectedGroup by remember { mutableStateOf<Pair<String, List<ClothingItem>>?>(null) }
