@@ -190,7 +190,12 @@ fun CosmeticAnalyticsScreen(
                                     val hsv = FloatArray(3)
                                     try {
                                         AndroidColor.colorToHSV(AndroidColor.parseColor(hex), hsv)
-                                        hsv[0] // 2. Hue (Rainbow order: 0-360)
+                                        // 🛠️ HUE ROTATION:
+                                        // High hues (330°+) are Pinks/Magentas. We subtract 360 
+                                        // so they sit at -30° to 0°, grouping them perfectly 
+                                        // with the Reds (0°+) at the start of the rainbow.
+                                        val hue = hsv[0]
+                                        if (hue > 330) hue - 360 else hue
                                     } catch (e: Exception) { 0f }
                                 },
                                 { (hex, _) ->
