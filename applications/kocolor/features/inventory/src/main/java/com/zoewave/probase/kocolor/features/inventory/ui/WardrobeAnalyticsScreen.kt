@@ -3,8 +3,21 @@ package com.zoewave.probase.kocolor.features.inventory.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -12,8 +25,10 @@ import androidx.compose.material.icons.automirrored.filled.TrendingDown
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
@@ -27,6 +42,7 @@ import com.zoewave.probase.kocolor.features.inventory.ui.components.*
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.kocolor.model.KoColorRoute
+import android.graphics.Color as AndroidColor
 import java.text.NumberFormat
 import java.util.*
 
@@ -145,26 +161,108 @@ fun WardrobeAnalyticsScreen(
                 }
             }
 
+            // 4. Wardrobe Palette (Chromatic Core)
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     Text(stringResource(R.string.applications_kocolor_features_inventory_wardrobe_palette), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
-                    val colorDistribution = uiState.items.mapNotNull { it.colorHex ?: it.dominantHex }.groupBy { it }.mapValues { it.value.size }.toList().sortedByDescending { it.second }
                     
-                    if (colorDistribution.isEmpty()) {
+                    val colorGroups = remember(uiState.items) {
+                        uiState.items
+                            .filter { it.colorHex.isNotBlank() }
+                            .groupBy { it.colorHex }
+                            .toList()
+                            .sortedBy { (hex, _) ->
+                                val hsv = FloatArray(3)
+                                try {
+                                    AndroidColor.colorToHSV(AndroidColor.parseColor(hex), hsv)
+                                    hsv[0] // Sort primarily by Hue
+                                } catch (e: Exception) {
+                                    0f
+                                }
+                            }
+                    }
+
+                    var selectedGroup by remember { mutableStateOf<Pair<String, List<ClothingItem>>?>(null) }
+
+                    if (colorGroups.isEmpty()) {
                         Text(stringResource(R.string.applications_kocolor_features_inventory_palette_prompt), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     } else {
-                        Row(
-                            modifier = Modifier.fillMaxWidth().height(80.dp).clip(RoundedCornerShape(16.dp)),
-                            horizontalArrangement = Arrangement.Start
-                        ) {
-                            colorDistribution.forEach { (hex, count) ->
-                                Box(
+                        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                            // The Spectrum Bar
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(80.dp)
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp)),
+                                horizontalArrangement = Arrangement.Start
+                            ) {
+                                colorGroups.forEach { group ->
+                                    val (hex, items) = group
+                                    val isSelected = selectedGroup?.first == hex
+                                    Box(
+                                        modifier = Modifier
+                                            .weight(items.size.toFloat())
+                                            .fillMaxHeight()
+                                            .background(parseColor(hex))
+                                            .border(
+                                                width = if (isSelected) 3.dp else 0.dp,
+                                                color = if (isSelected) Color.White else Color.Transparent
+                                            )
+                                            .clickable { 
+                                                selectedGroup = if (isSelected) null else group 
+                                            }
+                                    )
+                                }
+                            }
+                            
+                            // 🔍 Selection Details
+                            selectedGroup?.let { (hex, items) ->
+                                Column(
                                     modifier = Modifier
-                                        .weight(count.toFloat())
-                                        .fillMaxHeight()
-                                        .background(parseColor(hex))
-                                        .border(0.5.dp, Color.Black.copy(alpha = 0.1f))
-                                )
+                                        .fillMaxWidth()
+                                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
+                                        .padding(16.dp),
+                                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Box(
+                                            Modifier
+                                                .size(20.dp)
+                                                .clip(CircleShape)
+                                                .background(parseColor(hex))
+                                                .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
+                                        )
+                                        Spacer(Modifier.width(12.dp))
+                                        Text(
+                                            text = "${items.size} ${if (items.size == 1) "Garment" else "Garments"} in this shade",
+                                            style = MaterialTheme.typography.labelLarge,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                    
+                                    items.forEach { item ->
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .clickable { navTo(KoColorRoute.WardrobeDetail(item.id)) }
+                                                .padding(vertical = 4.dp),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Column(modifier = Modifier.weight(1f)) {
+                                                Text(item.name, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+                                                Text(item.brand ?: "Unknown Brand", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                            }
+                                            Icon(
+                                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(16.dp).rotate(180f),
+                                                tint = MaterialTheme.colorScheme.primary
+                                            )
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
