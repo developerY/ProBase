@@ -240,7 +240,7 @@ fun VanityLandingScreen(
                             icon = Icons.Default.Inventory2
                         ),
                         modifier = Modifier.weight(1f),
-                        onEvent = { navTo(KoColorRoute.ColorHub) },
+                        onEvent = { navTo(KoColorRoute.CosmeticAnalytics) },
                         navTo = navTo
                     )
                     SummaryStatCard(
