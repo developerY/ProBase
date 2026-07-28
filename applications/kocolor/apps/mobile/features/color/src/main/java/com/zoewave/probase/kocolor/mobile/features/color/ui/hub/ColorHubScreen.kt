@@ -16,6 +16,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
@@ -26,6 +33,7 @@ import com.zoewave.probase.kocolor.features.colors.domain.model.ColorSignature
 import com.zoewave.probase.kocolor.features.colors.domain.model.SourceType
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import android.graphics.Color as AndroidColor
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -142,27 +150,47 @@ fun ChromaticDnaBar(
     }
 
     var selectedGroup by remember { mutableStateOf<Pair<String, List<ColorSignature>>?>(null) }
+    val lazyListState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
 
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        // The Spectrum Bar
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(100.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp))
-        ) {
-            if (colorGroups.isEmpty()) {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("No color data found", style = MaterialTheme.typography.labelSmall)
-                }
-            } else {
-                colorGroups.forEach { group ->
-                    val (hex, items) = group
+        // The Spectrum Bar (Harmonica Scroll Effect)
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+            val totalGroups = colorGroups.size
+            val containerWidth = maxWidth
+            
+            // Calculate unselected width to fill exactly the container if possible, 
+            // but keep a minimum for visibility.
+            val baseItemWidth = if (totalGroups > 0) (containerWidth / totalGroups).coerceAtLeast(4.dp) else 0.dp
+
+            LazyRow(
+                state = lazyListState,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(100.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp)),
+                horizontalArrangement = Arrangement.Start
+            ) {
+                items(colorGroups.size) { index ->
+                    val group = colorGroups[index]
+                    val (hex, _) = group
                     val isSelected = selectedGroup?.first == hex
+                    
+                    // harmonica expansion effect
+                    val animatedWidth by animateDpAsState(
+                        targetValue = when {
+                            selectedGroup == null -> baseItemWidth
+                            isSelected -> 100.dp
+                            else -> 12.dp // Shrink neighbors
+                        },
+                        animationSpec = spring(stiffness = Spring.StiffnessLow),
+                        label = "width"
+                    )
+
                     Box(
                         modifier = Modifier
-                            .weight(items.size.toFloat())
+                            .width(animatedWidth)
                             .fillMaxHeight()
                             .background(parseColor(hex))
                             .border(
@@ -170,14 +198,22 @@ fun ChromaticDnaBar(
                                 color = if (isSelected) Color.White else Color.Transparent
                             )
                             .clickable { 
-                                selectedGroup = if (isSelected) null else group 
+                                if (isSelected) {
+                                    selectedGroup = null
+                                } else {
+                                    selectedGroup = group 
+                                    scope.launch {
+                                        // Center the clicked item
+                                        lazyListState.animateScrollToItem(index)
+                                    }
+                                }
                             }
                     )
                 }
             }
         }
 
-        // 🔍 Selection Details (What item adds what color)
+        // 🔍 Selection Details
         selectedGroup?.let { (hex, items) ->
             Column(
                 modifier = Modifier
