@@ -1,9 +1,30 @@
-package com.zoewave.probase.kocolor.mobile.features.color.util
+package com.zoewave.probase.kocolor.features.colors.util
 
+import android.graphics.Color
+import androidx.core.graphics.ColorUtils
+import com.zoewave.probase.kocolor.features.colors.domain.model.HsvValue
+import com.zoewave.probase.kocolor.features.colors.domain.model.LabValue
+import com.zoewave.probase.kocolor.features.colors.domain.model.PantoneMatch
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.sqrt
 
 object ColorScienceUtils {
+
+    fun hexToRgb(hex: String): Triple<Int, Int, Int>? {
+        return try {
+            val color = Color.parseColor(if (hex.startsWith("#")) hex else "#$hex")
+            Triple(Color.red(color), Color.green(color), Color.blue(color))
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    fun rgbToLab(r: Int, g: Int, b: Int): LabValue {
+        val outLab = DoubleArray(3)
+        ColorUtils.RGBToLAB(r, g, b, outLab)
+        return LabValue(outLab[0], outLab[1], outLab[2])
+    }
 
     data class Hsl(val h: Float, val s: Float, val l: Float)
 
@@ -33,18 +54,6 @@ object ColorScienceUtils {
         return Hsl(h, s, l)
     }
 
-    fun hexToRgb(hex: String): Triple<Int, Int, Int>? {
-        return try {
-            val color = if (hex.startsWith("#")) hex.substring(1) else hex
-            val r = color.substring(0, 2).toInt(16)
-            val g = color.substring(2, 4).toInt(16)
-            val b = color.substring(4, 6).toInt(16)
-            Triple(r, g, b)
-        } catch (e: Exception) {
-            null
-        }
-    }
-
     fun determineTemperature(hsl: Hsl): String {
         if (hsl.s < 0.08f) return "NEUTRAL"
         return if (hsl.h in 0.0f..80.0f || hsl.h in 320.0f..360.0f) "WARM" else "COOL"
@@ -60,23 +69,46 @@ object ColorScienceUtils {
 
     fun Int.toHexString(): String = String.format("#%06X", 0xFFFFFF and this)
 
-    /**
-     * Calculates the distance between two colors in RGB space.
-     */
+    fun hexToHsv(hex: String): HsvValue? {
+        return try {
+            val color = Color.parseColor(if (hex.startsWith("#")) hex else "#$hex")
+            val hsv = FloatArray(3)
+            Color.colorToHSV(color, hsv)
+            HsvValue(hsv[0], hsv[1], hsv[2])
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    fun findNearestPantone(hex: String): PantoneMatch {
+        // Mock lookup - In a real app, this would query a local database of 2000+ Pantone swatches
+        // For demonstration, we'll return a match based on the hue
+        val hsv = FloatArray(3)
+        try {
+            Color.colorToHSV(Color.parseColor(if (hex.startsWith("#")) hex else "#$hex"), hsv)
+        } catch (e: Exception) {
+            return PantoneMatch("UNKNOWN", "Neutral Gray", 0.0)
+        }
+        
+        return when {
+            hsv[0] in 0f..20f -> PantoneMatch("18-1662", "Flame Scarlet", 1.2)
+            hsv[0] in 200f..250f -> PantoneMatch("19-4052", "Classic Blue", 0.8)
+            hsv[0] in 50f..70f -> PantoneMatch("13-0647", "Illuminating", 1.5)
+            else -> PantoneMatch("19-0000", "Obsidian", 2.0)
+        }
+    }
+
     fun calculateDistance(hex1: String, hex2: String): Double {
         val rgb1 = hexToRgb(hex1) ?: return Double.MAX_VALUE
         val rgb2 = hexToRgb(hex2) ?: return Double.MAX_VALUE
         
-        return kotlin.math.sqrt(
+        return sqrt(
             Math.pow((rgb1.first - rgb2.first).toDouble(), 2.0) +
             Math.pow((rgb1.second - rgb2.second).toDouble(), 2.0) +
             Math.pow((rgb1.third - rgb2.third).toDouble(), 2.0)
         )
     }
 
-    /**
-     * Returns the complementary color of a given hex color.
-     */
     fun getComplementary(hex: String): String {
         val rgb = hexToRgb(hex) ?: return "#FFFFFF"
         val compR = 255 - rgb.first
@@ -85,12 +117,11 @@ object ColorScienceUtils {
         return String.format("#%02X%02X%02X", compR, compG, compB)
     }
 
-    /**
-     * Returns a list of hex colors representing the analogous harmony.
-     */
     fun getAnalogous(hex: String): List<String> {
         val hsv = FloatArray(3)
-        android.graphics.Color.colorToHSV(android.graphics.Color.parseColor(hex), hsv)
+        try {
+            Color.colorToHSV(Color.parseColor(if (hex.startsWith("#")) hex else "#$hex"), hsv)
+        } catch (e: Exception) { return emptyList() }
         
         val h1 = (hsv[0] + 30) % 360
         val h2 = (hsv[0] + 330) % 360
@@ -101,12 +132,11 @@ object ColorScienceUtils {
         )
     }
 
-    /**
-     * Returns a list of hex colors representing the triadic harmony.
-     */
     fun getTriadic(hex: String): List<String> {
         val hsv = FloatArray(3)
-        android.graphics.Color.colorToHSV(android.graphics.Color.parseColor(hex), hsv)
+        try {
+            Color.colorToHSV(Color.parseColor(if (hex.startsWith("#")) hex else "#$hex"), hsv)
+        } catch (e: Exception) { return emptyList() }
         
         val h1 = (hsv[0] + 120) % 360
         val h2 = (hsv[0] + 240) % 360
@@ -117,12 +147,11 @@ object ColorScienceUtils {
         )
     }
 
-    /**
-     * Returns a list of hex colors representing the monochromatic harmony.
-     */
     fun getMonochromatic(hex: String): List<String> {
         val hsv = FloatArray(3)
-        android.graphics.Color.colorToHSV(android.graphics.Color.parseColor(hex), hsv)
+        try {
+            Color.colorToHSV(Color.parseColor(if (hex.startsWith("#")) hex else "#$hex"), hsv)
+        } catch (e: Exception) { return emptyList() }
         
         return listOf(
             hsvToHex(hsv[0], (hsv[1] * 0.7f).coerceIn(0f, 1f), (hsv[2] * 0.7f).coerceIn(0f, 1f)),
@@ -131,7 +160,7 @@ object ColorScienceUtils {
     }
 
     private fun hsvToHex(h: Float, s: Float, v: Float): String {
-        val argb = android.graphics.Color.HSVToColor(floatArrayOf(h, s, v))
+        val argb = Color.HSVToColor(floatArrayOf(h, s, v))
         return String.format("#%06X", 0xFFFFFF and argb)
     }
 }

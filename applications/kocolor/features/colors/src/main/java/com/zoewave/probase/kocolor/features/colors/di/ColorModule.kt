@@ -2,7 +2,9 @@ package com.zoewave.probase.kocolor.features.colors.di
 
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.zoewave.probase.kocolor.features.colors.data.remote.ColorApiService
+import com.zoewave.probase.kocolor.features.colors.data.repository.ColorIntelligenceRepositoryImpl
 import com.zoewave.probase.kocolor.features.colors.data.repository.ColorRepositoryImpl
+import com.zoewave.probase.kocolor.features.colors.domain.repository.ColorIntelligenceRepository
 import com.zoewave.probase.kocolor.features.colors.domain.repository.ColorRepository
 import dagger.Binds
 import dagger.Module
@@ -56,4 +58,10 @@ abstract class ColorRepositoryModule {
     abstract fun bindColorRepository(
         impl: ColorRepositoryImpl
     ): ColorRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindColorIntelligenceRepository(
+        impl: ColorIntelligenceRepositoryImpl
+    ): ColorIntelligenceRepository
 }

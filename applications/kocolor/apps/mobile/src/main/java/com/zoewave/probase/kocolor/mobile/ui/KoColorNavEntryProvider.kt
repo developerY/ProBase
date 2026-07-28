@@ -63,6 +63,8 @@ import com.zoewave.probase.kocolor.mobile.features.color.ui.ColorSearchScreen
 import com.zoewave.probase.kocolor.mobile.features.color.ui.ColorSearchViewModel
 import com.zoewave.probase.kocolor.mobile.features.color.ui.ColorUiRoute
 import com.zoewave.probase.kocolor.mobile.features.color.ui.ColorViewModel
+import com.zoewave.probase.kocolor.mobile.features.color.ui.hub.ColorHubScreen
+import com.zoewave.probase.kocolor.mobile.features.color.ui.hub.ColorHubViewModel
 import com.zoewave.probase.kocolor.mobile.features.home.ui.CollectionDetailScreen
 import com.zoewave.probase.kocolor.mobile.features.home.ui.CollectionHubScreen
 import com.zoewave.probase.kocolor.mobile.features.home.ui.HomeUiRoute
@@ -180,6 +182,15 @@ fun koColorNavEntryProvider(
             ColorSearchScreen(
                 uiState = state,
                 onEvent = viewModel::onEvent,
+                navTo = onNavigateTo
+            )
+        }
+        is KoColorRoute.ColorHub -> NavEntry(route) {
+            val viewModel: ColorHubViewModel = hiltViewModel()
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+            ColorHubScreen(
+                uiState = state,
+                onEvent = {},
                 navTo = onNavigateTo
             )
         }

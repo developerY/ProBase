@@ -14,6 +14,7 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":applications:kocolor:model"))
     implementation(project(":applications:kocolor:data"))
+    implementation(project(":applications:kocolor:features:colors"))
     implementation(project(":features:graphics"))
 
     implementation(libs.androidx.compose.material3)
