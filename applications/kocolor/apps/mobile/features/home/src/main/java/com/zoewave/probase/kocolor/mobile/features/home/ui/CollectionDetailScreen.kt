@@ -49,7 +49,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.zIndex
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
@@ -64,6 +63,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
 import com.zoewave.probase.core.model.ritual.FashionAdvice
 import com.zoewave.probase.core.model.ritual.MakeupSuggestion
@@ -84,9 +84,9 @@ fun CollectionDetailScreen(
     navTo: (KoColorRoute) -> Unit
 ) {
     val advice = analysis.advice
-    var expandedSections by remember { mutableStateOf(setOf("STORY", "BLUEPRINT")) }
+    var expandedSections by remember { mutableStateOf(setOf("BLUEPRINT")) }
     var isMagnified by remember { mutableStateOf(false) }
-    var isCollapsed by remember { mutableStateOf(false) }
+    var isCollapsed by remember { mutableStateOf(true) }
     //     var expandedSections by remember { mutableStateOf(emptySet<String>()) }
 
     fun toggleSection(section: String) {
@@ -271,6 +271,24 @@ fun CollectionDetailScreen(
                 }
             }
 
+            // 3.5 Visual Blueprint Section (Reused from Simulator)
+            item {
+                CollapsibleSectionHeader(
+                    title = "Visual Blueprint",
+                    subtitle = "EXPLORE DETAILS",
+                    isExpanded = expandedSections.contains("BLUEPRINT"),
+                    onToggle = { toggleSection("BLUEPRINT") }
+                )
+            }
+
+            if (expandedSections.contains("BLUEPRINT")) {
+                item {
+                    VisualBlueprintSection(
+                        data = advice.toVisualBlueprintData()
+                    )
+                }
+            }
+
             // 3. Color Story
             item {
                 CollapsibleSectionHeader(
@@ -302,24 +320,6 @@ fun CollectionDetailScreen(
                             }
                         }
                     }
-                }
-            }
-
-            // 3.5 Visual Blueprint Section (Reused from Simulator)
-            item {
-                CollapsibleSectionHeader(
-                    title = "Visual Blueprint",
-                    subtitle = "EXPLORE DETAILS",
-                    isExpanded = expandedSections.contains("BLUEPRINT"),
-                    onToggle = { toggleSection("BLUEPRINT") }
-                )
-            }
-
-            if (expandedSections.contains("BLUEPRINT")) {
-                item {
-                    VisualBlueprintSection(
-                        data = advice.toVisualBlueprintData()
-                    )
                 }
             }
 

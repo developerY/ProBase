@@ -106,7 +106,7 @@ fun ClothingBlueprintView(
 
             // 1. Draw "Shades" (Soft Editorial Tints)
             data.topItem?.let { item ->
-                val pigment = parseColor(item.colorHex).copy(alpha = 0.22f)
+                val pigment = parseColor(item.colorHex).copy(alpha = 0.28f)
                 val topRect = RectF(
                     center.x - 45.dp.toPx(), center.y - 100.dp.toPx(),
                     center.x + 45.dp.toPx(), center.y - 20.dp.toPx()
@@ -122,7 +122,7 @@ fun ClothingBlueprintView(
             }
 
             data.bottomItem?.let { item ->
-                val pigment = parseColor(item.colorHex).copy(alpha = 0.2f)
+                val pigment = parseColor(item.colorHex).copy(alpha = 0.25f)
                 val bottomRect = RectF(
                     center.x - 35.dp.toPx(), center.y + 0.dp.toPx(),
                     center.x + 35.dp.toPx(), center.y + 120.dp.toPx()
@@ -138,7 +138,7 @@ fun ClothingBlueprintView(
             }
 
             data.shoeItem?.let { item ->
-                val pigment = parseColor(item.colorHex).copy(alpha = 0.25f)
+                val pigment = parseColor(item.colorHex).copy(alpha = 0.35f)
                 drawCircle(pigment, radius = 12.dp.toPx(), center = Offset(center.x - 12.dp.toPx(), center.y + 145.dp.toPx()))
                 drawCircle(pigment, radius = 12.dp.toPx(), center = Offset(center.x + 12.dp.toPx(), center.y + 145.dp.toPx()))
             }

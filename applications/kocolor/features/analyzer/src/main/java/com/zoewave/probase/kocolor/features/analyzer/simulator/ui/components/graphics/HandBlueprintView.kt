@@ -45,12 +45,11 @@ fun HandBlueprintView(
     val horizontalShift = 0.dp
     
     // 2. Define Feature Anchor Points (Start of the lines)
-    val nailsAnchor = Offset(-19.dp.value, -61.dp.value) // Ring finger
+    val nailsAnchor = Offset(-49.dp.value, -59.dp.value) // Ring finger
     val nailsCallout = Offset(-105.dp.value, 119.dp.value)
 
     // 4. Animate Width
     val nailsWidth by animateDpAsState(if (expandedCategory == "NAILS") 160.dp else 120.dp, label = "nailsWidth")
-    val calloutHalfHeight = 24.dp
     val dotCenterOffset = 3.dp // Dot center is 3dp inside the card corner
 
     Box(
@@ -85,27 +84,27 @@ fun HandBlueprintView(
             // Calibrated Nail Coordinates
             nailsHex?.let { hex ->
                 val pigment = parseColor(hex).copy(alpha = 0.5f)
-                
+
                 // Leftmost finger (Thumb)
                 drawCircle(pigment, radius = 9.dp.toPx(), center = Offset(center.x + (-20).dp.toPx(), center.y + (-74).dp.toPx()))
 
                 // Mid-Left finger (Index)
-                drawCircle(pigment, radius = 7.dp.toPx(), center = Offset(center.x + (12).dp.toPx(), center.y + (-131).dp.toPx()))
+                drawCircle(pigment, radius = 7.dp.toPx(), center = Offset(center.x + (13).dp.toPx(), center.y + (-132).dp.toPx()))
 
                 // Top finger (Middle)
-                drawCircle(pigment, radius = 7.dp.toPx(), center = Offset(center.x + (-31).dp.toPx(), center.y + (-110).dp.toPx()))
+                drawCircle(pigment, radius = 7.dp.toPx(), center = Offset(center.x + (-29).dp.toPx(), center.y + (-113).dp.toPx()))
 
                 // Mid-Right finger (Ring)
-                drawCircle(pigment, radius = 7.dp.toPx(), center = Offset(center.x + (-49).dp.toPx(), center.y + (-59).dp.toPx()))
+                drawCircle(pigment, radius = 7.dp.toPx(), center = Offset(center.x + (-49).dp.toPx(), center.y + (-70).dp.toPx()))
 
                 // Bottom-Right edge (Pinky)
-                drawCircle(pigment, radius = 7.dp.toPx(), center = Offset(center.x + (-44).dp.toPx(), center.y + (-29).dp.toPx()))
+                drawCircle(pigment, radius = 7.dp.toPx(), center = Offset(center.x + (-44).dp.toPx(), center.y + (-37).dp.toPx()))
             }
 
             // Elegant Curved Callout Line
             val start = Offset(center.x + nailsAnchor.x.dp.toPx(), center.y + nailsAnchor.y.dp.toPx())
             val end = Offset(center.x + nailsCallout.x.dp.toPx(), center.y + nailsCallout.y.dp.toPx())
-            
+
             val path = Path().apply {
                 moveTo(start.x, start.y)
                 quadraticTo(
@@ -113,7 +112,7 @@ fun HandBlueprintView(
                     end.x, end.y
                 )
             }
-            
+
             drawPath(
                 path = path,
                 color = Color.LightGray,
@@ -135,8 +134,8 @@ fun HandBlueprintView(
                 .width(nailsWidth)
                 .offset(
                     // Pin TopStart (Top-Left) dot to the line
-                    x = horizontalShift + nailsCallout.x.dp + (nailsWidth / 2) - dotCenterOffset,
-                    y = blueprintOffset + nailsCallout.y.dp + calloutHalfHeight - dotCenterOffset
+                    x = horizontalShift + nailsCallout.x.dp - dotCenterOffset,
+                    y = blueprintOffset + nailsCallout.y.dp - dotCenterOffset
                 ),
             anchorAlignment = Alignment.TopStart
         )
