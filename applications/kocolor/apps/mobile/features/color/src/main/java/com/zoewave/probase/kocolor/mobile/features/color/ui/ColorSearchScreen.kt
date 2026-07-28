@@ -42,6 +42,7 @@ import coil.compose.AsyncImage
 import com.zoewave.probase.features.graphics.colorpicker.ui.ColorPickerDialog
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import com.zoewave.probase.features.graphics.colorpicker.util.toHex
+import com.zoewave.probase.kocolor.features.colors.util.ColorScienceUtils
 import com.zoewave.probase.kocolor.mobile.features.color.R
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
@@ -77,6 +78,9 @@ fun ColorSearchScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = { navTo(KoColorRoute.ColorHub) }) {
+                        Icon(Icons.Default.FilterVintage, contentDescription = "Color Hub")
+                    }
                     IconButton(onClick = { /* Profile */ }) {
                         Icon(Icons.Default.AccountCircle, contentDescription = stringResource(R.string.applications_kocolor_apps_mobile_features_color_profile))
                     }
@@ -162,7 +166,7 @@ fun ColorSearchScreen(
                         )
                         Text(stringResource(R.string.applications_kocolor_apps_mobile_features_color_hex_format, uiState.selectedColorHex.uppercase()), style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
                         
-                        val rgb = com.zoewave.probase.kocolor.mobile.features.color.util.ColorScienceUtils.hexToRgb(uiState.selectedColorHex)
+                        val rgb = ColorScienceUtils.hexToRgb(uiState.selectedColorHex)
                         if (rgb != null) {
                             Text(stringResource(R.string.applications_kocolor_apps_mobile_features_color_rgb_format, rgb.first, rgb.second, rgb.third), style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
                         }

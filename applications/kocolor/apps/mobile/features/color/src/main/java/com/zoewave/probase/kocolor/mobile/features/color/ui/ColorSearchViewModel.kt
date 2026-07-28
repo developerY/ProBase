@@ -2,20 +2,20 @@ package com.zoewave.probase.kocolor.mobile.features.color.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.zoewave.probase.core.model.ritual.ClothingItem
+import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
 import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
 import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
-import com.zoewave.probase.kocolor.mobile.features.color.util.ColorScienceUtils
-import com.zoewave.probase.core.model.ritual.ClothingItem
-import com.zoewave.probase.core.model.ritual.CosmeticItem
+import com.zoewave.probase.kocolor.features.colors.domain.model.HarmonyMode
+import com.zoewave.probase.kocolor.features.colors.domain.repository.ColorIntelligenceRepository
+import com.zoewave.probase.kocolor.features.colors.util.ColorScienceUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-enum class SearchMode {
-    EXACT, COMPLEMENTARY, ANALOGOUS, TRIADIC, MONOCHROMATIC
-}
+typealias SearchMode = HarmonyMode
 
 data class ColorSearchUiState(
     val selectedColorHex: String = "#C25C4A",
@@ -33,7 +33,8 @@ data class ColorSearchUiState(
 class ColorSearchViewModel @Inject constructor(
     private val cosmeticRepository: CosmeticInventoryRepository,
     private val wardrobeRepository: WardrobeRepository,
-    private val sessionRepository: FashionSessionRepository
+    private val sessionRepository: FashionSessionRepository,
+    private val colorIntelligenceRepository: ColorIntelligenceRepository
 ) : ViewModel() {
 
     private val _selectedColorHex = MutableStateFlow("#C25C4A")
@@ -111,6 +112,10 @@ class ColorSearchViewModel @Inject constructor(
                 ColorScienceUtils.getMonochromatic(target).any { 
                     ColorScienceUtils.calculateDistance(it, item) < 60.0 
                 }
+            }
+            SearchMode.SPLIT_COMPLEMENTARY, SearchMode.TETRADIC -> {
+                // To be implemented in next phase
+                false
             }
         }
     }
