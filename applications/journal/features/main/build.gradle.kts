@@ -11,6 +11,7 @@ android {
 dependencies {
     implementation(project(":applications:journal:model"))
     implementation(project(":applications:journal:data"))
+    implementation(project(":features:camera"))
 
     // --- Shared Core Projects ---
     implementation(project(":core:model"))

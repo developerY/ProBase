@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -25,12 +26,45 @@ class JournalViewModel @Inject constructor(
     private val _currentEntry = MutableStateFlow<JournalEntry?>(null)
     val currentEntry = _currentEntry.asStateFlow()
 
+    // Hoisted draft state to survive navigation to Camera
+    private val _draftTitle = MutableStateFlow("")
+    val draftTitle = _draftTitle.asStateFlow()
+
+    private val _draftContent = MutableStateFlow("")
+    val draftContent = _draftContent.asStateFlow()
+
+    private val _draftImages = MutableStateFlow<List<Uri>>(emptyList())
+    val draftImages = _draftImages.asStateFlow()
+
     fun onEntrySelected(entry: JournalEntry?) {
         _currentEntry.value = entry
+        _draftTitle.value = entry?.title ?: ""
+        _draftContent.value = entry?.content ?: ""
+        _draftImages.value = entry?.images ?: emptyList()
     }
 
-    fun saveEntry(title: String, content: String, images: List<Uri>) {
+    fun updateTitle(title: String) {
+        _draftTitle.value = title
+    }
+
+    fun updateContent(content: String) {
+        _draftContent.value = content
+    }
+
+    fun addImages(uris: List<Uri>) {
+        _draftImages.update { it + uris }
+    }
+
+    fun removeImage(uri: Uri) {
+        _draftImages.update { it - uri }
+    }
+
+    fun saveEntry() {
         viewModelScope.launch {
+            val title = _draftTitle.value
+            val content = _draftContent.value
+            val images = _draftImages.value
+
             val entry = _currentEntry.value?.copy(
                 title = title,
                 content = content,
@@ -48,8 +82,15 @@ class JournalViewModel @Inject constructor(
             } else {
                 repository.updateJournalEntry(entry)
             }
-            _currentEntry.value = null
+            clearDraft()
         }
+    }
+
+    private fun clearDraft() {
+        _currentEntry.value = null
+        _draftTitle.value = ""
+        _draftContent.value = ""
+        _draftImages.value = emptyList()
     }
 
     fun deleteEntry(entry: JournalEntry) {
