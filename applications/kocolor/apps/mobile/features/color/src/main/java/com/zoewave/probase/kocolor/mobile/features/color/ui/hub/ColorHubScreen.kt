@@ -7,9 +7,7 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -21,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ColorLens
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -45,6 +44,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.zoewave.probase.kocolor.features.colors.domain.model.ColorSignature
 import com.zoewave.probase.kocolor.features.colors.domain.model.SourceType
+import com.zoewave.probase.kocolor.features.colors.util.ColorScienceUtils
 import com.zoewave.probase.kocolor.mobile.features.color.R
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import android.graphics.Color as AndroidColor
@@ -157,44 +157,53 @@ fun ColorHubScreen(
             // --- SECTION 2: CURATED ESSENTIALS ---
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+                    val title = if (selectedGroup == null) {
+                        "Curated Essentials"
+                    } else {
+                        val (hex, _) = selectedGroup!!
+                        "Shade: ${ColorScienceUtils.findNearestPantone(hex).name}"
+                    }
+
                     Text(
-                        "Curated Essentials",
+                        text = title,
                         style = MaterialTheme.typography.headlineSmall,
                         fontFamily = serifFont,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF2C2420)
                     )
                     
                     if (selectedGroup == null) {
-                        // Default View (Static placeholder for now)
-                        InventoryProductCard(
-                            name = "Dark Circle Concealer",
-                            source = "Vanity · Professional Studio Line",
-                            hex = "#D6A493",
-                            onClick = {}
-                        )
+                        // Placeholder View
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(120.dp),
+                            shape = RoundedCornerShape(24.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.5f)),
+                            border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))
+                        ) {
+                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Icon(
+                                        imageVector = Icons.Default.ColorLens,
+                                        contentDescription = null,
+                                        tint = Color.Gray.copy(alpha = 0.3f),
+                                        modifier = Modifier.size(32.dp)
+                                    )
+                                    Spacer(Modifier.height(8.dp))
+                                    Text(
+                                        "Select a color above to see matching items",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = Color.Gray
+                                    )
+                                }
+                            }
+                        }
                     } else {
                         // Selected Shade View
-                        val (hex, items) = selectedGroup!!
+                        val (_, items) = selectedGroup!!
                         
                         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            // Shade Header
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Box(
-                                    Modifier
-                                        .size(20.dp)
-                                        .clip(CircleShape)
-                                        .background(parseColor(hex))
-                                        .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
-                                )
-                                Spacer(Modifier.width(12.dp))
-                                Text(
-                                    text = "${items.size} ${if (items.size == 1) "Item" else "Items"} in this shade",
-                                    style = MaterialTheme.typography.labelLarge,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF2C2420)
-                                )
-                            }
-
                             // Dynamic list of items in the shade
                             items.forEach { sig ->
                                 InventoryProductCard(
