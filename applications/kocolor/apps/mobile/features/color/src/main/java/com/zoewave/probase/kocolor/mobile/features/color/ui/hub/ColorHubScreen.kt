@@ -3,34 +3,49 @@ package com.zoewave.probase.kocolor.mobile.features.color.ui.hub
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.zoewave.probase.kocolor.features.colors.domain.model.ColorSignature
 import com.zoewave.probase.kocolor.features.colors.domain.model.SourceType
+import com.zoewave.probase.kocolor.mobile.features.color.R
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import android.graphics.Color as AndroidColor
 import kotlinx.coroutines.launch
@@ -42,68 +57,294 @@ fun ColorHubScreen(
     onEvent: (Unit) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
+    var selectedGroup by remember { mutableStateOf<Pair<String, List<ColorSignature>>?>(null) }
+    val serifFont = FontFamily.Serif
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Color Hub", fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold) },
+                title = { 
+                    Text(
+                        "Chromatic DNA", 
+                        fontFamily = serifFont, 
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = Color(0xFF2C2420)
+                    ) 
+                },
                 navigationIcon = {
                     IconButton(onClick = { navTo(KoColorRoute.Back) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.Black)
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
-        }
+        },
+        containerColor = Color(0xFFF9F6F0) // Matching the dashboard background
     ) { padding ->
         LazyColumn(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize(),
             contentPadding = PaddingValues(24.dp),
-            verticalArrangement = Arrangement.spacedBy(32.dp)
+            verticalArrangement = Arrangement.spacedBy(40.dp)
         ) {
-            // 1. Chromatic DNA (The Inventory Visualization)
+            // --- SECTION 1: YOUR COLOR SPECTRUM ---
             item {
-                Text("Chromatic DNA", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                Spacer(Modifier.height(16.dp))
-                ChromaticDnaBar(
-                    colors = uiState.inventoryColors,
-                    navTo = navTo
-                )
+                Column {
+                    Text(
+                        "PROFILE ANALYSIS",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 1.2.sp,
+                        color = Color.Gray
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            "Your Color Spectrum",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontFamily = serifFont,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF2C2420)
+                        )
+                        Text(
+                            "Reset",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold,
+                            textDecoration = TextDecoration.Underline,
+                            modifier = Modifier.clickable { selectedGroup = null }
+                        )
+                    }
+                    
+                    Spacer(Modifier.height(20.dp))
+                    
+                    ChromaticDnaBar(
+                        colors = uiState.inventoryColors,
+                        selectedGroup = selectedGroup,
+                        onGroupSelected = { selectedGroup = it },
+                        navTo = navTo
+                    )
+                    
+                    Spacer(Modifier.height(16.dp))
+                    
+                    // Skin Tone Indicator
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(12.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFFE4A493)) // Roseate Sand swatch
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            buildAnnotatedString {
+                                append("Signature skin tone detected: ")
+                                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                                    append("Roseate Sand")
+                                }
+                            },
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color(0xFF2C2420)
+                        )
+                    }
+                }
             }
 
-            // 2. Palette Gap Analysis
+            // --- SECTION 2: CURATED ESSENTIALS ---
             item {
-                Text("Palette Gaps", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                Text(
-                    "Detected based on your ${uiState.userSeason.name} profile", 
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(Modifier.height(16.dp))
-                
-                if (uiState.paletteGaps.isEmpty()) {
-                    Text("Your inventory is perfectly balanced!", style = MaterialTheme.typography.bodyMedium)
-                } else {
-                    LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        items(uiState.paletteGaps) { hex ->
-                            GapIndicator(hex = hex)
+                Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+                    Text(
+                        "Curated Essentials",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontFamily = serifFont,
+                        fontWeight = FontWeight.Bold
+                    )
+                    
+                    if (selectedGroup == null) {
+                        // Default View (Static placeholder for now)
+                        InventoryProductCard(
+                            name = "Dark Circle Concealer",
+                            source = "Vanity · Professional Studio Line",
+                            hex = "#D6A493",
+                            onClick = {}
+                        )
+                    } else {
+                        // Selected Shade View
+                        val (hex, items) = selectedGroup!!
+                        
+                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            // Shade Header
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Box(
+                                    Modifier
+                                        .size(20.dp)
+                                        .clip(CircleShape)
+                                        .background(parseColor(hex))
+                                        .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
+                                )
+                                Spacer(Modifier.width(12.dp))
+                                Text(
+                                    text = "${items.size} ${if (items.size == 1) "Item" else "Items"} in this shade",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF2C2420)
+                                )
+                            }
+
+                            // Dynamic list of items in the shade
+                            items.forEach { sig ->
+                                InventoryProductCard(
+                                    name = sig.name ?: "Unnamed Item",
+                                    source = when (sig.sourceType) {
+                                        SourceType.WARDROBE -> "Wardrobe"
+                                        SourceType.VANITY -> "Vanity"
+                                    },
+                                    hex = sig.hex,
+                                    onClick = {
+                                        val route = when (sig.sourceType) {
+                                            SourceType.WARDROBE -> KoColorRoute.WardrobeDetail(sig.sourceId)
+                                            SourceType.VANITY -> KoColorRoute.CosmeticDetail(sig.sourceId)
+                                        }
+                                        navTo(route)
+                                    }
+                                )
+                            }
                         }
                     }
                 }
             }
-            
-            // 3. Recommended Additions (Simulated)
+
+            // --- SECTION 3: PALETTE INSIGHTS ---
             item {
-                Text("Suggested Harmonies", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                Spacer(Modifier.height(16.dp))
+                Column {
+                    Text(
+                        "Palette Insights",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontFamily = serifFont,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = buildAnnotatedString {
+                            append("Detected gaps based on your ")
+                            withStyle(SpanStyle(fontStyle = FontStyle.Italic, fontWeight = FontWeight.Bold)) {
+                                append(uiState.userSeason.name)
+                            }
+                            append(" season profile.")
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray
+                    )
+                    
+                    Spacer(Modifier.height(24.dp))
+                    
+                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                        InsightGapCard(
+                            label = "MISSING",
+                            color = Color(0xFF000080), // Midnight Navy
+                            name = "Midnight Navy",
+                            isEssential = true,
+                            modifier = Modifier.weight(1f)
+                        )
+                        InsightGapCard(
+                            label = "RECOMMENDED",
+                            color = Color(0xFF800080), // Royal Plum
+                            name = "Royal Plum",
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+            }
+
+            // --- SECTION 4: THE STYLIST'S EDIT ---
+            item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f))
+                    shape = RoundedCornerShape(32.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFF745E7A))
                 ) {
+                    Column(modifier = Modifier.padding(32.dp)) {
+                        Text(
+                            "The Stylist's Edit",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontFamily = serifFont,
+                            fontStyle = FontStyle.Italic,
+                            color = Color.White
+                        )
+                        
+                        Spacer(Modifier.height(24.dp))
+                        
+                        BulletPoint(
+                            text = buildAnnotatedString {
+                                append("Your current collection leans heavily into ")
+                                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append("Cool Neutrals") }
+                                append(". While sophisticated, it lacks the depth required for high-contrast seasonal styling.")
+                            }
+                        )
+                        
+                        Spacer(Modifier.height(16.dp))
+                        
+                        BulletPoint(
+                            text = buildAnnotatedString {
+                                append("Integrating ")
+                                withStyle(SpanStyle(fontStyle = FontStyle.Italic)) { append("Deep Jewel Tones") }
+                                append(" like Emerald and Sapphire will anchor your silhouette and provide a radiant glow against your Roseate Sand undertones.")
+                            }
+                        )
+                        
+                        Spacer(Modifier.height(32.dp))
+                        
+                        Button(
+                            onClick = { /* Shop */ },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD4AF37)),
+                            shape = RoundedCornerShape(20.dp),
+                            modifier = Modifier.height(48.dp)
+                        ) {
+                            Text(
+                                "SHOP THE EDIT",
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.Black,
+                                color = Color.White
+                            )
+                        }
+                    }
+                }
+            }
+
+            // --- SECTION 5: SEASONAL INSPIRATION ---
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(300.dp)
+                        .clip(RoundedCornerShape(32.dp))
+                ) {
+                    // In a real app, this would be an AsyncImage
+                    AsyncImage(
+                        model = "https://images.unsplash.com/photo-1549490349-8643362247b5?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                    
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.4f))))
+                    )
+                    
                     Text(
-                        "Try adding more deep jewel tones to your wardrobe to complement your current collection of cool neutrals.",
-                        modifier = Modifier.padding(16.dp),
-                        style = MaterialTheme.typography.bodyMedium
+                        "Seasonal Inspiration",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontFamily = serifFont,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        modifier = Modifier
+                            .align(Alignment.BottomStart)
+                            .padding(24.dp)
                     )
                 }
             }
@@ -114,8 +355,144 @@ fun ColorHubScreen(
 }
 
 @Composable
+private fun InventoryProductCard(
+    name: String,
+    source: String,
+    hex: String,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(20.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(CircleShape)
+                    .background(parseColor(hex))
+                    .border(0.5.dp, Color.Black.copy(alpha = 0.1f), CircleShape)
+            )
+            Spacer(Modifier.width(16.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = name,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF2C2420)
+                )
+                Text(
+                    text = source,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Gray
+                )
+            }
+            Icon(
+                Icons.AutoMirrored.Filled.ArrowForward,
+                contentDescription = null,
+                tint = Color.Black.copy(alpha = 0.6f)
+            )
+        }
+    }
+}
+
+@Composable
+private fun InsightGapCard(
+    label: String,
+    color: Color,
+    name: String,
+    isEssential: Boolean = false,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.aspectRatio(0.85f),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize().padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                label,
+                style = MaterialTheme.typography.labelSmall,
+                color = Color.Gray,
+                fontWeight = FontWeight.Bold
+            )
+            
+            Spacer(Modifier.height(16.dp))
+            
+            Box(contentAlignment = Alignment.TopEnd) {
+                Box(
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(CircleShape)
+                        .background(color)
+                        .shadow(4.dp, CircleShape)
+                )
+                
+                if (isEssential) {
+                    Surface(
+                        color = Color(0xFF8B7330),
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier.offset(x = 8.dp, y = (-4).dp)
+                    ) {
+                        Text(
+                            "ESSENTIAL",
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                            style = MaterialTheme.typography.labelSmall,
+                            fontSize = 8.sp,
+                            fontWeight = FontWeight.Black,
+                            color = Color.White
+                        )
+                    }
+                }
+            }
+            
+            Spacer(Modifier.height(16.dp))
+            
+            Text(
+                name,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF2C2420)
+            )
+        }
+    }
+}
+
+@Composable
+private fun BulletPoint(text: AnnotatedString) {
+    Row {
+        Text(
+            "✦", 
+            color = Color(0xFFD4AF37),
+            modifier = Modifier.padding(top = 2.dp)
+        )
+        Spacer(Modifier.width(12.dp))
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color.White.copy(alpha = 0.9f),
+            lineHeight = 22.sp
+        )
+    }
+}
+
+@Composable
 fun ChromaticDnaBar(
     colors: List<ColorSignature>,
+    selectedGroup: Pair<String, List<ColorSignature>>?,
+    onGroupSelected: (Pair<String, List<ColorSignature>>?) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     val colorGroups = remember(colors) {
@@ -149,7 +526,6 @@ fun ChromaticDnaBar(
             ))
     }
 
-    var selectedGroup by remember { mutableStateOf<Pair<String, List<ColorSignature>>?>(null) }
     val lazyListState = rememberLazyListState()
     val scope = rememberCoroutineScope()
 
@@ -199,9 +575,9 @@ fun ChromaticDnaBar(
                             )
                             .clickable { 
                                 if (isSelected) {
-                                    selectedGroup = null
+                                    onGroupSelected(null)
                                 } else {
-                                    selectedGroup = group 
+                                    onGroupSelected(group)
                                     scope.launch {
                                         // Center the clicked item
                                         lazyListState.animateScrollToItem(index)
@@ -212,83 +588,6 @@ fun ChromaticDnaBar(
                 }
             }
         }
-
-        // 🔍 Selection Details
-        selectedGroup?.let { (hex, items) ->
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        Modifier
-                            .size(20.dp)
-                            .clip(CircleShape)
-                            .background(parseColor(hex))
-                            .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
-                    )
-                    Spacer(Modifier.width(12.dp))
-                    Text(
-                        text = "${items.size} ${if (items.size == 1) "Item" else "Items"} in this shade",
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-                
-                items.forEach { sig ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { 
-                                val route = when (sig.sourceType) {
-                                    SourceType.WARDROBE -> KoColorRoute.WardrobeDetail(sig.sourceId)
-                                    SourceType.VANITY -> KoColorRoute.CosmeticDetail(sig.sourceId)
-                                }
-                                navTo(route)
-                            }
-                            .padding(vertical = 4.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(sig.name ?: "Unnamed Item", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
-                            Text(
-                                text = when (sig.sourceType) {
-                                    SourceType.WARDROBE -> "Wardrobe"
-                                    SourceType.VANITY -> "Vanity"
-                                }, 
-                                style = MaterialTheme.typography.bodySmall, 
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp).rotate(180f),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun GapIndicator(hex: String) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(
-            modifier = Modifier
-                .size(64.dp)
-                .clip(CircleShape)
-                .background(parseColor(hex))
-                .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
-        )
-        Spacer(Modifier.height(8.dp))
-        Text("Missing", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
     }
 }
 
