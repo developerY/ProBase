@@ -3,9 +3,11 @@ package com.zoewave.probase.kocolor.features.colors.data.repository
 import com.zoewave.probase.core.model.ritual.SeasonalType
 import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
 import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
+import com.zoewave.probase.kocolor.features.colors.domain.engine.StylistEditEngine
 import com.zoewave.probase.kocolor.features.colors.domain.model.ColorSignature
 import com.zoewave.probase.kocolor.features.colors.domain.model.HarmonyMode
 import com.zoewave.probase.kocolor.features.colors.domain.model.SourceType
+import com.zoewave.probase.kocolor.features.colors.domain.model.StylistEdit
 import com.zoewave.probase.kocolor.features.colors.domain.repository.ColorIntelligenceRepository
 import com.zoewave.probase.kocolor.features.colors.util.ColorScienceUtils
 import kotlinx.coroutines.flow.Flow
@@ -17,7 +19,8 @@ import javax.inject.Singleton
 @Singleton
 class ColorIntelligenceRepositoryImpl @Inject constructor(
     private val wardrobeRepository: WardrobeRepository,
-    private val cosmeticRepository: CosmeticInventoryRepository
+    private val cosmeticRepository: CosmeticInventoryRepository,
+    private val stylistEditEngine: StylistEditEngine
 ) : ColorIntelligenceRepository {
 
     override fun getAllInventoryColors(): Flow<List<ColorSignature>> {
@@ -91,6 +94,12 @@ class ColorIntelligenceRepositoryImpl @Inject constructor(
                      ColorScienceUtils.calculateDistance(idealHex, invHex) < 40.0 
                  }
              }
+        }
+    }
+
+    override fun getStylistEdit(userSeason: SeasonalType): Flow<StylistEdit> {
+        return getAllInventoryColors().map { inventory ->
+            stylistEditEngine.generateEdit(userSeason, inventory)
         }
     }
 

@@ -21,3 +21,11 @@ enum class SourceType {
     WARDROBE,
     VANITY
 }
+
+data class StylistEdit(
+    val title: String = "The Stylist's Edit",
+    val primaryInsight: String,
+    val recommendation: String,
+    val anchorColors: List<String>,
+    val buttonText: String = "SHOP THE EDIT"
+)

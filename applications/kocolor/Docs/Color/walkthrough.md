@@ -20,8 +20,7 @@ Selecting any color now reveals the `ProfessionalColorSpecSheet`. This component
 - **Pantone® Matching**: Near-matches to industry-standard color codes.
 - **HSV Breakdown**: Hue, Saturation, and Value specs for technical analysis.
 
-### 4. Advanced Harmony Search
-The `ColorSearchScreen` has been upgraded to support professional search modes beyond simple complementary matching, including Analogous, Triadic, and Monochromatic harmonies, powered by the centralized `ColorScienceUtils`.
+- **Dynamic "Stylist's Edit" Engine**: The static editorial section has been replaced with a narrative engine that analyzes the user's inventory distribution (e.g., % of neutrals) and generates personalized advice. It explicitly suggests high-impact color additions (like "Sapphire" or "Emerald") that harmonize with the user's biological undertones and seasonal profile.
 
 ---
 

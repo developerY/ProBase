@@ -270,54 +270,52 @@ fun ColorHubScreen(
 
             // --- SECTION 4: THE STYLIST'S EDIT ---
             item {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(32.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFF745E7A))
-                ) {
-                    Column(modifier = Modifier.padding(32.dp)) {
-                        Text(
-                            "The Stylist's Edit",
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontFamily = serifFont,
-                            fontStyle = FontStyle.Italic,
-                            color = Color.White
-                        )
-                        
-                        Spacer(Modifier.height(24.dp))
-                        
-                        BulletPoint(
-                            text = buildAnnotatedString {
-                                append("Your current collection leans heavily into ")
-                                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append("Cool Neutrals") }
-                                append(". While sophisticated, it lacks the depth required for high-contrast seasonal styling.")
-                            }
-                        )
-                        
-                        Spacer(Modifier.height(16.dp))
-                        
-                        BulletPoint(
-                            text = buildAnnotatedString {
-                                append("Integrating ")
-                                withStyle(SpanStyle(fontStyle = FontStyle.Italic)) { append("Deep Jewel Tones") }
-                                append(" like Emerald and Sapphire will anchor your silhouette and provide a radiant glow against your Roseate Sand undertones.")
-                            }
-                        )
-                        
-                        Spacer(Modifier.height(32.dp))
-                        
-                        Button(
-                            onClick = { /* Shop */ },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD4AF37)),
-                            shape = RoundedCornerShape(20.dp),
-                            modifier = Modifier.height(48.dp)
-                        ) {
+                uiState.stylistEdit?.let { edit ->
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(32.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFF745E7A))
+                    ) {
+                        Column(modifier = Modifier.padding(32.dp)) {
                             Text(
-                                "SHOP THE EDIT",
-                                style = MaterialTheme.typography.labelLarge,
-                                fontWeight = FontWeight.Black,
+                                edit.title,
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontFamily = serifFont,
+                                fontStyle = FontStyle.Italic,
                                 color = Color.White
                             )
+                            
+                            Spacer(Modifier.height(24.dp))
+                            
+                            BulletPoint(
+                                text = buildAnnotatedString {
+                                    append(edit.primaryInsight)
+                                }
+                            )
+                            
+                            Spacer(Modifier.height(16.dp))
+                            
+                            BulletPoint(
+                                text = buildAnnotatedString {
+                                    append(edit.recommendation)
+                                }
+                            )
+                            
+                            Spacer(Modifier.height(32.dp))
+                            
+                            Button(
+                                onClick = { /* Shop */ },
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD4AF37)),
+                                shape = RoundedCornerShape(20.dp),
+                                modifier = Modifier.height(48.dp)
+                            ) {
+                                Text(
+                                    edit.buttonText,
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = FontWeight.Black,
+                                    color = Color.White
+                                )
+                            }
                         }
                     }
                 }
