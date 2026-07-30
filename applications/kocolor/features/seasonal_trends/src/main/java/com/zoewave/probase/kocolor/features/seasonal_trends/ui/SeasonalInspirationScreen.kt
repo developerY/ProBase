@@ -7,15 +7,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -47,6 +39,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -58,8 +51,14 @@ fun SeasonalTrendsContainer(
     modifier: Modifier = Modifier
 ) {
     var isExpanded by remember { mutableStateOf(false) }
+    val configuration = LocalConfiguration.current
+    val screenHeight = configuration.screenHeightDp.dp
     
-    SharedTransitionLayout(modifier = modifier.fillMaxSize()) {
+    SharedTransitionLayout(
+        modifier = modifier
+            .fillMaxWidth()
+            .heightIn(max = if (isExpanded) screenHeight else 280.dp)
+    ) {
         AnimatedVisibility(
             visible = !isExpanded,
             enter = fadeIn(),
@@ -147,8 +146,11 @@ private fun SeasonalInspirationFullScreen(
     animatedVisibilityScope: androidx.compose.animation.AnimatedVisibilityScope
 ) {
     val serifFont = FontFamily.Serif
+    val configuration = LocalConfiguration.current
+    val screenHeight = configuration.screenHeightDp.dp
 
     Scaffold(
+        modifier = Modifier.height(screenHeight),
         topBar = {
             TopAppBar(
                 title = {},
