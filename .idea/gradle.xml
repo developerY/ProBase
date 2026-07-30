@@ -112,6 +112,7 @@
             <option value="$PROJECT_DIR$/applications/kocolor/features/obf" />
             <option value="$PROJECT_DIR$/applications/kocolor/features/products" />
             <option value="$PROJECT_DIR$/applications/kocolor/features/routines" />
+            <option value="$PROJECT_DIR$/applications/kocolor/features/seasonal_trends" />
             <option value="$PROJECT_DIR$/applications/kocolor/features/stitch" />
             <option value="$PROJECT_DIR$/applications/kocolor/features/store" />
             <option value="$PROJECT_DIR$/applications/kocolor/features/suggestions" />
