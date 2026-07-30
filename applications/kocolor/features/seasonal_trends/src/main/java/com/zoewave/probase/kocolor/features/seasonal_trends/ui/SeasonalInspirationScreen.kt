@@ -3,32 +3,29 @@ package com.zoewave.probase.kocolor.features.seasonal_trends.ui
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,14 +36,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.zoewave.probase.kocolor.features.seasonal_trends.ui.components.fluidDistortion
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -55,8 +51,14 @@ fun SeasonalTrendsContainer(
     modifier: Modifier = Modifier
 ) {
     var isExpanded by remember { mutableStateOf(false) }
+    val configuration = LocalConfiguration.current
+    val screenHeight = configuration.screenHeightDp.dp
     
-    SharedTransitionLayout(modifier = modifier.fillMaxSize()) {
+    SharedTransitionLayout(
+        modifier = modifier
+            .fillMaxWidth()
+            .heightIn(max = if (isExpanded) screenHeight else 280.dp)
+    ) {
         AnimatedVisibility(
             visible = !isExpanded,
             enter = fadeIn(),
@@ -135,7 +137,7 @@ private fun SeasonalInspirationCard(
     }
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
+@OptIn(ExperimentalSharedTransitionApi::class, ExperimentalMaterial3Api::class)
 @Composable
 private fun SeasonalInspirationFullScreen(
     uiState: SeasonalTrendsUiState,
@@ -143,97 +145,128 @@ private fun SeasonalInspirationFullScreen(
     sharedTransitionScope: androidx.compose.animation.SharedTransitionScope,
     animatedVisibilityScope: androidx.compose.animation.AnimatedVisibilityScope
 ) {
-    var size by remember { mutableStateOf(IntSize.Zero) }
-    val infiniteTransition = rememberInfiniteTransition(label = "fluid")
-    val time by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 10f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(10000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "time"
-    )
+    val serifFont = FontFamily.Serif
+    val configuration = LocalConfiguration.current
+    val screenHeight = configuration.screenHeightDp.dp
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .onSizeChanged { size = it }
-            .clickable { onDismiss() }
-    ) {
-        with(sharedTransitionScope) {
-            val baseModifier = Modifier
-                .fillMaxSize()
-                .sharedElement(
-                    rememberSharedContentState(key = "inspiration_image"),
-                    animatedVisibilityScope = animatedVisibilityScope
-                )
-            
-            val finalModifier = baseModifier.fluidDistortion(time, size.width.toFloat(), size.height.toFloat())
-
-            AsyncImage(
-                model = "https://images.unsplash.com/photo-1549490349-8643362247b5?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-                contentDescription = null,
-                modifier = finalModifier,
-                contentScale = ContentScale.Crop
+    Scaffold(
+        modifier = Modifier.height(screenHeight),
+        topBar = {
+            TopAppBar(
+                title = {},
+                navigationIcon = {
+                    IconButton(onClick = onDismiss) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
-        }
-        
-        // Editorial Overlay
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        0f to Color.Transparent,
-                        0.5f to Color.Black.copy(alpha = 0.3f),
-                        1f to Color.Black.copy(alpha = 0.8f)
-                    )
+        },
+        containerColor = Color.Black
+    ) { padding ->
+        Box(modifier = Modifier.fillMaxSize()) {
+            // 1. Background Image with sophisticated darkening
+            with(sharedTransitionScope) {
+                AsyncImage(
+                    model = "https://images.unsplash.com/photo-1549490349-8643362247b5?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .sharedElement(
+                            rememberSharedContentState(key = "inspiration_image"),
+                            animatedVisibilityScope = animatedVisibilityScope
+                        ),
+                    contentScale = ContentScale.Crop,
+                    alpha = 0.6f
                 )
-                .padding(32.dp)
-        ) {
+            }
+
+            // 2. High-Contrast Editorial Overlay
             Column(
-                modifier = Modifier.align(Alignment.BottomStart),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(Color.Transparent, Color.Black.copy(alpha = 0.8f))
+                        )
+                    )
+                    .padding(horizontal = 32.dp)
+                    .padding(bottom = 64.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.Bottom
             ) {
                 Text(
-                    "The Winter Editorial",
-                    style = MaterialTheme.typography.displayMedium,
-                    fontFamily = FontFamily.Serif,
+                    text = "The Winter",
+                    style = MaterialTheme.typography.displaySmall,
+                    fontFamily = serifFont,
+                    color = Color.White.copy(alpha = 0.7f),
+                    fontStyle = FontStyle.Italic
+                )
+                Text(
+                    text = "Editorial",
+                    style = MaterialTheme.typography.displayLarge.copy(lineHeight = 64.sp),
+                    fontFamily = serifFont,
                     fontWeight = FontWeight.Bold,
                     color = Color.White
                 )
-                
+
+                Spacer(Modifier.height(32.dp))
+
+                // High-End Divider
+                Box(
+                    Modifier
+                        .width(40.dp)
+                        .height(2.dp)
+                        .background(Color(0xFFD4AF37)) // Gold accent
+                )
+
+                Spacer(Modifier.height(32.dp))
+
                 when (uiState) {
                     is SeasonalTrendsUiState.Loading -> {
-                        CircularProgressIndicator(color = Color.White)
+                        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator(color = Color.White)
+                        }
                     }
                     is SeasonalTrendsUiState.Success -> {
-                        Text(
-                            uiState.editorial,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = Color.White.copy(alpha = 0.9f),
-                            lineHeight = 28.sp
-                        )
+                        val paragraphs = uiState.editorial.split("\n\n")
+                        paragraphs.forEach { paragraph ->
+                            Text(
+                                text = paragraph,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = Color.White.copy(alpha = 0.9f),
+                                lineHeight = 32.sp,
+                                letterSpacing = 0.5.sp
+                            )
+                            Spacer(Modifier.height(24.dp))
+                        }
                     }
                     is SeasonalTrendsUiState.Error -> {
                         Text(
-                            "Failed to load editorial: ${uiState.message}",
+                            "Failed to load insights.",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.error
                         )
                     }
                     else -> {}
                 }
-                
-                Spacer(Modifier.height(32.dp))
-                
+
+                Spacer(Modifier.height(24.dp))
+
                 Button(
-                    onClick = { onDismiss() },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.2f)),
-                    shape = RoundedCornerShape(16.dp)
+                    onClick = onDismiss,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.White),
+                    shape = RoundedCornerShape(20.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
                 ) {
-                    Text("BACK TO HUB", color = Color.White, fontWeight = FontWeight.Bold)
+                    Text(
+                        "DISMISS",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
                 }
             }
         }

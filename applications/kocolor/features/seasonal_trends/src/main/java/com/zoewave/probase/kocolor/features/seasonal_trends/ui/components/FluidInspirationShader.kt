@@ -8,40 +8,57 @@ import org.intellij.lang.annotations.Language
 import android.graphics.RenderEffect as AndroidRenderEffect
 
 @Language("AGSL")
-const val FLUID_DISTORTION_SHADER = """
+const val FROSTED_GLASS_SHADER = """
     uniform shader image;
     uniform float2 resolution;
     uniform float time;
+    uniform float frostAmount; // 0.0 (sharp) to 1.0 (frosted)
 
-    float2 distort(float2 uv, float t) {
-        float2 p = uv;
-        p.x += 0.05 * sin(p.y * 10.0 + t);
-        p.y += 0.05 * sin(p.x * 10.0 + t * 1.2);
-        
-        // Add more viscous swirling
-        p.x += 0.02 * sin(p.y * 20.0 - t * 0.5);
-        p.y += 0.02 * cos(p.x * 20.0 + t * 0.8);
-        
-        return p;
+    // Pseudo-random noise for the frost grain
+    float hash(float2 p) {
+        p = fract(p * float2(123.34, 456.21));
+        p += dot(p, p + 45.32);
+        return fract(p.x * p.y);
     }
 
     half4 main(float2 fragCoord) {
         float2 uv = fragCoord / resolution;
-        float2 distortedUv = distort(uv, time);
-        return image.eval(distortedUv * resolution);
+        
+        // 1. Tactile Jitter: Displace UVs slightly based on high-frequency noise
+        // This creates the "etched" look of frosted glass.
+        float2 noise = float2(
+            hash(uv + fract(time * 0.1)), 
+            hash(uv + fract(time * 0.1) + 1.0)
+        ) - 0.5;
+        
+        // Subtle distortion for refraction effect
+        float2 refractUv = uv + noise * 0.02 * frostAmount;
+        
+        half4 color = image.eval(refractUv * resolution);
+        
+        // 2. Grainy Overlay: Add a subtle shimmering grit
+        float grain = hash(fragCoord + time) * 0.08 * frostAmount;
+        color.rgb += half3(grain);
+        
+        // 3. Luminance Lift: Standard "Milky" look for frosted glass
+        color.rgb = mix(color.rgb, half3(1.0), 0.15 * frostAmount);
+        
+        return color;
     }
 """
 
-fun Modifier.fluidDistortion(
+fun Modifier.frostedGlass(
     time: Float,
+    frostAmount: Float,
     width: Float,
     height: Float
 ): Modifier = this.graphicsLayer {
     if (width <= 0f || height <= 0f) return@graphicsLayer
     
-    val shader = RuntimeShader(FLUID_DISTORTION_SHADER)
+    val shader = RuntimeShader(FROSTED_GLASS_SHADER)
     shader.setFloatUniform("resolution", width, height)
     shader.setFloatUniform("time", time)
+    shader.setFloatUniform("frostAmount", frostAmount)
     
     renderEffect = AndroidRenderEffect.createRuntimeShaderEffect(shader, "image").asComposeRenderEffect()
 }
