@@ -6,24 +6,18 @@ plugins {
 }
 
 android {
-    namespace = "com.zoewave.probase.kocolor.mobile.features.color"
+    namespace = "com.zoewave.probase.kocolor.features.seasonal_trends"
 }
 
 dependencies {
     implementation(project(":core:model"))
     implementation(project(":core:ui"))
     implementation(project(":applications:kocolor:model"))
-    implementation(project(":applications:kocolor:data"))
     implementation(project(":applications:kocolor:features:colors"))
-    implementation(project(":applications:kocolor:features:seasonal_trends"))
-    implementation(project(":features:graphics"))
-
-    implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.compose.material3.window.size)
-    implementation(libs.androidx.compose.ui.tooling.preview)
-    implementation(libs.androidx.compose.material.icons.extended)
+    
+    implementation(libs.androidx.compose.animation)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.coil.compose)
-    implementation("androidx.palette:palette-ktx:1.0.0")
+    implementation(libs.kotlinx.serialization.json)
 }

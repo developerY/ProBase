@@ -1,36 +1,66 @@
 package com.zoewave.probase.kocolor.mobile.features.color.ui.hub
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ColorLens
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -45,9 +75,13 @@ import coil.compose.AsyncImage
 import com.zoewave.probase.kocolor.features.colors.domain.model.ColorSignature
 import com.zoewave.probase.kocolor.features.colors.domain.model.SourceType
 import com.zoewave.probase.kocolor.features.colors.util.ColorScienceUtils
+import com.zoewave.probase.kocolor.features.seasonal_trends.ui.SeasonalTrendsContainer
+import com.zoewave.probase.kocolor.features.seasonal_trends.ui.SeasonalTrendsViewModel
 import com.zoewave.probase.kocolor.mobile.features.color.R
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import android.graphics.Color as AndroidColor
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -58,7 +92,44 @@ fun ColorHubScreen(
     navTo: (KoColorRoute) -> Unit
 ) {
     var selectedGroup by remember { mutableStateOf<Pair<String, List<ColorSignature>>?>(null) }
+    var showShopWipDialog by remember { mutableStateOf(false) }
     val serifFont = FontFamily.Serif
+
+    if (showShopWipDialog) {
+        AlertDialog(
+            onDismissRequest = { showShopWipDialog = false },
+            title = { 
+                Text(
+                    "Future of Fashion: AI Curation", 
+                    fontFamily = serifFont, 
+                    fontWeight = FontWeight.Bold
+                ) 
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text(
+                        "We are building a sophisticated AI-driven curator to transform your color analysis into action.",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Text(
+                        "Coming soon to the Boutique:",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                    BulletListItem("AI shortlists of items that perfectly fill your detected seasonal gaps.")
+                    // BulletListItem("Instant AR Try-On deep-links into NailLab and FaceLab for every item.")
+                    BulletListItem("Professional-grade matches verified by the Glow Archive engine.")
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showShopWipDialog = false }) {
+                    Text("CLOSE", fontWeight = FontWeight.Black)
+                }
+            },
+            shape = RoundedCornerShape(28.dp),
+            containerColor = Color.White
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -304,7 +375,7 @@ fun ColorHubScreen(
                             Spacer(Modifier.height(32.dp))
                             
                             Button(
-                                onClick = { /* Shop */ },
+                                onClick = { showShopWipDialog = true },
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD4AF37)),
                                 shape = RoundedCornerShape(20.dp),
                                 modifier = Modifier.height(48.dp)
@@ -323,37 +394,20 @@ fun ColorHubScreen(
 
             // --- SECTION 5: SEASONAL INSPIRATION ---
             item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(300.dp)
-                        .clip(RoundedCornerShape(32.dp))
-                ) {
-                    // In a real app, this would be an AsyncImage
-                    AsyncImage(
-                        model = "https://images.unsplash.com/photo-1549490349-8643362247b5?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-                        contentDescription = null,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                    
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.4f))))
-                    )
-                    
-                    Text(
-                        "Seasonal Inspiration",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontFamily = serifFont,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                        modifier = Modifier
-                            .align(Alignment.BottomStart)
-                            .padding(24.dp)
+                val trendsViewModel: SeasonalTrendsViewModel = hiltViewModel()
+                val trendsState by trendsViewModel.uiState.collectAsStateWithLifecycle()
+
+                LaunchedEffect(uiState.userSeason) {
+                    trendsViewModel.fetchSeasonalTrends(
+                        uiState.userSeason.name,
+                        "Roseate Sand" // Placeholder for actual skin tone
                     )
                 }
+
+                SeasonalTrendsContainer(
+                    uiState = trendsState,
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
             
             item { Spacer(Modifier.height(48.dp)) }
@@ -595,6 +649,14 @@ fun ChromaticDnaBar(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun BulletListItem(text: String) {
+    Row(modifier = Modifier.fillMaxWidth()) {
+        Text("•", modifier = Modifier.width(20.dp), fontWeight = FontWeight.Bold, color = Color(0xFFD4AF37))
+        Text(text, style = MaterialTheme.typography.bodySmall, color = Color.DarkGray)
     }
 }
 
