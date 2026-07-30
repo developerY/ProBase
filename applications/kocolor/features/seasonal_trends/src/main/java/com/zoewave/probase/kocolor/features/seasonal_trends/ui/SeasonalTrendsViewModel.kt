@@ -3,6 +3,7 @@ package com.zoewave.probase.kocolor.features.seasonal_trends.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.kocolor.features.colors.domain.repository.ColorIntelligenceRepository
+import com.zoewave.probase.kocolor.features.seasonal_trends.domain.GeminiService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,8 +21,7 @@ sealed class SeasonalTrendsUiState {
 @HiltViewModel
 class SeasonalTrendsViewModel @Inject constructor(
     private val colorRepository: ColorIntelligenceRepository,
-    // Assuming GeminiService exists and is injectable
-    // private val geminiService: GeminiService 
+    private val geminiService: GeminiService 
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<SeasonalTrendsUiState>(SeasonalTrendsUiState.Idle)
@@ -39,10 +39,7 @@ class SeasonalTrendsViewModel @Inject constructor(
                     for their specific profile.
                 """.trimIndent()
                 
-                // Mocking Gemini call for now
-                // val response = geminiService.generateContent(prompt)
-                val response = "As we transition into the Fall/Winter 2026 season, your $userProfile profile finds its most sophisticated expression in the rich, nocturnal depths of Deep Plum velvet. This material doesn't just hold color; it captures light, mirroring the clarity of your $userUndertone undertones. When paired with the grounded, architectural strength of Espresso brown, your silhouette achieves a high-contrast balance that feels both modern and timeless.\n\nTo complete the look, lean into the 'blurred berry' cosmetic trend. These soft-focus textures enhance your natural radiance without competing with the saturation of your ensemble. This season is about more than just matching palettes; it's about amplifying your biological canvas with materials that feel as luxurious as they look."
-                
+                val response = geminiService.generateContent(prompt)
                 _uiState.value = SeasonalTrendsUiState.Success(response)
             } catch (e: Exception) {
                 _uiState.value = SeasonalTrendsUiState.Error(e.message ?: "Unknown error occurred")

@@ -11,10 +11,12 @@ android {
 
 dependencies {
     implementation(project(":core:model"))
+    implementation(project(":core:data"))
     implementation(project(":core:ui"))
     implementation(project(":applications:kocolor:model"))
     implementation(project(":applications:kocolor:features:colors"))
     
+    implementation(libs.google.generative.ai)
     implementation(libs.androidx.compose.animation)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
