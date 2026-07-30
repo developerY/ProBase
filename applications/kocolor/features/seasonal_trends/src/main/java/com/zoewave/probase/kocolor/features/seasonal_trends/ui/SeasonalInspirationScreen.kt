@@ -6,6 +6,8 @@ import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.EaseInOutQuart
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
@@ -46,7 +48,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.zoewave.probase.kocolor.features.seasonal_trends.ui.components.fluidDistortion
+import com.zoewave.probase.kocolor.features.seasonal_trends.ui.components.frostedGlass
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -161,6 +163,12 @@ private fun SeasonalInspirationFullScreen(
             .onSizeChanged { size = it }
             .clickable { onDismiss() }
     ) {
+        val frostAmount by animateFloatAsState(
+            targetValue = 1f,
+            animationSpec = tween(durationMillis = 800, easing = EaseInOutQuart),
+            label = "frost"
+        )
+
         with(sharedTransitionScope) {
             val baseModifier = Modifier
                 .fillMaxSize()
@@ -169,7 +177,7 @@ private fun SeasonalInspirationFullScreen(
                     animatedVisibilityScope = animatedVisibilityScope
                 )
             
-            val finalModifier = baseModifier.fluidDistortion(time, size.width.toFloat(), size.height.toFloat())
+            val finalModifier = baseModifier.frostedGlass(time, frostAmount, size.width.toFloat(), size.height.toFloat())
 
             AsyncImage(
                 model = "https://images.unsplash.com/photo-1549490349-8643362247b5?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",

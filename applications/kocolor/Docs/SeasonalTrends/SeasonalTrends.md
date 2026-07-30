@@ -12,11 +12,12 @@ Move beyond mere "recommendations" by providing a high-end, editorial experience
 
 ## 🧩 Technical Pillars
 
-### 1. AGSL Fluid Shader (`FluidInspirationShader.kt`)
-To create a high-fashion, "liquid velvet" aesthetic without the overhead of video files, we use **AGSL (Android Graphics Shading Language)**.
-- **Effect**: procedura sine-wave and noise distortion applied to static bitmap UVs.
-- **Performance**: High-efficiency GPU-bound rendering with negligible APK bloat.
-- **Interaction**: Driven by an infinite time loop to maintain constant, subtle motion.
+### 1. Frosted Glass Morph Shader (`FluidInspirationShader.kt`)
+To create a high-fashion, "frosted glass" aesthetic, we use a morphing AGSL shader.
+- **The Morph**: As the card expands, the `frostAmount` animates from 0.0 (sharp) to 1.0 (frosted), creating a seamless transition from a clear image to a tactile background.
+- **Tactile Jitter**: Uses high-frequency noise to displace UVs, simulating the "etched" look of frosted glass.
+- **Grainy Shimmer**: Adds a subtle, moving grit to the surface to give it physical presence and depth.
+- **Milky Tint**: Mixes in a soft white luminance to achieve the classic "milk glass" effect seen in premium UI.
 
 ### 2. Shared Element Transitions
 We utilize the **SharedTransitionLayout** to maintain visual continuity.
