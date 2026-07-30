@@ -139,7 +139,7 @@ private fun SeasonalInspirationCard(
 
 @OptIn(ExperimentalSharedTransitionApi::class, ExperimentalMaterial3Api::class)
 @Composable
-private fun SeasonalInspirationFullScreen(
+fun SeasonalInspirationFullScreen(
     uiState: SeasonalTrendsUiState,
     onDismiss: () -> Unit,
     sharedTransitionScope: androidx.compose.animation.SharedTransitionScope,
@@ -187,14 +187,15 @@ private fun SeasonalInspirationFullScreen(
                     .fillMaxSize()
                     .background(
                         Brush.verticalGradient(
-                            listOf(Color.Transparent, Color.Black.copy(alpha = 0.8f))
+                            listOf(Color.Transparent, Color.Black.copy(alpha = 0.9f))
                         )
                     )
                     .padding(horizontal = 32.dp)
-                    .padding(bottom = 64.dp)
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.Bottom
+                    .verticalScroll(rememberScrollState())
             ) {
+                // Initial padding to push text to a nice reading position
+                Spacer(Modifier.height(360.dp))
+
                 Text(
                     text = "The Winter",
                     style = MaterialTheme.typography.displaySmall,
@@ -210,7 +211,7 @@ private fun SeasonalInspirationFullScreen(
                     color = Color.White
                 )
 
-                Spacer(Modifier.height(32.dp))
+                Spacer(Modifier.height(24.dp))
 
                 // High-End Divider
                 Box(
@@ -224,8 +225,18 @@ private fun SeasonalInspirationFullScreen(
 
                 when (uiState) {
                     is SeasonalTrendsUiState.Loading -> {
-                        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                            CircularProgressIndicator(color = Color.White)
+                        // Positioned directly in the text area
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 16.dp),
+                            contentAlignment = Alignment.TopCenter
+                        ) {
+                            CircularProgressIndicator(
+                                color = Color.White,
+                                modifier = Modifier.size(40.dp),
+                                strokeWidth = 3.dp
+                            )
                         }
                     }
                     is SeasonalTrendsUiState.Success -> {
@@ -251,7 +262,7 @@ private fun SeasonalInspirationFullScreen(
                     else -> {}
                 }
 
-                Spacer(Modifier.height(24.dp))
+                Spacer(Modifier.height(32.dp))
 
                 Button(
                     onClick = onDismiss,
@@ -268,6 +279,8 @@ private fun SeasonalInspirationFullScreen(
                         color = Color.Black
                     )
                 }
+
+                Spacer(Modifier.height(64.dp)) // Bottom safe area
             }
         }
     }
