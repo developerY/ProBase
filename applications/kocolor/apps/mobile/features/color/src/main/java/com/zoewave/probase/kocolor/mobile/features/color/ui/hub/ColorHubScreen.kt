@@ -58,7 +58,44 @@ fun ColorHubScreen(
     navTo: (KoColorRoute) -> Unit
 ) {
     var selectedGroup by remember { mutableStateOf<Pair<String, List<ColorSignature>>?>(null) }
+    var showShopWipDialog by remember { mutableStateOf(false) }
     val serifFont = FontFamily.Serif
+
+    if (showShopWipDialog) {
+        AlertDialog(
+            onDismissRequest = { showShopWipDialog = false },
+            title = { 
+                Text(
+                    "Future of Fashion: AI Curation", 
+                    fontFamily = serifFont, 
+                    fontWeight = FontWeight.Bold
+                ) 
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text(
+                        "We are building a sophisticated AI-driven curator to transform your color analysis into action.",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Text(
+                        "Coming soon to the Boutique:",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                    BulletListItem("AI shortlists of items that perfectly fill your detected seasonal gaps.")
+                    BulletListItem("Instant AR Try-On deep-links into NailLab and FaceLab for every item.")
+                    BulletListItem("Professional-grade matches verified by the Glow Archive engine.")
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showShopWipDialog = false }) {
+                    Text("CLOSE", fontWeight = FontWeight.Black)
+                }
+            },
+            shape = RoundedCornerShape(28.dp),
+            containerColor = Color.White
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -304,7 +341,7 @@ fun ColorHubScreen(
                             Spacer(Modifier.height(32.dp))
                             
                             Button(
-                                onClick = { /* Shop */ },
+                                onClick = { showShopWipDialog = true },
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD4AF37)),
                                 shape = RoundedCornerShape(20.dp),
                                 modifier = Modifier.height(48.dp)
@@ -595,6 +632,14 @@ fun ChromaticDnaBar(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun BulletListItem(text: String) {
+    Row(modifier = Modifier.fillMaxWidth()) {
+        Text("•", modifier = Modifier.width(20.dp), fontWeight = FontWeight.Bold, color = Color(0xFFD4AF37))
+        Text(text, style = MaterialTheme.typography.bodySmall, color = Color.DarkGray)
     }
 }
 
