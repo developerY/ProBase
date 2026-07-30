@@ -1,8 +1,15 @@
 package com.zoewave.probase.kocolor.mobile.features.color.ui.hub
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -82,9 +89,10 @@ import com.zoewave.probase.kocolor.model.KoColorRoute
 import android.graphics.Color as AndroidColor
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.zoewave.probase.kocolor.features.seasonal_trends.ui.SeasonalInspirationFullScreen
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun ColorHubScreen(
     uiState: ColorHubUiState,
@@ -93,7 +101,306 @@ fun ColorHubScreen(
 ) {
     var selectedGroup by remember { mutableStateOf<Pair<String, List<ColorSignature>>?>(null) }
     var showShopWipDialog by remember { mutableStateOf(false) }
+    var isTrendsExpanded by remember { mutableStateOf(false) }
+    
     val serifFont = FontFamily.Serif
+    val trendsViewModel: SeasonalTrendsViewModel = hiltViewModel()
+    val trendsState by trendsViewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(uiState.userSeason) {
+        trendsViewModel.fetchSeasonalTrends(
+            uiState.userSeason.name,
+            "Roseate Sand"
+        )
+    }
+
+    SharedTransitionLayout(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
+            topBar = {
+                CenterAlignedTopAppBar(
+                    title = { 
+                        Text(
+                            "Chromatic DNA", 
+                            fontFamily = serifFont, 
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = Color(0xFF2C2420)
+                        ) 
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = { navTo(KoColorRoute.Back) }) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.Black)
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                )
+            },
+            containerColor = Color(0xFFF9F6F0)
+        ) { padding ->
+            LazyColumn(
+                modifier = Modifier
+                    .padding(padding)
+                    .fillMaxSize(),
+                contentPadding = PaddingValues(24.dp),
+                verticalArrangement = Arrangement.spacedBy(40.dp)
+            ) {
+                // --- SECTION 1: YOUR COLOR SPECTRUM ---
+                item {
+                    Column {
+                        Text(
+                            "PROFILE ANALYSIS",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 1.2.sp,
+                            color = Color.Gray
+                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                "Your Color Spectrum",
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontFamily = serifFont,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF2C2420)
+                            )
+                            Text(
+                                "Reset",
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.Bold,
+                                textDecoration = TextDecoration.Underline,
+                                modifier = Modifier.clickable { selectedGroup = null }
+                            )
+                        }
+                        
+                        Spacer(Modifier.height(20.dp))
+                        
+                        ChromaticDnaBar(
+                            colors = uiState.inventoryColors,
+                            selectedGroup = selectedGroup,
+                            onGroupSelected = { selectedGroup = it },
+                            navTo = navTo
+                        )
+                        
+                        Spacer(Modifier.height(16.dp))
+                        
+                        // Skin Tone Indicator
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .size(12.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(0xFFE4A493))
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Text(
+                                buildAnnotatedString {
+                                    append("Signature skin tone detected: ")
+                                    withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                                        append("Roseate Sand")
+                                    }
+                                },
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color(0xFF2C2420)
+                            )
+                        }
+                    }
+                }
+
+                // --- SECTION 2: CURATED ESSENTIALS ---
+                item {
+                    Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+                        val title = if (selectedGroup == null) {
+                            "Curated Essentials"
+                        } else {
+                            val (hex, _) = selectedGroup!!
+                            "Shade: ${ColorScienceUtils.findNearestPantone(hex).name}"
+                        }
+
+                        Text(
+                            text = title,
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontFamily = serifFont,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF2C2420)
+                        )
+                        
+                        if (selectedGroup == null) {
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(120.dp),
+                                shape = RoundedCornerShape(24.dp),
+                                colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.5f)),
+                                border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))
+                            ) {
+                                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        Icon(
+                                            imageVector = Icons.Default.ColorLens,
+                                            contentDescription = null,
+                                            tint = Color.Gray.copy(alpha = 0.3f),
+                                            modifier = Modifier.size(32.dp)
+                                        )
+                                        Spacer(Modifier.height(8.dp))
+                                        Text(
+                                            "Select a color above to see matching items",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = Color.Gray
+                                        )
+                                    }
+                                }
+                            }
+                        } else {
+                            val (_, items) = selectedGroup!!
+                            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                items.forEach { sig ->
+                                    InventoryProductCard(
+                                        name = sig.name ?: "Unnamed Item",
+                                        source = when (sig.sourceType) {
+                                            SourceType.WARDROBE -> "Wardrobe"
+                                            SourceType.VANITY -> "Vanity"
+                                        },
+                                        hex = sig.hex,
+                                        onClick = {
+                                            val route = when (sig.sourceType) {
+                                                SourceType.WARDROBE -> KoColorRoute.WardrobeDetail(sig.sourceId)
+                                                SourceType.VANITY -> KoColorRoute.CosmeticDetail(sig.sourceId)
+                                            }
+                                            navTo(route)
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // --- SECTION 3: PALETTE INSIGHTS ---
+                item {
+                    Column {
+                        Text(
+                            "Palette Insights",
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontFamily = serifFont,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = buildAnnotatedString {
+                                append("Detected gaps based on your ")
+                                withStyle(SpanStyle(fontStyle = FontStyle.Italic, fontWeight = FontWeight.Bold)) {
+                                    append(uiState.userSeason.name)
+                                }
+                                append(" season profile.")
+                            },
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.Gray
+                        )
+                        
+                        Spacer(Modifier.height(24.dp))
+                        
+                        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                            InsightGapCard(
+                                label = "MISSING",
+                                color = Color(0xFF000080),
+                                name = "Midnight Navy",
+                                isEssential = true,
+                                modifier = Modifier.weight(1f)
+                            )
+                            InsightGapCard(
+                                label = "RECOMMENDED",
+                                color = Color(0xFF800080),
+                                name = "Royal Plum",
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    }
+                }
+
+                // --- SECTION 4: THE STYLIST'S EDIT ---
+                item {
+                    uiState.stylistEdit?.let { edit ->
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(32.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color(0xFF745E7A))
+                        ) {
+                            Column(modifier = Modifier.padding(32.dp)) {
+                                Text(
+                                    edit.title,
+                                    style = MaterialTheme.typography.headlineMedium,
+                                    fontFamily = serifFont,
+                                    fontStyle = FontStyle.Italic,
+                                    color = Color.White
+                                )
+                                
+                                Spacer(Modifier.height(24.dp))
+                                
+                                BulletPoint(
+                                    text = buildAnnotatedString {
+                                        append(edit.primaryInsight)
+                                    }
+                                )
+                                
+                                Spacer(Modifier.height(16.dp))
+                                
+                                BulletPoint(
+                                    text = buildAnnotatedString {
+                                        append(edit.recommendation)
+                                    }
+                                )
+                                
+                                Spacer(Modifier.height(32.dp))
+                                
+                                Button(
+                                    onClick = { showShopWipDialog = true },
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD4AF37)),
+                                    shape = RoundedCornerShape(20.dp),
+                                    modifier = Modifier.height(48.dp)
+                                ) {
+                                    Text(
+                                        edit.buttonText,
+                                        style = MaterialTheme.typography.labelLarge,
+                                        fontWeight = FontWeight.Black,
+                                        color = Color.White
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // --- SECTION 5: SEASONAL INSPIRATION (Trigger Only) ---
+                item {
+                    AnimatedVisibility(visible = !isTrendsExpanded) {
+                        SeasonalInspirationCardPreview(
+                            onExpand = { isTrendsExpanded = true },
+                            sharedTransitionScope = this@SharedTransitionLayout,
+                            animatedVisibilityScope = this@AnimatedVisibility
+                        )
+                    }
+                }
+                
+                item { Spacer(Modifier.height(48.dp)) }
+            }
+        }
+
+        // --- FULL SCREEN OVERLAY ---
+        AnimatedVisibility(
+            visible = isTrendsExpanded,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            SeasonalInspirationFullScreen(
+                uiState = trendsState,
+                onDismiss = { isTrendsExpanded = false },
+                sharedTransitionScope = this@SharedTransitionLayout,
+                animatedVisibilityScope = this@AnimatedVisibility
+            )
+        }
+    }
 
     if (showShopWipDialog) {
         AlertDialog(
@@ -117,7 +424,6 @@ fun ColorHubScreen(
                         fontWeight = FontWeight.Bold
                     )
                     BulletListItem("AI shortlists of items that perfectly fill your detected seasonal gaps.")
-                    // BulletListItem("Instant AR Try-On deep-links into NailLab and FaceLab for every item.")
                     BulletListItem("Professional-grade matches verified by the Glow Archive engine.")
                 }
             },
@@ -130,287 +436,63 @@ fun ColorHubScreen(
             containerColor = Color.White
         )
     }
+}
 
-    Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = { 
-                    Text(
-                        "Chromatic DNA", 
-                        fontFamily = serifFont, 
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = Color(0xFF2C2420)
-                    ) 
-                },
-                navigationIcon = {
-                    IconButton(onClick = { navTo(KoColorRoute.Back) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.Black)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
-            )
-        },
-        containerColor = Color(0xFFF9F6F0) // Matching the dashboard background
-    ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .padding(padding)
-                .fillMaxSize(),
-            contentPadding = PaddingValues(24.dp),
-            verticalArrangement = Arrangement.spacedBy(40.dp)
-        ) {
-            // --- SECTION 1: YOUR COLOR SPECTRUM ---
-            item {
-                Column {
-                    Text(
-                        "PROFILE ANALYSIS",
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Black,
-                        letterSpacing = 1.2.sp,
-                        color = Color.Gray
-                    )
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            "Your Color Spectrum",
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontFamily = serifFont,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF2C2420)
-                        )
-                        Text(
-                            "Reset",
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.Bold,
-                            textDecoration = TextDecoration.Underline,
-                            modifier = Modifier.clickable { selectedGroup = null }
-                        )
-                    }
-                    
-                    Spacer(Modifier.height(20.dp))
-                    
-                    ChromaticDnaBar(
-                        colors = uiState.inventoryColors,
-                        selectedGroup = selectedGroup,
-                        onGroupSelected = { selectedGroup = it },
-                        navTo = navTo
-                    )
-                    
-                    Spacer(Modifier.height(16.dp))
-                    
-                    // Skin Tone Indicator
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier
-                                .size(12.dp)
-                                .clip(CircleShape)
-                                .background(Color(0xFFE4A493)) // Roseate Sand swatch
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        Text(
-                            buildAnnotatedString {
-                                append("Signature skin tone detected: ")
-                                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                                    append("Roseate Sand")
-                                }
-                            },
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Color(0xFF2C2420)
-                        )
-                    }
-                }
-            }
-
-            // --- SECTION 2: CURATED ESSENTIALS ---
-            item {
-                Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
-                    val title = if (selectedGroup == null) {
-                        "Curated Essentials"
-                    } else {
-                        val (hex, _) = selectedGroup!!
-                        "Shade: ${ColorScienceUtils.findNearestPantone(hex).name}"
-                    }
-
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontFamily = serifFont,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF2C2420)
-                    )
-                    
-                    if (selectedGroup == null) {
-                        // Placeholder View
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(120.dp),
-                            shape = RoundedCornerShape(24.dp),
-                            colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.5f)),
-                            border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))
-                        ) {
-                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Icon(
-                                        imageVector = Icons.Default.ColorLens,
-                                        contentDescription = null,
-                                        tint = Color.Gray.copy(alpha = 0.3f),
-                                        modifier = Modifier.size(32.dp)
-                                    )
-                                    Spacer(Modifier.height(8.dp))
-                                    Text(
-                                        "Select a color above to see matching items",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = Color.Gray
-                                    )
-                                }
-                            }
-                        }
-                    } else {
-                        // Selected Shade View
-                        val (_, items) = selectedGroup!!
-                        
-                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            // Dynamic list of items in the shade
-                            items.forEach { sig ->
-                                InventoryProductCard(
-                                    name = sig.name ?: "Unnamed Item",
-                                    source = when (sig.sourceType) {
-                                        SourceType.WARDROBE -> "Wardrobe"
-                                        SourceType.VANITY -> "Vanity"
-                                    },
-                                    hex = sig.hex,
-                                    onClick = {
-                                        val route = when (sig.sourceType) {
-                                            SourceType.WARDROBE -> KoColorRoute.WardrobeDetail(sig.sourceId)
-                                            SourceType.VANITY -> KoColorRoute.CosmeticDetail(sig.sourceId)
-                                        }
-                                        navTo(route)
-                                    }
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-
-            // --- SECTION 3: PALETTE INSIGHTS ---
-            item {
-                Column {
-                    Text(
-                        "Palette Insights",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontFamily = serifFont,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = buildAnnotatedString {
-                            append("Detected gaps based on your ")
-                            withStyle(SpanStyle(fontStyle = FontStyle.Italic, fontWeight = FontWeight.Bold)) {
-                                append(uiState.userSeason.name)
-                            }
-                            append(" season profile.")
-                        },
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color.Gray
-                    )
-                    
-                    Spacer(Modifier.height(24.dp))
-                    
-                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                        InsightGapCard(
-                            label = "MISSING",
-                            color = Color(0xFF000080), // Midnight Navy
-                            name = "Midnight Navy",
-                            isEssential = true,
-                            modifier = Modifier.weight(1f)
-                        )
-                        InsightGapCard(
-                            label = "RECOMMENDED",
-                            color = Color(0xFF800080), // Royal Plum
-                            name = "Royal Plum",
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                }
-            }
-
-            // --- SECTION 4: THE STYLIST'S EDIT ---
-            item {
-                uiState.stylistEdit?.let { edit ->
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(32.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFF745E7A))
-                    ) {
-                        Column(modifier = Modifier.padding(32.dp)) {
-                            Text(
-                                edit.title,
-                                style = MaterialTheme.typography.headlineMedium,
-                                fontFamily = serifFont,
-                                fontStyle = FontStyle.Italic,
-                                color = Color.White
-                            )
-                            
-                            Spacer(Modifier.height(24.dp))
-                            
-                            BulletPoint(
-                                text = buildAnnotatedString {
-                                    append(edit.primaryInsight)
-                                }
-                            )
-                            
-                            Spacer(Modifier.height(16.dp))
-                            
-                            BulletPoint(
-                                text = buildAnnotatedString {
-                                    append(edit.recommendation)
-                                }
-                            )
-                            
-                            Spacer(Modifier.height(32.dp))
-                            
-                            Button(
-                                onClick = { showShopWipDialog = true },
-                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD4AF37)),
-                                shape = RoundedCornerShape(20.dp),
-                                modifier = Modifier.height(48.dp)
-                            ) {
-                                Text(
-                                    edit.buttonText,
-                                    style = MaterialTheme.typography.labelLarge,
-                                    fontWeight = FontWeight.Black,
-                                    color = Color.White
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-
-            // --- SECTION 5: SEASONAL INSPIRATION ---
-            item {
-                val trendsViewModel: SeasonalTrendsViewModel = hiltViewModel()
-                val trendsState by trendsViewModel.uiState.collectAsStateWithLifecycle()
-
-                LaunchedEffect(uiState.userSeason) {
-                    trendsViewModel.fetchSeasonalTrends(
-                        uiState.userSeason.name,
-                        "Roseate Sand" // Placeholder for actual skin tone
-                    )
-                }
-
-                SeasonalTrendsContainer(
-                    uiState = trendsState,
-                    modifier = Modifier.fillMaxWidth()
+@OptIn(ExperimentalSharedTransitionApi::class)
+@Composable
+private fun SeasonalInspirationCardPreview(
+    onExpand: () -> Unit,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedVisibilityScope // Pass actual scope
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(280.dp)
+            .clickable { onExpand() },
+        shape = RoundedCornerShape(32.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            with(sharedTransitionScope) {
+                AsyncImage(
+                    model = "https://images.unsplash.com/photo-1549490349-8643362247b5?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .sharedElement(
+                            rememberSharedContentState(key = "inspiration_image"),
+                            animatedVisibilityScope = animatedVisibilityScope
+                        ),
+                    contentScale = ContentScale.Crop
                 )
             }
             
-            item { Spacer(Modifier.height(48.dp)) }
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.5f))))
+            )
+            
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(24.dp)
+            ) {
+                Text(
+                    "Seasonal Inspiration",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontFamily = FontFamily.Serif,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+                Text(
+                    "Tap to explore your AI-curated style forecast",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.White.copy(alpha = 0.8f),
+                    fontWeight = FontWeight.Medium
+                )
+            }
         }
     }
 }

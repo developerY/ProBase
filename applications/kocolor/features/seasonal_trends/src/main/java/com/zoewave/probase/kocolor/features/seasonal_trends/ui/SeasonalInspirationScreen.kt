@@ -7,7 +7,16 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -36,10 +45,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -123,23 +132,32 @@ private fun SeasonalInspirationCard(
                     .background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.5f))))
             )
             
-            Text(
-                "Seasonal Inspiration",
-                style = MaterialTheme.typography.headlineSmall,
-                fontFamily = FontFamily.Serif,
-                fontWeight = FontWeight.Bold,
-                color = Color.White,
+            Column(
                 modifier = Modifier
                     .align(Alignment.BottomStart)
                     .padding(24.dp)
-            )
+            ) {
+                Text(
+                    "Seasonal Inspiration",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontFamily = FontFamily.Serif,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+                Text(
+                    "Tap to explore your AI-curated style forecast",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.White.copy(alpha = 0.8f),
+                    fontWeight = FontWeight.Medium
+                )
+            }
         }
     }
 }
 
 @OptIn(ExperimentalSharedTransitionApi::class, ExperimentalMaterial3Api::class)
 @Composable
-private fun SeasonalInspirationFullScreen(
+fun SeasonalInspirationFullScreen(
     uiState: SeasonalTrendsUiState,
     onDismiss: () -> Unit,
     sharedTransitionScope: androidx.compose.animation.SharedTransitionScope,
@@ -187,14 +205,15 @@ private fun SeasonalInspirationFullScreen(
                     .fillMaxSize()
                     .background(
                         Brush.verticalGradient(
-                            listOf(Color.Transparent, Color.Black.copy(alpha = 0.8f))
+                            listOf(Color.Transparent, Color.Black.copy(alpha = 0.9f))
                         )
                     )
                     .padding(horizontal = 32.dp)
-                    .padding(bottom = 64.dp)
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.Bottom
+                    .verticalScroll(rememberScrollState())
             ) {
+                // Content starts after the TopAppBar area
+                Spacer(Modifier.height(100.dp))
+
                 Text(
                     text = "The Winter",
                     style = MaterialTheme.typography.displaySmall,
@@ -210,7 +229,7 @@ private fun SeasonalInspirationFullScreen(
                     color = Color.White
                 )
 
-                Spacer(Modifier.height(32.dp))
+                Spacer(Modifier.height(24.dp))
 
                 // High-End Divider
                 Box(
@@ -224,8 +243,18 @@ private fun SeasonalInspirationFullScreen(
 
                 when (uiState) {
                     is SeasonalTrendsUiState.Loading -> {
-                        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                            CircularProgressIndicator(color = Color.White)
+                        // Positioned directly in the text area
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 16.dp),
+                            contentAlignment = Alignment.TopCenter
+                        ) {
+                            CircularProgressIndicator(
+                                color = Color.White,
+                                modifier = Modifier.size(40.dp),
+                                strokeWidth = 3.dp
+                            )
                         }
                     }
                     is SeasonalTrendsUiState.Success -> {
@@ -251,7 +280,7 @@ private fun SeasonalInspirationFullScreen(
                     else -> {}
                 }
 
-                Spacer(Modifier.height(24.dp))
+                Spacer(Modifier.height(32.dp))
 
                 Button(
                     onClick = onDismiss,
@@ -268,6 +297,8 @@ private fun SeasonalInspirationFullScreen(
                         color = Color.Black
                     )
                 }
+
+                Spacer(Modifier.height(64.dp)) // Bottom safe area
             }
         }
     }

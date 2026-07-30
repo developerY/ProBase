@@ -21,7 +21,7 @@ To create a high-fashion, "frosted glass" aesthetic, we use a morphing AGSL shad
 
 ### 2. Shared Element Transitions
 We utilize the **SharedTransitionLayout** to maintain visual continuity.
-- **The Flow**: A small preview card on the "Color Hub" dashboard expands into a full-screen immersive editorial.
+- **The Flow**: A small preview card on the "Color Hub" dashboard featuring a descriptive subtitle ("Tap to explore your AI-curated style forecast") expands into a full-screen immersive editorial.
 - **User Benefit**: Reduces cognitive load by visually tracking the context shift from "Dashboard" to "Inspiration."
 
 ### 3. Gemini AI Curation
