@@ -474,16 +474,25 @@ private fun SeasonalInspirationCardPreview(
                     .background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.5f))))
             )
             
-            Text(
-                "Seasonal Inspiration",
-                style = MaterialTheme.typography.headlineSmall,
-                fontFamily = FontFamily.Serif,
-                fontWeight = FontWeight.Bold,
-                color = Color.White,
+            Column(
                 modifier = Modifier
                     .align(Alignment.BottomStart)
                     .padding(24.dp)
-            )
+            ) {
+                Text(
+                    "Seasonal Inspiration",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontFamily = FontFamily.Serif,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+                Text(
+                    "Tap to explore your AI-curated style forecast",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.White.copy(alpha = 0.8f),
+                    fontWeight = FontWeight.Medium
+                )
+            }
         }
     }
 }
