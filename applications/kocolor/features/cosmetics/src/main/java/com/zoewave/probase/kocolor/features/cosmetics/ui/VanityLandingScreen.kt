@@ -1,5 +1,11 @@
 package com.zoewave.probase.kocolor.features.cosmetics.ui
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -48,6 +54,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -92,6 +99,18 @@ fun VanityLandingScreen(
     navTo: (KoColorRoute) -> Unit
 ) {
     var showTaxonomyInfo by remember { mutableStateOf(false) }
+
+    // --- Shimmer Animation Logic ---
+    val infiniteTransition = rememberInfiniteTransition(label = "shimmer")
+    val shimmerProgress by infiniteTransition.animateFloat(
+        initialValue = -0.5f,
+        targetValue = 1.5f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 3500, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "shimmer"
+    )
 
     if (showTaxonomyInfo) {
         ProfessionalTaxonomyDialog(
@@ -163,67 +182,74 @@ fun VanityLandingScreen(
                     )
                 )
 
-                ElevatedButton(
+                Surface(
                     onClick = { navTo(KoColorRoute.ColorHub) },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(88.dp),
-                    shape = RoundedCornerShape(24.dp),
-                    colors = ButtonDefaults.elevatedButtonColors(
-                        containerColor = Color.White
-                    ),
-                    elevation = ButtonDefaults.elevatedButtonElevation(defaultElevation = 8.dp),
-                    contentPadding = PaddingValues(0.dp)
+                        .height(96.dp),
+                    shape = RoundedCornerShape(32.dp),
+                    color = Color.White,
+                    shadowElevation = 8.dp,
+                    border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))
                 ) {
-                    Box(
+                    val shimmerBrush = Brush.linearGradient(
+                        colors = listOf(
+                            Color.Transparent,
+                            Color.White.copy(alpha = 0.3f),
+                            Color(0xFFA0C4FF).copy(alpha = 0.15f), // Subtle blue tint
+                            Color.White.copy(alpha = 0.3f),
+                            Color.Transparent
+                        ),
+                        start = Offset(x = shimmerProgress * 1000f, y = 0f),
+                        end = Offset(x = (shimmerProgress + 0.3f) * 1000f, y = 500f)
+                    )
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(horizontal = 20.dp),
-                        contentAlignment = Alignment.CenterStart
+                            .background(shimmerBrush)
+                            .padding(horizontal = 20.dp)
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth()
+                        // Icon with Chromatic background circle
+                        Box(
+                            modifier = Modifier
+                                .size(56.dp)
+                                .background(chromaticBrush, CircleShape),
+                            contentAlignment = Alignment.Center
                         ) {
-                            // Icon with Chromatic background circle
-                            Box(
-                                modifier = Modifier
-                                    .size(52.dp)
-                                    .background(chromaticBrush, CircleShape),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.ColorLens,
-                                    contentDescription = null,
-                                    tint = Color.White,
-                                    modifier = Modifier.size(28.dp)
-                                )
-                            }
-                            
-                            Spacer(Modifier.width(16.dp))
-                            
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = "Color Intelligence Hub",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    fontFamily = FontFamily.Serif,
-                                    color = Color(0xFF2C2420)
-                                )
-                                Text(
-                                    text = "Spectral blueprint & chromatic DNA",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = Color(0xFF2C2420).copy(alpha = 0.6f),
-                                    letterSpacing = 0.5.sp
-                                )
-                            }
-                            
                             Icon(
-                                imageVector = Icons.Default.ChevronRight,
+                                imageVector = Icons.Default.ColorLens,
                                 contentDescription = null,
-                                tint = Color(0xFF2C2420).copy(alpha = 0.3f)
+                                tint = Color.White,
+                                modifier = Modifier.size(28.dp)
                             )
                         }
+                        
+                        Spacer(Modifier.width(20.dp))
+                        
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Color Intelligence Hub",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = FontFamily.Serif,
+                                color = Color(0xFF2C2420)
+                            )
+                            Text(
+                                text = "Spectral blueprint & chromatic DNA",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = Color.Gray,
+                                letterSpacing = 0.5.sp
+                            )
+                        }
+                        
+                        Icon(
+                            imageVector = Icons.Default.ChevronRight,
+                            contentDescription = null,
+                            tint = Color.LightGray.copy(alpha = 0.8f),
+                            modifier = Modifier.size(20.dp)
+                        )
                     }
                 }
             }
