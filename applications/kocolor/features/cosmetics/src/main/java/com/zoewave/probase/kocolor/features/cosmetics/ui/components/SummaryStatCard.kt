@@ -12,6 +12,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -53,8 +54,8 @@ fun SummaryStatCard(
 
     Surface(
         onClick = onEvent,
-        modifier = modifier.height(110.dp), // Compact height but enough for the split
-        shape = RoundedCornerShape(24.dp),
+        modifier = modifier.height(80.dp), // Half-height pill
+        shape = RoundedCornerShape(20.dp),
         color = Color.White,
         shadowElevation = 8.dp,
         border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))
@@ -65,31 +66,33 @@ fun SummaryStatCard(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 8.dp)
+                    .padding(horizontal = 10.dp, vertical = 4.dp)
             ) {
-                // Small Circle Icon (Top Left)
-                Surface(
-                    shape = CircleShape,
-                    color = Color.Transparent,
-                    border = BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.4f)),
-                    modifier = Modifier.size(20.dp)
+                // High-Visibility Icon (Top Left)
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(Color.Gray.copy(alpha = 0.12f))
+                        .align(Alignment.TopStart),
+                    contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = uiState.icon,
                         contentDescription = null,
-                        modifier = Modifier.padding(3.dp),
-                        tint = Color.Gray.copy(alpha = 0.5f)
+                        modifier = Modifier.size(24.dp),
+                        tint = Color.Gray.copy(alpha = 0.7f)
                     )
                 }
 
-                // Centered Big Number
+                // Centered Number
                 if (valueBrush != null) {
                     Text(
                         text = uiState.value,
                         style = MaterialTheme.typography.displaySmall.copy(
                             fontFamily = serifFont,
                             brush = valueBrush,
-                            fontSize = 42.sp
+                            fontSize = 32.sp
                         ),
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.align(Alignment.Center)
@@ -99,7 +102,7 @@ fun SummaryStatCard(
                         text = uiState.value,
                         style = MaterialTheme.typography.displaySmall.copy(
                             fontFamily = serifFont,
-                            fontSize = 42.sp
+                            fontSize = 32.sp
                         ),
                         fontWeight = FontWeight.Bold,
                         color = charcoal,
@@ -112,17 +115,16 @@ fun SummaryStatCard(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(36.dp)
+                    .height(28.dp)
                     .background(chromaticBrush),
                 contentAlignment = Alignment.Center
             ) {
-                // Internal Translucent Button Style
                 Surface(
                     color = Color.White.copy(alpha = if (isExpiring) 0.12f else 0.45f), 
-                    shape = RoundedCornerShape(6.dp)
+                    shape = RoundedCornerShape(4.dp)
                 ) {
                     Row(
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp),
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
