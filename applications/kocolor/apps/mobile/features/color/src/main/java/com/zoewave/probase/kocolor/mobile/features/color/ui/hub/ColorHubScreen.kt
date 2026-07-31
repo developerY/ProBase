@@ -38,6 +38,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.ColorLens
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -443,15 +445,17 @@ fun ColorHubScreen(
 private fun SeasonalInspirationCardPreview(
     onExpand: () -> Unit,
     sharedTransitionScope: SharedTransitionScope,
-    animatedVisibilityScope: AnimatedVisibilityScope // Pass actual scope
+    animatedVisibilityScope: AnimatedVisibilityScope 
 ) {
-    Card(
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .height(280.dp)
+            .height(88.dp)
             .clickable { onExpand() },
-        shape = RoundedCornerShape(32.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        shape = CircleShape,
+        color = Color.White,
+        shadowElevation = 8.dp,
+        border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             with(sharedTransitionScope) {
@@ -464,33 +468,43 @@ private fun SeasonalInspirationCardPreview(
                             rememberSharedContentState(key = "inspiration_image"),
                             animatedVisibilityScope = animatedVisibilityScope
                         ),
-                    contentScale = ContentScale.Crop
+                    contentScale = ContentScale.Crop,
+                    alpha = 0.9f
                 )
             }
             
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.5f))))
-            )
-            
-            Column(
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .padding(24.dp)
+            Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.4f)))
+
+            Row(
+                modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    "Seasonal Inspiration",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontFamily = FontFamily.Serif,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
+                Icon(
+                    imageVector = Icons.Default.AutoAwesome,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(28.dp)
                 )
-                Text(
-                    "Tap to explore your AI-curated style forecast",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.White.copy(alpha = 0.8f),
-                    fontWeight = FontWeight.Medium
+                Spacer(Modifier.width(16.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    val serifFont = FontFamily.Serif
+                    Text(
+                        "Seasonal Inspiration",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontFamily = serifFont,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                    Text(
+                        "Tap to explore your AI style forecast",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.White.copy(alpha = 0.8f)
+                    )
+                }
+                Icon(
+                    imageVector = Icons.Default.ChevronRight,
+                    contentDescription = null,
+                    tint = Color.White.copy(alpha = 0.6f)
                 )
             }
         }
