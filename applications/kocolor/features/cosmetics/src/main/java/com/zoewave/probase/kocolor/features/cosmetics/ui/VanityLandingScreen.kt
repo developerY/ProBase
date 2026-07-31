@@ -36,9 +36,7 @@ import androidx.compose.material.icons.filled.ColorLens
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -266,8 +264,7 @@ fun VanityLandingScreen(
                             icon = Icons.Default.Inventory2
                         ),
                         modifier = Modifier.weight(1f),
-                        onEvent = { navTo(KoColorRoute.CosmeticAnalytics) },
-                        navTo = navTo
+                        onEvent = { navTo(KoColorRoute.InventoryManagement) }
                     )
                     SummaryStatCard(
                         uiState = SummaryStatUiState(
@@ -276,8 +273,7 @@ fun VanityLandingScreen(
                             icon = Icons.Default.ErrorOutline
                         ),
                         modifier = Modifier.weight(1f),
-                        onEvent = { navTo(KoColorRoute.ExpiringSoon) },
-                        navTo = navTo
+                        onEvent = { navTo(KoColorRoute.ExpiringSoon) }
                     )
                 }
             }
