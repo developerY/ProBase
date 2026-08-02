@@ -10,4 +10,5 @@ interface WardrobeRepository {
     suspend fun saveClothingItem(item: ClothingItem)
     suspend fun wearClothingItem(id: Long)
     suspend fun deleteClothing(id: Long)
+    suspend fun ingestStarterPack(): Result<Unit>
 }

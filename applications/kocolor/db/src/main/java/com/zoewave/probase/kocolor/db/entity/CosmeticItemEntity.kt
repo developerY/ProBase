@@ -17,6 +17,7 @@ data class CosmeticItemEntity(
     val chemistryBase: ChemistryBase = ChemistryBase.UNKNOWN,
     val finish: Finish = Finish.UNKNOWN,
     val coverage: Coverage = Coverage.NOT_APPLICABLE,
+    val temperature: Temperature = Temperature.UNKNOWN,
     
     val colorHex: String,
     val colorFamily: ColorFamily = ColorFamily.UNKNOWN,

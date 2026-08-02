@@ -5,8 +5,9 @@ import com.zoewave.probase.kocolor.features.obf.data.repository.ObfRepository
 import com.zoewave.probase.kocolor.data.mapper.toEntity
 import com.zoewave.probase.kocolor.data.mapper.toModel
 import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
+import com.zoewave.probase.kocolor.data.remote.KocolorApiService
 import com.zoewave.probase.kocolor.db.dao.CosmeticDao
-import com.zoewave.probase.core.model.ritual.CosmeticItem
+import com.zoewave.probase.core.model.ritual.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -15,7 +16,8 @@ import javax.inject.Singleton
 @Singleton
 class CosmeticInventoryRepositoryImpl @Inject constructor(
     private val obfRepository: ObfRepository,
-    private val cosmeticDao: CosmeticDao
+    private val cosmeticDao: CosmeticDao,
+    private val apiService: KocolorApiService
 ) : CosmeticInventoryRepository {
 
     override fun getAllCosmetics(): Flow<List<CosmeticItem>> {
@@ -43,5 +45,28 @@ class CosmeticInventoryRepositoryImpl @Inject constructor(
 
     override suspend fun deleteCosmeticItem(id: Long) {
         cosmeticDao.deleteCosmetic(id)
+    }
+
+    override suspend fun ingestStarterPack(): Result<Unit> = runCatching {
+        val response = apiService.getStarterPack()
+        response.cosmetics.forEach { dto ->
+            val macro = MacroCategory.entries.find { it.displayName == dto.macroCategory } ?: MacroCategory.TOOLS
+            val micro = try { MicroCategory.valueOf(dto.microCategory.uppercase()) } catch (e: Exception) { MicroCategory.OTHER }
+            
+            val item = CosmeticItem(
+                name = dto.name,
+                brand = "KoColor",
+                macroCategory = macro,
+                microCategory = micro,
+                formulation = try { Formulation.valueOf(dto.formulation.uppercase()) } catch (e: Exception) { Formulation.UNKNOWN },
+                chemistryBase = try { ChemistryBase.valueOf(dto.chemistry.uppercase()) } catch (e: Exception) { ChemistryBase.UNKNOWN },
+                finish = try { Finish.valueOf(dto.finish.uppercase()) } catch (e: Exception) { Finish.UNKNOWN },
+                coverage = try { Coverage.valueOf(dto.coverage.uppercase()) } catch (e: Exception) { Coverage.NOT_APPLICABLE },
+                temperature = try { Temperature.valueOf(dto.temperature.uppercase()) } catch (e: Exception) { Temperature.UNKNOWN },
+                colorHex = dto.colorHex,
+                imageUrl = dto.imageUrl
+            )
+            saveCosmeticItem(item)
+        }
     }
 }

@@ -1,2 +1,3 @@
 # Rust/Cargo
 server/**/target/
+target
