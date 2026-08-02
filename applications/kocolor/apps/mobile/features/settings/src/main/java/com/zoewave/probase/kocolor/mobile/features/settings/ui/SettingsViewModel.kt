@@ -7,6 +7,8 @@ import com.zoewave.probase.kocolor.db.dao.CosmeticDao
 import com.zoewave.probase.kocolor.db.dao.ClothingDao
 import com.zoewave.probase.core.data.service.health.HealthSessionManager
 import com.zoewave.probase.kocolor.features.settings.domain.seeder.VaultSeeder
+import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
+import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -45,6 +47,7 @@ sealed class SettingsEvent {
     data class OnHydrationGoalChanged(val goal: Double) : SettingsEvent()
     data object OnResetHydrationProgress : SettingsEvent()
     data object OnGenerateSampleData : SettingsEvent()
+    data object OnIngestStarterPack : SettingsEvent()
     data class InitializeWithSection(val section: String) : SettingsEvent()
 }
 
@@ -52,7 +55,9 @@ sealed class SettingsEvent {
 class SettingsViewModel @Inject constructor(
     private val koSettings: KoColorSettings,
     private val healthSessionManager: HealthSessionManager,
-    private val vaultSeeder: VaultSeeder
+    private val vaultSeeder: VaultSeeder,
+    private val cosmeticRepository: CosmeticInventoryRepository,
+    private val wardrobeRepository: WardrobeRepository
 ) : ViewModel() {
 
     private val _expandState = MutableStateFlow(
@@ -140,6 +145,9 @@ class SettingsViewModel @Inject constructor(
             SettingsEvent.OnGenerateSampleData -> {
                 triggerDatabaseSeed()
             }
+            SettingsEvent.OnIngestStarterPack -> {
+                ingestStarterPack()
+            }
             is SettingsEvent.InitializeWithSection -> {
                 if (event.section == "Hydration") {
                     _expandState.value = listOf(false, false, false, false, false, true, true)
@@ -158,6 +166,24 @@ class SettingsViewModel @Inject constructor(
                 .onFailure { error ->
                     _seedingState.value = SeedingState.Error(error.localizedMessage ?: "Unknown Error")
                 }
+        }
+    }
+
+    private fun ingestStarterPack() {
+        viewModelScope.launch {
+            _seedingState.value = SeedingState.Loading
+            
+            val cosmeticResult = cosmeticRepository.ingestStarterPack()
+            val wardrobeResult = wardrobeRepository.ingestStarterPack()
+            
+            if (cosmeticResult.isSuccess && wardrobeResult.isSuccess) {
+                _seedingState.value = SeedingState.Success
+            } else {
+                val error = cosmeticResult.exceptionOrNull()?.localizedMessage 
+                    ?: wardrobeResult.exceptionOrNull()?.localizedMessage 
+                    ?: "Ingestion Failed"
+                _seedingState.value = SeedingState.Error(error)
+            }
         }
     }
 }

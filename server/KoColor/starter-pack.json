@@ -2,51 +2,49 @@
   "version": 1,
   "cosmetics": [
     {
-      "id": "cosmetic_001",
-      "name": "KoColor Signature Crimson Lip Color",
-      "brand": "KoColor",
+      "id": "lip_round_trip_001",
+      "name": "Glow Catalyst Lip Stain",
+      "brand": "KoColor Atelier",
       "macro_category": "Lips",
       "micro_category": "Lipstick",
-      "formulation": "Cream",
-      "chemistry_base": "Oil",
-      "finish": "Satin",
-      "coverage": "Full",
-      "temperature": "Neutral",
-      "color_hex": "#5A1827",
-      "shade_name": "Imperial Crimson",
-      "image_url": "https://cdn.kocolor.com/inventory/assets/image_07157d.webp",
-      "notes": "High-pigment professional lip color with 12-hour wear.",
-      "instructions": "Apply to clean, dry lips. Use a lip brush for precision definition.",
-      "batch_code": "KC-LIP-2026-X1",
-      "pao_months": 18,
-      "price": 38.0,
-      "volume": "4g",
+      "formulation": "Liquid",
+      "chemistry_base": "Water",
+      "finish": "Radiant",
+      "coverage": "Buildable",
+      "temperature": "Cool",
+      "color_hex": "#800020",
+      "shade_name": "Velvet Mulberry",
+      "image_url": "https://cdn.kocolor.com/inventory/assets/velvet_mulberry.webp",
+      "notes": "A high-tech hybrid lip stain that provides weightless color and deep hydration.",
+      "instructions": "Apply one coat for a blurred look. Layer for intense saturation.",
+      "batch_code": "KC-LIP-2026-ST1",
+      "pao_months": 12,
+      "price": 34.0,
+      "volume": "5ml",
       "expiry_date": 1798761600000,
-      "hero_ingredient": "Camellia Japonica Seed Oil",
+      "hero_ingredient": "Hyaluronic Acid",
       "skin_compatibility": "All skin types",
       "contains_fragrance": false,
       "ingredients": [
-        "Ricinus Communis Oil",
-        "Candelilla Cera",
-        "Camellia Japonica Seed Oil",
-        "Tocopherol",
-        "Iron Oxides"
+        "Water",
+        "Glycerin",
+        "Red 7 Lake",
+        "Hyaluronic Acid",
+        "Tocopherol"
       ],
       "allergens": [],
       "eco_score": "A",
       "is_vegan": true,
       "is_cruelty_free": true,
-      "recycling_instructions": "Tube is 100% PCR aluminum. Rinse and place in metal recycling.",
+      "recycling_instructions": "Packaging is 100% recyclable. Return to store for points.",
       "ritual_placement": "Morning Routine (Step 8)",
       "fda_recall_status": "Clear",
       "fda_adverse_event_count": 0,
       "fda_clinical_warnings": [
-        "Keep out of reach of children."
+        "For external use only."
       ],
       "fda_top_reactions": [],
-      "fda_active_ingredients": [
-        "Titanium Dioxide"
-      ],
+      "fda_active_ingredients": [],
       "is_fda_checked": true
     },
     {
@@ -93,31 +91,5 @@
       "is_fda_checked": true
     }
   ],
-  "clothing": [
-    {
-      "id": "clothing_001",
-      "name": "Premium Silk Button-Up",
-      "brand": "KoColor Atelier",
-      "macro_category": "Tops",
-      "micro_category": "Tops",
-      "formality": "PROFESSIONAL",
-      "color_hex": "#0F52BA",
-      "size": "M",
-      "material": "100% Mulberry Silk",
-      "price": 120.0,
-      "image_url": "https://cdn.kocolor.com/inventory/assets/clothing_001.webp",
-      "notes": "Essential professional anchor piece.",
-      "dominant_hex": "#0F52BA",
-      "vibrant_hex": "#1E90FF",
-      "muted_hex": "#4682B4",
-      "palette_hexes": [
-        "#0F52BA",
-        "#FFFFFF"
-      ],
-      "color_temperature": "COOL",
-      "seasonal_palette": "WINTER",
-      "contrast_level": "HIGH",
-      "ko_color_group": "Cool Winter"
-    }
-  ]
+  "clothing": []
 }

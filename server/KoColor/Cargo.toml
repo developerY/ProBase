@@ -11,6 +11,10 @@ serde_json = "1.0"
 reqwest = { version = "0.11", features = ["json"] }
 jsonwebtoken = "9.2"
 
+[lib]
+name = "kocolor"
+path = "src/lib.rs"
+
 [[bin]]
 name = "generate_payload"
 path = "src/bin/generate_payload.rs"

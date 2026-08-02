@@ -30,6 +30,7 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
@@ -54,6 +55,7 @@ import com.zoewave.probase.kocolor.mobile.core.ui.health.HealthContent
 import com.zoewave.probase.kocolor.mobile.core.ui.health.HealthContentUiState
 import com.zoewave.probase.kocolor.mobile.features.settings.ui.SettingsEvent
 import com.zoewave.probase.kocolor.mobile.features.settings.ui.SettingsUiState
+import com.zoewave.probase.kocolor.mobile.features.settings.ui.SeedingState
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
 @Preview(showBackground = true)
@@ -172,13 +174,29 @@ fun SettingsScreen(
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text("Developer Options", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.error)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Button(
-                        onClick = { onEvent(SettingsEvent.OnGenerateSampleData) },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
-                    ) {
-                        Text("Add Sample Portfolio Items")
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Button(
+                            onClick = { onEvent(SettingsEvent.OnGenerateSampleData) },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                        ) {
+                            Text("Add Sample Portfolio Items")
+                        }
+
+                        Button(
+                            onClick = { onEvent(SettingsEvent.OnIngestStarterPack) },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF745E7A)) // Luxury Purple
+                        ) {
+                            Text("Load Starter Pack (High Fidelity)")
+                        }
+                    }
+
+                    if (uiState.seedingState is SeedingState.Loading) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                     }
                 }
             }
