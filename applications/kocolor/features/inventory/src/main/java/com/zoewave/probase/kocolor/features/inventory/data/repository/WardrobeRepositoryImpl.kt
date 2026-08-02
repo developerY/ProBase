@@ -8,11 +8,11 @@ import android.util.Log
 import com.zoewave.probase.kocolor.data.mapper.toEntity
 import com.zoewave.probase.kocolor.data.mapper.toModel
 import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
+import com.zoewave.probase.kocolor.data.remote.KocolorApiService
 import com.zoewave.probase.kocolor.db.dao.ClothingDao
 import com.zoewave.probase.kocolor.mobile.features.color.domain.engine.WardrobeColorEngine
 import com.zoewave.probase.core.util.color.ColorQuantizer
-import com.zoewave.probase.core.model.ritual.ClothingItem
-import com.zoewave.probase.core.model.ritual.Formality
+import com.zoewave.probase.core.model.ritual.*
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -20,6 +20,8 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileInputStream
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -29,6 +31,7 @@ private const val TAG = "WardrobeRepositoryImpl"
 class WardrobeRepositoryImpl @Inject constructor(
     private val clothingDao: ClothingDao,
     private val colorEngine: WardrobeColorEngine,
+    private val apiService: KocolorApiService,
     @ApplicationContext private val context: Context
 ) : WardrobeRepository {
 
@@ -120,13 +123,29 @@ class WardrobeRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun ingestStarterPack(): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            val response = apiService.getStarterPack()
+            response.clothing.forEach { dto ->
+                val item = ClothingItem(
+                    name = dto.name,
+                    brand = "KoColor",
+                    category = try { ClothingCategory.valueOf(dto.macroCategory.uppercase()) } catch (e: Exception) { ClothingCategory.OTHER },
+                    colorHex = dto.colorHex,
+                    imageUrl = dto.imageUrl
+                )
+                saveClothingItem(item)
+            }
+        }
+    }
+
     private suspend fun analyzeGarment(item: ClothingItem): ClothingItem {
         val imagePath = item.imageUrl ?: return item
         return try {
             val uri = if (imagePath.startsWith("content://") || imagePath.startsWith("file://")) {
                 Uri.parse(imagePath)
             } else {
-                Uri.fromFile(java.io.File(imagePath))
+                Uri.fromFile(File(imagePath))
             }
             
             val bitmap = loadDownsampledBitmap(uri) ?: return item
@@ -144,7 +163,7 @@ class WardrobeRepositoryImpl @Inject constructor(
                     context.contentResolver.openInputStream(uri)
                 } else {
                     val path = uri.path ?: ""
-                    java.io.FileInputStream(path)
+                    FileInputStream(path)
                 }
             }
             
