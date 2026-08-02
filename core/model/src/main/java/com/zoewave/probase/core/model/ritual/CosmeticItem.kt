@@ -207,6 +207,11 @@ enum class Coverage {
 }
 
 @Serializable
+enum class Temperature { 
+    WARM, COOL, NEUTRAL, OLIVE, UNKNOWN 
+}
+
+@Serializable
 data class CosmeticItem(
     val id: Long = 0,
     val name: String,
@@ -219,6 +224,7 @@ data class CosmeticItem(
     val chemistryBase: ChemistryBase = ChemistryBase.UNKNOWN,
     val finish: Finish = Finish.UNKNOWN,
     val coverage: Coverage = Coverage.NOT_APPLICABLE,
+    val temperature: Temperature = Temperature.UNKNOWN,
     
     val colorHex: String,
     val colorFamily: ColorFamily = ColorFamily.UNKNOWN,
