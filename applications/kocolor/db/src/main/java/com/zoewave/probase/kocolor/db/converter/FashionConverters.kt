@@ -131,4 +131,10 @@ class FashionConverters {
 
     @ColumnTypeConverter
     fun toColorFamily(value: String): ColorFamily = try { ColorFamily.valueOf(value) } catch (e: Exception) { ColorFamily.UNKNOWN }
+
+    @ColumnTypeConverter
+    fun fromTemperature(value: Temperature): String = value.name
+
+    @ColumnTypeConverter
+    fun toTemperature(value: String): Temperature = try { Temperature.valueOf(value) } catch (e: Exception) { Temperature.UNKNOWN }
 }
