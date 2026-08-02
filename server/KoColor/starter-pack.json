@@ -4,42 +4,120 @@
     {
       "id": "cosmetic_001",
       "name": "KoColor Signature Crimson Lip Color",
+      "brand": "KoColor",
       "macro_category": "Lips",
       "micro_category": "Lipstick",
       "formulation": "Cream",
-      "chemistry": "Oil",
+      "chemistry_base": "Oil",
       "finish": "Satin",
       "coverage": "Full",
       "temperature": "Neutral",
       "color_hex": "#5A1827",
-      "image_url": "https://cdn.kocolor.com/inventory/assets/image_07157d.webp"
+      "shade_name": "Imperial Crimson",
+      "image_url": "https://cdn.kocolor.com/inventory/assets/image_07157d.webp",
+      "notes": "High-pigment professional lip color with 12-hour wear.",
+      "instructions": "Apply to clean, dry lips. Use a lip brush for precision definition.",
+      "batch_code": "KC-LIP-2026-X1",
+      "pao_months": 18,
+      "price": 38.0,
+      "volume": "4g",
+      "expiry_date": 1798761600000,
+      "hero_ingredient": "Camellia Japonica Seed Oil",
+      "skin_compatibility": "All skin types",
+      "contains_fragrance": false,
+      "ingredients": [
+        "Ricinus Communis Oil",
+        "Candelilla Cera",
+        "Camellia Japonica Seed Oil",
+        "Tocopherol",
+        "Iron Oxides"
+      ],
+      "allergens": [],
+      "eco_score": "A",
+      "is_vegan": true,
+      "is_cruelty_free": true,
+      "recycling_instructions": "Tube is 100% PCR aluminum. Rinse and place in metal recycling.",
+      "ritual_placement": "Morning Routine (Step 8)",
+      "fda_recall_status": "Clear",
+      "fda_adverse_event_count": 0,
+      "fda_clinical_warnings": [
+        "Keep out of reach of children."
+      ],
+      "fda_top_reactions": [],
+      "fda_active_ingredients": [
+        "Titanium Dioxide"
+      ],
+      "is_fda_checked": true
     },
     {
       "id": "cosmetic_002",
       "name": "KoColor Velvet Canvas Primer",
+      "brand": "KoColor",
       "macro_category": "Skincare & Prep",
       "micro_category": "Primer",
       "formulation": "Gel",
-      "chemistry": "Silicone",
+      "chemistry_base": "Silicone",
       "finish": "Matte",
       "coverage": "Sheer",
       "temperature": "Neutral",
       "color_hex": "#FFFFFF",
-      "image_url": "https://cdn.kocolor.com/inventory/assets/image_velvet_primer.webp"
-    },
-    {
-      "id": "cosmetic_003",
-      "name": "KoColor Sculpt & Define Contour Powder",
-      "macro_category": "Color & Dimension",
-      "micro_category": "Contour",
-      "formulation": "Powder",
-      "chemistry": "Silicone",
-      "finish": "Matte",
-      "coverage": "Buildable",
-      "temperature": "Cool",
-      "color_hex": "#4A3728",
-      "image_url": "https://cdn.kocolor.com/inventory/assets/image_contour_powder.webp"
+      "shade_name": "Clear",
+      "image_url": "https://cdn.kocolor.com/inventory/assets/image_velvet_primer.webp",
+      "notes": "Pore-blurring primer for a glass-skin foundation base.",
+      "instructions": "Apply a pea-sized amount after SPF and before foundation.",
+      "batch_code": "KC-PRM-2026-B2",
+      "pao_months": 12,
+      "price": 42.0,
+      "volume": "30ml",
+      "expiry_date": 1798761600000,
+      "hero_ingredient": "Niacinamide",
+      "skin_compatibility": "Oily to Combination",
+      "contains_fragrance": false,
+      "ingredients": [
+        "Dimethicone",
+        "Niacinamide",
+        "Silica",
+        "Aqua"
+      ],
+      "allergens": [],
+      "eco_score": "B",
+      "is_vegan": true,
+      "is_cruelty_free": true,
+      "recycling_instructions": "Glass bottle is recyclable. Pump should be disposed of separately.",
+      "ritual_placement": "Morning Routine (Step 6)",
+      "fda_recall_status": "Clear",
+      "fda_adverse_event_count": 0,
+      "fda_clinical_warnings": [],
+      "fda_top_reactions": [],
+      "fda_active_ingredients": [],
+      "is_fda_checked": true
     }
   ],
-  "clothing": []
+  "clothing": [
+    {
+      "id": "clothing_001",
+      "name": "Premium Silk Button-Up",
+      "brand": "KoColor Atelier",
+      "macro_category": "Tops",
+      "micro_category": "Tops",
+      "formality": "PROFESSIONAL",
+      "color_hex": "#0F52BA",
+      "size": "M",
+      "material": "100% Mulberry Silk",
+      "price": 120.0,
+      "image_url": "https://cdn.kocolor.com/inventory/assets/clothing_001.webp",
+      "notes": "Essential professional anchor piece.",
+      "dominant_hex": "#0F52BA",
+      "vibrant_hex": "#1E90FF",
+      "muted_hex": "#4682B4",
+      "palette_hexes": [
+        "#0F52BA",
+        "#FFFFFF"
+      ],
+      "color_temperature": "COOL",
+      "seasonal_palette": "WINTER",
+      "contrast_level": "HIGH",
+      "ko_color_group": "Cool Winter"
+    }
+  ]
 }

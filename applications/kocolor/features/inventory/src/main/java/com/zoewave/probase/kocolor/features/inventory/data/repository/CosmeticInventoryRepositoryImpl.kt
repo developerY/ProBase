@@ -55,16 +55,40 @@ class CosmeticInventoryRepositoryImpl @Inject constructor(
             
             val item = CosmeticItem(
                 name = dto.name,
-                brand = "KoColor",
+                brand = dto.brand,
                 macroCategory = macro,
                 microCategory = micro,
                 formulation = try { Formulation.valueOf(dto.formulation.uppercase()) } catch (e: Exception) { Formulation.UNKNOWN },
-                chemistryBase = try { ChemistryBase.valueOf(dto.chemistry.uppercase()) } catch (e: Exception) { ChemistryBase.UNKNOWN },
+                chemistryBase = try { ChemistryBase.valueOf(dto.chemistryBase.uppercase()) } catch (e: Exception) { ChemistryBase.UNKNOWN },
                 finish = try { Finish.valueOf(dto.finish.uppercase()) } catch (e: Exception) { Finish.UNKNOWN },
                 coverage = try { Coverage.valueOf(dto.coverage.uppercase()) } catch (e: Exception) { Coverage.NOT_APPLICABLE },
                 temperature = try { Temperature.valueOf(dto.temperature.uppercase()) } catch (e: Exception) { Temperature.UNKNOWN },
                 colorHex = dto.colorHex,
-                imageUrl = dto.imageUrl
+                shadeName = dto.shadeName,
+                imageUrl = dto.imageUrl,
+                notes = dto.notes,
+                instructions = dto.instructions,
+                batchCode = dto.batchCode,
+                paoMonths = dto.paoMonths,
+                price = dto.price,
+                volume = dto.volume,
+                heroIngredient = dto.heroIngredient,
+                skinCompatibility = dto.skinCompatibility,
+                containsFragrance = dto.containsFragrance,
+                ingredients = dto.ingredients,
+                allergens = dto.allergens,
+                ecoScore = dto.ecoScore,
+                isVegan = dto.isVegan,
+                isCrueltyFree = dto.isCrueltyFree,
+                recyclingInstructions = dto.recyclingInstructions,
+                ritualPlacement = dto.ritualPlacement,
+                expiryDate = dto.expiryDate,
+                fdaRecallStatus = dto.fdaRecallStatus,
+                fdaAdverseEventCount = dto.fdaAdverseEventCount,
+                fdaClinicalWarnings = dto.fdaClinicalWarnings,
+                fdaTopReactions = dto.fdaTopReactions,
+                fdaActiveIngredients = dto.fdaActiveIngredients,
+                isFdaChecked = dto.isFdaChecked
             )
             saveCosmeticItem(item)
         }
