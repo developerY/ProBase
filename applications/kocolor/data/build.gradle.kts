@@ -29,6 +29,9 @@ dependencies {
     implementation(libs.hilt.work)
     ksp(libs.hilt.android.compiler)
 
+    implementation(libs.squareup.retrofit)
+    implementation(libs.retrofit.kotlinx.serialization.converter)
+
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)
