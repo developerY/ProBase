@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "cosmetics": [
+    {
+      "id": "cosmetic_001",
+      "name": "KoColor Signature Crimson Lip Color",
+      "macro_category": "Lips",
+      "micro_category": "Lipstick",
+      "formulation": "Cream",
+      "chemistry": "Oil",
+      "finish": "Satin",
+      "coverage": "Full",
+      "temperature": "Neutral",
+      "color_hex": "#5A1827",
+      "image_url": "https://cdn.kocolor.com/inventory/assets/image_07157d.webp"
+    },
+    {
+      "id": "cosmetic_002",
+      "name": "KoColor Velvet Canvas Primer",
+      "macro_category": "Skincare & Prep",
+      "micro_category": "Primer",
+      "formulation": "Gel",
+      "chemistry": "Silicone",
+      "finish": "Matte",
+      "coverage": "Sheer",
+      "temperature": "Neutral",
+      "color_hex": "#FFFFFF",
+      "image_url": "https://cdn.kocolor.com/inventory/assets/image_velvet_primer.webp"
+    },
+    {
+      "id": "cosmetic_003",
+      "name": "KoColor Sculpt & Define Contour Powder",
+      "macro_category": "Color & Dimension",
+      "micro_category": "Contour",
+      "formulation": "Powder",
+      "chemistry": "Silicone",
+      "finish": "Matte",
+      "coverage": "Buildable",
+      "temperature": "Cool",
+      "color_hex": "#4A3728",
+      "image_url": "https://cdn.kocolor.com/inventory/assets/image_contour_powder.webp"
+    }
+  ],
+  "clothing": []
+}
