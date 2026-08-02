@@ -129,10 +129,23 @@ class WardrobeRepositoryImpl @Inject constructor(
             response.clothing.forEach { dto ->
                 val item = ClothingItem(
                     name = dto.name,
-                    brand = "KoColor",
-                    category = try { ClothingCategory.valueOf(dto.macroCategory.uppercase()) } catch (e: Exception) { ClothingCategory.OTHER },
+                    brand = dto.brand,
+                    category = try { ClothingCategory.valueOf(dto.microCategory.uppercase()) } catch (e: Exception) { ClothingCategory.OTHER },
+                    formality = try { Formality.valueOf(dto.formality.uppercase()) } catch (e: Exception) { Formality.CASUAL },
                     colorHex = dto.colorHex,
-                    imageUrl = dto.imageUrl
+                    size = dto.size,
+                    material = dto.material,
+                    price = dto.price,
+                    imageUrl = dto.imageUrl,
+                    notes = dto.notes,
+                    dominantHex = dto.dominantHex,
+                    vibrantHex = dto.vibrantHex,
+                    mutedHex = dto.mutedHex,
+                    paletteHexes = dto.paletteHexes,
+                    colorTemperature = dto.colorTemperature,
+                    seasonalPalette = dto.seasonalPalette,
+                    contrastLevel = dto.contrastLevel,
+                    koColorGroup = dto.koColorGroup
                 )
                 saveClothingItem(item)
             }
