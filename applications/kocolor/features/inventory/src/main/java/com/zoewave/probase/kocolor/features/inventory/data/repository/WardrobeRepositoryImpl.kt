@@ -125,8 +125,12 @@ class WardrobeRepositoryImpl @Inject constructor(
 
     override suspend fun ingestStarterPack(): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {
+            Log.d("WardrobeRepo", "ingestStarterPack: Starting fetch from ${KocolorApiService.BASE_URL}")
             val response = apiService.getStarterPack()
+            Log.d("WardrobeRepo", "ingestStarterPack: Received ${response.cosmetics.size} cosmetics and ${response.clothing.size} clothing items")
+
             response.clothing.forEach { dto ->
+                Log.d("WardrobeRepo", "ingestStarterPack: Processing clothing: ${dto.name} (${dto.id})")
                 val item = ClothingItem(
                     name = dto.name,
                     brand = dto.brand,
@@ -148,7 +152,10 @@ class WardrobeRepositoryImpl @Inject constructor(
                     koColorGroup = dto.koColorGroup
                 )
                 saveClothingItem(item)
+                android.util.Log.d("WardrobeRepo", "ingestStarterPack: Saved clothing ${dto.name}")
             }
+        }.onFailure { e ->
+            Log.e("WardrobeRepo", "ingestStarterPack: FAILED", e)
         }
     }
 
