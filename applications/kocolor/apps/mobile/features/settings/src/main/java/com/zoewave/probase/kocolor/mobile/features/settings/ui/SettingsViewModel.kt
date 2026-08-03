@@ -49,6 +49,7 @@ sealed class SettingsEvent {
     data object OnResetHydrationProgress : SettingsEvent()
     data object OnGenerateSampleData : SettingsEvent()
     data object OnIngestStarterPack : SettingsEvent()
+    data object OnWipeStarterPack : SettingsEvent()
     data class InitializeWithSection(val section: String) : SettingsEvent()
 }
 
@@ -149,6 +150,9 @@ class SettingsViewModel @Inject constructor(
             SettingsEvent.OnIngestStarterPack -> {
                 ingestStarterPack()
             }
+            SettingsEvent.OnWipeStarterPack -> {
+                wipeStarterPack()
+            }
             is SettingsEvent.InitializeWithSection -> {
                 if (event.section == "Hydration") {
                     _expandState.value = listOf(false, false, false, false, false, true, true)
@@ -187,6 +191,23 @@ class SettingsViewModel @Inject constructor(
                     ?: "Ingestion Failed"
                 Log.e("SettingsVM", "ingestStarterPack: ERROR: $error")
                 _seedingState.value = SeedingState.Error(error)
+            }
+        }
+    }
+
+    private fun wipeStarterPack() {
+        viewModelScope.launch {
+            Log.d("SettingsVM", "wipeStarterPack: Wiping starter pack items")
+            _seedingState.value = SeedingState.Loading
+            
+            // For now we wipe specifically 'starter_pack_v1'
+            val cosmeticResult = cosmeticRepository.deleteCosmeticsByPack("starter_pack_v1")
+            val wardrobeResult = wardrobeRepository.deleteClothingByPack("starter_pack_v1")
+            
+            if (cosmeticResult.isSuccess && wardrobeResult.isSuccess) {
+                _seedingState.value = SeedingState.Success
+            } else {
+                _seedingState.value = SeedingState.Error("Failed to wipe starter pack items.")
             }
         }
     }

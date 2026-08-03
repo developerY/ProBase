@@ -123,14 +123,21 @@ class WardrobeRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun deleteClothingByPack(packId: String): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            Log.d(TAG, "deleteClothingByPack: Deleting items for pack $packId")
+            clothingDao.deleteClothingByPackId(packId)
+        }
+    }
+
     override suspend fun ingestStarterPack(): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {
-            Log.d("WardrobeRepo", "ingestStarterPack: Starting fetch from ${KocolorApiService.BASE_URL}")
+            Log.d(TAG, "ingestStarterPack: Starting fetch from ${KocolorApiService.BASE_URL}")
             val response = apiService.getStarterPack()
-            Log.d("WardrobeRepo", "ingestStarterPack: Received ${response.cosmetics.size} cosmetics and ${response.clothing.size} clothing items")
+            Log.d(TAG, "ingestStarterPack: Received ${response.cosmetics.size} cosmetics and ${response.clothing.size} clothing items")
 
             response.clothing.forEach { dto ->
-                Log.d("WardrobeRepo", "ingestStarterPack: Processing clothing: ${dto.name} (${dto.id})")
+                Log.d(TAG, "ingestStarterPack: Processing clothing: ${dto.name} (${dto.id})")
                 val item = ClothingItem(
                     name = dto.name,
                     brand = dto.brand,
@@ -149,13 +156,14 @@ class WardrobeRepositoryImpl @Inject constructor(
                     colorTemperature = dto.colorTemperature,
                     seasonalPalette = dto.seasonalPalette,
                     contrastLevel = dto.contrastLevel,
-                    koColorGroup = dto.koColorGroup
+                    koColorGroup = dto.koColorGroup,
+                    sourcePackId = "starter_pack_v1" // Tagging the source
                 )
                 saveClothingItem(item)
-                android.util.Log.d("WardrobeRepo", "ingestStarterPack: Saved clothing ${dto.name}")
+                Log.d(TAG, "ingestStarterPack: Saved clothing ${dto.name}")
             }
         }.onFailure { e ->
-            Log.e("WardrobeRepo", "ingestStarterPack: FAILED", e)
+            Log.e(TAG, "ingestStarterPack: FAILED", e)
         }
     }
 

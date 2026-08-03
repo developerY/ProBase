@@ -106,6 +106,10 @@ fun ApplicationGuideSection(item: CosmeticItem, atelierBrown: Color) {
 
 @Composable
 fun ClinicalSafetySection(item: CosmeticItem) {
+    val hasActiveRecall = item.fdaRecallStatus != null && 
+                         item.fdaRecallStatus != "Clear" && 
+                         item.fdaRecallStatus != "None"
+
     Column(modifier = Modifier.padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         when {
             !item.isFdaChecked -> {
@@ -121,14 +125,14 @@ fun ClinicalSafetySection(item: CosmeticItem) {
                     }
                 }
             }
-            item.fdaRecallStatus != null -> {
+            hasActiveRecall -> {
                 WarningBanner(
                     title = stringResource(R.string.applications_kocolor_features_cosmetics_active_fda_recall),
                     subtitle = stringResource(R.string.applications_kocolor_features_cosmetics_fda_recall_message_format, item.fdaRecallStatus ?: ""),
                     icon = Icons.Default.Warning
                 )
             }
-            item.fdaAdverseEventCount > 0 -> {
+            item.fdaAdverseEventCount > 10 -> { // Threshold for "High Events"
                 WarningBanner(
                     title = stringResource(R.string.applications_kocolor_features_cosmetics_adverse_events_reported_format, item.fdaAdverseEventCount),
                     subtitle = stringResource(R.string.applications_kocolor_features_cosmetics_reported_reactions_format, item.fdaTopReactions.take(3).joinToString(", ")),

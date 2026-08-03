@@ -59,6 +59,7 @@ data class CosmeticItemEntity(
     
     // --- Ritual Context ---
     val ritualPlacement: String? = null,
+    val sourcePackId: String? = null,
 
     // --- FDA & Clinical Safety ---
     val fdaRecallStatus: String? = null,

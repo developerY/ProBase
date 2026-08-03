@@ -60,6 +60,7 @@ data class ClothingItem(
     val seasonalPalette: String? = null,  // SPRING, SUMMER, AUTUMN, WINTER
     val contrastLevel: String? = null,    // LOW, MEDIUM, HIGH
     val koColorGroup: String? = null,     // Semantic group
+    val sourcePackId: String? = null,
 
     // --- Usage & Performance ---
     val usageCount: Int = 0

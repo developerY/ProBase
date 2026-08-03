@@ -275,6 +275,7 @@ data class CosmeticItem(
     
     // --- Ritual Context ---
     val ritualPlacement: String? = null, // e.g. "Morning Routine (Step 2)"
+    val sourcePackId: String? = null,
 
     // --- FDA & Clinical Safety ---
     val fdaRecallStatus: String? = null,

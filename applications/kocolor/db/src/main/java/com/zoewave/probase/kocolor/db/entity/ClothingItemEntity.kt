@@ -31,6 +31,7 @@ data class ClothingItemEntity(
     val seasonalPalette: String? = null,
     val contrastLevel: String? = null,
     val koColorGroup: String? = null,
+    val sourcePackId: String? = null,
 
     // --- Usage & Performance ---
     val usageCount: Int = 0
