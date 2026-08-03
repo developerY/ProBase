@@ -113,10 +113,10 @@ fun CosmeticDetailScreen(
         val expandedStates = remember { 
             mutableStateMapOf<String, Boolean>().apply {
                 put("Clinical Safety", true)
-                put("Ingredient Analysis", false)
-                put("Sustainability", false)
+                put("Ingredient Analysis", true)
+                put("Sustainability", true)
                 put("Application Guide", false)
-                put("Professional Facets", false)
+                put("Professional Facets", true)
                 put("Product Lifecycle", false)
                 put("Usage & Stock", true)
                 put("Coordination", false)
@@ -130,8 +130,12 @@ fun CosmeticDetailScreen(
                 .verticalScroll(rememberScrollState())
                 .background(Color.White)
         ) {
-            // 0. Recall Banner (High Priority)
-            item.fdaRecallStatus?.let { status ->
+            // 0. Recall Banner (High Priority) - Only show if NOT "Clear"
+            val hasActiveRecall = item.fdaRecallStatus != null && 
+                                 item.fdaRecallStatus != "Clear" && 
+                                 item.fdaRecallStatus != "None"
+
+            if (hasActiveRecall) {
                 Surface(
                     color = Color(0xFFD32F2F),
                     modifier = Modifier.fillMaxWidth()
@@ -151,7 +155,7 @@ fun CosmeticDetailScreen(
                                 letterSpacing = 2.sp
                             )
                             Text(
-                                stringResource(R.string.applications_kocolor_features_cosmetics_fda_recall_status_format, status),
+                                stringResource(R.string.applications_kocolor_features_cosmetics_fda_recall_status_format, item.fdaRecallStatus ?: ""),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = Color.White
                             )
@@ -178,7 +182,7 @@ fun CosmeticDetailScreen(
                     // FDA Clinical Safety Badge (Green/Red/Gray Indicator)
                     val fdaStatusColor = when {
                         !item.isFdaChecked -> Color.Gray // Not checked yet
-                        item.fdaRecallStatus != null -> Color(0xFFD32F2F) // Red for Recall
+                        hasActiveRecall -> Color(0xFFD32F2F) // Red for Recall
                         item.fdaAdverseEventCount > 10 -> Color(0xFFFF9800) // Orange for High Events
                         else -> Color(0xFF4CAF50) // Green for Checked & Safe
                     }
@@ -193,7 +197,7 @@ fun CosmeticDetailScreen(
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
                         ) {
                             Icon(
-                                imageVector = if (item.fdaRecallStatus != null) Icons.Default.Warning else Icons.Default.VerifiedUser,
+                                imageVector = if (hasActiveRecall) Icons.Default.Warning else Icons.Default.VerifiedUser,
                                 contentDescription = null,
                                 modifier = Modifier.size(12.dp),
                                 tint = fdaStatusColor
