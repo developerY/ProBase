@@ -268,7 +268,7 @@ fun CosmeticDetailScreen(
                 modifier = Modifier
                     .padding(horizontal = 24.dp, vertical = 8.dp)
                     .fillMaxWidth()
-                    .aspectRatio(1f),
+                    .aspectRatio(4f / 3f),
                 shape = RoundedCornerShape(12.dp),
                 border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFF0F0F0)),
                 color = Color(0xFFFBF8F5)
@@ -279,7 +279,7 @@ fun CosmeticDetailScreen(
                             model = item.imageUrl,
                             contentDescription = item.name,
                             modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(8.dp)),
-                            contentScale = ContentScale.Fit
+                            contentScale = ContentScale.Crop
                         )
                     } else {
                         Icon(Icons.Default.Image, null, modifier = Modifier.size(100.dp), tint = Color.LightGray)
