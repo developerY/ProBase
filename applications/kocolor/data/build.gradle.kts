@@ -1,6 +1,7 @@
 plugins {
     id("composetemplate.android.library")
     id("composetemplate.android.hilt")
+    id("composetemplate.kotlin.serialization")
     alias(libs.plugins.ksp)
 }
 

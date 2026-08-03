@@ -1,5 +1,6 @@
 package com.zoewave.probase.kocolor.mobile.features.settings.ui
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.kocolor.db.KoColorSettings
@@ -171,17 +172,20 @@ class SettingsViewModel @Inject constructor(
 
     private fun ingestStarterPack() {
         viewModelScope.launch {
+            Log.d("SettingsVM", "ingestStarterPack: Button clicked, setting state to Loading")
             _seedingState.value = SeedingState.Loading
             
             val cosmeticResult = cosmeticRepository.ingestStarterPack()
             val wardrobeResult = wardrobeRepository.ingestStarterPack()
             
             if (cosmeticResult.isSuccess && wardrobeResult.isSuccess) {
+                Log.d("SettingsVM", "ingestStarterPack: SUCCESS")
                 _seedingState.value = SeedingState.Success
             } else {
                 val error = cosmeticResult.exceptionOrNull()?.localizedMessage 
                     ?: wardrobeResult.exceptionOrNull()?.localizedMessage 
                     ?: "Ingestion Failed"
+                Log.e("SettingsVM", "ingestStarterPack: ERROR: $error")
                 _seedingState.value = SeedingState.Error(error)
             }
         }

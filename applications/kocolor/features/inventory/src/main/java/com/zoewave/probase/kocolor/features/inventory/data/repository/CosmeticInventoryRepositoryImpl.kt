@@ -1,5 +1,6 @@
 package com.zoewave.probase.kocolor.features.inventory.data.repository
 
+import android.util.Log
 import com.zoewave.probase.core.util.color.ColorQuantizer
 import com.zoewave.probase.kocolor.features.obf.data.repository.ObfRepository
 import com.zoewave.probase.kocolor.data.mapper.toEntity
@@ -48,21 +49,43 @@ class CosmeticInventoryRepositoryImpl @Inject constructor(
     }
 
     override suspend fun ingestStarterPack(): Result<Unit> = runCatching {
+        Log.d("CosmeticRepo", "ingestStarterPack: Starting fetch from ${KocolorApiService.BASE_URL}")
         val response = apiService.getStarterPack()
+        Log.d("CosmeticRepo", "ingestStarterPack: Received ${response.cosmetics.size} cosmetics and ${response.clothing.size} clothing items")
+        
         response.cosmetics.forEach { dto ->
+            Log.d("CosmeticRepo", "ingestStarterPack: Processing cosmetic: ${dto.name} (${dto.id})")
             val macro = MacroCategory.entries.find { it.displayName == dto.macroCategory } ?: MacroCategory.TOOLS
-            val micro = try { MicroCategory.valueOf(dto.microCategory.uppercase()) } catch (e: Exception) { MicroCategory.OTHER }
+            val micro = try { MicroCategory.valueOf(dto.microCategory.uppercase()) } catch (e: Exception) { 
+                Log.w("CosmeticRepo", "ingestStarterPack: Unknown microCategory ${dto.microCategory}, falling back to OTHER")
+                MicroCategory.OTHER 
+            }
             
             val item = CosmeticItem(
                 name = dto.name,
                 brand = dto.brand,
                 macroCategory = macro,
                 microCategory = micro,
-                formulation = try { Formulation.valueOf(dto.formulation.uppercase()) } catch (e: Exception) { Formulation.UNKNOWN },
-                chemistryBase = try { ChemistryBase.valueOf(dto.chemistryBase.uppercase()) } catch (e: Exception) { ChemistryBase.UNKNOWN },
-                finish = try { Finish.valueOf(dto.finish.uppercase()) } catch (e: Exception) { Finish.UNKNOWN },
-                coverage = try { Coverage.valueOf(dto.coverage.uppercase()) } catch (e: Exception) { Coverage.NOT_APPLICABLE },
-                temperature = try { Temperature.valueOf(dto.temperature.uppercase()) } catch (e: Exception) { Temperature.UNKNOWN },
+                formulation = try { Formulation.valueOf(dto.formulation.uppercase()) } catch (e: Exception) { 
+                    Log.w("CosmeticRepo", "ingestStarterPack: Unknown formulation ${dto.formulation}")
+                    Formulation.UNKNOWN 
+                },
+                chemistryBase = try { ChemistryBase.valueOf(dto.chemistryBase.uppercase()) } catch (e: Exception) { 
+                    Log.w("CosmeticRepo", "ingestStarterPack: Unknown chemistryBase ${dto.chemistryBase}")
+                    ChemistryBase.UNKNOWN 
+                },
+                finish = try { Finish.valueOf(dto.finish.uppercase()) } catch (e: Exception) { 
+                    Log.w("CosmeticRepo", "ingestStarterPack: Unknown finish ${dto.finish}")
+                    Finish.UNKNOWN 
+                },
+                coverage = try { Coverage.valueOf(dto.coverage.uppercase()) } catch (e: Exception) { 
+                    Log.w("CosmeticRepo", "ingestStarterPack: Unknown coverage ${dto.coverage}")
+                    Coverage.NOT_APPLICABLE 
+                },
+                temperature = try { Temperature.valueOf(dto.temperature.uppercase()) } catch (e: Exception) { 
+                    Log.w("CosmeticRepo", "ingestStarterPack: Unknown temperature ${dto.temperature}")
+                    Temperature.UNKNOWN 
+                },
                 colorHex = dto.colorHex,
                 shadeName = dto.shadeName,
                 imageUrl = dto.imageUrl,
@@ -90,7 +113,10 @@ class CosmeticInventoryRepositoryImpl @Inject constructor(
                 fdaActiveIngredients = dto.fdaActiveIngredients,
                 isFdaChecked = dto.isFdaChecked
             )
-            saveCosmeticItem(item)
+            val savedId = saveCosmeticItem(item)
+            android.util.Log.d("CosmeticRepo", "ingestStarterPack: Saved cosmetic ${dto.name} with local ID: $savedId")
         }
+    }.onFailure { e ->
+        android.util.Log.e("CosmeticRepo", "ingestStarterPack: FAILED", e)
     }
 }
