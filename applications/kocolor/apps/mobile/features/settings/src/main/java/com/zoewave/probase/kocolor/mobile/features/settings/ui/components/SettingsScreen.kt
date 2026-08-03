@@ -1,5 +1,6 @@
 package com.zoewave.probase.kocolor.mobile.features.settings.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,13 +33,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.material3.AlertDialog
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -93,6 +95,32 @@ fun SettingsScreen(
     val uriHandler = LocalUriHandler.current
     val privacyPolicyUrl = stringResource(R.string.applications_kocolor_apps_mobile_core_privacy_policy_url)
     val dataDeletionUrl = stringResource(R.string.applications_kocolor_apps_mobile_core_data_deletion_url)
+
+    var showWipeStarterConfirm by remember { mutableStateOf(false) }
+
+    if (showWipeStarterConfirm) {
+        AlertDialog(
+            onDismissRequest = { showWipeStarterConfirm = false },
+            title = { Text("Wipe Starter Pack?") },
+            text = { Text("This will permanently remove all items ingested from the High-Fidelity starter pack. Your personal scans will remain untouched.") },
+            confirmButton = {
+                TextButton(
+                    onClick = { 
+                        onEvent(SettingsEvent.OnWipeStarterPack)
+                        showWipeStarterConfirm = false
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text("WIPE DATA", fontWeight = FontWeight.Black)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showWipeStarterConfirm = false }) {
+                    Text("CANCEL")
+                }
+            }
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -191,6 +219,14 @@ fun SettingsScreen(
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF745E7A)) // Luxury Purple
                         ) {
                             Text("Load Starter Pack (High Fidelity)")
+                        }
+
+                        OutlinedButton(
+                            onClick = { showWipeStarterConfirm = true },
+                            modifier = Modifier.fillMaxWidth(),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.5f))
+                        ) {
+                            Text("Wipe Starter Pack", color = MaterialTheme.colorScheme.error)
                         }
                     }
 

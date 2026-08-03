@@ -48,6 +48,11 @@ class CosmeticInventoryRepositoryImpl @Inject constructor(
         cosmeticDao.deleteCosmetic(id)
     }
 
+    override suspend fun deleteCosmeticsByPack(packId: String): Result<Unit> = runCatching {
+        Log.d("CosmeticRepo", "deleteCosmeticsByPack: Deleting items for pack $packId")
+        cosmeticDao.deleteCosmeticsByPackId(packId)
+    }
+
     override suspend fun ingestStarterPack(): Result<Unit> = runCatching {
         Log.d("CosmeticRepo", "ingestStarterPack: Starting fetch from ${KocolorApiService.BASE_URL}")
         val response = apiService.getStarterPack()
@@ -105,6 +110,7 @@ class CosmeticInventoryRepositoryImpl @Inject constructor(
                 isCrueltyFree = dto.isCrueltyFree,
                 recyclingInstructions = dto.recyclingInstructions,
                 ritualPlacement = dto.ritualPlacement,
+                sourcePackId = "starter_pack_v1", // Tagging the source
                 expiryDate = dto.expiryDate,
                 fdaRecallStatus = dto.fdaRecallStatus,
                 fdaAdverseEventCount = dto.fdaAdverseEventCount,
@@ -114,9 +120,9 @@ class CosmeticInventoryRepositoryImpl @Inject constructor(
                 isFdaChecked = dto.isFdaChecked
             )
             val savedId = saveCosmeticItem(item)
-            android.util.Log.d("CosmeticRepo", "ingestStarterPack: Saved cosmetic ${dto.name} with local ID: $savedId")
+            Log.d("CosmeticRepo", "ingestStarterPack: Saved cosmetic ${dto.name} with local ID: $savedId")
         }
     }.onFailure { e ->
-        android.util.Log.e("CosmeticRepo", "ingestStarterPack: FAILED", e)
+        Log.e("CosmeticRepo", "ingestStarterPack: FAILED", e)
     }
 }

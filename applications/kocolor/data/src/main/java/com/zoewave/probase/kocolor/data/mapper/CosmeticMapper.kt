@@ -47,6 +47,7 @@ fun CosmeticItemEntity.toModel(): CosmeticItem = CosmeticItem(
     
     // Context
     ritualPlacement = ritualPlacement,
+    sourcePackId = sourcePackId,
     
     // FDA Safety
     fdaRecallStatus = fdaRecallStatus,
@@ -129,6 +130,7 @@ fun CosmeticItem.toEntity(): CosmeticItemEntity = CosmeticItemEntity(
     
     // Context
     ritualPlacement = ritualPlacement,
+    sourcePackId = sourcePackId,
     
     // FDA Safety
     fdaRecallStatus = fdaRecallStatus,
