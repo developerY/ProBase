@@ -1,25 +1,7 @@
 use kocolor::inventory::InventoryRegistry;
-use kocolor::StarterPackResponse;
-use serde::Serialize;
+use kocolor::{StarterPackResponse, PackManifest, PackInfo};
 use std::fs::File;
 use std::io::Write;
-
-#[derive(Serialize)]
-struct PackManifest {
-    packs: Vec<PackInfo>,
-}
-
-#[derive(Serialize)]
-struct PackInfo {
-    id: String,
-    name: String,
-    description: String,
-    version: u32,
-    #[serde(rename = "type")]
-    pack_type: String,
-    endpoint: String,
-    item_count: u32,
-}
 
 fn main() {
     let full_cosmetics = InventoryRegistry::all_cosmetics();
