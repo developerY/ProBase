@@ -1,0 +1,82 @@
+{
+  "version": 1,
+  "cosmetics": [
+    {
+      "id": "kc-cosm-005",
+      "name": "Glow Catalyst Lip Stain",
+      "brand": "KoColor",
+      "macro_category": "Lips",
+      "micro_category": "LIPSTICK",
+      "formulation": "CREAM",
+      "chemistry_base": "OIL",
+      "finish": "SATIN",
+      "coverage": "FULL",
+      "temperature": "NEUTRAL",
+      "color_hex": "#A81C28",
+      "shade_name": "Signature Crimson",
+      "image_url": "https://cdn.kocolor.com/inventory/assets/signature_crimson_lipstick.webp",
+      "notes": "Rich, iconic neutral red formulated for maximum color payoff, ultra-comfortable texture, and non-drying all-day wear.",
+      "instructions": "Apply directly from bullet starting at the center of upper lip (cupid's bow) and moving along contour to outer corners.",
+      "batch_code": "KC-2023-L5",
+      "pao_months": 24,
+      "price": 42.0,
+      "volume": "3.8g",
+      "expiry_date": 1798761600000,
+      "hero_ingredient": "Wild Mango Butter & Botanical Peptides",
+      "skin_compatibility": "All Skin Types",
+      "contains_fragrance": false,
+      "ingredients": [
+        "Ricinus Communis (Castor) Seed Oil",
+        "Octyldodecanol",
+        "Irvingia Gabonensis Kernel Butter",
+        "Candelilla Cera",
+        "Red 6 Lake",
+        "Red 7 Lake",
+        "Iron Oxides",
+        "Tocopheryl Acetate"
+      ],
+      "allergens": [],
+      "eco_score": "A",
+      "is_vegan": true,
+      "is_cruelty_free": true,
+      "recycling_instructions": "Refillable magnetic casing. Keep outer shell and order formula bullet refills to eliminate single-use packaging waste.",
+      "ritual_placement": "Morning Routine (Step 8)",
+      "fda_recall_status": "Clear",
+      "fda_adverse_event_count": 0,
+      "fda_clinical_warnings": [],
+      "fda_top_reactions": [],
+      "fda_active_ingredients": [],
+      "is_fda_checked": true
+    }
+  ],
+  "clothing": [
+    {
+      "id": "kc-cloth-001",
+      "name": "KoColor Silk Drape Executive Blouse",
+      "brand": "KoColor Studio",
+      "macro_category": "TOPS",
+      "micro_category": "TOPS",
+      "formality": "PROFESSIONAL",
+      "color_hex": "#A81C28",
+      "size": "M",
+      "material": "100% Mulberry Silk",
+      "price": 185.0,
+      "image_url": "https://cdn.kocolor.com/inventory/assets/silk_drape_blouse.webp",
+      "notes": "Essential professional silk blouse.",
+      "dominant_hex": "#A81C28",
+      "vibrant_hex": "#C82333",
+      "muted_hex": "#8B1720",
+      "palette_hexes": [
+        "#A81C28",
+        "#C82333",
+        "#8B1720",
+        "#FFFFFF",
+        "#1F2421"
+      ],
+      "color_temperature": "NEUTRAL",
+      "seasonal_palette": "WINTER",
+      "contrast_level": "HIGH",
+      "ko_color_group": "Crimson Velvet"
+    }
+  ]
+}
