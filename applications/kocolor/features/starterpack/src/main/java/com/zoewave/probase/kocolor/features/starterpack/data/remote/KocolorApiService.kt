@@ -1,6 +1,6 @@
-package com.zoewave.probase.kocolor.data.remote
+package com.zoewave.probase.kocolor.features.starterpack.data.remote
 
-import com.zoewave.probase.kocolor.data.remote.model.StarterPackResponse
+import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.StarterPackResponse
 import retrofit2.http.GET
 
 interface KocolorApiService {

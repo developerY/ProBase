@@ -8,7 +8,6 @@ import android.util.Log
 import com.zoewave.probase.kocolor.data.mapper.toEntity
 import com.zoewave.probase.kocolor.data.mapper.toModel
 import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
-import com.zoewave.probase.kocolor.data.remote.KocolorApiService
 import com.zoewave.probase.kocolor.db.dao.ClothingDao
 import com.zoewave.probase.kocolor.mobile.features.color.domain.engine.WardrobeColorEngine
 import com.zoewave.probase.core.util.color.ColorQuantizer
@@ -31,7 +30,6 @@ private const val TAG = "WardrobeRepositoryImpl"
 class WardrobeRepositoryImpl @Inject constructor(
     private val clothingDao: ClothingDao,
     private val colorEngine: WardrobeColorEngine,
-    private val apiService: KocolorApiService,
     @ApplicationContext private val context: Context
 ) : WardrobeRepository {
 
@@ -127,43 +125,6 @@ class WardrobeRepositoryImpl @Inject constructor(
         runCatching {
             Log.d(TAG, "deleteClothingByPack: Deleting items for pack $packId")
             clothingDao.deleteClothingByPackId(packId)
-        }
-    }
-
-    override suspend fun ingestStarterPack(): Result<Unit> = withContext(Dispatchers.IO) {
-        runCatching {
-            Log.d(TAG, "ingestStarterPack: Starting fetch from ${KocolorApiService.BASE_URL}")
-            val response = apiService.getStarterPack()
-            Log.d(TAG, "ingestStarterPack: Received ${response.cosmetics.size} cosmetics and ${response.clothing.size} clothing items")
-
-            response.clothing.forEach { dto ->
-                Log.d(TAG, "ingestStarterPack: Processing clothing: ${dto.name} (${dto.id})")
-                val item = ClothingItem(
-                    name = dto.name,
-                    brand = dto.brand,
-                    category = try { ClothingCategory.valueOf(dto.microCategory.uppercase()) } catch (e: Exception) { ClothingCategory.OTHER },
-                    formality = try { Formality.valueOf(dto.formality.uppercase()) } catch (e: Exception) { Formality.CASUAL },
-                    colorHex = dto.colorHex,
-                    size = dto.size,
-                    material = dto.material,
-                    price = dto.price,
-                    imageUrl = dto.imageUrl,
-                    notes = dto.notes,
-                    dominantHex = dto.dominantHex,
-                    vibrantHex = dto.vibrantHex,
-                    mutedHex = dto.mutedHex,
-                    paletteHexes = dto.paletteHexes,
-                    colorTemperature = dto.colorTemperature,
-                    seasonalPalette = dto.seasonalPalette,
-                    contrastLevel = dto.contrastLevel,
-                    koColorGroup = dto.koColorGroup,
-                    sourcePackId = "starter_pack_v1" // Tagging the source
-                )
-                saveClothingItem(item)
-                Log.d(TAG, "ingestStarterPack: Saved clothing ${dto.name}")
-            }
-        }.onFailure { e ->
-            Log.e(TAG, "ingestStarterPack: FAILED", e)
         }
     }
 

@@ -11,5 +11,4 @@ interface WardrobeRepository {
     suspend fun wearClothingItem(id: Long)
     suspend fun deleteClothing(id: Long)
     suspend fun deleteClothingByPack(packId: String): Result<Unit>
-    suspend fun ingestStarterPack(): Result<Unit>
 }

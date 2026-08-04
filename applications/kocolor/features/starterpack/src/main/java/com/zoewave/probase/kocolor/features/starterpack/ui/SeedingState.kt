@@ -1,4 +1,4 @@
-package com.zoewave.probase.kocolor.mobile.features.settings.ui
+package com.zoewave.probase.kocolor.features.starterpack.ui
 
 sealed class SeedingState {
     data object Idle : SeedingState()
