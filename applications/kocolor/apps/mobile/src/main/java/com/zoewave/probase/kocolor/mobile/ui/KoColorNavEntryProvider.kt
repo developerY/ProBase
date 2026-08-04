@@ -56,6 +56,7 @@ import com.zoewave.probase.kocolor.features.routines.ui.RoutineEditorScreen
 import com.zoewave.probase.kocolor.features.routines.ui.RoutineEditorUiState
 import com.zoewave.probase.kocolor.features.routines.ui.RoutinesUiRoute
 import com.zoewave.probase.kocolor.features.routines.ui.RoutinesViewModel
+import com.zoewave.probase.kocolor.features.starterpack.ui.StarterPackEvent
 import com.zoewave.probase.kocolor.mobile.core.ui.health.HealthUiRoute
 import com.zoewave.probase.kocolor.mobile.features.color.ui.ColorDetailScreen
 import com.zoewave.probase.kocolor.mobile.features.color.ui.ColorDetailUiState
@@ -491,9 +492,9 @@ fun koColorNavEntryProvider(
             val viewModel: com.zoewave.probase.kocolor.features.starterpack.ui.StarterPackViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()
             com.zoewave.probase.kocolor.features.starterpack.ui.StarterPackScreen(
-                uiState = state.seedingState,
-                onIngest = { viewModel.onEvent(com.zoewave.probase.kocolor.features.starterpack.ui.StarterPackEvent.OnIngestStarterPack) },
-                onWipe = { viewModel.onEvent(com.zoewave.probase.kocolor.features.starterpack.ui.StarterPackEvent.OnWipeStarterPack) },
+                uiState = state,
+                onIngest = { viewModel.onEvent(StarterPackEvent.OnIngestPack(it)) },
+                onWipe = { viewModel.onEvent(StarterPackEvent.OnWipePack(it)) },
                 onBack = onBack
             )
         }
