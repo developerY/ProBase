@@ -4,12 +4,8 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.kocolor.db.KoColorSettings
-import com.zoewave.probase.kocolor.db.dao.CosmeticDao
-import com.zoewave.probase.kocolor.db.dao.ClothingDao
 import com.zoewave.probase.core.data.service.health.HealthSessionManager
 import com.zoewave.probase.kocolor.features.settings.domain.seeder.VaultSeeder
-import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
-import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -31,8 +27,15 @@ data class SettingsUiState(
     val currentPalette: String = "CLASSIC",
     val tempUnit: String = "CELSIUS",
     val hydrationGoal: Double = 2.7,
-    val seedingState: SeedingState = SeedingState.Idle
+    val seedingState: SampleDataSeedingState = SampleDataSeedingState.Idle
 )
+
+sealed class SampleDataSeedingState {
+    data object Idle : SampleDataSeedingState()
+    data object Loading : SampleDataSeedingState()
+    data object Success : SampleDataSeedingState()
+    data class Error(val message: String) : SampleDataSeedingState()
+}
 
 sealed class SettingsEvent {
     data class OnAiExpandedToggled(val expanded: Boolean) : SettingsEvent()
@@ -48,8 +51,6 @@ sealed class SettingsEvent {
     data class OnHydrationGoalChanged(val goal: Double) : SettingsEvent()
     data object OnResetHydrationProgress : SettingsEvent()
     data object OnGenerateSampleData : SettingsEvent()
-    data object OnIngestStarterPack : SettingsEvent()
-    data object OnWipeStarterPack : SettingsEvent()
     data class InitializeWithSection(val section: String) : SettingsEvent()
 }
 
@@ -57,16 +58,14 @@ sealed class SettingsEvent {
 class SettingsViewModel @Inject constructor(
     private val koSettings: KoColorSettings,
     private val healthSessionManager: HealthSessionManager,
-    private val vaultSeeder: VaultSeeder,
-    private val cosmeticRepository: CosmeticInventoryRepository,
-    private val wardrobeRepository: WardrobeRepository
+    private val vaultSeeder: VaultSeeder
 ) : ViewModel() {
 
     private val _expandState = MutableStateFlow(
         listOf(false, false, false, false, false, false, false) // AI, About, Theme, Palette, Health, AppSettings, Hydration
     )
 
-    private val _seedingState = MutableStateFlow<SeedingState>(SeedingState.Idle)
+    private val _seedingState = MutableStateFlow<SampleDataSeedingState>(SampleDataSeedingState.Idle)
 
     val uiState: StateFlow<SettingsUiState> = combine(
         _expandState,
@@ -147,12 +146,6 @@ class SettingsViewModel @Inject constructor(
             SettingsEvent.OnGenerateSampleData -> {
                 triggerDatabaseSeed()
             }
-            SettingsEvent.OnIngestStarterPack -> {
-                ingestStarterPack()
-            }
-            SettingsEvent.OnWipeStarterPack -> {
-                wipeStarterPack()
-            }
             is SettingsEvent.InitializeWithSection -> {
                 if (event.section == "Hydration") {
                     _expandState.value = listOf(false, false, false, false, false, true, true)
@@ -163,52 +156,14 @@ class SettingsViewModel @Inject constructor(
 
     private fun triggerDatabaseSeed() {
         viewModelScope.launch {
-            _seedingState.value = SeedingState.Loading
+            _seedingState.value = SampleDataSeedingState.Loading
             vaultSeeder.wipeAndSeedDatabase()
                 .onSuccess {
-                    _seedingState.value = SeedingState.Success
+                    _seedingState.value = SampleDataSeedingState.Success
                 }
                 .onFailure { error ->
-                    _seedingState.value = SeedingState.Error(error.localizedMessage ?: "Unknown Error")
+                    _seedingState.value = SampleDataSeedingState.Error(error.localizedMessage ?: "Unknown Error")
                 }
-        }
-    }
-
-    private fun ingestStarterPack() {
-        viewModelScope.launch {
-            Log.d("SettingsVM", "ingestStarterPack: Button clicked, setting state to Loading")
-            _seedingState.value = SeedingState.Loading
-            
-            val cosmeticResult = cosmeticRepository.ingestStarterPack()
-            val wardrobeResult = wardrobeRepository.ingestStarterPack()
-            
-            if (cosmeticResult.isSuccess && wardrobeResult.isSuccess) {
-                Log.d("SettingsVM", "ingestStarterPack: SUCCESS")
-                _seedingState.value = SeedingState.Success
-            } else {
-                val error = cosmeticResult.exceptionOrNull()?.localizedMessage 
-                    ?: wardrobeResult.exceptionOrNull()?.localizedMessage 
-                    ?: "Ingestion Failed"
-                Log.e("SettingsVM", "ingestStarterPack: ERROR: $error")
-                _seedingState.value = SeedingState.Error(error)
-            }
-        }
-    }
-
-    private fun wipeStarterPack() {
-        viewModelScope.launch {
-            Log.d("SettingsVM", "wipeStarterPack: Wiping starter pack items")
-            _seedingState.value = SeedingState.Loading
-            
-            // For now we wipe specifically 'starter_pack_v1'
-            val cosmeticResult = cosmeticRepository.deleteCosmeticsByPack("starter_pack_v1")
-            val wardrobeResult = wardrobeRepository.deleteClothingByPack("starter_pack_v1")
-            
-            if (cosmeticResult.isSuccess && wardrobeResult.isSuccess) {
-                _seedingState.value = SeedingState.Success
-            } else {
-                _seedingState.value = SeedingState.Error("Failed to wipe starter pack items.")
-            }
         }
     }
 }

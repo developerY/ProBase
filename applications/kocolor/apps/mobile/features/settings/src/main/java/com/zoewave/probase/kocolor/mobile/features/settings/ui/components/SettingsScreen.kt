@@ -52,12 +52,13 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zoewave.probase.features.ai.configuration.ui.AiConfigurationCard
+import com.zoewave.probase.kocolor.features.starterpack.ui.StarterPackManagementCard
 import com.zoewave.probase.kocolor.mobile.core.R
 import com.zoewave.probase.kocolor.mobile.core.ui.health.HealthContent
 import com.zoewave.probase.kocolor.mobile.core.ui.health.HealthContentUiState
+import com.zoewave.probase.kocolor.mobile.features.settings.ui.SampleDataSeedingState
 import com.zoewave.probase.kocolor.mobile.features.settings.ui.SettingsEvent
 import com.zoewave.probase.kocolor.mobile.features.settings.ui.SettingsUiState
-import com.zoewave.probase.kocolor.mobile.features.settings.ui.SeedingState
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
 @Preview(showBackground = true)
@@ -95,32 +96,6 @@ fun SettingsScreen(
     val uriHandler = LocalUriHandler.current
     val privacyPolicyUrl = stringResource(R.string.applications_kocolor_apps_mobile_core_privacy_policy_url)
     val dataDeletionUrl = stringResource(R.string.applications_kocolor_apps_mobile_core_data_deletion_url)
-
-    var showWipeStarterConfirm by remember { mutableStateOf(false) }
-
-    if (showWipeStarterConfirm) {
-        AlertDialog(
-            onDismissRequest = { showWipeStarterConfirm = false },
-            title = { Text("Wipe Starter Pack?") },
-            text = { Text("This will permanently remove all items ingested from the High-Fidelity starter pack. Your personal scans will remain untouched.") },
-            confirmButton = {
-                TextButton(
-                    onClick = { 
-                        onEvent(SettingsEvent.OnWipeStarterPack)
-                        showWipeStarterConfirm = false
-                    },
-                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
-                ) {
-                    Text("WIPE DATA", fontWeight = FontWeight.Black)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showWipeStarterConfirm = false }) {
-                    Text("CANCEL")
-                }
-            }
-        )
-    }
 
     Scaffold(
         topBar = {
@@ -172,36 +147,14 @@ fun SettingsScreen(
                 navTo = navTo
             )
 
-            /*Card(
-                modifier = Modifier.fillMaxWidth(),
-                onClick = {
-                    android.util.Log.d("SettingsScreen", "Google XR Test clicked")
-                    navTo(KoColorRoute.GoogleXRTest)
-                }
-            ) {
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Info,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Column {
-                        Text("Google XR Test", style = MaterialTheme.typography.titleMedium)
-                        Text("Launch standard Google " + "First Activity" + " example", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
-                }
-            }*/
+            StarterPackManagementCard()
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.1f))
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Developer Options", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.error)
+                    Text("Legacy Developer Options", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.error)
                     Spacer(modifier = Modifier.height(16.dp))
                     
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -212,25 +165,9 @@ fun SettingsScreen(
                         ) {
                             Text("Add Sample Portfolio Items")
                         }
-
-                        Button(
-                            onClick = { onEvent(SettingsEvent.OnIngestStarterPack) },
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF745E7A)) // Luxury Purple
-                        ) {
-                            Text("Load Starter Pack (High Fidelity)")
-                        }
-
-                        OutlinedButton(
-                            onClick = { showWipeStarterConfirm = true },
-                            modifier = Modifier.fillMaxWidth(),
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.5f))
-                        ) {
-                            Text("Wipe Starter Pack", color = MaterialTheme.colorScheme.error)
-                        }
                     }
 
-                    if (uiState.seedingState is SeedingState.Loading) {
+                    if (uiState.seedingState is SampleDataSeedingState.Loading) {
                         Spacer(modifier = Modifier.height(16.dp))
                         LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                     }

@@ -11,6 +11,7 @@ android {
 
 dependencies {
     implementation(project(":applications:kocolor:data"))
+    implementation(project(":applications:kocolor:features:starterpack"))
     implementation(project(":applications:kocolor:db"))
     implementation(project(":applications:kocolor:model"))
     implementation(project(":applications:kocolor:apps:mobile:core"))
