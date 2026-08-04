@@ -38,8 +38,10 @@ Implemented a robust provenance model for every item in the database.
 - **Database**: Migrated to **Version 8** to include `sourceType` facets and the `installed_packs` registry.
 - **Rust Backend**: The `generate_payload.rs` tool now outputs a master `manifest.json` and individual curated payloads.
 - **Network Layer**: Retrofit in the `:starterpack` module is configured with strict Kotlinx Serialization and production CDN endpoints.
+- **Rust Backend**: Optimized the `kocolor` crate to include `PackManifest` and `PackInfo` models, ensuring the Axum server and Payload Generator share a single source of truth for dynamic delivery.
 
 ---
 
 **Status**: ✅ **SYSTEM STABILIZED & SCALABLE**
+**Database Version**: 1 (Initial)
 **Usage**: Manage all curated data via **Settings > Glow Archive Sync**.
