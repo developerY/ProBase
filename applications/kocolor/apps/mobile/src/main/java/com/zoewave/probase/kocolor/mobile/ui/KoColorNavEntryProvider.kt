@@ -70,6 +70,8 @@ import com.zoewave.probase.kocolor.mobile.features.home.ui.CollectionHubScreen
 import com.zoewave.probase.kocolor.mobile.features.home.ui.HomeUiRoute
 import com.zoewave.probase.kocolor.mobile.features.home.ui.HomeViewModel
 import com.zoewave.probase.kocolor.mobile.features.settings.ui.components.SettingsUiRoute
+import com.zoewave.probase.kocolor.features.starterpack.ui.StarterPackScreen
+import com.zoewave.probase.kocolor.features.starterpack.ui.StarterPackViewModel
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import kotlinx.coroutines.flow.collectLatest
 
@@ -483,6 +485,16 @@ fun koColorNavEntryProvider(
                 uiState = state,
                 onEvent = viewModel::onEvent,
                 navTo = onNavigateTo
+            )
+        }
+        is KoColorRoute.StarterPack -> NavEntry(route) {
+            val viewModel: com.zoewave.probase.kocolor.features.starterpack.ui.StarterPackViewModel = hiltViewModel()
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+            com.zoewave.probase.kocolor.features.starterpack.ui.StarterPackScreen(
+                uiState = state.seedingState,
+                onIngest = { viewModel.onEvent(com.zoewave.probase.kocolor.features.starterpack.ui.StarterPackEvent.OnIngestStarterPack) },
+                onWipe = { viewModel.onEvent(com.zoewave.probase.kocolor.features.starterpack.ui.StarterPackEvent.OnWipeStarterPack) },
+                onBack = onBack
             )
         }
         is KoColorRoute.Health -> NavEntry(route) {

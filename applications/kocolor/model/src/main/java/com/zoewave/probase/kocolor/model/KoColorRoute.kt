@@ -150,6 +150,9 @@ sealed class KoColorRoute {
     @Serializable
     data object GoogleXRTest : KoColorRoute()
 
+    @Serializable
+    data object StarterPack : KoColorRoute()
+
     val icon: ImageVector?
         get() = when (this) {
             Home -> Icons.Default.Home

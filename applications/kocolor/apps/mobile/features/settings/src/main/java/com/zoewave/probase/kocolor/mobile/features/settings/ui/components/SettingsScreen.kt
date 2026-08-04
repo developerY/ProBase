@@ -17,6 +17,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -52,7 +53,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zoewave.probase.features.ai.configuration.ui.AiConfigurationCard
-import com.zoewave.probase.kocolor.features.starterpack.ui.StarterPackManagementCard
 import com.zoewave.probase.kocolor.mobile.core.R
 import com.zoewave.probase.kocolor.mobile.core.ui.health.HealthContent
 import com.zoewave.probase.kocolor.mobile.core.ui.health.HealthContentUiState
@@ -147,29 +147,27 @@ fun SettingsScreen(
                 navTo = navTo
             )
 
-            StarterPackManagementCard()
-
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.1f))
+                onClick = { navTo(KoColorRoute.StarterPack) }
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Legacy Developer Options", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.error)
-                    Spacer(modifier = Modifier.height(16.dp))
-                    
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Button(
-                            onClick = { onEvent(SettingsEvent.OnGenerateSampleData) },
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
-                        ) {
-                            Text("Add Sample Portfolio Items")
-                        }
-                    }
-
-                    if (uiState.seedingState is SampleDataSeedingState.Loading) {
-                        Spacer(modifier = Modifier.height(16.dp))
-                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.AutoAwesome,
+                        contentDescription = null,
+                        tint = Color(0xFF745E7A)
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Column {
+                        Text("Glow Archive Sync", style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            "Manage high-fidelity starter and sample packs",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                 }
             }
