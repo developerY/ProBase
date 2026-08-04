@@ -275,6 +275,8 @@ data class CosmeticItem(
     
     // --- Ritual Context ---
     val ritualPlacement: String? = null, // e.g. "Morning Routine (Step 2)"
+    val sourceType: InventorySource = InventorySource.USER_SCAN,
+    val sourceName: String? = null,
     val sourcePackId: String? = null,
 
     // --- FDA & Clinical Safety ---
