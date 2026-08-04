@@ -2,8 +2,8 @@ package com.zoewave.probase.kocolor.features.starterpack.di
 
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.KocolorApiService
-import com.zoewave.probase.kocolor.features.starterpack.data.repository.StarterPackRepository
-import com.zoewave.probase.kocolor.features.starterpack.data.repository.StarterPackRepositoryImpl
+import com.zoewave.probase.kocolor.features.starterpack.data.repository.PackSyncRepository
+import com.zoewave.probase.kocolor.features.starterpack.data.repository.PackSyncRepositoryImpl
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -21,9 +21,9 @@ abstract class StarterPackModule {
 
     @Binds
     @Singleton
-    abstract fun bindStarterPackRepository(
-        impl: StarterPackRepositoryImpl
-    ): StarterPackRepository
+    abstract fun bindPackSyncRepository(
+        impl: PackSyncRepositoryImpl
+    ): PackSyncRepository
 
     companion object {
         @Provides
