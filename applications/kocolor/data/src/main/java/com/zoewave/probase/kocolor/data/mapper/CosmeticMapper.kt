@@ -47,6 +47,8 @@ fun CosmeticItemEntity.toModel(): CosmeticItem = CosmeticItem(
     
     // Context
     ritualPlacement = ritualPlacement,
+    sourceType = sourceType,
+    sourceName = sourceName,
     sourcePackId = sourcePackId,
     
     // FDA Safety
@@ -130,6 +132,8 @@ fun CosmeticItem.toEntity(): CosmeticItemEntity = CosmeticItemEntity(
     
     // Context
     ritualPlacement = ritualPlacement,
+    sourceType = sourceType,
+    sourceName = sourceName,
     sourcePackId = sourcePackId,
     
     // FDA Safety

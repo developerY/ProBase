@@ -1,5 +1,6 @@
 package com.zoewave.probase.kocolor.features.inventory.ui
 
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -7,9 +8,13 @@ import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
 import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
+import com.zoewave.probase.core.model.ritual.InventorySource
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 data class CategoryMetadata(
@@ -154,10 +159,16 @@ class WardrobeViewModel @Inject constructor(
     }
 
     private fun addItem(item: ClothingItem) {
-        android.util.Log.d("WardrobeVM", "Triggering add for item: ${item.name} (image: ${item.imageUrl})")
+        val userItem = item.copy(
+            id = 0L,
+            sourceType = InventorySource.USER_SCAN,
+            sourceName = "My Wardrobe",
+            sourcePackId = null
+        )
+        Log.d("WardrobeVM", "Triggering add for item: ${userItem.name} (image: ${userItem.imageUrl})")
         viewModelScope.launch {
-            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO + kotlinx.coroutines.NonCancellable) {
-                wardrobeRepository.saveClothingItem(item)
+            withContext(Dispatchers.IO + NonCancellable) {
+                wardrobeRepository.saveClothingItem(userItem)
             }
         }
     }

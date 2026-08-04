@@ -9,6 +9,23 @@ pub struct StarterPackResponse {
     pub clothing: Vec<ClothingItem>,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct PackManifest {
+    pub packs: Vec<PackInfo>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct PackInfo {
+    pub id: String,
+    pub name: String,
+    pub description: String,
+    pub version: u32,
+    #[serde(rename = "type")]
+    pub pack_type: String,
+    pub endpoint: String,
+    pub item_count: u32,
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct CosmeticItem {
     pub id: String,

@@ -25,6 +25,8 @@ fun ClothingItemEntity.toModel(): ClothingItem = ClothingItem(
     seasonalPalette = seasonalPalette,
     contrastLevel = contrastLevel,
     koColorGroup = koColorGroup,
+    sourceType = sourceType,
+    sourceName = sourceName,
     sourcePackId = sourcePackId,
     usageCount = usageCount
 )
@@ -51,6 +53,8 @@ fun ClothingItem.toEntity(): ClothingItemEntity = ClothingItemEntity(
     seasonalPalette = seasonalPalette,
     contrastLevel = contrastLevel,
     koColorGroup = koColorGroup,
+    sourceType = sourceType,
+    sourceName = sourceName,
     sourcePackId = sourcePackId,
     usageCount = usageCount
 )

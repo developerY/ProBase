@@ -137,4 +137,14 @@ class FashionConverters {
 
     @ColumnTypeConverter
     fun toTemperature(value: String): Temperature = try { Temperature.valueOf(value) } catch (e: Exception) { Temperature.UNKNOWN }
+
+    @ColumnTypeConverter
+    fun fromInventorySource(value: InventorySource): String = value.name
+
+    @ColumnTypeConverter
+    fun toInventorySource(value: String): InventorySource = try { 
+        InventorySource.valueOf(value) 
+    } catch (e: Exception) { 
+        InventorySource.UNKNOWN 
+    }
 }

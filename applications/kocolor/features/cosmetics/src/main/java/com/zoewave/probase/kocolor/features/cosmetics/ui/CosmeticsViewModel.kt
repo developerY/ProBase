@@ -13,6 +13,7 @@ import com.zoewave.probase.core.model.ritual.Finish
 import com.zoewave.probase.core.model.ritual.Formulation
 import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.core.model.ritual.MicroCategory
+import com.zoewave.probase.core.model.ritual.InventorySource
 import com.zoewave.probase.core.network.repository.weather.WeatherRepo
 import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
 import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
@@ -251,10 +252,16 @@ class CosmeticsViewModel @Inject constructor(
     fun onEvent(event: CosmeticsEvent) {
         when (event) {
             is CosmeticsEvent.AddItem -> {
-                addItem(event.item)
+                val userItem = event.item.copy(
+                    id = 0L,
+                    sourceType = InventorySource.USER_SCAN,
+                    sourceName = "My Archive",
+                    sourcePackId = null
+                )
+                addItem(userItem)
                 
-                if (_isObfContributionEnabled.value && !event.item.batchCode.isNullOrBlank()) {
-                    contributeToObf(event.item)
+                if (_isObfContributionEnabled.value && !userItem.batchCode.isNullOrBlank()) {
+                    contributeToObf(userItem)
                 }
 
                 sessionRepository.reset()

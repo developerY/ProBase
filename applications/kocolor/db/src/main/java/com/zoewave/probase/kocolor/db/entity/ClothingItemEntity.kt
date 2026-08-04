@@ -5,6 +5,7 @@ import androidx.room3.PrimaryKey
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.Formality
 import com.zoewave.probase.core.model.ritual.ColorFamily
+import com.zoewave.probase.core.model.ritual.InventorySource
 
 @Entity(tableName = "clothing_items")
 data class ClothingItemEntity(
@@ -31,6 +32,8 @@ data class ClothingItemEntity(
     val seasonalPalette: String? = null,
     val contrastLevel: String? = null,
     val koColorGroup: String? = null,
+    val sourceType: InventorySource = InventorySource.USER_SCAN,
+    val sourceName: String? = null,
     val sourcePackId: String? = null,
 
     // --- Usage & Performance ---

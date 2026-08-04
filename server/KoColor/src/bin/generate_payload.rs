@@ -1,42 +1,61 @@
 use kocolor::inventory::InventoryRegistry;
-use kocolor::StarterPackResponse;
+use kocolor::{StarterPackResponse, PackManifest, PackInfo};
 use std::fs::File;
 use std::io::Write;
 
 fn main() {
-    generate_starter_pack();
-    generate_sample_winter_pack();
-}
+    let full_cosmetics = InventoryRegistry::all_cosmetics();
+    let full_clothing = InventoryRegistry::all_clothing();
 
-fn generate_starter_pack() {
-    let cosmetics = InventoryRegistry::all_cosmetics();
-    let clothing = InventoryRegistry::all_clothing();
-
-    let response = StarterPackResponse {
+    // 1. Generate Full Starter Pack
+    let starter_pack = StarterPackResponse {
         version: 1,
-        cosmetics,
-        clothing,
+        cosmetics: full_cosmetics.clone(),
+        clothing: full_clothing.clone(),
     };
+    save_payload("starter-pack.json", &starter_pack);
 
-    save_payload("starter-pack.json", &response);
-    println!("✅ Generated: starter-pack.json (Full Catalog)");
-}
-
-fn generate_sample_winter_pack() {
-    // Compose a specific pack for Winter users
-    let (cosmetics, clothing) = InventoryRegistry::compose_pack(
-        vec!["kc-cosm-005", "kc-cosm-002"], // Lip Stain and C Serum
-        vec!["kc-cloth-001"]               // Silk Blouse
+    // 2. Generate Seasonal Winter Pack
+    let (winter_cosm, winter_cloth) = InventoryRegistry::compose_pack(
+        vec!["kc-cosm-005", "kc-cosm-014"],
+        vec!["kc-cloth-001"]
     );
-
-    let response = StarterPackResponse {
+    let winter_pack = StarterPackResponse {
         version: 1,
-        cosmetics,
-        clothing,
+        cosmetics: winter_cosm.clone(),
+        clothing: winter_cloth.clone(),
+    };
+    save_payload("winter-essentials.json", &winter_pack);
+
+    // 3. Generate the Manifest
+    let manifest = PackManifest {
+        packs: vec![
+            PackInfo {
+                id: "starter_pack_v1".to_string(),
+                name: "Core Collection".to_string(),
+                description: "The foundational high-fidelity product library for all users.".to_string(),
+                version: 1,
+                pack_type: "STARTER_PACK".to_string(),
+                endpoint: "starter-pack.json".to_string(),
+                item_count: (full_cosmetics.len() + full_clothing.len()) as u32,
+            },
+            PackInfo {
+                id: "winter_2026_kit".to_string(),
+                name: "Winter 2026 Trend Kit".to_string(),
+                description: "Curated seasonal picks for Winter color profiles.".to_string(),
+                version: 1,
+                pack_type: "SAMPLE_PACK".to_string(),
+                endpoint: "winter-essentials.json".to_string(),
+                item_count: (winter_cosm.len() + winter_cloth.len()) as u32,
+            },
+        ],
     };
 
-    save_payload("sample-winter-pack.json", &response);
-    println!("✅ Generated: sample-winter-pack.json (Curated Winter)");
+    let manifest_json = serde_json::to_string_pretty(&manifest).expect("Failed to serialize manifest");
+    let mut file = File::create("manifest.json").expect("Failed to create manifest.json");
+    file.write_all(manifest_json.as_bytes()).expect("Failed to write manifest");
+
+    println!("✅ Generated: starter-pack.json, winter-essentials.json, and manifest.json");
 }
 
 fn save_payload(filename: &str, response: &StarterPackResponse) {
