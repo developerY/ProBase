@@ -31,6 +31,10 @@ interface CosmeticDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCosmetic(item: CosmeticItemEntity): Long
 
+    @Transaction
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertCosmetics(items: List<CosmeticItemEntity>)
+
     @Update
     suspend fun updateCosmetic(item: CosmeticItemEntity)
 
@@ -38,7 +42,7 @@ interface CosmeticDao {
     suspend fun deleteCosmetic(id: Long)
 
     @Transaction
-    @Query("DELETE FROM cosmetic_items WHERE packId = :packId")
+    @Query("DELETE FROM cosmetic_items WHERE provenance_packId = :packId")
     suspend fun deleteCosmeticsByPackId(packId: String)
 
     @Query("DELETE FROM cosmetic_items")

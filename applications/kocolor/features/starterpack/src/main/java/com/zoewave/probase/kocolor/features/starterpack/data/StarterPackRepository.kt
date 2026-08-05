@@ -5,6 +5,7 @@ import android.util.Log
 import coil.imageLoader
 import coil.request.ImageRequest
 import com.zoewave.probase.core.model.ritual.*
+import com.zoewave.probase.core.util.HashUtils
 import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.KocolorApiService
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.PackItem
@@ -15,6 +16,8 @@ import com.zoewave.probase.kocolor.features.starterpack.domain.security.Signatur
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.decodeFromJsonElement
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -23,6 +26,7 @@ class StarterPackRepository @Inject constructor(
     private val apiService: KocolorApiService,
     private val cosmeticRepository: CosmeticInventoryRepository,
     private val signatureVerifier: SignatureVerifier,
+    private val json: Json,
     @ApplicationContext private val context: Context
 ) {
     private var searchIndexCache: List<SearchIndexEntry>? = null
@@ -38,14 +42,23 @@ class StarterPackRepository @Inject constructor(
 
     suspend fun getManifest(): SignedPayloadEnvelope<PackManifest> {
         val envelope = apiService.getManifest()
+        val rawData = envelope.data.toString()
+        
         // Boundary Enforcement: Verify Manifest first
-        if (!signatureVerifier.verify(envelope.data.toString(), envelope.signature)) {
+        if (!signatureVerifier.verify(rawData, envelope.signature)) {
             throw PackException.SignatureException("Manifest signature verification failed!")
         }
-        return envelope
+        
+        // Return a typed version for the caller
+        return SignedPayloadEnvelope(
+            data = json.decodeFromJsonElement(envelope.data),
+            signature = envelope.signature,
+            packageVersion = envelope.packageVersion,
+            schemaVersion = envelope.schemaVersion
+        )
     }
 
-    suspend fun getPackItems(packId: String): List<PackItem> {
+    suspend fun getPackItems(packId: String, expectedSha256: String? = null, publisher: String? = null): List<PackItem> {
         Log.d("StarterPackRepo", "getPackItems: Fetching $packId")
         val envelope = try {
             apiService.getPackItems(packId)
@@ -53,36 +66,46 @@ class StarterPackRepository @Inject constructor(
             throw PackException.DownloadException("Failed to download pack $packId", e)
         }
         
-        // 1. Run signature verification
-        if (!signatureVerifier.verify(envelope.data.toString(), envelope.signature)) {
+        val rawData = envelope.data.toString()
+
+        // 1. Pre-signature Integrity Check (SHA-256)
+        if (expectedSha256 != null) {
+            val actualSha256 = HashUtils.calculateSha256(rawData)
+            if (actualSha256 != expectedSha256) {
+                throw PackException.ManifestException("Pack $packId content corruption detected (Hash mismatch)!")
+            }
+        }
+
+        // 2. Run signature verification
+        if (!signatureVerifier.verify(rawData, envelope.signature)) {
             throw PackException.SignatureException("Pack $packId signature verification failed!")
         }
 
-        // 2. Schema Version check
+        // 3. Schema Version check
         if (envelope.schemaVersion < 2) {
              throw PackException.SchemaException("Pack $packId uses an outdated schema version (${envelope.schemaVersion})")
         }
         
-        // 3. Cache provenance for later import
+        // 4. Cache provenance for later import
         lastFetchedProvenance = Provenance(
             packId = packId,
             packageVersion = envelope.packageVersion,
             schemaVersion = envelope.schemaVersion,
-            publisher = "KoColor Official",
+            publisher = publisher ?: "KoColor Official",
             installedAtTimestamp = System.currentTimeMillis(),
             verificationState = VerificationState.VERIFIED
         )
         
-        return envelope.data
+        return json.decodeFromJsonElement(envelope.data)
     }
 
     suspend fun importItems(items: List<PackItem>) {
         withContext(Dispatchers.IO) {
             val provenance = lastFetchedProvenance
             
-            items.forEach { packItem ->
-                // Boundary Enforcement: Only map and persist
-                val cosmeticItem = CosmeticItem(
+            // Boundary Enforcement: Atomic Room Transaction via bulk insert
+            val cosmeticItems = items.map { packItem ->
+                CosmeticItem(
                     name = packItem.name,
                     brand = packItem.brand,
                     macroCategory = packItem.macroCategory?.let { macro ->
@@ -111,8 +134,9 @@ class StarterPackRepository @Inject constructor(
                     imageUrl = packItem.imageUrl,
                     provenance = provenance
                 )
-                cosmeticRepository.saveCosmeticItem(cosmeticItem)
             }
+            
+            cosmeticRepository.saveCosmeticItems(cosmeticItems)
 
             // Async pre-loading of assets
             items.forEach { item ->

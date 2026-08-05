@@ -27,6 +27,10 @@ interface ClothingDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertClothing(item: ClothingItemEntity)
 
+    @Transaction
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertClothingList(items: List<ClothingItemEntity>)
+
     @Update
     suspend fun updateClothing(item: ClothingItemEntity)
 
@@ -34,7 +38,7 @@ interface ClothingDao {
     suspend fun deleteClothing(id: Long)
 
     @Transaction
-    @Query("DELETE FROM clothing_items WHERE packId = :packId")
+    @Query("DELETE FROM clothing_items WHERE provenance_packId = :packId")
     suspend fun deleteClothingByPackId(packId: String)
 
     @Query("DELETE FROM clothing_items")

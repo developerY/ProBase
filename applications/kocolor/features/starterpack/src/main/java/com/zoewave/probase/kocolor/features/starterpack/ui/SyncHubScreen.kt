@@ -193,7 +193,7 @@ fun SyncHubScreen(
                         pack = pack,
                         status = status,
                         isUpdateAvailable = isUpdateAvailable,
-                        onIngest = { onNavigateTo(KoColorRoute.PackPreview(pack.id)) },
+                        onIngest = { onNavigateTo(KoColorRoute.PackPreview(packId = pack.id, sha256 = pack.sha256, publisher = pack.publisher)) },
                         onWipe = { showWipeConfirmByPackId = pack.id },
                         isLoading = uiState.seedingState is SeedingState.Loading
                     )
@@ -285,14 +285,17 @@ fun PackItemCard(
                         onClick = onIngest,
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = if (status == PackStatus.INSTALLED) Color.LightGray else Color(0xFF745E7A)
+                            containerColor = if (status == PackStatus.INSTALLED || status == PackStatus.VERIFIED) Color.LightGray else Color(0xFF745E7A)
                         ),
-                        enabled = !isLoading
+                        enabled = !isLoading && status != PackStatus.DEPRECATED && status != PackStatus.REMOVED
                     ) {
-                        val label = when {
-                            status == PackStatus.DOWNLOADING -> "SYNCING..."
-                            isUpdateAvailable -> "UPDATE"
-                            status == PackStatus.INSTALLED -> "VIEW PACK"
+                        val label = when (status) {
+                            PackStatus.DOWNLOADING -> "SYNCING..."
+                            PackStatus.VERIFIED -> "VERIFIED"
+                            PackStatus.UPDATE_AVAILABLE -> "UPDATE"
+                            PackStatus.INSTALLED -> "VIEW PACK"
+                            PackStatus.DEPRECATED -> "DEPRECATED"
+                            PackStatus.REMOVED -> "REMOVED"
                             else -> "PREVIEW"
                         }
                         Text(label, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)

@@ -35,7 +35,7 @@ data class ClothingItemEntity(
     val koColorGroup: String? = null,
     val sourceType: InventorySource = InventorySource.USER_SCAN,
     val sourceName: String? = null,
-    @Embedded val provenance: Provenance? = null,
+    @Embedded(prefix = "provenance_") val provenance: Provenance? = null,
     val parentItemId: String? = null,
     val isHidden: Boolean = false,
 
