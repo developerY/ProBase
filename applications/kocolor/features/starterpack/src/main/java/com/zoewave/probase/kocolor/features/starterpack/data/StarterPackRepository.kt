@@ -5,7 +5,6 @@ import android.util.Log
 import coil.imageLoader
 import coil.request.ImageRequest
 import com.zoewave.probase.core.model.ritual.*
-import com.zoewave.probase.core.util.HashUtils
 import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.KocolorApiService
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.PackItem
@@ -17,6 +16,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.decodeFromJsonElement
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -25,7 +25,7 @@ import javax.inject.Singleton
 class StarterPackRepository @Inject constructor(
     private val apiService: KocolorApiService,
     private val cosmeticRepository: CosmeticInventoryRepository,
-    private val signatureVerifier: SignatureVerifier,
+    private val verifier: SignatureVerifier,
     private val json: Json,
     @ApplicationContext private val context: Context
 ) {
@@ -42,14 +42,13 @@ class StarterPackRepository @Inject constructor(
 
     suspend fun getManifest(): SignedPayloadEnvelope<PackManifest> {
         val envelope = apiService.getManifest()
-        val rawData = envelope.data.toString()
+        val rawDataBytes = envelope.data.toString().toByteArray(Charsets.UTF_8)
         
-        // Boundary Enforcement: Verify Manifest first
-        if (!signatureVerifier.verify(rawData, envelope.signature)) {
+        // Root of Trust Verification (Skipping self-hash)
+        if (!verifier.verify(rawDataBytes, envelope.signature, "")) {
             throw PackException.SignatureException("Manifest signature verification failed!")
         }
         
-        // Return a typed version for the caller
         return SignedPayloadEnvelope(
             data = json.decodeFromJsonElement(envelope.data),
             signature = envelope.signature,
@@ -66,27 +65,23 @@ class StarterPackRepository @Inject constructor(
             throw PackException.DownloadException("Failed to download pack $packId", e)
         }
         
-        val rawData = envelope.data.toString()
+        val rawDataBytes = envelope.data.toString().toByteArray(Charsets.UTF_8)
 
-        // 1. Pre-signature Integrity Check (SHA-256)
-        if (expectedSha256 != null) {
-            val actualSha256 = HashUtils.calculateSha256(rawData)
-            if (actualSha256 != expectedSha256) {
-                throw PackException.ManifestException("Pack $packId content corruption detected (Hash mismatch)!")
-            }
+        // Dual-Layer Verification (Integrity + Authenticity)
+        val isVerified = verifier.verify(
+            payloadBytes = rawDataBytes,
+            signatureHex = envelope.signature,
+            expectedSha256 = expectedSha256 ?: ""
+        )
+
+        if (!isVerified) {
+            throw PackException.SignatureException("Pack $packId failed cryptographic verification.")
         }
 
-        // 2. Run signature verification
-        if (!signatureVerifier.verify(rawData, envelope.signature)) {
-            throw PackException.SignatureException("Pack $packId signature verification failed!")
-        }
-
-        // 3. Schema Version check
         if (envelope.schemaVersion < 2) {
-             throw PackException.SchemaException("Pack $packId uses an outdated schema version (${envelope.schemaVersion})")
+             throw PackException.SchemaException("Pack $packId uses unsupported schema v${envelope.schemaVersion}")
         }
         
-        // 4. Cache provenance for later import
         lastFetchedProvenance = Provenance(
             packId = packId,
             packageVersion = envelope.packageVersion,
@@ -103,7 +98,6 @@ class StarterPackRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             val provenance = lastFetchedProvenance
             
-            // Boundary Enforcement: Atomic Room Transaction via bulk insert
             val cosmeticItems = items.map { packItem ->
                 CosmeticItem(
                     name = packItem.name,
@@ -138,7 +132,6 @@ class StarterPackRepository @Inject constructor(
             
             cosmeticRepository.saveCosmeticItems(cosmeticItems)
 
-            // Async pre-loading of assets
             items.forEach { item ->
                 val request = ImageRequest.Builder(context)
                     .data(item.imageUrl)

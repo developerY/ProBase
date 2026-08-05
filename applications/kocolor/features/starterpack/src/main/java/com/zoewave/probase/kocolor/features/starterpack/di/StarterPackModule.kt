@@ -5,7 +5,7 @@ import com.zoewave.probase.kocolor.features.starterpack.data.remote.KocolorApiSe
 import com.zoewave.probase.kocolor.features.starterpack.data.repository.PackSyncRepository
 import com.zoewave.probase.kocolor.features.starterpack.data.repository.PackSyncRepositoryImpl
 import com.zoewave.probase.kocolor.features.starterpack.domain.security.SignatureVerifier
-import com.zoewave.probase.kocolor.features.starterpack.domain.security.SignatureVerifierImpl
+import com.zoewave.probase.kocolor.features.starterpack.domain.security.KoColorEd25519Verifier
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -30,7 +30,7 @@ abstract class StarterPackModule {
     @Binds
     @Singleton
     abstract fun bindSignatureVerifier(
-        impl: SignatureVerifierImpl
+        impl: KoColorEd25519Verifier
     ): SignatureVerifier
 
     companion object {
