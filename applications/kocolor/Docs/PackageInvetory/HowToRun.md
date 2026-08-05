@@ -4,15 +4,21 @@ Based on Section 4 of your document, here is exactly how to run the process to c
 
 ### How to Run the Payload Generator
 
-Run these commands in your terminal from the root of your project:
-
+**Step 0: Set Security Keys**
+Before running the generator, you must set your private signing key as an environment variable. Create a `.env` file in `server/kocolor/` or export it in your shell:
 ```bash
-# Navigate to the specific crate directory
+export CDN_PRIVATE_KEY_HEX="your_private_key_hex"
+```
+You can use the provided `.env.example` as a template.
+
+**Step 1: Navigate to the specific crate directory**
+```bash
 cd server/kocolor
+```
 
-# Run the binary that compiles the definitions into JSON
+**Step 2: Run the binary that compiles the definitions into JSON**
+```bash
 cargo run --bin generate_payload
-
 ```
 
 ### What This Command Does

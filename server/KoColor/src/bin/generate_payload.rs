@@ -6,9 +6,12 @@ use p256::ecdsa::{SigningKey, signature::Signer};
 use base64::{Engine as _, engine::general_purpose::STANDARD as BASE64};
 
 fn main() {
-    // SECP256R1 Private Key (Placeholder - in production use environment variables)
-    let sk_hex = "41f26f634582f3c7e6c4349377833a6b83f3e1b7c02b37a1a1f0a1f0a1f0a1f0";
-    let signing_key = SigningKey::from_slice(&hex::decode(sk_hex).unwrap()).expect("Invalid private key");
+    // SECP256R1 Private Key - Read from environment variable for security
+    let sk_hex = std::env::var("CDN_PRIVATE_KEY_HEX")
+        .expect("ERROR: CDN_PRIVATE_KEY_HEX environment variable not set. Please set your SECP256R1 private key hex.");
+
+    let signing_key = SigningKey::from_slice(&hex::decode(sk_hex).expect("Invalid hex in CDN_PRIVATE_KEY_HEX"))
+        .expect("Invalid private key format");
 
     let full_cosmetics = InventoryRegistry::all_cosmetics();
     let full_clothing = InventoryRegistry::all_clothing();

@@ -31,3 +31,7 @@ google-services-zoewave.json
 /server/kocolor/starter-pack.json
 /server/kocolor/winter-essentials.json
 /server/kocolor/spring-prep.json
+
+# Security & Keys
+.env
+.env.*
