@@ -2,6 +2,7 @@ package com.zoewave.probase.kocolor.features.starterpack.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,17 +23,21 @@ import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DownloadDone
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.DockedSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -50,17 +55,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoewave.probase.kocolor.db.entity.PackStatus
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.PackInfo
+import com.zoewave.probase.kocolor.model.KoColorRoute
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StarterPackScreen(
+fun SyncHubScreen(
     uiState: StarterPackUiState,
-    onIngest: (PackInfo) -> Unit,
-    onWipe: (String) -> Unit,
+    onEvent: (StarterPackEvent) -> Unit,
+    onNavigateTo: (KoColorRoute) -> Unit,
     onBack: () -> Unit
 ) {
     val serifFont = FontFamily.Serif
     var showWipeConfirmByPackId by remember { mutableStateOf<String?>(null) }
+    var searchActive by remember { mutableStateOf(false) }
 
     if (showWipeConfirmByPackId != null) {
         AlertDialog(
@@ -70,7 +77,7 @@ fun StarterPackScreen(
             confirmButton = {
                 TextButton(
                     onClick = { 
-                        showWipeConfirmByPackId?.let { onWipe(it) }
+                        showWipeConfirmByPackId?.let { onEvent(StarterPackEvent.OnWipePack(it)) }
                         showWipeConfirmByPackId = null
                     },
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
@@ -90,7 +97,7 @@ fun StarterPackScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Glow Archive Sync", fontFamily = serifFont, fontWeight = FontWeight.Bold) },
+                title = { Text("Glow Sync Hub", fontFamily = serifFont, fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -99,70 +106,110 @@ fun StarterPackScreen(
             )
         }
     ) { padding ->
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .padding(padding)
-                .fillMaxSize(),
-            contentPadding = PaddingValues(24.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+                .fillMaxSize()
         ) {
-            item {
-                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-                    Box(
-                        modifier = Modifier
-                            .size(100.dp)
-                            .background(Color(0xFF745E7A).copy(alpha = 0.1f), RoundedCornerShape(32.dp)),
-                        contentAlignment = Alignment.Center
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                DockedSearchBar(
+                    query = uiState.searchQuery,
+                    onQueryChange = { onEvent(StarterPackEvent.SearchQueryChanged(it)) },
+                    onSearch = { searchActive = false },
+                    active = searchActive,
+                    onActiveChange = { searchActive = it },
+                    placeholder = { Text("Search products or brands...") },
+                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentPadding = PaddingValues(16.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.AutoAwesome,
-                            contentDescription = null,
-                            tint = Color(0xFF745E7A),
-                            modifier = Modifier.size(56.dp)
+                        items(uiState.filteredSearchIndex) { entry ->
+                            ListItem(
+                                headlineContent = { Text(entry.term) },
+                                supportingContent = { Text(entry.brand) },
+                                leadingContent = { 
+                                    Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = Color(0xFF745E7A)) 
+                                },
+                                modifier = Modifier.clickable {
+                                    onNavigateTo(KoColorRoute.PackPreview(entry.packId, entry.id))
+                                    searchActive = false
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+                contentPadding = PaddingValues(24.dp),
+                verticalArrangement = Arrangement.spacedBy(24.dp)
+            ) {
+                item {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+                        Box(
+                            modifier = Modifier
+                                .size(80.dp)
+                                .background(Color(0xFF745E7A).copy(alpha = 0.1f), RoundedCornerShape(24.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.AutoAwesome,
+                                contentDescription = null,
+                                tint = Color(0xFF745E7A),
+                                modifier = Modifier.size(40.dp)
+                            )
+                        }
+                        Spacer(Modifier.height(16.dp))
+                        Text(
+                            "Product Libraries",
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontFamily = serifFont,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            "Power your AI styling with high-fidelity kits.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.Gray,
+                            textAlign = TextAlign.Center
                         )
                     }
-                    Spacer(Modifier.height(16.dp))
-                    Text(
-                        "Product Libraries",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontFamily = serifFont,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        "Power your AI styling with high-fidelity kits.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Gray,
-                        textAlign = TextAlign.Center
+                }
+
+                items(uiState.availablePacks) { pack ->
+                    val installed = uiState.installedPacks.find { it.packId == pack.id }
+                    val status = installed?.status ?: PackStatus.AVAILABLE
+                    val currentVersion = installed?.version ?: 0
+                    val isUpdateAvailable = pack.version > currentVersion && status == PackStatus.INSTALLED
+
+                    PackItemCard(
+                        pack = pack,
+                        status = status,
+                        isUpdateAvailable = isUpdateAvailable,
+                        onIngest = { onNavigateTo(KoColorRoute.PackPreview(pack.id)) },
+                        onWipe = { showWipeConfirmByPackId = pack.id },
+                        isLoading = uiState.seedingState is SeedingState.Loading
                     )
                 }
-            }
 
-            items(uiState.availablePacks) { pack ->
-                val installed = uiState.installedPacks.find { it.packId == pack.id }
-                val status = installed?.status ?: PackStatus.AVAILABLE
-                val currentVersion = installed?.version ?: 0
-                val isUpdateAvailable = pack.version > currentVersion && status == PackStatus.INSTALLED
-
-                PackItemCard(
-                    pack = pack,
-                    status = status,
-                    isUpdateAvailable = isUpdateAvailable,
-                    onIngest = { onIngest(pack) },
-                    onWipe = { showWipeConfirmByPackId = pack.id },
-                    isLoading = uiState.seedingState is SeedingState.Loading
-                )
-            }
-
-            if (uiState.availablePacks.isEmpty() && !uiState.isRefreshing) {
-                item {
-                    Box(modifier = Modifier.fillMaxWidth().padding(top = 48.dp), contentAlignment = Alignment.Center) {
-                        Text("No packs available.", color = Color.Gray)
+                if (uiState.availablePacks.isEmpty() && !uiState.isRefreshing) {
+                    item {
+                        Box(modifier = Modifier.fillMaxWidth().padding(top = 48.dp), contentAlignment = Alignment.Center) {
+                            Text("No packs available.", color = Color.Gray)
+                        }
                     }
                 }
-            }
-            
-            item {
-                Spacer(Modifier.height(48.dp))
+                
+                item {
+                    Spacer(Modifier.height(48.dp))
+                }
             }
         }
     }
@@ -216,8 +263,7 @@ fun PackItemCard(
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+                verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = "${pack.itemCount} ITEMS • v${pack.version}",
                     style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.sp),
@@ -246,8 +292,8 @@ fun PackItemCard(
                         val label = when {
                             status == PackStatus.DOWNLOADING -> "SYNCING..."
                             isUpdateAvailable -> "UPDATE"
-                            status == PackStatus.INSTALLED -> "RE-SYNC"
-                            else -> "DOWNLOAD"
+                            status == PackStatus.INSTALLED -> "VIEW PACK"
+                            else -> "PREVIEW"
                         }
                         Text(label, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
                     }

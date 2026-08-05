@@ -37,12 +37,15 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.squareup.retrofit)
     implementation(libs.retrofit.kotlinx.serialization.converter)
+    implementation(libs.coil.compose)
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
 
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.kotlin)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.truth)
 }
