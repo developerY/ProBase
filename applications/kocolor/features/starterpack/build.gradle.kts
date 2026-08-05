@@ -39,6 +39,8 @@ dependencies {
     implementation(libs.retrofit.kotlinx.serialization.converter)
     implementation(libs.coil.compose)
 
+    implementation("org.bouncycastle:bcprov-jdk18on:1.77")
+
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
 

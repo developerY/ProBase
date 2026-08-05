@@ -2,7 +2,6 @@ package com.zoewave.probase.kocolor.features.starterpack.data.repository
 
 import android.util.Log
 import com.zoewave.probase.core.model.ritual.*
-import com.zoewave.probase.core.util.HashUtils
 import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
 import com.zoewave.probase.kocolor.db.dao.ClothingDao
 import com.zoewave.probase.kocolor.db.dao.CosmeticDao
@@ -30,7 +29,7 @@ class PackSyncRepositoryImpl @Inject constructor(
     private val clothingDao: ClothingDao,
     private val installedPackDao: InstalledPackDao,
     private val cosmeticRepository: CosmeticInventoryRepository,
-    private val signatureVerifier: SignatureVerifier,
+    private val verifier: SignatureVerifier,
     private val json: Json
 ) : PackSyncRepository {
 
@@ -41,10 +40,10 @@ class PackSyncRepositoryImpl @Inject constructor(
     override suspend fun fetchManifest(): Result<List<PackInfo>> = runCatching {
         Log.d("PackSyncRepo", "fetchManifest: Querying CDN...")
         val envelope = apiService.getManifest()
-        val rawData = envelope.data.toString()
+        val rawDataBytes = envelope.data.toString().toByteArray(Charsets.UTF_8)
         
-        // 1. Verify signature
-        if (!signatureVerifier.verify(rawData, envelope.signature)) {
+        // Root of Trust Verification
+        if (!verifier.verify(rawDataBytes, envelope.signature, "")) {
             throw PackException.SignatureException("Manifest signature verification failed!")
         }
         
@@ -77,18 +76,16 @@ class PackSyncRepositoryImpl @Inject constructor(
                 throw PackException.DownloadException("Failed to fetch pack ${pack.id}", e)
             }
             
-            val rawData = envelope.data.toString()
+            val rawDataBytes = envelope.data.toString().toByteArray(Charsets.UTF_8)
 
-            // 3. Pre-signature Integrity Check (SHA-256)
-            if (pack.sha256 != null) {
-                val actualSha256 = HashUtils.calculateSha256(rawData)
-                if (actualSha256 != pack.sha256) {
-                    throw PackException.ManifestException("Pack ${pack.id} content corruption detected (Hash mismatch)!")
-                }
-            }
+            // 3. Verify signature using hash from manifest
+            val isVerified = verifier.verify(
+                payloadBytes = rawDataBytes,
+                signatureHex = envelope.signature,
+                expectedSha256 = pack.sha256 ?: ""
+            )
 
-            // 4. Verify signature
-            if (!signatureVerifier.verify(rawData, envelope.signature)) {
+            if (!isVerified) {
                 throw PackException.SignatureException("Pack ${pack.id} signature verification failed!")
             }
 
@@ -104,7 +101,7 @@ class PackSyncRepositoryImpl @Inject constructor(
                 verificationState = VerificationState.VERIFIED
             )
 
-            // 5. Ingest Cosmetics (Atomic Transaction via saveCosmeticItems)
+            // 4. Ingest Cosmetics (Atomic Transaction via saveCosmeticItems)
             val cosmeticItems = items.map { dto ->
                 val macro = MacroCategory.entries.find { it.name == (dto.macroCategory?.uppercase() ?: "") } ?: MacroCategory.COMPLEXION
                 val micro = try { MicroCategory.valueOf(dto.microCategory?.uppercase() ?: "") } catch (e: Exception) { MicroCategory.FOUNDATION }
@@ -129,7 +126,7 @@ class PackSyncRepositoryImpl @Inject constructor(
             }
             cosmeticRepository.saveCosmeticItems(cosmeticItems)
 
-            // 6. Finalize Installation
+            // 5. Finalize Installation
             installedPackDao.insertPack(InstalledPackEntity(
                 packId = pack.id,
                 name = pack.name,

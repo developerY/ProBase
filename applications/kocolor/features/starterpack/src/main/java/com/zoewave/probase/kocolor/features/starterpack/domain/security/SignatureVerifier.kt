@@ -1,47 +1,58 @@
 package com.zoewave.probase.kocolor.features.starterpack.domain.security
 
-import android.util.Base64
-import android.util.Log
-import com.zoewave.probase.kocolor.features.starterpack.BuildConfig
-import java.security.KeyFactory
-import java.security.PublicKey
-import java.security.Signature
-import java.security.spec.X509EncodedKeySpec
+import com.zoewave.probase.core.util.HashUtils
+import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters
+import org.bouncycastle.crypto.signers.Ed25519Signer
 import javax.inject.Inject
 import javax.inject.Singleton
 
 interface SignatureVerifier {
     /**
-     * Verifies that the provided [jsonPayload] was signed by the [signatureBase64].
-     * Uses SHA256withECDSA algorithm.
+     * @param payloadBytes The exact raw JSON byte array of the 'data' field.
+     * @param signatureHex The hex string signature from the envelope.
+     * @param expectedSha256 The SHA-256 hash provided in the manifest. If empty, hash check is skipped.
      */
-    suspend fun verify(jsonPayload: String, signatureBase64: String): Boolean
+    fun verify(payloadBytes: ByteArray, signatureHex: String, expectedSha256: String): Boolean
 }
 
 @Singleton
-class SignatureVerifierImpl @Inject constructor() : SignatureVerifier {
+class KoColorEd25519Verifier @Inject constructor() : SignatureVerifier {
 
-    private val publicKeyBase64 = BuildConfig.CDN_PUBLIC_KEY
+    // Hardcoded compiler public key for Zero-Trust verification
+    private val publicKeyHex = "97db82ffb678bf9939fd666795abd619cf0f4fe6c5f9b17a104f04df07a87e3c" 
 
-    override suspend fun verify(jsonPayload: String, signatureBase64: String): Boolean {
+    private val publicKeyParams by lazy {
+        Ed25519PublicKeyParameters(publicKeyHex.decodeHex(), 0)
+    }
+
+    override fun verify(payloadBytes: ByteArray, signatureHex: String, expectedSha256: String): Boolean {
+        // 1. Fast-Fail Integrity Check (SHA-256)
+        if (expectedSha256.isNotEmpty()) {
+            val calculatedHash = HashUtils.calculateSha256(payloadBytes)
+            if (!calculatedHash.equals(expectedSha256, ignoreCase = true)) {
+                return false // Fails integrity
+            }
+        }
+
+        // 2. Cryptographic Authenticity Check (Ed25519)
+        val signer = Ed25519Signer().apply {
+            init(false, publicKeyParams)
+            update(payloadBytes, 0, payloadBytes.size)
+        }
+
         return try {
-            val publicKey = loadPublicKey(publicKeyBase64)
-            val signature = Signature.getInstance("SHA256withECDSA")
-            signature.initVerify(publicKey)
-            signature.update(jsonPayload.toByteArray(Charsets.UTF_8))
-            
-            val signatureBytes = Base64.decode(signatureBase64, Base64.DEFAULT)
-            signature.verify(signatureBytes)
+            val signatureBytes = signatureHex.decodeHex()
+            signer.verifySignature(signatureBytes)
         } catch (e: Exception) {
-            Log.e("SignatureVerifier", "Verification failed", e)
-            false
+            false // Malformed signature string
         }
     }
 
-    private fun loadPublicKey(base64Key: String): PublicKey {
-        val keyBytes = Base64.decode(base64Key, Base64.DEFAULT)
-        val spec = X509EncodedKeySpec(keyBytes)
-        val kf = KeyFactory.getInstance("EC")
-        return kf.generatePublic(spec)
+    // --- Hex Utility Extensions ---
+    private fun String.decodeHex(): ByteArray {
+        check(length % 2 == 0) { "Must have an even length" }
+        return chunked(2)
+            .map { it.toInt(16).toByte() }
+            .toByteArray()
     }
 }
