@@ -4,6 +4,8 @@ import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFact
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.KocolorApiService
 import com.zoewave.probase.kocolor.features.starterpack.data.repository.PackSyncRepository
 import com.zoewave.probase.kocolor.features.starterpack.data.repository.PackSyncRepositoryImpl
+import com.zoewave.probase.kocolor.features.starterpack.domain.security.SignatureVerifier
+import com.zoewave.probase.kocolor.features.starterpack.domain.security.SignatureVerifierImpl
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -25,11 +27,23 @@ abstract class StarterPackModule {
         impl: PackSyncRepositoryImpl
     ): PackSyncRepository
 
+    @Binds
+    @Singleton
+    abstract fun bindSignatureVerifier(
+        impl: SignatureVerifierImpl
+    ): SignatureVerifier
+
     companion object {
         @Provides
         @Singleton
-        fun provideKocolorApiService(): KocolorApiService {
-            val json = Json { ignoreUnknownKeys = true }
+        fun provideJson(): Json = Json { 
+            ignoreUnknownKeys = true 
+            coerceInputValues = true
+        }
+
+        @Provides
+        @Singleton
+        fun provideKocolorApiService(json: Json): KocolorApiService {
             val contentType = "application/json".toMediaType()
             
             return Retrofit.Builder()

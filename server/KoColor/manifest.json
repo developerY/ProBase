@@ -1,43 +1,46 @@
 {
-  "packs": [
-    {
-      "id": "starter_pack_v1",
-      "name": "Core Collection",
-      "description": "The foundational high-fidelity product library for all users.",
-      "version": 1,
-      "type": "STARTER_PACK",
-      "endpoint": "starter-pack.json",
-      "item_count": 9,
-      "size_bytes": 1200000,
-      "hash": "sha256:abc123full",
-      "hero_image_url": null,
-      "expires_at": null
-    },
-    {
-      "id": "winter_2026_kit",
-      "name": "Winter 2026 Trend Kit",
-      "description": "Curated seasonal picks for Winter color profiles.",
-      "version": 1,
-      "type": "SAMPLE_PACK",
-      "endpoint": "winter-essentials.json",
-      "item_count": 2,
-      "size_bytes": 450000,
-      "hash": "sha256:xyz456winter",
-      "hero_image_url": null,
-      "expires_at": null
-    },
-    {
-      "id": "spring_prep_2026",
-      "name": "Spring Skin Prep",
-      "description": "Revitalizing routine for the new season.",
-      "version": 1,
-      "type": "SAMPLE_PACK",
-      "endpoint": "spring-prep.json",
-      "item_count": 2,
-      "size_bytes": 320000,
-      "hash": "sha256:def789spring",
-      "hero_image_url": null,
-      "expires_at": 1748736000000
-    }
-  ]
+  "signature": "MEQCIGutJD782732GI8rXmKjSKhsIuIk2fGoQZhD6kz0XI5IAiAQ/wcr6sEawHAI4iO+XmIbrPQlFvwA/hANajHG4hSiqw==",
+  "payload": {
+    "packs": [
+      {
+        "description": "The foundational high-fidelity product library for all users.",
+        "endpoint": "starter-pack.json",
+        "expires_at": null,
+        "hash": "sha256:abc123full",
+        "hero_image_url": null,
+        "id": "starter_pack_v1",
+        "item_count": 9,
+        "name": "Core Collection",
+        "size_bytes": 1200000,
+        "type": "STARTER_PACK",
+        "version": 1
+      },
+      {
+        "description": "Curated seasonal picks for Winter color profiles.",
+        "endpoint": "winter-essentials.json",
+        "expires_at": null,
+        "hash": "sha256:xyz456winter",
+        "hero_image_url": null,
+        "id": "winter_2026_kit",
+        "item_count": 2,
+        "name": "Winter 2026 Trend Kit",
+        "size_bytes": 450000,
+        "type": "SAMPLE_PACK",
+        "version": 1
+      },
+      {
+        "description": "Revitalizing routine for the new season.",
+        "endpoint": "spring-prep.json",
+        "expires_at": 1748736000000,
+        "hash": "sha256:def789spring",
+        "hero_image_url": null,
+        "id": "spring_prep_2026",
+        "item_count": 2,
+        "name": "Spring Skin Prep",
+        "size_bytes": 320000,
+        "type": "SAMPLE_PACK",
+        "version": 1
+      }
+    ]
+  }
 }

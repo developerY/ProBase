@@ -11,11 +11,18 @@ import com.zoewave.probase.kocolor.db.entity.InstalledPackEntity
 import com.zoewave.probase.kocolor.db.entity.PackStatus
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.KocolorApiService
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.PackInfo
+import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.PackManifest
+import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.StarterPackResponse
+import com.zoewave.probase.kocolor.features.starterpack.domain.security.SignatureVerifier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.decodeFromJsonElement
 import javax.inject.Inject
 import javax.inject.Singleton
+
+class PayloadVerificationException(message: String) : Exception(message)
 
 @Singleton
 class PackSyncRepositoryImpl @Inject constructor(
@@ -24,7 +31,9 @@ class PackSyncRepositoryImpl @Inject constructor(
     private val clothingDao: ClothingDao,
     private val installedPackDao: InstalledPackDao,
     private val cosmeticRepository: CosmeticInventoryRepository,
-    private val wardrobeRepository: WardrobeRepository
+    private val wardrobeRepository: WardrobeRepository,
+    private val signatureVerifier: SignatureVerifier,
+    private val json: Json
 ) : PackSyncRepository {
 
     override fun getInstalledPacks(): Flow<List<InstalledPackEntity>> {
@@ -33,11 +42,18 @@ class PackSyncRepositoryImpl @Inject constructor(
 
     override suspend fun fetchManifest(): Result<List<PackInfo>> = runCatching {
         Log.d("PackSyncRepo", "fetchManifest: Querying CDN...")
-        val manifest = apiService.getManifest()
+        val envelope = apiService.getManifest()
         
-        // Cache manifest in local DB for offline access
-        // We'll store it as a special pack record for now or could add a dedicated manifest table
-        // For simplicity, we just return the remote list. In a real app, we'd persist this.
+        // 1. Get raw JSON string for verification
+        val payloadString = envelope.payload.toString()
+        
+        // 2. Verify signature
+        if (!signatureVerifier.verify(payloadString, envelope.signature)) {
+            throw PayloadVerificationException("Manifest signature verification failed!")
+        }
+        
+        // 3. Decode verified payload
+        val manifest: PackManifest = json.decodeFromJsonElement(envelope.payload)
         manifest.packs
     }
 
@@ -59,11 +75,19 @@ class PackSyncRepositoryImpl @Inject constructor(
                 expiresAt = pack.expiresAt
             ))
 
-            // 2. Fetch the specific pack JSON
-            val response = apiService.getPack(pack.endpoint)
+            // 2. Fetch the specific pack JSON via envelope
+            val envelope = apiService.getPack(pack.endpoint)
+            val payloadString = envelope.payload.toString()
+
+            // 3. Verify signature
+            if (!signatureVerifier.verify(payloadString, envelope.signature)) {
+                throw PayloadVerificationException("Pack ${pack.id} signature verification failed!")
+            }
+
+            val response: StarterPackResponse = json.decodeFromJsonElement(envelope.payload)
             val sourceType = try { InventorySource.valueOf(pack.type) } catch (e: Exception) { InventorySource.UNKNOWN }
 
-            // 3. Ingest Cosmetics
+            // 4. Ingest Cosmetics
             response.cosmetics.forEach { dto ->
                 val macro = MacroCategory.entries.find { it.displayName == dto.macroCategory } ?: MacroCategory.TOOLS
                 val micro = try { MicroCategory.valueOf(dto.microCategory.uppercase()) } catch (e: Exception) { MicroCategory.OTHER }
@@ -110,7 +134,7 @@ class PackSyncRepositoryImpl @Inject constructor(
                 cosmeticRepository.saveCosmeticItem(item)
             }
 
-            // 4. Ingest Clothing
+            // 5. Ingest Clothing
             response.clothing.forEach { dto ->
                 val item = ClothingItem(
                     name = dto.name,
@@ -138,7 +162,7 @@ class PackSyncRepositoryImpl @Inject constructor(
                 wardrobeRepository.saveClothingItem(item)
             }
 
-            // 5. Finalize Installation
+            // 6. Finalize Installation
             installedPackDao.insertPack(InstalledPackEntity(
                 packId = pack.id,
                 name = pack.name,

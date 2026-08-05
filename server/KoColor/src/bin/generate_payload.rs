@@ -1,9 +1,15 @@
 use kocolor::inventory::InventoryRegistry;
-use kocolor::{StarterPackResponse, PackManifest, PackInfo};
+use kocolor::{StarterPackResponse, PackManifest, PackInfo, SignedPayloadEnvelope};
 use std::fs::File;
 use std::io::Write;
+use p256::ecdsa::{SigningKey, signature::Signer};
+use base64::{Engine as _, engine::general_purpose::STANDARD as BASE64};
 
 fn main() {
+    // SECP256R1 Private Key (Placeholder - in production use environment variables)
+    let sk_hex = "41f26f634582f3c7e6c4349377833a6b83f3e1b7c02b37a1a1f0a1f0a1f0a1f0";
+    let signing_key = SigningKey::from_slice(&hex::decode(sk_hex).unwrap()).expect("Invalid private key");
+
     let full_cosmetics = InventoryRegistry::all_cosmetics();
     let full_clothing = InventoryRegistry::all_clothing();
 
@@ -13,7 +19,7 @@ fn main() {
         cosmetics: full_cosmetics.clone(),
         clothing: full_clothing.clone(),
     };
-    save_payload("starter-pack.json", &starter_pack);
+    save_signed_payload("starter-pack.json", &starter_pack, &signing_key);
 
     // 2. Generate Seasonal Winter Pack
     let (winter_cosm, winter_cloth) = InventoryRegistry::compose_pack(
@@ -25,7 +31,7 @@ fn main() {
         cosmetics: winter_cosm.clone(),
         clothing: winter_cloth.clone(),
     };
-    save_payload("winter-essentials.json", &winter_pack);
+    save_signed_payload("winter-essentials.json", &winter_pack, &signing_key);
 
     // 3. Generate Spring Prep Kit
     let (spring_cosm, _) = InventoryRegistry::compose_pack(
@@ -37,7 +43,7 @@ fn main() {
         cosmetics: spring_cosm.clone(),
         clothing: vec![],
     };
-    save_payload("spring-prep.json", &spring_pack);
+    save_signed_payload("spring-prep.json", &spring_pack, &signing_key);
 
     // 4. Generate the Manifest
     let manifest = PackManifest {
@@ -84,15 +90,25 @@ fn main() {
         ],
     };
 
-    let manifest_json = serde_json::to_string_pretty(&manifest).expect("Failed to serialize manifest");
-    let mut file = File::create("manifest.json").expect("Failed to create manifest.json");
-    file.write_all(manifest_json.as_bytes()).expect("Failed to write manifest");
+    save_signed_payload("manifest.json", &manifest, &signing_key);
 
-    println!("✅ Generated: starter-pack.json, winter-essentials.json, spring-prep.json, and manifest.json");
+    println!("✅ Generated and SIGNED: starter-pack.json, winter-essentials.json, spring-prep.json, and manifest.json");
 }
 
-fn save_payload(filename: &str, response: &StarterPackResponse) {
-    let json_payload = serde_json::to_string_pretty(response).expect("Failed to serialize");
+fn save_signed_payload<T: serde::Serialize>(filename: &str, payload: &T, signing_key: &SigningKey) {
+    let payload_json = serde_json::to_value(payload).expect("Failed to serialize to value");
+    let payload_string = serde_json::to_string(&payload_json).expect("Failed to serialize to string");
+
+    // Sign the raw JSON string
+    let signature: p256::ecdsa::Signature = signing_key.sign(payload_string.as_bytes());
+    let signature_base64 = BASE64.encode(signature.to_der());
+
+    let envelope = SignedPayloadEnvelope {
+        signature: signature_base64,
+        payload: payload_json,
+    };
+
+    let final_json = serde_json::to_string_pretty(&envelope).expect("Failed to serialize envelope");
     let mut file = File::create(filename).expect("Failed to create file");
-    file.write_all(json_payload.as_bytes()).expect("Failed to write JSON");
+    file.write_all(final_json.as_bytes()).expect("Failed to write JSON");
 }
