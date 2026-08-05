@@ -98,57 +98,6 @@
         "Ascorbic Acid 15%"
       ],
       "is_fda_checked": true
-    },
-    {
-      "id": "kc-cosm-084",
-      "name": "Anthelios Melt-in Milk Sunscreen",
-      "brand": "La Roche-Posay",
-      "macro_category": "Skincare & Prep",
-      "micro_category": "SPF",
-      "formulation": "CREAM",
-      "chemistry_base": "WATER",
-      "finish": "SATIN",
-      "coverage": "SHEER",
-      "temperature": "NEUTRAL",
-      "color_hex": "#FFFFFF",
-      "shade_name": "Invisible Shield",
-      "image_url": "https://cdn.kocolor.com/inventory/assets/la_roche_posay_anthelios_melt_in_milk_sunscreen.webp",
-      "notes": "Award-winning broad spectrum SPF 60 melt-in lotion engineered with Cell-Ox Shield technology.",
-      "instructions": "Apply liberally 15 minutes before sun exposure; reapply every 2 hours.",
-      "batch_code": "KC-2026-SEED",
-      "pao_months": 12,
-      "price": 35.0,
-      "volume": "150ml",
-      "expiry_date": 1798761600000,
-      "hero_ingredient": "Avobenzone 3% & Tocopherol",
-      "skin_compatibility": "Sensitive, All Skin Types, Dermatologist Tested",
-      "contains_fragrance": false,
-      "ingredients": [
-        "Water/Aqua",
-        "Avobenzone",
-        "Homosalate",
-        "Octisalate",
-        "Octocrylene",
-        "Glycerin",
-        "Tocopherol"
-      ],
-      "allergens": [],
-      "eco_score": "A",
-      "is_vegan": true,
-      "is_cruelty_free": false,
-      "recycling_instructions": "Recycle tube via plastic curbside stream.",
-      "ritual_placement": "Morning Routine (Step 4)",
-      "fda_recall_status": "Clear",
-      "fda_adverse_event_count": 0,
-      "fda_clinical_warnings": [],
-      "fda_top_reactions": [],
-      "fda_active_ingredients": [
-        "Avobenzone 3%",
-        "Homosalate 10%",
-        "Octisalate 5%",
-        "Octocrylene 7%"
-      ],
-      "is_fda_checked": true
     }
   ],
   "clothing": []
