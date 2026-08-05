@@ -3,23 +3,20 @@ package com.zoewave.probase.kocolor.features.starterpack.data.repository
 import android.util.Log
 import com.zoewave.probase.core.model.ritual.*
 import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
-import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
 import com.zoewave.probase.kocolor.db.dao.ClothingDao
 import com.zoewave.probase.kocolor.db.dao.CosmeticDao
 import com.zoewave.probase.kocolor.db.dao.InstalledPackDao
 import com.zoewave.probase.kocolor.db.entity.InstalledPackEntity
 import com.zoewave.probase.kocolor.db.entity.PackStatus
+import com.zoewave.probase.kocolor.features.starterpack.data.PackException
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.KocolorApiService
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.PackInfo
 import com.zoewave.probase.kocolor.features.starterpack.domain.security.SignatureVerifier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
-
-class PayloadVerificationException(message: String) : Exception(message)
 
 @Singleton
 class PackSyncRepositoryImpl @Inject constructor(
@@ -28,9 +25,7 @@ class PackSyncRepositoryImpl @Inject constructor(
     private val clothingDao: ClothingDao,
     private val installedPackDao: InstalledPackDao,
     private val cosmeticRepository: CosmeticInventoryRepository,
-    private val wardrobeRepository: WardrobeRepository,
-    private val signatureVerifier: SignatureVerifier,
-    private val json: Json
+    private val signatureVerifier: SignatureVerifier
 ) : PackSyncRepository {
 
     override fun getInstalledPacks(): Flow<List<InstalledPackEntity>> {
@@ -41,15 +36,11 @@ class PackSyncRepositoryImpl @Inject constructor(
         Log.d("PackSyncRepo", "fetchManifest: Querying CDN...")
         val envelope = apiService.getManifest()
         
-        // 1. Get raw JSON string for verification (Stub/Actual)
-        val payloadString = envelope.data.toString()
-        
-        // 2. Verify signature
-        if (!signatureVerifier.verify(payloadString, envelope.signature)) {
-            throw PayloadVerificationException("Manifest signature verification failed!")
+        // 1. Verify signature
+        if (!signatureVerifier.verify(envelope.data.toString(), envelope.signature)) {
+            throw PackException.SignatureException("Manifest signature verification failed!")
         }
         
-        // 3. Data is already decoded in envelope.data
         envelope.data.packs
     }
 
@@ -72,12 +63,15 @@ class PackSyncRepositoryImpl @Inject constructor(
             ))
 
             // 2. Fetch the specific pack JSON via envelope
-            val envelope = apiService.getPack(pack.endpoint)
-            val payloadString = envelope.data.toString()
+            val envelope = try {
+                apiService.getPack(pack.endpoint)
+            } catch (e: Exception) {
+                throw PackException.DownloadException("Failed to fetch pack ${pack.id}", e)
+            }
 
             // 3. Verify signature
-            if (!signatureVerifier.verify(payloadString, envelope.signature)) {
-                throw PayloadVerificationException("Pack ${pack.id} signature verification failed!")
+            if (!signatureVerifier.verify(envelope.data.toString(), envelope.signature)) {
+                throw PackException.SignatureException("Pack ${pack.id} signature verification failed!")
             }
 
             val items = envelope.data
@@ -85,13 +79,14 @@ class PackSyncRepositoryImpl @Inject constructor(
 
             val provenance = Provenance(
                 packId = pack.id,
-                packVersion = envelope.version,
+                packageVersion = envelope.packageVersion,
+                schemaVersion = envelope.schemaVersion,
                 publisher = "KoColor Official",
                 installedAtTimestamp = System.currentTimeMillis(),
-                isSignatureVerified = true
+                verificationState = VerificationState.VERIFIED
             )
 
-            // 4. Ingest Cosmetics (Note: This Sync logic is for full pack, but uses same item logic)
+            // 4. Ingest Cosmetics
             items.forEach { dto ->
                 val macro = MacroCategory.entries.find { it.name == (dto.macroCategory?.uppercase() ?: "") } ?: MacroCategory.COMPLEXION
                 val micro = try { MicroCategory.valueOf(dto.microCategory?.uppercase() ?: "") } catch (e: Exception) { MicroCategory.FOUNDATION }
@@ -116,7 +111,7 @@ class PackSyncRepositoryImpl @Inject constructor(
                 cosmeticRepository.saveCosmeticItem(item)
             }
 
-            // 6. Finalize Installation
+            // 5. Finalize Installation
             installedPackDao.insertPack(InstalledPackEntity(
                 packId = pack.id,
                 name = pack.name,

@@ -18,8 +18,6 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
-class PayloadVerificationException(message: String) : Exception(message)
-
 @Singleton
 class StarterPackRepository @Inject constructor(
     private val apiService: KocolorApiService,
@@ -39,25 +37,40 @@ class StarterPackRepository @Inject constructor(
     }
 
     suspend fun getManifest(): SignedPayloadEnvelope<PackManifest> {
-        return apiService.getManifest()
+        val envelope = apiService.getManifest()
+        // Boundary Enforcement: Verify Manifest first
+        if (!signatureVerifier.verify(envelope.data.toString(), envelope.signature)) {
+            throw PackException.SignatureException("Manifest signature verification failed!")
+        }
+        return envelope
     }
 
     suspend fun getPackItems(packId: String): List<PackItem> {
         Log.d("StarterPackRepo", "getPackItems: Fetching $packId")
-        val envelope = apiService.getPackItems(packId)
-        
-        // 1. Run signature verification (Stub/Actual)
-        if (!signatureVerifier.verify(envelope.data.toString(), envelope.signature)) {
-            throw PayloadVerificationException("Pack $packId signature verification failed!")
+        val envelope = try {
+            apiService.getPackItems(packId)
+        } catch (e: Exception) {
+            throw PackException.DownloadException("Failed to download pack $packId", e)
         }
         
-        // 2. Cache provenance for later import
+        // 1. Run signature verification
+        if (!signatureVerifier.verify(envelope.data.toString(), envelope.signature)) {
+            throw PackException.SignatureException("Pack $packId signature verification failed!")
+        }
+
+        // 2. Schema Version check
+        if (envelope.schemaVersion < 2) {
+             throw PackException.SchemaException("Pack $packId uses an outdated schema version (${envelope.schemaVersion})")
+        }
+        
+        // 3. Cache provenance for later import
         lastFetchedProvenance = Provenance(
             packId = packId,
-            packVersion = envelope.version,
-            publisher = "KoColor Official", // Default publisher
+            packageVersion = envelope.packageVersion,
+            schemaVersion = envelope.schemaVersion,
+            publisher = "KoColor Official",
             installedAtTimestamp = System.currentTimeMillis(),
-            isSignatureVerified = true
+            verificationState = VerificationState.VERIFIED
         )
         
         return envelope.data
@@ -68,7 +81,7 @@ class StarterPackRepository @Inject constructor(
             val provenance = lastFetchedProvenance
             
             items.forEach { packItem ->
-                // Map PackItem to CosmeticItem with rich Provenance
+                // Boundary Enforcement: Only map and persist
                 val cosmeticItem = CosmeticItem(
                     name = packItem.name,
                     brand = packItem.brand,
@@ -101,7 +114,7 @@ class StarterPackRepository @Inject constructor(
                 cosmeticRepository.saveCosmeticItem(cosmeticItem)
             }
 
-            // Refinement: Trigger asynchronous pre-loading of full-resolution imageUrl assets
+            // Async pre-loading of assets
             items.forEach { item ->
                 val request = ImageRequest.Builder(context)
                     .data(item.imageUrl)

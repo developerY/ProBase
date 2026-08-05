@@ -54,10 +54,11 @@ fun CosmeticItemEntity.toModel(): CosmeticItem = CosmeticItem(
     provenance = provenance?.let {
         ModelProvenance(
             packId = it.packId,
-            packVersion = it.packVersion,
+            packageVersion = it.packageVersion,
+            schemaVersion = it.schemaVersion,
             publisher = it.publisher,
             installedAtTimestamp = it.installedAtTimestamp,
-            isSignatureVerified = it.isSignatureVerified
+            verificationState = it.verificationState
         )
     },
     parentItemId = parentItemId,
@@ -121,10 +122,11 @@ fun CosmeticItem.toEntity(): CosmeticItemEntity = CosmeticItemEntity(
     provenance = provenance?.let {
         DbProvenance(
             packId = it.packId,
-            packVersion = it.packVersion,
+            packageVersion = it.packageVersion,
+            schemaVersion = it.schemaVersion,
             publisher = it.publisher,
             installedAtTimestamp = it.installedAtTimestamp,
-            isSignatureVerified = it.isSignatureVerified
+            verificationState = it.verificationState
         )
     },
     parentItemId = parentItemId,
