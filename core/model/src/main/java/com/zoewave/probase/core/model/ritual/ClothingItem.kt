@@ -63,6 +63,7 @@ data class ClothingItem(
     val sourceType: InventorySource = InventorySource.USER_SCAN,
     val sourceName: String? = null,
     val sourcePackId: String? = null,
+    val provenance: Provenance? = null,
     val parentItemId: String? = null,
     val isHidden: Boolean = false,
 
