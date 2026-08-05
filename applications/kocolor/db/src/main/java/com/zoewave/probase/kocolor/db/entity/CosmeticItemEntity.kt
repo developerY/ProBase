@@ -1,5 +1,6 @@
 package com.zoewave.probase.kocolor.db.entity
 
+import androidx.room3.Embedded
 import androidx.room3.Entity
 import androidx.room3.PrimaryKey
 import com.zoewave.probase.core.model.ritual.*
@@ -62,7 +63,7 @@ data class CosmeticItemEntity(
     val ritualPlacement: String? = null,
     val sourceType: InventorySource = InventorySource.USER_SCAN,
     val sourceName: String? = null,
-    val sourcePackId: String? = null,
+    @Embedded val provenance: Provenance? = null,
     val parentItemId: String? = null,
     val isHidden: Boolean = false,
 

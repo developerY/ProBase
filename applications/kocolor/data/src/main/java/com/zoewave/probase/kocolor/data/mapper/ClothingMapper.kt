@@ -2,6 +2,8 @@ package com.zoewave.probase.kocolor.data.mapper
 
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.kocolor.db.entity.ClothingItemEntity
+import com.zoewave.probase.core.model.ritual.Provenance as ModelProvenance
+import com.zoewave.probase.kocolor.db.entity.Provenance as DbProvenance
 
 fun ClothingItemEntity.toModel(): ClothingItem = ClothingItem(
     id = id,
@@ -27,7 +29,16 @@ fun ClothingItemEntity.toModel(): ClothingItem = ClothingItem(
     koColorGroup = koColorGroup,
     sourceType = sourceType,
     sourceName = sourceName,
-    sourcePackId = sourcePackId,
+    provenance = provenance?.let {
+        ModelProvenance(
+            packId = it.packId,
+            packageVersion = it.packageVersion,
+            schemaVersion = it.schemaVersion,
+            publisher = it.publisher,
+            installedAtTimestamp = it.installedAtTimestamp,
+            verificationState = it.verificationState
+        )
+    },
     parentItemId = parentItemId,
     isHidden = isHidden,
     usageCount = usageCount
@@ -57,7 +68,16 @@ fun ClothingItem.toEntity(): ClothingItemEntity = ClothingItemEntity(
     koColorGroup = koColorGroup,
     sourceType = sourceType,
     sourceName = sourceName,
-    sourcePackId = sourcePackId,
+    provenance = provenance?.let {
+        DbProvenance(
+            packId = it.packId,
+            packageVersion = it.packageVersion,
+            schemaVersion = it.schemaVersion,
+            publisher = it.publisher,
+            installedAtTimestamp = it.installedAtTimestamp,
+            verificationState = it.verificationState
+        )
+    },
     parentItemId = parentItemId,
     isHidden = isHidden,
     usageCount = usageCount

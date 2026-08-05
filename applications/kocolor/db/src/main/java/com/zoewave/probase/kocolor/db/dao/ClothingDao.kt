@@ -34,7 +34,7 @@ interface ClothingDao {
     suspend fun deleteClothing(id: Long)
 
     @Transaction
-    @Query("DELETE FROM clothing_items WHERE sourcePackId = :packId")
+    @Query("DELETE FROM clothing_items WHERE packId = :packId")
     suspend fun deleteClothingByPackId(packId: String)
 
     @Query("DELETE FROM clothing_items")
