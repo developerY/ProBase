@@ -14,6 +14,7 @@ data class PackInfo(
     val name: String,
     val description: String,
     val version: Int,
+    val publisher: String = "KoColor Official",
     val type: String, // STARTER_PACK, SAMPLE_PACK, etc.
     val endpoint: String, // e.g. "starter-pack.json"
     @SerialName("item_count") val itemCount: Int,

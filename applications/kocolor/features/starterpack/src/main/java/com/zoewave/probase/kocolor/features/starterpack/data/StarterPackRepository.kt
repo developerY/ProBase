@@ -58,7 +58,7 @@ class StarterPackRepository @Inject constructor(
         )
     }
 
-    suspend fun getPackItems(packId: String, expectedSha256: String? = null): List<PackItem> {
+    suspend fun getPackItems(packId: String, expectedSha256: String? = null, publisher: String? = null): List<PackItem> {
         Log.d("StarterPackRepo", "getPackItems: Fetching $packId")
         val envelope = try {
             apiService.getPackItems(packId)
@@ -91,7 +91,7 @@ class StarterPackRepository @Inject constructor(
             packId = packId,
             packageVersion = envelope.packageVersion,
             schemaVersion = envelope.schemaVersion,
-            publisher = "KoColor Official",
+            publisher = publisher ?: "KoColor Official",
             installedAtTimestamp = System.currentTimeMillis(),
             verificationState = VerificationState.VERIFIED
         )

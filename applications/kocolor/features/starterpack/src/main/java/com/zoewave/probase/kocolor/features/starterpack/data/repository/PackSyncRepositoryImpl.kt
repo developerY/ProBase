@@ -99,7 +99,7 @@ class PackSyncRepositoryImpl @Inject constructor(
                 packId = pack.id,
                 packageVersion = envelope.packageVersion,
                 schemaVersion = envelope.schemaVersion,
-                publisher = "KoColor Official",
+                publisher = pack.publisher,
                 installedAtTimestamp = System.currentTimeMillis(),
                 verificationState = VerificationState.VERIFIED
             )
