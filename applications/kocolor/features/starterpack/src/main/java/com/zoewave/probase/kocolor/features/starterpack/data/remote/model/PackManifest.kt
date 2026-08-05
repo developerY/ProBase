@@ -1,5 +1,6 @@
 package com.zoewave.probase.kocolor.features.starterpack.data.remote.model
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -15,5 +16,9 @@ data class PackInfo(
     val version: Int,
     val type: String, // STARTER_PACK, SAMPLE_PACK, etc.
     val endpoint: String, // e.g. "starter-pack.json"
-    val item_count: Int
+    @SerialName("item_count") val itemCount: Int,
+    @SerialName("size_bytes") val sizeBytes: Long? = null,
+    val hash: String? = null,
+    @SerialName("hero_image_url") val heroImageUrl: String? = null,
+    @SerialName("expires_at") val expiresAt: Long? = null
 )

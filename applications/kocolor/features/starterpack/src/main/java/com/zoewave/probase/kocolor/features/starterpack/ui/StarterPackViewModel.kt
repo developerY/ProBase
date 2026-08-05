@@ -97,7 +97,7 @@ class StarterPackViewModel @Inject constructor(
                 .onSuccess {
                     _seedingState.value = SeedingState.Success
                 }
-                .onFailure { error ->
+                .onFailure {
                     _seedingState.value = SeedingState.Error("Failed to wipe pack.")
                 }
         }

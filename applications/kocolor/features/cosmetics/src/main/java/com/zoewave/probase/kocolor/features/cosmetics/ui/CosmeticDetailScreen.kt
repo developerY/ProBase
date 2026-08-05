@@ -380,6 +380,19 @@ fun CosmeticDetailScreen(
 
             // Action Buttons
             Column(modifier = Modifier.padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                if (item.sourceType != InventorySource.USER_SCAN && item.sourceType != InventorySource.CLONED) {
+                    Button(
+                        onClick = { onEvent(CosmeticsEvent.CloneToPersonal(item)) },
+                        modifier = Modifier.fillMaxWidth().height(56.dp),
+                        shape = RoundedCornerShape(8.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF745E7A)) // Luxury Purple
+                    ) {
+                        Icon(Icons.Default.ContentCopy, null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text("MAKE IT MINE", fontWeight = FontWeight.Bold)
+                    }
+                }
+
                 Button(
                     onClick = { onEvent(CosmeticsEvent.UseItem(item.id)) },
                     modifier = Modifier.fillMaxWidth().height(56.dp),

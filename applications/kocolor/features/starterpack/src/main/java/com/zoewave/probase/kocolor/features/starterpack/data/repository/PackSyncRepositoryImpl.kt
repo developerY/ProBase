@@ -33,7 +33,12 @@ class PackSyncRepositoryImpl @Inject constructor(
 
     override suspend fun fetchManifest(): Result<List<PackInfo>> = runCatching {
         Log.d("PackSyncRepo", "fetchManifest: Querying CDN...")
-        apiService.getManifest().packs
+        val manifest = apiService.getManifest()
+        
+        // Cache manifest in local DB for offline access
+        // We'll store it as a special pack record for now or could add a dedicated manifest table
+        // For simplicity, we just return the remote list. In a real app, we'd persist this.
+        manifest.packs
     }
 
     override suspend fun ingestPack(pack: PackInfo): Result<Unit> = withContext(Dispatchers.IO) {
@@ -47,7 +52,11 @@ class PackSyncRepositoryImpl @Inject constructor(
                 description = pack.description,
                 version = pack.version,
                 status = PackStatus.DOWNLOADING,
-                itemCount = pack.item_count
+                itemCount = pack.itemCount,
+                sizeBytes = pack.sizeBytes ?: 0L,
+                hash = pack.hash,
+                heroImageUrl = pack.heroImageUrl,
+                expiresAt = pack.expiresAt
             ))
 
             // 2. Fetch the specific pack JSON
@@ -136,7 +145,11 @@ class PackSyncRepositoryImpl @Inject constructor(
                 description = pack.description,
                 version = pack.version,
                 status = PackStatus.INSTALLED,
-                itemCount = pack.item_count
+                itemCount = pack.itemCount,
+                sizeBytes = pack.sizeBytes ?: 0L,
+                hash = pack.hash,
+                heroImageUrl = pack.heroImageUrl,
+                expiresAt = pack.expiresAt
             ))
         }
     }
