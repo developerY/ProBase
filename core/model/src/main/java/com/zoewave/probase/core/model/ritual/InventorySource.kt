@@ -9,5 +9,7 @@ enum class InventorySource {
     SAMPLE_PACK,    // Seasonal or trend-based miniatures
     PROMO_PACK,     // Brand-partnered limited collections
     GIFTED,         // Special unlocks or rewards
+    CLONED,         // Created from a template item
+    COMMUNITY,      // Peer-to-peer shared item
     UNKNOWN
 }

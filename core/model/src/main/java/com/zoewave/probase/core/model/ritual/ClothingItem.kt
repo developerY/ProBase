@@ -63,6 +63,8 @@ data class ClothingItem(
     val sourceType: InventorySource = InventorySource.USER_SCAN,
     val sourceName: String? = null,
     val sourcePackId: String? = null,
+    val parentItemId: String? = null,
+    val isHidden: Boolean = false,
 
     // --- Usage & Performance ---
     val usageCount: Int = 0
