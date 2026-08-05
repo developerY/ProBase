@@ -16,6 +16,8 @@ import com.zoewave.probase.kocolor.features.starterpack.domain.security.Signatur
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.decodeFromJsonElement
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -24,6 +26,7 @@ class StarterPackRepository @Inject constructor(
     private val apiService: KocolorApiService,
     private val cosmeticRepository: CosmeticInventoryRepository,
     private val signatureVerifier: SignatureVerifier,
+    private val json: Json,
     @ApplicationContext private val context: Context
 ) {
     private var searchIndexCache: List<SearchIndexEntry>? = null
@@ -39,11 +42,20 @@ class StarterPackRepository @Inject constructor(
 
     suspend fun getManifest(): SignedPayloadEnvelope<PackManifest> {
         val envelope = apiService.getManifest()
+        val rawData = envelope.data.toString()
+        
         // Boundary Enforcement: Verify Manifest first
-        if (!signatureVerifier.verify(envelope.data.toString(), envelope.signature)) {
+        if (!signatureVerifier.verify(rawData, envelope.signature)) {
             throw PackException.SignatureException("Manifest signature verification failed!")
         }
-        return envelope
+        
+        // Return a typed version for the caller
+        return SignedPayloadEnvelope(
+            data = json.decodeFromJsonElement(envelope.data),
+            signature = envelope.signature,
+            packageVersion = envelope.packageVersion,
+            schemaVersion = envelope.schemaVersion
+        )
     }
 
     suspend fun getPackItems(packId: String, expectedSha256: String? = null): List<PackItem> {
@@ -84,7 +96,7 @@ class StarterPackRepository @Inject constructor(
             verificationState = VerificationState.VERIFIED
         )
         
-        return envelope.data
+        return json.decodeFromJsonElement(envelope.data)
     }
 
     suspend fun importItems(items: List<PackItem>) {

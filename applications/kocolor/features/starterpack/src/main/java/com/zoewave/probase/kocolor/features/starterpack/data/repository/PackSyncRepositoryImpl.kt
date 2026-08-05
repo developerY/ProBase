@@ -12,10 +12,14 @@ import com.zoewave.probase.kocolor.db.entity.PackStatus
 import com.zoewave.probase.kocolor.features.starterpack.data.PackException
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.KocolorApiService
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.PackInfo
+import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.PackItem
+import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.PackManifest
 import com.zoewave.probase.kocolor.features.starterpack.domain.security.SignatureVerifier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.decodeFromJsonElement
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -26,7 +30,8 @@ class PackSyncRepositoryImpl @Inject constructor(
     private val clothingDao: ClothingDao,
     private val installedPackDao: InstalledPackDao,
     private val cosmeticRepository: CosmeticInventoryRepository,
-    private val signatureVerifier: SignatureVerifier
+    private val signatureVerifier: SignatureVerifier,
+    private val json: Json
 ) : PackSyncRepository {
 
     override fun getInstalledPacks(): Flow<List<InstalledPackEntity>> {
@@ -36,13 +41,15 @@ class PackSyncRepositoryImpl @Inject constructor(
     override suspend fun fetchManifest(): Result<List<PackInfo>> = runCatching {
         Log.d("PackSyncRepo", "fetchManifest: Querying CDN...")
         val envelope = apiService.getManifest()
+        val rawData = envelope.data.toString()
         
         // 1. Verify signature
-        if (!signatureVerifier.verify(envelope.data.toString(), envelope.signature)) {
+        if (!signatureVerifier.verify(rawData, envelope.signature)) {
             throw PackException.SignatureException("Manifest signature verification failed!")
         }
         
-        envelope.data.packs
+        val manifest: PackManifest = json.decodeFromJsonElement(envelope.data)
+        manifest.packs
     }
 
     override suspend fun ingestPack(pack: PackInfo): Result<Unit> = withContext(Dispatchers.IO) {
@@ -85,7 +92,7 @@ class PackSyncRepositoryImpl @Inject constructor(
                 throw PackException.SignatureException("Pack ${pack.id} signature verification failed!")
             }
 
-            val items = envelope.data
+            val items: List<PackItem> = json.decodeFromJsonElement(envelope.data)
             val sourceType = try { InventorySource.valueOf(pack.type) } catch (e: Exception) { InventorySource.UNKNOWN }
 
             val provenance = Provenance(

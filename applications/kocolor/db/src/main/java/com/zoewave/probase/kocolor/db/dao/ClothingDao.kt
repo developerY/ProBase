@@ -27,6 +27,10 @@ interface ClothingDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertClothing(item: ClothingItemEntity)
 
+    @Transaction
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertClothingList(items: List<ClothingItemEntity>)
+
     @Update
     suspend fun updateClothing(item: ClothingItemEntity)
 
