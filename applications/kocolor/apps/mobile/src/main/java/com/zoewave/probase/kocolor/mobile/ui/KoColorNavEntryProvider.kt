@@ -71,7 +71,9 @@ import com.zoewave.probase.kocolor.mobile.features.home.ui.CollectionHubScreen
 import com.zoewave.probase.kocolor.mobile.features.home.ui.HomeUiRoute
 import com.zoewave.probase.kocolor.mobile.features.home.ui.HomeViewModel
 import com.zoewave.probase.kocolor.mobile.features.settings.ui.components.SettingsUiRoute
-import com.zoewave.probase.kocolor.features.starterpack.ui.StarterPackScreen
+import com.zoewave.probase.kocolor.features.starterpack.ui.SyncHubScreen
+import com.zoewave.probase.kocolor.features.starterpack.ui.PackPreviewScreen
+import com.zoewave.probase.kocolor.features.starterpack.ui.PackPreviewViewModel
 import com.zoewave.probase.kocolor.features.starterpack.ui.StarterPackViewModel
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import kotlinx.coroutines.flow.collectLatest
@@ -491,10 +493,22 @@ fun koColorNavEntryProvider(
         is KoColorRoute.StarterPack -> NavEntry(route) {
             val viewModel: com.zoewave.probase.kocolor.features.starterpack.ui.StarterPackViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()
-            com.zoewave.probase.kocolor.features.starterpack.ui.StarterPackScreen(
+            SyncHubScreen(
                 uiState = state,
-                onIngest = { viewModel.onEvent(StarterPackEvent.OnIngestPack(it)) },
-                onWipe = { viewModel.onEvent(StarterPackEvent.OnWipePack(it)) },
+                onEvent = viewModel::onEvent,
+                onNavigateTo = onNavigateTo,
+                onBack = onBack
+            )
+        }
+        is KoColorRoute.PackPreview -> NavEntry(route) {
+            val viewModel: PackPreviewViewModel = hiltViewModel()
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+            PackPreviewScreen(
+                uiState = state,
+                onToggleSelection = viewModel::onToggleSelection,
+                onSelectAll = viewModel::onSelectAll,
+                onDeselectAll = viewModel::onDeselectAll,
+                onImportSelected = viewModel::onImportSelected,
                 onBack = onBack
             )
         }
