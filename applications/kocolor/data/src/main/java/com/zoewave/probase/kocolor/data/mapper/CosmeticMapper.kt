@@ -50,6 +50,8 @@ fun CosmeticItemEntity.toModel(): CosmeticItem = CosmeticItem(
     sourceType = sourceType,
     sourceName = sourceName,
     sourcePackId = sourcePackId,
+    parentItemId = parentItemId,
+    isHidden = isHidden,
     
     // FDA Safety
     fdaRecallStatus = fdaRecallStatus,
@@ -135,6 +137,8 @@ fun CosmeticItem.toEntity(): CosmeticItemEntity = CosmeticItemEntity(
     sourceType = sourceType,
     sourceName = sourceName,
     sourcePackId = sourcePackId,
+    parentItemId = parentItemId,
+    isHidden = isHidden,
     
     // FDA Safety
     fdaRecallStatus = fdaRecallStatus,

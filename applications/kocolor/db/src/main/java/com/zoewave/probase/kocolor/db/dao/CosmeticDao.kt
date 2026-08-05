@@ -4,6 +4,7 @@ import androidx.room3.Dao
 import androidx.room3.Insert
 import androidx.room3.OnConflictStrategy
 import androidx.room3.Query
+import androidx.room3.Transaction
 import androidx.room3.Update
 import com.zoewave.probase.core.model.ritual.MicroCategory
 import com.zoewave.probase.kocolor.db.entity.CosmeticItemEntity
@@ -36,6 +37,7 @@ interface CosmeticDao {
     @Query("DELETE FROM cosmetic_items WHERE id = :id")
     suspend fun deleteCosmetic(id: Long)
 
+    @Transaction
     @Query("DELETE FROM cosmetic_items WHERE sourcePackId = :packId")
     suspend fun deleteCosmeticsByPackId(packId: String)
 

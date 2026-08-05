@@ -28,6 +28,8 @@ fun ClothingItemEntity.toModel(): ClothingItem = ClothingItem(
     sourceType = sourceType,
     sourceName = sourceName,
     sourcePackId = sourcePackId,
+    parentItemId = parentItemId,
+    isHidden = isHidden,
     usageCount = usageCount
 )
 
@@ -56,5 +58,7 @@ fun ClothingItem.toEntity(): ClothingItemEntity = ClothingItemEntity(
     sourceType = sourceType,
     sourceName = sourceName,
     sourcePackId = sourcePackId,
+    parentItemId = parentItemId,
+    isHidden = isHidden,
     usageCount = usageCount
 )

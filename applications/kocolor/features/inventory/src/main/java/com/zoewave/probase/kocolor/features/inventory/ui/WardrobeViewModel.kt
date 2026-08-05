@@ -44,6 +44,7 @@ sealed class WardrobeEvent {
     data class WearItem(val id: Long) : WardrobeEvent()
     data class UpdateDraft(val item: ClothingItem) : WardrobeEvent()
     data class InitializeEdit(val itemId: Long) : WardrobeEvent()
+    data class CloneToPersonal(val item: ClothingItem) : WardrobeEvent()
 }
 
 @HiltViewModel
@@ -155,6 +156,7 @@ class WardrobeViewModel @Inject constructor(
                     }
                 }
             }
+            is WardrobeEvent.CloneToPersonal -> cloneToPersonal(event.item)
         }
     }
 
@@ -191,6 +193,20 @@ class WardrobeViewModel @Inject constructor(
     private fun deleteItem(id: Long) {
         viewModelScope.launch {
             wardrobeRepository.deleteClothing(id)
+        }
+    }
+
+    private fun cloneToPersonal(item: ClothingItem) {
+        viewModelScope.launch {
+            val cloned = item.copy(
+                id = 0L,
+                sourceType = InventorySource.CLONED,
+                sourcePackId = null,
+                parentItemId = item.id.toString(),
+                timestamp = System.currentTimeMillis()
+            )
+            wardrobeRepository.saveClothingItem(cloned)
+            Log.d("WardrobeVM", "Clothing item cloned: ${cloned.name}")
         }
     }
 }

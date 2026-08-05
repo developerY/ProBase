@@ -103,6 +103,7 @@ sealed class CosmeticsEvent {
     data object ResetScanState : CosmeticsEvent()
     data object ContinueToReview : CosmeticsEvent()
     data object CancelDiscovery : CosmeticsEvent()
+    data class CloneToPersonal(val item: CosmeticItem) : CosmeticsEvent()
 }
 
 @HiltViewModel
@@ -342,6 +343,9 @@ class CosmeticsViewModel @Inject constructor(
             CosmeticsEvent.ContinueToReview -> {
                 sessionRepository.setScanState(FashionSessionRepository.ScanStatus.SUCCESS)
             }
+            is CosmeticsEvent.CloneToPersonal -> {
+                cloneToPersonal(event.item)
+            }
         }
     }
 
@@ -550,6 +554,20 @@ class CosmeticsViewModel @Inject constructor(
     private fun deleteItem(id: Long) {
         viewModelScope.launch {
             cosmeticRepository.deleteCosmeticItem(id)
+        }
+    }
+
+    private fun cloneToPersonal(item: CosmeticItem) {
+        viewModelScope.launch {
+            val cloned = item.copy(
+                id = 0L, // New record
+                sourceType = InventorySource.CLONED,
+                sourcePackId = null, // Detach from pack wipe
+                parentItemId = item.id.toString(),
+                timestamp = System.currentTimeMillis()
+            )
+            cosmeticRepository.saveCosmeticItem(cloned)
+            Log.d("CosmeticsVM", "Item cloned to personal archive: ${cloned.name}")
         }
     }
 
