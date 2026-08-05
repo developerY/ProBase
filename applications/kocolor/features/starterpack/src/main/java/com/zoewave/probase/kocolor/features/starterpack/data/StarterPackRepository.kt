@@ -5,6 +5,7 @@ import android.util.Log
 import coil.imageLoader
 import coil.request.ImageRequest
 import com.zoewave.probase.core.model.ritual.*
+import com.zoewave.probase.core.util.HashUtils
 import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.KocolorApiService
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.PackItem
@@ -45,7 +46,7 @@ class StarterPackRepository @Inject constructor(
         return envelope
     }
 
-    suspend fun getPackItems(packId: String): List<PackItem> {
+    suspend fun getPackItems(packId: String, expectedSha256: String? = null): List<PackItem> {
         Log.d("StarterPackRepo", "getPackItems: Fetching $packId")
         val envelope = try {
             apiService.getPackItems(packId)
@@ -53,17 +54,27 @@ class StarterPackRepository @Inject constructor(
             throw PackException.DownloadException("Failed to download pack $packId", e)
         }
         
-        // 1. Run signature verification
-        if (!signatureVerifier.verify(envelope.data.toString(), envelope.signature)) {
+        val rawData = envelope.data.toString()
+
+        // 1. Pre-signature Integrity Check (SHA-256)
+        if (expectedSha256 != null) {
+            val actualSha256 = HashUtils.calculateSha256(rawData)
+            if (actualSha256 != expectedSha256) {
+                throw PackException.ManifestException("Pack $packId content corruption detected (Hash mismatch)!")
+            }
+        }
+
+        // 2. Run signature verification
+        if (!signatureVerifier.verify(rawData, envelope.signature)) {
             throw PackException.SignatureException("Pack $packId signature verification failed!")
         }
 
-        // 2. Schema Version check
+        // 3. Schema Version check
         if (envelope.schemaVersion < 2) {
              throw PackException.SchemaException("Pack $packId uses an outdated schema version (${envelope.schemaVersion})")
         }
         
-        // 3. Cache provenance for later import
+        // 4. Cache provenance for later import
         lastFetchedProvenance = Provenance(
             packId = packId,
             packageVersion = envelope.packageVersion,
@@ -80,9 +91,9 @@ class StarterPackRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             val provenance = lastFetchedProvenance
             
-            items.forEach { packItem ->
-                // Boundary Enforcement: Only map and persist
-                val cosmeticItem = CosmeticItem(
+            // Boundary Enforcement: Atomic Room Transaction via bulk insert
+            val cosmeticItems = items.map { packItem ->
+                CosmeticItem(
                     name = packItem.name,
                     brand = packItem.brand,
                     macroCategory = packItem.macroCategory?.let { macro ->
@@ -111,8 +122,9 @@ class StarterPackRepository @Inject constructor(
                     imageUrl = packItem.imageUrl,
                     provenance = provenance
                 )
-                cosmeticRepository.saveCosmeticItem(cosmeticItem)
             }
+            
+            cosmeticRepository.saveCosmeticItems(cosmeticItems)
 
             // Async pre-loading of assets
             items.forEach { item ->

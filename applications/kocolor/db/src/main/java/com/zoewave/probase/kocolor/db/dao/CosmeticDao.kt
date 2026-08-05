@@ -31,6 +31,9 @@ interface CosmeticDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCosmetic(item: CosmeticItemEntity): Long
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertCosmetics(items: List<CosmeticItemEntity>)
+
     @Update
     suspend fun updateCosmetic(item: CosmeticItemEntity)
 

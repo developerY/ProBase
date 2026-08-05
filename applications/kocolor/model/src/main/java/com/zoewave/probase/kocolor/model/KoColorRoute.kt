@@ -154,7 +154,11 @@ sealed class KoColorRoute {
     data object StarterPack : KoColorRoute()
 
     @Serializable
-    data class PackPreview(val packId: String, val targetItemId: String? = null) : KoColorRoute()
+    data class PackPreview(
+        val packId: String, 
+        val targetItemId: String? = null,
+        val sha256: String? = null
+    ) : KoColorRoute()
 
     val icon: ImageVector?
         get() = when (this) {

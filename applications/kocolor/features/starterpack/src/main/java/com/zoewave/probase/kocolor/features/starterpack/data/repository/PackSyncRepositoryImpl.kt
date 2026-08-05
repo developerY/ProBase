@@ -2,6 +2,7 @@ package com.zoewave.probase.kocolor.features.starterpack.data.repository
 
 import android.util.Log
 import com.zoewave.probase.core.model.ritual.*
+import com.zoewave.probase.core.util.HashUtils
 import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
 import com.zoewave.probase.kocolor.db.dao.ClothingDao
 import com.zoewave.probase.kocolor.db.dao.CosmeticDao
@@ -68,9 +69,19 @@ class PackSyncRepositoryImpl @Inject constructor(
             } catch (e: Exception) {
                 throw PackException.DownloadException("Failed to fetch pack ${pack.id}", e)
             }
+            
+            val rawData = envelope.data.toString()
 
-            // 3. Verify signature
-            if (!signatureVerifier.verify(envelope.data.toString(), envelope.signature)) {
+            // 3. Pre-signature Integrity Check (SHA-256)
+            if (pack.sha256 != null) {
+                val actualSha256 = HashUtils.calculateSha256(rawData)
+                if (actualSha256 != pack.sha256) {
+                    throw PackException.ManifestException("Pack ${pack.id} content corruption detected (Hash mismatch)!")
+                }
+            }
+
+            // 4. Verify signature
+            if (!signatureVerifier.verify(rawData, envelope.signature)) {
                 throw PackException.SignatureException("Pack ${pack.id} signature verification failed!")
             }
 
@@ -86,12 +97,12 @@ class PackSyncRepositoryImpl @Inject constructor(
                 verificationState = VerificationState.VERIFIED
             )
 
-            // 4. Ingest Cosmetics
-            items.forEach { dto ->
+            // 5. Ingest Cosmetics (Atomic Transaction via saveCosmeticItems)
+            val cosmeticItems = items.map { dto ->
                 val macro = MacroCategory.entries.find { it.name == (dto.macroCategory?.uppercase() ?: "") } ?: MacroCategory.COMPLEXION
                 val micro = try { MicroCategory.valueOf(dto.microCategory?.uppercase() ?: "") } catch (e: Exception) { MicroCategory.FOUNDATION }
                 
-                val item = CosmeticItem(
+                CosmeticItem(
                     name = dto.name,
                     brand = dto.brand,
                     macroCategory = macro,
@@ -108,10 +119,10 @@ class PackSyncRepositoryImpl @Inject constructor(
                     sourceName = pack.name,
                     provenance = provenance
                 )
-                cosmeticRepository.saveCosmeticItem(item)
             }
+            cosmeticRepository.saveCosmeticItems(cosmeticItems)
 
-            // 5. Finalize Installation
+            // 6. Finalize Installation
             installedPackDao.insertPack(InstalledPackEntity(
                 packId = pack.id,
                 name = pack.name,

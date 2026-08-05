@@ -6,7 +6,13 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 enum class PackStatus {
-    AVAILABLE, DOWNLOADING, INSTALLED
+    AVAILABLE, 
+    DOWNLOADING, 
+    VERIFIED, 
+    INSTALLED, 
+    UPDATE_AVAILABLE, 
+    DEPRECATED, 
+    REMOVED
 }
 
 @Entity(tableName = "installed_packs")

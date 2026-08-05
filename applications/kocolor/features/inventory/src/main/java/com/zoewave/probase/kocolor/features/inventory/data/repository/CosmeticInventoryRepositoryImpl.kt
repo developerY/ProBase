@@ -42,6 +42,13 @@ class CosmeticInventoryRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun saveCosmeticItems(items: List<CosmeticItem>) {
+        val entities = items.map { item ->
+            item.copy(colorFamily = ColorQuantizer.snapToFamily(item.colorHex)).toEntity()
+        }
+        cosmeticDao.insertCosmetics(entities)
+    }
+
     override suspend fun deleteCosmeticItem(id: Long) {
         cosmeticDao.deleteCosmetic(id)
     }

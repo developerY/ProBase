@@ -7,6 +7,7 @@ interface CosmeticInventoryRepository {
     fun getAllCosmetics(): Flow<List<CosmeticItem>>
     suspend fun fetchProductByBarcode(barcode: String): Result<CosmeticItem>
     suspend fun saveCosmeticItem(item: CosmeticItem): Long
+    suspend fun saveCosmeticItems(items: List<CosmeticItem>)
     suspend fun deleteCosmeticItem(id: Long)
     suspend fun deleteCosmeticsByPack(packId: String): Result<Unit>
 }

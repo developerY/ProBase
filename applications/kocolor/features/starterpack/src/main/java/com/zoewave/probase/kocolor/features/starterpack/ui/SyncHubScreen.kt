@@ -193,7 +193,7 @@ fun SyncHubScreen(
                         pack = pack,
                         status = status,
                         isUpdateAvailable = isUpdateAvailable,
-                        onIngest = { onNavigateTo(KoColorRoute.PackPreview(pack.id)) },
+                        onIngest = { onNavigateTo(KoColorRoute.PackPreview(pack.id, sha256 = pack.sha256)) },
                         onWipe = { showWipeConfirmByPackId = pack.id },
                         isLoading = uiState.seedingState is SeedingState.Loading
                     )

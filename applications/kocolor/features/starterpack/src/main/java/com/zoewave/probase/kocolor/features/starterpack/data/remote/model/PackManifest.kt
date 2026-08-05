@@ -19,6 +19,7 @@ data class PackInfo(
     @SerialName("item_count") val itemCount: Int,
     @SerialName("size_bytes") val sizeBytes: Long? = null,
     val hash: String? = null,
+    @SerialName("sha256") val sha256: String? = null,
     @SerialName("hero_image_url") val heroImageUrl: String? = null,
     @SerialName("expires_at") val expiresAt: Long? = null
 )
