@@ -2,6 +2,8 @@ package com.zoewave.probase.kocolor.data.mapper
 
 import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.kocolor.db.entity.CosmeticItemEntity
+import com.zoewave.probase.kocolor.db.entity.Provenance as DbProvenance
+import com.zoewave.probase.core.model.ritual.Provenance as ModelProvenance
 
 fun CosmeticItemEntity.toModel(): CosmeticItem = CosmeticItem(
     id = id,
@@ -49,7 +51,15 @@ fun CosmeticItemEntity.toModel(): CosmeticItem = CosmeticItem(
     ritualPlacement = ritualPlacement,
     sourceType = sourceType,
     sourceName = sourceName,
-    sourcePackId = sourcePackId,
+    provenance = provenance?.let {
+        ModelProvenance(
+            packId = it.packId,
+            packVersion = it.packVersion,
+            publisher = it.publisher,
+            installedAtTimestamp = it.installedAtTimestamp,
+            isSignatureVerified = it.isSignatureVerified
+        )
+    },
     parentItemId = parentItemId,
     isHidden = isHidden,
     
@@ -61,34 +71,6 @@ fun CosmeticItemEntity.toModel(): CosmeticItem = CosmeticItem(
     fdaActiveIngredients = fdaActiveIngredients,
     isFdaChecked = isFdaChecked
 )
-
-/**
- * Maps the rich [CosmeticItem] model to a flat payload suitable for 
- * uploading to the Open Beauty Facts (OBF) community database.
- */
-fun CosmeticItem.toObfPayload(): Map<String, String> {
-    return mutableMapOf<String, String>().apply {
-        put("product_name", name)
-        put("brands", brand)
-        put("barcode", batchCode ?: "")
-        put("ingredients_text", ingredients.joinToString(", "))
-        put("quantity", volume ?: "")
-        put("categories", "${macroCategory.displayName}, ${microCategory.displayName}")
-        
-        // Technical facets flattened back to readable tags
-        val tags = mutableListOf<String>()
-        if (formulation != com.zoewave.probase.core.model.ritual.Formulation.UNKNOWN) tags.add(formulation.name.lowercase())
-        if (finish != com.zoewave.probase.core.model.ritual.Finish.UNKNOWN) tags.add(finish.name.lowercase())
-        if (chemistryBase != com.zoewave.probase.core.model.ritual.ChemistryBase.UNKNOWN) tags.add(chemistryBase.name.lowercase())
-        
-        if (tags.isNotEmpty()) {
-            put("labels", tags.joinToString(", "))
-        }
-
-        if (isVegan == true) put("labels", (get("labels")?.let { "$it, " } ?: "") + "vegan")
-        if (isCrueltyFree == true) put("labels", (get("labels")?.let { "$it, " } ?: "") + "cruelty-free")
-    }
-}
 
 fun CosmeticItem.toEntity(): CosmeticItemEntity = CosmeticItemEntity(
     id = id,
@@ -136,7 +118,15 @@ fun CosmeticItem.toEntity(): CosmeticItemEntity = CosmeticItemEntity(
     ritualPlacement = ritualPlacement,
     sourceType = sourceType,
     sourceName = sourceName,
-    sourcePackId = sourcePackId,
+    provenance = provenance?.let {
+        DbProvenance(
+            packId = it.packId,
+            packVersion = it.packVersion,
+            publisher = it.publisher,
+            installedAtTimestamp = it.installedAtTimestamp,
+            isSignatureVerified = it.isSignatureVerified
+        )
+    },
     parentItemId = parentItemId,
     isHidden = isHidden,
     
