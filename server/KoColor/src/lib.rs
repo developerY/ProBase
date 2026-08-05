@@ -24,6 +24,10 @@ pub struct PackInfo {
     pub pack_type: String,
     pub endpoint: String,
     pub item_count: u32,
+    pub size_bytes: Option<u64>,
+    pub hash: Option<String>,
+    pub hero_image_url: Option<String>,
+    pub expires_at: Option<u64>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

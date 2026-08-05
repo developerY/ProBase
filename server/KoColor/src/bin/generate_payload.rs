@@ -17,8 +17,8 @@ fn main() {
 
     // 2. Generate Seasonal Winter Pack
     let (winter_cosm, winter_cloth) = InventoryRegistry::compose_pack(
-        vec!["kc-cosm-005", "kc-cosm-014"],
-        vec!["kc-cloth-001"]
+        vec!["kc-cosm-005", "kc-cosm-001"], // Lip Stain and Cleanser
+        vec!["kc-cloth-002"]               // Blazer
     );
     let winter_pack = StarterPackResponse {
         version: 1,
@@ -27,7 +27,19 @@ fn main() {
     };
     save_payload("winter-essentials.json", &winter_pack);
 
-    // 3. Generate the Manifest
+    // 3. Generate Spring Prep Kit (Skincare focus)
+    let (spring_cosm, _) = InventoryRegistry::compose_pack(
+        vec!["kc-cosm-001", "kc-cosm-002", "kc-cosm-084"], // Cleanser, Serum, SPF
+        vec![]
+    );
+    let spring_pack = StarterPackResponse {
+        version: 1,
+        cosmetics: spring_cosm.clone(),
+        clothing: vec![],
+    };
+    save_payload("spring-prep.json", &spring_pack);
+
+    // 4. Generate the Manifest
     let manifest = PackManifest {
         packs: vec![
             PackInfo {
@@ -38,6 +50,10 @@ fn main() {
                 pack_type: "STARTER_PACK".to_string(),
                 endpoint: "starter-pack.json".to_string(),
                 item_count: (full_cosmetics.len() + full_clothing.len()) as u32,
+                size_bytes: Some(1200000), // ~1.2MB
+                hash: Some("sha256:abc123full".to_string()),
+                hero_image_url: None,
+                expires_at: None,
             },
             PackInfo {
                 id: "winter_2026_kit".to_string(),
@@ -47,6 +63,23 @@ fn main() {
                 pack_type: "SAMPLE_PACK".to_string(),
                 endpoint: "winter-essentials.json".to_string(),
                 item_count: (winter_cosm.len() + winter_cloth.len()) as u32,
+                size_bytes: Some(450000), // ~450KB
+                hash: Some("sha256:xyz456winter".to_string()),
+                hero_image_url: None,
+                expires_at: None,
+            },
+            PackInfo {
+                id: "spring_prep_2026".to_string(),
+                name: "Spring Skin Prep".to_string(),
+                description: "Foundational skincare routine to revitalize for the new season.".to_string(),
+                version: 1,
+                pack_type: "SAMPLE_PACK".to_string(),
+                endpoint: "spring-prep.json".to_string(),
+                item_count: spring_cosm.len() as u32,
+                size_bytes: Some(320000), // ~320KB
+                hash: Some("sha256:def789spring".to_string()),
+                hero_image_url: None,
+                expires_at: Some(1748736000000), // Optional expiry
             },
         ],
     };
@@ -55,7 +88,7 @@ fn main() {
     let mut file = File::create("manifest.json").expect("Failed to create manifest.json");
     file.write_all(manifest_json.as_bytes()).expect("Failed to write manifest");
 
-    println!("✅ Generated: starter-pack.json, winter-essentials.json, and manifest.json");
+    println!("✅ Successfully generated 3 packs and master manifest.json!");
 }
 
 fn save_payload(filename: &str, response: &StarterPackResponse) {
