@@ -3,6 +3,12 @@ use serde::{Deserialize, Serialize};
 pub mod inventory;
 
 #[derive(Debug, Serialize, Deserialize)]
+pub struct SignedPayloadEnvelope {
+    pub signature: String,
+    pub payload: serde_json::Value,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct StarterPackResponse {
     pub version: u32,
     pub cosmetics: Vec<CosmeticItem>,

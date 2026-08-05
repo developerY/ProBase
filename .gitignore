@@ -26,3 +26,8 @@ google-services-zoewave.json
 
 # Rust Backend Isolation
 /server/target/
+/server/kocolor/target/
+/server/kocolor/manifest.json
+/server/kocolor/starter-pack.json
+/server/kocolor/winter-essentials.json
+/server/kocolor/spring-prep.json
