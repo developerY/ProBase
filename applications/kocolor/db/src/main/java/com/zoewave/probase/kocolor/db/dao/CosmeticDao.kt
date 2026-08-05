@@ -38,7 +38,7 @@ interface CosmeticDao {
     suspend fun deleteCosmetic(id: Long)
 
     @Transaction
-    @Query("DELETE FROM cosmetic_items WHERE sourcePackId = :packId")
+    @Query("DELETE FROM cosmetic_items WHERE packId = :packId")
     suspend fun deleteCosmeticsByPackId(packId: String)
 
     @Query("DELETE FROM cosmetic_items")
