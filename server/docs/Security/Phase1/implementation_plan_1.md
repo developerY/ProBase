@@ -26,7 +26,10 @@ Migrate the KoColor Secure Package Distribution Platform from plaintext JSON pay
     3. **Hash**: Calculate SHA-256 strictly on the **compressed bytes**.
     4. **Sign**: Generate Ed25519 signature strictly on the **compressed bytes**.
     5. **Output**: Save as `[id].kpkg`.
-- Update manifest generation to point to `.kpkg` endpoints and include the hashes/signatures of the compressed binaries.
+- Update manifest generation:
+    - Point to `.kpkg` endpoints.
+    - Include the hashes/signatures of the compressed binaries.
+    - **Optimization**: Include `uncompressed_size_bytes` for each pack to facilitate safe memory allocation on memory-constrained devices (e.g., Pixel Watch).
 
 ---
 
@@ -44,6 +47,7 @@ Migrate the KoColor Secure Package Distribution Platform from plaintext JSON pay
     2. **Integrity**: Verify SHA-256 hash against the manifest.
     3. **Authenticity**: Verify Ed25519 signature via `SignatureVerifier`.
     4. **Decompress**: Invoke `Zstd.decompress()` ONLY if the above steps pass.
+        - **Memory Safety**: Use `uncompressed_size_bytes` from the manifest to allocate the exact buffer size required, preventing `OutOfMemory` errors on wearables.
     5. **Ingest**: Parse the decompressed JSON and persist to Room in an atomic transaction.
 
 #### [MODIFY] [PackSyncRepositoryImpl.kt](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/features/starterpack/src/main/java/com/zoewave/probase/kocolor/features/starterpack/data/repository/PackSyncRepositoryImpl.kt)
@@ -52,6 +56,9 @@ Migrate the KoColor Secure Package Distribution Platform from plaintext JSON pay
 ---
 
 ### [Data Models]
+
+#### [MODIFY] [PackManifest.kt](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/features/starterpack/src/main/java/com/zoewave/probase/kocolor/features/starterpack/data/remote/model/PackManifest.kt)
+- Add `uncompressed_size_bytes` field to `PackInfo`.
 
 #### [MODIFY] [Provenance.kt](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/db/src/main/java/com/zoewave/probase/kocolor/db/entity/Provenance.kt)
 - Ensure the `Provenance` object correctly reflects the verification status of the compressed payload.
