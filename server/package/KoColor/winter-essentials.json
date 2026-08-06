@@ -1,6 +1,5 @@
 {
-  "signature": "MEYCIQCS+IDevAItMPaL1gGQYSWqcTIi/i4KMnYW9Z96pcDtPwIhAJQIvZl9UJzjNK6DzLiBhKhEmjwT1JoeBBOoGcAdQR9t",
-  "payload": {
+  "data": {
     "clothing": [
       {
         "brand": "KoColor Studio",
@@ -28,6 +27,7 @@
         "price": 185.0,
         "seasonal_palette": "WINTER",
         "size": "M",
+        "thumbnail_url": "https://cdn.kocolor.com/inventory/assets/silk_drape_blouse_thumb.webp",
         "vibrant_hex": "#C82333"
       }
     ],
@@ -77,9 +77,60 @@
         "shade_name": "Signature Crimson",
         "skin_compatibility": "All Skin Types",
         "temperature": "NEUTRAL",
+        "thumbnail_url": "https://cdn.kocolor.com/inventory/assets/signature_crimson_lipstick_thumb.webp",
         "volume": "3.8g"
+      },
+      {
+        "allergens": [],
+        "batch_code": "KC-2026-B4",
+        "brand": "KoColor",
+        "chemistry_base": "OIL",
+        "color_hex": "#E07A7A",
+        "contains_fragrance": false,
+        "coverage": "MEDIUM",
+        "eco_score": "A",
+        "expiry_date": 1798761600000,
+        "fda_active_ingredients": [],
+        "fda_adverse_event_count": 0,
+        "fda_clinical_warnings": [],
+        "fda_recall_status": "Clear",
+        "fda_top_reactions": [],
+        "finish": "SATIN",
+        "formulation": "CREAM",
+        "hero_ingredient": "Jojoba Seed Oil & Vitamin E",
+        "id": "kc-cosm-004",
+        "image_url": "https://cdn.kocolor.com/inventory/assets/petal_touch_flush_blush.webp",
+        "ingredients": [
+          "Caprylic/Capric Triglyceride",
+          "Simmondsia Chinensis (Jojoba) Seed Oil",
+          "Euphorbia Cerifera (Candelilla) Wax",
+          "Mica",
+          "Red 7 Lake",
+          "Iron Oxides",
+          "Tocopherol"
+        ],
+        "instructions": "Dab onto cheeks using fingertips or a dense blush brush, then diffuse upward toward temples for an elevated lifted look.",
+        "is_cruelty_free": true,
+        "is_fda_checked": true,
+        "is_vegan": true,
+        "macro_category": "Color & Dimension",
+        "micro_category": "BLUSH",
+        "name": "KoColor Petal Touch Flush Blush",
+        "notes": "Nourishing cream blush that melts on contact with skin to produce a dewy, natural-looking flush with buildable pigments.",
+        "pao_months": 18,
+        "price": 36.0,
+        "recycling_instructions": "Compact crafted from 100% PCR aluminum. Place directly in aluminum recycling.",
+        "ritual_placement": "Dimension Application (Step 7)",
+        "shade_name": "Warm Rosewood",
+        "skin_compatibility": "Dry, Normal, Combination",
+        "temperature": "WARM",
+        "thumbnail_url": "https://cdn.kocolor.com/inventory/assets/petal_touch_flush_blush_thumb.webp",
+        "volume": "8g"
       }
     ],
     "version": 1
-  }
+  },
+  "signature": "93745374d94de897d7f2c7202a8c5e71a79f3a6e4416596c48c2b64ce4c9466599f424d1128442dc10ef6fc823b8979bd1fff809f307f1d5511896e4ab3be90b",
+  "package_version": "1.0.0",
+  "schema_version": 2
 }

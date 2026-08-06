@@ -1,6 +1,5 @@
 {
-  "signature": "MEYCIQCZpc8A2uQCap1qZI/c7urj6c6NvIODID7ubbfpebLLVQIhAJpiuEmB6tHU474DyVFByOWBx062VciKUi/k6HswIa9T",
-  "payload": {
+  "data": {
     "clothing": [],
     "cosmetics": [
       {
@@ -50,6 +49,7 @@
         "shade_name": "Clear Crystal",
         "skin_compatibility": "All Skin Types, Sensitive Skin Safe",
         "temperature": "NEUTRAL",
+        "thumbnail_url": "https://cdn.kocolor.com/inventory/assets/purifying_gel_cleanser_thumb.webp",
         "volume": "150ml"
       },
       {
@@ -99,9 +99,13 @@
         "shade_name": "Luminous Glow",
         "skin_compatibility": "Normal, Combination, Dry",
         "temperature": "NEUTRAL",
+        "thumbnail_url": "https://cdn.kocolor.com/inventory/assets/luminescent_c_serum_thumb.webp",
         "volume": "30ml"
       }
     ],
     "version": 1
-  }
+  },
+  "signature": "be1772cab743b8207bce190b9d32ac6ba09cce2ee23a4ce08e81231d9a59c913701bc0ba7119a7b6634f18355cd839512bac4393a94948371c2cb7cf9846090a",
+  "package_version": "1.0.0",
+  "schema_version": 2
 }
