@@ -25,8 +25,6 @@ class PackPreviewViewModel @Inject constructor(
 ) : ViewModel() {
 
     private var packId: String? = null
-    private var sha256: String? = null
-    private var publisher: String? = null
 
     private val _uiState = MutableStateFlow(PackPreviewUiState())
     val uiState: StateFlow<PackPreviewUiState> = _uiState.asStateFlow()
@@ -35,8 +33,6 @@ class PackPreviewViewModel @Inject constructor(
         if (this.packId != null) return // Already initialized
         
         this.packId = packId
-        this.sha256 = sha256
-        this.publisher = publisher
         
         _uiState.update { it.copy(targetItemId = targetItemId) }
         loadPackItems()
@@ -48,7 +44,7 @@ class PackPreviewViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             try {
-                val items = repository.getPackItems(currentPackId, sha256, publisher)
+                val items = repository.getPackItems(currentPackId)
                 _uiState.update { state ->
                     state.copy(
                         items = items, 
