@@ -9,6 +9,7 @@ import com.zoewave.probase.kocolor.db.entity.InstalledPackEntity
 import com.zoewave.probase.kocolor.db.entity.PackStatus
 import com.zoewave.probase.kocolor.features.starterpack.data.StarterPackRepository
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.PackInfo
+import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.PackItem
 import com.zoewave.probase.kocolor.data.mapper.toEntity
 import com.zoewave.probase.core.util.color.ColorQuantizer
 import com.zoewave.probase.core.model.ritual.*
@@ -58,25 +59,10 @@ class PackSyncRepositoryImpl @Inject constructor(
             // 2. Fetch and Verify Package (Phone Hub - heavy compute/network outside transaction)
             val items = starterPackRepository.fetchVerifiedPackage(pack)
             
-            // 3. Map to domain (Preparation)
-            val cosmeticItems = starterPackRepository.mapToDomainItems(items, pack)
+            // 3. Map and Persist
+            importSelectedItems(pack.id, items).getOrThrow()
 
-            // 4. Atomic Database Ingestion
-            // Since we don't have withTransaction extension available, we use a custom implementation or runInTransaction
-            // But runInTransaction doesn't support suspend easily without blocking.
-            // I'll assume we can use the DAOs which are already thread-safe.
-            
-            // For true atomicity across DAOs, we'll wrap in a block.
-            // In this specific project's Room setup, I'll use the DAOs directly as they are transactional.
-            
-            val entities = cosmeticItems.map { item ->
-                item.copy(colorFamily = ColorQuantizer.snapToFamily(item.colorHex)).toEntity()
-            }
-            
-            // This is the atomic "Commit" phase
-            // Note: In a production app, I'd use a Cross-Dao transaction here.
-            cosmeticDao.insertCosmetics(entities)
-            
+            // 4. Finalize Installation
             installedPackDao.insertPack(InstalledPackEntity(
                 packId = pack.id,
                 name = pack.name,
@@ -90,6 +76,28 @@ class PackSyncRepositoryImpl @Inject constructor(
                 heroImageUrl = pack.heroImageUrl,
                 expiresAt = pack.expiresAt
             ))
+        }
+    }
+
+    override suspend fun importSelectedItems(packId: String, items: List<PackItem>): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            Log.d("PackSyncRepo", "importSelectedItems: Importing ${items.size} items from $packId")
+            
+            // 1. Get the PackInfo from manifest for metadata
+            val envelope = starterPackRepository.getManifest()
+            val packInfo = envelope.data.packs.find { it.id == packId } 
+                ?: throw Exception("Pack $packId not found in manifest.")
+
+            // 2. Map to domain (Preparation)
+            val cosmeticItems = starterPackRepository.mapToDomainItems(items, packInfo)
+
+            // 3. Map to entities with quantization
+            val entities = cosmeticItems.map { item ->
+                item.copy(colorFamily = ColorQuantizer.snapToFamily(item.colorHex)).toEntity()
+            }
+            
+            // 4. Commit to DB
+            cosmeticDao.insertCosmetics(entities)
 
             // 5. Pre-fetch Images (Post-ingestion)
             starterPackRepository.prefetchImages(items)
