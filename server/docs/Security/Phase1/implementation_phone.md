@@ -24,6 +24,9 @@ Introduce the `.kpkg` binary package format as the canonical distribution artifa
 ## Architectural Principles
 
 > [!IMPORTANT]
+> **Trust Bootstrap**: Before any package metadata is trusted, the application MUST verify the signature of `manifest.json` using the embedded root public key. Only after successful verification may package metadata (size, hash, signature, algorithms) be used. This completes the chain of trust from the app binary to the CDN artifacts.
+
+> [!IMPORTANT]
 > **Package Format Contract**: The `.kpkg` binary is the canonical distribution artifact. Client applications MUST NOT consume raw vendor JSON or unsigned payloads.
 
 > [!IMPORTANT]
@@ -49,6 +52,23 @@ Introduce the `.kpkg` binary package format as the canonical distribution artifa
 
 Optimize the `.kpkg` ingestion pipeline to protect the heap during large package downloads. This update implements incremental hashing and disk-spooling for the primary Android application.
 
+### [Ingestion Sequence]
+
+The application MUST follow this exact order of operations to maintain the security contract:
+
+1.  **Download Manifest**: Fetch `manifest.json` from the CDN.
+2.  **Verify Manifest**: Validate manifest signature using the embedded root public key.
+3.  **Download Package**: Stream the `.kpkg` binary from the CDN.
+4.  **Verify Hash**: Calculate SHA-256 incrementally while streaming to disk; reject if mismatch.
+5.  **Verify Signature**: Perform Ed25519 authenticity check on the spooled binary.
+6.  **Validate Schema & Format**: Negotiate `package_format_version` and `schema_version`.
+7.  **Decompress**: Invoke Zstd decompression ONLY after all cryptographic proofs pass.
+8.  **Parse**: Deserialize minified JSON into DTO models.
+9.  **Room Transaction**: Open an atomic database transaction.
+10. **Commit**: Persist to local inventory and finalize the installation record.
+
+---
+
 ### [Android Network Layer]
 
 #### [MODIFY] [KocolorApiService.kt](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/features/starterpack/src/main/java/com/zoewave/probase/kocolor/features/starterpack/data/remote/KocolorApiService.kt)
@@ -67,7 +87,7 @@ Optimize the `.kpkg` ingestion pipeline to protect the heap during large package
 ### [Android Repository Layer]
 
 #### [MODIFY] [StarterPackRepository.kt](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/features/starterpack/src/main/java/com/zoewave/probase/kocolor/features/starterpack/data/StarterPackRepository.kt)
-- Update `fetchVerifiedPackage` to use the Okio pipeline:
+- Update `fetchVerifiedPackage` to implement the [Ingestion Sequence](#ingestion-sequence) using the Okio pipeline:
     1.  **Spool to Disk**: Use `HashingSink` to write the network stream to a temporary file while calculating SHA-256.
     2.  **Verify Size & Hash**: Perform early rejection if the spooled file doesn't match manifest metadata.
     3.  **Verify Signature**: Stream the temporary file into the updated `SignatureVerifier`.
@@ -80,6 +100,7 @@ Optimize the `.kpkg` ingestion pipeline to protect the heap during large package
 
 | Failure Point | Action |
 | :--- | :--- |
+| **Manifest Validation** | Reject catalog (Critical trust failure). |
 | **Size Mismatch** | Reject (Truncated download). |
 | **Hash Mismatch** | Reject (Corrupted payload). |
 | **Signature Failure** | Reject (Unauthorized payload). |
