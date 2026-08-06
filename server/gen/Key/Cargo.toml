@@ -1,0 +1,10 @@
+[package]
+name = "keygen"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# We only need the crypto libraries to generate the keys here
+ed25519-dalek = { version = "2.0", features = ["rand_core"] }
+rand = "0.8"
+hex = "0.4"
