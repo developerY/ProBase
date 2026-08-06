@@ -7,9 +7,9 @@ import kotlinx.serialization.Serializable
 data class PackItem(
     val id: String,
     val name: String,
-    val shade: String,
+    @SerialName("shade_name") val shade: String? = null,
     val brand: String,
-    @SerialName("hex_color") val hexColor: String,
+    @SerialName("color_hex") val hexColor: String,
     @SerialName("thumbnail_url") val thumbnailUrl: String,
     @SerialName("image_url") val imageUrl: String,
     
@@ -20,5 +20,20 @@ data class PackItem(
     val coverage: String? = null,
     val temperature: String? = null,
     @SerialName("macro_category") val macroCategory: String? = null,
-    @SerialName("micro_category") val microCategory: String? = null
+    @SerialName("micro_category") val microCategory: String? = null,
+    val notes: String? = null,
+    val instructions: String? = null,
+    @SerialName("pao_months") val paoMonths: Int? = null,
+    @SerialName("expiry_date") val expiryDate: Long? = null,
+    val price: Double? = null,
+    val volume: String? = null,
+    val ingredients: List<String> = emptyList(),
+    val allergens: List<String> = emptyList()
+)
+
+@Serializable
+data class RemoteStarterPackResponse(
+    val version: Int,
+    val cosmetics: List<PackItem>,
+    val clothing: List<PackItem> = emptyList()
 )
