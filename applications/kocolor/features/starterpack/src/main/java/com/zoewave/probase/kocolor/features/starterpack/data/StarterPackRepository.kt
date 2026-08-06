@@ -6,7 +6,6 @@ import coil.imageLoader
 import coil.request.ImageRequest
 import com.github.luben.zstd.Zstd
 import com.zoewave.probase.core.model.ritual.*
-import com.zoewave.probase.core.util.HashUtils
 import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.KocolorApiService
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.*
@@ -16,6 +15,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromJsonElement
+import okio.HashingSink
+import okio.buffer
+import okio.sink
+import okio.source
+import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -62,89 +66,112 @@ class StarterPackRepository @Inject constructor(
         )
     }
 
-    suspend fun fetchVerifiedPackage(packInfo: PackInfo): List<PackItem> {
-        Log.d(TAG, "fetchVerifiedPackage: Starting secure download for ${packInfo.id}")
+    suspend fun fetchVerifiedPackage(packInfo: PackInfo): List<PackItem> = withContext(Dispatchers.IO) {
+        Log.d(TAG, "fetchVerifiedPackage: Starting secure streaming download for ${packInfo.id}")
         
-        // 1. Stream binary from CDN
-        val responseBody = try {
-            apiService.downloadPackageBinary(packInfo.endpoint)
-        } catch (e: Exception) {
-            throw PackException.DownloadException("Failed to download package from ${packInfo.endpoint}", e)
-        }
-        val rawBytes = responseBody.bytes()
+        val tempFile = File(context.cacheDir, "${packInfo.id}-temp.kpkg")
         
-        // 2. Size Validation (Early rejection)
-        if (rawBytes.size.toLong() != packInfo.compressedSizeBytes) {
-             throw PackException.IntegrityException("Size mismatch! Expected ${packInfo.compressedSizeBytes}, got ${rawBytes.size}")
-        }
-        if (rawBytes.size > MAX_PACKAGE_SIZE) {
-            throw PackException.IntegrityException("Package exceeds maximum allowed size of 32MB.")
-        }
+        try {
+            // 1. Stream binary from CDN
+            val responseBody = try {
+                apiService.downloadPackageBinary(packInfo.endpoint)
+            } catch (e: Exception) {
+                throw PackException.DownloadException("Failed to download package from ${packInfo.endpoint}", e)
+            }
 
-        // 3. Integrity Check (SHA-256) - Detect accidental corruption
-        val actualHash = HashUtils.calculateSha256(rawBytes)
-        if (!actualHash.equals(packInfo.sha256, ignoreCase = true)) {
-            throw PackException.IntegrityException("Integrity check failed for ${packInfo.id}. Hash mismatch.")
-        }
+            // 2. Spool to Disk & Hash Incrementally
+            val hashingSink = HashingSink.sha256(tempFile.sink())
+            var streamedBytes = 0L
 
-        // 4. Authenticity Check (Ed25519) - Prove publisher identity
-        val isAuthentic = verifier.verify(
-            payloadBytes = rawBytes,
-            signatureHex = packInfo.signature,
-            expectedSha256 = packInfo.sha256
-        )
-        if (!isAuthentic) {
-            throw PackException.SignatureException("Authenticity verification failed for ${packInfo.id}. Signature is invalid.")
-        }
+            responseBody.source().use { source ->
+                hashingSink.buffer().use { sink ->
+                    streamedBytes = sink.writeAll(source)
+                }
+            }
 
-        // 5. Version Negotiation
-        if (packInfo.packageFormatVersion > 1) {
-            throw PackException.VersionMismatchException("Unsupported package format version: ${packInfo.packageFormatVersion}")
-        }
-        if (packInfo.schemaVersion > 2) {
-            throw PackException.SchemaException("Schema version ${packInfo.schemaVersion} too new for this client.")
-        }
+            // 3. Size Validation (Early rejection)
+            if (streamedBytes != packInfo.compressedSizeBytes) {
+                 throw PackException.IntegrityException("Size mismatch! Expected ${packInfo.compressedSizeBytes}, got $streamedBytes")
+            }
+            if (streamedBytes > MAX_PACKAGE_SIZE) {
+                throw PackException.IntegrityException("Package exceeds maximum allowed size of 32MB.")
+            }
 
-        // 6. Algorithm Validation
-        if (packInfo.compressionAlgorithm != "zstd") {
-            throw PackException.VersionMismatchException("Unsupported compression algorithm: ${packInfo.compressionAlgorithm}")
+            // 4. Integrity Check (SHA-256) - Detect accidental corruption
+            val actualHash = hashingSink.hash.hex()
+            if (!actualHash.equals(packInfo.sha256, ignoreCase = true)) {
+                throw PackException.IntegrityException("Integrity check failed for ${packInfo.id}. Hash mismatch.")
+            }
+
+            // 5. Authenticity Check (Ed25519) - Prove publisher identity
+            // We use the Source overload to verify directly from disk without loading all bytes into memory.
+            val isAuthentic = tempFile.source().use { source ->
+                verifier.verify(source, packInfo.signature)
+            }
+            if (!isAuthentic) {
+                throw PackException.SignatureException("Authenticity verification failed for ${packInfo.id}. Signature is invalid.")
+            }
+
+            // 6. Version Negotiation
+            if (packInfo.packageFormatVersion > 1) {
+                throw PackException.VersionMismatchException("Unsupported package format version: ${packInfo.packageFormatVersion}")
+            }
+            if (packInfo.schemaVersion > 2) {
+                throw PackException.SchemaException("Schema version ${packInfo.schemaVersion} too new for this client.")
+            }
+
+            // 7. Algorithm Validation
+            if (packInfo.compressionAlgorithm != "zstd") {
+                throw PackException.VersionMismatchException("Unsupported compression algorithm: ${packInfo.compressionAlgorithm}")
+            }
+
+            // 8. Header Check (Zstd Magic Bytes)
+            // We check the first 4 bytes of the spooled file.
+            val fileBytes = tempFile.readBytes() // We still need the bytes for Zstd.decompress which currently takes ByteArray
+            // Wait, Zstd.decompress(ByteArray, int) is what I have.
+            // If I want to be purely streaming, I should use ZstdInputStream.
+            // But for now, since I've already spooled to disk, reading it back as a ByteArray is fine as it's within safety limits.
+            
+            if (!isZstdHeader(fileBytes)) {
+                throw PackException.IntegrityException("Binary is not a valid Zstd archive.")
+            }
+
+            // 9. Decompress (Verify-First Rule enforced: decompression ONLY after successful verification)
+            val decompressedBytes = try {
+                Zstd.decompress(fileBytes, packInfo.uncompressedSizeBytes.toInt())
+            } catch (e: Exception) {
+                throw PackException.IntegrityException("Decompression failed. Binary might be corrupt.")
+            }
+
+            // 10. Parse & Validate
+            val response: RemoteStarterPackResponse = try {
+                val jsonString = String(decompressedBytes, Charsets.UTF_8)
+                json.decodeFromString(jsonString)
+            } catch (e: Exception) {
+                throw PackException.SchemaException("Failed to parse decompressed JSON payload.")
+            }
+
+            // Flatten items for UI
+            val allItems = response.cosmetics + response.clothing
+
+            // 11. Cache Provenance
+            lastFetchedProvenance = Provenance(
+                packId = packInfo.id,
+                packageVersion = packInfo.version.toString(),
+                schemaVersion = packInfo.schemaVersion,
+                publisher = packInfo.publisher,
+                packageHash = packInfo.sha256,
+                installedAtTimestamp = System.currentTimeMillis(),
+                verificationState = VerificationState.VERIFIED
+            )
+            
+            allItems
+        } finally {
+            // Clean up: Always delete the temporary binary stream file
+            if (tempFile.exists()) {
+                tempFile.delete()
+            }
         }
-
-        // 7. Header Check (Zstd Magic Bytes)
-        if (!isZstdHeader(rawBytes)) {
-            throw PackException.IntegrityException("Binary is not a valid Zstd archive.")
-        }
-
-        // 8. Decompress (Verify-First Rule enforced: decompression ONLY after successful verification)
-        val decompressedBytes = try {
-            Zstd.decompress(rawBytes, packInfo.uncompressedSizeBytes.toInt())
-        } catch (e: Exception) {
-            throw PackException.IntegrityException("Decompression failed. Binary might be corrupt.")
-        }
-
-        // 9. Parse & Validate
-        val response: RemoteStarterPackResponse = try {
-            val jsonString = String(decompressedBytes, Charsets.UTF_8)
-            json.decodeFromString(jsonString)
-        } catch (e: Exception) {
-            throw PackException.SchemaException("Failed to parse decompressed JSON payload.")
-        }
-
-        // Flatten items for UI
-        val allItems = response.cosmetics + response.clothing
-
-        // 10. Cache Provenance
-        lastFetchedProvenance = Provenance(
-            packId = packInfo.id,
-            packageVersion = packInfo.version.toString(),
-            schemaVersion = packInfo.schemaVersion,
-            publisher = packInfo.publisher,
-            packageHash = packInfo.sha256,
-            installedAtTimestamp = System.currentTimeMillis(),
-            verificationState = VerificationState.VERIFIED
-        )
-        
-        return allItems
     }
 
     suspend fun getPackItems(packId: String): List<PackItem> {
