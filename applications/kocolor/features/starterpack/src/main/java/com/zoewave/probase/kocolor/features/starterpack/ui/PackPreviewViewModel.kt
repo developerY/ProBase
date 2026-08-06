@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.kocolor.features.starterpack.data.StarterPackRepository
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.PackItem
+import com.zoewave.probase.kocolor.features.starterpack.data.repository.PackSyncRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,7 +22,8 @@ data class PackPreviewUiState(
 
 @HiltViewModel
 class PackPreviewViewModel @Inject constructor(
-    private val repository: StarterPackRepository
+    private val repository: StarterPackRepository,
+    private val syncRepository: PackSyncRepository
 ) : ViewModel() {
 
     private var packId: String? = null
@@ -80,11 +82,12 @@ class PackPreviewViewModel @Inject constructor(
     }
 
     fun onImportSelected() {
+        val currentPackId = packId ?: return
         viewModelScope.launch {
             val selectedItems = _uiState.value.items.filter { it.id in _uiState.value.selectedIds }
             if (selectedItems.isNotEmpty()) {
                 _uiState.update { it.copy(isLoading = true) }
-                repository.importItems(selectedItems)
+                syncRepository.importSelectedItems(currentPackId, selectedItems)
                 _uiState.update { it.copy(isLoading = false) }
             }
         }
