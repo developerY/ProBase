@@ -57,6 +57,7 @@ fun CosmeticItemEntity.toModel(): CosmeticItem = CosmeticItem(
             packageVersion = it.packageVersion,
             schemaVersion = it.schemaVersion,
             publisher = it.publisher,
+            packageHash = it.packageHash,
             installedAtTimestamp = it.installedAtTimestamp,
             verificationState = it.verificationState
         )
@@ -125,6 +126,7 @@ fun CosmeticItem.toEntity(): CosmeticItemEntity = CosmeticItemEntity(
             packageVersion = it.packageVersion,
             schemaVersion = it.schemaVersion,
             publisher = it.publisher,
+            packageHash = it.packageHash,
             installedAtTimestamp = it.installedAtTimestamp,
             verificationState = it.verificationState
         )

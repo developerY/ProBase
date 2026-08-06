@@ -35,6 +35,7 @@ fun ClothingItemEntity.toModel(): ClothingItem = ClothingItem(
             packageVersion = it.packageVersion,
             schemaVersion = it.schemaVersion,
             publisher = it.publisher,
+            packageHash = it.packageHash,
             installedAtTimestamp = it.installedAtTimestamp,
             verificationState = it.verificationState
         )
@@ -74,6 +75,7 @@ fun ClothingItem.toEntity(): ClothingItemEntity = ClothingItemEntity(
             packageVersion = it.packageVersion,
             schemaVersion = it.schemaVersion,
             publisher = it.publisher,
+            packageHash = it.packageHash,
             installedAtTimestamp = it.installedAtTimestamp,
             verificationState = it.verificationState
         )
