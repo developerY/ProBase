@@ -1,16 +1,21 @@
 # Implementation Plan - Phase 1: The Static-First Compression Pipeline
 
-Migrate the KoColor Secure Package Distribution Platform from plaintext JSON payloads to compressed, signed binary packages (`.kpkg`) using Zstandard (zstd) and Ed25519 signatures. This phase focuses on bandwidth optimization and zero-trust security without requiring dynamic infrastructure.
+Migrate the KoColor Secure Package Distribution Platform from plaintext JSON payloads to compressed, signed binary packages (`.kpkg`) using Zstandard (zstd) and Ed25519 signatures. This phase focuses on bandwidth optimization and zero-trust security.
+
+> **Package Format Contract**: The `.kpkg` binary is the canonical distribution artifact. Client applications never consume raw vendor JSON or unsigned payloads.
 
 ## Architectural Principle
 
 > [!IMPORTANT]
-> **Verify-First Rule**: All binary payloads must be cryptographically verified (SHA-256 integrity + Ed25519 authenticity) before decompression. This protects against "zip bomb" attacks and ensures that the client only processes trusted, uncorrupted data.
+> **Verify-First Rule**: All binary payloads must be cryptographically verified before decompression. This protects against "zip bomb" attacks and ensures that the client only processes trusted data.
+>
+> *   **SHA-256**: Used for fast integrity checks, identification, CDN deduplication, and quick corruption detection.
+> *   **Ed25519**: Used for authenticity and tamper resistance.
 
 ## User Review Required
 
 > [!CAUTION]
-> This change introduces a breaking update to the package format. The Rust compiler must be executed to generate the new `.kpkg` files before the updated Android client can successfully ingest data.
+> **All package assets must be regenerated using the updated Rust Normalization Compiler before deployment. Legacy JSON payloads are not compatible with the new binary package format.**
 
 ## Proposed Changes
 
@@ -21,15 +26,16 @@ Migrate the KoColor Secure Package Distribution Platform from plaintext JSON pay
 
 #### [MODIFY] [generate_payload.rs](file:///Users/developer/AndroidStudioProjects/ProBase/server/package/KoColor/src/bin/generate_payload.rs)
 - Update `save_signed_payload` to implement the new binary transformation pipeline:
-    1. **Serialize**: Minified JSON serialization (`serde_json::to_vec`).
-    2. **Compress**: Zstd compression (level 3).
-    3. **Hash**: Calculate SHA-256 strictly on the **compressed bytes**.
-    4. **Sign**: Generate Ed25519 signature strictly on the **compressed bytes**.
-    5. **Output**: Save as `[id].kpkg`.
+    1.  **Serialize**: Minified JSON serialization (`serde_json::to_vec`).
+    2.  **Compress**: Zstd compression (level 3).
+    3.  **Hash**: Calculate SHA-256 strictly on the **compressed bytes**.
+    4.  **Sign**: Generate Ed25519 signature strictly on the **compressed bytes**.
+    5.  **Output**: Save as `[id]-[hash].kpkg` for immutable CDN caching.
 - Update manifest generation:
-    - Point to `.kpkg` endpoints.
+    - Point to `.kpkg` endpoints (using immutable hashed filenames).
     - Include the hashes/signatures of the compressed binaries.
-    - **Optimization**: Include `uncompressed_size_bytes` for each pack to facilitate safe memory allocation on memory-constrained devices (e.g., Pixel Watch).
+    - **Optimization**: Include `uncompressed_size_bytes` and `compressed_size_bytes` for each pack to facilitate safe memory allocation and download progress UI.
+    - **Future-proofing**: Include `compression_type` (e.g., `"zstd-v1"`).
 
 ---
 
@@ -39,39 +45,50 @@ Migrate the KoColor Secure Package Distribution Platform from plaintext JSON pay
 - Add `implementation("com.github.luben:zstd-jni:1.5.5-4")` for high-performance native decompression.
 
 #### [MODIFY] [KocolorApiService.kt](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/features/starterpack/src/main/java/com/zoewave/probase/kocolor/features/starterpack/data/remote/KocolorApiService.kt)
-- Add `downloadPackageBinary(packId: String): ResponseBody` to fetch raw binary data.
+- Add `downloadPackageBinary(url: String): ResponseBody` to fetch raw binary data using the full URL from the manifest.
 
 #### [MODIFY] [StarterPackRepository.kt](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/features/starterpack/src/main/java/com/zoewave/probase/kocolor/features/starterpack/data/StarterPackRepository.kt)
-- Update `getPackItems` to implement the verified decompression pipeline:
-    1. **Fetch**: Download raw binary bytes (`.kpkg`).
-    2. **Integrity**: Verify SHA-256 hash against the manifest.
-    3. **Authenticity**: Verify Ed25519 signature via `SignatureVerifier`.
-    4. **Decompress**: Invoke `Zstd.decompress()` ONLY if the above steps pass.
-        - **Memory Safety**: Use `uncompressed_size_bytes` from the manifest to allocate the exact buffer size required, preventing `OutOfMemory` errors on wearables.
-    5. **Ingest**: Parse the decompressed JSON and persist to Room in an atomic transaction.
-
-#### [MODIFY] [PackSyncRepositoryImpl.kt](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/features/starterpack/src/main/java/com/zoewave/probase/kocolor/features/starterpack/data/repository/PackSyncRepositoryImpl.kt)
-- Align the legacy ingestion logic with the new binary verification pipeline.
+- Rename `getPackItems` to `fetchVerifiedPackage`.
+- Implement the refined verification sequence:
+    1.  **Download**: Stream binary bytes (`.kpkg`).
+    2.  **Verify Manifest**: Ensure the manifest itself is signed and verified.
+    3.  **Verify Package Hash**: Check SHA-256 against the manifest entry.
+    4.  **Verify Signature**: Check Ed25519 authenticity.
+    5.  **Verify Compression Header**: Perform basic sanity check on Zstd magic bytes before invoking JNI.
+    6.  **Decompress**: Invoke `Zstd.decompress()` ONLY if all checks pass.
+        - **Memory Safety**: Use `uncompressed_size_bytes` from the manifest to allocate the exact buffer size required.
+    7.  **Ingest**: Parse the decompressed JSON and persist to Room in an atomic transaction.
 
 ---
 
 ### [Data Models]
 
 #### [MODIFY] [PackManifest.kt](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/features/starterpack/src/main/java/com/zoewave/probase/kocolor/features/starterpack/data/remote/model/PackManifest.kt)
-- Add `uncompressed_size_bytes` field to `PackInfo`.
+- Add `uncompressed_size_bytes`, `compressed_size_bytes`, and `compression_type` fields to `PackInfo`.
 
 #### [MODIFY] [Provenance.kt](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/db/src/main/java/com/zoewave/probase/kocolor/db/entity/Provenance.kt)
-- Ensure the `Provenance` object correctly reflects the verification status of the compressed payload.
+- Add `contentHash` to track the exact immutable binary identity of the source package.
+
+---
+
+## Failure Handling
+
+| Failure Point | Action |
+| :--- | :--- |
+| **Hash Mismatch** | Reject package immediately. |
+| **Signature Failure** | Reject package immediately. |
+| **Schema Mismatch** | Reject package (unsupported client). |
+| **Decompression Failure** | Reject package (corrupt or malicious). |
+| **Transaction Failure** | Rollback database changes. |
 
 ## Verification Plan
 
 ### Automated Tests
-- **Decompression Unit Tests**: Verify that `Zstd.decompress` correctly restores minified JSON on Android.
-- **Security Rejection Tests**: Confirm that the client throws `PackException.SignatureException` or `PackException.ManifestException` if the binary hash or signature is tampered with, and that decompression is *never* called in these cases.
+- **Decompression Unit Tests**: Verify `Zstd.decompress` restores minified JSON correctly.
+- **Security Rejection Tests**: Verify rejection of tampered hashes, signatures, and malformed headers.
 
 ### Manual Verification
-1. **Run Compiler**: Execute the Rust script and confirm `.kpkg` files are generated.
-2. **Deploy**: Update the local/remote CDN with the new binaries and manifest.
-3. **Android Sync**: Navigate to the Sync Hub in the app and verify search and preview still function.
-4. **Import**: Confirm that importing a pack works end-to-end and data appears in the local inventory.
-5. **Logcat Audit**: Monitor logs to ensure the verification sequence follows the **Integrity -> Authenticity -> Decompression** order.
+1.  **Run Compiler**: Confirm generation of `[id]-[hash].kpkg` and updated `manifest.json`.
+2.  **Deploy**: Update CDN and verify Cloudflare cache performance for hashed filenames.
+3.  **Import**: Confirm end-to-end import on a memory-constrained device (wearable).
+4.  **Audit**: Verify provenance `contentHash` in the Room database matches the manifest.
