@@ -4,6 +4,8 @@ Introduce the `.kpkg` binary package format as the canonical distribution artifa
 
 > **Package Format Contract**: The `.kpkg` binary is the canonical distribution artifact. Client applications never consume raw vendor JSON or unsigned payloads.
 
+> **Canonical Signing Rule**: The compressed `.kpkg` byte stream is the canonical artifact. All hashes and digital signatures are computed over the compressed bytes exactly as distributed.
+
 ## Architectural Principle
 
 > [!IMPORTANT]
@@ -32,11 +34,14 @@ Introduce the `.kpkg` binary package format as the canonical distribution artifa
     - Point to `.kpkg` endpoints (using immutable hashed filenames).
     - Include the hashes/signatures of the compressed binaries.
     - **Metadata Expansion**:
+        - `manifest_version`: Initialized to `1`.
         - `compressed_size_bytes`: Size of the `.kpkg` file.
         - `uncompressed_size_bytes`: Original size for deterministic memory allocation.
         - `compression_algorithm`: Default to `"zstd"`.
+        - `hash_algorithm`: Default to `"sha256"`.
+        - `signature_algorithm`: Default to `"ed25519"`.
         - `package_format_version`: Incremented to `1`.
-        - `encryption`: Reserved field, set to `"none"` for Phase 1.
+        - `encryption`: Reserved field, set to `"none"`.
 
 ---
 
@@ -52,12 +57,12 @@ Introduce the `.kpkg` binary package format as the canonical distribution artifa
 - Update `fetchVerifiedPackage` to implement the refined verification and safety sequence:
     1.  **Download**: Stream binary bytes.
     2.  **Size Validation**: Check `downloaded_bytes == compressed_size_bytes` immediately.
-    3.  **Integrity Check**: Verify SHA-256 hash of the binary.
-    4.  **Authenticity Check**: Verify Ed25519 signature of the binary.
+    3.  **Integrity Check**: Verify hash using `hash_algorithm`.
+    4.  **Authenticity Check**: Verify signature using `signature_algorithm`.
     5.  **Algorithm Validation**: Verify `compression_algorithm` is supported.
     6.  **Header Check**: Basic Zstd magic byte validation.
     7.  **Decompress**: Invoke `Zstd.decompress()` using `uncompressed_size_bytes` for exact buffer allocation.
-    8.  **Parse & Validate**: Parse JSON into DTOs and perform structural validation.
+    8.  **Parse & Validate**: Parse JSON into DTOs and perform structural validation against `schema_version`.
     9.  **Map & Persist**: Map to domain models and commit via Room `@Transaction`.
 
 ---
@@ -65,10 +70,7 @@ Introduce the `.kpkg` binary package format as the canonical distribution artifa
 ### [Data Models]
 
 #### [MODIFY] [PackManifest.kt](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/features/starterpack/src/main/java/com/zoewave/probase/kocolor/features/starterpack/data/remote/model/PackManifest.kt)
-- Reflect new fields: `uncompressed_size_bytes`, `compressed_size_bytes`, `compression_algorithm`, `package_format_version`, `encryption`.
-
-#### [MODIFY] [Provenance.kt](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/db/src/main/java/com/zoewave/probase/kocolor/db/entity/Provenance.kt)
-- Rename `contentHash` to `packageHash` to clarify it refers to the immutable distributed artifact.
+- Reflect new fields: `manifest_version`, `uncompressed_size_bytes`, `compressed_size_bytes`, `compression_algorithm`, `hash_algorithm`, `signature_algorithm`, `package_format_version`, `encryption`.
 
 ---
 
