@@ -7,6 +7,7 @@ data class Provenance(
     val packageVersion: String,
     val schemaVersion: Int,
     val publisher: String,
+    val packageHash: String,
     val installedAtTimestamp: Long,
     val verificationState: VerificationState
 )
