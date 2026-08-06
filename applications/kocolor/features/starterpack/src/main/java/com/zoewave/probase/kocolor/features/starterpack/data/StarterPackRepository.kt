@@ -6,7 +6,6 @@ import coil.imageLoader
 import coil.request.ImageRequest
 import com.github.luben.zstd.Zstd
 import com.zoewave.probase.core.model.ritual.*
-import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.KocolorApiService
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.*
 import com.zoewave.probase.kocolor.features.starterpack.domain.security.SignatureVerifier
@@ -14,6 +13,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.decodeFromJsonElement
 import okio.HashingSink
 import okio.buffer
@@ -26,15 +26,11 @@ import javax.inject.Singleton
 @Singleton
 class StarterPackRepository @Inject constructor(
     private val apiService: KocolorApiService,
-    private val cosmeticRepository: CosmeticInventoryRepository,
     private val verifier: SignatureVerifier,
     private val json: Json,
     @ApplicationContext private val context: Context
 ) {
     private var searchIndexCache: List<SearchIndexEntry>? = null
-    
-    // Caches provenance info from the last fetched pack to attach during import
-    private var lastFetchedProvenance: Provenance? = null
 
     private companion object {
         const val TAG = "StarterPackRepo"
@@ -49,12 +45,19 @@ class StarterPackRepository @Inject constructor(
     }
 
     suspend fun getManifest(): SignedPayloadEnvelope<PackManifest> {
-        val envelope = apiService.getManifest()
-        val rawDataBytes = envelope.data.toString().toByteArray(Charsets.UTF_8)
+        val responseBody = apiService.getManifestRaw()
+        val rawJson = responseBody.string()
+        
+        // 1. Parse the envelope structure once to get signature and metadata
+        val envelope: SignedPayloadEnvelope<JsonElement> = json.decodeFromString(rawJson)
+        
+        // 2. Trust Bootstrap: Extract the EXACT "data" string from the raw JSON
+        val dataPart = extractDataProperty(rawJson)
+        val rawDataBytes = dataPart.toByteArray(Charsets.UTF_8)
         
         // Root of Trust Verification
         if (!verifier.verify(rawDataBytes, envelope.signature, "")) {
-            throw PackException.SignatureException("Manifest signature verification failed!")
+            throw PackException.SignatureException("Trust Bootstrap Failed: Manifest signature is invalid!")
         }
         
         val manifest: PackManifest = json.decodeFromJsonElement(envelope.data)
@@ -104,7 +107,6 @@ class StarterPackRepository @Inject constructor(
             }
 
             // 5. Authenticity Check (Ed25519) - Prove publisher identity
-            // We use the Source overload to verify directly from disk without loading all bytes into memory.
             val isAuthentic = tempFile.source().use { source ->
                 verifier.verify(source, packInfo.signature)
             }
@@ -126,12 +128,7 @@ class StarterPackRepository @Inject constructor(
             }
 
             // 8. Header Check (Zstd Magic Bytes)
-            // We check the first 4 bytes of the spooled file.
-            val fileBytes = tempFile.readBytes() // We still need the bytes for Zstd.decompress which currently takes ByteArray
-            // Wait, Zstd.decompress(ByteArray, int) is what I have.
-            // If I want to be purely streaming, I should use ZstdInputStream.
-            // But for now, since I've already spooled to disk, reading it back as a ByteArray is fine as it's within safety limits.
-            
+            val fileBytes = tempFile.readBytes() 
             if (!isZstdHeader(fileBytes)) {
                 throw PackException.IntegrityException("Binary is not a valid Zstd archive.")
             }
@@ -152,20 +149,7 @@ class StarterPackRepository @Inject constructor(
             }
 
             // Flatten items for UI
-            val allItems = response.cosmetics + response.clothing
-
-            // 11. Cache Provenance
-            lastFetchedProvenance = Provenance(
-                packId = packInfo.id,
-                packageVersion = packInfo.version.toString(),
-                schemaVersion = packInfo.schemaVersion,
-                publisher = packInfo.publisher,
-                packageHash = packInfo.sha256,
-                installedAtTimestamp = System.currentTimeMillis(),
-                verificationState = VerificationState.VERIFIED
-            )
-            
-            allItems
+            response.cosmetics + response.clothing
         } finally {
             // Clean up: Always delete the temporary binary stream file
             if (tempFile.exists()) {
@@ -188,50 +172,102 @@ class StarterPackRepository @Inject constructor(
                bytes[2] == ZSTD_MAGIC[2] && bytes[3] == ZSTD_MAGIC[3]
     }
 
-    suspend fun importItems(items: List<PackItem>) {
-        withContext(Dispatchers.IO) {
-            val provenance = lastFetchedProvenance
-            
-            val cosmeticItems = items.map { packItem ->
-                CosmeticItem(
-                    name = packItem.name,
-                    brand = packItem.brand,
-                    macroCategory = packItem.macroCategory?.let { macro ->
-                        MacroCategory.entries.find { it.displayName == macro }
-                    } ?: MacroCategory.COMPLEXION,
-                    microCategory = packItem.microCategory?.let { micro ->
-                        try { MicroCategory.valueOf(micro.uppercase()) } catch (e: Exception) { null }
-                    } ?: MicroCategory.FOUNDATION,
-                    formulation = packItem.formulation?.let { 
-                        try { Formulation.valueOf(it.uppercase()) } catch (e: Exception) { null }
-                    } ?: Formulation.UNKNOWN,
-                    finish = packItem.finish?.let { 
-                        try { Finish.valueOf(it.uppercase()) } catch (e: Exception) { null }
-                    } ?: Finish.UNKNOWN,
-                    temperature = packItem.temperature?.let { 
-                        try { Temperature.valueOf(it.uppercase()) } catch (e: Exception) { null }
-                    } ?: Temperature.UNKNOWN,
-                    chemistryBase = packItem.chemistryBase?.let { 
-                        try { ChemistryBase.valueOf(it.uppercase()) } catch (e: Exception) { null }
-                    } ?: ChemistryBase.UNKNOWN,
-                    coverage = packItem.coverage?.let { 
-                        try { Coverage.valueOf(it.uppercase()) } catch (e: Exception) { null }
-                    } ?: Coverage.NOT_APPLICABLE,
-                    colorHex = packItem.hexColor,
-                    shadeName = packItem.shade,
-                    imageUrl = packItem.imageUrl,
-                    provenance = provenance
-                )
+    /**
+     * Extracts the raw JSON string for the "data" property from a SignedPayloadEnvelope.
+     */
+    private fun extractDataProperty(rawJson: String): String {
+        val dataKey = "\"data\":"
+        val startIdx = rawJson.indexOf(dataKey)
+        if (startIdx == -1) throw PackException.ManifestException("Manifest missing 'data' field.")
+        
+        val valueStart = startIdx + dataKey.length
+        
+        var actualStart = -1
+        for (i in valueStart until rawJson.length) {
+            if (rawJson[i] == '{' || rawJson[i] == '[') {
+                actualStart = i
+                break
             }
-            
-            cosmeticRepository.saveCosmeticItems(cosmeticItems)
+        }
+        if (actualStart == -1) throw PackException.ManifestException("Manifest 'data' field has invalid format.")
+        
+        var braceCount = 0
+        var inQuote = false
+        var escaped = false
+        
+        for (i in actualStart until rawJson.length) {
+            val char = rawJson[i]
+            if (escaped) { escaped = false; continue }
+            if (char == '\\') { escaped = true } 
+            else if (char == '"') { inQuote = !inQuote } 
+            else if (!inQuote) {
+                if (char == '{' || char == '[') braceCount++
+                else if (char == '}' || char == ']') {
+                    braceCount--
+                    if (braceCount == 0) return rawJson.substring(actualStart, i + 1)
+                }
+            }
+        }
+        throw PackException.ManifestException("Malformed JSON: Unbalanced braces in 'data' field.")
+    }
 
-            items.forEach { item ->
-                val request = ImageRequest.Builder(context)
-                    .data(item.imageUrl)
-                    .build()
-                context.imageLoader.enqueue(request)
-            }
+    /**
+     * Map pack items to domain models with appropriate provenance.
+     */
+    fun mapToDomainItems(items: List<PackItem>, packInfo: PackInfo): List<CosmeticItem> {
+        val provenance = Provenance(
+            packId = packInfo.id,
+            packageVersion = packInfo.version.toString(),
+            schemaVersion = packInfo.schemaVersion,
+            publisher = packInfo.publisher,
+            packageHash = packInfo.sha256,
+            installedAtTimestamp = System.currentTimeMillis(),
+            verificationState = VerificationState.VERIFIED
+        )
+
+        val sourceType = try { InventorySource.valueOf(packInfo.packType) } catch (e: Exception) { InventorySource.UNKNOWN }
+
+        return items.map { packItem ->
+            CosmeticItem(
+                name = packItem.name,
+                brand = packItem.brand,
+                macroCategory = packItem.macroCategory?.let { macro ->
+                    MacroCategory.entries.find { it.displayName == macro }
+                } ?: MacroCategory.COMPLEXION,
+                microCategory = packItem.microCategory?.let { micro ->
+                    try { MicroCategory.valueOf(micro.uppercase()) } catch (e: Exception) { null }
+                } ?: MicroCategory.FOUNDATION,
+                formulation = packItem.formulation?.let { 
+                    try { Formulation.valueOf(it.uppercase()) } catch (e: Exception) { null }
+                } ?: Formulation.UNKNOWN,
+                finish = packItem.finish?.let { 
+                    try { Finish.valueOf(it.uppercase()) } catch (e: Exception) { null }
+                } ?: Finish.UNKNOWN,
+                temperature = packItem.temperature?.let { 
+                    try { Temperature.valueOf(it.uppercase()) } catch (e: Exception) { null }
+                } ?: Temperature.UNKNOWN,
+                chemistryBase = packItem.chemistryBase?.let { 
+                    try { ChemistryBase.valueOf(it.uppercase()) } catch (e: Exception) { null }
+                } ?: ChemistryBase.UNKNOWN,
+                coverage = packItem.coverage?.let { 
+                    try { Coverage.valueOf(it.uppercase()) } catch (e: Exception) { null }
+                } ?: Coverage.NOT_APPLICABLE,
+                colorHex = packItem.hexColor,
+                shadeName = packItem.shade,
+                imageUrl = packItem.imageUrl,
+                sourceType = sourceType,
+                sourceName = packInfo.name,
+                provenance = provenance
+            )
+        }
+    }
+
+    fun prefetchImages(items: List<PackItem>) {
+        items.forEach { item ->
+            val request = ImageRequest.Builder(context)
+                .data(item.imageUrl)
+                .build()
+            context.imageLoader.enqueue(request)
         }
     }
 }

@@ -11,6 +11,9 @@ import retrofit2.http.Url
 
 interface KocolorApiService {
     @GET("manifest.json")
+    suspend fun getManifestRaw(): ResponseBody
+
+    @GET("manifest.json")
     suspend fun getManifest(): SignedPayloadEnvelope<JsonElement>
 
     @GET("{endpoint}")
