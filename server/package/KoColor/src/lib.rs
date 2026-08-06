@@ -4,8 +4,10 @@ pub mod inventory;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SignedPayloadEnvelope {
+    pub data: serde_json::Value,
     pub signature: String,
-    pub payload: serde_json::Value,
+    pub package_version: String,
+    pub schema_version: i32,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -24,6 +26,7 @@ pub struct PackManifest {
 pub struct PackInfo {
     pub id: String,
     pub name: String,
+    pub publisher: String,
     pub description: String,
     pub version: u32,
     #[serde(rename = "type")]
@@ -31,9 +34,17 @@ pub struct PackInfo {
     pub endpoint: String,
     pub item_count: u32,
     pub size_bytes: Option<u64>,
-    pub hash: Option<String>,
+    pub sha256: Option<String>,
     pub hero_image_url: Option<String>,
     pub expires_at: Option<u64>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct SearchIndexEntry {
+    pub id: String,
+    pub term: String,
+    pub brand: String,
+    pub pack_id: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -55,6 +66,7 @@ pub struct CosmeticItem {
     pub color_hex: String,
     pub shade_name: Option<String>,
     pub image_url: String,
+    pub thumbnail_url: String,
     pub notes: Option<String>,
     pub instructions: Option<String>,
 
@@ -103,6 +115,7 @@ pub struct ClothingItem {
     pub material: Option<String>,
     pub price: Option<f64>,
     pub image_url: String,
+    pub thumbnail_url: String,
     pub notes: Option<String>,
 
     // Wardrobe Color Engine Metadata

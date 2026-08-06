@@ -1,5 +1,6 @@
 package com.zoewave.probase.kocolor.features.starterpack.domain.security
 
+import com.zoewave.probase.kocolor.features.starterpack.data.SecurityConstants
 import com.zoewave.probase.core.util.HashUtils
 import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters
 import org.bouncycastle.crypto.signers.Ed25519Signer
@@ -19,7 +20,8 @@ interface SignatureVerifier {
 class KoColorEd25519Verifier @Inject constructor() : SignatureVerifier {
 
     // Hardcoded compiler public key for Zero-Trust verification
-    private val publicKeyHex = "97db82ffb678bf9939fd666795abd619cf0f4fe6c5f9b17a104f04df07a87e3c" 
+    // This is standard practice for root public keys
+    private val publicKeyHex = SecurityConstants.KOCOLOR_ROOT_PUBLIC_KEY 
 
     private val publicKeyParams by lazy {
         Ed25519PublicKeyParameters(publicKeyHex.decodeHex(), 0)

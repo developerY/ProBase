@@ -12,10 +12,6 @@ android {
     buildFeatures {
         buildConfig = true
     }
-
-    defaultConfig {
-        buildConfigField("String", "CDN_PUBLIC_KEY", "\"MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAER9uC/7Z4v8vQv5mZ5Gq1uGZfD8pX5sXoQ8E3B6h8j4g9w==\"")
-    }
 }
 
 dependencies {
