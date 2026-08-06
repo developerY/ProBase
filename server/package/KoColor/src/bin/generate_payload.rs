@@ -4,9 +4,10 @@ use std::fs::File;
 use std::io::Write;
 use ed25519_dalek::{SigningKey, Signer};
 use sha2::{Digest, Sha256};
+use chrono::Utc;
 
 fn main() {
-    // Ed25519 Private Key - Read from environment variable
+    // Ed25519 Private Key - Read from environment variable for security
     let sk_hex = std::env::var("CDN_PRIVATE_KEY_HEX")
         .expect("ERROR: CDN_PRIVATE_KEY_HEX environment variable not set. Please set your Ed25519 private key hex.");
 
@@ -17,6 +18,9 @@ fn main() {
     let full_clothing = InventoryRegistry::all_clothing();
 
     let mut search_index: Vec<SearchIndexEntry> = Vec::new();
+    let compiler_version = "kocolor-compiler 1.5.0".to_string();
+    let generated_at = Utc::now().to_rfc3339();
+    let key_id = "kocolor-root-v1".to_string();
 
     // 1. Generate Full Starter Pack
     let starter_pack = StarterPackResponse {
@@ -24,7 +28,16 @@ fn main() {
         cosmetics: full_cosmetics.clone(),
         clothing: full_clothing.clone(),
     };
-    let starter_sha256 = save_signed_payload("starter-pack.json", &starter_pack, &signing_key, "1.0.0");
+    let starter_info = compile_and_sign_pack(
+        "com.kocolor.pack.core",
+        "Core Collection",
+        "The foundational high-fidelity product library for all users.",
+        "KoColor Official",
+        "STARTER_PACK",
+        &starter_pack,
+        &signing_key,
+        "1.0.0"
+    );
     index_items(&mut search_index, &full_cosmetics, &full_clothing, "com.kocolor.pack.core");
 
     // 2. Generate Seasonal Winter Pack
@@ -37,7 +50,16 @@ fn main() {
         cosmetics: winter_cosm.clone(),
         clothing: winter_cloth.clone(),
     };
-    let winter_sha256 = save_signed_payload("winter-essentials.json", &winter_pack, &signing_key, "1.0.0");
+    let winter_info = compile_and_sign_pack(
+        "com.kocolor.pack.winter2026",
+        "Winter 2026 Trend Kit",
+        "Curated seasonal picks for Winter color profiles.",
+        "KoColor Official",
+        "SAMPLE_PACK",
+        &winter_pack,
+        &signing_key,
+        "1.0.0"
+    );
     index_items(&mut search_index, &winter_cosm, &winter_cloth, "com.kocolor.pack.winter2026");
 
     // 3. Generate Spring Prep Kit
@@ -50,7 +72,16 @@ fn main() {
         cosmetics: spring_cosm.clone(),
         clothing: vec![],
     };
-    let spring_sha256 = save_signed_payload("spring-prep.json", &spring_pack, &signing_key, "1.0.0");
+    let spring_info = compile_and_sign_pack(
+        "com.kocolor.pack.spring2026",
+        "Spring Skin Prep",
+        "Revitalizing routine for the new season.",
+        "KoColor Official",
+        "SAMPLE_PACK",
+        &spring_pack,
+        &signing_key,
+        "1.0.0"
+    );
     index_items(&mut search_index, &spring_cosm, &vec![], "com.kocolor.pack.spring2026");
 
     // 4. Save Search Index
@@ -60,88 +91,107 @@ fn main() {
 
     // 5. Generate the Manifest
     let manifest = PackManifest {
-        packs: vec![
-            PackInfo {
-                id: "com.kocolor.pack.core".to_string(),
-                name: "Core Collection".to_string(),
-                publisher: "KoColor Official".to_string(),
-                description: "The foundational high-fidelity product library for all users.".to_string(),
-                version: 1,
-                pack_type: "STARTER_PACK".to_string(),
-                endpoint: "starter-pack.json".to_string(),
-                item_count: (full_cosmetics.len() + full_clothing.len()) as u32,
-                size_bytes: Some(1200000),
-                sha256: Some(starter_sha256),
-                hero_image_url: None,
-                expires_at: None,
-            },
-            PackInfo {
-                id: "com.kocolor.pack.winter2026".to_string(),
-                name: "Winter 2026 Trend Kit".to_string(),
-                publisher: "KoColor Official".to_string(),
-                description: "Curated seasonal picks for Winter color profiles.".to_string(),
-                version: 1,
-                pack_type: "SAMPLE_PACK".to_string(),
-                endpoint: "winter-essentials.json".to_string(),
-                item_count: (winter_cosm.len() + winter_cloth.len()) as u32,
-                size_bytes: Some(450000),
-                sha256: Some(winter_sha256),
-                hero_image_url: None,
-                expires_at: None,
-            },
-            PackInfo {
-                id: "com.kocolor.pack.spring2026".to_string(),
-                name: "Spring Skin Prep".to_string(),
-                publisher: "KoColor Official".to_string(),
-                description: "Revitalizing routine for the new season.".to_string(),
-                version: 1,
-                pack_type: "SAMPLE_PACK".to_string(),
-                endpoint: "spring-prep.json".to_string(),
-                item_count: spring_cosm.len() as u32,
-                size_bytes: Some(320000),
-                sha256: Some(spring_sha256),
-                hero_image_url: None,
-                expires_at: Some(1748736000000),
-            },
-        ],
+        manifest_version: 1,
+        generated_at,
+        compiler_version,
+        key_id,
+        packs: vec![starter_info, winter_info, spring_info],
     };
 
-    save_signed_payload("manifest.json", &manifest, &signing_key, "1.0.0");
+    save_signed_manifest("manifest.json", &manifest, &signing_key, "1.0.0");
 
-    println!("✅ Generated and SIGNED: starter-pack.json, winter-essentials.json, spring-prep.json, and manifest.json");
+    println!("✅ Generated and SIGNED all binary .kpkg packages and manifest.json");
     println!("✅ Generated discovery index: search_index.json");
 }
 
-fn save_signed_payload<T: serde::Serialize>(
-    filename: &str,
+fn compile_and_sign_pack<T: serde::Serialize>(
+    id: &str,
+    name: &str,
+    description: &str,
+    publisher: &str,
+    pack_type: &str,
     payload: &T,
     signing_key: &SigningKey,
     package_version: &str
-) -> String {
-    let payload_json = serde_json::to_value(payload).expect("Failed to serialize to value");
-    let payload_string = serde_json::to_string(&payload_json).expect("Failed to serialize to string");
+) -> PackInfo {
+    // 1. Deterministic Minified JSON Serialization
+    let json_bytes = serde_json::to_vec(payload).expect("Failed to serialize to JSON");
+    let uncompressed_size = json_bytes.len() as u64;
 
-    // 1. Calculate SHA-256 for the manifest
+    // 2. Zstandard Compression (Level 3 - mobile optimized)
+    let compressed_bytes = zstd::stream::encode_all(json_bytes.as_slice(), 3).expect("Failed to compress with zstd");
+    let compressed_size = compressed_bytes.len() as u64;
+
+    // 3. Calculate SHA-256 strictly on COMPRESSED bytes
     let mut hasher = Sha256::new();
-    hasher.update(payload_string.as_bytes());
+    hasher.update(&compressed_bytes);
     let sha256_hex = hex::encode(hasher.finalize());
 
-    // 2. Sign the raw JSON string with Ed25519
-    let signature = signing_key.sign(payload_string.as_bytes());
+    // 4. Sign COMPRESSED bytes with Ed25519
+    let signature = signing_key.sign(&compressed_bytes);
+    let signature_hex = hex::encode(signature.to_bytes());
+
+    // 5. Save as immutable binary artifact
+    let filename = format!("{}-{}.kpkg", id, sha256_hex);
+    let mut file = File::create(&filename).expect("Failed to create kpkg file");
+    file.write_all(&compressed_bytes).expect("Failed to write kpkg binary");
+
+    PackInfo {
+        id: id.to_string(),
+        name: name.to_string(),
+        publisher: publisher.to_string(),
+        description: description.to_string(),
+        version: 1,
+        pack_type: pack_type.to_string(),
+        endpoint: filename,
+        item_count: match serde_json::to_value(payload).unwrap() {
+            serde_json::Value::Object(map) => {
+                let mut count = 0;
+                if let Some(serde_json::Value::Array(v)) = map.get("cosmetics") { count += v.len(); }
+                if let Some(serde_json::Value::Array(v)) = map.get("clothing") { count += v.len(); }
+                count as u32
+            },
+            _ => 0
+        },
+        compressed_size_bytes: compressed_size,
+        uncompressed_size_bytes: uncompressed_size,
+        sha256: sha256_hex,
+        signature: signature_hex,
+        compression_algorithm: "zstd".to_string(),
+        hash_algorithm: "sha256".to_string(),
+        hash_encoding: "hex-lowercase".to_string(),
+        signature_algorithm: "ed25519".to_string(),
+        signature_encoding: "hex".to_string(),
+        package_format_version: 1,
+        schema_version: 2,
+        encryption: "none".to_string(),
+        hero_image_url: None,
+        expires_at: if id.contains("spring") { Some(Utc::now().timestamp_millis() as u64 + 7776000000) } else { None },
+    }
+}
+
+fn save_signed_manifest(
+    filename: &str,
+    manifest: &PackManifest,
+    signing_key: &SigningKey,
+    package_version: &str
+) {
+    let manifest_json = serde_json::to_value(manifest).expect("Failed to serialize manifest");
+    let manifest_string = serde_json::to_string(&manifest_json).expect("Failed to serialize manifest string");
+
+    let signature = signing_key.sign(manifest_string.as_bytes());
     let signature_hex = hex::encode(signature.to_bytes());
 
     let envelope = SignedPayloadEnvelope {
-        data: payload_json,
+        data: manifest_json,
         signature: signature_hex,
         package_version: package_version.to_string(),
-        schema_version: 2, // Android Zero-Trust requirement
+        schema_version: 2,
     };
 
-    let final_json = serde_json::to_string_pretty(&envelope).expect("Failed to serialize envelope");
-    let mut file = File::create(filename).expect("Failed to create file");
-    file.write_all(final_json.as_bytes()).expect("Failed to write JSON");
-
-    sha256_hex
+    let final_json = serde_json::to_string_pretty(&envelope).expect("Failed to serialize manifest envelope");
+    let mut file = File::create(filename).expect("Failed to create manifest file");
+    file.write_all(final_json.as_bytes()).expect("Failed to write manifest JSON");
 }
 
 fn index_items(

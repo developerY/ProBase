@@ -19,6 +19,10 @@ pub struct StarterPackResponse {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PackManifest {
+    pub manifest_version: u32,
+    pub generated_at: String, // ISO-8601
+    pub compiler_version: String,
+    pub key_id: String,
     pub packs: Vec<PackInfo>,
 }
 
@@ -33,8 +37,18 @@ pub struct PackInfo {
     pub pack_type: String,
     pub endpoint: String,
     pub item_count: u32,
-    pub size_bytes: Option<u64>,
-    pub sha256: Option<String>,
+    pub compressed_size_bytes: u64,
+    pub uncompressed_size_bytes: u64,
+    pub sha256: String,
+    pub signature: String,
+    pub compression_algorithm: String,
+    pub hash_algorithm: String,
+    pub hash_encoding: String,
+    pub signature_algorithm: String,
+    pub signature_encoding: String,
+    pub package_format_version: u32,
+    pub schema_version: u32,
+    pub encryption: String,
     pub hero_image_url: Option<String>,
     pub expires_at: Option<u64>,
 }
