@@ -36,6 +36,7 @@ dependencies {
     implementation(libs.coil.compose)
 
     implementation("org.bouncycastle:bcprov-jdk18on:1.77")
+    implementation("com.github.luben:zstd-jni:1.5.5-4")
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)

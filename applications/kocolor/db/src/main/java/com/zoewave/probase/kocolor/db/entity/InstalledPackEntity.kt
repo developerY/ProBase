@@ -25,6 +25,7 @@ data class InstalledPackEntity(
     val itemCount: Int,
     val sizeBytes: Long = 0L,
     val hash: String? = null,
+    val packageHash: String? = null,
     val heroImageUrl: String? = null,
     val expiresAt: Long? = null,
     val timestamp: Long = System.currentTimeMillis()
