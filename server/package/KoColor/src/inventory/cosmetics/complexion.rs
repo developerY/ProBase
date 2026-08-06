@@ -15,6 +15,7 @@ pub fn seamless_silk_foundation() -> CosmeticItem {
         color_hex: "#E0AC81".to_string(),
         shade_name: Some("Warm Silk 220W".to_string()),
         image_url: "https://cdn.kocolor.com/inventory/assets/seamless_silk_foundation.webp".to_string(),
+        thumbnail_url: "https://cdn.kocolor.com/inventory/assets/seamless_silk_foundation_thumb.webp".to_string(),
         notes: Some("Weightless medium-coverage liquid foundation engineered to balance oil and moisture while delivering a natural satin finish.".to_string()),
         instructions: Some("Shake well before use. Dispense 1 pump onto the back of your hand and blend outward using the KoColor Precision Sculpting Brush.".to_string()),
         batch_code: Some("KC-2026-F3".to_string()),

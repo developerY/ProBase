@@ -15,6 +15,7 @@ pub fn petal_touch_blush() -> CosmeticItem {
         color_hex: "#E07A7A".to_string(),
         shade_name: Some("Warm Rosewood".to_string()),
         image_url: "https://cdn.kocolor.com/inventory/assets/petal_touch_flush_blush.webp".to_string(),
+        thumbnail_url: "https://cdn.kocolor.com/inventory/assets/petal_touch_flush_blush_thumb.webp".to_string(),
         notes: Some("Nourishing cream blush that melts on contact with skin to produce a dewy, natural-looking flush with buildable pigments.".to_string()),
         instructions: Some("Dab onto cheeks using fingertips or a dense blush brush, then diffuse upward toward temples for an elevated lifted look.".to_string()),
         batch_code: Some("KC-2026-B4".to_string()),
