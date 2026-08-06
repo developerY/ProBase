@@ -1,16 +1,16 @@
 {
-  "signature": "MEUCIQDHHFqIeQH7r8T8w2T8eZVYOHa8muQUyLbKIdcUXsOn4gIgeZYrarnrlYFphVZR5ipHi5PM7Z4wkeAEwqAv4d8rUUw=",
-  "payload": {
+  "data": {
     "packs": [
       {
         "description": "The foundational high-fidelity product library for all users.",
         "endpoint": "starter-pack.json",
         "expires_at": null,
-        "hash": "sha256:abc123full",
         "hero_image_url": null,
-        "id": "starter_pack_v1",
+        "id": "com.kocolor.pack.core",
         "item_count": 9,
         "name": "Core Collection",
+        "publisher": "KoColor Official",
+        "sha256": "a3b1c3ea9172f58e3af515a9dcf4a6665c35035f1fc4f504f364610facc399c3",
         "size_bytes": 1200000,
         "type": "STARTER_PACK",
         "version": 1
@@ -19,11 +19,12 @@
         "description": "Curated seasonal picks for Winter color profiles.",
         "endpoint": "winter-essentials.json",
         "expires_at": null,
-        "hash": "sha256:xyz456winter",
         "hero_image_url": null,
-        "id": "winter_2026_kit",
-        "item_count": 2,
+        "id": "com.kocolor.pack.winter2026",
+        "item_count": 3,
         "name": "Winter 2026 Trend Kit",
+        "publisher": "KoColor Official",
+        "sha256": "483e6805a8cfb84643445d8dd599e0d0bbdbce6e27a91fe77bc58fca03feea76",
         "size_bytes": 450000,
         "type": "SAMPLE_PACK",
         "version": 1
@@ -32,15 +33,19 @@
         "description": "Revitalizing routine for the new season.",
         "endpoint": "spring-prep.json",
         "expires_at": 1748736000000,
-        "hash": "sha256:def789spring",
         "hero_image_url": null,
-        "id": "spring_prep_2026",
+        "id": "com.kocolor.pack.spring2026",
         "item_count": 2,
         "name": "Spring Skin Prep",
+        "publisher": "KoColor Official",
+        "sha256": "197485e6f2e06dd402ffa367739e8116303c5883eccd80301257d125dbbd797c",
         "size_bytes": 320000,
         "type": "SAMPLE_PACK",
         "version": 1
       }
     ]
-  }
+  },
+  "signature": "2e09368c7f6b6624b93a6f88f48acf5bf10b0f403cab4508f9e27c610a7975f3b2085282186f8b7e461bf34a432a5ca339de9d21b5772b549b1b0863d6b2bf0d",
+  "package_version": "1.0.0",
+  "schema_version": 2
 }

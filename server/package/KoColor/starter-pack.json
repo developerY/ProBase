@@ -1,6 +1,5 @@
 {
-  "signature": "MEUCIQDge14BhMRi0e7GveCZvxnrbQjRZPen6JxRlPMJF57pjAIgHWuCbzs1Yhl3TGJ3bVrRcNTt0IpmkXKpIsdH2HgTRlw=",
-  "payload": {
+  "data": {
     "clothing": [
       {
         "brand": "KoColor Studio",
@@ -28,6 +27,7 @@
         "price": 185.0,
         "seasonal_palette": "WINTER",
         "size": "M",
+        "thumbnail_url": "https://cdn.kocolor.com/inventory/assets/silk_drape_blouse_thumb.webp",
         "vibrant_hex": "#C82333"
       },
       {
@@ -56,6 +56,7 @@
         "price": 340.0,
         "seasonal_palette": "WINTER",
         "size": "M",
+        "thumbnail_url": "https://cdn.kocolor.com/inventory/assets/tailored_sculpted_blazer_thumb.webp",
         "vibrant_hex": "#3B474C"
       }
     ],
@@ -107,6 +108,7 @@
         "shade_name": "Clear Crystal",
         "skin_compatibility": "All Skin Types, Sensitive Skin Safe",
         "temperature": "NEUTRAL",
+        "thumbnail_url": "https://cdn.kocolor.com/inventory/assets/purifying_gel_cleanser_thumb.webp",
         "volume": "150ml"
       },
       {
@@ -156,6 +158,7 @@
         "shade_name": "Luminous Glow",
         "skin_compatibility": "Normal, Combination, Dry",
         "temperature": "NEUTRAL",
+        "thumbnail_url": "https://cdn.kocolor.com/inventory/assets/luminescent_c_serum_thumb.webp",
         "volume": "30ml"
       },
       {
@@ -207,6 +210,7 @@
         "shade_name": "Invisible Shield",
         "skin_compatibility": "Sensitive, All Skin Types, Dermatologist Tested",
         "temperature": "NEUTRAL",
+        "thumbnail_url": "https://cdn.kocolor.com/inventory/assets/la_roche_posay_anthelios_melt_in_milk_sunscreen_thumb.webp",
         "volume": "150ml"
       },
       {
@@ -254,6 +258,7 @@
         "shade_name": "Signature Crimson",
         "skin_compatibility": "All Skin Types",
         "temperature": "NEUTRAL",
+        "thumbnail_url": "https://cdn.kocolor.com/inventory/assets/signature_crimson_lipstick_thumb.webp",
         "volume": "3.8g"
       },
       {
@@ -298,6 +303,7 @@
         "shade_name": "Bee's Knees Crimson",
         "skin_compatibility": "All Lip Types",
         "temperature": "WARM",
+        "thumbnail_url": "https://cdn.kocolor.com/inventory/assets/colourpop_blotted_lip_thumb.webp",
         "volume": "1.0g"
       },
       {
@@ -348,6 +354,7 @@
         "shade_name": "Warm Silk 220W",
         "skin_compatibility": "All Skin Types",
         "temperature": "WARM",
+        "thumbnail_url": "https://cdn.kocolor.com/inventory/assets/seamless_silk_foundation_thumb.webp",
         "volume": "30ml"
       },
       {
@@ -394,9 +401,13 @@
         "shade_name": "Warm Rosewood",
         "skin_compatibility": "Dry, Normal, Combination",
         "temperature": "WARM",
+        "thumbnail_url": "https://cdn.kocolor.com/inventory/assets/petal_touch_flush_blush_thumb.webp",
         "volume": "8g"
       }
     ],
     "version": 1
-  }
+  },
+  "signature": "8ab5f46375c561ea15111aa63c3b767ed4e3f7aaa0fa496321a1f49c8b9543496334d8d145eb3e2cf80bd75a4158b456323661727d8aa1afc75c9c256830dc01",
+  "package_version": "1.0.0",
+  "schema_version": 2
 }
