@@ -2,6 +2,8 @@ package com.zoewave.probase.kocolor.features.starterpack.domain.security
 
 import com.zoewave.probase.kocolor.features.starterpack.data.SecurityConstants
 import com.zoewave.probase.core.util.HashUtils
+import okio.Source
+import okio.buffer
 import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters
 import org.bouncycastle.crypto.signers.Ed25519Signer
 import javax.inject.Inject
@@ -14,6 +16,13 @@ interface SignatureVerifier {
      * @param expectedSha256 The SHA-256 hash provided in the manifest. If empty, hash check is skipped.
      */
     fun verify(payloadBytes: ByteArray, signatureHex: String, expectedSha256: String): Boolean
+
+    /**
+     * Overload for streaming verification to protect the heap.
+     * @param source The Okio Source containing the raw binary payload.
+     * @param signatureHex The hex string signature from the manifest.
+     */
+    fun verify(source: Source, signatureHex: String): Boolean
 }
 
 @Singleton
@@ -47,6 +56,28 @@ class KoColorEd25519Verifier @Inject constructor() : SignatureVerifier {
             signer.verifySignature(signatureBytes)
         } catch (e: Exception) {
             false // Malformed signature string
+        }
+    }
+
+    override fun verify(source: Source, signatureHex: String): Boolean {
+        val signer = Ed25519Signer().apply {
+            init(false, publicKeyParams)
+        }
+
+        val buffer = ByteArray(8192) // 8KB chunks
+        source.buffer().use { bufferedSource ->
+            while (true) {
+                val bytesRead = bufferedSource.read(buffer)
+                if (bytesRead == -1) break
+                signer.update(buffer, 0, bytesRead)
+            }
+        }
+
+        return try {
+            val signatureBytes = signatureHex.decodeHex()
+            signer.verifySignature(signatureBytes)
+        } catch (e: Exception) {
+            false
         }
     }
 
