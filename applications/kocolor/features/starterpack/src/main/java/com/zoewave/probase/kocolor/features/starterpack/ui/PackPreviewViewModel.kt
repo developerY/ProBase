@@ -1,6 +1,5 @@
 package com.zoewave.probase.kocolor.features.starterpack.ui
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.kocolor.features.starterpack.data.StarterPackRepository
@@ -22,32 +21,39 @@ data class PackPreviewUiState(
 
 @HiltViewModel
 class PackPreviewViewModel @Inject constructor(
-    private val repository: StarterPackRepository,
-    savedStateHandle: SavedStateHandle
+    private val repository: StarterPackRepository
 ) : ViewModel() {
 
-    private val packId: String = checkNotNull(savedStateHandle["packId"])
-    private val targetItemId: String? = savedStateHandle["targetItemId"]
-    private val sha256: String? = savedStateHandle["sha256"]
-    private val publisher: String? = savedStateHandle["publisher"]
+    private var packId: String? = null
+    private var sha256: String? = null
+    private var publisher: String? = null
 
-    private val _uiState = MutableStateFlow(PackPreviewUiState(targetItemId = targetItemId))
+    private val _uiState = MutableStateFlow(PackPreviewUiState())
     val uiState: StateFlow<PackPreviewUiState> = _uiState.asStateFlow()
 
-    init {
+    fun initialize(packId: String, targetItemId: String?, sha256: String?, publisher: String?) {
+        if (this.packId != null) return // Already initialized
+        
+        this.packId = packId
+        this.sha256 = sha256
+        this.publisher = publisher
+        
+        _uiState.update { it.copy(targetItemId = targetItemId) }
         loadPackItems()
     }
 
     private fun loadPackItems() {
+        val currentPackId = packId ?: return
+        
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             try {
-                val items = repository.getPackItems(packId, sha256, publisher)
-                _uiState.update { 
-                    it.copy(
+                val items = repository.getPackItems(currentPackId, sha256, publisher)
+                _uiState.update { state ->
+                    state.copy(
                         items = items, 
                         isLoading = false,
-                        selectedIds = if (targetItemId != null) setOf(targetItemId) else emptySet()
+                        selectedIds = if (state.targetItemId != null) setOf(state.targetItemId) else emptySet()
                     ) 
                 }
             } catch (e: Exception) {
