@@ -52,9 +52,9 @@ KOCOLOR_PRIVATE_KEY=your_64_character_hex_private_key_here
 
 The Public Key is safe to distribute. It should be compiled directly into the Android application.
 
-1. Place it in your `local.properties` or `build.gradle.kts` to expose it as a `BuildConfig` variable, OR define it as a constant in your security module:
+1. Define it as a constant in your security module (`SecurityConstants.kt`):
 ```kotlin
-// In KoColorEd25519Verifier.kt or a Constants file
+// In SecurityConstants.kt
 const val KOCOLOR_ROOT_PUBLIC_KEY = "your_64_character_hex_public_key_here"
 ```
 
