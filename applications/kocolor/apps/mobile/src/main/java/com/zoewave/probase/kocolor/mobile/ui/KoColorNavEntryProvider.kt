@@ -1,6 +1,7 @@
 package com.zoewave.probase.kocolor.mobile.ui
 
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -502,6 +503,16 @@ fun koColorNavEntryProvider(
         }
         is KoColorRoute.PackPreview -> NavEntry(route) {
             val viewModel: PackPreviewViewModel = hiltViewModel()
+
+            LaunchedEffect(route.packId) {
+                viewModel.initialize(
+                    packId = route.packId,
+                    targetItemId = route.targetItemId,
+                    sha256 = route.sha256,
+                    publisher = route.publisher
+                )
+            }
+
             val state by viewModel.uiState.collectAsStateWithLifecycle()
             PackPreviewScreen(
                 uiState = state,
