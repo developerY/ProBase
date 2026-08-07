@@ -36,7 +36,7 @@ dependencies {
     implementation(libs.coil.compose)
 
     implementation("org.bouncycastle:bcprov-jdk18on:1.77")
-    implementation("io.airlift:aircompressor:2.0.3")
+    implementation(libs.zstdJni)
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
