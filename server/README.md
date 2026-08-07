@@ -5,10 +5,20 @@ This directory contains the **Rust Normalization Compiler**, the engine responsi
 ## 🏗 System Architecture
 
 The platform operates on a **Static-First Hub & Spoke** model:
-1.  **Compiler (Rust)**: Normalizes data, applies Zstandard compression, and signs payloads with Ed25519.
+1.  **Compiler (Rust)**: Normalizes data into the **KoColor Canonical Product Schema (KCPS)**, applies Zstandard compression, and signs payloads with Ed25519.
 2.  **CDN (Static)**: Hosts the `manifest.json` and `.kpkg` binaries (Cloudflare / GitHub Pages).
 3.  **Hub (Android Phone)**: Streams, verifies, decompresses, and persists packages into a local Room database.
 4.  **Spoke (Wear OS / XR)**: Mirrors the verified data from the Phone Hub via local synchronization.
+
+---
+
+## 📚 Documentation & Specifications
+
+The following documents define the platform's protocols and standards:
+- [**KCPS v2 Specification**](./docs/PackageDistribution/KCPS_v2_SPEC.md): The definitive data contract for KoColor products.
+- [**Product Authoring Guide**](./docs/PackageDistribution/KCPS_Product_Authoring_Guide.md): Instructions for creating valid JSON product definitions.
+- [**Compiler Operations**](./docs/PackageDistribution/COMPILER_OPS.md): Detailed guide on running the Rust build pipeline.
+- [**Architecture Overview**](./docs/PackageDistribution/architecture_overview.md): High-level system design and security invariants.
 
 ---
 
