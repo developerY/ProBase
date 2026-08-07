@@ -5,17 +5,27 @@ This document defines the strict data contract for KoColor Distribution Packages
 **KCPS Version**: 2  
 **`schema_version`**: 2
 
-## 🏗 Package Layout
+After successful verification and decompression, every `.kpkg` package MUST produce exactly one JSON document conforming to this schema.
 
-A compliant `.kpkg` binary, when decompressed, MUST contain a JSON object with the following top-level structure:
+## Decompressed Payload Format
+
+A compliant `.kpkg` payload MUST contain a JSON object with the following top-level structure:
 
 ```json
 {
-  "version": 1,
+  "schema_version": 2,
   "cosmetics": [ ... ],
   "clothing": [ ... ]
 }
 ```
+
+### Payload Invariants
+
+- **Exactly one root JSON object**.
+- **`cosmetics` and `clothing` MUST exist** as top-level arrays.
+- **Arrays MAY be empty**.
+- **Unknown top-level fields MUST be ignored** by the consumer.
+- **Duplicate `id` values MUST NOT exist anywhere** in the package, regardless of whether the items are in the cosmetics or clothing arrays.
 
 ---
 
@@ -34,6 +44,7 @@ A compliant `.kpkg` binary, when decompressed, MUST contain a JSON object with t
 - **Forward Compatibility**: Adding optional fields is backward compatible. Clients MUST ignore unknown fields.
 - **Breaking Changes**: Removing required fields or renaming existing fields requires a new schema version.
 - **Enum Evolution**: Existing enum values MUST NOT change meaning. New enum values MAY only be added in a new schema version.
+- **Enum Philosophy**: Enum values are part of the wire protocol and are case-sensitive. Their serialized names MUST remain stable across compiler implementations.
 
 ---
 
@@ -49,9 +60,9 @@ A compliant `.kpkg` binary, when decompressed, MUST contain a JSON object with t
 | `macro_category` | ✓ | `String` | High-level group. See [Reference Enums](#enums). |
 | `micro_category` | ✓ | `String` | Specific item type. See [Reference Enums](#enums). |
 
-### 3.2 Professional Facets (AI Styling)
+### 3.2 Professional Facets (Cosmetic Items Only)
 
-These fields are **strictly validated** for Cosmetic items.
+These fields are strictly validated for Cosmetic items. **Clothing-only fields MUST NOT appear on cosmetic items.**
 
 | Field | Required | Wire Type | Description |
 | :--- | :--- | :--- | :--- |
@@ -91,7 +102,9 @@ These fields are **strictly validated** for Cosmetic items.
 | `is_vegan` | Optional | `Boolean?` | Contains no animal products. |
 | `is_cruelty_free` | Optional | `Boolean?` | Not tested on animals. |
 
-### 3.6 Wardrobe Metadata (Clothing Only)
+### 3.6 Wardrobe Metadata (Clothing Items Only)
+
+These fields are specific to the Wardrobe Color Engine. **Cosmetic-only fields MUST NOT appear on clothing items.**
 
 | Field | Required | Wire Type | Description |
 | :--- | :--- | :--- | :--- |
@@ -107,7 +120,7 @@ A package (`.kpkg`) MUST be rejected if:
 2. A field type does not match the **Wire Type** specified.
 3. An enum field contains a value not present in the [Reference Enums](#enums).
 4. The `schema_version` of the package is unsupported by the client.
-5. Duplicate `id` values exist within the same package.
+5. Duplicate `id` values exist anywhere in the package.
 6. The `id` or `name` of any item is empty or whitespace only.
 7. Any array contains `null` values.
 8. JSON object keys are not unique.

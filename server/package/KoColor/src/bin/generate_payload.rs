@@ -24,7 +24,7 @@ fn main() {
 
     // 1. Generate Full Starter Pack
     let starter_pack = StarterPackResponse {
-        version: 1,
+        schema_version: 2,
         cosmetics: full_cosmetics.clone(),
         clothing: full_clothing.clone(),
     };
@@ -46,7 +46,7 @@ fn main() {
         vec!["kc-cloth-001"]
     );
     let winter_pack = StarterPackResponse {
-        version: 1,
+        schema_version: 2,
         cosmetics: winter_cosm.clone(),
         clothing: winter_cloth.clone(),
     };
@@ -68,7 +68,7 @@ fn main() {
         vec![]
     );
     let spring_pack = StarterPackResponse {
-        version: 1,
+        schema_version: 2,
         cosmetics: spring_cosm.clone(),
         clothing: vec![],
     };

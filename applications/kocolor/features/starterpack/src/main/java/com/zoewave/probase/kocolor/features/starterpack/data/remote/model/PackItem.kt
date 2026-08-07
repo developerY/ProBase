@@ -44,7 +44,7 @@ data class PackItem(
 
 @Serializable
 data class RemoteStarterPackResponse(
-    val version: Int,
+    @SerialName("schema_version") val schemaVersion: Int,
     val cosmetics: List<PackItem>,
     val clothing: List<PackItem> = emptyList()
 )

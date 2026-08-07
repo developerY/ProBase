@@ -148,6 +148,10 @@ class StarterPackRepository @Inject constructor(
                 throw PackException.SchemaException("Failed to parse decompressed JSON payload.")
             }
 
+            if (response.schemaVersion > 2) {
+                throw PackException.SchemaException("Payload schema version ${response.schemaVersion} too new for this client.")
+            }
+
             // Flatten items for UI
             response.cosmetics + response.clothing
         } finally {
