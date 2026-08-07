@@ -12,6 +12,12 @@ android {
     buildFeatures {
         buildConfig = true
     }
+
+    packaging {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
 }
 
 dependencies {
@@ -36,7 +42,7 @@ dependencies {
     implementation(libs.coil.compose)
 
     implementation("org.bouncycastle:bcprov-jdk18on:1.77")
-    implementation(libs.zstdJni)
+    implementation("com.github.luben:zstd-jni:1.5.7-12@aar")
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)

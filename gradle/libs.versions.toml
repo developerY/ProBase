@@ -52,7 +52,7 @@ androidxSecurity = "1.1.0"
 
 # -- Background --
 work = "2.11.2"
-zstd-jni = "1.5.7-12"
+zstd-jni = "1.5.6-3"
 
 # -- Networking (Rest & GQL) --
 okhttp = "5.4.0"
