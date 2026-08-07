@@ -113,7 +113,7 @@ pub struct CosmeticItem {
     pub fda_clinical_warnings: Vec<String>,
     pub fda_top_reactions: Vec<String>,
     pub fda_active_ingredients: Vec<String>,
-    pub is_fda_checked: bool,
+    pub fda_data_verified: bool,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

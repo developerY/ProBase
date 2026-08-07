@@ -5,13 +5,13 @@ pub fn seamless_silk_foundation() -> CosmeticItem {
         id: "kc-cosm-003".to_string(),
         name: "KoColor Seamless Silk Foundation".to_string(),
         brand: "KoColor".to_string(),
-        macro_category: "Complexion".to_string(),
+        macro_category: "COMPLEXION".to_string(),
         micro_category: "FOUNDATION".to_string(),
-        formulation: "LIQUID".to_string(),
-        chemistry_base: "SILICONE".to_string(),
-        finish: "SATIN".to_string(),
-        coverage: "MEDIUM".to_string(),
-        temperature: "WARM".to_string(),
+        formulation: Some("LIQUID".to_string()),
+        chemistry_base: Some("SILICONE".to_string()),
+        finish: Some("SATIN".to_string()),
+        coverage: Some("MEDIUM".to_string()),
+        temperature: Some("WARM".to_string()),
         color_hex: "#E0AC81".to_string(),
         shade_name: Some("Warm Silk 220W".to_string()),
         image_url: "https://cdn.kocolor.com/inventory/assets/seamless_silk_foundation.webp".to_string(),
@@ -50,6 +50,6 @@ pub fn seamless_silk_foundation() -> CosmeticItem {
         fda_active_ingredients: vec![
             "Titanium Dioxide 4.2%".to_string()
         ],
-        is_fda_checked: true,
+        fda_data_verified: true,
     }
 }

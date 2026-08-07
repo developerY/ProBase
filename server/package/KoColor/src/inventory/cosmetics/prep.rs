@@ -5,13 +5,13 @@ pub fn purifying_gel_cleanser() -> CosmeticItem {
         id: "kc-cosm-001".to_string(),
         name: "KoColor Purifying Gel Cleanser".to_string(),
         brand: "KoColor".to_string(),
-        macro_category: "Skincare & Prep".to_string(),
+        macro_category: "PREP".to_string(),
         micro_category: "CLEANSER".to_string(),
-        formulation: "GEL".to_string(),
-        chemistry_base: "WATER".to_string(),
-        finish: "MATTE".to_string(),
-        coverage: "SHEER".to_string(),
-        temperature: "NEUTRAL".to_string(),
+        formulation: Some("GEL".to_string()),
+        chemistry_base: Some("WATER".to_string()),
+        finish: Some("MATTE".to_string()),
+        coverage: Some("SHEER".to_string()),
+        temperature: Some("NEUTRAL".to_string()),
         color_hex: "#F4F6F0".to_string(),
         shade_name: Some("Clear Crystal".to_string()),
         image_url: "https://cdn.kocolor.com/inventory/assets/purifying_gel_cleanser.webp".to_string(),
@@ -49,7 +49,7 @@ pub fn purifying_gel_cleanser() -> CosmeticItem {
         fda_active_ingredients: vec![
             "Salicylic Acid 0.5%".to_string()
         ],
-        is_fda_checked: true,
+        fda_data_verified: true,
     }
 }
 
@@ -58,13 +58,13 @@ pub fn luminescent_c_serum() -> CosmeticItem {
         id: "kc-cosm-002".to_string(),
         name: "KoColor Luminescent C Serum".to_string(),
         brand: "KoColor".to_string(),
-        macro_category: "Skincare & Prep".to_string(),
+        macro_category: "PREP".to_string(),
         micro_category: "SERUM".to_string(),
-        formulation: "LIQUID".to_string(),
-        chemistry_base: "WATER".to_string(),
-        finish: "RADIANT".to_string(),
-        coverage: "SHEER".to_string(),
-        temperature: "NEUTRAL".to_string(),
+        formulation: Some("LIQUID".to_string()),
+        chemistry_base: Some("WATER".to_string()),
+        finish: Some("RADIANT".to_string()),
+        coverage: Some("SHEER".to_string()),
+        temperature: Some("NEUTRAL".to_string()),
         color_hex: "#FFF8E7".to_string(),
         shade_name: Some("Luminous Glow".to_string()),
         image_url: "https://cdn.kocolor.com/inventory/assets/luminescent_c_serum.webp".to_string(),
@@ -102,7 +102,7 @@ pub fn luminescent_c_serum() -> CosmeticItem {
         fda_active_ingredients: vec![
             "Ascorbic Acid 15%".to_string()
         ],
-        is_fda_checked: true,
+        fda_data_verified: true,
     }
 }
 
@@ -111,13 +111,13 @@ pub fn anthelios_sunscreen() -> CosmeticItem {
         id: "kc-cosm-084".to_string(),
         name: "Anthelios Melt-in Milk Sunscreen".to_string(),
         brand: "La Roche-Posay".to_string(),
-        macro_category: "Skincare & Prep".to_string(),
+        macro_category: "PREP".to_string(),
         micro_category: "SPF".to_string(),
-        formulation: "CREAM".to_string(),
-        chemistry_base: "WATER".to_string(),
-        finish: "SATIN".to_string(),
-        coverage: "SHEER".to_string(),
-        temperature: "NEUTRAL".to_string(),
+        formulation: Some("CREAM".to_string()),
+        chemistry_base: Some("WATER".to_string()),
+        finish: Some("SATIN".to_string()),
+        coverage: Some("SHEER".to_string()),
+        temperature: Some("NEUTRAL".to_string()),
         color_hex: "#FFFFFF".to_string(),
         shade_name: Some("Invisible Shield".to_string()),
         image_url: "https://cdn.kocolor.com/inventory/assets/la_roche_posay_anthelios_melt_in_milk_sunscreen.webp".to_string(),
@@ -144,6 +144,6 @@ pub fn anthelios_sunscreen() -> CosmeticItem {
         fda_clinical_warnings: vec![],
         fda_top_reactions: vec![],
         fda_active_ingredients: vec!["Avobenzone 3%".to_string(), "Homosalate 10%".to_string(), "Octisalate 5%".to_string(), "Octocrylene 7%".to_string()],
-        is_fda_checked: true,
+        fda_data_verified: true,
     }
 }
