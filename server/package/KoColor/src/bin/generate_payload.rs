@@ -189,7 +189,7 @@ fn save_signed_manifest(
         schema_version: 2,
     };
 
-    let final_json = serde_json::to_string_pretty(&envelope).expect("Failed to serialize manifest envelope");
+    let final_json = serde_json::to_string(&envelope).expect("Failed to serialize manifest envelope");
     let mut file = File::create(filename).expect("Failed to create manifest file");
     file.write_all(final_json.as_bytes()).expect("Failed to write manifest JSON");
 }
