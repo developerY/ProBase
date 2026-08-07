@@ -8,7 +8,7 @@ All source data should be structured as a `StarterPackResponse`. You can author 
 
 ```json
 {
-  "version": 1,
+  "schema_version": 2,
   "cosmetics": [ ... ],
   "clothing": [ ... ]
 }

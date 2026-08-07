@@ -12,7 +12,7 @@ pub struct SignedPayloadEnvelope {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct StarterPackResponse {
-    pub version: u32,
+    pub schema_version: u32,
     pub cosmetics: Vec<CosmeticItem>,
     pub clothing: Vec<ClothingItem>,
 }
@@ -70,11 +70,11 @@ pub struct CosmeticItem {
     pub micro_category: String,
 
     // Level 3 Professional Facets
-    pub formulation: String,
-    pub chemistry_base: String,
-    pub finish: String,
-    pub coverage: String,
-    pub temperature: String,
+    pub formulation: Option<String>,
+    pub chemistry_base: Option<String>,
+    pub finish: Option<String>,
+    pub coverage: Option<String>,
+    pub temperature: Option<String>,
 
     // UI Visuals
     pub color_hex: String,
@@ -123,9 +123,8 @@ pub struct ClothingItem {
     pub brand: Option<String>,
     pub macro_category: String,
     pub micro_category: String,
-    pub formality: String,
+    pub formality: Option<String>,
     pub color_hex: String,
-    pub size: Option<String>,
     pub material: Option<String>,
     pub price: Option<f64>,
     pub image_url: String,
