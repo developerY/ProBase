@@ -4,7 +4,7 @@ import android.content.Context
 import android.util.Log
 import coil.imageLoader
 import coil.request.ImageRequest
-import io.airlift.compress.zstd.ZstdDecompressor
+import com.github.luben.zstd.Zstd
 import com.zoewave.probase.core.model.ritual.*
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.KocolorApiService
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.*
@@ -135,13 +135,7 @@ class StarterPackRepository @Inject constructor(
 
             // 9. Decompress (Verify-First Rule enforced: decompression ONLY after successful verification)
             val decompressedBytes = try {
-                val decompressor = ZstdDecompressor()
-                val output = ByteArray(packInfo.uncompressedSizeBytes.toInt())
-                decompressor.decompress(
-                    fileBytes, 0, fileBytes.size,
-                    output, 0, output.size
-                )
-                output
+                Zstd.decompress(fileBytes, packInfo.uncompressedSizeBytes.toInt())
             } catch (e: Exception) {
                 throw PackException.IntegrityException("Decompression failed. Binary might be corrupt.")
             }
