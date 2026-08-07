@@ -98,6 +98,19 @@ class WardrobeRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun saveClothingItems(items: List<ClothingItem>) {
+        withContext(Dispatchers.IO) {
+            try {
+                val entities = items.map { item ->
+                    item.copy(colorFamily = ColorQuantizer.snapToFamily(item.colorHex)).toEntity()
+                }
+                clothingDao.insertClothingList(entities)
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to save bulk clothing items", e)
+            }
+        }
+    }
+
     override suspend fun wearClothingItem(id: Long) {
         withContext(Dispatchers.IO) {
             try {

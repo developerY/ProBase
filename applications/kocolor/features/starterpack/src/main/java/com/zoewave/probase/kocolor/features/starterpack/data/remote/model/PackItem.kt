@@ -13,14 +13,22 @@ data class PackItem(
     @SerialName("thumbnail_url") val thumbnailUrl: String,
     @SerialName("image_url") val imageUrl: String,
     
-    // Canonical KoColor Schema extensions
+    // Professional Facets (Cosmetic)
     val formulation: String? = null,
     @SerialName("chemistry_base") val chemistryBase: String? = null,
     val finish: String? = null,
     val coverage: String? = null,
     val temperature: String? = null,
+    
+    // Wardrobe Metadata (Clothing)
+    val formality: String? = null,
+    val material: String? = null,
+
+    // Classification
     @SerialName("macro_category") val macroCategory: String? = null,
     @SerialName("micro_category") val microCategory: String? = null,
+    
+    // Additional Metadata
     val notes: String? = null,
     val instructions: String? = null,
     @SerialName("pao_months") val paoMonths: Int? = null,
@@ -28,7 +36,10 @@ data class PackItem(
     val price: Double? = null,
     val volume: String? = null,
     val ingredients: List<String> = emptyList(),
-    val allergens: List<String> = emptyList()
+    val allergens: List<String> = emptyList(),
+    @SerialName("is_fda_checked") val isFdaChecked: Boolean = false,
+    @SerialName("is_vegan") val isVegan: Boolean? = null,
+    @SerialName("is_cruelty_free") val isCrueltyFree: Boolean? = null
 )
 
 @Serializable

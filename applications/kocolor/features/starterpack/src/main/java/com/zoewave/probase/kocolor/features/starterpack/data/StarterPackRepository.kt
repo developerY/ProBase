@@ -214,7 +214,7 @@ class StarterPackRepository @Inject constructor(
     /**
      * Map pack items to domain models with appropriate provenance.
      */
-    fun mapToDomainItems(items: List<PackItem>, packInfo: PackInfo): List<CosmeticItem> {
+    fun mapToDomainItems(items: List<PackItem>, packInfo: PackInfo): Pair<List<CosmeticItem>, List<ClothingItem>> {
         val provenance = Provenance(
             packId = packInfo.id,
             packageVersion = packInfo.version.toString(),
@@ -227,39 +227,76 @@ class StarterPackRepository @Inject constructor(
 
         val sourceType = try { InventorySource.valueOf(packInfo.packType) } catch (e: Exception) { InventorySource.UNKNOWN }
 
-        return items.map { packItem ->
-            CosmeticItem(
-                name = packItem.name,
-                brand = packItem.brand,
-                macroCategory = packItem.macroCategory?.let { macro ->
-                    MacroCategory.entries.find { it.displayName == macro }
-                } ?: MacroCategory.COMPLEXION,
-                microCategory = packItem.microCategory?.let { micro ->
-                    try { MicroCategory.valueOf(micro.uppercase()) } catch (e: Exception) { null }
-                } ?: MicroCategory.FOUNDATION,
-                formulation = packItem.formulation?.let { 
-                    try { Formulation.valueOf(it.uppercase()) } catch (e: Exception) { null }
-                } ?: Formulation.UNKNOWN,
-                finish = packItem.finish?.let { 
-                    try { Finish.valueOf(it.uppercase()) } catch (e: Exception) { null }
-                } ?: Finish.UNKNOWN,
-                temperature = packItem.temperature?.let { 
-                    try { Temperature.valueOf(it.uppercase()) } catch (e: Exception) { null }
-                } ?: Temperature.UNKNOWN,
-                chemistryBase = packItem.chemistryBase?.let { 
-                    try { ChemistryBase.valueOf(it.uppercase()) } catch (e: Exception) { null }
-                } ?: ChemistryBase.UNKNOWN,
-                coverage = packItem.coverage?.let { 
-                    try { Coverage.valueOf(it.uppercase()) } catch (e: Exception) { null }
-                } ?: Coverage.NOT_APPLICABLE,
-                colorHex = packItem.hexColor,
-                shadeName = packItem.shade,
-                imageUrl = packItem.imageUrl,
-                sourceType = sourceType,
-                sourceName = packInfo.name,
-                provenance = provenance
-            )
+        val cosmetics = mutableListOf<CosmeticItem>()
+        val clothing = mutableListOf<ClothingItem>()
+
+        items.forEach { packItem ->
+            val macro = packItem.macroCategory?.uppercase() ?: ""
+            
+            if (macro == "TOPS" || macro == "BOTTOMS" || macro == "SHOES" || macro == "ACCESSORIES" || macro == "OTHER") {
+                clothing.add(
+                    ClothingItem(
+                        name = packItem.name,
+                        brand = packItem.brand,
+                        category = try { ClothingCategory.valueOf(macro) } catch (e: Exception) { ClothingCategory.OTHER },
+                        formality = try { Formality.valueOf(packItem.formality?.uppercase() ?: "CASUAL") } catch (e: Exception) { Formality.CASUAL },
+                        colorHex = packItem.hexColor,
+                        material = packItem.material,
+                        price = packItem.price,
+                        imageUrl = packItem.imageUrl,
+                        notes = packItem.notes,
+                        sourceType = sourceType,
+                        sourceName = packInfo.name,
+                        provenance = provenance
+                    )
+                )
+            } else {
+                cosmetics.add(
+                    CosmeticItem(
+                        name = packItem.name,
+                        brand = packItem.brand,
+                        macroCategory = MacroCategory.entries.find { it.name == macro } ?: MacroCategory.COMPLEXION,
+                        microCategory = packItem.microCategory?.let { micro ->
+                            try { MicroCategory.valueOf(micro.uppercase()) } catch (e: Exception) { null }
+                        } ?: MicroCategory.FOUNDATION,
+                        formulation = packItem.formulation?.let { 
+                            try { Formulation.valueOf(it.uppercase()) } catch (e: Exception) { null }
+                        } ?: Formulation.UNKNOWN,
+                        finish = packItem.finish?.let { 
+                            try { Finish.valueOf(it.uppercase()) } catch (e: Exception) { null }
+                        } ?: Finish.UNKNOWN,
+                        temperature = packItem.temperature?.let { 
+                            try { Temperature.valueOf(it.uppercase()) } catch (e: Exception) { null }
+                        } ?: Temperature.UNKNOWN,
+                        chemistryBase = packItem.chemistryBase?.let { 
+                            try { ChemistryBase.valueOf(it.uppercase()) } catch (e: Exception) { null }
+                        } ?: ChemistryBase.UNKNOWN,
+                        coverage = packItem.coverage?.let { 
+                            try { Coverage.valueOf(it.uppercase()) } catch (e: Exception) { null }
+                        } ?: Coverage.NOT_APPLICABLE,
+                        colorHex = packItem.hexColor,
+                        shadeName = packItem.shade,
+                        imageUrl = packItem.imageUrl,
+                        notes = packItem.notes,
+                        instructions = packItem.instructions,
+                        paoMonths = packItem.paoMonths,
+                        expiryDate = packItem.expiryDate,
+                        price = packItem.price,
+                        volume = packItem.volume,
+                        ingredients = packItem.ingredients,
+                        allergens = packItem.allergens,
+                        isFdaChecked = packItem.isFdaChecked,
+                        isVegan = packItem.isVegan,
+                        isCrueltyFree = packItem.isCrueltyFree,
+                        sourceType = sourceType,
+                        sourceName = packInfo.name,
+                        provenance = provenance
+                    )
+                )
+            }
         }
+        
+        return Pair(cosmetics, clothing)
     }
 
     fun prefetchImages(items: List<PackItem>) {

@@ -12,7 +12,6 @@ import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.PackIn
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.PackItem
 import com.zoewave.probase.kocolor.data.mapper.toEntity
 import com.zoewave.probase.core.util.color.ColorQuantizer
-import com.zoewave.probase.core.model.ritual.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
@@ -89,15 +88,19 @@ class PackSyncRepositoryImpl @Inject constructor(
                 ?: throw Exception("Pack $packId not found in manifest.")
 
             // 2. Map to domain (Preparation)
-            val cosmeticItems = starterPackRepository.mapToDomainItems(items, packInfo)
+            val (cosmeticItems, clothingItems) = starterPackRepository.mapToDomainItems(items, packInfo)
 
             // 3. Map to entities with quantization
-            val entities = cosmeticItems.map { item ->
+            val cosmeticEntities = cosmeticItems.map { item ->
+                item.copy(colorFamily = ColorQuantizer.snapToFamily(item.colorHex)).toEntity()
+            }
+            val clothingEntities = clothingItems.map { item ->
                 item.copy(colorFamily = ColorQuantizer.snapToFamily(item.colorHex)).toEntity()
             }
             
             // 4. Commit to DB
-            cosmeticDao.insertCosmetics(entities)
+            cosmeticDao.insertCosmetics(cosmeticEntities)
+            clothingDao.insertClothingList(clothingEntities)
 
             // 5. Pre-fetch Images (Post-ingestion)
             starterPackRepository.prefetchImages(items)
