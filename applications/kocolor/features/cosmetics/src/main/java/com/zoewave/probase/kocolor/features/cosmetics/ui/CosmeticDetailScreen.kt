@@ -1,14 +1,41 @@
 package com.zoewave.probase.kocolor.features.cosmetics.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.VerifiedUser
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
@@ -24,9 +51,26 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.zoewave.probase.core.model.ritual.ChemistryBase
+import com.zoewave.probase.core.model.ritual.CosmeticItem
+import com.zoewave.probase.core.model.ritual.Coverage
+import com.zoewave.probase.core.model.ritual.Finish
+import com.zoewave.probase.core.model.ritual.Formulation
+import com.zoewave.probase.core.model.ritual.InventorySource
+import com.zoewave.probase.core.model.ritual.MacroCategory
+import com.zoewave.probase.core.model.ritual.MicroCategory
 import com.zoewave.probase.kocolor.features.cosmetics.R
-import com.zoewave.probase.kocolor.features.cosmetics.ui.components.*
-import com.zoewave.probase.core.model.ritual.*
+import com.zoewave.probase.kocolor.features.cosmetics.ui.components.ApplicationGuideSection
+import com.zoewave.probase.kocolor.features.cosmetics.ui.components.AtelierExpandableSection
+import com.zoewave.probase.kocolor.features.cosmetics.ui.components.ClinicalSafetySection
+import com.zoewave.probase.kocolor.features.cosmetics.ui.components.ColorHueMapSection
+import com.zoewave.probase.kocolor.features.cosmetics.ui.components.CoordinationSection
+import com.zoewave.probase.kocolor.features.cosmetics.ui.components.IngredientAnalysisSection
+import com.zoewave.probase.kocolor.features.cosmetics.ui.components.ProductDatesSection
+import com.zoewave.probase.kocolor.features.cosmetics.ui.components.ProfessionalFacetsSection
+import com.zoewave.probase.kocolor.features.cosmetics.ui.components.SustainabilitySection
+import com.zoewave.probase.kocolor.features.cosmetics.ui.components.UsageStockSection
+import com.zoewave.probase.kocolor.features.cosmetics.ui.components.ValueAnalysisSection
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
 data class CosmeticDetailUiState(
@@ -181,7 +225,7 @@ fun CosmeticDetailScreen(
 
                     // FDA Clinical Safety Badge (Green/Red/Gray Indicator)
                     val fdaStatusColor = when {
-                        !item.isFdaChecked -> Color.Gray // Not checked yet
+                        !item.fdaDataVerified -> Color.Gray // Not checked yet
                         hasActiveRecall -> Color(0xFFD32F2F) // Red for Recall
                         item.fdaAdverseEventCount > 10 -> Color(0xFFFF9800) // Orange for High Events
                         else -> Color(0xFF4CAF50) // Green for Checked & Safe

@@ -112,7 +112,7 @@ fun ClinicalSafetySection(item: CosmeticItem) {
 
     Column(modifier = Modifier.padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         when {
-            !item.isFdaChecked -> {
+            !item.fdaDataVerified -> {
                 Surface(
                     color = Color(0xFFF5F5F5),
                     shape = RoundedCornerShape(12.dp),

@@ -24,6 +24,9 @@ google-services-zoewave.json
 /.kotlin/
 /.idea/
 
+# SeaWeed
+# /applications/seaweed/docs/BlockChain
+
 # Rust Backend Isolation
 /server/package/KoColor/target/
 /server/package/KoColor/manifest.json
