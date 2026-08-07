@@ -8,6 +8,7 @@ interface WardrobeRepository {
     fun getShortlistByIntent(intent: String): Flow<List<ClothingItem>>
     fun getClothingById(id: Long): Flow<ClothingItem?>
     suspend fun saveClothingItem(item: ClothingItem)
+    suspend fun saveClothingItems(items: List<ClothingItem>)
     suspend fun wearClothingItem(id: Long)
     suspend fun deleteClothing(id: Long)
     suspend fun deleteClothingByPack(packId: String): Result<Unit>
