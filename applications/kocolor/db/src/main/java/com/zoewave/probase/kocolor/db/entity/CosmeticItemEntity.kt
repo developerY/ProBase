@@ -73,5 +73,5 @@ data class CosmeticItemEntity(
     val fdaClinicalWarnings: List<String> = emptyList(),
     val fdaTopReactions: List<String> = emptyList(),
     val fdaActiveIngredients: List<String> = emptyList(),
-    val isFdaChecked: Boolean = false
+    val fdaDataVerified: Boolean = false
 )

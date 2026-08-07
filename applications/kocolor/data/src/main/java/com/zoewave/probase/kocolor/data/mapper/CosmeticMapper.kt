@@ -71,7 +71,7 @@ fun CosmeticItemEntity.toModel(): CosmeticItem = CosmeticItem(
     fdaClinicalWarnings = fdaClinicalWarnings,
     fdaTopReactions = fdaTopReactions,
     fdaActiveIngredients = fdaActiveIngredients,
-    isFdaChecked = isFdaChecked
+    fdaDataVerified = fdaDataVerified
 )
 
 fun CosmeticItem.toEntity(): CosmeticItemEntity = CosmeticItemEntity(
@@ -140,5 +140,5 @@ fun CosmeticItem.toEntity(): CosmeticItemEntity = CosmeticItemEntity(
     fdaClinicalWarnings = fdaClinicalWarnings,
     fdaTopReactions = fdaTopReactions,
     fdaActiveIngredients = fdaActiveIngredients,
-    isFdaChecked = isFdaChecked
+    fdaDataVerified = fdaDataVerified
 )

@@ -289,7 +289,7 @@ class StarterPackRepository @Inject constructor(
                         volume = packItem.volume,
                         ingredients = packItem.ingredients,
                         allergens = packItem.allergens,
-                        isFdaChecked = packItem.isFdaChecked,
+                        fdaDataVerified = packItem.fdaDataVerified,
                         isVegan = packItem.isVegan,
                         isCrueltyFree = packItem.isCrueltyFree,
                         sourceType = sourceType,

@@ -112,9 +112,11 @@ fn compile_and_sign_pack<T: serde::Serialize>(
     pack_type: &str,
     payload: &T,
     signing_key: &SigningKey,
-    package_version: &str
+    _package_version: &str
 ) -> PackInfo {
     // 1. Deterministic Minified JSON Serialization
+    // Note: Rust Normalization Compiler is the canonical serializer.
+    // The implementation MUST ensure deterministic field ordering, encoding, and escaping.
     let json_bytes = serde_json::to_vec(payload).expect("Failed to serialize to JSON");
     let uncompressed_size = json_bytes.len() as u64;
 

@@ -31,7 +31,7 @@ Use this for simple catalog seeding where AI styling details aren't yet availabl
   "color_hex": "#BD1D2D",
   "image_url": "https://cdn.kocolor.com/assets/ruby_woo.webp",
   "thumbnail_url": "https://cdn.kocolor.com/assets/ruby_woo_thumb.webp",
-  "is_fda_checked": true,
+  "fda_data_verified": true,
   "ingredients": ["Ricinus Communis Oil", "Candelilla Cera"],
   "allergens": []
 }
@@ -63,7 +63,7 @@ Use this to fully power the AI Styling Engine and Transparency reports.
   "allergens": ["Gluten Free"],
   "is_vegan": true,
   "is_cruelty_free": true,
-  "is_fda_checked": true
+  "fda_data_verified": true
 }
 ```
 
@@ -85,7 +85,7 @@ Clothing items power the Wardrobe Color Engine and styling recommendations.
   "thumbnail_url": "https://cdn.kocolor.com/assets/silk_blouse_thumb.webp",
   "formality": "PROFESSIONAL",
   "material": "SILK",
-  "is_fda_checked": false
+  "fda_data_verified": false
 }
 ```
 

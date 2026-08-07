@@ -37,7 +37,7 @@ data class PackItem(
     val volume: String? = null,
     val ingredients: List<String> = emptyList(),
     val allergens: List<String> = emptyList(),
-    @SerialName("is_fda_checked") val isFdaChecked: Boolean = false,
+    @SerialName("fda_data_verified") val fdaDataVerified: Boolean = false,
     @SerialName("is_vegan") val isVegan: Boolean? = null,
     @SerialName("is_cruelty_free") val isCrueltyFree: Boolean? = null
 )

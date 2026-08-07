@@ -62,7 +62,7 @@ data class CosmeticItemDto(
     @SerialName("fda_clinical_warnings") val fdaClinicalWarnings: List<String> = emptyList(),
     @SerialName("fda_top_reactions") val fdaTopReactions: List<String> = emptyList(),
     @SerialName("fda_active_ingredients") val fdaActiveIngredients: List<String> = emptyList(),
-    @SerialName("is_fda_checked") val isFdaChecked: Boolean = false
+    @SerialName("fda_data_verified") val fdaDataVerified: Boolean = false
 )
 
 @Serializable
