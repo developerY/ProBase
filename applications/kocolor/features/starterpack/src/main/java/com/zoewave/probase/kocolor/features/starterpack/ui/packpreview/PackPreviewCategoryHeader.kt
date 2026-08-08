@@ -24,50 +24,56 @@ fun PackPreviewCategoryHeader(
     onSelectAll: () -> Unit,
     onClear: () -> Unit
 ) {
+    // Top-level surface must be fully opaque to block scrolling items beneath it
     Surface(
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-        shape = RoundedCornerShape(8.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp)
+        color = MaterialTheme.colorScheme.surface, // 100% opaque surface
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Row(
+        Surface(
+            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f), // Darker darkened transparency
+            shape = RoundedCornerShape(8.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+                .padding(vertical = 4.dp)
         ) {
             Row(
-                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
-                    .weight(1f)
-                    .clickable { onToggleCollapse() }
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Icon(
-                    imageVector = if (isCollapsed) Icons.Default.KeyboardArrowRight else Icons.Default.KeyboardArrowDown,
-                    contentDescription = "Expand/Collapse"
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "$categoryName ($selectedCount/$totalCount)",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-            Row {
-                TextButton(
-                    onClick = onSelectAll,
-                    contentPadding = PaddingValues(horizontal = 8.dp)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable { onToggleCollapse() }
                 ) {
-                    Text("Select All", style = MaterialTheme.typography.labelMedium)
+                    Icon(
+                        imageVector = if (isCollapsed) Icons.Default.KeyboardArrowRight else Icons.Default.KeyboardArrowDown,
+                        contentDescription = "Expand/Collapse"
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "$categoryName ($selectedCount/$totalCount)",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
-                TextButton(
-                    onClick = onClear,
-                    contentPadding = PaddingValues(horizontal = 8.dp)
-                ) {
-                    Text("Clear", style = MaterialTheme.typography.labelMedium)
+
+                Row {
+                    TextButton(
+                        onClick = onSelectAll,
+                        contentPadding = PaddingValues(horizontal = 8.dp)
+                    ) {
+                        Text("Select All", style = MaterialTheme.typography.labelMedium)
+                    }
+                    TextButton(
+                        onClick = onClear,
+                        contentPadding = PaddingValues(horizontal = 8.dp)
+                    ) {
+                        Text("Clear", style = MaterialTheme.typography.labelMedium)
+                    }
                 }
             }
         }

@@ -78,8 +78,15 @@ fun PackPreviewItemRow(
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
+            val subtitleText = remember(item.brand, item.shade) {
+                if (!item.shade.isNullOrBlank()) {
+                    "${item.brand} • ${item.shade}"
+                } else {
+                    item.brand
+                }
+            }
             Text(
-                text = "${item.brand} • ${item.shade}",
+                text = subtitleText,
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.Gray
             )
