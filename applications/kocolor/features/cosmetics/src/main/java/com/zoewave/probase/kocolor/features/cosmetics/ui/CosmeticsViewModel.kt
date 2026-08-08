@@ -442,7 +442,7 @@ class CosmeticsViewModel @Inject constructor(
                             fdaTopReactions = topReactions,
                             fdaClinicalWarnings = label?.warnings ?: emptyList(),
                             fdaActiveIngredients = label?.active_ingredient ?: emptyList(),
-                            isFdaChecked = true,
+                            fdaDataVerified = true,
                             // Enrich with chemDB info if found
                             heroIngredient = chemicalInfo?.name ?: current.heroIngredient,
                             notes = (current.notes ?: "") + (chemicalInfo?.safetyHazards?.joinToString("\n")?.let { "\nSafety: $it" } ?: "")

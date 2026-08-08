@@ -61,7 +61,7 @@ cargo run --bin generate_payload
 ```
 
 ### 4. Output Artifacts
-The compiler generates the following files in `server/package/KoColor/`:
+The compiler generates the following files in `server/package/KoColor/dist/`:
 *   `manifest.json`: The signed root index containing all package metadata.
 *   `search_index.json`: Global discovery index for the Android Sync Hub.
 *   `*.kpkg`: The compressed, signed binary data payloads.

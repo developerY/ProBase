@@ -499,7 +499,7 @@ fun StitchProductBuilder(
             ) {
                 Column(modifier = Modifier.padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Checkbox(checked = draft.isFdaChecked, onCheckedChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(isFdaChecked = it))) })
+                        Checkbox(checked = draft.fdaDataVerified, onCheckedChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(fdaDataVerified = it))) })
                         Text("FDA Safety Checked", style = MaterialTheme.typography.bodyMedium)
                     }
                     AtelierTextField(
