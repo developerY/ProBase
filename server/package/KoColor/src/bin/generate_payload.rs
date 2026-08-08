@@ -29,7 +29,7 @@ fn main() {
 
     // 1. Generate Full Starter Pack
     let starter_pack = StarterPackResponse {
-        schema_version: 2,
+        schema_version: 1,
         cosmetics: full_cosmetics.clone(),
         clothing: full_clothing.clone(),
     };
@@ -53,7 +53,7 @@ fn main() {
         vec!["kc-cloth-001"]
     );
     let winter_pack = StarterPackResponse {
-        schema_version: 2,
+        schema_version: 1,
         cosmetics: winter_cosm.clone(),
         clothing: winter_cloth.clone(),
     };
@@ -77,7 +77,7 @@ fn main() {
         vec![]
     );
     let spring_pack = StarterPackResponse {
-        schema_version: 2,
+        schema_version: 1,
         cosmetics: spring_cosm.clone(),
         clothing: vec![],
     };
@@ -212,7 +212,7 @@ fn compile_and_sign_pack<T: serde::Serialize>(
         signature_algorithm: "ed25519".to_string(),
         signature_encoding: "hex".to_string(),
         package_format_version: 1,
-        schema_version: 2,
+        schema_version: 1,
         encryption: "none".to_string(),
         hero_image_url: None,
         expires_at: if id.contains("spring") { Some(Utc::now().timestamp_millis() as u64 + 7776000000) } else { None },
@@ -236,7 +236,7 @@ fn save_signed_manifest(
         data: manifest_json,
         signature: signature_hex,
         package_version: package_version.to_string(),
-        schema_version: 2,
+        schema_version: 1,
     };
 
     let final_json = serde_json::to_string(&envelope).expect("Failed to serialize manifest envelope");

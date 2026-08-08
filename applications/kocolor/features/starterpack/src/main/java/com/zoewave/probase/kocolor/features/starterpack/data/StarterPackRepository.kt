@@ -118,7 +118,7 @@ class StarterPackRepository @Inject constructor(
             if (packInfo.packageFormatVersion > 1) {
                 throw PackException.VersionMismatchException("Unsupported package format version: ${packInfo.packageFormatVersion}")
             }
-            if (packInfo.schemaVersion > 2) {
+            if (packInfo.schemaVersion > 1) {
                 throw PackException.SchemaException("Schema version ${packInfo.schemaVersion} too new for this client.")
             }
 
@@ -148,7 +148,7 @@ class StarterPackRepository @Inject constructor(
                 throw PackException.SchemaException("Failed to parse decompressed JSON payload.")
             }
 
-            if (response.schemaVersion > 2) {
+            if (response.schemaVersion > 1) {
                 throw PackException.SchemaException("Payload schema version ${response.schemaVersion} too new for this client.")
             }
 

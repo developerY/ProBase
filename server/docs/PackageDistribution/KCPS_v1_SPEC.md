@@ -1,9 +1,9 @@
-# KoColor Canonical Product Schema (KCPS) v2
+# KoColor Canonical Product Schema (KCPS) v1
 
 This document defines the strict data contract for KoColor Distribution Packages (`.kpkg`). Every item in a package MUST conform to this schema to be accepted by a KCPS-compliant package ingestion pipeline.
 
-**KCPS Version**: 2  
-**`schema_version`**: 2
+**KCPS Version**: 1  
+**`schema_version`**: 1
 
 After successful verification and decompression, every `.kpkg` package MUST produce exactly one JSON document conforming to this schema.
 
@@ -13,7 +13,7 @@ A compliant `.kpkg` payload MUST contain a JSON object with the following top-le
 
 ```json
 {
-  "schema_version": 2,
+  "schema_version": 1,
   "cosmetics": [ ... ],
   "clothing": [ ... ]
 }

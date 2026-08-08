@@ -208,7 +208,7 @@ private fun SyncHubScreenPreview() {
                         signatureAlgorithm = "ed25519",
                         signatureEncoding = "hex",
                         packageFormatVersion = 1,
-                        schemaVersion = 2,
+                        schemaVersion = 1,
                         encryption = "none"
                     )
                 )
