@@ -136,7 +136,7 @@ private fun PackageInfoDialogPreview() {
                 signatureAlgorithm = "",
                 signatureEncoding = "",
                 packageFormatVersion = 1,
-                schemaVersion = 2,
+                schemaVersion = 1,
                 encryption = "",
                 previewItems = listOf(
                     PreviewItem("Iconic Red Lipstick", "Signature Crimson • SATIN • FULL COVERAGE"),
