@@ -69,7 +69,7 @@ class StarterPackRepository @Inject constructor(
         )
     }
 
-    suspend fun fetchVerifiedPackage(packInfo: PackInfo): List<PackItem> = withContext(Dispatchers.IO) {
+    suspend fun fetchVerifiedPackage(packInfo: PackInfo): KcpsPayload = withContext(Dispatchers.IO) {
         Log.d(TAG, "fetchVerifiedPackage: Starting secure streaming download for ${packInfo.id}")
         
         val tempFile = File(context.cacheDir, "${packInfo.id}-temp.kpkg")
@@ -141,7 +141,7 @@ class StarterPackRepository @Inject constructor(
             }
 
             // 10. Parse & Validate
-            val response: RemoteStarterPackResponse = try {
+            val response: KcpsPayload = try {
                 val jsonString = String(decompressedBytes, Charsets.UTF_8)
                 json.decodeFromString(jsonString)
             } catch (e: Exception) {
@@ -152,8 +152,7 @@ class StarterPackRepository @Inject constructor(
                 throw PackException.SchemaException("Payload schema version ${response.schemaVersion} too new for this client.")
             }
 
-            // Flatten items for UI
-            response.cosmetics + response.clothing
+            response
         } finally {
             // Clean up: Always delete the temporary binary stream file
             if (tempFile.exists()) {
@@ -162,12 +161,13 @@ class StarterPackRepository @Inject constructor(
         }
     }
 
-    suspend fun getPackItems(packId: String): List<PackItem> {
+    suspend fun getPackItems(packId: String): List<PackItemDto> {
         val manifest = getManifest().data
         val packInfo = manifest.packs.find { it.id == packId } 
             ?: throw PackException.ManifestException("Pack $packId not found in manifest.")
         
-        return fetchVerifiedPackage(packInfo)
+        val payload = fetchVerifiedPackage(packInfo)
+        return payload.cosmetics + payload.clothing
     }
 
     private fun isZstdHeader(bytes: ByteArray): Boolean {
@@ -218,7 +218,7 @@ class StarterPackRepository @Inject constructor(
     /**
      * Map pack items to domain models with appropriate provenance.
      */
-    fun mapToDomainItems(items: List<PackItem>, packInfo: PackInfo): Pair<List<CosmeticItem>, List<ClothingItem>> {
+    fun mapToDomainItems(payload: KcpsPayload, packInfo: PackInfo): Pair<List<CosmeticItem>, List<ClothingItem>> {
         val provenance = Provenance(
             packId = packInfo.id,
             packageVersion = packInfo.version.toString(),
@@ -231,82 +231,68 @@ class StarterPackRepository @Inject constructor(
 
         val sourceType = try { InventorySource.valueOf(packInfo.packType) } catch (e: Exception) { InventorySource.UNKNOWN }
 
-        val cosmetics = mutableListOf<CosmeticItem>()
-        val clothing = mutableListOf<ClothingItem>()
+        val cosmetics = payload.cosmetics.map { dto ->
+            CosmeticItem(
+                name = dto.name,
+                brand = dto.brand,
+                macroCategory = try { MacroCategory.valueOf(dto.macroCategory.uppercase()) } catch (e: Exception) { MacroCategory.COMPLEXION },
+                microCategory = try { MicroCategory.valueOf(dto.microCategory.uppercase()) } catch (e: Exception) { MicroCategory.FOUNDATION },
+                formulation = dto.formulation?.let { try { Formulation.valueOf(it.uppercase()) } catch (e: Exception) { Formulation.UNKNOWN } } ?: Formulation.UNKNOWN,
+                chemistryBase = dto.chemistryBase?.let { try { ChemistryBase.valueOf(it.uppercase()) } catch (e: Exception) { ChemistryBase.UNKNOWN } } ?: ChemistryBase.UNKNOWN,
+                finish = dto.finish?.let { try { Finish.valueOf(it.uppercase()) } catch (e: Exception) { Finish.UNKNOWN } } ?: Finish.UNKNOWN,
+                coverage = dto.coverage?.let { try { Coverage.valueOf(it.uppercase()) } catch (e: Exception) { Coverage.NOT_APPLICABLE } } ?: Coverage.NOT_APPLICABLE,
+                temperature = dto.temperature?.let { try { Temperature.valueOf(it.uppercase()) } catch (e: Exception) { Temperature.UNKNOWN } } ?: Temperature.UNKNOWN,
+                colorHex = dto.colorHex,
+                shadeName = dto.shadeName,
+                imageUrl = dto.imageUrl,
+                notes = dto.notes,
+                instructions = dto.instructions,
+                price = dto.price,
+                volume = dto.volume,
+                paoMonths = dto.paoMonths,
+                expiryDate = dto.expiryDate,
+                ingredients = dto.ingredients,
+                allergens = dto.allergens,
+                isVegan = dto.isVegan,
+                isCrueltyFree = dto.isCrueltyFree,
+                fdaDataVerified = dto.fdaDataVerified,
+                sourceType = sourceType,
+                sourceName = packInfo.name,
+                provenance = provenance
+            )
+        }
 
-        items.forEach { packItem ->
-            val macro = packItem.macroCategory?.uppercase() ?: ""
-            
-            if (macro == "TOPS" || macro == "BOTTOMS" || macro == "SHOES" || macro == "ACCESSORIES" || macro == "OTHER") {
-                clothing.add(
-                    ClothingItem(
-                        name = packItem.name,
-                        brand = packItem.brand,
-                        category = try { ClothingCategory.valueOf(macro) } catch (e: Exception) { ClothingCategory.OTHER },
-                        formality = try { Formality.valueOf(packItem.formality?.uppercase() ?: "CASUAL") } catch (e: Exception) { Formality.CASUAL },
-                        colorHex = packItem.hexColor,
-                        material = packItem.material,
-                        price = packItem.price,
-                        imageUrl = packItem.imageUrl,
-                        notes = packItem.notes,
-                        sourceType = sourceType,
-                        sourceName = packInfo.name,
-                        provenance = provenance
-                    )
-                )
-            } else {
-                cosmetics.add(
-                    CosmeticItem(
-                        name = packItem.name,
-                        brand = packItem.brand,
-                        macroCategory = MacroCategory.entries.find { it.name == macro } ?: MacroCategory.COMPLEXION,
-                        microCategory = packItem.microCategory?.let { micro ->
-                            try { MicroCategory.valueOf(micro.uppercase()) } catch (e: Exception) { null }
-                        } ?: MicroCategory.FOUNDATION,
-                        formulation = packItem.formulation?.let { 
-                            try { Formulation.valueOf(it.uppercase()) } catch (e: Exception) { null }
-                        } ?: Formulation.UNKNOWN,
-                        finish = packItem.finish?.let { 
-                            try { Finish.valueOf(it.uppercase()) } catch (e: Exception) { null }
-                        } ?: Finish.UNKNOWN,
-                        temperature = packItem.temperature?.let { 
-                            try { Temperature.valueOf(it.uppercase()) } catch (e: Exception) { null }
-                        } ?: Temperature.UNKNOWN,
-                        chemistryBase = packItem.chemistryBase?.let { 
-                            try { ChemistryBase.valueOf(it.uppercase()) } catch (e: Exception) { null }
-                        } ?: ChemistryBase.UNKNOWN,
-                        coverage = packItem.coverage?.let { 
-                            try { Coverage.valueOf(it.uppercase()) } catch (e: Exception) { null }
-                        } ?: Coverage.NOT_APPLICABLE,
-                        colorHex = packItem.hexColor,
-                        shadeName = packItem.shade,
-                        imageUrl = packItem.imageUrl,
-                        notes = packItem.notes,
-                        instructions = packItem.instructions,
-                        paoMonths = packItem.paoMonths,
-                        expiryDate = packItem.expiryDate,
-                        price = packItem.price,
-                        volume = packItem.volume,
-                        ingredients = packItem.ingredients,
-                        allergens = packItem.allergens,
-                        fdaDataVerified = packItem.fdaDataVerified,
-                        isVegan = packItem.isVegan,
-                        isCrueltyFree = packItem.isCrueltyFree,
-                        sourceType = sourceType,
-                        sourceName = packInfo.name,
-                        provenance = provenance
-                    )
-                )
-            }
+        val clothing = payload.clothing.map { dto ->
+            ClothingItem(
+                name = dto.name,
+                brand = dto.brand,
+                category = try { ClothingCategory.valueOf(dto.macroCategory.uppercase()) } catch (e: Exception) { ClothingCategory.OTHER },
+                formality = dto.formality?.let { try { Formality.valueOf(it.uppercase()) } catch (e: Exception) { Formality.CASUAL } } ?: Formality.CASUAL,
+                colorHex = dto.colorHex,
+                material = dto.material,
+                price = dto.price,
+                imageUrl = dto.imageUrl,
+                dominantHex = dto.dominantHex,
+                vibrantHex = dto.vibrantHex,
+                mutedHex = dto.mutedHex,
+                paletteHexes = dto.paletteHexes,
+                colorTemperature = dto.colorTemperature,
+                seasonalPalette = dto.seasonalPalette,
+                contrastLevel = dto.contrastLevel,
+                koColorGroup = dto.koColorGroup,
+                sourceType = sourceType,
+                sourceName = packInfo.name,
+                provenance = provenance
+            )
         }
         
         return Pair(cosmetics, clothing)
     }
 
-    fun prefetchImages(items: List<PackItem>) {
-        items.forEach { item ->
+    fun prefetchImages(payload: KcpsPayload) {
+        (payload.cosmetics.map { it.imageUrl } + payload.clothing.map { it.imageUrl }).forEach { url ->
             val request = ImageRequest.Builder(context)
-                .data(item.imageUrl)
+                .data(url)
                 .build()
             context.imageLoader.enqueue(request)
         }

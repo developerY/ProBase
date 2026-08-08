@@ -8,8 +8,8 @@ import com.zoewave.probase.kocolor.db.dao.InstalledPackDao
 import com.zoewave.probase.kocolor.db.entity.InstalledPackEntity
 import com.zoewave.probase.kocolor.db.entity.PackStatus
 import com.zoewave.probase.kocolor.features.starterpack.data.StarterPackRepository
+import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.KcpsPayload
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.PackInfo
-import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.PackItem
 import com.zoewave.probase.kocolor.data.mapper.toEntity
 import com.zoewave.probase.core.util.color.ColorQuantizer
 import kotlinx.coroutines.Dispatchers
@@ -56,10 +56,10 @@ class PackSyncRepositoryImpl @Inject constructor(
             ))
 
             // 2. Fetch and Verify Package (Phone Hub - heavy compute/network outside transaction)
-            val items = starterPackRepository.fetchVerifiedPackage(pack)
+            val payload = starterPackRepository.fetchVerifiedPackage(pack)
             
             // 3. Map and Persist
-            importSelectedItems(pack.id, items).getOrThrow()
+            importSelectedItems(pack.id, payload).getOrThrow()
 
             // 4. Finalize Installation
             installedPackDao.insertPack(InstalledPackEntity(
@@ -78,9 +78,9 @@ class PackSyncRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun importSelectedItems(packId: String, items: List<PackItem>): Result<Unit> = withContext(Dispatchers.IO) {
+    override suspend fun importSelectedItems(packId: String, payload: KcpsPayload): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {
-            Log.d("PackSyncRepo", "importSelectedItems: Importing ${items.size} items from $packId")
+            Log.d("PackSyncRepo", "importSelectedItems: Importing from $packId")
             
             // 1. Get the PackInfo from manifest for metadata
             val envelope = starterPackRepository.getManifest()
@@ -88,7 +88,7 @@ class PackSyncRepositoryImpl @Inject constructor(
                 ?: throw Exception("Pack $packId not found in manifest.")
 
             // 2. Map to domain (Preparation)
-            val (cosmeticItems, clothingItems) = starterPackRepository.mapToDomainItems(items, packInfo)
+            val (cosmeticItems, clothingItems) = starterPackRepository.mapToDomainItems(payload, packInfo)
 
             // 3. Map to entities with quantization
             val cosmeticEntities = cosmeticItems.map { item ->
@@ -103,7 +103,7 @@ class PackSyncRepositoryImpl @Inject constructor(
             clothingDao.insertClothingList(clothingEntities)
 
             // 5. Pre-fetch Images (Post-ingestion)
-            starterPackRepository.prefetchImages(items)
+            starterPackRepository.prefetchImages(payload)
         }
     }
 

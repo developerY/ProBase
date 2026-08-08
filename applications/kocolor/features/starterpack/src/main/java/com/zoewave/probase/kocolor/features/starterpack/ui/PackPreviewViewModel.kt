@@ -3,7 +3,10 @@ package com.zoewave.probase.kocolor.features.starterpack.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.kocolor.features.starterpack.data.StarterPackRepository
-import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.PackItem
+import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.ClothingItemDto
+import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.CosmeticItemDto
+import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.KcpsPayload
+import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.PackItemDto
 import com.zoewave.probase.kocolor.features.starterpack.data.repository.PackSyncRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,8 +17,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class PackPreviewUiState(
-    val items: List<PackItem> = emptyList(),
-    val groupedItems: Map<String, List<PackItem>> = emptyMap(),
+    val items: List<PackItemDto> = emptyList(),
+    val groupedItems: Map<String, List<PackItemDto>> = emptyMap(),
     val selectedIds: Set<String> = emptySet(),
     val collapsedCategories: Set<String> = emptySet(),
     val isLoading: Boolean = false,
@@ -115,7 +118,17 @@ class PackPreviewViewModel @Inject constructor(
             val selectedItems = _uiState.value.items.filter { it.id in _uiState.value.selectedIds }
             if (selectedItems.isNotEmpty()) {
                 _uiState.update { it.copy(isLoading = true) }
-                syncRepository.importSelectedItems(currentPackId, selectedItems)
+                
+                // Construct a V1 payload for selected items
+                val cosmetics: List<CosmeticItemDto> = selectedItems.mapNotNull { it as? CosmeticItemDto }
+                val clothing: List<ClothingItemDto> = selectedItems.mapNotNull { it as? ClothingItemDto }
+                val payload = KcpsPayload(
+                    schemaVersion = 1, 
+                    cosmetics = cosmetics, 
+                    clothing = clothing
+                )
+                
+                syncRepository.importSelectedItems(currentPackId, payload)
                 _uiState.update { it.copy(isLoading = false) }
             }
         }
