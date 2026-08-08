@@ -1,25 +1,36 @@
 package com.zoewave.probase.kocolor.features.starterpack.ui.synchub
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material3.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScrollableTabRow
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.kocolor.db.entity.PackStatus
@@ -39,6 +50,7 @@ fun SyncHubScreen(
 ) {
     val serifFont = FontFamily.Serif
     var showWipeConfirmByPackId by remember { mutableStateOf<String?>(null) }
+    var selectedInfoPack by remember { mutableStateOf<PackInfo?>(null) }
 
     if (showWipeConfirmByPackId != null) {
         AlertDialog(
@@ -114,7 +126,8 @@ fun SyncHubScreen(
                     HeroPackageCard(
                         pack = heroPack,
                         status = uiState.installedPacks.find { it.packId == heroPack.id }?.status ?: PackStatus.AVAILABLE,
-                        onImportClick = { onNavigateTo(KoColorRoute.PackPreview(packId = heroPack.id, sha256 = heroPack.sha256, publisher = heroPack.publisher)) }
+                        onImportClick = { onNavigateTo(KoColorRoute.PackPreview(packId = heroPack.id, sha256 = heroPack.sha256, publisher = heroPack.publisher)) },
+                        onInfoClick = { selectedInfoPack = heroPack }
                     )
                 }
             }
@@ -144,6 +157,7 @@ fun SyncHubScreen(
                             status = installed?.status ?: PackStatus.AVAILABLE,
                             onImportClick = { onNavigateTo(KoColorRoute.PackPreview(packId = pack.id, sha256 = pack.sha256, publisher = pack.publisher)) },
                             onWipeClick = { showWipeConfirmByPackId = pack.id },
+                            onInfoClick = { selectedInfoPack = pack },
                             isLoading = uiState.seedingState is SeedingState.Loading,
                             modifier = Modifier.weight(1f)
                         )
@@ -158,6 +172,13 @@ fun SyncHubScreen(
                 Spacer(modifier = Modifier.height(80.dp))
             }
         }
+    }
+
+    selectedInfoPack?.let { pack ->
+        PackageInfoDialog(
+            pack = pack,
+            onDismiss = { selectedInfoPack = null }
+        )
     }
 }
 
