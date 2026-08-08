@@ -16,7 +16,7 @@ We use a sealed interface to handle polymorphic collections of cosmetics and clo
 sealed interface PackItemDto {
     val id: String
     val name: String
-    val brand: String?
+    val brand: String
     val macroCategory: String
     val microCategory: String
     val colorHex: String
