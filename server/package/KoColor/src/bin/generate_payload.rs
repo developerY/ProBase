@@ -27,11 +27,11 @@ fn main() {
     let generated_at = Utc::now().to_rfc3339();
     let key_id = "kocolor-root-v1".to_string();
 
-    // 1. Generate Full Starter Pack
+    // 1. Generate Full Starter Pack (9 Items from your provided JSON)
     let starter_pack = StarterPackResponse {
         schema_version: 1,
         cosmetics: full_cosmetics.clone(),
-        clothing: full_clothing.clone(),
+        clothing: vec![], // Resetting clothing for the core starter as per your JSON
     };
     let starter_info = compile_and_sign_pack(
         "com.kocolor.pack.core",
@@ -41,7 +41,7 @@ fn main() {
         "STARTER_PACK",
         &starter_pack,
         &full_cosmetics,
-        &full_clothing,
+        &vec![], // No clothing in core
         &signing_key,
         "1.0.0"
     );
@@ -49,7 +49,7 @@ fn main() {
 
     // 2. Generate Seasonal Winter Pack
     let (winter_cosm, winter_cloth) = InventoryRegistry::compose_pack(
-        vec!["kc-cosm-005", "kc-cosm-004"],
+        vec!["kc-starter-lips-01", "kc-starter-dimension-01"],
         vec!["kc-cloth-001"]
     );
     let winter_pack = StarterPackResponse {
@@ -73,7 +73,7 @@ fn main() {
 
     // 3. Generate Spring Prep Kit
     let (spring_cosm, _) = InventoryRegistry::compose_pack(
-        vec!["kc-cosm-001", "kc-cosm-002"],
+        vec!["kc-starter-prep-01", "kc-starter-prep-02"],
         vec![]
     );
     let spring_pack = StarterPackResponse {

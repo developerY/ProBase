@@ -11,11 +11,13 @@ impl InventoryRegistry {
         vec![
             cosmetics::prep::purifying_gel_cleanser(),
             cosmetics::prep::luminescent_c_serum(),
-            cosmetics::prep::anthelios_sunscreen(),
-            cosmetics::lips::glow_catalyst_lip_stain(),
-            cosmetics::lips::colourpop_blotted_lip(),
+            cosmetics::prep::melt_in_milk_sunscreen(),
             cosmetics::complexion::seamless_silk_foundation(),
-            cosmetics::dimension::petal_touch_blush(),
+            cosmetics::complexion::everyday_clear_concealer(),
+            cosmetics::dimension::petal_touch_flush_blush(),
+            cosmetics::eyes::lash_lift_mascara(),
+            cosmetics::lips::glow_catalyst_lip_stain(),
+            cosmetics::lips::blotted_lip(),
         ]
     }
 
