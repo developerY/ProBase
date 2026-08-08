@@ -58,7 +58,7 @@ data class CosmeticItemDto(
 data class ClothingItemDto(
     override val id: String,
     override val name: String,
-    override val brand: String?,
+    override val brand: String,
     @SerialName("macro_category") override val macroCategory: String,
     @SerialName("micro_category") override val microCategory: String,
     @SerialName("color_hex") override val colorHex: String,
