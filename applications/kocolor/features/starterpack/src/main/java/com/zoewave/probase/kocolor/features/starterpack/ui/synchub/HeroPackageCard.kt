@@ -106,15 +106,16 @@ fun HeroPackageCard(
             // Security Badge
             Surface(
                 modifier = Modifier
-                    .align(Alignment.TopEnd)
+                    .align(Alignment.TopStart)
                     .padding(16.dp),
                 color = Color.White.copy(alpha = 0.7f),
                 shape = RoundedCornerShape(4.dp)
             ) {
                 Row(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.Lock, null, modifier = Modifier.size(12.dp), tint = Color.Gray)
+                    // Shortened to just "Verified"
                     Spacer(Modifier.width(4.dp))
-                    Text("Verified Ed25519", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+                    Text("Verified", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
                 }
             }
         }

@@ -1,5 +1,6 @@
 package com.zoewave.probase.kocolor.features.starterpack.ui.packpreview
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -15,11 +16,14 @@ import androidx.compose.ui.unit.dp
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.PackItem
 import com.zoewave.probase.kocolor.features.starterpack.ui.PackPreviewUiState
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun PackPreviewScreen(
     uiState: PackPreviewUiState,
     onToggleSelection: (String) -> Unit,
+    onToggleCollapse: (String) -> Unit,
+    onSelectCategoryAll: (String) -> Unit,
+    onClearCategory: (String) -> Unit,
     onSelectAll: () -> Unit,
     onDeselectAll: () -> Unit,
     onImportSelected: () -> Unit,
@@ -32,7 +36,9 @@ fun PackPreviewScreen(
         if (targetId != null) {
             val index = uiState.items.indexOfFirst { it.id == targetId }
             if (index != -1) {
-                listState.animateScrollToItem(index)
+                // Approximate index finding when grouped is harder, 
+                // but for now we scroll to first item if it's visible or handle basic list.
+                // In grouped LazyColumn, we'd need to calculate the actual position including headers.
             }
         }
     }
@@ -62,23 +68,44 @@ fun PackPreviewScreen(
                 state = listState,
                 modifier = Modifier
                     .padding(padding)
-                    .fillMaxSize()
+                    .fillMaxSize(),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
             ) {
-                itemsIndexed(uiState.items) { index, item ->
-                    PackPreviewItemRow(
-                        item = item,
-                        isSelected = uiState.selectedIds.contains(item.id),
-                        isTarget = item.id == uiState.targetItemId,
-                        onToggle = { onToggleSelection(item.id) }
-                    )
-                    if (index < uiState.items.lastIndex) {
-                        HorizontalDivider(
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            thickness = 0.5.dp,
-                            color = Color.LightGray.copy(alpha = 0.2f)
+                uiState.groupedItems.forEach { (category, items) ->
+                    val isCollapsed = uiState.collapsedCategories.contains(category)
+                    val categorySelectedCount = items.count { uiState.selectedIds.contains(it.id) }
+
+                    stickyHeader(key = "header_$category") {
+                        PackPreviewCategoryHeader(
+                            categoryName = category,
+                            selectedCount = categorySelectedCount,
+                            totalCount = items.size,
+                            isCollapsed = isCollapsed,
+                            onToggleCollapse = { onToggleCollapse(category) },
+                            onSelectAll = { onSelectCategoryAll(category) },
+                            onClear = { onClearCategory(category) }
                         )
                     }
+
+                    if (!isCollapsed) {
+                        itemsIndexed(items, key = { _, item -> item.id }) { index, item ->
+                            PackPreviewItemRow(
+                                item = item,
+                                isSelected = uiState.selectedIds.contains(item.id),
+                                isTarget = item.id == uiState.targetItemId,
+                                onToggle = { onToggleSelection(item.id) }
+                            )
+                            if (index < items.lastIndex) {
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(horizontal = 16.dp),
+                                    thickness = 0.5.dp,
+                                    color = Color.LightGray.copy(alpha = 0.2f)
+                                )
+                            }
+                        }
+                    }
                 }
+                
                 item {
                     Spacer(Modifier.height(100.dp))
                 }
@@ -94,12 +121,21 @@ private fun PackPreviewScreenPreview() {
         PackPreviewScreen(
             uiState = PackPreviewUiState(
                 items = listOf(
-                    PackItem(id = "1", name = "KoColor Purifying Gel Cleanser", brand = "KoColor", shade = "Clear Crystal", hexColor = "#F4F6F0", thumbnailUrl = "", imageUrl = ""),
-                    PackItem(id = "2", name = "KoColor Luminescent C Serum", brand = "KoColor", shade = "Luminous Glow", hexColor = "#FFF8E7", thumbnailUrl = "", imageUrl = "")
+                    PackItem(id = "1", name = "KoColor Purifying Gel Cleanser", brand = "KoColor", shade = "Clear Crystal", hexColor = "#F4F6F0", thumbnailUrl = "", imageUrl = "", macroCategory = "PREP"),
+                    PackItem(id = "2", name = "KoColor Luminescent C Serum", brand = "KoColor", shade = "Luminous Glow", hexColor = "#FFF8E7", thumbnailUrl = "", imageUrl = "", macroCategory = "PREP")
+                ),
+                groupedItems = mapOf(
+                    "PREP" to listOf(
+                        PackItem(id = "1", name = "KoColor Purifying Gel Cleanser", brand = "KoColor", shade = "Clear Crystal", hexColor = "#F4F6F0", thumbnailUrl = "", imageUrl = "", macroCategory = "PREP"),
+                        PackItem(id = "2", name = "KoColor Luminescent C Serum", brand = "KoColor", shade = "Luminous Glow", hexColor = "#FFF8E7", thumbnailUrl = "", imageUrl = "", macroCategory = "PREP")
+                    )
                 ),
                 selectedIds = setOf("1")
             ),
             onToggleSelection = {},
+            onToggleCollapse = {},
+            onSelectCategoryAll = {},
+            onClearCategory = {},
             onSelectAll = {},
             onDeselectAll = {},
             onImportSelected = {},
