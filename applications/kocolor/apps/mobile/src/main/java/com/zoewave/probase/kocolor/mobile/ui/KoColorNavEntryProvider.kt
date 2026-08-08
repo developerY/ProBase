@@ -517,6 +517,9 @@ fun koColorNavEntryProvider(
             PackPreviewScreen(
                 uiState = state,
                 onToggleSelection = viewModel::onToggleSelection,
+                onToggleCollapse = viewModel::onToggleCategoryCollapse,
+                onSelectCategoryAll = viewModel::onSelectCategoryAll,
+                onClearCategory = viewModel::onClearCategory,
                 onSelectAll = viewModel::onSelectAll,
                 onDeselectAll = viewModel::onDeselectAll,
                 onImportSelected = viewModel::onImportSelected,

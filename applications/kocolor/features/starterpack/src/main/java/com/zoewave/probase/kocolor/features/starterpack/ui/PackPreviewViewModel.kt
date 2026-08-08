@@ -15,7 +15,9 @@ import javax.inject.Inject
 
 data class PackPreviewUiState(
     val items: List<PackItem> = emptyList(),
+    val groupedItems: Map<String, List<PackItem>> = emptyMap(),
     val selectedIds: Set<String> = emptySet(),
+    val collapsedCategories: Set<String> = emptySet(),
     val isLoading: Boolean = false,
     val targetItemId: String? = null
 )
@@ -50,6 +52,7 @@ class PackPreviewViewModel @Inject constructor(
                 _uiState.update { state ->
                     state.copy(
                         items = items, 
+                        groupedItems = items.groupBy { it.macroCategory ?: "OTHER" },
                         isLoading = false,
                         selectedIds = if (state.targetItemId != null) setOf(state.targetItemId) else emptySet()
                     ) 
@@ -68,6 +71,31 @@ class PackPreviewViewModel @Inject constructor(
                 state.selectedIds + itemId
             }
             state.copy(selectedIds = newSelected)
+        }
+    }
+
+    fun onToggleCategoryCollapse(category: String) {
+        _uiState.update { state ->
+            val updated = if (state.collapsedCategories.contains(category)) {
+                state.collapsedCategories - category
+            } else {
+                state.collapsedCategories + category
+            }
+            state.copy(collapsedCategories = updated)
+        }
+    }
+
+    fun onSelectCategoryAll(category: String) {
+        _uiState.update { state ->
+            val categoryItemIds = state.groupedItems[category]?.map { it.id }.orEmpty()
+            state.copy(selectedIds = state.selectedIds + categoryItemIds)
+        }
+    }
+
+    fun onClearCategory(category: String) {
+        _uiState.update { state ->
+            val categoryItemIds = state.groupedItems[category]?.map { it.id }.orEmpty().toSet()
+            state.copy(selectedIds = state.selectedIds - categoryItemIds)
         }
     }
 
