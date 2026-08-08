@@ -72,7 +72,7 @@ import com.zoewave.probase.kocolor.mobile.features.home.ui.CollectionHubScreen
 import com.zoewave.probase.kocolor.mobile.features.home.ui.HomeUiRoute
 import com.zoewave.probase.kocolor.mobile.features.home.ui.HomeViewModel
 import com.zoewave.probase.kocolor.mobile.features.settings.ui.components.SettingsUiRoute
-import com.zoewave.probase.kocolor.features.starterpack.ui.SyncHubScreen
+import com.zoewave.probase.kocolor.features.starterpack.ui.synchub.SyncHubScreen
 import com.zoewave.probase.kocolor.features.starterpack.ui.PackPreviewScreen
 import com.zoewave.probase.kocolor.features.starterpack.ui.PackPreviewViewModel
 import com.zoewave.probase.kocolor.features.starterpack.ui.StarterPackViewModel
