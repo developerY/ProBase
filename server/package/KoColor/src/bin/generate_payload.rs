@@ -1,12 +1,17 @@
 use kocolor::inventory::InventoryRegistry;
 use kocolor::{StarterPackResponse, PackManifest, PackInfo, SignedPayloadEnvelope, SearchIndexEntry, CosmeticItem, ClothingItem};
-use std::fs::File;
+use std::fs::{self, File};
 use std::io::Write;
 use ed25519_dalek::{SigningKey, Signer};
 use sha2::{Digest, Sha256};
 use chrono::Utc;
 
+const DIST_DIR: &str = "dist";
+
 fn main() {
+    // 0. Ensure distribution directory exists
+    fs::create_dir_all(DIST_DIR).expect("Failed to create dist directory");
+
     // Ed25519 Private Key - Read from environment variable for security
     let sk_hex = std::env::var("CDN_PRIVATE_KEY_HEX")
         .expect("ERROR: CDN_PRIVATE_KEY_HEX environment variable not set. Please set your Ed25519 private key hex.");
@@ -86,7 +91,8 @@ fn main() {
 
     // 4. Save Search Index
     let search_index_json = serde_json::to_string_pretty(&search_index).expect("Failed to serialize search index");
-    let mut search_file = File::create("search_index.json").expect("Failed to create search_index.json");
+    let search_path = format!("{}/search_index.json", DIST_DIR);
+    let mut search_file = File::create(search_path).expect("Failed to create search_index.json");
     search_file.write_all(search_index_json.as_bytes()).expect("Failed to write search_index.json");
 
     // 5. Generate the Manifest
@@ -98,10 +104,11 @@ fn main() {
         packs: vec![starter_info, winter_info, spring_info],
     };
 
-    save_signed_manifest("manifest.json", &manifest, &signing_key, "1.0.0");
+    let manifest_path = format!("{}/manifest.json", DIST_DIR);
+    save_signed_manifest(&manifest_path, &manifest, &signing_key, "1.0.0");
 
-    println!("✅ Generated and SIGNED all binary .kpkg packages and manifest.json");
-    println!("✅ Generated discovery index: search_index.json");
+    println!("✅ Generated and SIGNED all binary .kpkg packages and manifest.json in /{}", DIST_DIR);
+    println!("✅ Generated discovery index: search_index.json in /{}", DIST_DIR);
 }
 
 fn compile_and_sign_pack<T: serde::Serialize>(
@@ -135,7 +142,8 @@ fn compile_and_sign_pack<T: serde::Serialize>(
 
     // 5. Save as immutable binary artifact
     let filename = format!("{}-{}.kpkg", id, sha256_hex);
-    let mut file = File::create(&filename).expect("Failed to create kpkg file");
+    let filepath = format!("{}/{}", DIST_DIR, filename);
+    let mut file = File::create(&filepath).expect("Failed to create kpkg file");
     file.write_all(&compressed_bytes).expect("Failed to write kpkg binary");
 
     PackInfo {
