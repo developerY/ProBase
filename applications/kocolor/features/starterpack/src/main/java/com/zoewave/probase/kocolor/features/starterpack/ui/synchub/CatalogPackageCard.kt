@@ -7,6 +7,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -28,6 +29,7 @@ fun CatalogPackageCard(
     status: PackStatus,
     onImportClick: () -> Unit,
     onWipeClick: () -> Unit,
+    onInfoClick: () -> Unit,
     isLoading: Boolean,
     modifier: Modifier = Modifier
 ) {
@@ -52,6 +54,17 @@ fun CatalogPackageCard(
                     contentScale = ContentScale.Crop
                 )
                 
+                // Info Button
+                IconButton(
+                    onClick = onInfoClick,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(8.dp)
+                        .size(24.dp)
+                ) {
+                    Icon(Icons.Default.Info, contentDescription = "Info", tint = Color.Black.copy(alpha = 0.6f))
+                }
+
                 if (status == PackStatus.INSTALLED) {
                     Surface(
                         modifier = Modifier.align(Alignment.TopEnd).padding(8.dp),
@@ -142,6 +155,7 @@ private fun CatalogPackageCardPreview() {
             status = PackStatus.AVAILABLE,
             onImportClick = {},
             onWipeClick = {},
+            onInfoClick = {},
             isLoading = false
         )
     }

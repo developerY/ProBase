@@ -1,8 +1,11 @@
 package com.zoewave.probase.kocolor.features.starterpack.ui.synchub
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -24,7 +27,8 @@ import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.PackIn
 fun HeroPackageCard(
     pack: PackInfo,
     status: PackStatus,
-    onImportClick: () -> Unit
+    onImportClick: () -> Unit,
+    onInfoClick: () -> Unit
 ) {
     val serifFont = FontFamily.Serif
     val plumColor = Color(0xFF5A3854)
@@ -45,6 +49,17 @@ fun HeroPackageCard(
                 contentScale = ContentScale.Crop
             )
             
+            // Info Button (mockup image_4c0f3c.jpg top right of hero)
+            IconButton(
+                onClick = onInfoClick,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(8.dp)
+                    .background(Color.White.copy(alpha = 0.5f), CircleShape)
+            ) {
+                Icon(Icons.Default.Info, contentDescription = "Info", tint = Color.Black)
+            }
+
             // Content Card
             Surface(
                 modifier = Modifier
@@ -134,7 +149,8 @@ private fun HeroPackageCardPreview() {
                 encryption = "none"
             ),
             status = PackStatus.AVAILABLE,
-            onImportClick = {}
+            onImportClick = {},
+            onInfoClick = {}
         )
     }
 }

@@ -40,6 +40,8 @@ fn main() {
         "KoColor Official",
         "STARTER_PACK",
         &starter_pack,
+        &full_cosmetics,
+        &full_clothing,
         &signing_key,
         "1.0.0"
     );
@@ -62,6 +64,8 @@ fn main() {
         "KoColor Official",
         "SAMPLE_PACK",
         &winter_pack,
+        &winter_cosm,
+        &winter_cloth,
         &signing_key,
         "1.0.0"
     );
@@ -84,6 +88,8 @@ fn main() {
         "KoColor Official",
         "SAMPLE_PACK",
         &spring_pack,
+        &spring_cosm,
+        &vec![],
         &signing_key,
         "1.0.0"
     );
@@ -118,29 +124,70 @@ fn compile_and_sign_pack<T: serde::Serialize>(
     publisher: &str,
     pack_type: &str,
     payload: &T,
+    cosmetics: &Vec<CosmeticItem>,
+    clothing: &Vec<ClothingItem>,
     signing_key: &SigningKey,
     _package_version: &str
 ) -> PackInfo {
     // 1. Deterministic Minified JSON Serialization
-    // Note: Rust Normalization Compiler is the canonical serializer.
-    // The implementation MUST ensure deterministic field ordering, encoding, and escaping.
     let json_bytes = serde_json::to_vec(payload).expect("Failed to serialize to JSON");
     let uncompressed_size = json_bytes.len() as u64;
 
-    // 2. Zstandard Compression (Level 3 - mobile optimized)
+    // 2. Zstandard Compression
     let compressed_bytes = zstd::stream::encode_all(json_bytes.as_slice(), 3).expect("Failed to compress with zstd");
     let compressed_size = compressed_bytes.len() as u64;
 
-    // 3. Calculate SHA-256 strictly on COMPRESSED bytes
+    // 3. Calculate SHA-256
     let mut hasher = Sha256::new();
     hasher.update(&compressed_bytes);
     let sha256_hex = hex::encode(hasher.finalize());
 
-    // 4. Sign COMPRESSED bytes with Ed25519
+    // 4. Sign
     let signature = signing_key.sign(&compressed_bytes);
     let signature_hex = hex::encode(signature.to_bytes());
 
-    // 5. Save as immutable binary artifact
+    // 5. Build Preview Projection
+    let mut preview_items: Vec<kocolor::PreviewItem> = Vec::new();
+
+    // Add cosmetics to preview
+    for item in cosmetics {
+        let shade = item.shade_name.clone().unwrap_or_else(|| "Standard".to_string());
+        let desc = format!(
+            "{} • {} • {} COVERAGE",
+            shade,
+            item.finish.as_deref().unwrap_or("NATURAL"),
+            item.coverage.as_deref().unwrap_or("MEDIUM")
+        );
+        preview_items.push(kocolor::PreviewItem {
+            name: item.name.clone(),
+            description: desc,
+        });
+    }
+
+    // Add clothing to preview if room
+    for item in clothing {
+        let desc = format!(
+            "{} • {} FORMALITY",
+            item.material.as_deref().unwrap_or("Mixed Fiber"),
+            item.formality.as_deref().unwrap_or("CASUAL")
+        );
+        preview_items.push(kocolor::PreviewItem {
+            name: item.name.clone(),
+            description: desc,
+        });
+    }
+
+    // Cap to 10 items for manifest efficiency
+    let actual_count = preview_items.len();
+    if preview_items.len() > 10 {
+        preview_items.truncate(10);
+        preview_items.push(kocolor::PreviewItem {
+            name: "...".to_string(),
+            description: format!("And {} more high-fidelity items", actual_count - 10),
+        });
+    }
+
+    // 6. Save as immutable binary artifact
     let filename = format!("{}-{}.kpkg", id, sha256_hex);
     let filepath = format!("{}/{}", DIST_DIR, filename);
     let mut file = File::create(&filepath).expect("Failed to create kpkg file");
@@ -154,15 +201,7 @@ fn compile_and_sign_pack<T: serde::Serialize>(
         version: 1,
         pack_type: pack_type.to_string(),
         endpoint: filename,
-        item_count: match serde_json::to_value(payload).unwrap() {
-            serde_json::Value::Object(map) => {
-                let mut count = 0;
-                if let Some(serde_json::Value::Array(v)) = map.get("cosmetics") { count += v.len(); }
-                if let Some(serde_json::Value::Array(v)) = map.get("clothing") { count += v.len(); }
-                count as u32
-            },
-            _ => 0
-        },
+        item_count: (cosmetics.len() + clothing.len()) as u32,
         compressed_size_bytes: compressed_size,
         uncompressed_size_bytes: uncompressed_size,
         sha256: sha256_hex,
@@ -177,6 +216,7 @@ fn compile_and_sign_pack<T: serde::Serialize>(
         encryption: "none".to_string(),
         hero_image_url: None,
         expires_at: if id.contains("spring") { Some(Utc::now().timestamp_millis() as u64 + 7776000000) } else { None },
+        preview_items,
     }
 }
 
