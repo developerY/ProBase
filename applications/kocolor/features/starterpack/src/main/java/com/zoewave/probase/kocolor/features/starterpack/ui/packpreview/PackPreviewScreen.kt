@@ -44,6 +44,7 @@ fun PackPreviewScreen(
     }
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.surface, // Match opaque headers
         topBar = {
             PackPreviewTopAppBar(
                 onBack = onBack,
