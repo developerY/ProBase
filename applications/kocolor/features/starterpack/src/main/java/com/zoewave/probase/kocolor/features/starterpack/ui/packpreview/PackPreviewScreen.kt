@@ -5,6 +5,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -13,7 +16,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.PackItem
+import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.CosmeticItemDto
+import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.PackItemDto
 import com.zoewave.probase.kocolor.features.starterpack.ui.PackPreviewUiState
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -44,6 +48,7 @@ fun PackPreviewScreen(
     }
 
     Scaffold(
+        modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing),
         containerColor = MaterialTheme.colorScheme.surface, // Match opaque headers
         topBar = {
             PackPreviewTopAppBar(
@@ -118,19 +123,66 @@ fun PackPreviewScreen(
 @Preview(showBackground = true)
 @Composable
 private fun PackPreviewScreenPreview() {
+    val mockItem1 = CosmeticItemDto(
+        id = "1",
+        name = "KoColor Purifying Gel Cleanser",
+        brand = "KoColor",
+        shadeName = "Clear Crystal",
+        colorHex = "#F4F6F0",
+        thumbnailUrl = "",
+        imageUrl = "",
+        macroCategory = "PREP",
+        microCategory = "CLEANSER",
+        price = 18.0,
+        notes = null,
+        formulation = "GEL",
+        chemistryBase = "WATER",
+        finish = "NATURAL",
+        coverage = "SHEER",
+        temperature = "NEUTRAL",
+        volume = "150ml",
+        paoMonths = 12,
+        expiryDate = null,
+        instructions = null,
+        ingredients = emptyList(),
+        allergens = emptyList(),
+        isVegan = true,
+        isCrueltyFree = true,
+        fdaDataVerified = true
+    )
+    val mockItem2 = CosmeticItemDto(
+        id = "2",
+        name = "KoColor Luminescent C Serum",
+        brand = "KoColor",
+        shadeName = "Luminous Glow",
+        colorHex = "#FFF8E7",
+        thumbnailUrl = "",
+        imageUrl = "",
+        macroCategory = "PREP",
+        microCategory = "SERUM",
+        price = 28.0,
+        notes = null,
+        formulation = "LIQUID",
+        chemistryBase = "WATER",
+        finish = "RADIANT",
+        coverage = "SHEER",
+        temperature = "NEUTRAL",
+        volume = "30ml",
+        paoMonths = 6,
+        expiryDate = null,
+        instructions = null,
+        ingredients = emptyList(),
+        allergens = emptyList(),
+        isVegan = true,
+        isCrueltyFree = true,
+        fdaDataVerified = true
+    )
+
     MaterialTheme {
         PackPreviewScreen(
             uiState = PackPreviewUiState(
-                items = listOf(
-                    PackItem(id = "1", name = "KoColor Purifying Gel Cleanser", brand = "KoColor", shade = "Clear Crystal", hexColor = "#F4F6F0", thumbnailUrl = "", imageUrl = "", macroCategory = "PREP"),
-                    PackItem(id = "2", name = "KoColor Luminescent C Serum", brand = "KoColor", shade = "Luminous Glow", hexColor = "#FFF8E7", thumbnailUrl = "", imageUrl = "", macroCategory = "PREP")
-                ),
-                groupedItems = mapOf(
-                    "PREP" to listOf(
-                        PackItem(id = "1", name = "KoColor Purifying Gel Cleanser", brand = "KoColor", shade = "Clear Crystal", hexColor = "#F4F6F0", thumbnailUrl = "", imageUrl = "", macroCategory = "PREP"),
-                        PackItem(id = "2", name = "KoColor Luminescent C Serum", brand = "KoColor", shade = "Luminous Glow", hexColor = "#FFF8E7", thumbnailUrl = "", imageUrl = "", macroCategory = "PREP")
-                    )
-                ),
+                items = listOf(mockItem1, mockItem2),
+                groupedItems = mapOf("PREP" to listOf(mockItem1, mockItem2)),
                 selectedIds = setOf("1")
             ),
             onToggleSelection = {},

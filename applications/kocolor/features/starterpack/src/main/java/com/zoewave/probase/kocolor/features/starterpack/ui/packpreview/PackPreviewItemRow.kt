@@ -21,12 +21,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.PackItem
+import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.CosmeticItemDto
+import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.PackItemDto
 import kotlinx.coroutines.delay
 
 @Composable
 fun PackPreviewItemRow(
-    item: PackItem,
+    item: PackItemDto,
     isSelected: Boolean,
     isTarget: Boolean,
     onToggle: () -> Unit
@@ -78,15 +79,15 @@ fun PackPreviewItemRow(
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
-            val subtitleText = remember(item.brand, item.shade) {
-                if (!item.shade.isNullOrBlank()) {
-                    "${item.brand} • ${item.shade}"
+            val subtitleText = remember(item.brand, item.shadeName) {
+                if (!item.shadeName.isNullOrBlank()) {
+                    "${item.brand} • ${item.shadeName}"
                 } else {
                     item.brand
                 }
             }
             Text(
-                text = subtitleText,
+                text = subtitleText ?: "",
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.Gray
             )
@@ -95,11 +96,11 @@ fun PackPreviewItemRow(
                     modifier = Modifier
                         .size(14.dp)
                         .clip(CircleShape)
-                        .background(parseHexColor(item.hexColor))
+                        .background(parseHexColor(item.colorHex))
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(
-                    text = item.hexColor,
+                    text = item.colorHex,
                     style = MaterialTheme.typography.labelMedium,
                     color = Color.DarkGray
                 )
@@ -131,14 +132,32 @@ private fun parseHexColor(hex: String): Color {
 private fun PackPreviewItemRowPreview() {
     MaterialTheme {
         PackPreviewItemRow(
-            item = PackItem(
+            item = CosmeticItemDto(
                 id = "1",
                 name = "KoColor Purifying Gel Cleanser",
                 brand = "KoColor",
-                shade = "Clear Crystal",
-                hexColor = "#F4F6F0",
+                shadeName = "Clear Crystal",
+                colorHex = "#F4F6F0",
                 thumbnailUrl = "",
-                imageUrl = ""
+                imageUrl = "",
+                macroCategory = "PREP",
+                microCategory = "CLEANSER",
+                price = 18.0,
+                notes = null,
+                formulation = "GEL",
+                chemistryBase = "WATER",
+                finish = "NATURAL",
+                coverage = "SHEER",
+                temperature = "NEUTRAL",
+                volume = "150ml",
+                paoMonths = 12,
+                expiryDate = null,
+                instructions = null,
+                ingredients = emptyList(),
+                allergens = emptyList(),
+                isVegan = true,
+                isCrueltyFree = true,
+                fdaDataVerified = true
             ),
             isSelected = true,
             isTarget = false,
