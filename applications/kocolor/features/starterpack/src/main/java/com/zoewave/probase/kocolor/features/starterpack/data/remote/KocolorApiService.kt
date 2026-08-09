@@ -30,6 +30,6 @@ interface KocolorApiService {
     suspend fun downloadPackageBinary(@Url url: String): ResponseBody
 
     companion object {
-        const val BASE_URL = "https://cdn.kocolor.com/inventory/"
+        const val BASE_URL = "https://cdn.kocolor.com/inventory/dist/"
     }
 }
