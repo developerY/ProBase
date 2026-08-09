@@ -131,7 +131,8 @@ fun SyncHubScreen(
                         pack = heroPack,
                         status = uiState.installedPacks.find { it.packId == heroPack.id }?.status ?: PackStatus.AVAILABLE,
                         onImportClick = { onNavigateTo(KoColorRoute.PackPreview(packId = heroPack.id, sha256 = heroPack.sha256, publisher = heroPack.publisher)) },
-                        onInfoClick = { selectedInfoPack = heroPack }
+                        onInfoClick = { selectedInfoPack = heroPack },
+                        onWipeClick = { showWipeConfirmByPackId = heroPack.id }
                     )
                 }
             }
