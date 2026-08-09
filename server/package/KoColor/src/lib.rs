@@ -134,6 +134,11 @@ pub struct CosmeticItem {
     pub calculated_cielab: Option<CielabData>,
     pub calculated_blurhash: Option<String>,
     pub calculated_safety_flags: Option<SafetyFlags>,
+    #[serde(default)]
+    pub calculated_hero_actives: Vec<String>,
+    pub calculated_unit_price: Option<f64>,
+    #[serde(default)]
+    pub calculated_search_tokens: Vec<String>,
 
     // FDA & Clinical Safety
     pub fda_recall_status: Option<String>,
