@@ -1,5 +1,6 @@
-use crate::CielabData;
+use crate::{CielabData, SafetyFlags};
 use std::f64::consts::PI;
+use image::GenericImageView;
 
 /// Maps chemistry base to thermodynamic phase.
 pub fn get_chemistry_phase(base: &str) -> String {
@@ -10,6 +11,49 @@ pub fn get_chemistry_phase(base: &str) -> String {
         "ALCOHOL" => "VOLATILE_SOLVENT".to_string(),
         _ => "UNKNOWN_PHASE".to_string(),
     }
+}
+
+/// Scans ingredients for safety flags.
+pub fn get_safety_flags(ingredients: &[String]) -> SafetyFlags {
+    let mut flags = SafetyFlags {
+        is_silicone_free: true,
+        is_paraben_free: true,
+        is_sulfate_free: true,
+    };
+
+    for ingredient in ingredients {
+        let lower = ingredient.to_lowercase();
+
+        if lower.contains("paraben") {
+            flags.is_paraben_free = false;
+        }
+
+        if lower.contains("sulfate") || lower == "sls" || lower == "sles" {
+            flags.is_sulfate_free = false;
+        }
+
+        if lower.ends_with("-cone") || lower.ends_with("-conol") || lower.ends_with("-siloxane")
+           || lower.contains("dimethicone") || lower.contains("cyclomethicone") {
+            flags.is_silicone_free = false;
+        }
+    }
+
+    flags
+}
+
+/// Generates a BlurHash from an image URL or local path.
+pub fn generate_blurhash(source: &str) -> Option<String> {
+    let bytes = if source.starts_with("http") {
+        reqwest::blocking::get(source).ok()?.bytes().ok()?.to_vec()
+    } else {
+        std::fs::read(source).ok()?
+    };
+
+    let img = image::load_from_memory(&bytes).ok()?;
+    let (width, height) = img.dimensions();
+    let pixels = img.to_rgba8();
+
+    Some(blurhash::encode(4, 4, width, height, &pixels))
 }
 
 /// Converts a hex color string to CIELAB coordinates.
