@@ -59,12 +59,23 @@ fn main() {
 
             // 4. Parse JSON and validate KCPS v1
             let json_content = fs::read_to_string(&path_buf).expect("Failed to read JSON file");
-            let payload: StarterPackResponse = serde_json::from_str(&json_content)
+            let mut payload: StarterPackResponse = serde_json::from_str(&json_content)
                 .unwrap_or_else(|e| panic!("❌ Invalid KCPS JSON in {}: {}", file_stem, e));
 
             // STRICT VERSION 1 ENFORCEMENT
             if payload.schema_version != 1 {
                 panic!("❌ Schema Mismatch in {}.json: Expected v1, found v{}", file_stem, payload.schema_version);
+            }
+
+            // 🚀 INTERCEPT: Compute at Compile Time (Enrichment)
+            for item in &mut payload.cosmetics {
+                // A. Chemistry Phase Mapping
+                if let Some(ref base) = item.chemistry_base {
+                    item.calculated_chemistry_phase = Some(kocolor::engine_enrichment::get_chemistry_phase(base));
+                }
+
+                // B. Hex to CIELAB Colorimetry
+                item.calculated_cielab = kocolor::engine_enrichment::hex_to_cielab(&item.color_hex);
             }
 
             // 5. Compile, Compress, Hash, and Sign
