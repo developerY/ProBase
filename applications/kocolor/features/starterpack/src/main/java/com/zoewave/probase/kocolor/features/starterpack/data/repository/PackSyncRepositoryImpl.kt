@@ -102,7 +102,22 @@ class PackSyncRepositoryImpl @Inject constructor(
             cosmeticDao.insertCosmetics(cosmeticEntities)
             clothingDao.insertClothingList(clothingEntities)
 
-            // 5. Pre-fetch Images (Post-ingestion)
+            // 5. Update Installed Pack status so it appears as "Installed" in Hub/Preview
+            installedPackDao.insertPack(InstalledPackEntity(
+                packId = packInfo.id,
+                name = packInfo.name,
+                description = packInfo.description,
+                version = packInfo.version,
+                status = PackStatus.INSTALLED,
+                itemCount = packInfo.itemCount,
+                sizeBytes = packInfo.compressedSizeBytes,
+                hash = packInfo.sha256,
+                packageHash = packInfo.sha256,
+                heroImageUrl = packInfo.heroImageUrl,
+                expiresAt = packInfo.expiresAt
+            ))
+
+            // 6. Pre-fetch Images (Post-ingestion)
             starterPackRepository.prefetchImages(payload)
         }
     }
