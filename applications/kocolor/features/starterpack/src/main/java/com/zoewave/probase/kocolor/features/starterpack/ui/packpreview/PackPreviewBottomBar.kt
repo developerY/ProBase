@@ -32,26 +32,6 @@ fun PackPreviewBottomBar(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            if (isWipeVisible) {
-                Button(
-                    onClick = onWipe,
-                    modifier = Modifier
-                        .size(height = 56.dp, width = 64.dp),
-                    shape = RoundedCornerShape(20.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.2f),
-                        contentColor = MaterialTheme.colorScheme.error
-                    ),
-                    contentPadding = PaddingValues(0.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Wipe Collection",
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-            }
-
             Button(
                 onClick = onImportSelected,
                 modifier = Modifier
@@ -69,6 +49,26 @@ fun PackPreviewBottomBar(
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
+                    )
+                }
+            }
+
+            if (isWipeVisible) {
+                Button(
+                    onClick = onWipe,
+                    modifier = Modifier
+                        .size(height = 56.dp, width = 64.dp),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.2f),
+                        contentColor = MaterialTheme.colorScheme.error
+                    ),
+                    contentPadding = PaddingValues(0.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Wipe Collection",
+                        modifier = Modifier.size(24.dp)
                     )
                 }
             }
