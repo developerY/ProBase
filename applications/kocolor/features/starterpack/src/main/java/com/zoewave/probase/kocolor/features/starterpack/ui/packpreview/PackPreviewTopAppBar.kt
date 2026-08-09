@@ -15,9 +15,7 @@ import androidx.compose.ui.tooling.preview.Preview
 fun PackPreviewTopAppBar(
     onBack: () -> Unit,
     onSelectAll: () -> Unit,
-    onClear: () -> Unit,
-    onWipe: () -> Unit,
-    isWipeVisible: Boolean = false
+    onClear: () -> Unit
 ) {
     val serifFont = FontFamily.Serif
 
@@ -42,15 +40,6 @@ fun PackPreviewTopAppBar(
             }
         },
         actions = {
-            if (isWipeVisible) {
-                IconButton(onClick = onWipe) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Wipe",
-                        tint = MaterialTheme.colorScheme.error
-                    )
-                }
-            }
             TextButton(onClick = onSelectAll) {
                 Text("Select All", style = MaterialTheme.typography.labelMedium)
             }
@@ -68,9 +57,7 @@ private fun PackPreviewTopAppBarPreview() {
         PackPreviewTopAppBar(
             onBack = {},
             onSelectAll = {},
-            onClear = {},
-            onWipe = {},
-            isWipeVisible = true
+            onClear = {}
         )
     }
 }

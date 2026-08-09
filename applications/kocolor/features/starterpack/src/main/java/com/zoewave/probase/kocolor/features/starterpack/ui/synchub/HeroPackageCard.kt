@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
@@ -29,8 +28,7 @@ fun HeroPackageCard(
     pack: PackInfo,
     status: PackStatus,
     onImportClick: () -> Unit,
-    onInfoClick: () -> Unit,
-    onWipeClick: () -> Unit
+    onInfoClick: () -> Unit
 ) {
     val serifFont = FontFamily.Serif
     val plumColor = Color(0xFF5A3854)
@@ -51,30 +49,15 @@ fun HeroPackageCard(
                 contentScale = ContentScale.Crop
             )
             
-            // Action Buttons Container (Top End)
-            Row(
+            // Info Button (mockup image_4c0f3c.jpg top right of hero)
+            IconButton(
+                onClick = onInfoClick,
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .padding(8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(8.dp)
+                    .background(Color.White.copy(alpha = 0.5f), CircleShape)
             ) {
-                if (status == PackStatus.INSTALLED) {
-                    IconButton(
-                        onClick = onWipeClick,
-                        modifier = Modifier.background(Color.White.copy(alpha = 0.5f), CircleShape)
-                    ) {
-                        Icon(Icons.Default.Delete, contentDescription = "Wipe", tint = MaterialTheme.colorScheme.error.copy(alpha = 0.8f))
-                    }
-                }
-
-                // Info Button
-                IconButton(
-                    onClick = onInfoClick,
-                    modifier = Modifier.background(Color.White.copy(alpha = 0.5f), CircleShape)
-                ) {
-                    Icon(Icons.Default.Info, contentDescription = "Info", tint = Color.Black)
-                }
+                Icon(Icons.Default.Info, contentDescription = "Info", tint = Color.Black)
             }
 
             // Content Card
@@ -168,8 +151,7 @@ private fun HeroPackageCardPreview() {
             ),
             status = PackStatus.AVAILABLE,
             onImportClick = {},
-            onInfoClick = {},
-            onWipeClick = {}
+            onInfoClick = {}
         )
     }
 }

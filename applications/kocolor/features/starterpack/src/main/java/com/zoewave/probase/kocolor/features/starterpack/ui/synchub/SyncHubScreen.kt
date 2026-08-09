@@ -131,8 +131,7 @@ fun SyncHubScreen(
                         pack = heroPack,
                         status = uiState.installedPacks.find { it.packId == heroPack.id }?.status ?: PackStatus.AVAILABLE,
                         onImportClick = { onNavigateTo(KoColorRoute.PackPreview(packId = heroPack.id, sha256 = heroPack.sha256, publisher = heroPack.publisher)) },
-                        onInfoClick = { selectedInfoPack = heroPack },
-                        onWipeClick = { showWipeConfirmByPackId = heroPack.id }
+                        onInfoClick = { selectedInfoPack = heroPack }
                     )
                 }
             }
@@ -161,7 +160,6 @@ fun SyncHubScreen(
                             pack = pack,
                             status = installed?.status ?: PackStatus.AVAILABLE,
                             onImportClick = { onNavigateTo(KoColorRoute.PackPreview(packId = pack.id, sha256 = pack.sha256, publisher = pack.publisher)) },
-                            onWipeClick = { showWipeConfirmByPackId = pack.id },
                             onInfoClick = { selectedInfoPack = pack },
                             isLoading = uiState.seedingState is SeedingState.Loading,
                             modifier = Modifier.weight(1f)
