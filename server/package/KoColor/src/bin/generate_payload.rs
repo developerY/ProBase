@@ -40,10 +40,20 @@ fn main() {
             let file_stem = path_buf.file_stem().and_then(|s| s.to_str()).unwrap_or("unknown_pack");
 
             // 3. Derive Manifest Metadata from the filename
-            // e.g., "winter_2026.json" -> ID: "com.kocolor.pack.winter-2026", Name: "WINTER 2026"
-            let pack_id = format!("com.kocolor.pack.{}", file_stem.replace("_", "-"));
-            let pack_name = file_stem.replace("_", " ").to_uppercase();
-            let description = format!("Automated compilation of {}.json", file_stem);
+            let (pack_id, pack_name) = if file_stem == "core_collection" {
+                ("com.kocolor.pack.core".to_string(), "KoColor Core Collection".to_string())
+            } else {
+                (
+                    format!("com.kocolor.pack.{}", file_stem.replace("_", "-")),
+                    file_stem.replace("_", " ").to_uppercase()
+                )
+            };
+
+            let description = if file_stem == "core_collection" {
+                "The foundational high-fidelity product library for all users.".to_string()
+            } else {
+                format!("Automated compilation of {}.json", file_stem)
+            };
 
             println!("⚙️  Compiling: {}", path_buf.display());
 
