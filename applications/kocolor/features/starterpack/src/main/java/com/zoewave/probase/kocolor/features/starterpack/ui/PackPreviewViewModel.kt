@@ -2,6 +2,7 @@ package com.zoewave.probase.kocolor.features.starterpack.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.zoewave.probase.kocolor.db.entity.PackStatus
 import com.zoewave.probase.kocolor.features.starterpack.data.StarterPackRepository
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.ClothingItemDto
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.CosmeticItemDto
@@ -12,6 +13,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -22,6 +24,7 @@ data class PackPreviewUiState(
     val selectedIds: Set<String> = emptySet(),
     val collapsedCategories: Set<String> = emptySet(),
     val isLoading: Boolean = false,
+    val isInstalled: Boolean = false,
     val targetItemId: String? = null
 )
 
@@ -42,6 +45,15 @@ class PackPreviewViewModel @Inject constructor(
         this.packId = packId
         
         _uiState.update { it.copy(targetItemId = targetItemId) }
+        
+        // Check if pack is installed to show Wipe button
+        viewModelScope.launch {
+            syncRepository.getInstalledPacks().collectLatest { installedPacks ->
+                val isInstalled = installedPacks.any { it.packId == packId && it.status == PackStatus.INSTALLED }
+                _uiState.update { it.copy(isInstalled = isInstalled) }
+            }
+        }
+        
         loadPackItems()
     }
 
@@ -131,6 +143,15 @@ class PackPreviewViewModel @Inject constructor(
                 syncRepository.importSelectedItems(currentPackId, payload)
                 _uiState.update { it.copy(isLoading = false) }
             }
+        }
+    }
+
+    fun onWipeCollection() {
+        val currentPackId = packId ?: return
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            syncRepository.wipePack(currentPackId)
+            _uiState.update { it.copy(isLoading = false) }
         }
     }
 }

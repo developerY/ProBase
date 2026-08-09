@@ -3,6 +3,7 @@ package com.zoewave.probase.kocolor.features.starterpack.ui.packpreview
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.font.FontFamily
@@ -14,7 +15,9 @@ import androidx.compose.ui.tooling.preview.Preview
 fun PackPreviewTopAppBar(
     onBack: () -> Unit,
     onSelectAll: () -> Unit,
-    onClear: () -> Unit
+    onClear: () -> Unit,
+    onWipe: () -> Unit,
+    isWipeVisible: Boolean = false
 ) {
     val serifFont = FontFamily.Serif
 
@@ -39,6 +42,15 @@ fun PackPreviewTopAppBar(
             }
         },
         actions = {
+            if (isWipeVisible) {
+                IconButton(onClick = onWipe) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Wipe",
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
             TextButton(onClick = onSelectAll) {
                 Text("Select All", style = MaterialTheme.typography.labelMedium)
             }
@@ -56,7 +68,9 @@ private fun PackPreviewTopAppBarPreview() {
         PackPreviewTopAppBar(
             onBack = {},
             onSelectAll = {},
-            onClear = {}
+            onClear = {},
+            onWipe = {},
+            isWipeVisible = true
         )
     }
 }
