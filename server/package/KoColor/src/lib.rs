@@ -125,7 +125,7 @@ pub struct CosmeticItem {
 pub struct ClothingItem {
     pub id: String,
     pub name: String,
-    pub brand: Option<String>,
+    pub brand: String,
     pub macro_category: String,
     pub micro_category: String,
     pub formality: Option<String>,

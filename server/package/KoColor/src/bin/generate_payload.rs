@@ -254,7 +254,7 @@ fn index_items(
         index.push(SearchIndexEntry {
             id: item.id.clone(),
             term: item.name.clone(),
-            brand: item.brand.clone().unwrap_or("Generic".to_string()),
+            brand: item.brand.clone(),
             pack_id: pack_id.to_string(),
         });
     }
