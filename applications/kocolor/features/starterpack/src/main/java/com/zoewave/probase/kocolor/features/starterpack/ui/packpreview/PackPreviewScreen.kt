@@ -8,12 +8,15 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.CosmeticItemDto
@@ -30,10 +33,37 @@ fun PackPreviewScreen(
     onClearCategory: (String) -> Unit,
     onSelectAll: () -> Unit,
     onDeselectAll: () -> Unit,
+    onWipeCollection: () -> Unit,
     onImportSelected: () -> Unit,
     onBack: () -> Unit
 ) {
     val listState = rememberLazyListState()
+    var showWipeConfirm by remember { mutableStateOf(false) }
+
+    if (showWipeConfirm) {
+        AlertDialog(
+            onDismissRequest = { showWipeConfirm = false },
+            title = { Text("Wipe this Collection?", fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold) },
+            text = { Text("This will permanently remove all items from this collection. Your personal 'Make it Mine' items are safe.") },
+            confirmButton = {
+                TextButton(
+                    onClick = { 
+                        onWipeCollection()
+                        showWipeConfirm = false
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text("WIPE DATA", fontWeight = FontWeight.Black)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showWipeConfirm = false }) {
+                    Text("CANCEL")
+                }
+            },
+            shape = RoundedCornerShape(28.dp)
+        )
+    }
 
     LaunchedEffect(uiState.targetItemId) {
         val targetId = uiState.targetItemId
@@ -54,7 +84,9 @@ fun PackPreviewScreen(
             PackPreviewTopAppBar(
                 onBack = onBack,
                 onSelectAll = onSelectAll,
-                onClear = onDeselectAll
+                onClear = onDeselectAll,
+                onWipe = { showWipeConfirm = true },
+                isWipeVisible = uiState.isInstalled
             )
         },
         bottomBar = {
@@ -191,6 +223,7 @@ private fun PackPreviewScreenPreview() {
             onClearCategory = {},
             onSelectAll = {},
             onDeselectAll = {},
+            onWipeCollection = {},
             onImportSelected = {},
             onBack = {}
         )
