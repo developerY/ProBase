@@ -36,17 +36,18 @@ data class ClothingItemDto(...) : PackItemDto
 
 ---
 
-## ⚙️ 2. The Rust Package Compiler (`kocolor-compiler`)
+## ⚙️ 2. The Rust Data-Driven Compiler (`generate_payload`)
 
-The backend has transitioned from a simple generator to a **Strict Validation Compiler**.
+The backend has transitioned into a pure, data-driven Command Line Interface (CLI). Hardcoded registries have been removed in favor of a flexible directory-based workflow.
 
 ### Key Logic:
-1.  **Strict Type Check**: Validates the source JSON against Rust structs before compilation.
-2.  **Deterministic Serialization**: Instead of hashing raw text, we serialize the Rust struct to a byte vector. This ensures that two JSON files with the same data but different whitespace result in the exact same `.kpkg` hash.
-3.  **Filenaming**: Implements the `com.kocolor.pack.{id}-{sha256}.kpkg` standard.
-4.  **Manifest Auto-Update**: Every build outputs a complete manifest entry ready for the CDN.
+1.  **Directory Iteration**: The compiler automatically scans the `input_packs/` directory for any `.json` files.
+2.  **Dynamic Metadata**: `pack_id` and `name` are dynamically derived from the physical filename (e.g., `winter_2026.json` -> `com.kocolor.pack.winter-2026`).
+3.  **Strict Type Check**: Validates every JSON source against KCPS v1 Rust structs before compilation.
+4.  **Deterministic Serialization**: Serializes to a canonical byte vector to ensure stable SHA-256 hashes.
+5.  **Unified Artifacts**: Automatically builds a single `manifest.json` and a global `search_index.json` covering all detected packs.
 
-**Usage**: `cargo run --bin kocolor-compiler -- build starter-pack ./source.json`
+**Usage**: Simply drop a JSON file into `server/package/KoColor/input_packs/` and run `./runMe.sh`.
 
 ---
 

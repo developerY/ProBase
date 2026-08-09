@@ -5,17 +5,15 @@ This journey follows a product from its initial definition in a JSON source to i
 ---
 
 ## 🏗️ Step 1: Definition
-You define your products in `starter_pack_source.json`. 
-*   Every item belongs to a `macro_category` (e.g., `LIPS`, `COMPLEXION`).
-*   Every item has high-fidelity metadata like `formulation`, `finish`, and `ingredients`.
+You define your products in a JSON source file (e.g., `holiday_kit.json`) and place it in the `server/package/KoColor/input_packs/` directory.
 
 ## ⚙️ Step 2: Compilation
-Run the Rust compiler to transform your JSON into a secure distribution package:
+Run the automated distribution pipeline:
 ```bash
 cd server/package/KoColor
-cargo run --bin kocolor-compiler -- build starter-pack ./starter_pack_source.json
+./runMe.sh
 ```
-**The Result**: A compressed `.kpkg` file and a new `manifest.json` entry with a valid ECDSA signature and SHA-256 hash.
+**The Result**: The compiler automatically detects your new JSON file, validates it, compresses it into a `.kpkg`, and updates the master `manifest.json` and `search_index.json` in the `/dist` folder.
 
 ## 📱 Step 3: Mobile Sync
 Open the KoColor app and navigate to **Settings > Glow Archive Sync**.
