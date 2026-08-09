@@ -22,5 +22,5 @@ name = "kocolor"
 path = "src/lib.rs"
 
 [[bin]]
-name = "generate_payload"
-path = "src/bin/generate_payload.rs"
+name = "kocolor-compiler"
+path = "src/bin/kocolor-compiler.rs"
