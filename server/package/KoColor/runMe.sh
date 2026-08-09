@@ -27,7 +27,7 @@ mkdir -p dist/
 echo "⚙️  [Compiler] Running authoritative payload generator (Version 1)..."
 
 # Run the distribution generator which compiles Core, Seasonal, and the Manifest
-cargo run --bin generate_payload
+cargo run --bin kocolor-compiler
 
 # Capture exit status
 GEN_STATUS=$?

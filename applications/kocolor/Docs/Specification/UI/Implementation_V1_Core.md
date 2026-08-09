@@ -36,7 +36,7 @@ data class ClothingItemDto(...) : PackItemDto
 
 ---
 
-## ⚙️ 2. The Rust Data-Driven Compiler (`generate_payload`)
+## ⚙️ 2. The Rust Data-Driven Compiler (`kocolor-compiler`)
 
 The backend has transitioned into a pure, data-driven Command Line Interface (CLI). Hardcoded registries have been removed in favor of a flexible directory-based workflow.
 

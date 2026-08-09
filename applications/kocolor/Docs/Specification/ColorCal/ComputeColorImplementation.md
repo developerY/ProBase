@@ -49,7 +49,7 @@ This data allows the mobile app to perform professional-grade shade matching and
 
 *   **[`src/lib.rs`](file:///Users/developer/AndroidStudioProjects/ProBase/server/package/KoColor/src/lib.rs)**: Updated `CosmeticItem` struct to include `calculated_cielab` and `calculated_chemistry_phase`.
 *   **[`src/engine_enrichment.rs`](file:///Users/developer/AndroidStudioProjects/ProBase/server/package/KoColor/src/engine_enrichment.rs)**: New module containing the physics and color science math.
-*   **[`src/bin/generate_payload.rs`](file:///Users/developer/AndroidStudioProjects/ProBase/server/package/KoColor/src/bin/generate_payload.rs)**: Intercepted the build pipeline to apply enrichment before serialization.
+*   **[`src/bin/kocolor-compiler.rs`](file:///Users/developer/AndroidStudioProjects/ProBase/server/package/KoColor/src/bin/kocolor-compiler.rs)**: Intercepted the build pipeline to apply enrichment before serialization.
 
 ---
 **Status**: ✅ **ACTIVE**
