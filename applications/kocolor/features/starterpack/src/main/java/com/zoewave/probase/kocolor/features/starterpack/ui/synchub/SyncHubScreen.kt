@@ -195,7 +195,7 @@ private fun SyncHubScreenPreview() {
                 availablePacks = listOf(
                     PackInfo(
                         id = "com.kocolor.pack.core",
-                        name = "Core Collection",
+                        name = "KoColor Core Collection",
                         description = "The foundational high-fidelity product library.",
                         version = 1,
                         publisher = "KoColor",
