@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+pub mod engine_enrichment;
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SignedPayloadEnvelope {
     pub data: serde_json::Value,
@@ -58,6 +60,14 @@ pub struct PreviewItem {
     pub description: String,
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct CielabData {
+    pub l: f64,
+    pub a: f64,
+    pub b: f64,
+    pub hue_angle_hab: f64,
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SearchIndexEntry {
     pub id: String,
@@ -111,6 +121,10 @@ pub struct CosmeticItem {
 
     // Ritual Context
     pub ritual_placement: Option<String>,
+
+    // Engine Enrichment (Calculated at Compile Time)
+    pub calculated_chemistry_phase: Option<String>,
+    pub calculated_cielab: Option<CielabData>,
 
     // FDA & Clinical Safety
     pub fda_recall_status: Option<String>,
