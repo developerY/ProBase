@@ -81,6 +81,15 @@ fn main() {
 
                 // D. Safety Flags (Clean Beauty Tokenization)
                 item.calculated_safety_flags = Some(kocolor::engine_enrichment::get_safety_flags(&item.ingredients));
+
+                // E. Hero Actives Extraction
+                item.calculated_hero_actives = kocolor::engine_enrichment::get_hero_actives(&item.ingredients);
+
+                // F. Unit Price Normalization
+                item.calculated_unit_price = kocolor::engine_enrichment::calculate_unit_price(item.price, item.volume.as_ref());
+
+                // G. Search Tokenization
+                item.calculated_search_tokens = kocolor::engine_enrichment::generate_search_tokens(&item.name, &item.brand);
             }
 
             // 5. Compile, Compress, Hash, and Sign

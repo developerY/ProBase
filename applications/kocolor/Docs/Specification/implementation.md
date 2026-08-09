@@ -35,6 +35,9 @@ The compiler is no longer an inventory database; it is a **Transformation Pipeli
 *   **Physics Enrichment**:
     *   **Chemistry**: Maps bases to thermodynamic phases (e.g., `HYDROPHILIC_AQUEOUS`).
     *   **Colorimetry**: Converts sRGB Hex to **CIELAB** coordinates and calculates the **Hue Angle ($h_{ab}$)** for D65 illuminant.
+    *   **Visuals**: Generates **BlurHash** placeholders for all thumbnails.
+    *   **Safety**: Tokenizes ingredients into binary flags (e.g., `is_silicone_free`).
+    *   **Intelligence**: Extracts **Hero Actives**, normalizes **Unit Price**, and generates **Search Tokens**.
 
 ---
 

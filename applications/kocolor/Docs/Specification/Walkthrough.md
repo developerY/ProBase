@@ -15,6 +15,9 @@ You no longer modify code to add inventory. Products are defined in **KCPS v1** 
 When you run `./runMe.sh`, the **`kocolor-compiler`** performs expert-level science before the data reaches the user:
 *   **Colorimetry**: Translates sRGB hex codes into the **CIELAB** ($L^*a^*b^*$) 3D color space (D65 Illuminant).
 *   **Thermodynamics**: Maps chemical bases to professional phases (e.g., `SILICONE` → `HYDROPHOBIC_SILOXANE`) to pre-calculate pilling risks.
+*   **Visuals**: Generates **BlurHash** color-accurate placeholders for all product thumbnails.
+*   **Safety**: Tokenizes ingredient lists into binary safety flags (e.g., Silicone-Free, Paraben-Free).
+*   **Intelligence**: Extracts key **Hero Actives** (Retinol, Vitamin C, etc.), calculates standardized **Unit Pricing**, and generates indexed **Search Tokens**.
 
 ### 3. Distribution Security (Zero-Trust)
 The compiler transforms the raw JSON into secure binary artifacts:

@@ -41,6 +41,63 @@ pub fn get_safety_flags(ingredients: &[String]) -> SafetyFlags {
     flags
 }
 
+/// Scans ingredients for hero actives using a dictionary.
+pub fn get_hero_actives(ingredients: &[String]) -> Vec<String> {
+    let heroes = vec![
+        "Retinol", "Vitamin C", "Niacinamide", "Hyaluronic Acid", "Salicylic Acid",
+        "Glycolic Acid", "Ceramide", "Peptide", "Squalane", "Glycerin",
+        "Tocopherol", "Ferulic Acid", "Bakuchiol", "Azelaic Acid", "Panthenol"
+    ];
+
+    let mut detected = Vec::new();
+    for ingredient in ingredients {
+        let lower_ing = ingredient.to_lowercase();
+        for hero in &heroes {
+            if lower_ing.contains(&hero.to_lowercase()) {
+                detected.push(hero.to_string());
+            }
+        }
+    }
+    detected.sort();
+    detected.dedup();
+    detected
+}
+
+/// Calculates unit price by parsing volume.
+pub fn calculate_unit_price(price: Option<f64>, volume: Option<&String>) -> Option<f64> {
+    let price = price?;
+    let volume_str = volume?;
+
+    // Extract first numeric match
+    let numeric_part: String = volume_str.chars()
+        .take_while(|c| c.is_digit(10) || *c == '.')
+        .collect();
+
+    let val: f64 = numeric_part.parse().ok()?;
+    if val > 0.0 {
+        Some(price / val)
+    } else {
+        None
+    }
+}
+
+/// Generates search tokens for typo-tolerant matching.
+pub fn generate_search_tokens(name: &str, brand: &str) -> Vec<String> {
+    let mut tokens = Vec::new();
+    let combined = format!("{} {}", brand, name).to_lowercase();
+
+    // Split by non-alphanumeric
+    for word in combined.split(|c: char| !c.is_alphanumeric()) {
+        if word.len() > 1 {
+            tokens.push(word.to_string());
+        }
+    }
+
+    tokens.sort();
+    tokens.dedup();
+    tokens
+}
+
 /// Generates a BlurHash from an image URL or local path.
 pub fn generate_blurhash(source: &str) -> Option<String> {
     let bytes = if source.starts_with("http") {
