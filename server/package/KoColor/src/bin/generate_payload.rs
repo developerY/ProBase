@@ -1,16 +1,18 @@
-use kocolor::inventory::InventoryRegistry;
 use kocolor::{StarterPackResponse, PackManifest, PackInfo, SignedPayloadEnvelope, SearchIndexEntry, CosmeticItem, ClothingItem};
 use std::fs::{self, File};
 use std::io::Write;
+use std::path::Path;
 use ed25519_dalek::{SigningKey, Signer};
 use sha2::{Digest, Sha256};
 use chrono::Utc;
 
 const DIST_DIR: &str = "dist";
+const INPUT_DIR: &str = "input_packs"; // Target directory for all source JSON files
 
 fn main() {
-    // 0. Ensure distribution directory exists
+    // 0. Ensure required directories exist
     fs::create_dir_all(DIST_DIR).expect("Failed to create dist directory");
+    fs::create_dir_all(INPUT_DIR).expect("Failed to create input_packs directory");
 
     // Ed25519 Private Key - Read from environment variable for security
     let sk_hex = std::env::var("CDN_PRIVATE_KEY_HEX")
@@ -19,112 +21,75 @@ fn main() {
     let sk_bytes = hex::decode(sk_hex).expect("Invalid hex in CDN_PRIVATE_KEY_HEX");
     let signing_key = SigningKey::from_bytes(sk_bytes.as_slice().try_into().expect("Invalid private key format"));
 
-    let full_cosmetics = InventoryRegistry::all_cosmetics();
-    let full_clothing = InventoryRegistry::all_clothing();
-
     let mut search_index: Vec<SearchIndexEntry> = Vec::new();
+    let mut compiled_packs: Vec<PackInfo> = Vec::new();
+
     let compiler_version = "kocolor-compiler 1.5.0".to_string();
     let generated_at = Utc::now().to_rfc3339();
     let key_id = "kocolor-root-v1".to_string();
 
-    // 1. Generate Full Starter Pack (9 Items from your provided JSON)
-    let starter_pack = StarterPackResponse {
-        schema_version: 1,
-        cosmetics: full_cosmetics.clone(),
-        clothing: vec![], // Resetting clothing for the core starter as per your JSON
-    };
-    let starter_info = compile_and_sign_pack(
-        "com.kocolor.pack.core",
-        "Core Collection",
-        "The foundational high-fidelity product library for all users.",
-        "KoColor Official",
-        "STARTER_PACK",
-        &starter_pack,
-        &full_cosmetics,
-        &vec![], // No clothing in core
-        &signing_key,
-        "1.0.0"
-    );
-    index_items(&mut search_index, &full_cosmetics, &full_clothing, "com.kocolor.pack.core");
+    // 1. Read all files in the input directory
+    let paths = fs::read_dir(INPUT_DIR).expect("Failed to read input_packs directory");
 
-    // 2. Generate Seasonal Winter Pack
-    let (winter_cosm, winter_cloth) = InventoryRegistry::compose_pack(
-        vec!["kc-starter-lips-01", "kc-starter-dimension-01"],
-        vec!["kc-cloth-001"]
-    );
-    let winter_pack = StarterPackResponse {
-        schema_version: 1,
-        cosmetics: winter_cosm.clone(),
-        clothing: winter_cloth.clone(),
-    };
-    let winter_info = compile_and_sign_pack(
-        "com.kocolor.pack.winter2026",
-        "Winter 2026 Trend Kit",
-        "Curated seasonal picks for Winter color profiles.",
-        "KoColor Official",
-        "SAMPLE_PACK",
-        &winter_pack,
-        &winter_cosm,
-        &winter_cloth,
-        &signing_key,
-        "1.0.0"
-    );
-    index_items(&mut search_index, &winter_cosm, &winter_cloth, "com.kocolor.pack.winter2026");
+    for path in paths {
+        let entry = path.expect("Failed to read directory entry");
+        let path_buf = entry.path();
 
-    // 3. Generate Spring Prep Kit
-    let (spring_cosm, _) = InventoryRegistry::compose_pack(
-        vec!["kc-starter-prep-01", "kc-starter-prep-02"],
-        vec![]
-    );
-    let spring_pack = StarterPackResponse {
-        schema_version: 1,
-        cosmetics: spring_cosm.clone(),
-        clothing: vec![],
-    };
-    let spring_info = compile_and_sign_pack(
-        "com.kocolor.pack.spring2026",
-        "Spring Skin Prep",
-        "Revitalizing routine for the new season.",
-        "KoColor Official",
-        "SAMPLE_PACK",
-        &spring_pack,
-        &spring_cosm,
-        &vec![],
-        &signing_key,
-        "1.0.0"
-    );
-    index_items(&mut search_index, &spring_cosm, &vec![], "com.kocolor.pack.spring2026");
+        // 2. Process only valid .json files
+        if path_buf.is_file() && path_buf.extension().and_then(|s| s.to_str()) == Some("json") {
+            let file_stem = path_buf.file_stem().and_then(|s| s.to_str()).unwrap_or("unknown_pack");
 
-    // 4. Generate Favorites Discovery Pack (Loaded from external JSON)
-    let fav_json = fs::read_to_string("./favorites_pack_source.json").expect("Failed to read favorites_pack_source.json");
-    let fav_payload: StarterPackResponse = serde_json::from_str(&fav_json).expect("Invalid favorites JSON");
-    let fav_info = compile_and_sign_pack(
-        "com.kocolor.pack.favorites",
-        "Favorites Discovery Kit",
-        "A curated selection of our most-loved high-fidelity essentials.",
-        "KoColor Official",
-        "SAMPLE_PACK",
-        &fav_payload,
-        &fav_payload.cosmetics,
-        &fav_payload.clothing,
-        &signing_key,
-        "1.0.0"
-    );
-    index_items(&mut search_index, &fav_payload.cosmetics, &fav_payload.clothing, "com.kocolor.pack.favorites");
+            // 3. Derive Manifest Metadata from the filename
+            // e.g., "winter_2026.json" -> ID: "com.kocolor.pack.winter-2026", Name: "WINTER 2026"
+            let pack_id = format!("com.kocolor.pack.{}", file_stem.replace("_", "-"));
+            let pack_name = file_stem.replace("_", " ").to_uppercase();
+            let description = format!("Automated compilation of {}.json", file_stem);
 
-    // 5. Save Search Index
+            println!("⚙️  Compiling: {}", path_buf.display());
+
+            // 4. Parse JSON and validate KCPS v1
+            let json_content = fs::read_to_string(&path_buf).expect("Failed to read JSON file");
+            let payload: StarterPackResponse = serde_json::from_str(&json_content)
+                .unwrap_or_else(|e| panic!("❌ Invalid KCPS JSON in {}: {}", file_stem, e));
+
+            // STRICT VERSION 1 ENFORCEMENT
+            if payload.schema_version != 1 {
+                panic!("❌ Schema Mismatch in {}.json: Expected v1, found v{}", file_stem, payload.schema_version);
+            }
+
+            // 5. Compile, Compress, Hash, and Sign
+            let pack_info = compile_and_sign_pack(
+                &pack_id,
+                &pack_name,
+                &description,
+                "KoColor Official",
+                "STANDARD_PACK",
+                &payload,
+                &payload.cosmetics,
+                &payload.clothing,
+                &signing_key,
+                "1.0.0"
+            );
+
+            // 6. Append to index and manifest collections
+            index_items(&mut search_index, &payload.cosmetics, &payload.clothing, &pack_id);
+            compiled_packs.push(pack_info);
+        }
+    }
+
+    // 7. Save Search Index
     let search_index_json = serde_json::to_string_pretty(&search_index).expect("Failed to serialize search index");
     let search_path = format!("{}/search_index.json", DIST_DIR);
     let mut search_file = File::create(search_path).expect("Failed to create search_index.json");
     search_file.write_all(search_index_json.as_bytes()).expect("Failed to write search_index.json");
 
-    // 5. Generate the Manifest
+    // 8. Generate and Save the Root Manifest
     let manifest = PackManifest {
         manifest_version: 1,
         generated_at,
         compiler_version,
         key_id,
-        packs: vec![starter_info, winter_info, spring_info, fav_info],
+        packs: compiled_packs,
     };
 
     let manifest_path = format!("{}/manifest.json", DIST_DIR);
@@ -150,16 +115,16 @@ fn compile_and_sign_pack<T: serde::Serialize>(
     let json_bytes = serde_json::to_vec(payload).expect("Failed to serialize to JSON");
     let uncompressed_size = json_bytes.len() as u64;
 
-    // 2. Zstandard Compression
+    // 2. Zstandard Compression (Level 3 - mobile optimized)
     let compressed_bytes = zstd::stream::encode_all(json_bytes.as_slice(), 3).expect("Failed to compress with zstd");
     let compressed_size = compressed_bytes.len() as u64;
 
-    // 3. Calculate SHA-256
+    // 3. Calculate SHA-256 strictly on COMPRESSED bytes
     let mut hasher = Sha256::new();
     hasher.update(&compressed_bytes);
     let sha256_hex = hex::encode(hasher.finalize());
 
-    // 4. Sign
+    // 4. Sign COMPRESSED bytes with Ed25519
     let signature = signing_key.sign(&compressed_bytes);
     let signature_hex = hex::encode(signature.to_bytes());
 

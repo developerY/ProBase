@@ -1,7 +1,5 @@
 use serde::{Deserialize, Serialize};
 
-pub mod inventory;
-
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SignedPayloadEnvelope {
     pub data: serde_json::Value,
