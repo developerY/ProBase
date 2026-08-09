@@ -95,7 +95,24 @@ fn main() {
     );
     index_items(&mut search_index, &spring_cosm, &vec![], "com.kocolor.pack.spring2026");
 
-    // 4. Save Search Index
+    // 4. Generate Favorites Discovery Pack (Loaded from external JSON)
+    let fav_json = fs::read_to_string("./favorites_pack_source.json").expect("Failed to read favorites_pack_source.json");
+    let fav_payload: StarterPackResponse = serde_json::from_str(&fav_json).expect("Invalid favorites JSON");
+    let fav_info = compile_and_sign_pack(
+        "com.kocolor.pack.favorites",
+        "Favorites Discovery Kit",
+        "A curated selection of our most-loved high-fidelity essentials.",
+        "KoColor Official",
+        "SAMPLE_PACK",
+        &fav_payload,
+        &fav_payload.cosmetics,
+        &fav_payload.clothing,
+        &signing_key,
+        "1.0.0"
+    );
+    index_items(&mut search_index, &fav_payload.cosmetics, &fav_payload.clothing, "com.kocolor.pack.favorites");
+
+    // 5. Save Search Index
     let search_index_json = serde_json::to_string_pretty(&search_index).expect("Failed to serialize search index");
     let search_path = format!("{}/search_index.json", DIST_DIR);
     let mut search_file = File::create(search_path).expect("Failed to create search_index.json");
@@ -107,7 +124,7 @@ fn main() {
         generated_at,
         compiler_version,
         key_id,
-        packs: vec![starter_info, winter_info, spring_info],
+        packs: vec![starter_info, winter_info, spring_info, fav_info],
     };
 
     let manifest_path = format!("{}/manifest.json", DIST_DIR);
