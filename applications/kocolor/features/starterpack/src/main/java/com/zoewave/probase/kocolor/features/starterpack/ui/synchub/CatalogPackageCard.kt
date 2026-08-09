@@ -6,7 +6,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -28,7 +27,6 @@ fun CatalogPackageCard(
     pack: PackInfo,
     status: PackStatus,
     onImportClick: () -> Unit,
-    onWipeClick: () -> Unit,
     onInfoClick: () -> Unit,
     isLoading: Boolean,
     modifier: Modifier = Modifier
@@ -110,15 +108,6 @@ fun CatalogPackageCard(
                     ) {
                         Text(if (status == PackStatus.INSTALLED) "PREVIEW" else "IMPORT", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     }
-                    
-                    if (status == PackStatus.INSTALLED) {
-                        IconButton(
-                            onClick = onWipeClick,
-                            modifier = Modifier.size(36.dp)
-                        ) {
-                            Icon(Icons.Default.Delete, null, modifier = Modifier.size(20.dp), tint = Color.Gray)
-                        }
-                    }
                 }
             }
         }
@@ -154,7 +143,6 @@ private fun CatalogPackageCardPreview() {
             ),
             status = PackStatus.AVAILABLE,
             onImportClick = {},
-            onWipeClick = {},
             onInfoClick = {},
             isLoading = false
         )

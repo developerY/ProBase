@@ -84,16 +84,16 @@ fun PackPreviewScreen(
             PackPreviewTopAppBar(
                 onBack = onBack,
                 onSelectAll = onSelectAll,
-                onClear = onDeselectAll,
-                onWipe = { showWipeConfirm = true },
-                isWipeVisible = uiState.isInstalled
+                onClear = onDeselectAll
             )
         },
         bottomBar = {
             PackPreviewBottomBar(
                 selectedCount = uiState.selectedIds.size,
                 isLoading = uiState.isLoading,
-                onImportSelected = onImportSelected
+                onImportSelected = onImportSelected,
+                onWipe = { showWipeConfirm = true },
+                isWipeVisible = uiState.isInstalled
             )
         }
     ) { padding ->
