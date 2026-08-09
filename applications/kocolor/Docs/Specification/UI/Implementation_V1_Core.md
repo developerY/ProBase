@@ -46,6 +46,11 @@ The backend has transitioned into a pure, data-driven Command Line Interface (CL
 3.  **Strict Type Check**: Validates every JSON source against KCPS v1 Rust structs before compilation.
 4.  **Deterministic Serialization**: Serializes to a canonical byte vector to ensure stable SHA-256 hashes.
 5.  **Unified Artifacts**: Automatically builds a single `manifest.json` and a global `search_index.json` covering all detected packs.
+6.  **Enrichment Engine**:
+    *   **Colorimetry**: Converts Hex to CIELAB and $h_{ab}$ (D65).
+    *   **Chemistry**: Maps bases to thermodynamic phases.
+    *   **Visuals**: Generates **BlurHash** placeholders for all thumbnails.
+    *   **Safety**: Tokenizes ingredients into binary flags.
 
 **Usage**: Simply drop a JSON file into `server/package/KoColor/input_packs/` and run `./runMe.sh`.
 

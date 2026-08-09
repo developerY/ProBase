@@ -1,7 +1,6 @@
 use kocolor::{StarterPackResponse, PackManifest, PackInfo, SignedPayloadEnvelope, SearchIndexEntry, CosmeticItem, ClothingItem};
 use std::fs::{self, File};
 use std::io::Write;
-use std::path::Path;
 use ed25519_dalek::{SigningKey, Signer};
 use sha2::{Digest, Sha256};
 use chrono::Utc;
@@ -76,6 +75,12 @@ fn main() {
 
                 // B. Hex to CIELAB Colorimetry
                 item.calculated_cielab = kocolor::engine_enrichment::hex_to_cielab(&item.color_hex);
+
+                // C. BlurHash Generation
+                item.calculated_blurhash = kocolor::engine_enrichment::generate_blurhash(&item.thumbnail_url);
+
+                // D. Safety Flags (Clean Beauty Tokenization)
+                item.calculated_safety_flags = Some(kocolor::engine_enrichment::get_safety_flags(&item.ingredients));
             }
 
             // 5. Compile, Compress, Hash, and Sign

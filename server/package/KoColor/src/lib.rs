@@ -76,6 +76,13 @@ pub struct SearchIndexEntry {
     pub pack_id: String,
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+pub struct SafetyFlags {
+    pub is_silicone_free: bool,
+    pub is_paraben_free: bool,
+    pub is_sulfate_free: bool,
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct CosmeticItem {
     pub id: String,
@@ -125,6 +132,8 @@ pub struct CosmeticItem {
     // Engine Enrichment (Calculated at Compile Time)
     pub calculated_chemistry_phase: Option<String>,
     pub calculated_cielab: Option<CielabData>,
+    pub calculated_blurhash: Option<String>,
+    pub calculated_safety_flags: Option<SafetyFlags>,
 
     // FDA & Clinical Safety
     pub fda_recall_status: Option<String>,

@@ -12,10 +12,12 @@ zstd = "0.13"
 chrono = { version = "0.4", features = ["serde"] }
 ed25519-dalek = "2.0"
 sha2 = "0.10"
-reqwest = { version = "0.11", features = ["json"] }
+reqwest = { version = "0.11", features = ["json", "blocking"] }
 jsonwebtoken = "9.2"
 base64 = "0.21"
 hex = "0.4"
+image = "0.24"
+blurhash = "0.1"
 
 [lib]
 name = "kocolor"
