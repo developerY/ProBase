@@ -30,6 +30,7 @@ The compiler will transition to a two-pass system:
 ### B. Asset Optimization Pipeline (`rayon` integrated)
 *   **Hero Stream**: Process 1:1 PNGs -> Resize to 1024x1024 -> Lossy WebP (85%).
 *   **Thumbnail Stream**: Resize to 256x256 -> Generate 4x4 Base83 BlurHash string.
+*   **Determinism Lock**: Explicitly lock image resizing filters (e.g., `Lanczos3`, `Gaussian`) to a specific implementation version to prevent non-deterministic pixel variations during library updates.
 *   **Parallelism**: Use `rayon` to process all product images concurrently, maximizing build machine throughput.
 
 ### C. Composition Engine (TOML)
@@ -56,11 +57,14 @@ The compiler will perform a "Clean Purge" during the transformation from authori
 - [ ] **Task 1: Workspace Initialization**
     - Create `raw_assets/` and `package_configs/` folders.
     - Setup `Cargo.toml` with `image`, `blurhash`, `rayon`, and `toml`.
+    - **Commit `Cargo.lock`** to ensure deterministic dependency versions across all build machines.
 - [ ] **Task 2: KPSS Indexing & Validation**
-    - Implement directory walker for `raw_assets/`.
+    - Implement directory walker for `raw_assets/` (Discovery Only).
+    - **Enforce Non-Authoritative Folders**: Add validation to hard-error if logic attempts to infer metadata (brand/category) from folder paths.
     - Build the `CanonicalProductIndex` HashMap.
 - [ ] **Task 3: The Asset Stream**
     - Implement the concurrent WebP and BlurHash generation logic.
+    - **Lock Resizing math**: Ensure specific versioning for `Lanczos3` or `Gaussian` filters to maintain byte-identical outputs.
 - [ ] **Task 4: TOML Assortment Logic**
     - Create the composition resolver to build packages by ID.
 - [ ] **Task 5: Final Packaging & Signing**
