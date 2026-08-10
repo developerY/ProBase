@@ -50,7 +50,7 @@ Products exist in a global pool. To group them into a downloadable "Pack" for th
 **Example Collection (`package_configs/starter_kit.toml`):**
 ```toml
 [package_metadata]
-id = "starter-kit-v1"
+id = "starter-kit"
 name = "Essentials Starter Kit"
 description = "The foundational kit for professional styling."
 
@@ -78,7 +78,7 @@ Once your JSON and TOML files are ready, execute the compiler to generate secure
 *   **Enrichment**: Calculates CIELAB color math and Chemistry phases.
 *   **Visuals**: Concurrently generates WebP Hero/Thumbnail images and **BlurHash** placeholders.
 *   **Security**: Signs every package with **Ed25519** and hashes them with **SHA-256**.
-*   **Registry**: Automatically updates the global `manifest.json` and `search_index.json`.
+*   **Registry**: Automatically updates the global `manifest.json`.
 
 ---
 
