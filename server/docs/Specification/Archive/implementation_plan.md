@@ -1,53 +1,35 @@
-# Implementation Plan: KoColor Rust Starter-Pack Backend
+# Rust Server Proxy Implementation
 
-This plan outlines the steps to transform the existing Rust server into a structured Cargo Workspace that provides a local data-seeding API for the KoColor Android application.
+Implement a Rust-based serverless proxy using Axum to handle Gemini API requests and App Check verification. The server will be located in the `server/` directory at the project root, isolated from the Android Gradle build.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> **Asset Dependency**: The implementation assumes that image files (e.g., `image_07157d.jpg`) are placed in the `server/KoColor/assets/` directory. I will create this directory and add a placeholder note if the files are not yet present.
-
-> [!NOTE]
-> **Port Change**: The current server runs on `8080`. Per the `prompt.md` requirement, I will move it to `3000` to align with the development specification.
+> This plan sets up the boilerplate for a Rust server. You will need to provide your Gemini API key and configure Google Cloud Run for final deployment.
 
 ## Proposed Changes
 
-### 1. Workspace Configuration
+### [Server Component]
+
 #### [NEW] [Cargo.toml](file:///Users/developer/AndroidStudioProjects/ProBase/server/Cargo.toml)
-Create a root workspace file to manage the backend components.
-```toml
-[workspace]
-members = ["KoColor"]
-resolver = "2"
-```
+Defines Rust dependencies: `axum`, `tokio`, `serde`, `reqwest`, `jsonwebtoken`.
 
-### 2. Package Configuration
-#### [MODIFY] [Cargo.toml](file:///Users/developer/AndroidStudioProjects/ProBase/server/KoColor/Cargo.toml)
-Update the package name and add the `base64` crate for image processing.
-```toml
-[package]
-name = "kocolor"
-# ... dependencies: add base64
-```
+#### [NEW] [main.rs](file:///Users/developer/AndroidStudioProjects/ProBase/server/src/main.rs)
+Boilerplate Axum server with a health check and a placeholder for Gemini extraction.
 
-### 3. Server Logic
-#### [MODIFY] [main.rs](file:///Users/developer/AndroidStudioProjects/ProBase/server/KoColor/src/main.rs)
-- **Domain Models**: Implement Serde structs for `StarterPackResponse`, `CosmeticItem`, and `ClothingItem` following the three-tier taxonomy.
-- **Image Helper**: Add `encode_image_to_base64` to convert local assets into `data:image/jpeg;base64` strings.
-- **Handler**: Implement `get_starter_pack` which seeds the initial "Classic" items (Crimson Lip Color, Velvet Primer, etc.).
-- **Routing**: Bind `GET /api/v1/starter-pack` to the handler.
+#### [NEW] [Dockerfile](file:///Users/developer/AndroidStudioProjects/ProBase/server/Dockerfile)
+Multi-stage Dockerfile for building and running the Rust application in a container.
 
-### 4. Asset Management
-#### [NEW] [assets/](file:///Users/developer/AndroidStudioProjects/ProBase/server/KoColor/assets/)
-Ensure the directory exists for storing the reference product images.
+### [Project Configuration]
+
+#### [MODIFY] [.gitignore](file:///Users/developer/AndroidStudioProjects/ProBase/.gitignore)
+Add `/server/target/` to ignore Rust build artifacts.
 
 ## Verification Plan
 
 ### Automated Tests
-- I will attempt a `cargo build` within the sub-agent to verify syntax correctness.
-- Once deployed, the endpoint can be verified via:
-  `curl http://localhost:3000/api/v1/starter-pack`
+- None at this stage (boilerplate setup).
 
 ### Manual Verification
-- Verify the JSON response contains the correct Base64 strings.
-- Check that the `chemistry`, `formulation`, and `temperature` facets match the `ProfessionalTaxonomy.md` specs.
+- Verify the files are created in the correct locations.
+- The user can later run `cargo build` in the `server/` directory to verify compilation (requires Rust toolchain).
