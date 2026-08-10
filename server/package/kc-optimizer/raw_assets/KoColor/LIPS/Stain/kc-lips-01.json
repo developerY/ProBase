@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-lips-01",
+  "name": "Glow Catalyst Lip Stain",
+  "brand": "KoColor",
+  "macro_category": "LIPS",
+  "micro_category": "STAIN",
+  "shade_name": "Crimson Catalyst",
+  "color_hex": "#A81C28",
+  "raw_image_input": "./kc-lips-01.png",
+  "price": 24.0,
+  "volume": "4ml",
+  "notes": "Long-wearing hydrating lip tint.",
+  "hero_ingredient": "Water",
+  "eco_score": "A",
+  "ingredients": ["Water", "Octyldodecanol", "Trimethylsiloxyphenyl Dimethicone", "Ethylcellulose", "Red 28 Lake", "Yellow 6 Lake"],
+  "Contains_Fragrance": true,
+  "recycling_instructions": "Plastic vial is recyclable.",
+  "fda_data_verified": true
+}

@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-lips-02",
+  "name": "Blotted Lip Balm",
+  "brand": "KoColor",
+  "macro_category": "LIPS",
+  "micro_category": "BALM",
+  "shade_name": "Blotted Cherry",
+  "color_hex": "#B72227",
+  "raw_image_input": "./kc-lips-02.png",
+  "price": 21.0,
+  "volume": "3g",
+  "notes": "Matte blotted balm with sheer buildable color.",
+  "hero_ingredient": "Shea Butter",
+  "eco_score": "A+",
+  "ingredients": ["Caprylic/Capric Triglyceride", "Ricinus Communis (Castor) Seed Oil", "Microcrystalline Wax", "Red 7 Lake", "Shea Butter"],
+  "Contains_Fragrance": false,
+  "recycling_instructions": "Lipstick tube is recyclable.",
+  "fda_data_verified": true
+}

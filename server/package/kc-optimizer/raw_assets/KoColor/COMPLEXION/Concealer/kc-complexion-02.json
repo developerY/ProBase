@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-complexion-02",
+  "name": "Everyday Clear Concealer",
+  "brand": "KoColor",
+  "macro_category": "COMPLEXION",
+  "micro_category": "CONCEALER",
+  "shade_name": "Honey 210",
+  "color_hex": "#D4A373",
+  "raw_image_input": "./kc-complexion-02.png",
+  "price": 26.0,
+  "volume": "6ml",
+  "notes": "Crease-resistant spot and under-eye corrector.",
+  "hero_ingredient": "Niacinamide",
+  "eco_score": "A",
+  "ingredients": ["Water", "Dimethicone", "Titanium Dioxide", "Butylene Glycol", "Iron Oxides", "Niacinamide"],
+  "Contains_Fragrance": false,
+  "recycling_instructions": "Small plastic container; check local recycling rules.",
+  "fda_data_verified": true
+}
