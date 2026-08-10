@@ -1,0 +1,17 @@
+[package_metadata]
+id = "kocolor-complete-collection"
+name = "KoColor Core Collection"
+description = "The complete foundational routine spanning prep, complexion, dimension, eyes, and lips."
+
+[assortment]
+includes = [
+    "kc-prep-01",
+    "kc-prep-02",
+    "kc-prep-03",
+    "kc-complexion-01",
+    "kc-complexion-02",
+    "kc-dimension-01",
+    "kc-eyes-01",
+    "kc-lips-01",
+    "kc-lips-02"
+]
