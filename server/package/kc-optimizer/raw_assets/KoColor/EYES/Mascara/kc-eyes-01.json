@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-eyes-01",
+  "name": "Lash Lift Defining Mascara",
+  "brand": "KoColor",
+  "macro_category": "EYES",
+  "micro_category": "MASCARA",
+  "shade_name": "Soft Black",
+  "color_hex": "#1A1A1A",
+  "raw_image_input": "./kc-eyes-01.png",
+  "price": 20.0,
+  "volume": "8ml",
+  "notes": "Defining mascara for instant lift and separation.",
+  "hero_ingredient": "Panthenol",
+  "eco_score": "B-",
+  "ingredients": ["Water", "Beeswax", "Iron Oxides", "Copernicia Cerifera (Carnauba) Wax", "Stearic Acid", "Panthenol"],
+  "Contains_Fragrance": false,
+  "recycling_instructions": "Wand and tube must be cleaned before recycling.",
+  "fda_data_verified": true
+}

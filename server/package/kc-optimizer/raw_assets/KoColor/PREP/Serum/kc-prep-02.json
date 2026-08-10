@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-prep-02",
+  "name": "Luminescent C Serum",
+  "brand": "KoColor",
+  "macro_category": "PREP",
+  "micro_category": "SERUM",
+  "shade_name": "Luminous Glow",
+  "color_hex": "#FFF8E7",
+  "raw_image_input": "./kc-prep-02.png",
+  "price": 32.0,
+  "volume": "30ml",
+  "notes": "Antioxidant Vitamin C treatment for skin radiance.",
+  "hero_ingredient": "Ascorbic Acid (Vitamin C)",
+  "eco_score": "A",
+  "ingredients": ["Water", "Ascorbic Acid (Vitamin C)", "Glycerin", "Tocopherol", "Sodium Hyaluronate"],
+  "Contains_Fragrance": false,
+  "recycling_instructions": "Glass bottle is recyclable; remove dropper pump before disposal.",
+  "fda_data_verified": true
+}

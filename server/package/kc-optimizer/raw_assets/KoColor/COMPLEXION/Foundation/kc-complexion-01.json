@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-complexion-01",
+  "name": "Seamless Silk Foundation",
+  "brand": "KoColor",
+  "macro_category": "COMPLEXION",
+  "micro_category": "FOUNDATION",
+  "shade_name": "Warm Beige 220W",
+  "color_hex": "#E0AC81",
+  "raw_image_input": "./kc-complexion-01.png",
+  "price": 42.0,
+  "volume": "30ml",
+  "notes": "Buildable medium coverage foundation with a natural skin finish.",
+  "hero_ingredient": "Glycerin",
+  "eco_score": "A-",
+  "ingredients": ["Water", "Cyclopentasiloxane", "Titanium Dioxide", "Glycerin", "Iron Oxides", "Silica"],
+  "Contains_Fragrance": false,
+  "recycling_instructions": "Glass bottle recyclable; remove pump.",
+  "fda_data_verified": true
+}

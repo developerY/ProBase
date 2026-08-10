@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-prep-01",
+  "name": "Purifying Gel Cleanser",
+  "brand": "KoColor",
+  "macro_category": "PREP",
+  "micro_category": "CLEANSER",
+  "shade_name": "Clear Crystal",
+  "color_hex": "#F4F6F0",
+  "raw_image_input": "./kc-prep-01.png",
+  "price": 18.0,
+  "volume": "150ml",
+  "notes": "Gentle daily foaming cleanser that balances skin pH.",
+  "hero_ingredient": "Niacinamide",
+  "eco_score": "A",
+  "ingredients": ["Water", "Glycerin", "Sodium Cocoyl Glycinate", "Citric Acid", "Niacinamide"],
+  "Contains_Fragrance": false,
+  "recycling_instructions": "Rinse bottle and recycle via local plastic streams.",
+  "fda_data_verified": true
+}

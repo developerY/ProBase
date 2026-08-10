@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-prep-03",
+  "name": "Melt-in Milk Sunscreen",
+  "brand": "KoColor",
+  "macro_category": "PREP",
+  "micro_category": "SPF",
+  "shade_name": "Invisible Shield",
+  "color_hex": "#FFFFFF",
+  "raw_image_input": "./kc-prep-03.png",
+  "price": 24.0,
+  "volume": "50ml",
+  "notes": "Broad-spectrum SPF 50+ lightweight facial fluid.",
+  "hero_ingredient": "Zinc Oxide",
+  "eco_score": "B+",
+  "ingredients": ["Water", "Zinc Oxide", "Caprylic/Capric Triglyceride", "Squalane", "Polyhydroxystearic Acid"],
+  "Contains_Fragrance": false,
+  "recycling_instructions": "Tube is recyclable where local facilities exist.",
+  "fda_data_verified": true
+}

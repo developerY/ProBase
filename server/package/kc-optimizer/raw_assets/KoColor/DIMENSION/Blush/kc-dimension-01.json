@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-dimension-01",
+  "name": "Petal Touch Flush Blush",
+  "brand": "KoColor",
+  "macro_category": "DIMENSION",
+  "micro_category": "BLUSH",
+  "shade_name": "Rosewood",
+  "color_hex": "#C86D7C",
+  "raw_image_input": "./kc-dimension-01.png",
+  "price": 22.0,
+  "volume": "5g",
+  "notes": "Soft velvet blush powder that brightens the complexion.",
+  "hero_ingredient": "Zinc Stearate",
+  "eco_score": "B",
+  "ingredients": ["Mica", "Talc", "Dimethicone", "Silica", "Zinc Stearate", "Red 7 Lake", "Iron Oxides"],
+  "Contains_Fragrance": false,
+  "recycling_instructions": "Compact is recyclable when pan is removed.",
+  "fda_data_verified": true
+}
