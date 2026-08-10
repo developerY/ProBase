@@ -19,8 +19,9 @@ I have successfully implemented the final pass of the **KoColor Asset Engineerin
 *   **[`composer.rs`](file:///Users/developer/AndroidStudioProjects/ProBase/server/package/kc-optimizer/src/composer.rs)**: Updated to return a unified `PackageManifestRecord` for every assembled collection.
 *   **[`main.rs`](file:///Users/developer/AndroidStudioProjects/ProBase/server/package/kc-optimizer/src/main.rs)**: Orchestrates the generation of the global **`manifest.json`** artifact, which serves as the "Trusted Registry" for the entire mobile ecosystem.
 
-### 4. Deterministic Key Generation
-*   Integrated `rand::rngs::OsRng` for secure build-time key generation, with architectural hooks for future vault/ENV variable integration.
+### 4. Secure Key Provisioning
+*   Integrated `rand::rngs::OsRng` for secure, zero-config local development.
+*   **Determinism Hook**: Added architectural hooks to ingest static keys via secure ENV variables/vaults in CI/CD, guaranteeing that unmodified source data results in byte-identical signatures across distributed build machines.
 
 ---
 
