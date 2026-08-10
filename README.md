@@ -23,6 +23,19 @@ The flagship application of this repository. AshBike is a multi-device cycling c
 
 
 
+### 💄 KoColor
+
+A professional-grade cosmetic and wardrobe management platform with a focus on cryptographic data integrity and "Compute-at-Compile-Time" science.
+
+* `applications/kocolor/apps/mobile`
+
+* **Key Features**:
+    * **Glow Sync Hub**: Multi-pack inventory ingestion from a verified global registry.
+    * **Boutique Selection**: High-fidelity product picker with sticky category headers and selective import.
+    * **Zero-Trust Security**: Authenticity verification via Ed25519 signatures and SHA-256 content addressing.
+    * **Enriched Intelligence**: Pre-calculated CIELAB colorimetry and thermodynamic phase mapping (pilling prevention).
+    * **Make it Mine**: Personalized archive cloning that detaches curated items into secure user-owned records.
+
 ### 📸 PhotoDo
 
 A photo-centric task management application that blends visual documentation with structured workflows.

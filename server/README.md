@@ -1,94 +1,69 @@
-# KoColor Secure Package Distribution Platform
+# KoColor Sovereign Distribution Platform
 
-This directory contains the **Rust Normalization Compiler**, the engine responsible for transforming raw vendor data into secure, highly compressed, and cryptographically signed KoColor Packages (`.kpkg`).
+This directory contains the core infrastructure for the **KoColor Sovereign Distribution Platform**, a high-performance system for generating, securing, and distributing professional cosmetic and wardrobe intelligence.
 
-## 🏗 System Architecture
+## 🏗️ System Architecture: "Compute at Compile Time"
 
-The platform operates on a **Static-First Hub & Spoke** model:
-1.  **Compiler (Rust)**: Normalizes data into the **KoColor Canonical Product Schema (KCPS)**, applies Zstandard compression, and signs payloads with Ed25519.
-2.  **CDN (Static)**: Hosts the `manifest.json` and `.kpkg` binaries (Cloudflare / GitHub Pages).
-3.  **Hub (Android Phone)**: Streams, verifies, decompresses, and persists packages into a local Room database.
-4.  **Spoke (Wear OS / XR)**: Mirrors the verified data from the Phone Hub via local synchronization.
+The platform operates on a **Static-First Hub & Spoke** model, offloading heavy mathematical and chemical calculations from the mobile device to the build-time compiler.
 
----
-
-## 📚 Documentation & Specifications
-
-The following documents define the platform's protocols and standards:
-- [**KCPS v2 Specification**](./docs/PackageDistribution/KCPS_v2_SPEC.md): The definitive data contract for KoColor products.
-- [**Product Authoring Guide**](./docs/PackageDistribution/KCPS_Product_Authoring_Guide.md): Instructions for creating valid JSON product definitions.
-- [**Compiler Operations**](./docs/PackageDistribution/COMPILER_OPS.md): Detailed guide on running the Rust build pipeline.
-- [**Architecture Overview**](./docs/PackageDistribution/architecture_overview.md): High-level system design and security invariants.
+1.  **Normalization Compiler (`kc-optimizer`)**: The Rust-based engine that transforms raw authoring data into optimized, signed payloads.
+2.  **CDN (Static Distribution)**: Hosts the cryptographically signed `manifest.json` and highly compressed `.kpkg` binaries (GitHub Pages).
+3.  **Platform Hub (Android Phone)**: The central verification and ingestion engine.
+4.  **Downstream Spokes (Wear OS / XR)**: Consumer devices that mirror data from the verified Phone Hub.
 
 ---
 
-## 🔐 Security Protocol (Phase 1.1)
+## 🔐 The Multi-Layer Trust Framework
 
-All distribution artifacts follow the **Verify-First Rule**:
-*   **Trust Bootstrap**: `manifest.json` is signed. The client verifies this signature using an embedded Root Public Key.
-*   **Integrity (SHA-256)**: Every `.kpkg` has a unique hash in the manifest to detect corruption.
-*   **Authenticity (Ed25519)**: Every `.kpkg` is signed. The client verifies the signature *before* decompression.
-*   **Immutability**: Packages are content-addressed using the convention `<package-id>-<sha256>.kpkg`.
+We enforce a strict **Verify-Before-Execute** policy to ensure a zero-trust distribution environment.
+
+*   **Trust Bootstrap**: Every manifest is signed with an **Ed25519** private key. The client verifies the signature before reading metadata.
+*   **Integrity (SHA-256)**: Every binary package is content-addressed using its SHA-256 hash.
+*   **Authenticity**: Packages are signed immediately after compression. The client verifies this signature *before* decompression.
+*   **Safety**: All ingestion is protected by **JSON Bomb Prevention** logic and hardcoded safety caps (32MB).
 
 ---
 
-## 🚀 Operational Guide
+## ⚙️ Core Toolchain: `kc-optimizer`
 
-### 1. Requirements
-*   **Rust Toolchain**: 1.75+
-*   **Private Key**: A 32-byte Ed25519 private key (64 hex characters).
+The `kc-optimizer` project is a data-driven compiler that replaces hardcoded registries with a flexible, directory-based workflow.
 
-### 2. Setup Environment
-Create a `.env` file in `server/package/KoColor/`:
-```env
-CDN_PRIVATE_KEY_HEX=your_64_character_hex_private_key
-```
-*Note: If you need to generate a new keypair, run the keygen utility:*
+### Key Capabilities:
+*   **Colorimetry Engine**: Converts sRGB hex to **CIELAB** ($L^*a^*b^*$) and Hue Angle ($h_{ab}$) for D65 illuminants.
+*   **Enrichment Engine**: Maps chemical bases to thermodynamic phases and tokenizes ingredients for "Clean Beauty" filtering.
+*   **Visual Pipeline**: Generates **BlurHash** placeholders and optimized **WebP** assets concurrently via `rayon`.
+*   **Deterministic Sealing**: Produces byte-identical `.kpkg` binaries using high-ratio **Zstd** (Level 19) compression.
+
+---
+
+## 🚀 Team Workflow
+
+Adding new inventory to the KoColor ecosystem requires **zero source-code changes**.
+
+### 1. The "Drop"
+Place raw images (.png) and authoring metadata (**KPSS v1** JSON) into the `kc-optimizer/raw_assets/` directory.
+
+### 2. The "Mix"
+Define package assortments in the `kc-optimizer/package_configs/` directory using TOML.
+
+### 3. The "Run"
+Execute the authoritative distribution pipeline:
 ```bash
-cd server/gen/Key
-cargo run --bin keygen
+cd server/package/kc-optimizer
+./runMe.sh
 ```
-
-### 3. Run the Compiler
-The compiler aggregates all inventory definitions, generates the search index, and builds the signed binary packages.
-
-```bash
-# Navigate to the compiler crate
-cd server/package/KoColor
-
-# Execute the normalization pipeline
-cargo run --bin generate_payload
-```
-
-### 4. Output Artifacts
-The compiler generates the following files in `server/package/KoColor/dist/`:
-*   `manifest.json`: The signed root index containing all package metadata.
-*   `search_index.json`: Global discovery index for the Android Sync Hub.
-*   `*.kpkg`: The compressed, signed binary data payloads.
 
 ---
 
-## 🌐 Deployment (CDN)
+## 📚 Technical Documentation Hub
 
-Since the architecture is static, "deployment" simply means syncing the output artifacts to your web host.
-
-### Folder Structure for CDN
-```text
-/inventory/
-├── manifest.json
-├── search_index.json
-├── com.kocolor.pack.core-a3b1c3...kpkg
-└── com.kocolor.pack.winter2026-483e68...kpkg
-```
-
-### GitHub / Cloudflare Sync
-1.  Copy the generated files to your `kc-cdn` repository.
-2.  **Commit and Push**.
-3.  Ensure the Android `BASE_URL` in `KocolorApiService.kt` matches your raw CDN path.
+*   **[Sovereign Architecture Guide](./docs/Specification/Anchor.md)**: The foundational "Data as Code" manifesto.
+*   **[KCPS v1 Specification](./docs/Specification/Schema/KCPS_v1_SPEC.md)**: The authoritative distribution data contract.
+*   **[Product Authoring Guide](./docs/Specification/Schema/KCPS_Product_Authoring_Guide.md)**: How to define KPSS-compliant source data.
+*   **[User Manual](./docs/Specification/ProductGen/USER_MANUAL.md)**: Operational guide for the Asset Engineering Platform.
+*   **[Platform Walkthrough](./docs/Specification/Walkthrough.md)**: End-to-end journey from authoring to mobile ingestion.
 
 ---
-
-## 📋 Maintenance Checklist
-*   [ ] **Version Bumping**: Increment the `version` in `generate_payload.rs` when data changes.
-*   [ ] **Schema Changes**: Increment `schema_version` to `3` if adding mandatory fields to items.
-*   [ ] **Immutable Purge**: Periodically remove old `.kpkg` files from the CDN that are no longer referenced in the current `manifest.json`.
+**Status**: 🚀 **V1 PRODUCTION ACTIVE**
+**Compiler**: `kocolor-asset-processor`
+**Security Standard**: Ed25519 + SHA-256 + Zstd
