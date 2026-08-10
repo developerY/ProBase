@@ -21,6 +21,11 @@ toml = "0.8"
 # Filesystem traversal
 walkdir = "2.4"
 
+# Compression
+zstd = "0.13"
+
 # Cryptography & Hashing (for deterministic signing)
 sha2 = "0.10"
-ed25519-dalek = "2.1"
+ed25519-dalek = { version = "2.1", features = ["rand_core"] }
+hex = "0.4"
+rand = "0.8"
