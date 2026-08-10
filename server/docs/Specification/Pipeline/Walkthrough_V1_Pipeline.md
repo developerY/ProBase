@@ -5,7 +5,7 @@ This journey follows a product from its initial definition in a JSON source to i
 ---
 
 ## 🏗️ Step 1: Definition
-You define your products in a JSON source file (e.g., `holiday_kit.json`) and place it in the `server/package/KoColor/input_packs/` directory.
+You define your products in a **KPSS v1 (Authoring Source)** compliant JSON source file (e.g., `holiday_kit.json`) and place it within the **`raw_assets/`** directory structure.
 
 ## ⚙️ Step 2: Compilation
 Run the automated distribution pipeline:

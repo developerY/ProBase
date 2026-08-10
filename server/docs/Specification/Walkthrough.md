@@ -7,8 +7,8 @@ This document provides a comprehensive end-to-end journey of the KoColor invento
 ## 🏗️ Phase 1: Data Authoring & Compilation
 
 ### 1. Zero-Touch Product Definition
-You no longer modify code to add inventory. Products are defined in **KCPS v1** compliant JSON files located in `server/package/KoColor/input_packs/`.
-*   **Schema Enforcement**: The compiler rejects any file missing required fields like `brand` or `macro_category`.
+You no longer modify code to add inventory. Products are defined in **KPSS v1 (Authoring Source)** compliant JSON files located within the `raw_assets/` directory structure.
+*   **Schema Enforcement**: The compiler rejects any file missing required authoring fields like `brand` or `macro_category` before transforming them into distribution-ready KCPS objects.
 *   **Domain Integrity**: Cosmetic-specific fields (like `fda_data_verified`) are strictly prohibited in clothing arrays.
 
 ### 2. "Compute at Compile Time" Enrichment

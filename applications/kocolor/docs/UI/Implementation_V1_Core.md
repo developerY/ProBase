@@ -41,9 +41,9 @@ data class ClothingItemDto(...) : PackItemDto
 The backend has transitioned into a pure, data-driven Command Line Interface (CLI). Hardcoded registries have been removed in favor of a flexible directory-based workflow.
 
 ### Key Logic:
-1.  **Directory Iteration**: The compiler automatically scans the `input_packs/` directory for any `.json` files.
-2.  **Dynamic Metadata**: `pack_id` and `name` are dynamically derived from the physical filename (e.g., `winter_2026.json` -> `com.kocolor.pack.winter-2026`).
-3.  **Strict Type Check**: Validates every JSON source against KCPS v1 Rust structs before compilation.
+1.  **Pass 1 (Indexing)**: Traverse `raw_assets/`, validate against **KPSS v1**, and build a global product index.
+2.  **Pass 2 (Composition)**: Traverse `package_configs/`, resolve IDs from the index, and generate signed **KCPS v1** payloads.
+3.  **Strict Type Check**: Validates every authoring source against KPSS v1 Rust structs before compilation.
 4.  **Deterministic Serialization**: Serializes to a canonical byte vector to ensure stable SHA-256 hashes.
 5.  **Unified Artifacts**: Automatically builds a single `manifest.json` and a global `search_index.json` covering all detected packs.
 6.  **Enrichment Engine**:
@@ -52,7 +52,7 @@ The backend has transitioned into a pure, data-driven Command Line Interface (CL
     *   **Visuals**: Generates **BlurHash** placeholders for all thumbnails.
     *   **Safety**: Tokenizes ingredients into binary flags.
 
-**Usage**: Simply drop a JSON file into `server/package/KoColor/input_packs/` and run `./runMe.sh`.
+**Usage**: Simply drop a KPSS JSON file into `raw_assets/`, define the assortment in `package_configs/`, and run `./runMe.sh`.
 
 ---
 
