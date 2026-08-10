@@ -41,6 +41,8 @@ The workspace is now fully prepared for **Pass 1 (Semantic Indexing)**. The envi
 
 **Next Milestone**: Automated recursive traversal and validation of the `raw_assets/` directory.
 
+For a guide on how the team can use this new pipeline, see the **[Team Workflow: The "Drop JSON & Run" Pipeline](file:///Users/developer/AndroidStudioProjects/ProBase/server/docs/Specification/ProductGen/Team_Workflow.md)**.
+
 ---
 
 ## ⚙️ 4. Asset Stream Optimization (Task 3)
