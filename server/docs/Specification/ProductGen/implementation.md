@@ -65,7 +65,7 @@ The compiler will perform a "Clean Purge" during the transformation from authori
 - [x] **Task 3: The Asset Stream**
     - Implement the concurrent WebP and BlurHash generation logic.
     - **Lock Resizing math**: Ensure specific versioning for `Lanczos3` or `Gaussian` filters to maintain byte-identical outputs.
-- [ ] **Task 4: TOML Assortment Logic**
+- [x] **Task 4: TOML Assortment Logic**
     - Create the composition resolver to build packages by ID.
 - [ ] **Task 5: Final Packaging & Signing**
     - Update the Ed25519 signing logic to include the newly enriched KCPS fields.

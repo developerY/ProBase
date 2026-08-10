@@ -2,41 +2,67 @@ mod models;
 mod indexer;
 mod optimizer;
 mod composer;
+mod packager;
 
 use rayon::prelude::*;
 use std::fs;
 use std::path::Path;
 use std::time::Instant;
+use ed25519_dalek::SigningKey;
+use rand::rngs::OsRng;
 
 fn main() {
     println!("🚀 Starting KoColor Asset Engineering Pipeline (v1.0)...");
     let start_time = Instant::now();
 
-    let raw_assets_dir = "./raw_assets";
-    let output_dist_dir = Path::new("./dist/assets");
+    // Generate a secure Ed25519 keypair for this build run
+    // (In production, this would be loaded from a secure ENV variable or vault)
+    let mut csprng = OsRng;
+    let signing_key = SigningKey::generate(&mut csprng);
 
-    // Ensure the output directory exists
-    fs::create_dir_all(output_dist_dir).expect("Failed to create dist directory");
+    let raw_assets_dir = "./raw_assets";
+    let output_dist_dir = Path::new("./dist");
+    let assets_dist_dir = output_dist_dir.join("assets");
+
+    // Ensure the output directories exist
+    fs::create_dir_all(&assets_dist_dir).expect("Failed to create dist/assets directory");
 
     // --- PASS 1: DATA INGESTION ---
     println!("\n--- PASS 1: DATA INGESTION ---");
     let canonical_index = indexer::build_canonical_index(raw_assets_dir);
 
-    // --- PASS 2: ASSET OPTIMIZATION ---
+    // --- PASS 2: CONCURRENT ASSET OPTIMIZATION ---
     println!("\n--- PASS 2: CONCURRENT ASSET OPTIMIZATION ---");
 
     // We convert the HashMap values to a parallel iterator to process all images concurrently
-    canonical_index.par_iter().for_each(|(id, kpss_data)| {
-        println!("⚙️  Optimizing assets for: {}...", id);
+    // Collect the results into a HashMap for the Composer
+    let optimized_asset_map: std::collections::HashMap<String, optimizer::OptimizedAssets> = canonical_index
+        .par_iter()
+        .map(|(id, kpss_data)| {
+            println!("⚙️  Optimizing assets for: {}...", id);
+            let assets = optimizer::process_asset_stream(&kpss_data.raw_image_input, &assets_dist_dir);
+            (id.clone(), assets)
+        })
+        .collect();
 
-        // Pass the relative image path directly from the JSON payload
-        let _optimized_assets = optimizer::process_asset_stream(
-            &kpss_data.raw_image_input,
-            output_dist_dir
-        );
+    // --- PASS 3: COMPOSITION & PACKAGING ---
+    println!("\n--- PASS 3: COMPOSITION & PACKAGING ---");
+    let manifest_records = composer::assemble_packages(
+        &canonical_index,
+        &optimized_asset_map,
+        "./package_configs",
+        output_dist_dir,
+        &signing_key
+    );
 
-        // Note: In Task 4, we will use these returned OptimizedAssets to build the final KCPS Payload.
-    });
+    // --- PASS 4: GENERATE MASTER MANIFEST ---
+    println!("\n--- PASS 4: GENERATE MASTER MANIFEST ---");
+    let manifest_json = serde_json::to_string_pretty(&manifest_records)
+        .expect("❌ Failed to generate master manifest");
+
+    let manifest_path = output_dist_dir.join("manifest.json");
+    fs::write(manifest_path, manifest_json).expect("❌ Failed to write manifest.json");
+    println!("  📜 master manifest.json written.");
 
     println!("\n✅ CCT Build completed in {:.2?}.", start_time.elapsed());
 }

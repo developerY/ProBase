@@ -1,0 +1,39 @@
+use ed25519_dalek::{Signer, SigningKey, Signature};
+use sha2::{Digest, Sha256};
+use std::fs;
+use std::path::Path;
+use zstd::stream::encode_all;
+
+/// Compresses the KCPS JSON payload using Zstd, writes the .kpkg binary,
+/// computes its SHA-256 hash, and signs it with an Ed25519 private key.
+pub fn seal_package(
+    json_bytes: &[u8],
+    package_id: &str,
+    signing_key: &SigningKey,
+    dist_dir: &Path,
+) -> (String, String) {
+    // 1. Zstd Compression
+    // We use level 19 (maximum) because we are computing at compile-time.
+    // This ruthlessly shrinks the payload for mobile downloads.
+    let compressed_bytes = encode_all(json_bytes, 19)
+        .expect("❌ Zstd compression failed");
+
+    // 2. Write the .kpkg binary artifact
+    let kpkg_filename = format!("{}.kpkg", package_id);
+    let kpkg_path = dist_dir.join(&kpkg_filename);
+    fs::write(&kpkg_path, &compressed_bytes)
+        .unwrap_or_else(|err| panic!("❌ Failed to write {}: {}", kpkg_filename, err));
+
+    // 3. Generate SHA-256 Hash
+    let mut hasher = Sha256::new();
+    hasher.update(&compressed_bytes);
+    let hash_result = hasher.finalize();
+    let hash_hex = hex::encode(hash_result);
+
+    // 4. Cryptographic Signing (Ed25519)
+    // We sign the compressed bytes to guarantee absolute integrity on the CDN
+    let signature: Signature = signing_key.sign(&compressed_bytes);
+    let sig_hex = hex::encode(signature.to_bytes());
+
+    (hash_hex, sig_hex)
+}

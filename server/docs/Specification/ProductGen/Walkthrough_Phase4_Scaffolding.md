@@ -50,3 +50,13 @@ We implemented a high-performance, multi-threaded image processing pipeline usin
 *   **Deterministic Resizing**: Hardcoded `Lanczos3` and `Gaussian` filter types in [`optimizer.rs`](file:///Users/developer/AndroidStudioProjects/ProBase/server/package/kc-optimizer/src/optimizer.rs) to ensure byte-identical WebP artifacts.
 *   **BlurHash Generation**: Integrated the `blurhash` crate to compute Base83 visual placeholders from thumbnail pixel data during the build phase.
 *   **Asset Naming Rule Enforcement**: Automated the derivation of production filenames from authoring source paths, ensuring consistent CDN mapping.
+
+---
+
+## 📝 5. Composition Engine & The Purge (Task 4)
+
+We implemented the TOML-driven composition layer, transforming raw data into distribution-ready packages.
+
+*   **Referential Integrity**: The compiler resolves product IDs from the in-memory Canonical Index. If a TOML manifest requests a non-existent or unoptimized product, the build fails immediately.
+*   **The Clean Purge**: Successfully implemented the **KPSS -> KCPS** transformation, injecting BlurHashes and CDN URLs while strictly purging local file system paths and intermediate metadata.
+*   **Decoupled Assortment**: Product existence is now fully separated from package composition, allowing products to be reused across multiple collections without data duplication.
