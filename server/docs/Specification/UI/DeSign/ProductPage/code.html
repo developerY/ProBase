@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Glow Archive - Product Details</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Playfair+Display:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-fixed": "#171d14",
+                        "error": "#ba1a1a",
+                        "on-surface-variant": "#4d4447",
+                        "tertiary-fixed-dim": "#c2c9ba",
+                        "on-secondary-fixed": "#161d1f",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "surface-bright": "#fef8f8",
+                        "surface-container": "#f2ecec",
+                        "surface": "#fef8f8",
+                        "on-tertiary": "#ffffff",
+                        "background": "#fef8f8",
+                        "on-secondary-container": "#5d6466",
+                        "outline": "#7f7477",
+                        "error-container": "#ffdad6",
+                        "inverse-primary": "#d7c1c7",
+                        "on-background": "#1d1b1b",
+                        "primary-fixed-dim": "#d7c1c7",
+                        "on-tertiary-container": "#62695d",
+                        "surface-tint": "#6b5a5f",
+                        "on-primary": "#ffffff",
+                        "outline-variant": "#d0c3c6",
+                        "inverse-surface": "#323030",
+                        "on-surface": "#1d1b1b",
+                        "on-error": "#ffffff",
+                        "secondary-fixed": "#dde4e6",
+                        "secondary-container": "#dae1e3",
+                        "surface-container-high": "#ede7e7",
+                        "on-error-container": "#93000a",
+                        "primary-fixed": "#f4dde3",
+                        "tertiary-container": "#e2e9da",
+                        "primary-container": "#f8e1e7",
+                        "primary": "#6b5a5f",
+                        "on-primary-fixed-variant": "#524348",
+                        "on-primary-container": "#746368",
+                        "secondary-fixed-dim": "#c1c8ca",
+                        "on-tertiary-fixed-variant": "#42493e",
+                        "on-secondary-fixed-variant": "#41484a",
+                        "surface-container-low": "#f8f2f2",
+                        "tertiary": "#596055",
+                        "secondary": "#586062",
+                        "on-primary-fixed": "#24181c",
+                        "tertiary-fixed": "#dee5d6",
+                        "surface-variant": "#e7e1e1",
+                        "surface-container-highest": "#e7e1e1",
+                        "surface-dim": "#ded9d9",
+                        "inverse-on-surface": "#f5efef"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-md": "12px",
+                        "container-padding": "24px",
+                        "unit": "8px",
+                        "gutter": "16px",
+                        "section-gap": "40px",
+                        "stack-lg": "24px",
+                        "stack-sm": "4px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "headline-md": ["Playfair Display"],
+                        "label-sm": ["Inter"],
+                        "label-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "display-lg": ["Playfair Display"],
+                        "headline-lg-mobile": ["Playfair Display"],
+                        "headline-lg": ["Playfair Display"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "500" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.08em", "fontWeight": "600" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "display-lg": ["42px", { "lineHeight": "52px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            -webkit-tap-highlight-color: transparent;
+        }
+        .soft-shadow {
+            box-shadow: 0 4px 20px rgba(107, 90, 95, 0.04);
+        }
+        .modal-shadow {
+            box-shadow: 0 8px 30px rgba(107, 90, 95, 0.08);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen pb-safe pb-32">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-40 bg-surface shadow-sm">
+<div class="flex justify-between items-center w-full px-container-padding py-stack-md">
+<button aria-label="Go Back" class="text-primary hover:opacity-80 transition-opacity active:scale-[0.98] duration-200">
+<span class="material-symbols-outlined text-headline-md">arrow_back</span>
+</button>
+<h1 class="font-headline-md text-headline-md text-primary tracking-tight">Glow Archive</h1>
+<div class="w-8 h-8 rounded-full bg-surface-container-highest overflow-hidden">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A small, circular avatar portrait of a young woman with a calm expression, glowing skin, and minimal makeup. The image has a soft, light-mode aesthetic with pastel undertones, matching a premium, serene cosmetic app design." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDwwgxpZG3_-veaLhFjb1EurdmWgQ2kiD-gH9SI2cH2uPO3BY4E5HcH_NDIioAAFjMyFe7vkPvkkN9h7WYlqSYU2VB699Yf2ii3Oa6CiJDFFnaDSkMc9Qixk8UDNOUR2D5GbsWZf_tZhaOe5oORJTBgfzFKtYKe9BDLSQanl-0drFeVYVZCrpBD-npICH-aLYP08C0gUTLqb_lZoWTqzoFmj6HrRRcLltQh5ORHeSMQQY-5C8Onab_vDK09tRq1putQKgYsTrJGGsOR"/>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="pt-[80px] px-container-padding">
+<!-- Hero Product Image -->
+<section class="mt-stack-md rounded-2xl overflow-hidden soft-shadow bg-surface-container-lowest aspect-[4/5] relative">
+<img alt="Radiance Serum Product Shot" class="w-full h-full object-cover" data-alt="A high-end, close-up macro shot of a sleek glass dropper bottle containing a glowing, pale pink radiance serum. The bottle is resting on a pristine, soft ivory marble surface. The lighting is diffused and airy, casting gentle, multi-layered shadows that evoke a sense of modern elegance and tactile luxury." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDJiV2C8O6Q_pE7ya06S4bjcuu1m_eUAYyBetnR9_yoeH5gPsdGMzTNCslJviOgvozdpB34vJtBofFEYJBqNWTZQinTy6OqNcs8ZmDJ1yuF94UE562kOX8kIt6E9v_GZBnalDcihUEoIZ-WaSnA6KrohtcpH2gNK4pZzwD24tWbREorcDuhxBbNUZEoDPP5uVgIjN3EMaM3oZCtVywrBlSjDoGOfPhannwDSqP7xV1P0qP-2B_PjMQ8hea6oJUneO-vZk8YhRVjeJWU"/>
+<!-- Category Chip Floating -->
+<div class="absolute top-4 left-4 bg-surface-container-lowest/90 backdrop-blur-sm border border-outline-variant rounded-full px-3 py-1">
+<span class="font-label-sm text-label-sm text-primary uppercase">Skincare • Serum</span>
+</div>
+</section>
+<!-- Product Identity -->
+<section class="mt-stack-lg text-center">
+<h2 class="font-display-lg text-display-lg text-on-surface">Luminous Radiance</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant mt-unit">Aura Botanica</p>
+</section>
+<!-- Expiration & Status Bento -->
+<section class="mt-section-gap grid grid-cols-2 gap-gutter">
+<!-- Countdown Widget -->
+<div class="col-span-2 bg-surface-container-lowest soft-shadow rounded-2xl p-container-padding flex items-center justify-between border border-surface-variant">
+<div>
+<h3 class="font-label-md text-label-md text-on-surface-variant uppercase">Time Remaining</h3>
+<p class="font-headline-lg-mobile text-headline-lg-mobile text-primary mt-unit">120 Days</p>
+</div>
+<div class="relative w-16 h-16">
+<svg class="w-full h-full transform -rotate-90" viewbox="0 0 36 36">
+<path class="text-surface-variant" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3"></path>
+<path class="text-primary" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="75, 100" stroke-width="3"></path>
+</svg>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-[20px]" style="font-variation-settings: 'FILL' 1;">hourglass_bottom</span>
+</div>
+</div>
+</div>
+<!-- Open Date -->
+<div class="bg-surface-container-lowest soft-shadow rounded-xl p-stack-md border border-surface-variant flex flex-col justify-center">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase mb-1">Opened On</span>
+<span class="font-body-md text-body-md text-on-surface">Oct 12, 2023</span>
+</div>
+<!-- Expiration Date -->
+<div class="bg-surface-container-lowest soft-shadow rounded-xl p-stack-md border border-surface-variant flex flex-col justify-center">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase mb-1">Expires By</span>
+<span class="font-body-md text-body-md text-on-surface">Feb 09, 2024</span>
+</div>
+</section>
+<!-- Details & Notes -->
+<section class="mt-section-gap">
+<h3 class="font-headline-md text-headline-md text-on-surface mb-stack-md">Usage Details</h3>
+<div class="space-y-stack-md">
+<div class="bg-surface-container-lowest soft-shadow rounded-xl p-container-padding border border-surface-variant">
+<h4 class="font-label-md text-label-md text-primary mb-unit flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">water_drop</span>
+                        Instructions
+                    </h4>
+<p class="font-body-md text-body-md text-on-surface-variant">Apply 3-4 drops to cleansed and toned skin. Massage gently upward. Use AM and PM for optimal glow.</p>
+</div>
+<div class="bg-surface-container-lowest soft-shadow rounded-xl p-container-padding border border-surface-variant">
+<h4 class="font-label-md text-label-md text-primary mb-unit flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">edit_note</span>
+                        Personal Notes
+                    </h4>
+<p class="font-body-md text-body-md text-on-surface-variant">Feels slightly tacky at first but absorbs well. Don't mix with direct Vitamin C.</p>
+</div>
+</div>
+</section>
+<!-- Action Buttons -->
+<section class="mt-section-gap flex flex-col gap-stack-md">
+<button class="w-full bg-primary-container text-on-primary-container font-label-md text-label-md py-4 rounded-full flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] transition-all">
+<span class="material-symbols-outlined text-[20px]">edit</span>
+                Edit Details
+            </button>
+<button class="w-full bg-surface-container-highest text-on-surface-variant font-label-md text-label-md py-4 rounded-full flex items-center justify-center gap-2 hover:bg-surface-variant active:scale-[0.98] transition-all">
+<span class="material-symbols-outlined text-[20px]">check_circle</span>
+                Mark as Finished
+            </button>
+</section>
+</main>
+<!-- Navigation Suppressed: Content Canvas Priority for Detailed View -->
+<!-- As per the rules: "Automatic Suppression: You MUST exclude the navigation shell if the page intent is: Task-Focused: Any sub-page featuring a 'Close' or 'Back' action that implies a temporary departure from the main navigation flow." -->
+<!-- This is a specific product detail page with a back button in the top app bar. -->
+</body></html>
