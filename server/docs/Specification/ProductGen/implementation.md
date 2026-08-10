@@ -67,7 +67,7 @@ The compiler will perform a "Clean Purge" during the transformation from authori
     - **Lock Resizing math**: Ensure specific versioning for `Lanczos3` or `Gaussian` filters to maintain byte-identical outputs.
 - [x] **Task 4: TOML Assortment Logic**
     - Create the composition resolver to build packages by ID.
-- [ ] **Task 5: Final Packaging & Signing**
+- [x] **Task 5: Final Packaging & Signing**
     - Update the Ed25519 signing logic to include the newly enriched KCPS fields.
 - [ ] **Task 6: Documentation Update**
     - Update the user walkthrough with the new "Drop JSON & Run" workflow.
