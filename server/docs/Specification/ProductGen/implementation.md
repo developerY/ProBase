@@ -58,11 +58,11 @@ The compiler will perform a "Clean Purge" during the transformation from authori
     - Create `raw_assets/` and `package_configs/` folders.
     - Setup `Cargo.toml` with `image`, `blurhash`, `rayon`, and `toml`.
     - **Commit `Cargo.lock`** to ensure deterministic dependency versions across all build machines.
-- [ ] **Task 2: KPSS Indexing & Validation**
+- [x] **Task 2: KPSS Indexing & Validation**
     - Implement directory walker for `raw_assets/` (Discovery Only).
     - **Enforce Non-Authoritative Folders**: Add validation to hard-error if logic attempts to infer metadata (brand/category) from folder paths.
     - Build the `CanonicalProductIndex` HashMap.
-- [ ] **Task 3: The Asset Stream**
+- [x] **Task 3: The Asset Stream**
     - Implement the concurrent WebP and BlurHash generation logic.
     - **Lock Resizing math**: Ensure specific versioning for `Lanczos3` or `Gaussian` filters to maintain byte-identical outputs.
 - [ ] **Task 4: TOML Assortment Logic**

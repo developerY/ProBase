@@ -8,11 +8,12 @@ You **should not modify Rust code when a new product/package arrives.** New part
 
 ### What is correct now
 
-* ✅ **KCPS v1** is the current schema. No historical versions are needed during pre-release development.
-* ✅ Product definitions live in **JSON**, not Rust modules.
+* ✅ **KPSS v1** is the authoring source schema.
+* ✅ **KCPS v1** is the optimized wire/distribution schema.
+* ✅ Product definitions live in **KPSS JSON**, not Rust modules.
 * ✅ Rust is the **compiler/normalization engine**, not the inventory database.
-* ✅ A new package can be dropped in and compiled without changing Rust.
-* ✅ KCPS validation happens at the compiler boundary.
+* ✅ A new package can be dropped in via `raw_assets/` and compiled without changing Rust.
+* ✅ KPSS validation and KCPS transformation happens at the compiler boundary.
 * ✅ Derived/algorithmic information can be computed by Rust during compilation.
 * ✅ `.kpkg` is the distribution artifact.
 * ✅ Zstandard compression is appropriate.
@@ -48,15 +49,15 @@ I'd replace the old appendix with:
 Product data is **data, not Rust source code**.
 
 New products and partner packages MUST be provided as JSON conforming
-to KCPS v1. The KoColor Normalization Compiler is data-driven and
+to **KPSS v1**. The KoColor Normalization Compiler is data-driven and
 MUST NOT require Rust source-code changes when new products,
 brands, categories, or packages are introduced.
 
 The compiler is responsible for:
 
-1. Parsing the source JSON.
-2. Validating the data against KCPS v1.
-3. Normalizing and canonicalizing the data.
+1. Parsing the **KPSS** source JSON.
+2. Validating the data against KPSS v1.
+3. Normalizing and canonicalizing the data into **KCPS v1**.
 4. Computing compiler-derived attributes where applicable.
 5. Generating the canonical payload.
 6. Compressing the payload with Zstandard.

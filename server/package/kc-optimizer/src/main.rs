@@ -3,23 +3,40 @@ mod indexer;
 mod optimizer;
 mod composer;
 
+use rayon::prelude::*;
+use std::fs;
+use std::path::Path;
 use std::time::Instant;
 
 fn main() {
     println!("🚀 Starting KoColor Asset Engineering Pipeline (v1.0)...");
     let start_time = Instant::now();
 
-    // Pass 1: Build the Canonical Product Index
-    println!("📦 Indexing authoring source...");
-    let canonical_index = indexer::build_canonical_index("./raw_assets");
+    let raw_assets_dir = "./raw_assets";
+    let output_dist_dir = Path::new("./dist/assets");
 
-    // Pass 2: Process Asset Streams (Rayon parallel execution would be invoked here)
-    println!("⚙️  Computing image optimizations and BlurHashes...");
-    // Iterate through index, run optimizer::process_asset_stream()
+    // Ensure the output directory exists
+    fs::create_dir_all(output_dist_dir).expect("Failed to create dist directory");
 
-    // Pass 3: Compose Packages & Sign
-    println!("📝 Resolving TOML assortments & packaging...");
-    composer::build_packages(&canonical_index, "./package_configs");
+    // --- PASS 1: DATA INGESTION ---
+    println!("\n--- PASS 1: DATA INGESTION ---");
+    let canonical_index = indexer::build_canonical_index(raw_assets_dir);
 
-    println!("✅ Build sealed in {:.2?}.", start_time.elapsed());
+    // --- PASS 2: ASSET OPTIMIZATION ---
+    println!("\n--- PASS 2: CONCURRENT ASSET OPTIMIZATION ---");
+
+    // We convert the HashMap values to a parallel iterator to process all images concurrently
+    canonical_index.par_iter().for_each(|(id, kpss_data)| {
+        println!("⚙️  Optimizing assets for: {}...", id);
+
+        // Pass the relative image path directly from the JSON payload
+        let _optimized_assets = optimizer::process_asset_stream(
+            &kpss_data.raw_image_input,
+            output_dist_dir
+        );
+
+        // Note: In Task 4, we will use these returned OptimizedAssets to build the final KCPS Payload.
+    });
+
+    println!("\n✅ CCT Build completed in {:.2?}.", start_time.elapsed());
 }

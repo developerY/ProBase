@@ -30,7 +30,8 @@ We have implemented a **Zero-Trust Distribution Model**.
 
 The compiler is no longer an inventory database; it is a **Transformation Pipeline**.
 
-*   **Dynamic Discovery**: Scans `input_packs/` for partner JSON files.
+*   **Dynamic Discovery**: Scans **`raw_assets/`** for **KPSS v1** partner JSON files and raw PNGs.
+*   **Composition**: Resolves **`package_configs/`** TOML files to assemble multi-product packages.
 *   **Deterministic Serialization**: Serializes structs to canonical bytes to ensure stable hashes.
 *   **Physics Enrichment**:
     *   **Chemistry**: Maps bases to thermodynamic phases (e.g., `HYDROPHILIC_AQUEOUS`).
@@ -57,8 +58,9 @@ The UI layer is designed for **Zero Latency** and **Professional Accuracy**.
 
 ## 🛠️ 5. Deployment Workflow
 
-1.  **Authoring**: Create KCPS v1 JSON in `input_packs/`.
-2.  **Compilation**: Run `./runMe.sh` to generate signed artifacts in `dist/`.
+1.  **Authoring**: Create **KPSS v1** JSON in `raw_assets/`.
+2.  **Assortment**: Define the package composition in `package_configs/`.
+3.  **Compilation**: Run `./runMe.sh` to generate signed **KCPS v1** artifacts in `dist/`.
 3.  **Sync**: The mobile app pings `manifest.json` on the CDN.
 4.  **Ingestion**: User selects items and imports them via verified binary streams.
 
