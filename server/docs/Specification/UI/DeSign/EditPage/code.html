@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Glow Archive - Add Product</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Playfair+Display:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-fixed": "#171d14",
+                        "error": "#ba1a1a",
+                        "on-surface-variant": "#4d4447",
+                        "tertiary-fixed-dim": "#c2c9ba",
+                        "on-secondary-fixed": "#161d1f",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "surface-bright": "#fef8f8",
+                        "surface-container": "#f2ecec",
+                        "surface": "#fef8f8",
+                        "on-tertiary": "#ffffff",
+                        "background": "#fef8f8",
+                        "on-secondary-container": "#5d6466",
+                        "outline": "#7f7477",
+                        "error-container": "#ffdad6",
+                        "inverse-primary": "#d7c1c7",
+                        "on-background": "#1d1b1b",
+                        "primary-fixed-dim": "#d7c1c7",
+                        "on-tertiary-container": "#62695d",
+                        "surface-tint": "#6b5a5f",
+                        "on-primary": "#ffffff",
+                        "outline-variant": "#d0c3c6",
+                        "inverse-surface": "#323030",
+                        "on-surface": "#1d1b1b",
+                        "on-error": "#ffffff",
+                        "secondary-fixed": "#dde4e6",
+                        "secondary-container": "#dae1e3",
+                        "surface-container-high": "#ede7e7",
+                        "on-error-container": "#93000a",
+                        "primary-fixed": "#f4dde3",
+                        "tertiary-container": "#e2e9da",
+                        "primary-container": "#f8e1e7",
+                        "primary": "#6b5a5f",
+                        "on-primary-fixed-variant": "#524348",
+                        "on-primary-container": "#746368",
+                        "secondary-fixed-dim": "#c1c8ca",
+                        "on-tertiary-fixed-variant": "#42493e",
+                        "on-secondary-fixed-variant": "#41484a",
+                        "surface-container-low": "#f8f2f2",
+                        "tertiary": "#596055",
+                        "secondary": "#586062",
+                        "on-primary-fixed": "#24181c",
+                        "tertiary-fixed": "#dee5d6",
+                        "surface-variant": "#e7e1e1",
+                        "surface-container-highest": "#e7e1e1",
+                        "surface-dim": "#ded9d9",
+                        "inverse-on-surface": "#f5efef"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px",
+                        "2xl": "1.5rem"
+                    },
+                    "spacing": {
+                        "stack-md": "12px",
+                        "container-padding": "24px",
+                        "unit": "8px",
+                        "gutter": "16px",
+                        "section-gap": "40px",
+                        "stack-lg": "24px",
+                        "stack-sm": "4px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "headline-md": ["Playfair Display"],
+                        "label-sm": ["Inter"],
+                        "label-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "display-lg": ["Playfair Display"],
+                        "headline-lg-mobile": ["Playfair Display"],
+                        "headline-lg": ["Playfair Display"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "500" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.08em", "fontWeight": "600" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "display-lg": ["42px", { "lineHeight": "52px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .custom-shadow-level-1 {
+            box-shadow: 0 4px 20px rgba(23, 29, 20, 0.04);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md antialiased pb-24 md:pb-0 pt-20">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 bg-surface dark:bg-surface-dim shadow-sm docked full-width flex justify-between items-center px-container-padding py-stack-md">
+<button aria-label="Go back" class="text-on-surface-variant hover:opacity-80 transition-opacity active:scale-[0.98] duration-200">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-headline-md text-headline-md text-primary dark:text-primary-fixed-dim">New Addition</h1>
+<div class="w-6 h-6"></div> <!-- Spacer for center alignment -->
+</header>
+<!-- Main Content -->
+<main class="px-container-padding pt-stack-lg max-w-md mx-auto">
+<!-- Image Upload Placeholder -->
+<section class="mb-section-gap flex flex-col items-center">
+<div class="relative w-40 h-40 rounded-full bg-surface-container-high border border-outline-variant flex flex-col items-center justify-center cursor-pointer hover:opacity-80 transition-opacity overflow-hidden custom-shadow-level-1">
+<img alt="Placeholder for cosmetic product upload" class="absolute inset-0 w-full h-full object-cover opacity-20" data-alt="A soft, out-of-focus background image of a luxurious vanity setup in a high-key, light mode setting. It subtly features elegant glass bottles and pastel packaging. The mood is calm, modern, and perfectly aligned with a premium cosmetics brand, using an ivory and champagne gold color palette to imply luxury." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAeoUlo4E6f1kEBd8rqerSTgifnNccYfaiMDzKOig9-1Ox06ta473KQlCoGZcorBmkfEnm2NBbulgwmT8iGtrWcE7nAONH0kDN0I4neDTzCsRk3_4qXqb8qbFmxdf6AzpQIamL0ENqpTd_xBlWjU30wHKgmmrcuuJsHdBDdfUVRPDWH6SHdyrLdCjm4yzxpuLUUaMLYs2LfN2uZ_clzBm4lI8s-_PSOhNv6A1zBZ1m-NEEtETCsvNbV0FCY_V5X09nlsqAgThUNaAWO"/>
+<span class="material-symbols-outlined text-primary text-4xl mb-unit z-10" data-icon="add_a_photo" style="font-variation-settings: 'FILL' 0;">add_a_photo</span>
+<span class="font-label-sm text-label-sm text-primary z-10">Upload Image</span>
+</div>
+</section>
+<!-- Form -->
+<form class="space-y-stack-lg">
+<!-- Product Name -->
+<div class="relative">
+<input class="block w-full px-unit py-3 text-body-md text-on-surface bg-transparent border-0 border-b-[0.5px] border-primary appearance-none focus:outline-none focus:ring-0 focus:border-primary peer transition-colors" id="productName" placeholder=" " type="text"/>
+<label class="absolute text-label-sm text-on-surface-variant duration-300 transform -translate-y-4 scale-75 top-3 z-10 origin-[0] left-unit peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4" for="productName">Product Name</label>
+</div>
+<!-- Brand -->
+<div class="relative">
+<input class="block w-full px-unit py-3 text-body-md text-on-surface bg-transparent border-0 border-b-[0.5px] border-primary appearance-none focus:outline-none focus:ring-0 focus:border-primary peer transition-colors" id="brand" placeholder=" " type="text"/>
+<label class="absolute text-label-sm text-on-surface-variant duration-300 transform -translate-y-4 scale-75 top-3 z-10 origin-[0] left-unit peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4" for="brand">Brand</label>
+</div>
+<!-- Category (Dropdown) -->
+<div class="relative">
+<select class="block w-full px-unit py-3 text-body-md text-on-surface bg-transparent border-0 border-b-[0.5px] border-primary appearance-none focus:outline-none focus:ring-0 focus:border-primary peer transition-colors cursor-pointer" id="category">
+<option disabled="" hidden="" selected="" value=""></option>
+<option value="skincare">Skincare</option>
+<option value="makeup">Makeup</option>
+<option value="fragrance">Fragrance</option>
+<option value="haircare">Haircare</option>
+</select>
+<label class="absolute text-label-sm text-on-surface-variant duration-300 transform -translate-y-4 scale-75 top-3 z-10 origin-[0] left-unit peer-focus:scale-75 peer-focus:-translate-y-4 pointer-events-none" for="category">Category</label>
+<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-primary">
+<span class="material-symbols-outlined" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+<!-- Price & Open Date Row -->
+<div class="flex gap-gutter">
+<div class="relative flex-1">
+<input class="block w-full pl-6 pr-unit py-3 text-body-md text-on-surface bg-transparent border-0 border-b-[0.5px] border-primary appearance-none focus:outline-none focus:ring-0 focus:border-primary peer transition-colors" id="price" placeholder=" " step="0.01" type="number"/>
+<span class="absolute left-unit top-3 text-body-md text-on-surface-variant">$</span>
+<label class="absolute text-label-sm text-on-surface-variant duration-300 transform -translate-y-4 scale-75 top-3 z-10 origin-[0] left-6 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4" for="price">Price</label>
+</div>
+<div class="relative flex-1">
+<input class="block w-full px-unit py-3 text-body-md text-on-surface bg-transparent border-0 border-b-[0.5px] border-primary appearance-none focus:outline-none focus:ring-0 focus:border-primary peer transition-colors" id="openDate" placeholder=" " type="date"/>
+<label class="absolute text-label-sm text-on-surface-variant duration-300 transform -translate-y-4 scale-75 top-3 z-10 origin-[0] left-unit peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4" for="openDate">Open Date</label>
+</div>
+</div>
+<!-- Expiration Date -->
+<div class="relative">
+<input class="block w-full px-unit py-3 text-body-md text-on-surface bg-transparent border-0 border-b-[0.5px] border-primary appearance-none focus:outline-none focus:ring-0 focus:border-primary peer transition-colors" id="expDate" placeholder=" " type="date"/>
+<label class="absolute text-label-sm text-on-surface-variant duration-300 transform -translate-y-4 scale-75 top-3 z-10 origin-[0] left-unit peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4" for="expDate">Expiration Date</label>
+</div>
+<!-- Scan Barcode Shortcut -->
+<div class="pt-unit pb-stack-md flex justify-center">
+<button class="flex items-center gap-unit text-primary font-label-md text-label-md hover:opacity-80 transition-opacity" type="button">
+<span class="material-symbols-outlined" data-icon="barcode_scanner">barcode_scanner</span>
+<span>Scan Barcode instead</span>
+</button>
+</div>
+<!-- Add Button -->
+<button class="w-full bg-primary text-on-primary py-4 rounded-full font-label-md text-label-md active:scale-[0.98] transition-transform duration-200 custom-shadow-level-1 mt-section-gap" type="submit">
+                Add to Vanity
+            </button>
+</form>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-container-padding pb-safe pt-stack-md bg-surface dark:bg-surface-dim border-t-[0.5px] border-outline-variant dark:border-outline shadow-lg docked full-width rounded-t-xl md:hidden">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline hover:text-primary dark:hover:text-primary-fixed-dim transition-colors active:scale-95 duration-200" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="spa" style="font-variation-settings: 'FILL' 0;">spa</span>
+<span class="font-label-sm text-label-sm">Vanity</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline hover:text-primary dark:hover:text-primary-fixed-dim transition-colors active:scale-95 duration-200" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="inventory_2" style="font-variation-settings: 'FILL' 0;">inventory_2</span>
+<span class="font-label-sm text-label-sm">Collection</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary dark:text-primary-fixed-dim font-bold hover:text-primary dark:hover:text-primary-fixed-dim transition-colors active:scale-95 duration-200" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="add_circle" style="font-variation-settings: 'FILL' 1;">add_circle</span>
+<span class="font-label-sm text-label-sm">Add</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline hover:text-primary dark:hover:text-primary-fixed-dim transition-colors active:scale-95 duration-200" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="person" style="font-variation-settings: 'FILL' 0;">person</span>
+<span class="font-label-sm text-label-sm">Profile</span>
+</a>
+</nav>
+</body></html>

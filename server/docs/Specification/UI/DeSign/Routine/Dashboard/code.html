@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Serene Rituals | Daily Dashboard</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&amp;family=Manrope:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-surface": "#2d312f",
+                        "outline-variant": "#c3c8c1",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-fixed": "#1c1c19",
+                        "on-secondary-fixed": "#2f140a",
+                        "error": "#ba1a1a",
+                        "surface-container-lowest": "#ffffff",
+                        "outline": "#737873",
+                        "secondary-fixed": "#ffdbcf",
+                        "background": "#f7faf6",
+                        "surface": "#f7faf6",
+                        "on-error-container": "#93000a",
+                        "surface-dim": "#d8dbd7",
+                        "on-secondary": "#ffffff",
+                        "tertiary": "#5d5c58",
+                        "tertiary-container": "#767471",
+                        "surface-container-low": "#f1f4f0",
+                        "surface-container-high": "#e6e9e5",
+                        "surface-container-highest": "#e0e3df",
+                        "on-primary-fixed": "#0b2013",
+                        "inverse-on-surface": "#eff2ed",
+                        "secondary": "#7c5548",
+                        "on-tertiary-fixed-variant": "#474743",
+                        "on-tertiary-container": "#fcffe3",
+                        "on-secondary-container": "#795245",
+                        "on-background": "#181c1a",
+                        "error-container": "#ffdad6",
+                        "primary-fixed": "#d0e9d4",
+                        "inverse-primary": "#b4cdb9",
+                        "tertiary-fixed": "#e5e2dd",
+                        "secondary-container": "#fdc9b8",
+                        "surface-container": "#ecefea",
+                        "primary-fixed-dim": "#b4cdb9",
+                        "on-primary-fixed-variant": "#364c3c",
+                        "secondary-fixed-dim": "#eebbaa",
+                        "tertiary-fixed-dim": "#c8c6c2",
+                        "primary": "#4b6151",
+                        "on-surface": "#181c1a",
+                        "surface-tint": "#4e6353",
+                        "on-error": "#ffffff",
+                        "on-surface-variant": "#434843",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-container": "#f6fff5",
+                        "on-secondary-fixed-variant": "#623e32",
+                        "surface-bright": "#f7faf6",
+                        "surface-variant": "#e0e3df",
+                        "primary-container": "#647a69"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-desktop": "40px",
+                        "section-gap": "48px",
+                        "base": "8px",
+                        "gutter": "16px",
+                        "margin-mobile": "20px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Playfair Display"],
+                        "body-lg": ["Manrope"],
+                        "label-caps": ["Manrope"],
+                        "body-sm": ["Manrope"],
+                        "title-md": ["Manrope"],
+                        "headline-lg-mobile": ["Playfair Display"],
+                        "headline-lg": ["Playfair Display"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "title-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .ring-progress {
+            transition: stroke-dashoffset 0.6s ease;
+        }
+        .card-shadow {
+            box-shadow: 0 4px 32px rgba(75, 97, 81, 0.05);
+        }
+        .ritual-locked {
+            filter: grayscale(1) opacity(0.5);
+            pointer-events: none;
+        }
+        @keyframes subtle-float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+        .float-icon {
+            animation: subtle-float 4s ease-in-out infinite;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen font-body-lg">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 bg-surface dark:bg-on-background flex justify-between items-center w-full px-margin-mobile py-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary-fixed overflow-hidden flex items-center justify-center">
+<img alt="Profile" class="w-full h-full object-cover" data-alt="A close-up, high-quality portrait of a woman with natural, radiant skin and a calm expression. The lighting is soft and warm, reminiscent of a peaceful morning. The background is a blurred, minimalist interior with soft sage green and cream tones, aligning with a clean wellness aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCStFA25-LpPdtgVaAITB171Qtb39pdovsomD971UGTO-Kiw9sU5tl7tYRAWjcNoACPmAl9956mhKKj0W0A3W72tdLyArIlvqe58WdExBBOkwws-BeGU_oXkHdFZCHWL4_ubEZbnG9Fl3pX3ffGqLfgkyyWxWIagUJeWaxqHvREiNSKAD7MjXlBnmqG4O8ybOkRCqH7AcCUC_ErsmwlsdjAqdsIFTEvd4LEDV15bwTOehyBjXbSUFfOGYk42iZtiomJVgiSds6e4pV7"/>
+</div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary dark:text-primary-fixed-dim font-bold tracking-tight">Serene Rituals</h1>
+</div>
+<button class="text-on-surface-variant hover:opacity-80 transition-opacity active:scale-95 duration-200">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</header>
+<main class="pt-24 pb-32 px-margin-mobile max-w-[1200px] mx-auto">
+<!-- Hero / Morning Ritual Progress -->
+<section class="mb-section-gap">
+<div class="bg-surface-container-low rounded-xl p-8 card-shadow flex flex-col md:flex-row items-center justify-between gap-8 border border-white/50">
+<div class="flex-1 text-center md:text-left">
+<div class="flex items-center justify-center md:justify-start gap-2 mb-2">
+<span class="material-symbols-outlined text-primary float-icon" data-icon="wb_sunny" style="font-variation-settings: 'FILL' 1;">wb_sunny</span>
+<span class="font-label-caps text-label-caps text-primary uppercase tracking-[0.1em]">Current Ritual</span>
+</div>
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-2">Your Morning Ritual</h2>
+<p class="text-on-surface-variant max-w-md">Every step is an act of care. Complete your morning sequence to prepare for a balanced day ahead.</p>
+</div>
+<div class="relative w-32 h-32 flex items-center justify-center">
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-surface-container-highest" cx="64" cy="64" fill="transparent" r="58" stroke="currentColor" stroke-width="8"></circle>
+<circle class="text-primary ring-progress" cx="64" cy="64" fill="transparent" r="58" stroke="currentColor" stroke-dasharray="364.4" stroke-dashoffset="218.6" stroke-linecap="round" stroke-width="8"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="font-headline-lg-mobile text-headline-lg-mobile text-primary">2/5</span>
+<span class="font-label-caps text-label-caps text-outline uppercase">Done</span>
+</div>
+</div>
+</div>
+</section>
+<!-- AM Task List - Bento Style -->
+<section class="mb-section-gap">
+<div class="flex items-center justify-between mb- gutter">
+<h3 class="font-title-md text-title-md text-on-surface">AM Essentials</h3>
+<span class="text-body-sm text-outline">5 mins remaining</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
+<!-- Task 1: Done -->
+<div class="bg-surface-container-highest rounded-xl p-6 flex items-start gap-4 transition-all duration-300 border border-transparent hover:border-primary/20">
+<div class="mt-1">
+<input checked="" class="w-6 h-6 rounded-full border-2 border-primary text-primary focus:ring-primary transition-all cursor-pointer" type="checkbox"/>
+</div>
+<div>
+<h4 class="font-title-md text-body-lg text-on-surface font-bold">Cleansing</h4>
+<p class="text-body-sm text-on-surface-variant mb-3">Gentle milk cleanser with botanical extracts.</p>
+<span class="bg-primary/10 text-primary px-3 py-1 rounded-full font-label-caps text-[10px] uppercase">Step 01</span>
+</div>
+</div>
+<!-- Task 2: Done -->
+<div class="bg-surface-container-highest rounded-xl p-6 flex items-start gap-4 transition-all duration-300 border border-transparent hover:border-primary/20">
+<div class="mt-1">
+<input checked="" class="w-6 h-6 rounded-full border-2 border-primary text-primary focus:ring-primary transition-all cursor-pointer" type="checkbox"/>
+</div>
+<div>
+<h4 class="font-title-md text-body-lg text-on-surface font-bold">Vitamin C Serum</h4>
+<p class="text-body-sm text-on-surface-variant mb-3">Antioxidant protection and brightening.</p>
+<span class="bg-primary/10 text-primary px-3 py-1 rounded-full font-label-caps text-[10px] uppercase">Step 02</span>
+</div>
+</div>
+<!-- Task 3: To Do -->
+<div class="bg-white rounded-xl p-6 flex items-start gap-4 card-shadow border border-surface-container transition-all duration-300 hover:scale-[1.01]">
+<div class="mt-1">
+<input class="w-6 h-6 rounded-full border-2 border-outline text-primary focus:ring-primary transition-all cursor-pointer" type="checkbox"/>
+</div>
+<div>
+<h4 class="font-title-md text-body-lg text-on-surface font-bold">Moisturizer</h4>
+<p class="text-body-sm text-on-surface-variant mb-3">Lightweight barrier support with ceramides.</p>
+<span class="bg-surface-container-highest text-outline px-3 py-1 rounded-full font-label-caps text-[10px] uppercase">Step 03</span>
+</div>
+</div>
+<!-- Task 4: To Do -->
+<div class="bg-white rounded-xl p-6 flex items-start gap-4 card-shadow border border-surface-container transition-all duration-300 hover:scale-[1.01]">
+<div class="mt-1">
+<input class="w-6 h-6 rounded-full border-2 border-outline text-primary focus:ring-primary transition-all cursor-pointer" type="checkbox"/>
+</div>
+<div>
+<h4 class="font-title-md text-body-lg text-on-surface font-bold">SPF 50</h4>
+<p class="text-body-sm text-on-surface-variant mb-3">Broad-spectrum mineral protection.</p>
+<span class="bg-surface-container-highest text-outline px-3 py-1 rounded-full font-label-caps text-[10px] uppercase">Step 04</span>
+</div>
+</div>
+<!-- Task 5: To Do -->
+<div class="bg-white rounded-xl p-6 flex items-start gap-4 card-shadow border border-surface-container transition-all duration-300 hover:scale-[1.01]">
+<div class="mt-1">
+<input class="w-6 h-6 rounded-full border-2 border-outline text-primary focus:ring-primary transition-all cursor-pointer" type="checkbox"/>
+</div>
+<div>
+<h4 class="font-title-md text-body-lg text-on-surface font-bold">Sunless Tan</h4>
+<p class="text-body-sm text-on-surface-variant mb-3">Self-tan drops for a healthy glow.</p>
+<span class="bg-surface-container-highest text-outline px-3 py-1 rounded-full font-label-caps text-[10px] uppercase">Step 05</span>
+</div>
+</div>
+<!-- Product Recommendation Card -->
+<div class="bg-secondary-container/30 rounded-xl p-6 flex flex-col justify-between border border-secondary/10">
+<div>
+<h4 class="font-title-md text-body-lg text-secondary font-bold">Daily Insight</h4>
+<p class="text-body-sm text-on-secondary-fixed-variant mt-2 italic">"Patience is the foundation of every lasting ritual."</p>
+</div>
+<button class="mt-4 w-full bg-secondary text-white py-2 rounded-lg font-label-caps text-label-caps hover:opacity-90 transition-opacity">
+                        VIEW PROGRESS
+                    </button>
+</div>
+</div>
+</section>
+<!-- Evening Ritual - Locked -->
+<section class="mb-section-gap">
+<div class="flex items-center gap-3 mb-gutter">
+<h3 class="font-title-md text-title-md text-on-surface">Evening Ritual</h3>
+<span class="bg-outline/20 text-outline px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">Locked until 7 PM</span>
+</div>
+<div class="ritual-locked grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<div class="bg-surface-container rounded-xl p-6 border border-outline-variant/30 flex items-center gap-4">
+<span class="material-symbols-outlined text-outline" data-icon="dark_mode">dark_mode</span>
+<div>
+<p class="font-bold text-on-surface">Double Cleanse</p>
+<p class="text-body-sm text-outline">Oil + Water based cleaning</p>
+</div>
+</div>
+<div class="bg-surface-container rounded-xl p-6 border border-outline-variant/30 flex items-center gap-4">
+<span class="material-symbols-outlined text-outline" data-icon="opacity">opacity</span>
+<div>
+<p class="font-bold text-on-surface">Retinol</p>
+<p class="text-body-sm text-outline">Evening repair complex</p>
+</div>
+</div>
+<div class="bg-surface-container rounded-xl p-6 border border-outline-variant/30 flex items-center gap-4">
+<span class="material-symbols-outlined text-outline" data-icon="nights_stay">nights_stay</span>
+<div>
+<p class="font-bold text-on-surface">Night Cream</p>
+<p class="text-body-sm text-outline">Rich overnight hydration</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-3 bg-surface-container dark:bg-inverse-surface shadow-[0_-4px_16px_rgba(75,97,81,0.08)] rounded-t-xl">
+<a class="flex flex-col items-center justify-center bg-primary-container dark:bg-primary text-on-primary-container dark:text-on-primary rounded-full px-4 py-1 active:scale-95 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="wb_sunny" style="font-variation-settings: 'FILL' 1;">wb_sunny</span>
+<span class="font-label-caps text-label-caps">Today</span>
+</a>
+<a class="flex flex-col items-center justify-center text-outline dark:text-outline-variant hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-all duration-200 px-4 py-1 rounded-full" href="#">
+<span class="material-symbols-outlined" data-icon="auto_stories">auto_stories</span>
+<span class="font-label-caps text-label-caps">Journal</span>
+</a>
+<a class="flex flex-col items-center justify-center text-outline dark:text-outline-variant hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-all duration-200 px-4 py-1 rounded-full" href="#">
+<span class="material-symbols-outlined" data-icon="shutter_speed">shutter_speed</span>
+<span class="font-label-caps text-label-caps">Products</span>
+</a>
+<a class="flex flex-col items-center justify-center text-outline dark:text-outline-variant hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-all duration-200 px-4 py-1 rounded-full" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-caps text-label-caps">Profile</span>
+</a>
+</nav>
+<script>
+        // Micro-interaction: Checkbox interaction updates ring progress (visual simulation)
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        const progressRing = document.querySelector('.ring-progress');
+        const progressText = document.querySelector('.absolute .text-primary');
+        const totalTasks = 5;
+        
+        function updateProgress() {
+            const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+            const percentage = (checkedCount / totalTasks) * 100;
+            const circumference = 2 * Math.PI * 58;
+            const offset = circumference - (percentage / 100) * circumference;
+            
+            progressRing.style.strokeDashoffset = offset;
+            progressText.textContent = `${checkedCount}/${totalTasks}`;
+        }
+
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', (e) => {
+                // Add a subtle bounce animation to the card when checked
+                const card = e.target.closest('div.bg-white, div.bg-surface-container-highest');
+                if(e.target.checked) {
+                    card.classList.remove('bg-white');
+                    card.classList.add('bg-surface-container-highest');
+                    card.style.transform = 'scale(0.98)';
+                    setTimeout(() => card.style.transform = '', 200);
+                } else {
+                    card.classList.remove('bg-surface-container-highest');
+                    card.classList.add('bg-white');
+                }
+                updateProgress();
+            });
+        });
+
+        // Initialize strokeDasharray for the ring
+        window.onload = () => {
+            const circumference = 2 * Math.PI * 58;
+            progressRing.style.strokeDasharray = circumference;
+            updateProgress();
+        };
+    </script>
+</body></html>
