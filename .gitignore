@@ -31,6 +31,9 @@ google-services-zoewave.json
 /server/package/KoColor/target/
 /server/package/KoColor/dist/
 
+/server/package/kc-optimizer/target
+/server/package/kc-optimizer/raw_assets
+
 /server/gen/Key/target
 
 # Security & Keys
