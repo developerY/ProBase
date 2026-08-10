@@ -69,7 +69,7 @@ The compiler will perform a "Clean Purge" during the transformation from authori
     - Create the composition resolver to build packages by ID.
 - [x] **Task 5: Final Packaging & Signing**
     - Update the Ed25519 signing logic to include the newly enriched KCPS fields.
-- [ ] **Task 6: Documentation Update**
+- [x] **Task 6: Documentation Update**
     - Update the user walkthrough with the new "Drop JSON & Run" workflow.
 
 ---
