@@ -284,11 +284,11 @@ class StarterPackRepository @Inject constructor(
                 
                 // --- Engine Enrichment (Calculated at Compile Time) ---
                 calculatedChemistryPhase = dto.calculatedChemistryPhase,
-                calculatedCielabL = dto.calculatedCielab?.l,
-                calculatedCielabA = dto.calculatedCielab?.a,
-                calculatedCielabB = dto.calculatedCielab?.b,
-                calculatedHueAngle = dto.calculatedCielab?.hueAngleHab,
-                calculatedBlurhash = dto.calculatedBlurhash,
+                calculatedCielabL = dto.cielab?.getOrNull(0)?.toDouble(),
+                calculatedCielabA = dto.cielab?.getOrNull(1)?.toDouble(),
+                calculatedCielabB = dto.cielab?.getOrNull(2)?.toDouble(),
+                calculatedHueAngle = null, // Logic for hue angle can be added if needed, or if Rust provides 4 values
+                calculatedBlurhash = dto.blurhash,
                 isSiliconeFree = dto.calculatedSafetyFlags?.isSiliconeFree,
                 isParabenFree = dto.calculatedSafetyFlags?.isParabenFree,
                 isSulfateFree = dto.calculatedSafetyFlags?.isSulfateFree,
@@ -321,7 +321,7 @@ class StarterPackRepository @Inject constructor(
                 provenance = provenance,
                 
                 // --- Engine Enrichment (Calculated at Compile Time) ---
-                calculatedBlurhash = dto.calculatedBlurhash,
+                calculatedBlurhash = dto.blurhash,
                 searchTokens = dto.calculatedSearchTokens
             )
         }
