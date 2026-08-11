@@ -29,16 +29,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.zoewave.probase.core.ui.util.rememberBlurHashPainter
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.CosmeticItemDto
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.PackItemDto
-import com.zoewave.probase.kocolor.features.starterpack.ui.util.BlurHashDecoder
 import kotlinx.coroutines.delay
 
 @Composable
@@ -79,15 +77,12 @@ fun PackPreviewItemRow(
                 .clip(RoundedCornerShape(12.dp))
                 .background(Color(0xFFF5F5F5))
         ) {
-            val blurhash = item.blurhash
-            val placeholder = remember(blurhash) {
-                BlurHashDecoder.decode(blurhash, 32, 32)?.asImageBitmap()
-            }
+            val placeholder = rememberBlurHashPainter(blurHash = item.blurhash)
 
             AsyncImage(
                 model = item.thumbnailUrl,
                 contentDescription = null,
-                placeholder = placeholder?.let { BitmapPainter(it) },
+                placeholder = placeholder,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
             )

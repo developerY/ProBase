@@ -68,7 +68,7 @@ data class ClothingItem(
     val isHidden: Boolean = false,
 
     // --- Engine Enrichment (Calculated at Compile Time) ---
-    val calculatedBlurhash: String? = null,
+    val blurhash: String? = null,
     val searchTokens: List<String> = emptyList(),
 
     // --- Usage & Performance ---

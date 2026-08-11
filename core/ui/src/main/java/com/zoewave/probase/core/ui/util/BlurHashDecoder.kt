@@ -1,4 +1,4 @@
-package com.zoewave.probase.kocolor.features.starterpack.ui.util
+package com.zoewave.probase.core.ui.util
 
 import android.graphics.Bitmap
 import android.graphics.Color
