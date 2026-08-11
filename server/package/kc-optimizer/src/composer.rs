@@ -56,6 +56,16 @@ pub fn assemble_packages(
                     panic!("❌ Composition Error: Missing optimized assets for '{}'.", product_id);
                 });
 
+                // Trigger compile-time science calculations
+                let enriched = crate::enrichment::enrich_product(
+                    &source_data.color_hex,
+                    &source_data.ingredients,
+                    source_data.contains_fragrance,
+                    &source_data.name,
+                    &source_data.brand,
+                    &source_data.macro_category,
+                );
+
                 // Transform KPSS (Authoring) -> KCPS (Wire Object)
                 // We map the fields and INJECT the generated CDN paths and BlurHashes.
                 let kcps_item = KcpsPayload {
@@ -72,6 +82,10 @@ pub fn assemble_packages(
                     blurhash: asset_data.blurhash.clone(),
                     image_url: format!("https://cdn.kocolor.com/assets/{}", asset_data.hero_filename),
                     thumbnail_url: format!("https://cdn.kocolor.com/assets/{}", asset_data.thumb_filename),
+
+                    // Inject Scientific Enrichment
+                    cielab: enriched.cielab,
+                    safety_flags: enriched.safety_flags,
 
                     // Propagated Fields
                     notes: source_data.notes.clone(),

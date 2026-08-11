@@ -49,6 +49,10 @@ pub struct KcpsPayload {
     pub image_url: String,
     pub thumbnail_url: String,
 
+    // Advanced Scientific Enrichment (Computed)
+    pub cielab: [f32; 3],
+    pub safety_flags: Vec<String>,
+
     // Propagated Fields
     pub notes: Option<String>,
     pub hero_ingredient: Option<String>,
