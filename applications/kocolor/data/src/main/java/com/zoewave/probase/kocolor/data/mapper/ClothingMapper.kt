@@ -42,6 +42,11 @@ fun ClothingItemEntity.toModel(): ClothingItem = ClothingItem(
     },
     parentItemId = parentItemId,
     isHidden = isHidden,
+    
+    // Engine Enrichment
+    calculatedBlurhash = calculatedBlurhash,
+    searchTokens = searchTokens,
+    
     usageCount = usageCount
 )
 
@@ -82,5 +87,10 @@ fun ClothingItem.toEntity(): ClothingItemEntity = ClothingItemEntity(
     },
     parentItemId = parentItemId,
     isHidden = isHidden,
+    
+    // Engine Enrichment
+    calculatedBlurhash = calculatedBlurhash,
+    searchTokens = searchTokens,
+    
     usageCount = usageCount
 )

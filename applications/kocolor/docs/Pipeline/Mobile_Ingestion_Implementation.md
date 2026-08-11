@@ -50,16 +50,16 @@ The UI must utilize the pre-calculated build-time intelligence for a premium use
 
 ## 🛠️ Implementation Checklist
 
-- [ ] **Task 1: Security Integration**
-    - Integrate Ed25519 verification logic and Public Key anchoring.
-- [ ] **Task 2: Zstd Compression Engine**
-    - Setup `zstd-jni` dependency and implement bounded decompression.
-- [ ] **Task 3: Streaming Ingestion Pipeline**
-    - Build the `HashingSink` downloader with early-rejection logic.
-- [ ] **Task 4: Room Persistence & Mapping**
-    - Create the migration-free V1 database and transactional seeding logic.
-- [ ] **Task 5: Boutique UI Construction**
-    - Build the Jetpack Compose selector with BlurHash support.
+- [x] **Task 1: Security Integration**
+    - Integrated **Tink** for Ed25519 verification and Public Key anchoring.
+- [x] **Task 2: Zstd Compression Engine**
+    - Setup `zstd-jni` dependency and implemented **bounded decompression** with safety caps.
+- [x] **Task 3: Streaming Ingestion Pipeline**
+    - Built the `HashingSink` downloader with **Verify-Before-Execute** early-rejection logic.
+- [x] **Task 4: Room Persistence & Mapping**
+    - Created the transactional seeding logic and implemented the **"Make it Mine"** cloning mechanism.
+- [x] **Task 5: Boutique UI Construction**
+    - Built the Jetpack Compose selector with **BlurHash** instant placeholder support.
 
 ---
 **Status**: 🗓️ **PLANNING COMPLETE**

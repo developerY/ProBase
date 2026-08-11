@@ -47,4 +47,26 @@ interface CosmeticDao {
 
     @Query("DELETE FROM cosmetic_items")
     suspend fun deleteAllCosmetics()
+
+    /**
+     * "MAKE IT MINE" Action: Clones a product and detaches it from the collection lifecycle.
+     * The new item has no provenance (provenance_packId is NULL), protecting it from collection wipes.
+     */
+    @Transaction
+    @Query("""
+        INSERT INTO cosmetic_items (
+            name, brand, macroCategory, microCategory, formulation, chemistryBase, finish, coverage, 
+            temperature, colorHex, colorFamily, shadeName, imageUrl, notes, instructions, timestamp,
+            paoMonths, price, volume, ingredients, allergens, isVegan, isCrueltyFree, fdaDataVerified,
+            sourceType, sourceName, provenance_packId
+        )
+        SELECT 
+            name, brand, macroCategory, microCategory, formulation, chemistryBase, finish, coverage, 
+            temperature, colorHex, colorFamily, shadeName, imageUrl, notes, instructions, :timestamp,
+            paoMonths, price, volume, ingredients, allergens, isVegan, isCrueltyFree, fdaDataVerified,
+            'USER_SCAN', sourceName, NULL
+        FROM cosmetic_items 
+        WHERE id = :sourceId
+    """)
+    suspend fun cloneToPersonalArchive(sourceId: Long, timestamp: Long = System.currentTimeMillis())
 }

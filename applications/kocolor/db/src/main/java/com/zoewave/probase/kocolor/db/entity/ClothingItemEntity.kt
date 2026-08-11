@@ -4,8 +4,8 @@ import androidx.room3.Embedded
 import androidx.room3.Entity
 import androidx.room3.PrimaryKey
 import com.zoewave.probase.core.model.ritual.ClothingCategory
-import com.zoewave.probase.core.model.ritual.Formality
 import com.zoewave.probase.core.model.ritual.ColorFamily
+import com.zoewave.probase.core.model.ritual.Formality
 import com.zoewave.probase.core.model.ritual.InventorySource
 
 @Entity(tableName = "clothing_items")
@@ -38,6 +38,10 @@ data class ClothingItemEntity(
     @Embedded(prefix = "provenance_") val provenance: Provenance? = null,
     val parentItemId: String? = null,
     val isHidden: Boolean = false,
+
+    // --- Engine Enrichment (Calculated at Compile Time) ---
+    val calculatedBlurhash: String? = null,
+    val searchTokens: List<String> = emptyList(),
 
     // --- Usage & Performance ---
     val usageCount: Int = 0

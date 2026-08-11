@@ -5,9 +5,27 @@ import android.util.Log
 import coil.imageLoader
 import coil.request.ImageRequest
 import com.github.luben.zstd.Zstd
-import com.zoewave.probase.core.model.ritual.*
+import com.zoewave.probase.core.model.ritual.ChemistryBase
+import com.zoewave.probase.core.model.ritual.ClothingCategory
+import com.zoewave.probase.core.model.ritual.ClothingItem
+import com.zoewave.probase.core.model.ritual.CosmeticItem
+import com.zoewave.probase.core.model.ritual.Coverage
+import com.zoewave.probase.core.model.ritual.Finish
+import com.zoewave.probase.core.model.ritual.Formality
+import com.zoewave.probase.core.model.ritual.Formulation
+import com.zoewave.probase.core.model.ritual.InventorySource
+import com.zoewave.probase.core.model.ritual.MacroCategory
+import com.zoewave.probase.core.model.ritual.MicroCategory
+import com.zoewave.probase.core.model.ritual.Provenance
+import com.zoewave.probase.core.model.ritual.Temperature
+import com.zoewave.probase.core.model.ritual.VerificationState
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.KocolorApiService
-import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.*
+import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.KcpsPayload
+import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.PackInfo
+import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.PackItemDto
+import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.PackManifest
+import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.SearchIndexEntry
+import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.SignedPayloadEnvelope
 import com.zoewave.probase.kocolor.features.starterpack.domain.security.SignatureVerifier
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -134,6 +152,10 @@ class StarterPackRepository @Inject constructor(
             }
 
             // 9. Decompress (Verify-First Rule enforced: decompression ONLY after successful verification)
+            if (packInfo.uncompressedSizeBytes > MAX_PACKAGE_SIZE) {
+                throw PackException.IntegrityException("Uncompressed payload too large (>32MB). Possible JSON bomb.")
+            }
+
             val decompressedBytes = try {
                 Zstd.decompress(fileBytes, packInfo.uncompressedSizeBytes.toInt())
             } catch (e: Exception) {
@@ -258,7 +280,21 @@ class StarterPackRepository @Inject constructor(
                 fdaDataVerified = dto.fdaDataVerified,
                 sourceType = sourceType,
                 sourceName = packInfo.name,
-                provenance = provenance
+                provenance = provenance,
+                
+                // --- Engine Enrichment (Calculated at Compile Time) ---
+                calculatedChemistryPhase = dto.calculatedChemistryPhase,
+                calculatedCielabL = dto.calculatedCielab?.l,
+                calculatedCielabA = dto.calculatedCielab?.a,
+                calculatedCielabB = dto.calculatedCielab?.b,
+                calculatedHueAngle = dto.calculatedCielab?.hueAngleHab,
+                calculatedBlurhash = dto.calculatedBlurhash,
+                isSiliconeFree = dto.calculatedSafetyFlags?.isSiliconeFree,
+                isParabenFree = dto.calculatedSafetyFlags?.isParabenFree,
+                isSulfateFree = dto.calculatedSafetyFlags?.isSulfateFree,
+                heroActives = dto.calculatedHeroActives,
+                calculatedUnitPrice = dto.calculatedUnitPrice,
+                searchTokens = dto.calculatedSearchTokens
             )
         }
 
@@ -282,7 +318,11 @@ class StarterPackRepository @Inject constructor(
                 koColorGroup = dto.koColorGroup,
                 sourceType = sourceType,
                 sourceName = packInfo.name,
-                provenance = provenance
+                provenance = provenance,
+                
+                // --- Engine Enrichment (Calculated at Compile Time) ---
+                calculatedBlurhash = dto.calculatedBlurhash,
+                searchTokens = dto.calculatedSearchTokens
             )
         }
         

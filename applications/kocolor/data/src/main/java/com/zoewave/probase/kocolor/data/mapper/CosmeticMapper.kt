@@ -2,8 +2,8 @@ package com.zoewave.probase.kocolor.data.mapper
 
 import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.kocolor.db.entity.CosmeticItemEntity
-import com.zoewave.probase.kocolor.db.entity.Provenance as DbProvenance
 import com.zoewave.probase.core.model.ritual.Provenance as ModelProvenance
+import com.zoewave.probase.kocolor.db.entity.Provenance as DbProvenance
 
 fun CosmeticItemEntity.toModel(): CosmeticItem = CosmeticItem(
     id = id,
@@ -64,6 +64,20 @@ fun CosmeticItemEntity.toModel(): CosmeticItem = CosmeticItem(
     },
     parentItemId = parentItemId,
     isHidden = isHidden,
+    
+    // Engine Enrichment
+    calculatedChemistryPhase = calculatedChemistryPhase,
+    calculatedCielabL = calculatedCielabL,
+    calculatedCielabA = calculatedCielabA,
+    calculatedCielabB = calculatedCielabB,
+    calculatedHueAngle = calculatedHueAngle,
+    calculatedBlurhash = calculatedBlurhash,
+    isSiliconeFree = isSiliconeFree,
+    isParabenFree = isParabenFree,
+    isSulfateFree = isSulfateFree,
+    heroActives = heroActives,
+    calculatedUnitPrice = calculatedUnitPrice,
+    searchTokens = searchTokens,
     
     // FDA Safety
     fdaRecallStatus = fdaRecallStatus,
@@ -133,6 +147,20 @@ fun CosmeticItem.toEntity(): CosmeticItemEntity = CosmeticItemEntity(
     },
     parentItemId = parentItemId,
     isHidden = isHidden,
+    
+    // Engine Enrichment
+    calculatedChemistryPhase = calculatedChemistryPhase,
+    calculatedCielabL = calculatedCielabL,
+    calculatedCielabA = calculatedCielabA,
+    calculatedCielabB = calculatedCielabB,
+    calculatedHueAngle = calculatedHueAngle,
+    calculatedBlurhash = calculatedBlurhash,
+    isSiliconeFree = isSiliconeFree,
+    isParabenFree = isParabenFree,
+    isSulfateFree = isSulfateFree,
+    heroActives = heroActives,
+    calculatedUnitPrice = calculatedUnitPrice,
+    searchTokens = searchTokens,
     
     // FDA Safety
     fdaRecallStatus = fdaRecallStatus,
