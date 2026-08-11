@@ -20,12 +20,15 @@ import javax.inject.Inject
 
 data class PackPreviewUiState(
     val items: List<PackItemDto> = emptyList(),
+    val filteredItems: List<PackItemDto> = emptyList(),
     val groupedItems: Map<String, List<PackItemDto>> = emptyMap(),
     val selectedIds: Set<String> = emptySet(),
     val collapsedCategories: Set<String> = emptySet(),
     val isLoading: Boolean = false,
     val isInstalled: Boolean = false,
-    val targetItemId: String? = null
+    val targetItemId: String? = null,
+    val searchQuery: String = "",
+    val sortByValue: Boolean = false
 )
 
 @HiltViewModel
@@ -65,9 +68,11 @@ class PackPreviewViewModel @Inject constructor(
             try {
                 val items = repository.getPackItems(currentPackId)
                 _uiState.update { state ->
+                    val filtered = applyFilterAndSort(items, state.searchQuery, state.sortByValue)
                     state.copy(
                         items = items, 
-                        groupedItems = items.groupBy { it.macroCategory ?: "OTHER" },
+                        filteredItems = filtered,
+                        groupedItems = filtered.groupBy { it.macroCategory },
                         isLoading = false,
                         selectedIds = if (state.targetItemId != null) setOf(state.targetItemId) else emptySet()
                     ) 
@@ -75,6 +80,51 @@ class PackPreviewViewModel @Inject constructor(
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false) }
             }
+        }
+    }
+
+    fun onSearchQueryChanged(query: String) {
+        _uiState.update { state ->
+            val filtered = applyFilterAndSort(state.items, query, state.sortByValue)
+            state.copy(
+                searchQuery = query,
+                filteredItems = filtered,
+                groupedItems = filtered.groupBy { it.macroCategory }
+            )
+        }
+    }
+
+    fun onToggleValueSort() {
+        _uiState.update { state ->
+            val newSort = !state.sortByValue
+            val filtered = applyFilterAndSort(state.items, state.searchQuery, newSort)
+            state.copy(
+                sortByValue = newSort,
+                filteredItems = filtered,
+                groupedItems = filtered.groupBy { it.macroCategory }
+            )
+        }
+    }
+
+    private fun applyFilterAndSort(
+        items: List<PackItemDto>,
+        query: String,
+        sortByValue: Boolean
+    ): List<PackItemDto> {
+        val filtered = if (query.isBlank()) {
+            items
+        } else {
+            items.filter { item ->
+                item.name.contains(query, ignoreCase = true) ||
+                item.brand?.contains(query, ignoreCase = true) == true ||
+                item.calculatedSearchTokens.any { it.contains(query, ignoreCase = true) }
+            }
+        }
+
+        return if (sortByValue) {
+            filtered.sortedBy { it.calculatedUnitPrice ?: Double.MAX_VALUE }
+        } else {
+            filtered
         }
     }
 

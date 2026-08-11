@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -35,6 +37,8 @@ fun PackPreviewScreen(
     onDeselectAll: () -> Unit,
     onWipeCollection: () -> Unit,
     onImportSelected: () -> Unit,
+    onSearchQueryChanged: (String) -> Unit,
+    onToggleValueSort: () -> Unit,
     onBack: () -> Unit
 ) {
     val listState = rememberLazyListState()
@@ -102,50 +106,91 @@ fun PackPreviewScreen(
                 CircularProgressIndicator(color = Color(0xFF745E7A))
             }
         } else {
-            LazyColumn(
-                state = listState,
+            Column(
                 modifier = Modifier
                     .padding(padding)
-                    .fillMaxSize(),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                    .fillMaxSize()
             ) {
-                uiState.groupedItems.forEach { (category, items) ->
-                    val isCollapsed = uiState.collapsedCategories.contains(category)
-                    val categorySelectedCount = items.count { uiState.selectedIds.contains(it.id) }
-
-                    stickyHeader(key = "header_$category") {
-                        PackPreviewCategoryHeader(
-                            categoryName = category,
-                            selectedCount = categorySelectedCount,
-                            totalCount = items.size,
-                            isCollapsed = isCollapsed,
-                            onToggleCollapse = { onToggleCollapse(category) },
-                            onSelectAll = { onSelectCategoryAll(category) },
-                            onClear = { onClearCategory(category) }
+                // Digital Counter Filters
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    OutlinedTextField(
+                        value = uiState.searchQuery,
+                        onValueChange = onSearchQueryChanged,
+                        placeholder = { Text("Search products or actives...") },
+                        modifier = Modifier.weight(1f),
+                        singleLine = true,
+                        shape = RoundedCornerShape(12.dp),
+                        colors = TextFieldDefaults.colors(
+                            unfocusedContainerColor = Color(0xFFF5F5F5),
+                            focusedContainerColor = Color.White
                         )
-                    }
+                    )
+                    
+                    FilterChip(
+                        selected = uiState.sortByValue,
+                        onClick = onToggleValueSort,
+                        label = { 
+                            Text(
+                                text = if (uiState.sortByValue) "Best Value First" else "Value Sorting", 
+                                style = MaterialTheme.typography.labelSmall 
+                            ) 
+                        },
+                        shape = RoundedCornerShape(12.dp),
+                        leadingIcon = if (uiState.sortByValue) {
+                            { Icon(Icons.Default.Check, null, modifier = Modifier.size(16.dp)) }
+                        } else null
+                    )
+                }
 
-                    if (!isCollapsed) {
-                        itemsIndexed(items, key = { _, item -> item.id }) { index, item ->
-                            PackPreviewItemRow(
-                                item = item,
-                                isSelected = uiState.selectedIds.contains(item.id),
-                                isTarget = item.id == uiState.targetItemId,
-                                onToggle = { onToggleSelection(item.id) }
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier.weight(1f),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                ) {
+                    uiState.groupedItems.forEach { (category, items) ->
+                        val isCollapsed = uiState.collapsedCategories.contains(category)
+                        val categorySelectedCount = items.count { uiState.selectedIds.contains(it.id) }
+
+                        stickyHeader(key = "header_$category") {
+                            PackPreviewCategoryHeader(
+                                categoryName = category,
+                                selectedCount = categorySelectedCount,
+                                totalCount = items.size,
+                                isCollapsed = isCollapsed,
+                                onToggleCollapse = { onToggleCollapse(category) },
+                                onSelectAll = { onSelectCategoryAll(category) },
+                                onClear = { onClearCategory(category) }
                             )
-                            if (index < items.lastIndex) {
-                                HorizontalDivider(
-                                    modifier = Modifier.padding(horizontal = 16.dp),
-                                    thickness = 0.5.dp,
-                                    color = Color.LightGray.copy(alpha = 0.2f)
+                        }
+
+                        if (!isCollapsed) {
+                            itemsIndexed(items, key = { _, item -> item.id }) { index, item ->
+                                PackPreviewItemRow(
+                                    item = item,
+                                    isSelected = uiState.selectedIds.contains(item.id),
+                                    isTarget = item.id == uiState.targetItemId,
+                                    onToggle = { onToggleSelection(item.id) }
                                 )
+                                if (index < items.lastIndex) {
+                                    HorizontalDivider(
+                                        modifier = Modifier.padding(horizontal = 16.dp),
+                                        thickness = 0.5.dp,
+                                        color = Color.LightGray.copy(alpha = 0.2f)
+                                    )
+                                }
                             }
                         }
                     }
-                }
-                
-                item {
-                    Spacer(Modifier.height(100.dp))
+                    
+                    item {
+                        Spacer(Modifier.height(100.dp))
+                    }
                 }
             }
         }
@@ -225,6 +270,8 @@ private fun PackPreviewScreenPreview() {
             onDeselectAll = {},
             onWipeCollection = {},
             onImportSelected = {},
+            onSearchQueryChanged = {},
+            onToggleValueSort = {},
             onBack = {}
         )
     }

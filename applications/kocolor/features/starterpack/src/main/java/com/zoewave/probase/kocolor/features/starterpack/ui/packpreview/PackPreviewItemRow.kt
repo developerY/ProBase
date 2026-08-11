@@ -121,6 +121,16 @@ fun PackPreviewItemRow(
                     style = MaterialTheme.typography.labelMedium,
                     color = Color.DarkGray
                 )
+                
+                item.calculatedUnitPrice?.let { unitPrice ->
+                    Spacer(Modifier.width(12.dp))
+                    Text(
+                        text = "Value: $${"%.2f".format(unitPrice)}/ml",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color(0xFF2E7D32),
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
         }
 

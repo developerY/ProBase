@@ -345,7 +345,7 @@ fun CosmeticDetailScreen(
             ) {
                 Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(24.dp)) {
                     if (item.imageUrl != null) {
-                        val placeholder = rememberBlurHashPainter(blurHash = item.calculatedBlurhash)
+                        val placeholder = rememberBlurHashPainter(blurHash = item.blurhash)
                         AsyncImage(
                             model = item.imageUrl,
                             contentDescription = item.name,

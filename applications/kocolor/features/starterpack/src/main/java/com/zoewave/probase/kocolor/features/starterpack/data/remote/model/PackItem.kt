@@ -23,6 +23,8 @@ sealed interface PackItemDto {
     val thumbnailUrl: String
     val blurhash: String?
     val price: Double?
+    val calculatedUnitPrice: Double?
+    val calculatedSearchTokens: List<String>
     val notes: String?
 }
 
@@ -60,8 +62,8 @@ data class CosmeticItemDto(
     override val blurhash: String? = null,
     @SerialName("calculated_safety_flags") val calculatedSafetyFlags: SafetyFlags? = null,
     @SerialName("calculated_hero_actives") val calculatedHeroActives: List<String> = emptyList(),
-    @SerialName("calculated_unit_price") val calculatedUnitPrice: Double? = null,
-    @SerialName("calculated_search_tokens") val calculatedSearchTokens: List<String> = emptyList()
+    @SerialName("calculated_unit_price") override val calculatedUnitPrice: Double? = null,
+    @SerialName("calculated_search_tokens") override val calculatedSearchTokens: List<String> = emptyList()
 ) : PackItemDto
 
 @Serializable
@@ -97,5 +99,6 @@ data class ClothingItemDto(
     
     // --- Engine Enrichment (Calculated at Compile Time) ---
     override val blurhash: String? = null,
-    @SerialName("calculated_search_tokens") val calculatedSearchTokens: List<String> = emptyList()
+    @SerialName("calculated_unit_price") override val calculatedUnitPrice: Double? = null,
+    @SerialName("calculated_search_tokens") override val calculatedSearchTokens: List<String> = emptyList()
 ) : PackItemDto
