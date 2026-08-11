@@ -107,7 +107,7 @@ fun InventoryManagementScreen(
             
             InventoryList(
                 uiState = InventoryListUiState(displayItems),
-                onEvent = { item -> navTo(KoColorRoute.CosmeticDetail(item.id)) },
+                onEvent = { item -> navTo(KoColorRoute.CosmeticDetail(item.internalId)) },
                 navTo = navTo
             )
         }

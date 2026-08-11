@@ -21,7 +21,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.VerifiedUser
@@ -63,9 +62,7 @@ import com.zoewave.probase.core.model.ritual.InventorySource
 import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.core.model.ritual.MicroCategory
 import com.zoewave.probase.core.ui.components.MakeItMineButton
-import com.zoewave.probase.core.ui.intelligence.CompatibilityBadge
 import com.zoewave.probase.core.ui.util.rememberBlurHashPainter
-import com.zoewave.probase.core.util.ChemistryCompatibilityEngine
 import com.zoewave.probase.kocolor.features.cosmetics.R
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.ApplicationGuideSection
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.AtelierExpandableSection
@@ -97,7 +94,7 @@ private fun CosmeticDetailScreenPreview() {
         CosmeticDetailScreen(
             uiState = CosmeticDetailUiState(
                 item = CosmeticItem(
-                    id = 1L,
+                    internalId = 1L,
                     name = "Cool Ivory Foundation",
                     brand = "KoColor",
                     macroCategory = MacroCategory.COMPLEXION,
@@ -154,12 +151,22 @@ fun CosmeticDetailScreen(
                 actions = {
                     IconButton(onClick = { 
                         onEvent(CosmeticsEvent.StartEditing(item))
-                        navTo(KoColorRoute.CosmeticEdit(item.id))
+                        navTo(KoColorRoute.CosmeticEdit(item.internalId))
                     }) {
                         Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_edit), tint = Color.Gray)
                     }
                 }
             )
+        },
+        bottomBar = {
+            if (item.sourceType != InventorySource.USER_SCAN && item.sourceType != InventorySource.CLONED) {
+                Box(modifier = Modifier.padding(16.dp)) {
+                    MakeItMineButton(
+                        status = uiState.archiveStatus,
+                        onClick = { onEvent(CosmeticsEvent.CloneToPersonal(item)) }
+                    )
+                }
+            }
         }
     ) { padding ->
         val expandedStates = remember { 
@@ -457,7 +464,7 @@ fun CosmeticDetailScreen(
                 }
 
                 Button(
-                    onClick = { onEvent(CosmeticsEvent.UseItem(item.id)) },
+                    onClick = { onEvent(CosmeticsEvent.UseItem(item.internalId)) },
                     modifier = Modifier.fillMaxWidth().height(56.dp),
                     shape = RoundedCornerShape(8.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = atelierBrown)

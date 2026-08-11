@@ -28,7 +28,7 @@ fun CosmeticProductGridCard(
     navTo: (KoColorRoute) -> Unit
 ) {
     val item = uiState
-    val onClick = { navTo(KoColorRoute.CosmeticDetail(item.id)) }
+    val onClick = { navTo(KoColorRoute.CosmeticDetail(item.internalId)) }
     Card(
         modifier = Modifier.fillMaxWidth().aspectRatio(4f / 3f).clickable { onClick() },
         shape = RoundedCornerShape(24.dp)

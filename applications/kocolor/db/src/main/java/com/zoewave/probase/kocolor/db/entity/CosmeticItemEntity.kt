@@ -15,7 +15,7 @@ import com.zoewave.probase.core.model.ritual.Temperature
 
 @Entity(tableName = "cosmetic_items")
 data class CosmeticItemEntity(
-    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    @PrimaryKey(autoGenerate = true) val internalId: Long = 0,
     val name: String,
     val brand: String,
     val macroCategory: MacroCategory,

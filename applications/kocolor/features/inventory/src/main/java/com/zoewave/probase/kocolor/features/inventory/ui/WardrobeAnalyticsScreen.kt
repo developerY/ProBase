@@ -260,7 +260,7 @@ fun WardrobeAnalyticsScreen(
                                         Row(
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .clickable { navTo(KoColorRoute.WardrobeDetail(item.id)) }
+                                                .clickable { navTo(KoColorRoute.WardrobeDetail(item.internalId)) }
                                                 .padding(vertical = 4.dp),
                                             horizontalArrangement = Arrangement.SpaceBetween,
                                             verticalAlignment = Alignment.CenterVertically
@@ -319,8 +319,8 @@ private fun WardrobeAnalyticsScreenPreview() {
             uiState = WardrobeUiState(
                 totalInvestment = 2450.0,
                 items = listOf(
-                    ClothingItem(id = 1, name = "Silk Blazer", category = ClothingCategory.TOPS, usageCount = 12, colorHex = "#F5F5DC", price = 350.0),
-                    ClothingItem(id = 2, name = "Denim Jeans", category = ClothingCategory.BOTTOMS, usageCount = 45, colorHex = "#000080", price = 120.0)
+                    ClothingItem(internalId = 1, name = "Silk Blazer", category = ClothingCategory.TOPS, usageCount = 12, colorHex = "#F5F5DC", price = 350.0),
+                    ClothingItem(internalId = 2, name = "Denim Jeans", category = ClothingCategory.BOTTOMS, usageCount = 45, colorHex = "#000080", price = 120.0)
                 )
             ),
             onEvent = {},

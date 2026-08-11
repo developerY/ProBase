@@ -57,7 +57,7 @@ private fun WardrobeDetailScreenPreview() {
                 wardrobeUiState = WardrobeUiState(
                     items = listOf(
                         ClothingItem(
-                            id = 1, 
+                            internalId = 1, 
                             name = "Silk Blouse", 
                             brand = "Celine", 
                             category = ClothingCategory.TOPS, 
@@ -82,7 +82,7 @@ fun WardrobeDetailScreen(
     onEvent: (WardrobeEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    val item = uiState.wardrobeUiState.items.find { it.id == uiState.itemId } ?: return
+    val item = uiState.wardrobeUiState.items.find { it.internalId == uiState.itemId } ?: return
     val atelierBrown = Color(0xFF8B5E3C)
     val archiveStatus = uiState.archiveStatus
 
@@ -96,7 +96,7 @@ fun WardrobeDetailScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { navTo(KoColorRoute.WardrobeEdit(item.id)) }) {
+                    IconButton(onClick = { navTo(KoColorRoute.WardrobeEdit(item.internalId)) }) {
                         Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.applications_kocolor_features_inventory_edit))
                     }
                 }
@@ -203,7 +203,7 @@ fun WardrobeDetailScreen(
                 Spacer(Modifier.height(32.dp))
 
                 Button(
-                    onClick = { onEvent(WardrobeEvent.WearItem(item.id)) },
+                    onClick = { onEvent(WardrobeEvent.WearItem(item.internalId)) },
                     modifier = Modifier.fillMaxWidth().height(56.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = atelierBrown)

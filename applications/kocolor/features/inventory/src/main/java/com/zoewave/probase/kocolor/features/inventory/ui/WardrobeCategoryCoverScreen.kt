@@ -65,8 +65,8 @@ private fun WardrobeCategoryCoverScreenPreview() {
                 categoryName = "Tops",
                 wardrobeUiState = WardrobeUiState(
                     items = listOf(
-                        ClothingItem(id = 1, name = "Silk Shirt", brand = "Luxury", category = ClothingCategory.TOPS, price = 85.0, usageCount = 12, colorHex = "#FFFFFF"),
-                        ClothingItem(id = 2, name = "Cashmere Sweater", brand = "Premium", category = ClothingCategory.TOPS, price = 250.0, usageCount = 3, colorHex = "#FFFFFF")
+                        ClothingItem(internalId = 1, name = "Silk Shirt", brand = "Luxury", category = ClothingCategory.TOPS, price = 85.0, usageCount = 12, colorHex = "#FFFFFF"),
+                        ClothingItem(internalId = 2, name = "Cashmere Sweater", brand = "Premium", category = ClothingCategory.TOPS, price = 250.0, usageCount = 3, colorHex = "#FFFFFF")
                     )
                 )
             ),

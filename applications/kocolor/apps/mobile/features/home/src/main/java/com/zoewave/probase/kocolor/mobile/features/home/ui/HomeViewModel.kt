@@ -322,7 +322,7 @@ class HomeViewModel @Inject constructor(
     )
 
     private fun CosmeticItemEntity.toModel() = CosmeticItem(
-        id = id,
+        internalId = internalId,
         name = name,
         brand = brand,
         macroCategory = macroCategory,
@@ -349,7 +349,7 @@ class HomeViewModel @Inject constructor(
     )
 
     private fun ClothingItemEntity.toModel() = ClothingItem(
-        id = id,
+        internalId = internalId,
         name = name,
         brand = brand,
         category = category,

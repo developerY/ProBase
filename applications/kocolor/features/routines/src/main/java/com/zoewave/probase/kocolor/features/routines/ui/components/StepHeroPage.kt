@@ -85,7 +85,7 @@ fun StepHeroPage(
     val routineId = uiState.routineId
     val routineTime = uiState.routineTime
     
-    val linkedProducts = allProducts.filter { step.productIds.contains(it.id) }
+    val linkedProducts = allProducts.filter { step.productIds.contains(it.internalId) }
     
     var showJournalDialog by remember { mutableStateOf(false) }
     var journalDraft by remember { mutableStateOf("") }

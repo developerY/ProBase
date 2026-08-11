@@ -15,7 +15,7 @@ enum class EnrichmentStatus {
  */
 @Entity(tableName = "discovered_products")
 data class ProductEntity(
-    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    @PrimaryKey(autoGenerate = true) val internalId: Long = 0,
     val brand: String,
     val productName: String,
     val category: String? = null,

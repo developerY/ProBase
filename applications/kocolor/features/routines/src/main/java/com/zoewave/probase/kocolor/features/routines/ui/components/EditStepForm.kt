@@ -30,7 +30,7 @@ fun EditStepForm(
 ) {
     val step = uiState.step
     val allProducts = uiState.allProducts
-    val linkedProduct = allProducts.find { step.productIds.contains(it.id) }
+    val linkedProduct = allProducts.find { step.productIds.contains(it.internalId) }
     Column(modifier = modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(28.dp)) {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(text = stringResource(R.string.applications_kocolor_features_routines_step_title_label), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, modifier = Modifier.alpha(0.4f), letterSpacing = 1.sp)

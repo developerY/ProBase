@@ -135,10 +135,10 @@ class StyleSimulatorViewModel @Inject constructor(
             .groupBy { it.colorFamily }
 
         val recommendedClothing = allClothing.filter { item ->
-            "w_${item.id}" in (result?.selectedClothingIds ?: emptyList())
+            "w_${item.internalId}" in (result?.selectedClothingIds ?: emptyList())
         }
         val recommendedCosmetics = allCosmetics.filter { item ->
-            "c_${item.id}" in (result?.selectedCosmeticIds ?: emptyList())
+            "c_${item.internalId}" in (result?.selectedCosmeticIds ?: emptyList())
         }
 
         StyleSimulatorUiState(
@@ -338,11 +338,11 @@ class StyleSimulatorViewModel @Inject constructor(
             val id = match.groupValues[2].toLongOrNull() ?: return@forEach
             
             val richName = if (domain == "w") {
-                clothing.find { it.id == id }?.let { 
+                clothing.find { it.internalId == id }?.let { 
                     "${it.brand ?: ""} ${it.name.removePrefix(it.brand ?: "")}".trim()
                 }
             } else {
-                cosmetics.find { it.id == id }?.let {
+                cosmetics.find { it.internalId == id }?.let {
                     "${it.brand} ${it.name.removePrefix(it.brand)}".trim()
                 }
             }
@@ -370,7 +370,7 @@ class StyleSimulatorViewModel @Inject constructor(
                 advice = state.rationale ?: "",
                 keyPieces = state.recommendedClothing.map { it.name },
                 colorCombinations = state.recommendedPalette,
-                wardrobeItemIds = state.recommendedClothing.map { it.id                },
+                wardrobeItemIds = state.recommendedClothing.map { it.internalId },
                 suggestedItems = state.recommendedClothing.map { item ->
                     SuggestedPiece(
                         name = item.name,
@@ -399,7 +399,7 @@ class StyleSimulatorViewModel @Inject constructor(
                     recommendedColors = cosmetic.colorHex?.let { listOf(it) } ?: emptyList(),
                     suggestedProductName = cosmetic.name,
                     suggestedProductImageUrl = cosmetic.imageUrl,
-                    productId = cosmetic.id
+                    productId = cosmetic.internalId
                 )
             }
 

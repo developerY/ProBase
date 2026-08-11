@@ -86,14 +86,14 @@ fun mapToVisualBlueprintData(
 }
 
 private fun CosmeticItem.toBlueprintItem() = BlueprintItem(
-    id = id,
+    id = internalId,
     name = name,
     colorHex = colorHex,
     imageUrl = imageUrl
 )
 
 private fun ClothingItem.toBlueprintItem() = BlueprintItem(
-    id = id,
+    id = internalId,
     name = name,
     colorHex = colorHex,
     imageUrl = imageUrl

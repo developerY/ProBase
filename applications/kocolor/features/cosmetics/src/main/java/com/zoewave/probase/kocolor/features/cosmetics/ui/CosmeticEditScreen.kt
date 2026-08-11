@@ -62,7 +62,7 @@ private fun CosmeticEditScreenPreview() {
             uiState = CosmeticEditUiState(
                 itemId = 1L,
                 draftItem = CosmeticItem(
-                    id = 1L,
+                    internalId = 1L,
                     name = "Cool Ivory",
                     brand = "KoColor",
                     macroCategory = MacroCategory.COMPLEXION,

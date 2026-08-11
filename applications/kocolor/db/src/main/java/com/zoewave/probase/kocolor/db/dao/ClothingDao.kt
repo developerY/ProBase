@@ -18,7 +18,7 @@ interface ClothingDao {
     @Query("SELECT * FROM clothing_items WHERE category = :category ORDER BY timestamp DESC")
     fun getClothingByCategory(category: String): Flow<List<ClothingItemEntity>>
 
-    @Query("SELECT * FROM clothing_items WHERE id = :id")
+    @Query("SELECT * FROM clothing_items WHERE internalId = :id")
     fun getClothingById(id: Long): Flow<ClothingItemEntity?>
 
     @Query("SELECT * FROM clothing_items WHERE formality >= :minFormality ORDER BY timestamp DESC")
@@ -34,7 +34,7 @@ interface ClothingDao {
     @Update
     suspend fun updateClothing(item: ClothingItemEntity)
 
-    @Query("DELETE FROM clothing_items WHERE id = :id")
+    @Query("DELETE FROM clothing_items WHERE internalId = :id")
     suspend fun deleteClothing(id: Long)
 
     @Transaction
@@ -61,7 +61,7 @@ interface ClothingDao {
             colorTemperature, seasonalPalette, contrastLevel, koColorGroup, 'USER_SCAN', 
             sourceName, NULL
         FROM clothing_items 
-        WHERE id = :sourceId
+        WHERE internalId = :sourceInternalId
     """)
-    suspend fun cloneToPersonalArchive(sourceId: Long, timestamp: Long = System.currentTimeMillis())
+    suspend fun cloneToPersonalArchive(sourceInternalId: Long, timestamp: Long = System.currentTimeMillis())
 }

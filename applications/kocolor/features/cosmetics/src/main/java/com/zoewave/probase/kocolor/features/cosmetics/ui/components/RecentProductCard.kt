@@ -33,7 +33,7 @@ fun RecentProductCard(
     navTo: (KoColorRoute) -> Unit
 ) {
     val item = uiState
-    val onClick = { navTo(KoColorRoute.CosmeticDetail(item.id)) }
+    val onClick = { navTo(KoColorRoute.CosmeticDetail(item.internalId)) }
     Card(
         modifier = modifier.width(200.dp).height(260.dp).clickable(onClick = onClick),
         shape = RoundedCornerShape(24.dp)

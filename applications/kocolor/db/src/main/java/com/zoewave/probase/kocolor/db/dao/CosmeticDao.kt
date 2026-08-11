@@ -25,7 +25,7 @@ interface CosmeticDao {
     @Query("SELECT * FROM cosmetic_items WHERE microCategory = :microCategory ORDER BY timestamp DESC")
     fun getCosmeticsByMicroCategory(microCategory: MicroCategory): Flow<List<CosmeticItemEntity>>
 
-    @Query("SELECT * FROM cosmetic_items WHERE id = :id")
+    @Query("SELECT * FROM cosmetic_items WHERE internalId = :id")
     fun getCosmeticById(id: Long): Flow<CosmeticItemEntity?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -38,7 +38,7 @@ interface CosmeticDao {
     @Update
     suspend fun updateCosmetic(item: CosmeticItemEntity)
 
-    @Query("DELETE FROM cosmetic_items WHERE id = :id")
+    @Query("DELETE FROM cosmetic_items WHERE internalId = :id")
     suspend fun deleteCosmetic(id: Long)
 
     @Transaction
@@ -66,7 +66,7 @@ interface CosmeticDao {
             paoMonths, price, volume, ingredients, allergens, isVegan, isCrueltyFree, fdaDataVerified,
             'USER_SCAN', sourceName, NULL
         FROM cosmetic_items 
-        WHERE id = :sourceId
+        WHERE internalId = :sourceInternalId
     """)
-    suspend fun cloneToPersonalArchive(sourceId: Long, timestamp: Long = System.currentTimeMillis())
+    suspend fun cloneToPersonalArchive(sourceInternalId: Long, timestamp: Long = System.currentTimeMillis())
 }

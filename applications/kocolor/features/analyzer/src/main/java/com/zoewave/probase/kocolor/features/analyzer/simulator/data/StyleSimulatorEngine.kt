@@ -144,14 +144,14 @@ class StyleSimulatorEngine @Inject constructor(
         val anchoredCategories = anchoredWardrobe.map { it.category }.toSet()
         val prunedWardrobe = wardrobe.filter { item ->
             if (anchoredCategories.contains(item.category)) {
-                anchoredWardrobe.any { it.id == item.id }
+                anchoredWardrobe.any { it.internalId == item.internalId }
             } else true
         }
 
         val anchoredCosmeticMacros = anchoredCosmetics.map { it.macroCategory }.toSet()
         val prunedCosmetics = cosmetics.filter { item ->
             if (anchoredCosmeticMacros.contains(item.macroCategory)) {
-                anchoredCosmetics.any { it.id == item.id }
+                anchoredCosmetics.any { it.internalId == item.internalId }
             } else true
         }
 
@@ -159,13 +159,13 @@ class StyleSimulatorEngine @Inject constructor(
         val minWardrobe = prunedWardrobe.groupBy { it.category.name.lowercase() }
             .mapValues { (_, items) ->
                 items.distinctBy { "${it.category}_${it.colorFamily}" }
-                    .map { listOf("w_${it.id}", it.name.lowercase(), it.colorHex ?: "#000000", it.formality.toKey()) }
+                    .map { listOf("w_${it.internalId}", it.name.lowercase(), it.colorHex ?: "#000000", it.formality.toKey()) }
             }
 
         val minCosmetics = prunedCosmetics.groupBy { it.macroCategory.name.lowercase() }
             .mapValues { (_, items) ->
                 items.distinctBy { "${it.microCategory}_${it.colorFamily}" }
-                    .map { listOf("c_${it.id}", it.microCategory.name.lowercase(), it.colorHex ?: "#000000") }
+                    .map { listOf("c_${it.internalId}", it.microCategory.name.lowercase(), it.colorHex ?: "#000000") }
             }
 
         return json.encodeToString(CloudManifest(minWardrobe, minCosmetics))
@@ -287,8 +287,8 @@ class StyleSimulatorEngine @Inject constructor(
 
         return StyleBlueprint(
             rationale = "Local Architect: Selected from your vault based on intent.",
-            selectedClothingIds = selectedItems.map { "w_${it.id}" },
-            selectedCosmeticIds = selectedCosmetics.map { "c_${it.id}" },
+            selectedClothingIds = selectedItems.map { "w_${it.internalId}" },
+            selectedCosmeticIds = selectedCosmetics.map { "c_${it.internalId}" },
             recommendedPalette = finalPalette
         )
     }

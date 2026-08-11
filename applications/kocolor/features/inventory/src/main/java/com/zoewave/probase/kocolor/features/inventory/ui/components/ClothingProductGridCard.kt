@@ -25,7 +25,7 @@ import com.zoewave.probase.kocolor.model.KoColorRoute
 @Composable
 fun ClothingProductGridCard(uiState: ClothingItem, navTo: (KoColorRoute) -> Unit) {
     val item = uiState
-    val onClick = { navTo(KoColorRoute.WardrobeDetail(item.id)) }
+    val onClick = { navTo(KoColorRoute.WardrobeDetail(item.internalId)) }
     Card(
         modifier = Modifier.fillMaxWidth().aspectRatio(0.75f).clickable { onClick() },
         shape = RoundedCornerShape(24.dp)

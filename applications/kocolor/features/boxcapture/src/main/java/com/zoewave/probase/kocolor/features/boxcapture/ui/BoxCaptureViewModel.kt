@@ -284,7 +284,7 @@ class BoxCaptureViewModel @Inject constructor(
         queueEnrichment(productId)
         
         _discoveryState.value = DiscoveryState.LocalSuccess(localData)
-        _uiState.value = BoxCaptureUiState.FinalReview(productEntity.copy(id = productId))
+        _uiState.value = BoxCaptureUiState.FinalReview(productEntity.copy(internalId = productId))
     }
 
     private fun queueEnrichment(productId: Long) {

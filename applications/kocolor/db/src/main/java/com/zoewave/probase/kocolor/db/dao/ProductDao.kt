@@ -13,7 +13,7 @@ interface ProductDao {
     @Query("SELECT * FROM discovered_products ORDER BY timestamp DESC")
     fun getAllProducts(): Flow<List<ProductEntity>>
 
-    @Query("SELECT * FROM discovered_products WHERE id = :id")
+    @Query("SELECT * FROM discovered_products WHERE internalId = :id")
     suspend fun getProductById(id: Long): ProductEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -22,6 +22,6 @@ interface ProductDao {
     @Update
     suspend fun updateProduct(product: ProductEntity)
 
-    @Query("DELETE FROM discovered_products WHERE id = :id")
+    @Query("DELETE FROM discovered_products WHERE internalId = :id")
     suspend fun deleteProduct(id: Long)
 }

@@ -389,7 +389,7 @@ fun AtelierWardrobeCard(
 @Composable
 fun RecentClothingCard(uiState: ClothingItem, modifier: Modifier = Modifier, onEvent: (Unit) -> Unit, navTo: (KoColorRoute) -> Unit) {
     val item = uiState
-    val onClick = { navTo(KoColorRoute.WardrobeDetail(item.id)) }
+    val onClick = { navTo(KoColorRoute.WardrobeDetail(item.internalId)) }
     Card(
         modifier = modifier.width(220.dp).aspectRatio(0.8f).clickable { onClick() },
         shape = RoundedCornerShape(28.dp)

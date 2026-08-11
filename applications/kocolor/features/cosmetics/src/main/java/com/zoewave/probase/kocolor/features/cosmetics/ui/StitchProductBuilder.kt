@@ -107,7 +107,7 @@ private fun StitchProductBuilderEditPreview() {
         StitchProductBuilder(
             uiState = CosmeticsUiState(
                 draftItem = CosmeticItem(
-                    id = 1L,
+                    internalId = 1L,
                     name = "Luminous Silk Foundation",
                     brand = "Armani",
                     macroCategory = MacroCategory.COMPLEXION,
@@ -132,7 +132,7 @@ fun StitchProductBuilder(
     val draft = uiState.draftItem
     val scrollState = rememberScrollState()
     val atelierBrown = Color(0xFF8B5E3C)
-    val isEditMode = draft.id != 0L
+    val isEditMode = draft.internalId != 0L
 
     var showColorPicker by remember { mutableStateOf(false) }
     var showDatePickerTarget by remember { mutableStateOf<String?>(null) }
@@ -231,7 +231,7 @@ fun StitchProductBuilder(
             confirmButton = {
                 TextButton(
                     onClick = { 
-                        onEvent(CosmeticsEvent.DeleteItem(draft.id))
+                        onEvent(CosmeticsEvent.DeleteItem(draft.internalId))
                         showDeleteConfirmation = false
                         navTo(KoColorRoute.Back)
                     },

@@ -1,12 +1,15 @@
 package com.zoewave.probase.kocolor.features.cosmetics.ui
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Log
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.core.data.repository.AiConfigurationSettings
+import com.zoewave.probase.core.model.network.DiscoveryStatus
 import com.zoewave.probase.core.model.network.ServiceStatus
 import com.zoewave.probase.core.model.ritual.ArchiveStatus
 import com.zoewave.probase.core.model.ritual.CosmeticItem
@@ -75,7 +78,7 @@ data class CosmeticsUiState(
     val categoryFilter: String? = null,
     val scanStatus: String? = null,
     val scanState: FashionSessionRepository.ScanStatus = FashionSessionRepository.ScanStatus.IDLE,
-    val discoveryStatus: com.zoewave.probase.core.model.network.DiscoveryStatus = com.zoewave.probase.core.model.network.DiscoveryStatus(),
+    val discoveryStatus: DiscoveryStatus = DiscoveryStatus(),
     val isObfContributionEnabled: Boolean = false,
     val uvIndex: Double = 0.0,
     val archiveStatuses: Map<Long, ArchiveStatus> = emptyMap()
@@ -183,7 +186,7 @@ class CosmeticsViewModel @Inject constructor(
         val aiResult = array[1] as CosmeticItem?
         val draft = array[2] as CosmeticItem
         val scanState = array[3] as FashionSessionRepository.ScanStatus
-        val discStatus = array[4] as com.zoewave.probase.core.model.network.DiscoveryStatus
+        val discStatus = array[4] as DiscoveryStatus
         val query = array[5] as String
         val sort = array[6] as SortOption
         val filter = array[7] as String?
@@ -261,7 +264,7 @@ class CosmeticsViewModel @Inject constructor(
         when (event) {
             is CosmeticsEvent.AddItem -> {
                 val userItem = event.item.copy(
-                    id = 0L,
+                    internalId = 0L,
                     sourceType = InventorySource.USER_SCAN,
                     sourceName = "My Archive",
                     sourcePackId = null
@@ -295,7 +298,7 @@ class CosmeticsViewModel @Inject constructor(
             is CosmeticsEvent.InitializeEdit -> {
                 viewModelScope.launch {
                     cosmeticRepository.getAllCosmetics().map { items -> 
-                        items.find { it.id == event.itemId } 
+                        items.find { it.internalId == event.itemId } 
                     }.filterNotNull().first().let { model ->
                         sessionRepository.setCosmeticDraft(model)
                     }
@@ -309,7 +312,7 @@ class CosmeticsViewModel @Inject constructor(
                              currentDraft.brand.isBlank() && 
                              currentDraft.imageUrl == null && 
                              currentDraft.batchCode == null &&
-                             currentDraft.id == 0L)
+                             currentDraft.internalId == 0L)
                 
                 if (!isEmpty || sessionRepository.scanState.value == FashionSessionRepository.ScanStatus.ANALYZING || sessionRepository.scanState.value == FashionSessionRepository.ScanStatus.SUCCESS) return
                 
@@ -477,7 +480,7 @@ class CosmeticsViewModel @Inject constructor(
 
     private fun useItem(id: Long) {
         viewModelScope.launch {
-            val item = uiState.value.items.find { it.id == id } ?: return@launch
+            val item = uiState.value.items.find { it.internalId == id } ?: return@launch
             val updated = item.copy(
                 usageCount = item.usageCount + 1,
                 isOpened = true,
@@ -543,10 +546,10 @@ class CosmeticsViewModel @Inject constructor(
         }
     }
 
-    private fun loadBitmapFromUri(uri: Uri): android.graphics.Bitmap? {
+    private fun loadBitmapFromUri(uri: Uri): Bitmap? {
         return try {
             val inputStream = context.contentResolver.openInputStream(uri)
-            android.graphics.BitmapFactory.decodeStream(inputStream)
+            BitmapFactory.decodeStream(inputStream)
         } catch (e: Exception) {
             null
         }
@@ -565,21 +568,21 @@ class CosmeticsViewModel @Inject constructor(
     }
 
     private fun cloneToPersonal(item: CosmeticItem) {
-        if (_archiveStatuses.value[item.id] == ArchiveStatus.SUCCESS || 
-            _archiveStatuses.value[item.id] == ArchiveStatus.ARCHIVING) return
+        if (_archiveStatuses.value[item.internalId] == ArchiveStatus.SUCCESS || 
+            _archiveStatuses.value[item.internalId] == ArchiveStatus.ARCHIVING) return
 
         viewModelScope.launch {
-            _archiveStatuses.update { it + (item.id to ArchiveStatus.ARCHIVING) }
+            _archiveStatuses.update { it + (item.internalId to ArchiveStatus.ARCHIVING) }
             
             try {
                 // Use the DAO's optimized SQL cloning logic
-                cosmeticRepository.cloneToPersonalArchive(item.id)
+                cosmeticRepository.cloneToPersonalArchive(item.internalId)
                 
                 // Keep the success state visible for a moment for UX
-                _archiveStatuses.update { it + (item.id to ArchiveStatus.SUCCESS) }
+                _archiveStatuses.update { it + (item.internalId to ArchiveStatus.SUCCESS) }
             } catch (e: Exception) {
                 Log.e("CosmeticsVM", "Cloning failed", e)
-                _archiveStatuses.update { it + (item.id to ArchiveStatus.ERROR) }
+                _archiveStatuses.update { it + (item.internalId to ArchiveStatus.ERROR) }
             }
         }
     }

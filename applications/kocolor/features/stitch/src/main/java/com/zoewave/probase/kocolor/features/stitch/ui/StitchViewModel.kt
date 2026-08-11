@@ -123,7 +123,7 @@ class StitchViewModel @Inject constructor(
             val newList = advice.makeupSuggestions.toMutableList()
             if (index < newList.size) {
                 newList[index] = newList[index].copy(
-                    productId = item.id,
+                    productId = item.internalId,
                     suggestedProductName = item.name,
                     suggestedProductImageUrl = item.imageUrl,
                     category = item.microCategory.displayName
@@ -133,7 +133,7 @@ class StitchViewModel @Inject constructor(
                     category = item.microCategory.displayName,
                     advice = "Custom selection.",
                     recommendedColors = item.colorHex?.let { listOf(it) } ?: emptyList(),
-                    productId = item.id,
+                    productId = item.internalId,
                     suggestedProductName = item.name,
                     suggestedProductImageUrl = item.imageUrl
                 ))
@@ -152,7 +152,7 @@ class StitchViewModel @Inject constructor(
                 
                 // For simplicity, we match itemIndex to the lists
                 if (itemIndex < itemIds.size) {
-                    itemIds[itemIndex] = item.id
+                    itemIds[itemIndex] = item.internalId
                     suggestedItems[itemIndex] = SuggestedPiece(
                         name = item.name,
                         category = item.category.name,
@@ -162,7 +162,7 @@ class StitchViewModel @Inject constructor(
                         isOwned = true
                     )
                 } else {
-                    itemIds.add(item.id)
+                    itemIds.add(item.internalId)
                     suggestedItems.add(SuggestedPiece(
                         name = item.name,
                         category = item.category.name,

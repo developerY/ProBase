@@ -34,11 +34,11 @@ class CosmeticInventoryRepositoryImpl @Inject constructor(
         val bucketedItem = item.copy(
             colorFamily = ColorQuantizer.snapToFamily(item.colorHex)
         )
-        return if (bucketedItem.id == 0L) {
+        return if (bucketedItem.internalId == 0L) {
             cosmeticDao.insertCosmetic(bucketedItem.toEntity())
         } else {
             cosmeticDao.updateCosmetic(bucketedItem.toEntity())
-            bucketedItem.id
+            bucketedItem.internalId
         }
     }
 
@@ -58,8 +58,8 @@ class CosmeticInventoryRepositoryImpl @Inject constructor(
         cosmeticDao.deleteCosmeticsByPackId(packId)
     }
 
-    override suspend fun cloneToPersonalArchive(id: Long): Result<Unit> = runCatching {
-        Log.d("CosmeticRepo", "cloneToPersonalArchive: Cloning item $id")
-        cosmeticDao.cloneToPersonalArchive(id)
+    override suspend fun cloneToPersonalArchive(internalId: Long): Result<Unit> = runCatching {
+        Log.d("CosmeticRepo", "cloneToPersonalArchive: Cloning item $internalId")
+        cosmeticDao.cloneToPersonalArchive(internalId)
     }
 }
