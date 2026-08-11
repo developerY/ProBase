@@ -11,6 +11,7 @@ pub struct PackageManifestRecord {
     pub package_id: String,
     pub hash: String,
     pub signature: String,
+    pub uncompressed_size_bytes: u64,
 }
 
 /// Parses TOML manifests, resolves product IDs from the canonical index,
@@ -106,7 +107,7 @@ pub fn assemble_packages(
             let final_json = serde_json::to_string(&package_payloads)
                 .expect("❌ Failed to serialize KCPS payload");
 
-            let (hash_hex, sig_hex) = packager::seal_package(
+            let (hash_hex, sig_hex, uncompressed_size) = packager::seal_package(
                 final_json.as_bytes(),
                 &manifest.package_metadata.id,
                 signing_key,
@@ -117,6 +118,7 @@ pub fn assemble_packages(
                 package_id: manifest.package_metadata.id.clone(),
                 hash: hash_hex,
                 signature: sig_hex,
+                uncompressed_size_bytes: uncompressed_size,
             });
 
             println!("  🔒 Sealed package '{}' (.kpkg generated & signed).", manifest.package_metadata.id);

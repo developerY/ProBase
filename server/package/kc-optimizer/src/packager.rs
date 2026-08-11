@@ -6,12 +6,15 @@ use zstd::stream::encode_all;
 
 /// Compresses the KCPS JSON payload using Zstd, writes the .kpkg binary,
 /// computes its SHA-256 hash, and signs it with an Ed25519 private key.
+/// Returns (hash_hex, signature_hex, uncompressed_size_bytes).
 pub fn seal_package(
     json_bytes: &[u8],
     package_id: &str,
     signing_key: &SigningKey,
     dist_dir: &Path,
-) -> (String, String) {
+) -> (String, String, u64) {
+    let uncompressed_size = json_bytes.len() as u64;
+
     // 1. Zstd Compression
     // We use level 19 (maximum) because we are computing at compile-time.
     // This ruthlessly shrinks the payload for mobile downloads.
@@ -35,5 +38,5 @@ pub fn seal_package(
     let signature: Signature = signing_key.sign(&compressed_bytes);
     let sig_hex = hex::encode(signature.to_bytes());
 
-    (hash_hex, sig_hex)
+    (hash_hex, sig_hex, uncompressed_size)
 }
