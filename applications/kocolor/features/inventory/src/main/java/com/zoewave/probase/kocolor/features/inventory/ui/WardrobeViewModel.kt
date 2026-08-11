@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
 import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
+import com.zoewave.probase.core.model.ritual.ArchiveStatus
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.core.model.ritual.InventorySource
@@ -34,7 +35,8 @@ data class WardrobeUiState(
     val totalInvestment: Double = 0.0,
     val totalItems: Int = 0,
     val itemsByCategory: Map<String, Int> = emptyMap(),
-    val categoriesMetadata: Map<String, CategoryMetadata> = emptyMap()
+    val categoriesMetadata: Map<String, CategoryMetadata> = emptyMap(),
+    val archiveStatuses: Map<Long, ArchiveStatus> = emptyMap()
 )
 
 sealed class WardrobeEvent {
@@ -55,6 +57,7 @@ class WardrobeViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _draftItem = MutableStateFlow(ClothingItem(name = "", category = ClothingCategory.TOPS, colorHex = "#FFFFFF"))
+    private val _archiveStatuses = MutableStateFlow<Map<Long, ArchiveStatus>>(emptyMap())
 
     private var lastProcessedUri: String? = null
 
@@ -98,8 +101,9 @@ class WardrobeViewModel @Inject constructor(
 
     val uiState: StateFlow<WardrobeUiState> = combine(
         wardrobeRepository.getAllClothing(),
-        _draftItem
-    ) { models, draft ->
+        _draftItem,
+        _archiveStatuses
+    ) { models, draft, archiveStatuses ->
         val totalInvestment = models.sumOf { it.price ?: 0.0 }
         val itemsByCategory = models.groupBy { it.category.name }.mapValues { it.value.size }
         
@@ -129,7 +133,8 @@ class WardrobeViewModel @Inject constructor(
             totalInvestment = totalInvestment,
             totalItems = models.size,
             itemsByCategory = itemsByCategory,
-            categoriesMetadata = categoryMetadata
+            categoriesMetadata = categoryMetadata,
+            archiveStatuses = archiveStatuses
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), WardrobeUiState())
 
@@ -197,17 +202,19 @@ class WardrobeViewModel @Inject constructor(
     }
 
     private fun cloneToPersonal(item: ClothingItem) {
+        if (_archiveStatuses.value[item.id] == ArchiveStatus.SUCCESS || 
+            _archiveStatuses.value[item.id] == ArchiveStatus.ARCHIVING) return
+
         viewModelScope.launch {
-            val cloned = item.copy(
-                id = 0L,
-                sourceType = InventorySource.CLONED,
-                sourcePackId = null,
-                provenance = null, // Critical: Remove provenance to protect from collection removal
-                parentItemId = item.id.toString(),
-                timestamp = System.currentTimeMillis()
-            )
-            wardrobeRepository.saveClothingItem(cloned)
-            Log.d("WardrobeVM", "Clothing item cloned: ${cloned.name}")
+            _archiveStatuses.update { it + (item.id to ArchiveStatus.ARCHIVING) }
+            
+            try {
+                wardrobeRepository.cloneToPersonalArchive(item.id)
+                _archiveStatuses.update { it + (item.id to ArchiveStatus.SUCCESS) }
+            } catch (e: Exception) {
+                Log.e("WardrobeVM", "Cloning failed", e)
+                _archiveStatuses.update { it + (item.id to ArchiveStatus.ERROR) }
+            }
         }
     }
 }

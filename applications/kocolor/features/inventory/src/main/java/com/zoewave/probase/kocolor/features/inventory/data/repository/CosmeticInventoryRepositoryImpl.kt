@@ -57,4 +57,9 @@ class CosmeticInventoryRepositoryImpl @Inject constructor(
         Log.d("CosmeticRepo", "deleteCosmeticsByPack: Deleting items for pack $packId")
         cosmeticDao.deleteCosmeticsByPackId(packId)
     }
+
+    override suspend fun cloneToPersonalArchive(id: Long): Result<Unit> = runCatching {
+        Log.d("CosmeticRepo", "cloneToPersonalArchive: Cloning item $id")
+        cosmeticDao.cloneToPersonalArchive(id)
+    }
 }

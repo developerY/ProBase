@@ -141,6 +141,13 @@ class WardrobeRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun cloneToPersonalArchive(id: Long): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            Log.d(TAG, "cloneToPersonalArchive: Cloning item $id")
+            clothingDao.cloneToPersonalArchive(id)
+        }
+    }
+
     private suspend fun analyzeGarment(item: ClothingItem): ClothingItem {
         val imagePath = item.imageUrl ?: return item
         return try {

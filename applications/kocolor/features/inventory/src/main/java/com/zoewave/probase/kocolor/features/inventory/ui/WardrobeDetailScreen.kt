@@ -32,15 +32,19 @@ import com.zoewave.probase.kocolor.features.inventory.ui.components.DetailRow
 import com.zoewave.probase.kocolor.features.inventory.ui.components.MetricItem
 import com.zoewave.probase.kocolor.features.inventory.ui.components.ProInsightCard
 import com.zoewave.probase.kocolor.features.inventory.ui.components.SectionHeader
+import com.zoewave.probase.core.model.ritual.ArchiveStatus
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
+import com.zoewave.probase.core.model.ritual.InventorySource
+import com.zoewave.probase.core.ui.components.MakeItMineButton
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import java.text.NumberFormat
 import java.util.*
 
 data class WardrobeDetailUiState(
     val itemId: Long,
-    val wardrobeUiState: WardrobeUiState
+    val wardrobeUiState: WardrobeUiState,
+    val archiveStatus: ArchiveStatus = ArchiveStatus.IDLE
 )
 
 @Preview(showBackground = true)
@@ -80,6 +84,7 @@ fun WardrobeDetailScreen(
 ) {
     val item = uiState.wardrobeUiState.items.find { it.id == uiState.itemId } ?: return
     val atelierBrown = Color(0xFF8B5E3C)
+    val archiveStatus = uiState.archiveStatus
 
     Scaffold(
         topBar = {
@@ -96,6 +101,17 @@ fun WardrobeDetailScreen(
                     }
                 }
             )
+        },
+        bottomBar = {
+            if (item.sourceType != InventorySource.USER_SCAN && item.sourceType != InventorySource.CLONED) {
+                Box(modifier = Modifier.padding(16.dp)) {
+                    MakeItMineButton(
+                        status = archiveStatus,
+                        onClick = { onEvent(WardrobeEvent.CloneToPersonal(item)) },
+                        containerColor = atelierBrown
+                    )
+                }
+            }
         }
     ) { padding ->
         Column(
