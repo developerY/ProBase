@@ -43,4 +43,25 @@ interface ClothingDao {
 
     @Query("DELETE FROM clothing_items")
     suspend fun deleteAllClothing()
+
+    /**
+     * "MAKE IT MINE" Action: Clones a clothing item and detaches it from the collection lifecycle.
+     */
+    @Transaction
+    @Query("""
+        INSERT INTO clothing_items (
+            name, brand, category, formality, colorHex, colorFamily, size, material, price, 
+            imageUrl, notes, timestamp, dominantHex, vibrantHex, mutedHex, paletteHexes, 
+            colorTemperature, seasonalPalette, contrastLevel, koColorGroup, sourceType, 
+            sourceName, provenance_packId
+        )
+        SELECT 
+            name, brand, category, formality, colorHex, colorFamily, size, material, price, 
+            imageUrl, notes, :timestamp, dominantHex, vibrantHex, mutedHex, paletteHexes, 
+            colorTemperature, seasonalPalette, contrastLevel, koColorGroup, 'USER_SCAN', 
+            sourceName, NULL
+        FROM clothing_items 
+        WHERE id = :sourceId
+    """)
+    suspend fun cloneToPersonalArchive(sourceId: Long, timestamp: Long = System.currentTimeMillis())
 }

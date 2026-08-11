@@ -21,6 +21,7 @@ sealed interface PackItemDto {
     val shadeName: String?
     val imageUrl: String
     val thumbnailUrl: String
+    val calculatedBlurhash: String?
     val price: Double?
     val notes: String?
 }
@@ -51,8 +52,32 @@ data class CosmeticItemDto(
     val allergens: List<String>,
     @SerialName("is_vegan") val isVegan: Boolean?,
     @SerialName("is_cruelty_free") val isCrueltyFree: Boolean?,
-    @SerialName("fda_data_verified") val fdaDataVerified: Boolean
+    @SerialName("fda_data_verified") val fdaDataVerified: Boolean,
+    
+    // --- Engine Enrichment (Calculated at Compile Time) ---
+    @SerialName("calculated_chemistry_phase") val calculatedChemistryPhase: String? = null,
+    @SerialName("calculated_cielab") val calculatedCielab: CielabData? = null,
+    @SerialName("calculated_blurhash") override val calculatedBlurhash: String? = null,
+    @SerialName("calculated_safety_flags") val calculatedSafetyFlags: SafetyFlags? = null,
+    @SerialName("calculated_hero_actives") val calculatedHeroActives: List<String> = emptyList(),
+    @SerialName("calculated_unit_price") val calculatedUnitPrice: Double? = null,
+    @SerialName("calculated_search_tokens") val calculatedSearchTokens: List<String> = emptyList()
 ) : PackItemDto
+
+@Serializable
+data class CielabData(
+    val l: Double,
+    val a: Double,
+    val b: Double,
+    @SerialName("hue_angle_hab") val hueAngleHab: Double
+)
+
+@Serializable
+data class SafetyFlags(
+    @SerialName("is_silicone_free") val isSiliconeFree: Boolean,
+    @SerialName("is_paraben_free") val isParabenFree: Boolean,
+    @SerialName("is_sulfate_free") val isSulfateFree: Boolean
+)
 
 @Serializable
 data class ClothingItemDto(
@@ -76,5 +101,9 @@ data class ClothingItemDto(
     @SerialName("color_temperature") val colorTemperature: String? = null,
     @SerialName("seasonal_palette") val seasonalPalette: String? = null,
     @SerialName("contrast_level") val contrastLevel: String? = null,
-    @SerialName("ko_color_group") val koColorGroup: String? = null
+    @SerialName("ko_color_group") val koColorGroup: String? = null,
+    
+    // --- Engine Enrichment (Calculated at Compile Time) ---
+    @SerialName("calculated_blurhash") override val calculatedBlurhash: String? = null,
+    @SerialName("calculated_search_tokens") val calculatedSearchTokens: List<String> = emptyList()
 ) : PackItemDto

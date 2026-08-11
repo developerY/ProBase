@@ -3,8 +3,15 @@ package com.zoewave.probase.kocolor.db.entity
 import androidx.room3.Embedded
 import androidx.room3.Entity
 import androidx.room3.PrimaryKey
-import com.zoewave.probase.core.model.ritual.*
+import com.zoewave.probase.core.model.ritual.ChemistryBase
+import com.zoewave.probase.core.model.ritual.ColorFamily
+import com.zoewave.probase.core.model.ritual.Coverage
+import com.zoewave.probase.core.model.ritual.Finish
+import com.zoewave.probase.core.model.ritual.Formulation
 import com.zoewave.probase.core.model.ritual.InventorySource
+import com.zoewave.probase.core.model.ritual.MacroCategory
+import com.zoewave.probase.core.model.ritual.MicroCategory
+import com.zoewave.probase.core.model.ritual.Temperature
 
 @Entity(tableName = "cosmetic_items")
 data class CosmeticItemEntity(
@@ -66,6 +73,20 @@ data class CosmeticItemEntity(
     @Embedded(prefix = "provenance_") val provenance: Provenance? = null,
     val parentItemId: String? = null,
     val isHidden: Boolean = false,
+
+    // --- Engine Enrichment (Calculated at Compile Time) ---
+    val calculatedChemistryPhase: String? = null,
+    val calculatedCielabL: Double? = null,
+    val calculatedCielabA: Double? = null,
+    val calculatedCielabB: Double? = null,
+    val calculatedHueAngle: Double? = null,
+    val calculatedBlurhash: String? = null,
+    val isSiliconeFree: Boolean? = null,
+    val isParabenFree: Boolean? = null,
+    val isSulfateFree: Boolean? = null,
+    val heroActives: List<String> = emptyList(),
+    val calculatedUnitPrice: Double? = null,
+    val searchTokens: List<String> = emptyList(),
 
     // --- FDA & Clinical Safety ---
     val fdaRecallStatus: String? = null,

@@ -202,6 +202,7 @@ class WardrobeViewModel @Inject constructor(
                 id = 0L,
                 sourceType = InventorySource.CLONED,
                 sourcePackId = null,
+                provenance = null, // Critical: Remove provenance to protect from collection removal
                 parentItemId = item.id.toString(),
                 timestamp = System.currentTimeMillis()
             )

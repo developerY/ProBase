@@ -1,11 +1,10 @@
 package com.zoewave.probase.kocolor.features.starterpack.domain.security
 
-import com.zoewave.probase.kocolor.features.starterpack.data.SecurityConstants
+import com.google.crypto.tink.subtle.Ed25519Verify
 import com.zoewave.probase.core.util.HashUtils
+import com.zoewave.probase.kocolor.features.starterpack.data.SecurityConstants
 import okio.Source
 import okio.buffer
-import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters
-import org.bouncycastle.crypto.signers.Ed25519Signer
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -29,11 +28,10 @@ interface SignatureVerifier {
 class KoColorEd25519Verifier @Inject constructor() : SignatureVerifier {
 
     // Hardcoded compiler public key for Zero-Trust verification
-    // This is standard practice for root public keys
     private val publicKeyHex = SecurityConstants.KOCOLOR_ROOT_PUBLIC_KEY 
 
-    private val publicKeyParams by lazy {
-        Ed25519PublicKeyParameters(publicKeyHex.decodeHex(), 0)
+    private val verifier by lazy {
+        Ed25519Verify(publicKeyHex.decodeHex())
     }
 
     override fun verify(payloadBytes: ByteArray, signatureHex: String, expectedSha256: String): Boolean {
@@ -45,43 +43,29 @@ class KoColorEd25519Verifier @Inject constructor() : SignatureVerifier {
             }
         }
 
-        // 2. Cryptographic Authenticity Check (Ed25519)
-        val signer = Ed25519Signer().apply {
-            init(false, publicKeyParams)
-            update(payloadBytes, 0, payloadBytes.size)
-        }
-
+        // 2. Cryptographic Authenticity Check (Ed25519 via Tink)
         return try {
             val signatureBytes = signatureHex.decodeHex()
-            signer.verifySignature(signatureBytes)
+            verifier.verify(signatureBytes, payloadBytes)
+            true
         } catch (e: Exception) {
-            false // Malformed signature string
+            false // Invalid signature or malformed data
         }
     }
 
     override fun verify(source: Source, signatureHex: String): Boolean {
-        val signer = Ed25519Signer().apply {
-            init(false, publicKeyParams)
-        }
-
-        val buffer = ByteArray(8192) // 8KB chunks
-        source.buffer().use { bufferedSource ->
-            while (true) {
-                val bytesRead = bufferedSource.read(buffer)
-                if (bytesRead == -1) break
-                signer.update(buffer, 0, bytesRead)
-            }
-        }
-
+        // Tink's Ed25519Verify requires the full message to verify.
+        // Since .kpkg files are relatively small (<32MB), we read into memory.
         return try {
+            val payloadBytes = source.buffer().readByteArray()
             val signatureBytes = signatureHex.decodeHex()
-            signer.verifySignature(signatureBytes)
+            verifier.verify(signatureBytes, payloadBytes)
+            true
         } catch (e: Exception) {
             false
         }
     }
 
-    // --- Hex Utility Extensions ---
     private fun String.decodeHex(): ByteArray {
         check(length % 2 == 0) { "Must have an even length" }
         return chunked(2)

@@ -563,6 +563,7 @@ class CosmeticsViewModel @Inject constructor(
                 id = 0L, // New record
                 sourceType = InventorySource.CLONED,
                 sourcePackId = null, // Detach from pack wipe
+                provenance = null,   // Critical: Remove provenance to protect from collection removal
                 parentItemId = item.id.toString(),
                 timestamp = System.currentTimeMillis()
             )

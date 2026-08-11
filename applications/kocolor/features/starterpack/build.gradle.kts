@@ -38,8 +38,10 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.squareup.retrofit)
+    implementation(libs.squareup.okhttp3.logging.interceptor)
     implementation(libs.retrofit.kotlinx.serialization.converter)
     implementation(libs.coil.compose)
+    implementation(libs.tinkAndroid)
 
     implementation("org.bouncycastle:bcprov-jdk18on:1.77")
     implementation("com.github.luben:zstd-jni:1.5.7-12@aar")

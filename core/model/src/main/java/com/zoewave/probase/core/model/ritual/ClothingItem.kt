@@ -67,6 +67,10 @@ data class ClothingItem(
     val parentItemId: String? = null,
     val isHidden: Boolean = false,
 
+    // --- Engine Enrichment (Calculated at Compile Time) ---
+    val calculatedBlurhash: String? = null,
+    val searchTokens: List<String> = emptyList(),
+
     // --- Usage & Performance ---
     val usageCount: Int = 0
 ) {
