@@ -3,6 +3,7 @@ mod indexer;
 mod optimizer;
 mod composer;
 mod packager;
+mod enrichment;
 
 use rayon::prelude::*;
 use std::fs;
@@ -63,6 +64,28 @@ fn main() {
     let manifest_path = output_dist_dir.join("manifest.json");
     fs::write(manifest_path, manifest_json).expect("❌ Failed to write manifest.json");
     println!("  📜 master manifest.json written.");
+
+    // --- PASS 5: GENERATE GLOBAL SEARCH INDEX ---
+    println!("\n--- PASS 5: GENERATE SEARCH INDEX ---");
+
+    // Build a lightweight mapping of ID -> Search Tokens for the mobile Hub
+    let mut search_index = std::collections::HashMap::new();
+
+    for (id, data) in &canonical_index {
+        let tokens = enrichment::generate_search_tokens(
+            &data.name,
+            &data.brand,
+            &data.macro_category
+        );
+        search_index.insert(id.clone(), tokens);
+    }
+
+    let search_json = serde_json::to_string_pretty(&search_index)
+        .expect("❌ Failed to generate search index");
+
+    let search_path = output_dist_dir.join("search_index.json");
+    fs::write(search_path, search_json).expect("❌ Failed to write search_index.json");
+    println!("  🔍 search_index.json written.");
 
     println!("\n✅ CCT Build completed in {:.2?}.", start_time.elapsed());
 }
