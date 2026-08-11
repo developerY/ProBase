@@ -79,7 +79,7 @@ fun PackPreviewItemRow(
                 .clip(RoundedCornerShape(12.dp))
                 .background(Color(0xFFF5F5F5))
         ) {
-            val blurhash = item.calculatedBlurhash
+            val blurhash = item.blurhash
             val placeholder = remember(blurhash) {
                 BlurHashDecoder.decode(blurhash, 32, 32)?.asImageBitmap()
             }
@@ -162,7 +162,7 @@ private fun PackPreviewItemRowPreview() {
                 colorHex = "#F4F6F0",
                 thumbnailUrl = "",
                 imageUrl = "",
-                calculatedBlurhash = "LEHV6nWB2yk8pyo0adRj00WBof%M",
+                blurhash = "LEHV6nWB2yk8pyo0adRj00WBof%M",
                 macroCategory = "PREP",
                 microCategory = "CLEANSER",
                 price = 18.0,

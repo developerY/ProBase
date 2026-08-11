@@ -21,7 +21,7 @@ sealed interface PackItemDto {
     val shadeName: String?
     val imageUrl: String
     val thumbnailUrl: String
-    val calculatedBlurhash: String?
+    val blurhash: String?
     val price: Double?
     val notes: String?
 }
@@ -56,21 +56,13 @@ data class CosmeticItemDto(
     
     // --- Engine Enrichment (Calculated at Compile Time) ---
     @SerialName("calculated_chemistry_phase") val calculatedChemistryPhase: String? = null,
-    @SerialName("calculated_cielab") val calculatedCielab: CielabData? = null,
-    @SerialName("calculated_blurhash") override val calculatedBlurhash: String? = null,
+    val cielab: List<Float>? = null,
+    override val blurhash: String? = null,
     @SerialName("calculated_safety_flags") val calculatedSafetyFlags: SafetyFlags? = null,
     @SerialName("calculated_hero_actives") val calculatedHeroActives: List<String> = emptyList(),
     @SerialName("calculated_unit_price") val calculatedUnitPrice: Double? = null,
     @SerialName("calculated_search_tokens") val calculatedSearchTokens: List<String> = emptyList()
 ) : PackItemDto
-
-@Serializable
-data class CielabData(
-    val l: Double,
-    val a: Double,
-    val b: Double,
-    @SerialName("hue_angle_hab") val hueAngleHab: Double
-)
 
 @Serializable
 data class SafetyFlags(
@@ -104,6 +96,6 @@ data class ClothingItemDto(
     @SerialName("ko_color_group") val koColorGroup: String? = null,
     
     // --- Engine Enrichment (Calculated at Compile Time) ---
-    @SerialName("calculated_blurhash") override val calculatedBlurhash: String? = null,
+    override val blurhash: String? = null,
     @SerialName("calculated_search_tokens") val calculatedSearchTokens: List<String> = emptyList()
 ) : PackItemDto
