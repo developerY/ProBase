@@ -66,5 +66,7 @@ The user views an imported item and taps the luxury **"MAKE IT MINE"** button.
 
 ---
 
-## ⏭️ Next: Phase 4 Asset Engineering
-For detailed progress on the next generation of the distribution pipeline, see the **[Phase 4 Walkthrough](file:///Users/developer/AndroidStudioProjects/ProBase/server/docs/Specification/ProductGen/Walkthrough_Phase4_Scaffolding.md)**.
+## ⏭️ Next: Evolution of the Engine
+For detailed progress on the next generation of the distribution pipeline, see:
+*   **[Phase 4: Asset Engineering Scaffolding](file:///Users/developer/AndroidStudioProjects/ProBase/server/docs/Specification/ProductGen/Walkthrough_Phase4_Scaffolding.md)**
+*   **[Phase 5: Intelligence & Global Search](file:///Users/developer/AndroidStudioProjects/ProBase/server/docs/Specification/ProductGen/Walkthrough_Phase5_Intelligence_Search.md)**
