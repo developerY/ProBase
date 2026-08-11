@@ -37,6 +37,7 @@ This index provides a centralized Table of Contents for all architectural bluepr
 *Implementation details for the primary verification and ingestion gateway.*
 
 *   **[Mobile Ingestion Implementation](../../applications/kocolor/docs/Pipeline/Mobile_Ingestion_Implementation.md)**: Blueprint for verified streaming, Zstd, and Room sync.
+*   **[Ingestion & Security Walkthrough](../../applications/kocolor/docs/Walkthrough_Mobile_Ingestion_Enrichment.md)**: Technical guide for scientific enrichment, BlurHash, and "Make it Mine" cloning.
 *   **[Boutique UI Specification](../../applications/kocolor/docs/UI/Implementation_V1_Core.md)**: High-fidelity selection UI and sticky header constraints.
 *   **Feature Modules**:
     *   [BoxCapture](../../applications/kocolor/docs/BoxCapture/walkthrough.md)
