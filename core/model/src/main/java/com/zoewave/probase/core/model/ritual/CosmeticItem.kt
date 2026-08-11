@@ -282,8 +282,9 @@ data class CosmeticItem(
     val parentItemId: String? = null,
     val isHidden: Boolean = false,
 
-    // --- Engine Enrichment (Calculated at Compile Time) ---
+    // Engine Enrichment (Calculated at Compile Time) ---
     val calculatedChemistryPhase: String? = null,
+    val chemistryPhase: ChemistryPhase = ChemistryPhase.fromString(calculatedChemistryPhase),
     val calculatedCielabL: Double? = null,
     val calculatedCielabA: Double? = null,
     val calculatedCielabB: Double? = null,

@@ -1,5 +1,6 @@
 package com.zoewave.probase.kocolor.features.cosmetics.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -52,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.zoewave.probase.core.model.ritual.ChemistryBase
+import com.zoewave.probase.core.model.ritual.ChemistryPhase
 import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.core.model.ritual.Coverage
 import com.zoewave.probase.core.model.ritual.Finish
@@ -59,6 +61,8 @@ import com.zoewave.probase.core.model.ritual.Formulation
 import com.zoewave.probase.core.model.ritual.InventorySource
 import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.core.model.ritual.MicroCategory
+import com.zoewave.probase.core.ui.intelligence.CompatibilityBadge
+import com.zoewave.probase.core.util.ChemistryCompatibilityEngine
 import com.zoewave.probase.kocolor.features.cosmetics.R
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.ApplicationGuideSection
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.AtelierExpandableSection
@@ -273,6 +277,23 @@ fun CosmeticDetailScreen(
                                 fontWeight = FontWeight.Bold
                             )
                         }
+                    }
+                }
+
+                if (item.chemistryPhase != ChemistryPhase.UNKNOWN) {
+                    Spacer(Modifier.height(12.dp))
+                    Surface(
+                        color = atelierBrown.copy(alpha = 0.05f),
+                        shape = RoundedCornerShape(4.dp),
+                        border = BorderStroke(0.5.dp, atelierBrown.copy(alpha = 0.2f))
+                    ) {
+                        Text(
+                            text = "PHASE: ${item.chemistryPhase.name.replace("_", " ")}",
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.sp),
+                            color = atelierBrown,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 }
 

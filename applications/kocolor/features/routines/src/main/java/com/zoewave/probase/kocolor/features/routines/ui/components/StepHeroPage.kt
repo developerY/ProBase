@@ -52,9 +52,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.zoewave.probase.core.model.ritual.ChemistryPhase
 import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.core.model.ritual.RoutineStep
 import com.zoewave.probase.core.model.ritual.RoutineTime
+import com.zoewave.probase.core.ui.intelligence.CompatibilityBadge
+import com.zoewave.probase.core.util.ChemistryCompatibilityEngine
 import com.zoewave.probase.features.health.nutrition.ui.shared.BioMealSuggestionSection
 import com.zoewave.probase.kocolor.features.routines.R
 import com.zoewave.probase.kocolor.features.routines.ui.RoutinesEvent
@@ -442,6 +445,16 @@ fun StepHeroPage(
                                 }
                             }
                         }
+                    }
+
+                    // Interfacial Chemistry Evaluation
+                    if (linkedProducts.size >= 2) {
+                        Spacer(Modifier.height(8.dp))
+                        val compatibility = ChemistryCompatibilityEngine.evaluateLayering(
+                            linkedProducts[0].chemistryPhase,
+                            linkedProducts[1].chemistryPhase
+                        )
+                        CompatibilityBadge(result = compatibility)
                     }
                 }
             }
