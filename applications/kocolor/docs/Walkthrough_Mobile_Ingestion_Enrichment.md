@@ -37,7 +37,7 @@ The `CosmeticItem` and `ClothingItem` models have been expanded to include:
 To ensure a "Boutique" experience during high-velocity scrolling, we implemented instant visual placeholders.
 
 *   **BlurHash Decoding**: Created a native Kotlin `BlurHashDecoder` utility.
-*   **UI Integration**: `PackPreviewItemRow` now uses the `calculated_blurhash` as an initial placeholder for Coil's `AsyncImage`.
+*   **UI Integration**: `PackPreviewItemRow` now uses the `blurhash` as an initial placeholder for Coil's `AsyncImage`.
 *   **UX Benefit**: Users see a beautiful, color-accurate blurred version of the product image instantly, eliminating the "empty box" state while high-res assets download.
 
 ---
