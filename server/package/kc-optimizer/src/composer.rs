@@ -11,7 +11,7 @@ pub struct PackageManifestRecord {
     pub package_id: String,
     pub hash: String,
     pub signature: String,
-    pub uncompressed_size_bytes: u64,
+    pub uncompressed_size_bytes: usize, // Required for Android bomb prevention
 }
 
 /// Parses TOML manifests, resolves product IDs from the canonical index,
@@ -107,8 +107,12 @@ pub fn assemble_packages(
             let final_json = serde_json::to_string(&package_payloads)
                 .expect("❌ Failed to serialize KCPS payload");
 
-            let (hash_hex, sig_hex, uncompressed_size) = packager::seal_package(
-                final_json.as_bytes(),
+            // Measure the byte length BEFORE compression
+            let uncompressed_bytes = final_json.as_bytes();
+            let size_bytes = uncompressed_bytes.len();
+
+            let (hash_hex, sig_hex, _) = packager::seal_package(
+                uncompressed_bytes,
                 &manifest.package_metadata.id,
                 signing_key,
                 dist_dir
@@ -118,10 +122,10 @@ pub fn assemble_packages(
                 package_id: manifest.package_metadata.id.clone(),
                 hash: hash_hex,
                 signature: sig_hex,
-                uncompressed_size_bytes: uncompressed_size,
+                uncompressed_size_bytes: size_bytes,
             });
 
-            println!("  🔒 Sealed package '{}' (.kpkg generated & signed).", manifest.package_metadata.id);
+            println!("  🔒 Sealed package '{}' (Size: {} bytes).", manifest.package_metadata.id, size_bytes);
         }
     }
 
