@@ -80,7 +80,7 @@ data class CosmeticItemEntity(
     val calculatedCielabA: Double? = null,
     val calculatedCielabB: Double? = null,
     val calculatedHueAngle: Double? = null,
-    val calculatedBlurhash: String? = null,
+    val blurhash: String? = null,
     val isSiliconeFree: Boolean? = null,
     val isParabenFree: Boolean? = null,
     val isSulfateFree: Boolean? = null,
