@@ -43,7 +43,7 @@ private fun WardrobeLandingScreenPreview() {
                 totalItems = 9,
                 totalInvestment = 1615.0,
                 items = listOf(
-                    ClothingItem(id = 1, name = "Blouse", category = ClothingCategory.TOPS, colorHex = "#FFFFFF")
+                    ClothingItem(internalId = 1, name = "Blouse", category = ClothingCategory.TOPS, colorHex = "#FFFFFF")
                 )
             ),
             onEvent = {},

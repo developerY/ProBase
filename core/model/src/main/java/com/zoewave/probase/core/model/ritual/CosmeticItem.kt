@@ -213,7 +213,7 @@ enum class Temperature {
 
 @Serializable
 data class CosmeticItem(
-    val id: Long = 0,
+    val internalId: Long = 0,
     val name: String,
     val brand: String,
     val macroCategory: MacroCategory,

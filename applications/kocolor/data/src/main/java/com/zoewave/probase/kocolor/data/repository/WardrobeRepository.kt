@@ -12,5 +12,5 @@ interface WardrobeRepository {
     suspend fun wearClothingItem(id: Long)
     suspend fun deleteClothing(id: Long)
     suspend fun deleteClothingByPack(packId: String): Result<Unit>
-    suspend fun cloneToPersonalArchive(id: Long): Result<Unit>
+    suspend fun cloneToPersonalArchive(internalId: Long): Result<Unit>
 }

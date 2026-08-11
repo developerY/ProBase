@@ -67,7 +67,7 @@ class WardrobeViewModel @Inject constructor(
         itemId?.let { id ->
             if (id != 0L) {
                 viewModelScope.launch {
-                    wardrobeRepository.getClothingById(id).first()?.let { model ->
+                    wardrobeRepository.getClothingById(id).firstOrNull()?.let { model ->
                         _draftItem.update { current ->
                             // If we already have a NEW image in current (captured), keep it
                             if (current.imageUrl != null && current.imageUrl != model.imageUrl) {
@@ -86,7 +86,7 @@ class WardrobeViewModel @Inject constructor(
             .filterNotNull()
             .onEach { uri ->
                 if (uri != lastProcessedUri) {
-                    android.util.Log.d("WardrobeVM", "Processing NEW captured URI: $uri")
+                    Log.d("WardrobeVM", "Processing NEW captured URI: $uri")
                     lastProcessedUri = uri
                     val properUri = if (uri.startsWith("content://") || uri.startsWith("file://")) {
                         uri
@@ -146,9 +146,9 @@ class WardrobeViewModel @Inject constructor(
             is WardrobeEvent.WearItem -> wearItem(event.id)
             is WardrobeEvent.UpdateDraft -> _draftItem.value = event.item
             is WardrobeEvent.InitializeEdit -> {
-                if (_draftItem.value.id != event.itemId) {
+                if (_draftItem.value.internalId != event.itemId) {
                     viewModelScope.launch {
-                        wardrobeRepository.getClothingById(event.itemId).first()?.let { model ->
+                        wardrobeRepository.getClothingById(event.itemId).firstOrNull()?.let { model ->
                             _draftItem.update { current ->
                                 // Prioritize newly captured image in current draft
                                 if (current.imageUrl != null && current.imageUrl != model.imageUrl) {
@@ -167,7 +167,7 @@ class WardrobeViewModel @Inject constructor(
 
     private fun addItem(item: ClothingItem) {
         val userItem = item.copy(
-            id = 0L,
+            internalId = 0L,
             sourceType = InventorySource.USER_SCAN,
             sourceName = "My Wardrobe",
             sourcePackId = null
@@ -181,9 +181,9 @@ class WardrobeViewModel @Inject constructor(
     }
 
     private fun updateItem(item: ClothingItem) {
-        android.util.Log.d("WardrobeVM", "Triggering save for item: ${item.name} (image: ${item.imageUrl})")
+        Log.d("WardrobeVM", "Triggering save for item: ${item.name} (image: ${item.imageUrl})")
         viewModelScope.launch {
-            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO + kotlinx.coroutines.NonCancellable) {
+            withContext(Dispatchers.IO + NonCancellable) {
                 wardrobeRepository.saveClothingItem(item)
             }
         }
@@ -202,18 +202,18 @@ class WardrobeViewModel @Inject constructor(
     }
 
     private fun cloneToPersonal(item: ClothingItem) {
-        if (_archiveStatuses.value[item.id] == ArchiveStatus.SUCCESS || 
-            _archiveStatuses.value[item.id] == ArchiveStatus.ARCHIVING) return
+        if (_archiveStatuses.value[item.internalId] == ArchiveStatus.SUCCESS || 
+            _archiveStatuses.value[item.internalId] == ArchiveStatus.ARCHIVING) return
 
         viewModelScope.launch {
-            _archiveStatuses.update { it + (item.id to ArchiveStatus.ARCHIVING) }
+            _archiveStatuses.update { it + (item.internalId to ArchiveStatus.ARCHIVING) }
             
             try {
-                wardrobeRepository.cloneToPersonalArchive(item.id)
-                _archiveStatuses.update { it + (item.id to ArchiveStatus.SUCCESS) }
+                wardrobeRepository.cloneToPersonalArchive(item.internalId)
+                _archiveStatuses.update { it + (item.internalId to ArchiveStatus.SUCCESS) }
             } catch (e: Exception) {
                 Log.e("WardrobeVM", "Cloning failed", e)
-                _archiveStatuses.update { it + (item.id to ArchiveStatus.ERROR) }
+                _archiveStatuses.update { it + (item.internalId to ArchiveStatus.ERROR) }
             }
         }
     }

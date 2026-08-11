@@ -271,7 +271,7 @@ fun CosmeticAnalyticsScreen(
                                         Row(
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .clickable { navTo(KoColorRoute.CosmeticDetail(item.id)) }
+                                                .clickable { navTo(KoColorRoute.CosmeticDetail(item.internalId)) }
                                                 .padding(vertical = 4.dp),
                                             horizontalArrangement = Arrangement.SpaceBetween,
                                             verticalAlignment = Alignment.CenterVertically
@@ -331,7 +331,7 @@ private fun CosmeticAnalyticsScreenPreview() {
             uiState = CosmeticsUiState(
                 items = listOf(
                     CosmeticItem(
-                        id = 1, 
+                        internalId = 1, 
                         name = "Silk Primer", 
                         brand = "KoColor", 
                         macroCategory = MacroCategory.PREP,
@@ -341,7 +341,7 @@ private fun CosmeticAnalyticsScreenPreview() {
                         price = 28.0
                     ),
                     CosmeticItem(
-                        id = 2, 
+                        internalId = 2, 
                         name = "Cool Ivory", 
                         brand = "KoColor", 
                         macroCategory = MacroCategory.COMPLEXION,

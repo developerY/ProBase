@@ -134,7 +134,7 @@ fun WardrobeScreen(
                             items.forEach { item ->
                                 WardrobeCard(
                                     uiState = item,
-                                    onEvent = { onEvent(WardrobeEvent.DeleteItem(item.id)) },
+                                    onEvent = { onEvent(WardrobeEvent.DeleteItem(item.internalId)) },
                                     navTo = navTo,
                                     modifier = Modifier.weight(1f).aspectRatio(0.75f)
                                 )

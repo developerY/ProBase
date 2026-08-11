@@ -46,7 +46,7 @@ private fun WardrobeEditScreenPreview() {
                 itemId = 1L,
                 wardrobeUiState = WardrobeUiState(
                     draftItem = ClothingItem(
-                        id = 1L,
+                        internalId = 1L,
                         name = "Blazer",
                         category = ClothingCategory.TOPS,
                         colorHex = "#000000"

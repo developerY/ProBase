@@ -9,6 +9,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavEntry
 import androidx.xr.projected.ProjectedContext
 import androidx.xr.projected.experimental.ExperimentalProjectedApi
+import com.zoewave.probase.core.model.ritual.ArchiveStatus
+import com.zoewave.probase.features.camera.productcapture.ui.DiscoveryStatusScreen
 import com.zoewave.probase.features.health.nutrition.ui.shared.MealsUiEvent
 import com.zoewave.probase.features.health.nutrition.ui.shared.MealsUiRoute
 import com.zoewave.probase.features.health.nutrition.ui.shared.MealsUiState
@@ -16,7 +18,6 @@ import com.zoewave.probase.features.health.nutrition.ui.shared.MealsViewModel
 import com.zoewave.probase.features.readers.barcode.ui.BarcodeScannerScreen
 import com.zoewave.probase.features.readers.qrscanner.ui.QRCodeScannerScreen
 import com.zoewave.probase.features.weather.ui.WeatherUiRoute
-import com.zoewave.probase.core.model.ritual.ArchiveStatus
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorScreen
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorViewModel
 import com.zoewave.probase.kocolor.features.analyzer.ui.AnalyzerUiRoute
@@ -28,7 +29,6 @@ import com.zoewave.probase.kocolor.features.clothingcapture.ui.ClothingCaptureEv
 import com.zoewave.probase.kocolor.features.clothingcapture.ui.ClothingCaptureUiRoute
 import com.zoewave.probase.kocolor.features.clothingcapture.ui.ClothingCaptureViewModel
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticAnalyticsScreen
-import com.zoewave.probase.features.camera.productcapture.ui.DiscoveryStatusScreen
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticCategoryCoverScreen
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticCategoryCoverUiState
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticDetailScreen
@@ -58,7 +58,9 @@ import com.zoewave.probase.kocolor.features.routines.ui.RoutineEditorScreen
 import com.zoewave.probase.kocolor.features.routines.ui.RoutineEditorUiState
 import com.zoewave.probase.kocolor.features.routines.ui.RoutinesUiRoute
 import com.zoewave.probase.kocolor.features.routines.ui.RoutinesViewModel
-import com.zoewave.probase.kocolor.features.starterpack.ui.StarterPackEvent
+import com.zoewave.probase.kocolor.features.starterpack.ui.PackPreviewViewModel
+import com.zoewave.probase.kocolor.features.starterpack.ui.packpreview.PackPreviewScreen
+import com.zoewave.probase.kocolor.features.starterpack.ui.synchub.SyncHubScreen
 import com.zoewave.probase.kocolor.mobile.core.ui.health.HealthUiRoute
 import com.zoewave.probase.kocolor.mobile.features.color.ui.ColorDetailScreen
 import com.zoewave.probase.kocolor.mobile.features.color.ui.ColorDetailUiState
@@ -73,10 +75,6 @@ import com.zoewave.probase.kocolor.mobile.features.home.ui.CollectionHubScreen
 import com.zoewave.probase.kocolor.mobile.features.home.ui.HomeUiRoute
 import com.zoewave.probase.kocolor.mobile.features.home.ui.HomeViewModel
 import com.zoewave.probase.kocolor.mobile.features.settings.ui.components.SettingsUiRoute
-import com.zoewave.probase.kocolor.features.starterpack.ui.synchub.SyncHubScreen
-import com.zoewave.probase.kocolor.features.starterpack.ui.packpreview.PackPreviewScreen
-import com.zoewave.probase.kocolor.features.starterpack.ui.PackPreviewViewModel
-import com.zoewave.probase.kocolor.features.starterpack.ui.StarterPackViewModel
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import kotlinx.coroutines.flow.collectLatest
 
@@ -455,7 +453,7 @@ fun koColorNavEntryProvider(
         is KoColorRoute.CosmeticDetail -> NavEntry(route) {
             val viewModel: CosmeticsViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()
-            val item = state.items.find { it.id == route.itemId }
+            val item = state.items.find { it.internalId == route.itemId }
             val archiveStatus = state.archiveStatuses[route.itemId] ?: ArchiveStatus.IDLE
             
             CosmeticDetailScreen(

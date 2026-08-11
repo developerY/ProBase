@@ -229,7 +229,7 @@ fun RoutineDetailScreen(
             }
 
             itemsIndexed(routine.steps, key = { _, step -> step.id }) { index, step ->
-                val linkedProduct = state.allProducts.find { step.productIds.contains(it.id) }
+                val linkedProduct = state.allProducts.find { step.productIds.contains(it.internalId) }
                 
                 SplitRitualStep(
                     uiState = SplitRitualStepUiState(

@@ -75,7 +75,7 @@ class WardrobeRepositoryImpl @Inject constructor(
     override suspend fun saveClothingItem(item: ClothingItem) {
         withContext(Dispatchers.IO) {
             try {
-                val existingItem = if (item.id != 0L) clothingDao.getClothingById(item.id).firstOrNull()?.toModel() else null
+                val existingItem = if (item.internalId != 0L) clothingDao.getClothingById(item.internalId).firstOrNull()?.toModel() else null
                 
                 val needsAnalysis = item.imageUrl != null && (
                     item.dominantHex == null || 
@@ -141,10 +141,10 @@ class WardrobeRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun cloneToPersonalArchive(id: Long): Result<Unit> = withContext(Dispatchers.IO) {
+    override suspend fun cloneToPersonalArchive(internalId: Long): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {
-            Log.d(TAG, "cloneToPersonalArchive: Cloning item $id")
-            clothingDao.cloneToPersonalArchive(id)
+            Log.d(TAG, "cloneToPersonalArchive: Cloning item $internalId")
+            clothingDao.cloneToPersonalArchive(internalId)
         }
     }
 

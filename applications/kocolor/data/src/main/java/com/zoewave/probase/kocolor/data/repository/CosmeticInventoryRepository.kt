@@ -10,5 +10,5 @@ interface CosmeticInventoryRepository {
     suspend fun saveCosmeticItems(items: List<CosmeticItem>)
     suspend fun deleteCosmeticItem(id: Long)
     suspend fun deleteCosmeticsByPack(packId: String): Result<Unit>
-    suspend fun cloneToPersonalArchive(id: Long): Result<Unit>
+    suspend fun cloneToPersonalArchive(internalId: Long): Result<Unit>
 }

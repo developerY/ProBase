@@ -38,7 +38,7 @@ fun CosmeticProductCard(
     ElevatedCard(
         modifier = modifier
             .fillMaxWidth()
-            .clickable { navTo(KoColorRoute.CosmeticDetail(uiState.id)) },
+            .clickable { navTo(KoColorRoute.CosmeticDetail(uiState.internalId)) },
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.elevatedCardColors(containerColor = cardColor, contentColor = contentColor)
     ) {
@@ -66,7 +66,7 @@ fun CosmeticProductCard(
                     Text(text = uiState.brand, style = MaterialTheme.typography.bodySmall, color = contentColor.copy(alpha = 0.7f))
                 }
                 
-                IconButton(onClick = { onEvent(CosmeticsEvent.DeleteItem(uiState.id)) }) {
+                IconButton(onClick = { onEvent(CosmeticsEvent.DeleteItem(uiState.internalId)) }) {
                     Icon(Icons.Default.Delete, null, tint = contentColor.copy(alpha = 0.6f))
                 }
             }
@@ -79,7 +79,7 @@ fun CosmeticProductCard(
                     Text(text = uiState.costPerUse?.let { "$%.2f".format(it) } ?: stringResource(R.string.applications_kocolor_features_cosmetics_not_available), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
                 }
                 Button(
-                    onClick = { onEvent(CosmeticsEvent.UseItem(uiState.id)) },
+                    onClick = { onEvent(CosmeticsEvent.UseItem(uiState.internalId)) },
                     colors = ButtonDefaults.buttonColors(containerColor = contentColor.copy(alpha = 0.2f), contentColor = contentColor),
                     shape = RoundedCornerShape(8.dp)
                 ) {

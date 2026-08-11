@@ -45,7 +45,7 @@ fun WardrobeCard(
     val contentColor = if (isDark) Color.White else Color.Black
 
     ElevatedCard(
-        modifier = modifier.clickable { navTo(KoColorRoute.WardrobeDetail(uiState.id)) },
+        modifier = modifier.clickable { navTo(KoColorRoute.WardrobeDetail(uiState.internalId)) },
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.elevatedCardColors(containerColor = bgColor)
     ) {

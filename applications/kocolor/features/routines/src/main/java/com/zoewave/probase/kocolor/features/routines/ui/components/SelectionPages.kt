@@ -62,8 +62,8 @@ private fun ItemSelectionPagePreview() {
         ItemSelectionPage(
             uiState = ItemSelectionUiState(
                 items = listOf(
-                    CosmeticItem(id = 1, name = "Product 1", brand = "Brand A", macroCategory = MacroCategory.PREP, microCategory = MicroCategory.CLEANSER, colorHex = "#FFFFFF"),
-                    CosmeticItem(id = 2, name = "Product 2", brand = "Brand B", macroCategory = MacroCategory.PREP, microCategory = MicroCategory.TONER, colorHex = "#FFFFFF")
+                    CosmeticItem(internalId = 1, name = "Product 1", brand = "Brand A", macroCategory = MacroCategory.PREP, microCategory = MicroCategory.CLEANSER, colorHex = "#FFFFFF"),
+                    CosmeticItem(internalId = 2, name = "Product 2", brand = "Brand B", macroCategory = MacroCategory.PREP, microCategory = MicroCategory.TONER, colorHex = "#FFFFFF")
                 ),
                 selectedIds = listOf(1)
             ),
@@ -158,9 +158,9 @@ fun ItemSelectionPage(
     val selectedIds = uiState.selectedIds
     LazyColumn(modifier = modifier.fillMaxSize(), contentPadding = PaddingValues(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         items(products) { product ->
-            val isSelected = selectedIds.contains(product.id)
+            val isSelected = selectedIds.contains(product.internalId)
             Surface(
-                onClick = { onEvent(product.id) }, 
+                onClick = { onEvent(product.internalId) }, 
                 modifier = Modifier.fillMaxWidth(), 
                 shape = RoundedCornerShape(16.dp), 
                 color = if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surface, 
