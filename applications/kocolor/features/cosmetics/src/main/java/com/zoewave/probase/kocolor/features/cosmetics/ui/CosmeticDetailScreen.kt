@@ -52,6 +52,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.zoewave.probase.core.model.ritual.ArchiveStatus
 import com.zoewave.probase.core.model.ritual.ChemistryBase
 import com.zoewave.probase.core.model.ritual.ChemistryPhase
 import com.zoewave.probase.core.model.ritual.CosmeticItem
@@ -61,6 +62,7 @@ import com.zoewave.probase.core.model.ritual.Formulation
 import com.zoewave.probase.core.model.ritual.InventorySource
 import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.core.model.ritual.MicroCategory
+import com.zoewave.probase.core.ui.components.MakeItMineButton
 import com.zoewave.probase.core.ui.intelligence.CompatibilityBadge
 import com.zoewave.probase.core.ui.util.rememberBlurHashPainter
 import com.zoewave.probase.core.util.ChemistryCompatibilityEngine
@@ -84,7 +86,8 @@ data class CosmeticDetailUiState(
     val estimatedDaysRemaining: Int? = 45,
     val colorCompatibility: List<String> = listOf("#FBF8F5", "#E6A68A", "#2C2420"), 
     val bioSyncMessage: String? = "✨ High Synergy Today: Your hydration markers are low (0.0L); this Hyaluronic Acid will compensate.",
-    val uvIndex: Double = 0.0
+    val uvIndex: Double = 0.0,
+    val archiveStatus: ArchiveStatus = ArchiveStatus.IDLE
 )
 
 @Preview(showBackground = true, name = "Populated")
@@ -447,16 +450,10 @@ fun CosmeticDetailScreen(
             // Action Buttons
             Column(modifier = Modifier.padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 if (item.sourceType != InventorySource.USER_SCAN && item.sourceType != InventorySource.CLONED) {
-                    Button(
-                        onClick = { onEvent(CosmeticsEvent.CloneToPersonal(item)) },
-                        modifier = Modifier.fillMaxWidth().height(56.dp),
-                        shape = RoundedCornerShape(8.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF745E7A)) // Luxury Purple
-                    ) {
-                        Icon(Icons.Default.ContentCopy, null, modifier = Modifier.size(18.dp))
-                        Spacer(Modifier.width(8.dp))
-                        Text("MAKE IT MINE", fontWeight = FontWeight.Bold)
-                    }
+                    MakeItMineButton(
+                        status = uiState.archiveStatus,
+                        onClick = { onEvent(CosmeticsEvent.CloneToPersonal(item)) }
+                    )
                 }
 
                 Button(

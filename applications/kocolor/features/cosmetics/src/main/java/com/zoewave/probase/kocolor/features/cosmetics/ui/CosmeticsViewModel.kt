@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.core.data.repository.AiConfigurationSettings
 import com.zoewave.probase.core.model.network.ServiceStatus
+import com.zoewave.probase.core.model.ritual.ArchiveStatus
 import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.core.model.ritual.Finish
 import com.zoewave.probase.core.model.ritual.Formulation
@@ -34,6 +35,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -75,7 +77,8 @@ data class CosmeticsUiState(
     val scanState: FashionSessionRepository.ScanStatus = FashionSessionRepository.ScanStatus.IDLE,
     val discoveryStatus: com.zoewave.probase.core.model.network.DiscoveryStatus = com.zoewave.probase.core.model.network.DiscoveryStatus(),
     val isObfContributionEnabled: Boolean = false,
-    val uvIndex: Double = 0.0
+    val uvIndex: Double = 0.0,
+    val archiveStatuses: Map<Long, ArchiveStatus> = emptyMap()
 ) {
     val canContributeToObf: Boolean get() = !draftItem.batchCode.isNullOrBlank()
     val isScanSuccessful: Boolean get() = scanState == FashionSessionRepository.ScanStatus.SUCCESS
@@ -126,6 +129,7 @@ class CosmeticsViewModel @Inject constructor(
     private val _scanStatus = MutableStateFlow<String?>(null)
     private val _isObfContributionEnabled = MutableStateFlow(false)
     private val _uvIndex = MutableStateFlow(0.0)
+    private val _archiveStatuses = MutableStateFlow<Map<Long, ArchiveStatus>>(emptyMap())
 
     init {
         fetchWeather()
@@ -172,7 +176,8 @@ class CosmeticsViewModel @Inject constructor(
         _categoryFilter,
         _scanStatus,
         _isObfContributionEnabled,
-        _uvIndex
+        _uvIndex,
+        _archiveStatuses
     ) { array ->
         val models = array[0] as List<CosmeticItem>
         val aiResult = array[1] as CosmeticItem?
@@ -185,6 +190,7 @@ class CosmeticsViewModel @Inject constructor(
         val scanStatus = array[8] as String?
         val contributionEnabled = array[9] as Boolean
         val uvVal = array[10] as Double
+        val archiveStatuses = array[11] as Map<Long, ArchiveStatus>
 
         val groupStats = models.groupBy { it.macroCategory.displayName }.mapValues { it.value.size }
         
@@ -246,7 +252,8 @@ class CosmeticsViewModel @Inject constructor(
             scanState = scanState,
             discoveryStatus = discStatus,
             isObfContributionEnabled = contributionEnabled,
-            uvIndex = uvVal
+            uvIndex = uvVal,
+            archiveStatuses = archiveStatuses
         )
     }.stateIn(viewModelScope, SharingStarted.Eagerly, CosmeticsUiState())
 
@@ -558,17 +565,22 @@ class CosmeticsViewModel @Inject constructor(
     }
 
     private fun cloneToPersonal(item: CosmeticItem) {
+        if (_archiveStatuses.value[item.id] == ArchiveStatus.SUCCESS || 
+            _archiveStatuses.value[item.id] == ArchiveStatus.ARCHIVING) return
+
         viewModelScope.launch {
-            val cloned = item.copy(
-                id = 0L, // New record
-                sourceType = InventorySource.CLONED,
-                sourcePackId = null, // Detach from pack wipe
-                provenance = null,   // Critical: Remove provenance to protect from collection removal
-                parentItemId = item.id.toString(),
-                timestamp = System.currentTimeMillis()
-            )
-            cosmeticRepository.saveCosmeticItem(cloned)
-            Log.d("CosmeticsVM", "Item cloned to personal archive: ${cloned.name}")
+            _archiveStatuses.update { it + (item.id to ArchiveStatus.ARCHIVING) }
+            
+            try {
+                // Use the DAO's optimized SQL cloning logic
+                cosmeticRepository.cloneToPersonalArchive(item.id)
+                
+                // Keep the success state visible for a moment for UX
+                _archiveStatuses.update { it + (item.id to ArchiveStatus.SUCCESS) }
+            } catch (e: Exception) {
+                Log.e("CosmeticsVM", "Cloning failed", e)
+                _archiveStatuses.update { it + (item.id to ArchiveStatus.ERROR) }
+            }
         }
     }
 

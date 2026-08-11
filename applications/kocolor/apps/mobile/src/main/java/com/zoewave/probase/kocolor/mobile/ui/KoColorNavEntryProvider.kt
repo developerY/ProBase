@@ -16,6 +16,7 @@ import com.zoewave.probase.features.health.nutrition.ui.shared.MealsViewModel
 import com.zoewave.probase.features.readers.barcode.ui.BarcodeScannerScreen
 import com.zoewave.probase.features.readers.qrscanner.ui.QRCodeScannerScreen
 import com.zoewave.probase.features.weather.ui.WeatherUiRoute
+import com.zoewave.probase.core.model.ritual.ArchiveStatus
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorScreen
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorViewModel
 import com.zoewave.probase.kocolor.features.analyzer.ui.AnalyzerUiRoute
@@ -384,8 +385,9 @@ fun koColorNavEntryProvider(
         is KoColorRoute.WardrobeDetail -> NavEntry(route) {
             val viewModel: WardrobeViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()
+            val archiveStatus = state.archiveStatuses[route.itemId] ?: ArchiveStatus.IDLE
             WardrobeDetailScreen(
-                uiState = WardrobeDetailUiState(route.itemId, state),
+                uiState = WardrobeDetailUiState(route.itemId, state, archiveStatus),
                 onEvent = viewModel::onEvent,
                 navTo = onNavigateTo
             )
@@ -454,8 +456,14 @@ fun koColorNavEntryProvider(
             val viewModel: CosmeticsViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()
             val item = state.items.find { it.id == route.itemId }
+            val archiveStatus = state.archiveStatuses[route.itemId] ?: ArchiveStatus.IDLE
+            
             CosmeticDetailScreen(
-                uiState = CosmeticDetailUiState(item),
+                uiState = CosmeticDetailUiState(
+                    item = item,
+                    archiveStatus = archiveStatus,
+                    uvIndex = state.uvIndex
+                ),
                 onEvent = viewModel::onEvent,
                 navTo = onNavigateTo
             )
