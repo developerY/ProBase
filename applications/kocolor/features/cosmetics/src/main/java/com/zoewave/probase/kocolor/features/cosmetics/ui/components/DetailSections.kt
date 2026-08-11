@@ -12,6 +12,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -29,6 +31,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
+import com.zoewave.probase.core.ui.intelligence.ChromaticDnaBar
+import com.zoewave.probase.core.ui.intelligence.IntelligenceChip
 import com.zoewave.probase.kocolor.features.cosmetics.R
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticDetailUiState
 import com.zoewave.probase.core.model.ritual.CosmeticItem
@@ -195,6 +199,7 @@ fun WarningBanner(title: String, subtitle: String, icon: ImageVector) {
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun IngredientAnalysisSection(item: CosmeticItem, bioSyncMessage: String?) {
     val resolvedHero = item.heroIngredient 
@@ -203,6 +208,24 @@ fun IngredientAnalysisSection(item: CosmeticItem, bioSyncMessage: String?) {
 
     Column(modifier = Modifier.padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         DetailMetricRow(stringResource(R.string.applications_kocolor_features_cosmetics_hero_ingredient), resolvedHero)
+
+        // Scientific Actives Chips
+        if (item.heroActives.isNotEmpty()) {
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                item.heroActives.forEach { active ->
+                    IntelligenceChip(
+                        text = active,
+                        containerColor = Color(0xFF745E7A).copy(alpha = 0.1f),
+                        contentColor = Color(0xFF745E7A),
+                        borderColor = Color(0xFF745E7A).copy(alpha = 0.2f)
+                    )
+                }
+            }
+        }
         
         bioSyncMessage?.let { msg ->
             Surface(
@@ -221,6 +244,18 @@ fun IngredientAnalysisSection(item: CosmeticItem, bioSyncMessage: String?) {
         } ?: DetailMetricRow(stringResource(R.string.applications_kocolor_features_cosmetics_skin_compatibility), item.skinCompatibility ?: stringResource(R.string.applications_kocolor_features_cosmetics_universal))
 
         DetailMetricRow(stringResource(R.string.applications_kocolor_features_cosmetics_fragrance), if (item.containsFragrance == true) stringResource(R.string.applications_kocolor_features_cosmetics_contains_fragrance) else stringResource(R.string.applications_kocolor_features_cosmetics_none_unscented))
+
+        // Safety Status Chips
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            if (item.isSiliconeFree == true) IntelligenceChip("Silicone-Free", containerColor = Color(0xFFE8F5E9), contentColor = Color(0xFF2E7D32))
+            if (item.isParabenFree == true) IntelligenceChip("Paraben-Free", containerColor = Color(0xFFE8F5E9), contentColor = Color(0xFF2E7D32))
+            if (item.isSulfateFree == true) IntelligenceChip("Sulfate-Free", containerColor = Color(0xFFE8F5E9), contentColor = Color(0xFF2E7D32))
+            if (item.containsFragrance == false) IntelligenceChip("Fragrance-Free", containerColor = Color(0xFFE8F5E9), contentColor = Color(0xFF2E7D32))
+        }
         
         if (item.allergens.isNotEmpty()) {
             Spacer(Modifier.height(8.dp))
@@ -355,7 +390,9 @@ fun ValueAnalysisSection(item: CosmeticItem) {
 }
 
 @Composable
-fun ColorHueMapSection(colorHex: String, shadeName: String?, compatibility: List<String>) {
+fun ColorHueMapSection(item: CosmeticItem, compatibility: List<String>) {
+    val colorHex = item.colorHex
+    val shadeName = item.shadeName
     val color = parseColor(colorHex)
     val hsv = remember(colorHex) {
         val hsv = FloatArray(3)
@@ -370,6 +407,14 @@ fun ColorHueMapSection(colorHex: String, shadeName: String?, compatibility: List
             fontFamily = FontFamily.Serif,
             fontWeight = FontWeight.Bold,
             color = Color(0xFF2C2420)
+        )
+        
+        Spacer(Modifier.height(24.dp))
+        
+        ChromaticDnaBar(
+            l = item.calculatedCielabL?.toFloat() ?: 50f,
+            a = item.calculatedCielabA?.toFloat() ?: 0f,
+            b = item.calculatedCielabB?.toFloat() ?: 0f
         )
         
         Spacer(Modifier.height(24.dp))

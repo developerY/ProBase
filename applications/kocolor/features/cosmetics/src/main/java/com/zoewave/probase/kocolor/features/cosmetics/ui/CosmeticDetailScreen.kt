@@ -62,6 +62,7 @@ import com.zoewave.probase.core.model.ritual.InventorySource
 import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.core.model.ritual.MicroCategory
 import com.zoewave.probase.core.ui.intelligence.CompatibilityBadge
+import com.zoewave.probase.core.ui.util.rememberBlurHashPainter
 import com.zoewave.probase.core.util.ChemistryCompatibilityEngine
 import com.zoewave.probase.kocolor.features.cosmetics.R
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.ApplicationGuideSection
@@ -344,9 +345,11 @@ fun CosmeticDetailScreen(
             ) {
                 Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(24.dp)) {
                     if (item.imageUrl != null) {
+                        val placeholder = rememberBlurHashPainter(blurHash = item.calculatedBlurhash)
                         AsyncImage(
                             model = item.imageUrl,
                             contentDescription = item.name,
+                            placeholder = placeholder,
                             modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(8.dp)),
                             contentScale = ContentScale.Crop
                         )
@@ -367,14 +370,12 @@ fun CosmeticDetailScreen(
                 ValueAnalysisSection(item)
             }
 
-            item.colorHex?.let { colorHex ->
-                AtelierExpandableSection(
-                    title = stringResource(R.string.applications_kocolor_features_cosmetics_color_hue_map),
-                    isExpanded = expandedStates["Color Hue Map"] == true,
-                    onToggle = { expandedStates["Color Hue Map"] = it }
-                ) {
-                    ColorHueMapSection(colorHex, item.shadeName, uiState.colorCompatibility)
-                }
+            AtelierExpandableSection(
+                title = stringResource(R.string.applications_kocolor_features_cosmetics_color_hue_map),
+                isExpanded = expandedStates["Color Hue Map"] == true,
+                onToggle = { expandedStates["Color Hue Map"] = it }
+            ) {
+                ColorHueMapSection(item, uiState.colorCompatibility)
             }
             
             AtelierExpandableSection(

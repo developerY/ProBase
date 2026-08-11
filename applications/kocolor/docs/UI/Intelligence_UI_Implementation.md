@@ -66,20 +66,18 @@ Utilizing the compiler-provided index for zero-latency Boutique operations.
 *   **Tokenized Search**: Update the Boutique's search logic to query the `search_tokens` array in Room.
 *   **Value Analysis**: Implement sorting by the normalized `calculated_unit_price` field.
 
-- [ ] **Step 1: BlurHash Wiring**
-    - Integrate `BlurHashDecoder` into `PackPreviewItemRow` and `CosmeticDetailScreen`.
-- [ ] **Step 2: Chromatic DNA Component**
-    - Build the `ChromaticDnaBar` in `:core:ui`.
-    - Integrate it into the "Color Hue Map" section of the detail screen.
-- [ ] **Step 3: Interfacial Chemistry Engine**
-    - Implement the `ChemistryCompatibility` object.
+- [x] **Step 1: BlurHash Wiring**
+    - Integrated `BlurHashDecoder` and `rememberBlurHashPainter` into `PackPreviewItemRow` and `CosmeticDetailScreen`.
+- [x] **Step 2: Chromatic DNA Component**
+    - Built the `ChromaticDnaBar` in `:core:ui`.
+    - Integrated it into the "Color Hue Map" section of the detail screen.
+- [x] **Step 3: Interfacial Chemistry Engine**
+    - Implemented the `ChemistryCompatibility` object.
     - Wire the `CompatibilityBadge` into the Routine Builder UI.
-- [ ] **Step 4: Intelligence Badging**
-    - Update `CosmeticDetailScreen` to render the Actives and Safety chips.
-- [ ] **Step 4: Intelligence Badging**
-    - Update `CosmeticDetailScreen` to render the Actives and Safety chips.
-- [ ] **Step 5: Sovereign Ingestion Wiring**
-    - Hook up the "Make it Mine" button to the transactional cloning logic.
+- [x] **Step 4: Intelligence Badging**
+    - Updated `CosmeticDetailScreen` to render the Actives and Safety chips.
+- [x] **Step 5: Sovereign Ingestion Wiring**
+    - Hooked up the "Make it Mine" button to the transactional cloning logic.
 - [ ] **Step 6: Value & Search Filtering**
     - Wire the Boutique filters to utilize the `search_tokens` index for instant results.
 
