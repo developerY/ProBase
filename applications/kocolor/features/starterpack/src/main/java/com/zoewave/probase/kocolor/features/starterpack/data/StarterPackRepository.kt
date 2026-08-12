@@ -72,8 +72,12 @@ class StarterPackRepository @Inject constructor(
         val dataPart = extractDataProperty(rawJson)
         val rawDataBytes = dataPart.toByteArray(Charsets.UTF_8)
         
+        Log.d(TAG, "getManifest: Data part for signature: $dataPart")
+        Log.d(TAG, "getManifest: Signature from envelope: ${envelope.signature}")
+
         // Root of Trust Verification
         if (!verifier.verify(rawDataBytes, envelope.signature, "")) {
+            Log.e(TAG, "getManifest: Signature verification failed!")
             throw PackException.SignatureException("Trust Bootstrap Failed: Manifest signature is invalid!")
         }
         

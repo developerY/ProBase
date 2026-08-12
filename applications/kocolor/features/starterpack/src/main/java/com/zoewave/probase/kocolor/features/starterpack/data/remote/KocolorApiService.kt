@@ -1,6 +1,5 @@
 package com.zoewave.probase.kocolor.features.starterpack.data.remote
 
-import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.SearchIndexEntry
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.SignedPayloadEnvelope
 import kotlinx.serialization.json.JsonElement
 import okhttp3.ResponseBody
