@@ -28,11 +28,11 @@ google-services-zoewave.json
 # /applications/seaweed/docs/BlockChain
 
 # Rust Backend Isolation
-/server/package/KoColor/target/
-/server/package/KoColor/dist/
+/server/package/kc-distributor/target/
+/server/package/kc-distributor/dist/
 
 /server/package/kc-optimizer/target
-
+/server/package/kc-optimizer/dist
 /server/gen/Key/target
 
 # Security & Keys

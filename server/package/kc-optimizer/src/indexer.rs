@@ -19,8 +19,15 @@ pub fn build_canonical_index(raw_assets_dir: &str) -> HashMap<String, KpssSource
                 .unwrap_or_else(|err| panic!("❌ Failed to read file {:?}: {}", path, err));
 
             // Deserialize against our strict KPSS v1 struct
-            let kpss_source: KpssSource = serde_json::from_str(&file_content)
+            let mut kpss_source: KpssSource = serde_json::from_str(&file_content)
                 .unwrap_or_else(|err| panic!("❌ Invalid KPSS v1 JSON in {:?}: {}", path, err));
+
+            // Resolve relative image path to absolute/full path from root
+            if kpss_source.raw_image_input.starts_with("./") {
+                let parent = path.parent().expect("Failed to get parent dir");
+                let resolved = parent.join(&kpss_source.raw_image_input[2..]);
+                kpss_source.raw_image_input = resolved.to_string_lossy().to_string();
+            }
 
             // Architecture Safeguard: Enforce Schema Version
             if kpss_source.schema_version != 1 {

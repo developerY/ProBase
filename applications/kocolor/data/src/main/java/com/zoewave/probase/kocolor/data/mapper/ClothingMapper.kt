@@ -7,6 +7,7 @@ import com.zoewave.probase.kocolor.db.entity.Provenance as DbProvenance
 
 fun ClothingItemEntity.toModel(): ClothingItem = ClothingItem(
     internalId = internalId,
+    remoteId = remoteId,
     name = name,
     brand = brand,
     category = category,
@@ -52,6 +53,7 @@ fun ClothingItemEntity.toModel(): ClothingItem = ClothingItem(
 
 fun ClothingItem.toEntity(): ClothingItemEntity = ClothingItemEntity(
     internalId = internalId,
+    remoteId = remoteId,
     name = name,
     brand = brand,
     category = category,

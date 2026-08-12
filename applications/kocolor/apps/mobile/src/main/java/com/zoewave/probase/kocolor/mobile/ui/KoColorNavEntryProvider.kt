@@ -532,6 +532,7 @@ fun koColorNavEntryProvider(
                 onImportSelected = viewModel::onImportSelected,
                 onSearchQueryChanged = viewModel::onSearchQueryChanged,
                 onToggleValueSort = viewModel::onToggleValueSort,
+                onItemInfoClick = { /* TODO */ },
                 onBack = onBack
             )
         }

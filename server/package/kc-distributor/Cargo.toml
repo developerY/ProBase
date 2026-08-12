@@ -1,0 +1,16 @@
+[package]
+name = "kc-distributor"
+version = "1.0.0"
+edition = "2021"
+authors = ["Atelier Engineering"]
+description = "Distribution packager and WebP transcoder for KoColor"
+
+[dependencies]
+# Filesystem traversal
+walkdir = "2.4"
+
+# Image processing (Transcoding to 1024x1024 / 256x256 WebP)
+image = { version = "0.24", default-features = false, features = ["png", "jpeg", "webp"] }
+
+# Deployment bundling
+zip = "0.6"

@@ -23,6 +23,7 @@ This index provides a centralized Table of Contents for all architectural bluepr
 *   **[Product Authoring Guide](./Schema/KCPS_Product_Authoring_Guide.md)**: Manual for authors creating KPSS JSON and raw assets.
 
 ### Distribution Security
+*   **[Rust Distribution Walkthrough](./Walkthrough_Rust_Distribution_Final.md)**: Final guide for the full compiler and deployment pipeline.
 *   **[Streaming Integrity Architecture](./Pipeline/Streaming_Integrity_Architecture.md)**: Hash-in-filename and secure spooling logic.
 *   **[JSON Bomb Prevention](./Pipeline/JSON_Bomb_Prevention.md)**: Countermeasures against memory-exhaustion attacks.
 

@@ -7,6 +7,7 @@ import com.zoewave.probase.kocolor.db.entity.Provenance as DbProvenance
 
 fun CosmeticItemEntity.toModel(): CosmeticItem = CosmeticItem(
     internalId = internalId,
+    remoteId = remoteId,
     name = name,
     brand = brand,
     macroCategory = macroCategory,
@@ -90,6 +91,7 @@ fun CosmeticItemEntity.toModel(): CosmeticItem = CosmeticItem(
 
 fun CosmeticItem.toEntity(): CosmeticItemEntity = CosmeticItemEntity(
     internalId = internalId,
+    remoteId = remoteId,
     name = name,
     brand = brand,
     macroCategory = macroCategory,

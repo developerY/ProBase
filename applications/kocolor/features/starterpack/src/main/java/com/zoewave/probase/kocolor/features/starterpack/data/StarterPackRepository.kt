@@ -255,6 +255,7 @@ class StarterPackRepository @Inject constructor(
 
         val cosmetics = payload.cosmetics.map { dto ->
             CosmeticItem(
+                remoteId = dto.id,
                 name = dto.name,
                 brand = dto.brand,
                 macroCategory = try { MacroCategory.valueOf(dto.macroCategory.uppercase()) } catch (e: Exception) { MacroCategory.COMPLEXION },
@@ -300,6 +301,7 @@ class StarterPackRepository @Inject constructor(
 
         val clothing = payload.clothing.map { dto ->
             ClothingItem(
+                remoteId = dto.id,
                 name = dto.name,
                 brand = dto.brand,
                 category = try { ClothingCategory.valueOf(dto.macroCategory.uppercase()) } catch (e: Exception) { ClothingCategory.OTHER },
