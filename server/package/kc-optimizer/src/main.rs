@@ -108,12 +108,13 @@ fn main() {
         search_index.insert(id.clone(), tokens);
     }
 
-    let search_json = serde_json::to_string_pretty(&search_index)
+    // Use to_string (compact) to match manifest trust style and Retrofit expectations
+    let search_json = serde_json::to_string(&search_index)
         .expect("❌ Failed to generate search index");
 
     let search_path = output_dist_dir.join("search_index.json");
     fs::write(search_path, search_json).expect("❌ Failed to write search_index.json");
-    println!("  🔍 search_index.json written.");
+    println!("  🔍 search_index.json written (Compact Map format).");
 
     println!("\n✅ CCT Build completed in {:.2?}.", start_time.elapsed());
 }
