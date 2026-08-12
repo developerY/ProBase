@@ -8,6 +8,7 @@ import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.Clothi
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.CosmeticItemDto
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.KcpsPayload
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.PackItemDto
+import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.ProductEditorialNotes
 import com.zoewave.probase.kocolor.features.starterpack.data.repository.PackSyncRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,7 +29,9 @@ data class PackPreviewUiState(
     val isInstalled: Boolean = false,
     val targetItemId: String? = null,
     val searchQuery: String = "",
-    val sortByValue: Boolean = false
+    val sortByValue: Boolean = false,
+    val selectedItemNotes: ProductEditorialNotes? = null,
+    val isNotesLoading: Boolean = false
 )
 
 @HiltViewModel
@@ -203,5 +206,22 @@ class PackPreviewViewModel @Inject constructor(
             syncRepository.wipePack(currentPackId)
             _uiState.update { it.copy(isLoading = false) }
         }
+    }
+
+    fun onItemInfoClick(itemId: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isNotesLoading = true, selectedItemNotes = null) }
+            repository.getProductEditorialNotes(itemId)
+                .onSuccess { notes ->
+                    _uiState.update { it.copy(isNotesLoading = false, selectedItemNotes = notes) }
+                }
+                .onFailure {
+                    _uiState.update { it.copy(isNotesLoading = false) }
+                }
+        }
+    }
+
+    fun onDismissNotes() {
+        _uiState.update { it.copy(selectedItemNotes = null) }
     }
 }

@@ -40,6 +40,7 @@ fun PackPreviewScreen(
     onSearchQueryChanged: (String) -> Unit,
     onToggleValueSort: () -> Unit,
     onItemInfoClick: (String) -> Unit,
+    onDismissNotes: () -> Unit,
     onBack: () -> Unit
 ) {
     val listState = rememberLazyListState()
@@ -81,6 +82,12 @@ fun PackPreviewScreen(
             }
         }
     }
+
+    ProductEditorialNotesDialog(
+        notes = uiState.selectedItemNotes,
+        isLoading = uiState.isNotesLoading,
+        onDismiss = onDismissNotes
+    )
 
     Scaffold(
         modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing),
@@ -275,6 +282,7 @@ private fun PackPreviewScreenPreview() {
             onSearchQueryChanged = {},
             onToggleValueSort = {},
             onItemInfoClick = {},
+            onDismissNotes = {},
             onBack = {}
         )
     }

@@ -24,6 +24,7 @@ import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.KcpsPa
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.PackInfo
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.PackItemDto
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.PackManifest
+import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.ProductEditorialNotes
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.SignedPayloadEnvelope
 import com.zoewave.probase.kocolor.features.starterpack.domain.security.SignatureVerifier
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -193,6 +194,10 @@ class StarterPackRepository @Inject constructor(
         
         val payload = fetchVerifiedPackage(packInfo)
         return payload.cosmetics + payload.clothing
+    }
+
+    suspend fun getProductEditorialNotes(productId: String): Result<ProductEditorialNotes> = runCatching {
+        apiService.getProductNotes(productId)
     }
 
     private fun isZstdHeader(bytes: ByteArray): Boolean {
