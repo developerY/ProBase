@@ -1,7 +1,7 @@
 [package_metadata]
 id = "kocolor-complete-collection"
-name = "KoColor Core Collection"
-description = "The complete foundational routine spanning prep, complexion, dimension, eyes, and lips."
+name = "KoColor Complete Collection"
+description = "The authoritative starter kit for the KoColor ecosystem."
 
 [assortment]
 includes = [

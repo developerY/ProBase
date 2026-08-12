@@ -29,11 +29,12 @@ google-services-zoewave.json
 
 # Rust Backend Isolation
 /server/package/kc-distributor/target/
-/server/package/kc-distributor/dist/
-
 /server/package/kc-optimizer/target
-/server/package/kc-optimizer/dist
 /server/gen/Key/target
+
+# Pipeline Artifacts
+/server/package/input/**/*.png
+/server/package/dist/
 
 # Security & Keys
 **/.env
