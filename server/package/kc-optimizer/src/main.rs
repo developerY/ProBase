@@ -21,7 +21,7 @@ fn main() {
     let mut csprng = OsRng;
     let signing_key = SigningKey::generate(&mut csprng);
 
-    let raw_assets_dir = "./raw_assets";
+    let raw_assets_dir = "./input";
     let output_dist_dir = Path::new("./dist");
     let assets_dist_dir = output_dist_dir.join("assets");
 
@@ -51,7 +51,7 @@ fn main() {
     let manifest_records = composer::assemble_packages(
         &canonical_index,
         &optimized_asset_map,
-        "./package_configs",
+        "./input/package_configs",
         output_dist_dir,
         &signing_key
     );

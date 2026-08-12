@@ -6,8 +6,8 @@ use walkdir::WalkDir;
 use zip::write::FileOptions;
 
 fn main() {
-    // Assuming the script is run from a root where raw_assets and dist (from optimizer) exist
-    let raw_dir = Path::new("raw_assets");
+    // Assuming the script is run from a root where input and dist (from optimizer) exist
+    let raw_dir = Path::new("input");
     let dist_dir = Path::new("dist");
 
     println!("🧹 Preparing distribution directories...");
@@ -18,7 +18,7 @@ fn main() {
     fs::create_dir_all(dist_dir.join("notes")).unwrap();
     fs::create_dir_all(dist_dir.join("json")).unwrap();
 
-    println!("🔍 Scanning raw_assets for images, notes, and JSON...");
+    println!("🔍 Scanning input for images, notes, and JSON...");
 
     for entry in WalkDir::new(raw_dir).into_iter().filter_map(|e| e.ok()) {
         let path = entry.path();
@@ -62,9 +62,9 @@ fn main() {
     }
 
     // Step 4: The ZIP Engine
-    let zip_path = Path::new("kocolor-v1-deploy.zip");
+    let zip_path = dist_dir.join("kocolor-v1-deploy.zip");
     println!("🗜️ Zipping distribution payload to {:?}...", zip_path);
-    create_zip(dist_dir, zip_path);
+    create_zip(dist_dir, &zip_path);
 
     println!("🚀 Distribution packaging complete! Immutable artifact ready for CDN.");
 }
