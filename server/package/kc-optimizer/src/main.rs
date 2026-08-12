@@ -75,6 +75,8 @@ fn main() {
     let manifest_data_json = serde_json::to_string(&manifest_data)
         .expect("❌ Failed to serialize manifest data");
 
+    // ⚠️ CRITICAL: Root of Trust must be generated on the EXACT bytes written to the file.
+    // We sign the compact version and write the file compactly to avoid canonicalization errors.
     let signature = packager::sign_data(manifest_data_json.as_bytes(), &signing_key);
 
     let envelope = models::SignedPayloadEnvelope {
@@ -84,12 +86,12 @@ fn main() {
         schema_version: 1,
     };
 
-    let manifest_json = serde_json::to_string_pretty(&envelope)
+    let manifest_json = serde_json::to_string(&envelope)
         .expect("❌ Failed to generate master manifest envelope");
 
     let manifest_path = output_dist_dir.join("manifest.json");
     fs::write(manifest_path, manifest_json).expect("❌ Failed to write manifest.json");
-    println!("  📜 master manifest.json written (with Ed25519 envelope).");
+    println!("  📜 master manifest.json written (Compact Binary Trust established).");
 
     // --- PASS 5: GENERATE GLOBAL SEARCH INDEX ---
     println!("\n--- PASS 5: GENERATE SEARCH INDEX ---");

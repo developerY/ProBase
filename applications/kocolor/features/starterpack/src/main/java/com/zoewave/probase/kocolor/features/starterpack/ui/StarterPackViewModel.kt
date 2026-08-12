@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.kocolor.db.entity.InstalledPackEntity
 import com.zoewave.probase.kocolor.features.starterpack.data.StarterPackRepository
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.PackInfo
-import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.SearchIndexEntry
 import com.zoewave.probase.kocolor.features.starterpack.data.repository.PackSyncRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -19,7 +18,7 @@ data class StarterPackUiState(
     val seedingState: SeedingState = SeedingState.Idle,
     val isRefreshing: Boolean = false,
     val searchQuery: String = "",
-    val filteredSearchIndex: List<SearchIndexEntry> = emptyList()
+    val filteredSearchIndex: Map<String, List<String>> = emptyMap()
 )
 
 sealed class StarterPackEvent {
@@ -40,19 +39,18 @@ class StarterPackViewModel @Inject constructor(
     private val _isRefreshing = MutableStateFlow(false)
 
     private val _searchQuery = MutableStateFlow("")
-    private val _searchIndex = MutableStateFlow<List<SearchIndexEntry>>(emptyList())
+    private val _searchIndex = MutableStateFlow<Map<String, List<String>>>(emptyMap())
 
-    val filteredSearchIndex: StateFlow<List<SearchIndexEntry>> = _searchQuery
+    val filteredSearchIndex: StateFlow<Map<String, List<String>>> = _searchQuery
         .debounce(300L)
         .distinctUntilChanged()
         .combine(_searchIndex) { query, index ->
             if (query.isBlank()) index
-            else index.filter { entry ->
-                entry.term.contains(query, ignoreCase = true) ||
-                entry.brand.contains(query, ignoreCase = true)
+            else index.filter { (_, tokens) ->
+                tokens.any { it.contains(query, ignoreCase = true) }
             }
         }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
 
     val uiState: StateFlow<StarterPackUiState> = combine(
         _availablePacks,
@@ -68,7 +66,7 @@ class StarterPackViewModel @Inject constructor(
             seedingState = args[2] as SeedingState,
             isRefreshing = args[3] as Boolean,
             searchQuery = args[4] as String,
-            filteredSearchIndex = args[5] as List<SearchIndexEntry>
+            filteredSearchIndex = args[5] as Map<String, List<String>>
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), StarterPackUiState())
 
