@@ -5,7 +5,7 @@ This directory is the centralized workspace for the Compute-at-Compile-Time (CCT
 ## 🗂️ Directory Structure
 
 * **`input/`**: The "Source of Truth". Contains everything needed to build a distribution.
-    * **`KoColor/`**: Human-readable product hierarchy (JSON triads).
+    * **`KoColor/`**: Human-readable product hierarchy (Authoring assets: JSON & High-Res PNG).
     * **`package_configs/`**: TOML manifests defining kit compositions (e.g. `starter-kit.toml`).
 * **`dist/`**: The "Output Vault". Contains intermediate build files and the final deployment ZIP.
 * **`kc-optimizer/`**: Rust Crate for scientific enrichment, signing, and `.kpkg` generation.
@@ -23,6 +23,7 @@ To generate a new deployment payload, execute the pipeline script from this dire
 
 * **`dist/kocolor-v1-deploy.zip`**: The atomic, immutable deployment archive ready for CDN upload.
 * **`dist/manifest.json`**: The signed root of trust for the mobile client.
+* **`dist/search_index.json`**: The pre-calculated, zero-latency global search index.
 
 ## 🛠️ Workflow
 

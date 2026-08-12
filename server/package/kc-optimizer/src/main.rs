@@ -22,7 +22,7 @@ fn main() {
     let signing_key = SigningKey::generate(&mut csprng);
 
     let raw_assets_dir = "./input";
-    let output_dist_dir = Path::new("./dist");
+    let output_dist_dir = Path::new("./dist/deployment");
     let assets_dist_dir = output_dist_dir.join("assets");
 
     // Ensure the output directories exist
