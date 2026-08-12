@@ -24,7 +24,6 @@ import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.KcpsPa
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.PackInfo
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.PackItemDto
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.PackManifest
-import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.SearchIndexEntry
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.SignedPayloadEnvelope
 import com.zoewave.probase.kocolor.features.starterpack.domain.security.SignatureVerifier
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -48,7 +47,7 @@ class StarterPackRepository @Inject constructor(
     private val json: Json,
     @ApplicationContext private val context: Context
 ) {
-    private var searchIndexCache: List<SearchIndexEntry>? = null
+    private var searchIndexCache: Map<String, List<String>>? = null
 
     private companion object {
         const val TAG = "StarterPackRepo"
@@ -56,7 +55,7 @@ class StarterPackRepository @Inject constructor(
         val ZSTD_MAGIC = byteArrayOf(0x28.toByte(), 0xB5.toByte(), 0x2F.toByte(), 0xFD.toByte())
     }
 
-    suspend fun getSearchIndex(): List<SearchIndexEntry> {
+    suspend fun getSearchIndex(): Map<String, List<String>> {
         return searchIndexCache ?: apiService.getSearchIndex().also {
             searchIndexCache = it
         }

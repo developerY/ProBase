@@ -20,7 +20,7 @@ interface KocolorApiService {
     suspend fun getPack(@Path("endpoint") endpoint: String): SignedPayloadEnvelope<JsonElement>
 
     @GET("search_index.json")
-    suspend fun getSearchIndex(): List<SearchIndexEntry>
+    suspend fun getSearchIndex(): Map<String, List<String>>
 
     @GET("packs/{packId}.json")
     suspend fun getPackItems(@Path("packId") packId: String): SignedPayloadEnvelope<JsonElement>
