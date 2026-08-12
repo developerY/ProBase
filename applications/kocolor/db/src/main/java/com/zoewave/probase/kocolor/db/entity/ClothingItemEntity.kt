@@ -11,6 +11,7 @@ import com.zoewave.probase.core.model.ritual.InventorySource
 @Entity(tableName = "clothing_items")
 data class ClothingItemEntity(
     @PrimaryKey(autoGenerate = true) val internalId: Long = 0,
+    val remoteId: String? = null,
     val name: String,
     val brand: String? = null,
     val category: ClothingCategory,

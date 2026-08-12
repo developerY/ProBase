@@ -44,7 +44,8 @@ fun PackPreviewItemRow(
     item: PackItemDto,
     isSelected: Boolean,
     isTarget: Boolean,
-    onToggle: () -> Unit
+    onInfoClick: () -> Unit,
+    onSelectClick: () -> Unit
 ) {
     var highlightActive by remember { mutableStateOf(isTarget) }
     
@@ -65,84 +66,101 @@ fun PackPreviewItemRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(backgroundColor)
-            .clickable { onToggle() }
-            .padding(vertical = 12.dp, horizontal = 16.dp),
+            .background(backgroundColor),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Thumbnail with subtle rounded square like in mockup
+        // --- LEFT SIDE: INFO NAVIGATION ---
+        Row(
+            modifier = Modifier
+                .weight(1f)
+                .clickable { onInfoClick() }
+                .padding(vertical = 12.dp, horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Thumbnail with subtle rounded square like in mockup
+            Box(
+                modifier = Modifier
+                    .size(64.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color(0xFFF5F5F5))
+            ) {
+                val placeholder = rememberBlurHashPainter(blurHash = item.blurhash)
+
+                AsyncImage(
+                    model = item.thumbnailUrl,
+                    contentDescription = null,
+                    placeholder = placeholder,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            }
+
+            Spacer(Modifier.width(16.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = item.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                val subtitleText = remember(item.brand, item.shadeName) {
+                    if (!item.shadeName.isNullOrBlank()) {
+                        "${item.brand} • ${item.shadeName}"
+                    } else {
+                        item.brand
+                    }
+                }
+                Text(
+                    text = subtitleText ?: "",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Gray
+                )
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 2.dp)) {
+                    Box(
+                        modifier = Modifier
+                            .size(14.dp)
+                            .clip(CircleShape)
+                            .background(parseHexColor(item.colorHex))
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = item.colorHex,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = Color.DarkGray
+                    )
+                    
+                    item.calculatedUnitPrice?.let { unitPrice ->
+                        Spacer(Modifier.width(12.dp))
+                        Text(
+                            text = "Value: $${"%.2f".format(unitPrice)}/ml",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color(0xFF2E7D32),
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+        }
+
+        // --- RIGHT SIDE: SELECTION TARGET ---
         Box(
             modifier = Modifier
-                .size(64.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(Color(0xFFF5F5F5))
+                .padding(end = 8.dp)
+                .size(48.dp)
+                .clip(CircleShape)
+                .clickable { onSelectClick() },
+            contentAlignment = Alignment.Center
         ) {
-            val placeholder = rememberBlurHashPainter(blurHash = item.blurhash)
-
-            AsyncImage(
-                model = item.thumbnailUrl,
-                contentDescription = null,
-                placeholder = placeholder,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
+            // Using RadioButton logic but style it like the circle in mockup
+            RadioButton(
+                selected = isSelected,
+                onClick = { onSelectClick() },
+                colors = RadioButtonDefaults.colors(
+                    selectedColor = Color(0xFF745E7A).copy(alpha = 0.5f),
+                    unselectedColor = Color.LightGray
+                )
             )
         }
-
-        Spacer(Modifier.width(16.dp))
-
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = item.name,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-            val subtitleText = remember(item.brand, item.shadeName) {
-                if (!item.shadeName.isNullOrBlank()) {
-                    "${item.brand} • ${item.shadeName}"
-                } else {
-                    item.brand
-                }
-            }
-            Text(
-                text = subtitleText ?: "",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.Gray
-            )
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 2.dp)) {
-                Box(
-                    modifier = Modifier
-                        .size(14.dp)
-                        .clip(CircleShape)
-                        .background(parseHexColor(item.colorHex))
-                )
-                Spacer(Modifier.width(8.dp))
-                Text(
-                    text = item.colorHex,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = Color.DarkGray
-                )
-                
-                item.calculatedUnitPrice?.let { unitPrice ->
-                    Spacer(Modifier.width(12.dp))
-                    Text(
-                        text = "Value: $${"%.2f".format(unitPrice)}/ml",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Color(0xFF2E7D32),
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
-        }
-
-        // Using RadioButton logic but style it like the circle in mockup
-        RadioButton(
-            selected = isSelected,
-            onClick = { onToggle() },
-            colors = RadioButtonDefaults.colors(
-                selectedColor = Color(0xFF745E7A).copy(alpha = 0.5f),
-                unselectedColor = Color.LightGray
-            )
-        )
     }
 }
 
@@ -189,7 +207,8 @@ private fun PackPreviewItemRowPreview() {
             ),
             isSelected = true,
             isTarget = false,
-            onToggle = {}
+            onInfoClick = {},
+            onSelectClick = {}
         )
     }
 }

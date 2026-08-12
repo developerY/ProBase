@@ -38,6 +38,7 @@ enum class Formality(val rank: Int) {
 @Serializable
 data class ClothingItem(
     val internalId: Long = 0,
+    val remoteId: String? = null,
     val name: String,
     val brand: String? = null,
     val category: ClothingCategory,

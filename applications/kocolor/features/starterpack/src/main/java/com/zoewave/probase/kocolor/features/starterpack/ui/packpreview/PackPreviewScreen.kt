@@ -39,6 +39,7 @@ fun PackPreviewScreen(
     onImportSelected: () -> Unit,
     onSearchQueryChanged: (String) -> Unit,
     onToggleValueSort: () -> Unit,
+    onItemInfoClick: (String) -> Unit,
     onBack: () -> Unit
 ) {
     val listState = rememberLazyListState()
@@ -175,7 +176,8 @@ fun PackPreviewScreen(
                                     item = item,
                                     isSelected = uiState.selectedIds.contains(item.id),
                                     isTarget = item.id == uiState.targetItemId,
-                                    onToggle = { onToggleSelection(item.id) }
+                                    onInfoClick = { onItemInfoClick(item.id) },
+                                    onSelectClick = { onToggleSelection(item.id) }
                                 )
                                 if (index < items.lastIndex) {
                                     HorizontalDivider(
@@ -272,6 +274,7 @@ private fun PackPreviewScreenPreview() {
             onImportSelected = {},
             onSearchQueryChanged = {},
             onToggleValueSort = {},
+            onItemInfoClick = {},
             onBack = {}
         )
     }
