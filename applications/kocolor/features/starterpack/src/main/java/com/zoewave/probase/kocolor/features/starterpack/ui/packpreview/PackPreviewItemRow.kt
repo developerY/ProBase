@@ -4,24 +4,13 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.RadioButtonDefaults
-import androidx.compose.material3.Text
-import androidx.compose.material3.VerticalDivider
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -30,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -69,6 +59,7 @@ fun PackPreviewItemRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .height(IntrinsicSize.Min)
             .background(backgroundColor),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -143,30 +134,37 @@ fun PackPreviewItemRow(
                     }
                 }
             }
+
+            Icon(
+                imageVector = Icons.Default.Info,
+                contentDescription = "View Details",
+                modifier = Modifier.size(20.dp).alpha(0.3f),
+                tint = Color.Gray
+            )
         }
 
         // --- DIVIDER ---
         VerticalDivider(
             modifier = Modifier
-                .height(48.dp)
-                .padding(vertical = 8.dp),
+                .fillMaxHeight()
+                .padding(vertical = 12.dp),
             thickness = 1.dp,
-            color = Color.LightGray.copy(alpha = 0.2f)
+            color = Color.Black.copy(alpha = 0.08f)
         )
 
         // --- RIGHT SIDE: SELECTION TARGET ---
         Box(
             modifier = Modifier
-                .padding(end = 8.dp)
-                .size(48.dp)
-                .clip(CircleShape)
+                .width(64.dp)
+                .fillMaxHeight()
+                .background(Color(0xFFF9F9F9))
                 .clickable { onSelectClick() },
             contentAlignment = Alignment.Center
         ) {
             // Using RadioButton logic but style it like the circle in mockup
             RadioButton(
                 selected = isSelected,
-                onClick = { onSelectClick() },
+                onClick = null, // Handled by Box click
                 colors = RadioButtonDefaults.colors(
                     selectedColor = Color(0xFF745E7A).copy(alpha = 0.5f),
                     unselectedColor = Color.LightGray
