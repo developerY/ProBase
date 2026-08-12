@@ -1,18 +1,9 @@
-use crate::models::{KcpsPayload, KpssSource, PackageManifest};
+use crate::models::{KcpsPackagePayload, KpssSource, PackageManifest, PackInfo, PreviewItem, CosmeticItemDto, ClothingItemDto};
 use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
 use ed25519_dalek::SigningKey;
-use serde::Serialize;
 use crate::packager;
-
-#[derive(Serialize)]
-pub struct PackageManifestRecord {
-    pub package_id: String,
-    pub hash: String,
-    pub signature: String,
-    pub uncompressed_size_bytes: usize, // Required for Android bomb prevention
-}
 
 /// Parses TOML manifests, resolves product IDs from the canonical index,
 /// and assembles the final KCPS wire payloads for distribution.
@@ -22,7 +13,7 @@ pub fn assemble_packages(
     config_dir: &str,
     dist_dir: &Path,
     signing_key: &SigningKey,
-) -> Vec<PackageManifestRecord> {
+) -> Vec<PackInfo> {
     println!("📦 Scanning '{}' for TOML package manifests...", config_dir);
 
     let mut manifest_records = Vec::new();
@@ -45,7 +36,8 @@ pub fn assemble_packages(
             let manifest: PackageManifest = toml::from_str(&toml_content)
                 .unwrap_or_else(|err| panic!("❌ Invalid TOML structure in {:?}: {}", path, err));
 
-            let mut package_payloads: Vec<KcpsPayload> = Vec::new();
+            let mut cosmetic_payloads: Vec<CosmeticItemDto> = Vec::new();
+            let mut clothing_payloads: Vec<ClothingItemDto> = Vec::new();
 
             // Resolve each requested ID against the Canonical Index
             for product_id in &manifest.assortment.includes {
@@ -69,60 +61,141 @@ pub fn assemble_packages(
 
                 // Transform KPSS (Authoring) -> KCPS (Wire Object)
                 // We map the fields and INJECT the generated CDN paths and BlurHashes.
-                let kcps_item = KcpsPayload {
-                    schema_version: 1,
-                    id: source_data.id.clone(),
-                    name: source_data.name.clone(),
-                    brand: source_data.brand.clone(),
-                    macro_category: source_data.macro_category.clone(),
-                    micro_category: source_data.micro_category.clone(),
-                    shade_name: source_data.shade_name.clone(),
-                    color_hex: source_data.color_hex.clone(),
 
-                    // Injected CCT Artifacts
-                    blurhash: asset_data.blurhash.clone(),
-                    image_url: format!("https://cdn.kocolor.com/assets/{}", asset_data.hero_filename),
-                    thumbnail_url: format!("https://cdn.kocolor.com/assets/{}", asset_data.thumb_filename),
+                // Heuristic: If it has ingredients and is in a beauty category, it's a cosmetic
+                if source_data.macro_category != "TOPS" && source_data.macro_category != "BOTTOMS" {
+                    let kcps_item = CosmeticItemDto {
+                        id: source_data.id.clone(),
+                        name: source_data.name.clone(),
+                        brand: source_data.brand.clone(),
+                        macro_category: source_data.macro_category.clone(),
+                        micro_category: source_data.micro_category.clone(),
+                        shade_name: Some(source_data.shade_name.clone()),
+                        color_hex: source_data.color_hex.clone(),
 
-                    // Inject Scientific Enrichment
-                    cielab: enriched.cielab,
-                    safety_flags: enriched.safety_flags,
+                        // Injected CCT Artifacts
+                        blurhash: Some(asset_data.blurhash.clone()),
+                        image_url: format!("https://cdn.kocolor.com/inventory/dist/assets/hero/{}", asset_data.hero_filename),
+                        thumbnail_url: format!("https://cdn.kocolor.com/inventory/dist/assets/thumb/{}", asset_data.thumb_filename),
 
-                    // Propagated Fields
-                    notes: source_data.notes.clone(),
-                    hero_ingredient: source_data.hero_ingredient.clone(),
-                    price: source_data.price,
-                    volume: source_data.volume.clone(),
-                    eco_score: source_data.eco_score.clone(),
-                    ingredients: source_data.ingredients.clone(),
-                    contains_fragrance: source_data.contains_fragrance,
-                    recycling_instructions: source_data.recycling_instructions.clone(),
-                    fda_data_verified: source_data.fda_data_verified,
-                };
+                        // Inject Scientific Enrichment
+                        cielab: Some(enriched.cielab.to_vec()),
+                        calculated_safety_flags: Some(enriched.safety_flags),
+                        calculated_search_tokens: enriched.search_tokens,
 
-                package_payloads.push(kcps_item);
+                        // Propagated Fields
+                        notes: source_data.notes.clone(),
+                        price: Some(source_data.price),
+                        volume: Some(source_data.volume.clone()),
+                        ingredients: source_data.ingredients.clone(),
+                        fda_data_verified: source_data.fda_data_verified,
+
+                        // Defaults for optional fields
+                        formulation: None,
+                        chemistry_base: None,
+                        finish: None,
+                        coverage: None,
+                        temperature: None,
+                        pao_months: None,
+                        expiry_date: None,
+                        instructions: source_data.recycling_instructions.clone(),
+                        allergens: Vec::new(),
+                        is_vegan: None,
+                        is_cruelty_free: None,
+                        calculated_chemistry_phase: None,
+                        calculated_hero_actives: source_data.hero_ingredient.clone().map(|h| vec![h]).unwrap_or_default(),
+                        calculated_unit_price: Some(source_data.price),
+                    };
+                    cosmetic_payloads.push(kcps_item);
+                } else {
+                    let kcps_item = ClothingItemDto {
+                        id: source_data.id.clone(),
+                        name: source_data.name.clone(),
+                        brand: source_data.brand.clone(),
+                        macro_category: source_data.macro_category.clone(),
+                        micro_category: source_data.micro_category.clone(),
+                        color_hex: source_data.color_hex.clone(),
+                        shade_name: Some(source_data.shade_name.clone()),
+                        image_url: format!("https://cdn.kocolor.com/assets/{}", asset_data.hero_filename),
+                        thumbnail_url: format!("https://cdn.kocolor.com/assets/{}", asset_data.thumb_filename),
+                        price: Some(source_data.price),
+                        notes: source_data.notes.clone(),
+
+                        // Injected CCT Artifacts
+                        blurhash: Some(asset_data.blurhash.clone()),
+                        calculated_unit_price: Some(source_data.price),
+                        calculated_search_tokens: enriched.search_tokens,
+
+                        // Defaults
+                        formality: None,
+                        material: None,
+                        dominant_hex: None,
+                        vibrant_hex: None,
+                        muted_hex: None,
+                        palette_hexes: Vec::new(),
+                        color_temperature: None,
+                        seasonal_palette: None,
+                        contrast_level: None,
+                        ko_color_group: None,
+                    };
+                    clothing_payloads.push(kcps_item);
+                }
             }
 
+            let package_payload = KcpsPackagePayload {
+                schema_version: 1,
+                cosmetics: cosmetic_payloads,
+                clothing: clothing_payloads,
+            };
+
             // Serialize and hand off to the Packager for Zstd and Ed25519
-            let final_json = serde_json::to_string(&package_payloads)
+            let final_json = serde_json::to_string(&package_payload)
                 .expect("❌ Failed to serialize KCPS payload");
 
             // Measure the byte length BEFORE compression
             let uncompressed_bytes = final_json.as_bytes();
             let size_bytes = uncompressed_bytes.len();
 
-            let (hash_hex, sig_hex, _) = packager::seal_package(
+            let (hash_hex, sig_hex, uncompressed_size, compressed_size) = packager::seal_package(
                 uncompressed_bytes,
                 &manifest.package_metadata.id,
                 signing_key,
                 dist_dir
             );
 
-            manifest_records.push(PackageManifestRecord {
-                package_id: manifest.package_metadata.id.clone(),
-                hash: hash_hex,
+            // Build Preview Items (First 3 products)
+            let mut preview_items = Vec::new();
+            for p in package_payload.cosmetics.iter().take(3) {
+                preview_items.push(PreviewItem {
+                    name: p.name.clone(),
+                    description: p.notes.clone().unwrap_or_default(),
+                });
+            }
+
+            manifest_records.push(PackInfo {
+                id: manifest.package_metadata.id.clone(),
+                name: manifest.package_metadata.name.clone(),
+                description: manifest.package_metadata.description.clone(),
+                version: 1,
+                publisher: "Atelier Engineering".to_string(),
+                pack_type: "CORE".to_string(),
+                endpoint: format!("{}.kpkg", manifest.package_metadata.id),
+                item_count: package_payload.cosmetics.len() + package_payload.clothing.len(),
+                compressed_size_bytes: compressed_size,
+                uncompressed_size_bytes: uncompressed_size,
+                sha256: hash_hex,
                 signature: sig_hex,
-                uncompressed_size_bytes: size_bytes,
+                compression_algorithm: "zstd".to_string(),
+                hash_algorithm: "sha256".to_string(),
+                hash_encoding: "hex".to_string(),
+                signature_algorithm: "ed25519".to_string(),
+                signature_encoding: "hex".to_string(),
+                package_format_version: 1,
+                schema_version: 1,
+                encryption: "none".to_string(),
+                hero_image_url: None,
+                expires_at: None,
+                preview_items,
             });
 
             println!("  🔒 Sealed package '{}' (Size: {} bytes).", manifest.package_metadata.id, size_bytes);

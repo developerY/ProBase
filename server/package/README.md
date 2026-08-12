@@ -25,6 +25,11 @@ To generate a new deployment payload, execute the pipeline script from this dire
 * **`dist/manifest.json`**: The signed root of trust for the mobile client.
 * **`dist/search_index.json`**: The pre-calculated, zero-latency global search index.
 
+## 🔍 Verification
+
+For detailed instructions on constructing CDN URLs and verifying deployment via browser or Postman, see:
+* [**CDN Distribution & Verification Guide**](./docs/CDN_Distribution_Verification.md)
+
 ## 🛠️ Workflow
 
 1. Edit or add product JSONs and raw assets in `input/KoColor/`.

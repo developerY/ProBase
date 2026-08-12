@@ -10,16 +10,21 @@ use std::fs;
 use std::path::Path;
 use std::time::Instant;
 use ed25519_dalek::SigningKey;
-use rand::rngs::OsRng;
 
 fn main() {
     println!("🚀 Starting KoColor Asset Engineering Pipeline (v1.0)...");
     let start_time = Instant::now();
 
-    // Generate a secure Ed25519 keypair for this build run
-    // (In production, this would be loaded from a secure ENV variable or vault)
-    let mut csprng = OsRng;
-    let signing_key = SigningKey::generate(&mut csprng);
+    // Secure Ed25519 keypair for the distribution pipeline
+    // In production, this would be loaded from a secure ENV variable or vault.
+    let private_key_hex = "dc1d99af3fb46499dfb365d75631746dff779aafa0646cddab2c15767c40735f";
+    let private_key_bytes = hex::decode(private_key_hex).expect("❌ Invalid private key hex");
+    let signing_key = SigningKey::from_bytes(&private_key_bytes.try_into().expect("❌ Invalid key length"));
+
+    println!("🚀 Starting KoColor Asset Engineering Pipeline (v1.0)...");
+    println!("🔑 Root of Trust Keypair:");
+    println!("   Public Key (Hex):  {}", hex::encode(signing_key.verifying_key().to_bytes()));
+    println!("   ⚠️  Update SecurityConstants.kt in Android with this Public Key for verification to pass.\n");
 
     let raw_assets_dir = "./input";
     let output_dist_dir = Path::new("./dist/deployment");
@@ -58,12 +63,33 @@ fn main() {
 
     // --- PASS 4: GENERATE MASTER MANIFEST ---
     println!("\n--- PASS 4: GENERATE MASTER MANIFEST ---");
-    let manifest_json = serde_json::to_string_pretty(&manifest_records)
-        .expect("❌ Failed to generate master manifest");
+
+    let manifest_data = models::PackManifestOutput {
+        manifest_version: 1,
+        generated_at: chrono::Utc::now().to_rfc3339(),
+        compiler_version: env!("CARGO_PKG_VERSION").to_string(),
+        key_id: "atelier-dev-01".to_string(),
+        packs: manifest_records,
+    };
+
+    let manifest_data_json = serde_json::to_string(&manifest_data)
+        .expect("❌ Failed to serialize manifest data");
+
+    let signature = packager::sign_data(manifest_data_json.as_bytes(), &signing_key);
+
+    let envelope = models::SignedPayloadEnvelope {
+        data: manifest_data,
+        signature,
+        package_version: "1.0.0".to_string(),
+        schema_version: 1,
+    };
+
+    let manifest_json = serde_json::to_string_pretty(&envelope)
+        .expect("❌ Failed to generate master manifest envelope");
 
     let manifest_path = output_dist_dir.join("manifest.json");
     fs::write(manifest_path, manifest_json).expect("❌ Failed to write manifest.json");
-    println!("  📜 master manifest.json written.");
+    println!("  📜 master manifest.json written (with Ed25519 envelope).");
 
     // --- PASS 5: GENERATE GLOBAL SEARCH INDEX ---
     println!("\n--- PASS 5: GENERATE SEARCH INDEX ---");
