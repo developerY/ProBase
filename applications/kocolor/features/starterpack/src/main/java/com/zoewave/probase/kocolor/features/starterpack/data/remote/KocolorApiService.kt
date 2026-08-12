@@ -1,5 +1,6 @@
 package com.zoewave.probase.kocolor.features.starterpack.data.remote
 
+import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.ProductEditorialNotes
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.SignedPayloadEnvelope
 import kotlinx.serialization.json.JsonElement
 import okhttp3.ResponseBody
@@ -20,6 +21,9 @@ interface KocolorApiService {
 
     @GET("search_index.json")
     suspend fun getSearchIndex(): Map<String, List<String>>
+
+    @GET("notes/{id}.notes.json")
+    suspend fun getProductNotes(@Path("id") id: String): ProductEditorialNotes
 
     @GET("packs/{packId}.json")
     suspend fun getPackItems(@Path("packId") packId: String): SignedPayloadEnvelope<JsonElement>
