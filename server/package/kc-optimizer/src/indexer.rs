@@ -12,9 +12,11 @@ pub fn build_canonical_index(raw_assets_dir: &str) -> HashMap<String, KpssSource
 
     for entry in WalkDir::new(raw_assets_dir).into_iter().filter_map(|e| e.ok()) {
         let path = entry.path();
+        let file_name = path.file_name().and_then(|s| s.to_str()).unwrap_or("");
 
-        // We only care about parsing the JSON authoring files here.
-        if path.is_file() && path.extension().and_then(|s| s.to_str()) == Some("json") {
+        // We only care about parsing the core JSON authoring files.
+        // Ignore .notes.json files as they are handled by the distributor.
+        if path.is_file() && file_name.ends_with(".json") && !file_name.ends_with(".notes.json") {
             let file_content = fs::read_to_string(path)
                 .unwrap_or_else(|err| panic!("❌ Failed to read file {:?}: {}", path, err));
 
