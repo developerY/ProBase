@@ -32,8 +32,13 @@ google-services-zoewave.json
 /server/package/kc-optimizer/target
 /server/gen/Key/target
 
-# Pipeline Artifacts
-/server/package/input/**/*.png
+# Pipeline Artifacts (Raw source assets should NEVER be committed)
+/server/package/input/KoColor/**/*.png
+/server/package/input/KoColor/**/*.jpg
+/server/package/input/KoColor/**/*.jpeg
+/server/package/input/KoColor/**/*.webp
+
+# Distribution Output
 /server/package/dist/
 
 # Security & Keys
