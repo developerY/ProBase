@@ -6,13 +6,13 @@ use zstd::stream::encode_all;
 
 /// Compresses the KCPS JSON payload using Zstd, writes the .kpkg binary,
 /// computes its SHA-256 hash, and signs it with an Ed25519 private key.
-/// Returns (hash_hex, signature_hex, uncompressed_size_bytes).
+/// Returns (hash_hex, signature_hex, uncompressed_size_bytes, compressed_size_bytes).
 pub fn seal_package(
     json_bytes: &[u8],
     package_id: &str,
     signing_key: &SigningKey,
     dist_dir: &Path,
-) -> (String, String, u64) {
+) -> (String, String, u64, u64) {
     let uncompressed_size = json_bytes.len() as u64;
 
     // 1. Zstd Compression
@@ -38,5 +38,11 @@ pub fn seal_package(
     let signature: Signature = signing_key.sign(&compressed_bytes);
     let sig_hex = hex::encode(signature.to_bytes());
 
-    (hash_hex, sig_hex, uncompressed_size)
+    (hash_hex, sig_hex, uncompressed_size, compressed_bytes.len() as u64)
+}
+
+/// Signs the raw byte array with an Ed25519 private key.
+pub fn sign_data(data: &[u8], signing_key: &SigningKey) -> String {
+    let signature: Signature = signing_key.sign(data);
+    hex::encode(signature.to_bytes())
 }

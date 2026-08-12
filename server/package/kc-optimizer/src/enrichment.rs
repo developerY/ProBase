@@ -1,8 +1,10 @@
+use crate::models::SafetyFlags;
+
 /// The Enrichment Engine: Computes science and safety data at compile-time.
 
 pub struct EnrichedData {
     pub cielab: [f32; 3],
-    pub safety_flags: Vec<String>,
+    pub safety_flags: SafetyFlags,
     pub search_tokens: Vec<String>,
 }
 
@@ -60,28 +62,22 @@ pub fn compute_cielab(hex_color: &str) -> [f32; 3] {
 }
 
 /// Tokenizes ingredients to flag safety markers and allergens.
-pub fn compute_safety_flags(ingredients: &[String], contains_fragrance: bool) -> Vec<String> {
-    let mut flags = Vec::new();
-
+pub fn compute_safety_flags(ingredients: &[String], _contains_fragrance: bool) -> SafetyFlags {
     let ingredients_lower: Vec<String> = ingredients.iter().map(|i| i.to_lowercase()).collect();
-
-    if !contains_fragrance {
-        flags.push("Fragrance-Free".to_string());
-    }
 
     let has_silicone = ingredients_lower.iter().any(|i| {
         i.ends_with("cone") || i.ends_with("conol") || i.ends_with("siloxane") || i.contains("dimethicone")
     });
-    if !has_silicone {
-        flags.push("Silicone-Free".to_string());
-    }
 
     let has_paraben = ingredients_lower.iter().any(|i| i.contains("paraben"));
-    if !has_paraben {
-        flags.push("Paraben-Free".to_string());
-    }
 
-    flags
+    let has_sulfate = ingredients_lower.iter().any(|i| i.contains("sulfate") || i.contains("sulphate"));
+
+    SafetyFlags {
+        is_silicone_free: !has_silicone,
+        is_paraben_free: !has_paraben,
+        is_sulfate_free: !has_sulfate,
+    }
 }
 
 /// Generates optimized tokens for the mobile search index.
