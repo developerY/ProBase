@@ -116,8 +116,8 @@ pub fn assemble_packages(
                         micro_category: source_data.micro_category.clone(),
                         color_hex: source_data.color_hex.clone(),
                         shade_name: Some(source_data.shade_name.clone()),
-                        image_url: format!("https://cdn.kocolor.com/assets/{}", asset_data.hero_filename),
-                        thumbnail_url: format!("https://cdn.kocolor.com/assets/{}", asset_data.thumb_filename),
+                        image_url: format!("https://cdn.kocolor.com/inventory/dist/assets/hero/{}", asset_data.hero_filename),
+                        thumbnail_url: format!("https://cdn.kocolor.com/inventory/dist/assets/thumb/{}", asset_data.thumb_filename),
                         price: Some(source_data.price),
                         notes: source_data.notes.clone(),
 
