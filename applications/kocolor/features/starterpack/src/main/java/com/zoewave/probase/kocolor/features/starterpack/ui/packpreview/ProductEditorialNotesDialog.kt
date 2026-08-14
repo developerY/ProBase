@@ -34,12 +34,13 @@ fun ProductEditorialNotesDialog(
                             model = thumbnailUrl,
                             contentDescription = null,
                             modifier = Modifier
-                                .size(120.dp)
-                                .clip(RoundedCornerShape(12.dp))
+                                .fillMaxWidth()
+                                .aspectRatio(1f)
+                                .clip(RoundedCornerShape(16.dp))
                                 .background(Color(0xFFF5F5F5)),
                             contentScale = ContentScale.Crop
                         )
-                        Spacer(Modifier.height(16.dp))
+                        Spacer(Modifier.height(24.dp))
                     }
                     Text(
                         text = notes?.editorialTitle ?: "Analyzing Product...",
