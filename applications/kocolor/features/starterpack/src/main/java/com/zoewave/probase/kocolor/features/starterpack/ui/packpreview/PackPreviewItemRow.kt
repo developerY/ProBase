@@ -2,7 +2,9 @@ package com.zoewave.probase.kocolor.features.starterpack.ui.packpreview
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -71,12 +73,17 @@ fun PackPreviewItemRow(
                 .padding(vertical = 12.dp, horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Thumbnail with subtle rounded square like in mockup
+            // Thumbnail with colored border
             Box(
                 modifier = Modifier
                     .size(64.dp)
                     .clip(RoundedCornerShape(12.dp))
                     .background(Color(0xFFF5F5F5))
+                    .border(
+                        width = 2.dp,
+                        color = parseHexColor(item.colorHex).copy(alpha = 0.6f),
+                        shape = RoundedCornerShape(12.dp)
+                    )
             ) {
                 val placeholder = rememberBlurHashPainter(blurHash = item.blurhash)
 

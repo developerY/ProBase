@@ -36,6 +36,7 @@ import androidx.compose.material.icons.filled.ColorLens
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -129,6 +130,9 @@ fun VanityLandingScreen(
                 actions = {
                     IconButton(onClick = { navTo(KoColorRoute.DiscoveryStatus) }) {
                         Icon(Icons.Default.CloudDone, contentDescription = "Discovery Health")
+                    }
+                    IconButton(onClick = { navTo(KoColorRoute.StarterPack) }) { 
+                        Icon(Icons.Default.Sync, contentDescription = "Glow Sync") 
                     }
                     IconButton(onClick = { navTo(KoColorRoute.BoxCapture()) }) { 
                         Icon(Icons.Default.AutoAwesome, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_scan_box_title)) 
@@ -246,6 +250,79 @@ fun VanityLandingScreen(
                             imageVector = Icons.Default.ChevronRight,
                             contentDescription = null,
                             tint = Color.LightGray.copy(alpha = 0.8f),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+            }
+
+            // --- PROMINENT GLOW SYNC HUB ENTRY ---
+            item {
+                Surface(
+                    onClick = { navTo(KoColorRoute.StarterPack) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(96.dp),
+                    shape = RoundedCornerShape(32.dp),
+                    color = Color(0xFF5A3854), // Elegant Plum
+                    shadowElevation = 8.dp
+                ) {
+                    val shimmerBrush = Brush.linearGradient(
+                        colors = listOf(
+                            Color.Transparent,
+                            Color.White.copy(alpha = 0.1f),
+                            Color(0xFFD4AF37).copy(alpha = 0.15f), // Gold tint
+                            Color.White.copy(alpha = 0.1f),
+                            Color.Transparent
+                        ),
+                        start = Offset(x = shimmerProgress * 1000f, y = 0f),
+                        end = Offset(x = (shimmerProgress + 0.3f) * 1000f, y = 500f)
+                    )
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(shimmerBrush)
+                            .padding(horizontal = 20.dp)
+                    ) {
+                        // Icon with Gold background circle
+                        Box(
+                            modifier = Modifier
+                                .size(56.dp)
+                                .background(Color(0xFFD4AF37), CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.AutoAwesome,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(28.dp)
+                            )
+                        }
+                        
+                        Spacer(Modifier.width(20.dp))
+                        
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Glow Sync Hub",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = FontFamily.Serif,
+                                color = Color.White
+                            )
+                            Text(
+                                text = "High-fidelity scientific collections",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = Color.White.copy(alpha = 0.7f),
+                                letterSpacing = 0.5.sp
+                            )
+                        }
+                        
+                        Icon(
+                            imageVector = Icons.Default.ChevronRight,
+                            contentDescription = null,
+                            tint = Color.White.copy(alpha = 0.5f),
                             modifier = Modifier.size(20.dp)
                         )
                     }

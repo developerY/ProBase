@@ -1,6 +1,7 @@
 package com.zoewave.probase.kocolor.features.starterpack.ui.packpreview
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -21,10 +22,13 @@ import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.Produc
 fun ProductEditorialNotesDialog(
     notes: ProductEditorialNotes?,
     thumbnailUrl: String?,
+    colorHex: String?,
     isLoading: Boolean,
     onDismiss: () -> Unit
 ) {
     if (isLoading || notes != null) {
+        val itemColor = colorHex?.let { parseHexColor(it) } ?: Color.Transparent
+
         AlertDialog(
             onDismissRequest = onDismiss,
             title = {
@@ -37,7 +41,8 @@ fun ProductEditorialNotesDialog(
                                 .fillMaxWidth()
                                 .aspectRatio(1f)
                                 .clip(RoundedCornerShape(16.dp))
-                                .background(Color(0xFFF5F5F5)),
+                                .background(Color(0xFFF5F5F5))
+                                .border(4.dp, itemColor.copy(alpha = 0.8f), RoundedCornerShape(16.dp)),
                             contentScale = ContentScale.Crop
                         )
                         Spacer(Modifier.height(24.dp))
@@ -71,6 +76,14 @@ fun ProductEditorialNotesDialog(
             },
             shape = RoundedCornerShape(28.dp)
         )
+    }
+}
+
+private fun parseHexColor(hex: String): Color {
+    return try {
+        Color(android.graphics.Color.parseColor(if (hex.startsWith("#")) hex else "#$hex"))
+    } catch (e: Exception) {
+        Color.Gray
     }
 }
 
