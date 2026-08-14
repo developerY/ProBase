@@ -1,21 +1,26 @@
 package com.zoewave.probase.kocolor.features.starterpack.ui.packpreview
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.ProductEditorialNotes
 
 @Composable
 fun ProductEditorialNotesDialog(
     notes: ProductEditorialNotes?,
+    thumbnailUrl: String?,
     isLoading: Boolean,
     onDismiss: () -> Unit
 ) {
@@ -23,11 +28,25 @@ fun ProductEditorialNotesDialog(
         AlertDialog(
             onDismissRequest = onDismiss,
             title = {
-                Text(
-                    text = notes?.editorialTitle ?: "Analyzing Product...",
-                    fontFamily = FontFamily.Serif,
-                    fontWeight = FontWeight.Bold
-                )
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    if (thumbnailUrl != null) {
+                        AsyncImage(
+                            model = thumbnailUrl,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(120.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(Color(0xFFF5F5F5)),
+                            contentScale = ContentScale.Crop
+                        )
+                        Spacer(Modifier.height(16.dp))
+                    }
+                    Text(
+                        text = notes?.editorialTitle ?: "Analyzing Product...",
+                        fontFamily = FontFamily.Serif,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             },
             text = {
                 if (isLoading) {
