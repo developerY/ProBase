@@ -42,7 +42,7 @@ fun ProductEditorialNotesDialog(
                                 .aspectRatio(1f)
                                 .clip(RoundedCornerShape(16.dp))
                                 .background(Color(0xFFF5F5F5))
-                                .border(4.dp, itemColor.copy(alpha = 0.8f), RoundedCornerShape(16.dp)),
+                                .border(8.dp, itemColor.copy(alpha = 0.8f), RoundedCornerShape(16.dp)),
                             contentScale = ContentScale.Crop
                         )
                         Spacer(Modifier.height(24.dp))

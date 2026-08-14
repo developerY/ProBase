@@ -80,7 +80,7 @@ fun PackPreviewItemRow(
                     .clip(RoundedCornerShape(12.dp))
                     .background(Color(0xFFF5F5F5))
                     .border(
-                        width = 2.dp,
+                        width = 4.dp,
                         color = parseHexColor(item.colorHex).copy(alpha = 0.6f),
                         shape = RoundedCornerShape(12.dp)
                     )
