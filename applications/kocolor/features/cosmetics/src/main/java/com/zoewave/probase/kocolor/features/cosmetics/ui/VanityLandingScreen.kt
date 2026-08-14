@@ -33,19 +33,22 @@ import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.ColorLens
-import androidx.compose.material.icons.filled.ErrorOutline
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.Kitchen
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -58,6 +61,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -121,7 +125,7 @@ fun VanityLandingScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text(stringResource(R.string.applications_kocolor_features_cosmetics_glow_archive), style = MaterialTheme.typography.titleLarge, fontFamily = FontFamily.Serif) },
+                title = { Text("Glow Archive", style = MaterialTheme.typography.titleLarge, fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = { navTo(KoColorRoute.Back) }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_back))
@@ -129,25 +133,30 @@ fun VanityLandingScreen(
                 },
                 actions = {
                     IconButton(onClick = { navTo(KoColorRoute.DiscoveryStatus) }) {
-                        Icon(Icons.Default.CloudDone, contentDescription = "Discovery Health")
+                        Icon(Icons.Default.CloudDone, contentDescription = "Discovery Health", tint = Color.DarkGray)
                     }
                     IconButton(onClick = { navTo(KoColorRoute.StarterPack) }) { 
-                        Icon(Icons.Default.Sync, contentDescription = "Glow Sync") 
+                        Icon(Icons.Default.AutoAwesome, contentDescription = "Glow Sync", tint = Color.DarkGray) 
                     }
-                    IconButton(onClick = { navTo(KoColorRoute.BoxCapture()) }) { 
-                        Icon(Icons.Default.AutoAwesome, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_scan_box_title)) 
+                    IconButton(onClick = { navTo(KoColorRoute.InventoryManagement) }) { 
+                        Icon(Icons.Default.Inventory2, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_inventory_title), tint = Color.DarkGray) 
                     }
-                    IconButton(onClick = { navTo(KoColorRoute.InventoryManagement) }) { Icon(Icons.Default.Inventory2, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_inventory_title)) }
-                    IconButton(onClick = { navTo(KoColorRoute.ColorSearch) }) { Icon(Icons.Default.Search, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_filter)) }
-                }
+                    IconButton(onClick = { navTo(KoColorRoute.ColorSearch) }) { 
+                        Icon(Icons.Default.Search, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_filter), tint = Color.DarkGray) 
+                    }
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = Color(0xFFFCF9F6)
+                )
             )
         },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { navTo(KoColorRoute.CosmeticAdd()) },
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-                shape = CircleShape
+                containerColor = Color(0xFF5A3854), // Dark Plum matching image
+                contentColor = Color.White,
+                shape = CircleShape,
+                elevation = FloatingActionButtonDefaults.elevation(8.dp)
             ) {
                 Icon(Icons.Default.Add, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_add_item))
             }
@@ -155,22 +164,27 @@ fun VanityLandingScreen(
         modifier = modifier
     ) { padding ->
         LazyColumn(
-            modifier = Modifier.padding(padding).fillMaxSize(),
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize()
+                .background(Color(0xFFFCF9F6)), // Light cream background
             contentPadding = PaddingValues(24.dp),
             verticalArrangement = Arrangement.spacedBy(32.dp)
         ) {
             item {
                 Column {
                     Text(
-                        text = stringResource(R.string.applications_kocolor_features_cosmetics_welcome_header),
-                        style = MaterialTheme.typography.headlineLarge,
+                        text = "Good morning,\nBeautiful.", // Two-line to match image
+                        style = MaterialTheme.typography.displaySmall,
                         fontFamily = FontFamily.Serif,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF1A1C1E)
                     )
+                    Spacer(Modifier.height(8.dp))
                     Text(
-                        text = stringResource(R.string.applications_kocolor_features_cosmetics_welcome_desc),
+                        text = "Here is a glance at the collection today.", // Match image text
                         style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                     )
                 }
             }
@@ -188,17 +202,17 @@ fun VanityLandingScreen(
                     onClick = { navTo(KoColorRoute.ColorHub) },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(96.dp),
-                    shape = RoundedCornerShape(32.dp),
+                        .height(140.dp), // Taller as per image
+                    shape = RoundedCornerShape(24.dp),
                     color = Color.White,
-                    shadowElevation = 8.dp,
+                    shadowElevation = 4.dp,
                     border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))
                 ) {
                     val shimmerBrush = Brush.linearGradient(
                         colors = listOf(
                             Color.Transparent,
                             Color.White.copy(alpha = 0.3f),
-                            Color(0xFFA0C4FF).copy(alpha = 0.15f), // Subtle blue tint
+                            Color(0xFFA0C4FF).copy(alpha = 0.1f),
                             Color.White.copy(alpha = 0.3f),
                             Color.Transparent
                         ),
@@ -211,33 +225,18 @@ fun VanityLandingScreen(
                         modifier = Modifier
                             .fillMaxSize()
                             .background(shimmerBrush)
-                            .padding(horizontal = 20.dp)
+                            .padding(horizontal = 24.dp)
                     ) {
-                        // Icon with Chromatic background circle
-                        Box(
-                            modifier = Modifier
-                                .size(56.dp)
-                                .background(chromaticBrush, CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.ColorLens,
-                                contentDescription = null,
-                                tint = Color.White,
-                                modifier = Modifier.size(28.dp)
-                            )
-                        }
-                        
-                        Spacer(Modifier.width(20.dp))
-                        
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Color Intelligence Hub",
-                                style = MaterialTheme.typography.titleLarge,
+                                text = "Color Intelligence\nHub", // Forced wrap to match image
+                                style = MaterialTheme.typography.headlineMedium,
                                 fontWeight = FontWeight.Bold,
                                 fontFamily = FontFamily.Serif,
-                                color = Color(0xFF2C2420)
+                                color = Color(0xFF2C2420),
+                                lineHeight = 32.sp
                             )
+                            Spacer(Modifier.height(4.dp))
                             Text(
                                 text = "Spectral blueprint & chromatic DNA",
                                 style = MaterialTheme.typography.labelMedium,
@@ -245,13 +244,21 @@ fun VanityLandingScreen(
                                 letterSpacing = 0.5.sp
                             )
                         }
-                        
-                        Icon(
-                            imageVector = Icons.Default.ChevronRight,
-                            contentDescription = null,
-                            tint = Color.LightGray.copy(alpha = 0.8f),
-                            modifier = Modifier.size(20.dp)
-                        )
+
+                        // Icon with Chromatic background circle on the RIGHT
+                        Box(
+                            modifier = Modifier
+                                .size(72.dp)
+                                .background(chromaticBrush, CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ColorLens,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(36.dp)
+                            )
+                        }
                     }
                 }
             }
@@ -262,21 +269,21 @@ fun VanityLandingScreen(
                     onClick = { navTo(KoColorRoute.StarterPack) },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(96.dp),
-                    shape = RoundedCornerShape(32.dp),
-                    color = Color(0xFF5A3854), // Elegant Plum
-                    shadowElevation = 8.dp
+                        .height(140.dp), // Taller as per image
+                    shape = RoundedCornerShape(24.dp),
+                    color = Color(0xFF2E1A2C), // Deeper Dark Plum
+                    shadowElevation = 6.dp
                 ) {
                     val shimmerBrush = Brush.linearGradient(
                         colors = listOf(
                             Color.Transparent,
-                            Color.White.copy(alpha = 0.1f),
-                            Color(0xFFD4AF37).copy(alpha = 0.15f), // Gold tint
-                            Color.White.copy(alpha = 0.1f),
+                            Color.White.copy(alpha = 0.05f),
+                            Color(0xFFD4AF37).copy(alpha = 0.1f), 
+                            Color.White.copy(alpha = 0.05f),
                             Color.Transparent
                         ),
-                        start = Offset(x = shimmerProgress * 1000f, y = 0f),
-                        end = Offset(x = (shimmerProgress + 0.3f) * 1000f, y = 500f)
+                        start = Offset(x = shimmerProgress * 1200f, y = 0f),
+                        end = Offset(x = (shimmerProgress + 0.4f) * 1200f, y = 600f)
                     )
 
                     Row(
@@ -284,46 +291,24 @@ fun VanityLandingScreen(
                         modifier = Modifier
                             .fillMaxSize()
                             .background(shimmerBrush)
-                            .padding(horizontal = 20.dp)
+                            .padding(horizontal = 24.dp)
                     ) {
-                        // Icon with Gold background circle
-                        Box(
-                            modifier = Modifier
-                                .size(56.dp)
-                                .background(Color(0xFFD4AF37), CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.AutoAwesome,
-                                contentDescription = null,
-                                tint = Color.White,
-                                modifier = Modifier.size(28.dp)
-                            )
-                        }
-                        
-                        Spacer(Modifier.width(20.dp))
-                        
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = "Glow Sync Hub",
-                                style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.Medium,
                                 fontFamily = FontFamily.Serif,
                                 color = Color.White
                             )
-                            Text(
-                                text = "High-fidelity scientific collections",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = Color.White.copy(alpha = 0.7f),
-                                letterSpacing = 0.5.sp
-                            )
                         }
                         
+                        // Large Gold Stars Icon on the RIGHT
                         Icon(
-                            imageVector = Icons.Default.ChevronRight,
+                            imageVector = Icons.Default.AutoAwesome,
                             contentDescription = null,
-                            tint = Color.White.copy(alpha = 0.5f),
-                            modifier = Modifier.size(20.dp)
+                            tint = Color(0xFFD4AF37),
+                            modifier = Modifier.size(64.dp)
                         )
                     }
                 }
@@ -336,18 +321,18 @@ fun VanityLandingScreen(
                 ) {
                     SummaryStatCard(
                         uiState = SummaryStatUiState(
-                            label = stringResource(R.string.applications_kocolor_features_cosmetics_total_products),
+                            label = "TOTAL_INVENTORY",
                             value = uiState.totalCosmetics.toString(),
-                            icon = Icons.Default.Inventory2
+                            icon = Icons.Default.Kitchen
                         ),
                         modifier = Modifier.weight(1f),
                         onEvent = { navTo(KoColorRoute.InventoryManagement) }
                     )
                     SummaryStatCard(
                         uiState = SummaryStatUiState(
-                            label = stringResource(R.string.applications_kocolor_features_cosmetics_expiring_soon),
+                            label = "EXPIRING_SOON",
                             value = uiState.expiringCosmeticsCount.toString(),
-                            icon = Icons.Default.ErrorOutline
+                            icon = Icons.Default.Warning
                         ),
                         modifier = Modifier.weight(1f),
                         onEvent = { navTo(KoColorRoute.ExpiringSoon) }
@@ -363,26 +348,27 @@ fun VanityLandingScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = stringResource(R.string.applications_kocolor_features_cosmetics_categories),
+                            text = "CATEGORIES",
                             style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 1.sp
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 1.5.sp
                         )
+                        // Minimalist Info Icon
                         Surface(
                             onClick = { showTaxonomyInfo = true },
                             shape = CircleShape,
-                            color = Color.White,
-                            border = BorderStroke(1.dp, Color(0xFFD4AF37)), 
-                            shadowElevation = 4.dp,
-                            modifier = Modifier.size(36.dp)
+                            color = Color(0xFFF7F2EB),
+                            border = BorderStroke(1.dp, Color(0xFFD4AF37).copy(alpha = 0.5f)),
+                            modifier = Modifier.size(28.dp)
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Text(
-                                    text = stringResource(R.string.applications_kocolor_features_cosmetics_info_icon),
-                                    style = MaterialTheme.typography.titleMedium.copy(
+                                    text = "i",
+                                    style = MaterialTheme.typography.bodySmall.copy(
                                         fontFamily = FontFamily.Serif,
-                                        fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
-                                        fontWeight = FontWeight.Bold
+                                        fontStyle = FontStyle.Italic,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 12.sp
                                     ),
                                     color = Color(0xFF2C2420)
                                 )
