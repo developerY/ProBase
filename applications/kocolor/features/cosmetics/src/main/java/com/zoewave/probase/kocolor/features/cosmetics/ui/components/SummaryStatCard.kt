@@ -33,12 +33,12 @@ fun SummaryStatCard(
     modifier: Modifier = Modifier,
     onEvent: () -> Unit
 ) {
-    val isExpiring = uiState.label.contains("EXPIRING")
+    val isExpiring = uiState.label.contains("EXPIRING") || uiState.label.contains("Soon")
     val serifFont = FontFamily.Serif
     val charcoal = Color(0xFF2C2420)
 
-    val chromaticBrush = if (isExpiring) {
-        Brush.verticalGradient(listOf(Color(0xFF4A0000), Color(0xFF8B0000)))
+    val footerBrush = if (isExpiring) {
+        Brush.verticalGradient(listOf(Color(0xFF4A101D), Color(0xFF1A050A))) // Dark Burgundy/Plum
     } else {
         Brush.horizontalGradient(listOf(
             Color(0xFFA0C4FF), Color(0xFFBDB2FF), Color(0xFFFFADAD), 
@@ -54,94 +54,81 @@ fun SummaryStatCard(
 
     Surface(
         onClick = onEvent,
-        modifier = modifier.height(80.dp), // Half-height pill
-        shape = RoundedCornerShape(20.dp),
+        modifier = modifier.height(180.dp), // Taller card as per image
+        shape = RoundedCornerShape(24.dp),
         color = Color.White,
-        shadowElevation = 8.dp,
+        shadowElevation = 4.dp,
         border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            // 1. Top Section
-            Box(
+            // 1. Icon and Value Section
+            Column(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
-                    .padding(horizontal = 10.dp, vertical = 4.dp)
+                    .padding(top = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-                // High-Visibility Icon (Top Left)
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(Color.Gray.copy(alpha = 0.12f))
-                        .align(Alignment.TopStart),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = uiState.icon,
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp),
-                        tint = Color.Gray.copy(alpha = 0.7f)
-                    )
-                }
+                // High-Visibility Icon
+                Icon(
+                    imageVector = uiState.icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(32.dp),
+                    tint = if (isExpiring) Color(0xFFB76E79) else charcoal
+                )
+
+                Spacer(Modifier.height(8.dp))
 
                 // Centered Number
                 if (valueBrush != null) {
                     Text(
                         text = uiState.value,
-                        style = MaterialTheme.typography.displaySmall.copy(
+                        style = MaterialTheme.typography.displayMedium.copy(
                             fontFamily = serifFont,
                             brush = valueBrush,
-                            fontSize = 32.sp
+                            fontSize = 48.sp
                         ),
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.align(Alignment.Center)
+                        fontWeight = FontWeight.Bold
                     )
                 } else {
                     Text(
                         text = uiState.value,
-                        style = MaterialTheme.typography.displaySmall.copy(
+                        style = MaterialTheme.typography.displayMedium.copy(
                             fontFamily = serifFont,
-                            fontSize = 32.sp
+                            fontSize = 48.sp
                         ),
                         fontWeight = FontWeight.Bold,
-                        color = charcoal,
-                        modifier = Modifier.align(Alignment.Center)
+                        color = charcoal
                     )
                 }
             }
 
-            // 2. Bottom Colored Footer
+            // 2. Bottom Colored Footer Button
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(28.dp)
-                    .background(chromaticBrush),
+                    .height(48.dp)
+                    .background(footerBrush),
                 contentAlignment = Alignment.Center
             ) {
-                Surface(
-                    color = Color.White.copy(alpha = if (isExpiring) 0.12f else 0.45f), 
-                    shape = RoundedCornerShape(4.dp)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = if (isExpiring) "VIEW ITEMS" else "VIEW INVENTORY",
-                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 7.sp),
-                            fontWeight = FontWeight.Black,
-                            color = if (isExpiring) Color.White else charcoal.copy(alpha = 0.8f),
-                            letterSpacing = 0.5.sp
-                        )
-                        Spacer(Modifier.width(4.dp))
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                            contentDescription = null,
-                            modifier = Modifier.size(8.dp),
-                            tint = if (isExpiring) Color.White else charcoal.copy(alpha = 0.4f)
-                        )
-                    }
+                    Text(
+                        text = if (isExpiring) "VIEW ITEMS" else "VIEW INVENTORY",
+                        style = MaterialTheme.typography.labelLarge.copy(fontSize = 12.sp),
+                        fontWeight = FontWeight.Black,
+                        color = if (isExpiring) Color.White else charcoal.copy(alpha = 0.8f),
+                        letterSpacing = 1.sp
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                        contentDescription = null,
+                        modifier = Modifier.size(12.dp),
+                        tint = if (isExpiring) Color.White else charcoal.copy(alpha = 0.6f)
+                    )
                 }
             }
         }

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -41,6 +42,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -206,16 +208,25 @@ fun VanityCategoryCard(
                                 fontFamily = FontFamily.Serif,
                                 color = Color.Black
                             )
-                            IconButton(
+                            Spacer(Modifier.width(8.dp))
+                            Surface(
                                 onClick = { showExplanation = true },
-                                modifier = Modifier.size(32.dp)
+                                shape = CircleShape,
+                                color = Color.Black.copy(alpha = 0.05f),
+                                modifier = Modifier.size(20.dp)
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.Info,
-                                    contentDescription = "Category Info",
-                                    modifier = Modifier.size(16.dp),
-                                    tint = Color.Black.copy(alpha = 0.2f)
-                                )
+                                Box(contentAlignment = Alignment.Center) {
+                                    Text(
+                                        text = "i",
+                                        style = MaterialTheme.typography.labelSmall.copy(
+                                            fontFamily = FontFamily.Serif,
+                                            fontStyle = FontStyle.Italic,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 10.sp
+                                        ),
+                                        color = Color.Black.copy(alpha = 0.4f)
+                                    )
+                                }
                             }
                         }
                         Row(verticalAlignment = Alignment.CenterVertically) {
