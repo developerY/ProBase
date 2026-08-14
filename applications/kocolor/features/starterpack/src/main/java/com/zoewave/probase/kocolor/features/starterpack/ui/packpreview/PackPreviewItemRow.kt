@@ -25,9 +25,12 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.zoewave.probase.core.ui.util.rememberBlurHashPainter
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.CosmeticItemDto
@@ -70,19 +73,19 @@ fun PackPreviewItemRow(
             modifier = Modifier
                 .weight(1f)
                 .clickable { onInfoClick() }
-                .padding(vertical = 12.dp, horizontal = 16.dp),
+                .padding(vertical = 16.dp, horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Thumbnail with colored border
+            // Thumbnail with thick colored border
             Box(
                 modifier = Modifier
-                    .size(64.dp)
-                    .clip(RoundedCornerShape(12.dp))
+                    .size(80.dp) // Slightly larger to match new layout
+                    .clip(RoundedCornerShape(16.dp))
                     .background(Color(0xFFF5F5F5))
                     .border(
                         width = 4.dp,
-                        color = parseHexColor(item.colorHex).copy(alpha = 0.6f),
-                        shape = RoundedCornerShape(12.dp)
+                        color = parseHexColor(item.colorHex),
+                        shape = RoundedCornerShape(16.dp)
                     )
             ) {
                 val placeholder = rememberBlurHashPainter(blurHash = item.blurhash)
@@ -99,11 +102,37 @@ fun PackPreviewItemRow(
             Spacer(Modifier.width(16.dp))
 
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = item.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = item.name,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontFamily = FontFamily.Serif,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF1A1C1E)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Surface(
+                        onClick = { onInfoClick() },
+                        shape = CircleShape,
+                        color = Color.Transparent,
+                        border = BorderStroke(1.dp, Color.LightGray),
+                        modifier = Modifier.size(18.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Text(
+                                text = "i",
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontFamily = FontFamily.Serif,
+                                    fontStyle = FontStyle.Italic,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 10.sp
+                                ),
+                                color = Color.Gray
+                            )
+                        }
+                    }
+                }
+                
                 val subtitleText = remember(item.brand, item.shadeName) {
                     if (!item.shadeName.isNullOrBlank()) {
                         "${item.brand} • ${item.shadeName}"
@@ -114,26 +143,26 @@ fun PackPreviewItemRow(
                 Text(
                     text = subtitleText ?: "",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Gray
+                    color = Color.Gray,
+                    letterSpacing = 0.2.sp
                 )
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 2.dp)) {
+                
+                Row(
+                    verticalAlignment = Alignment.CenterVertically, 
+                    modifier = Modifier.padding(top = 4.dp)
+                ) {
                     Box(
                         modifier = Modifier
-                            .size(14.dp)
+                            .size(16.dp)
                             .clip(CircleShape)
                             .background(parseHexColor(item.colorHex))
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        text = item.colorHex,
-                        style = MaterialTheme.typography.labelMedium,
-                        color = Color.DarkGray
+                            .border(1.dp, Color.Black.copy(alpha = 0.1f), CircleShape)
                     )
                     
                     item.calculatedUnitPrice?.let { unitPrice ->
                         Spacer(Modifier.width(12.dp))
                         Text(
-                            text = "Value: $${"%.2f".format(unitPrice)}/ml",
+                            text = "$${"%.2f".format(unitPrice)}/ml",
                             style = MaterialTheme.typography.labelSmall,
                             color = Color(0xFF2E7D32),
                             fontWeight = FontWeight.Bold
@@ -141,13 +170,6 @@ fun PackPreviewItemRow(
                     }
                 }
             }
-
-            Icon(
-                imageVector = Icons.Default.Info,
-                contentDescription = "View Details",
-                modifier = Modifier.size(20.dp).alpha(0.3f),
-                tint = Color.Gray
-            )
         }
 
         // --- DIVIDER ---
@@ -156,27 +178,42 @@ fun PackPreviewItemRow(
                 .fillMaxHeight()
                 .padding(vertical = 12.dp),
             thickness = 1.dp,
-            color = Color.Black.copy(alpha = 0.08f)
+            color = Color.Black.copy(alpha = 0.05f)
         )
 
         // --- RIGHT SIDE: SELECTION TARGET ---
         Box(
             modifier = Modifier
-                .width(64.dp)
+                .width(72.dp)
                 .fillMaxHeight()
-                .background(Color(0xFFF9F9F9))
                 .clickable { onSelectClick() },
             contentAlignment = Alignment.Center
         ) {
-            // Using RadioButton logic but style it like the circle in mockup
-            RadioButton(
-                selected = isSelected,
-                onClick = null, // Handled by Box click
-                colors = RadioButtonDefaults.colors(
-                    selectedColor = Color(0xFF745E7A).copy(alpha = 0.5f),
-                    unselectedColor = Color.LightGray
-                )
-            )
+            val selectionColor = Color(0xFF745E7A)
+            
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(CircleShape)
+                    .border(
+                        width = 1.dp,
+                        color = if (isSelected) selectionColor else Color.LightGray,
+                        shape = CircleShape
+                    )
+                    .background(
+                        if (isSelected) selectionColor.copy(alpha = 0.1f) else Color.Transparent
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                if (isSelected) {
+                    Box(
+                        modifier = Modifier
+                            .size(16.dp)
+                            .clip(CircleShape)
+                            .background(selectionColor)
+                    )
+                }
+            }
         }
     }
 }
