@@ -46,7 +46,7 @@ fun CatalogPackageCard(
                 .height(200.dp)
             ) {
                 AsyncImage(
-                    model = pack.heroImageUrl ?: "https://cdn.kocolor.com/inventory/assets/${pack.id}.webp",
+                    model = pack.heroImageUrl ?: "https://cdn.kocolor.com/inventory/dist/assets/hero/${pack.id}.webp",
                     contentDescription = null,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop

@@ -116,8 +116,8 @@ pub fn assemble_packages(
                         micro_category: source_data.micro_category.clone(),
                         color_hex: source_data.color_hex.clone(),
                         shade_name: Some(source_data.shade_name.clone()),
-                        image_url: format!("https://cdn.kocolor.com/assets/{}", asset_data.hero_filename),
-                        thumbnail_url: format!("https://cdn.kocolor.com/assets/{}", asset_data.thumb_filename),
+                        image_url: format!("https://cdn.kocolor.com/inventory/dist/assets/hero/{}", asset_data.hero_filename),
+                        thumbnail_url: format!("https://cdn.kocolor.com/inventory/dist/assets/thumb/{}", asset_data.thumb_filename),
                         price: Some(source_data.price),
                         notes: source_data.notes.clone(),
 
@@ -172,6 +172,11 @@ pub fn assemble_packages(
                 });
             }
 
+            // Select Hero Image (Using the first item's THUMBNAIL for faster loading in the Hub)
+            let hero_image_url = package_payload.cosmetics.first()
+                .map(|p| p.thumbnail_url.clone())
+                .or_else(|| package_payload.clothing.first().map(|p| p.thumbnail_url.clone()));
+
             manifest_records.push(PackInfo {
                 id: manifest.package_metadata.id.clone(),
                 name: manifest.package_metadata.name.clone(),
@@ -193,7 +198,7 @@ pub fn assemble_packages(
                 package_format_version: 1,
                 schema_version: 1,
                 encryption: "none".to_string(),
-                hero_image_url: None,
+                hero_image_url,
                 expires_at: None,
                 preview_items,
             });

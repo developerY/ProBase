@@ -43,7 +43,7 @@ fun HeroPackageCard(
         Box(modifier = Modifier.fillMaxSize()) {
             // Background Image
             AsyncImage(
-                model = pack.heroImageUrl ?: "https://cdn.kocolor.com/inventory/assets/hero_core.webp",
+                model = pack.heroImageUrl ?: "https://cdn.kocolor.com/inventory/dist/assets/hero/kc-prep-01.webp",
                 contentDescription = null,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop

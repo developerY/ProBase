@@ -38,8 +38,9 @@ google-services-zoewave.json
 /server/package/input/KoColor/**/*.jpeg
 /server/package/input/KoColor/**/*.webp
 
-# Distribution Output
+# Distribution Input & Output
 /server/package/dist/
+/server/package/input
 
 # Security & Keys
 **/.env
