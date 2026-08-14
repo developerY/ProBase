@@ -147,31 +147,6 @@ fun SettingsScreen(
                 navTo = navTo
             )
 
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                onClick = { navTo(KoColorRoute.StarterPack) }
-            ) {
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.AutoAwesome,
-                        contentDescription = null,
-                        tint = Color(0xFF745E7A)
-                    )
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Column {
-                        Text("Glow Archive Sync", style = MaterialTheme.typography.titleMedium)
-                        Text(
-                            "Manage high-fidelity starter and sample packs",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-            }
-            
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text("About", style = MaterialTheme.typography.titleMedium)

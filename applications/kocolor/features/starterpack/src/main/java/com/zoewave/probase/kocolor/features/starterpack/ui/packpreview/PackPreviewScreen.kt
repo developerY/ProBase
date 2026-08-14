@@ -86,6 +86,7 @@ fun PackPreviewScreen(
     ProductEditorialNotesDialog(
         notes = uiState.selectedItemNotes,
         thumbnailUrl = uiState.selectedItemThumbnail,
+        colorHex = uiState.selectedItemColor,
         isLoading = uiState.isNotesLoading,
         onDismiss = onDismissNotes
     )
