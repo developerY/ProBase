@@ -75,12 +75,13 @@ fun PackPreviewItemRow(
             modifier = Modifier
                 .weight(1f)
                 .clickable { onInfoClick() }
-                .padding(vertical = 20.dp, horizontal = 16.dp),
+                .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Thumbnail with thick colored border
             Box(
                 modifier = Modifier
+                    .padding(vertical = 12.dp)
                     .size(96.dp)
                     .clip(RoundedCornerShape(24.dp))
                     .background(Color(0xFFFBF8F5))
@@ -104,36 +105,13 @@ fun PackPreviewItemRow(
             Spacer(Modifier.width(20.dp))
 
             Column(modifier = Modifier.weight(1f)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = item.name,
-                        style = MaterialTheme.typography.titleLarge.copy(fontSize = 16.sp), // Slightly smaller header
-                        fontFamily = FontFamily.Serif,
-                        fontWeight = FontWeight.Medium,
-                        color = Color(0xFF1A1C1E)
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Surface(
-                        onClick = { onInfoClick() },
-                        shape = CircleShape,
-                        color = Color.Transparent,
-                        border = BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.5f)),
-                        modifier = Modifier.size(18.dp)
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Text(
-                                text = "i",
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    fontFamily = FontFamily.Serif,
-                                    fontStyle = FontStyle.Italic,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 10.sp
-                                ),
-                                color = Color.Gray.copy(alpha = 0.6f)
-                            )
-                        }
-                    }
-                }
+                Text(
+                    text = item.name,
+                    style = MaterialTheme.typography.titleLarge.copy(fontSize = 16.sp),
+                    fontFamily = FontFamily.Serif,
+                    fontWeight = FontWeight.Medium,
+                    color = Color(0xFF1A1C1E)
+                )
                 
                 val subtitleText = remember(item.brand, item.shadeName) {
                     if (!item.shadeName.isNullOrBlank()) {
@@ -143,29 +121,19 @@ fun PackPreviewItemRow(
                     }
                 }
                 
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 2.dp)) {
-                    Text(
-                        text = subtitleText ?: "",
-                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp), // Increased size
-                        color = Color.Gray,
-                        letterSpacing = 0.2.sp
-                    )
-                    Spacer(Modifier.width(10.dp))
-                    // Color swatch next to name
-                    Box(
-                        modifier = Modifier
-                            .size(14.dp)
-                            .clip(CircleShape)
-                            .background(parseHexColor(item.colorHex))
-                            .border(0.5.dp, Color.Black.copy(alpha = 0.08f), CircleShape)
-                    )
-                }
+                Text(
+                    text = subtitleText ?: "",
+                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp),
+                    color = Color.Gray,
+                    letterSpacing = 0.2.sp,
+                    modifier = Modifier.padding(top = 2.dp)
+                )
                 
                 item.calculatedUnitPrice?.let { unitPrice ->
                     Text(
                         text = "$${"%.2f".format(unitPrice)}/ml",
                         style = MaterialTheme.typography.titleLarge.copy(
-                            fontSize = 13.sp, // Decreased size
+                            fontSize = 13.sp,
                             fontWeight = FontWeight.Light
                         ),
                         color = Color(0xFF7CA682),
@@ -175,11 +143,21 @@ fun PackPreviewItemRow(
             }
         }
 
-        // --- RIGHT SIDE: SELECTION TARGET (GLOWING) ---
+        // --- LINE BREAK (Vertical Divider) ---
+        VerticalDivider(
+            modifier = Modifier
+                .fillMaxHeight()
+                .padding(vertical = 12.dp),
+            thickness = 1.dp,
+            color = Color.Black.copy(alpha = 0.1f)
+        )
+
+        // --- RIGHT SIDE: SELECTION TARGET (Gray) ---
         Box(
             modifier = Modifier
-                .width(88.dp)
+                .width(64.dp) // Adjusted for clear separate click area
                 .fillMaxHeight()
+                .background(Color.Black.copy(alpha = 0.04f)) // Slight gray background
                 .clickable { onSelectClick() },
             contentAlignment = Alignment.Center
         ) {
@@ -195,22 +173,22 @@ fun PackPreviewItemRow(
 
             Box(
                 modifier = Modifier
-                    .size(64.dp)
+                    .size(32.dp) // Proportional reduction
                     .background(glowBrush, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Surface(
-                    modifier = Modifier.size(36.dp),
+                    modifier = Modifier.size(18.dp), // Proportional reduction
                     shape = CircleShape,
                     color = Color.White,
-                    border = BorderStroke(1.5.dp, if (isSelected) selectionColor else Color.LightGray.copy(alpha = 0.6f)),
+                    border = BorderStroke(1.dp, if (isSelected) selectionColor else Color.LightGray.copy(alpha = 0.6f)),
                     shadowElevation = 2.dp
                 ) {
                     if (isSelected) {
                         Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                             Box(
                                 modifier = Modifier
-                                    .size(18.dp)
+                                    .size(10.dp) // Proportional reduction
                                     .clip(CircleShape)
                                     .background(selectionColor)
                             )
