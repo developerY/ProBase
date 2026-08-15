@@ -535,6 +535,20 @@ fun koColorNavEntryProvider(
                 onToggleValueSort = viewModel::onToggleValueSort,
                 onItemInfoClick = viewModel::onItemInfoClick,
                 onDismissNotes = viewModel::onDismissNotes,
+                onImportSuccess = { isClothing ->
+                    if (route.categoryFilter == "clothing") {
+                        onNavigateTo(KoColorRoute.WardrobeLanding)
+                    } else if (route.categoryFilter == "cosmetics") {
+                        onNavigateTo(KoColorRoute.VanityLanding)
+                    } else {
+                        // Fallback to item-based logic if no filter
+                        if (isClothing) {
+                            onNavigateTo(KoColorRoute.WardrobeLanding)
+                        } else {
+                            onNavigateTo(KoColorRoute.VanityLanding)
+                        }
+                    }
+                },
                 onBack = onBack
             )
         }

@@ -308,14 +308,35 @@ class StarterPackRepository @Inject constructor(
         }
 
         val clothing = payload.clothing.map { dto ->
+            // High-Fidelity Category Mapping
+            val mappedCategory = when (dto.microCategory.uppercase()) {
+                "SHIRT" -> ClothingCategory.TOPS
+                "PANTS" -> ClothingCategory.BOTTOMS
+                "SHOES" -> ClothingCategory.SHOES
+                "OUTERWEAR" -> ClothingCategory.OUTERWEAR
+                "ACTIVEWEAR" -> ClothingCategory.ACTIVEWEAR
+                "DRESS" -> ClothingCategory.DRESSES
+                "ONE_PIECE" -> ClothingCategory.DRESSES
+                else -> {
+                    try {
+                        ClothingCategory.valueOf(dto.macroCategory.uppercase())
+                    } catch (e: Exception) {
+                        // Fallback to macro if micro doesn't match
+                        if (dto.macroCategory.uppercase() == "APPAREL") ClothingCategory.TOPS
+                        else ClothingCategory.OTHER
+                    }
+                }
+            }
+
             ClothingItem(
                 remoteId = dto.id,
                 name = dto.name,
                 brand = dto.brand,
-                category = try { ClothingCategory.valueOf(dto.macroCategory.uppercase()) } catch (e: Exception) { ClothingCategory.OTHER },
+                category = mappedCategory,
                 formality = dto.formality?.let { try { Formality.valueOf(it.uppercase()) } catch (e: Exception) { Formality.CASUAL } } ?: Formality.CASUAL,
                 colorHex = dto.colorHex,
-                material = dto.material,
+                size = dto.volume,
+                material = if (dto.ingredients.isNotEmpty()) dto.ingredients.joinToString(", ") else dto.material,
                 price = dto.price,
                 imageUrl = dto.imageUrl,
                 dominantHex = dto.dominantHex,

@@ -149,13 +149,13 @@ fun VanityLandingScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { navTo(KoColorRoute.CosmeticAdd()) },
+                onClick = { navTo(KoColorRoute.StarterPack(filter = "cosmetics")) },
                 containerColor = Color(0xFF5A3854), // Dark Plum matching image
                 contentColor = Color.White,
                 shape = CircleShape,
                 elevation = FloatingActionButtonDefaults.elevation(8.dp)
             ) {
-                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_add_item))
+                Icon(Icons.Default.Add, contentDescription = "Discover Collections")
             }
         },
         modifier = modifier

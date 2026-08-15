@@ -158,7 +158,8 @@ sealed class KoColorRoute {
         val packId: String, 
         val targetItemId: String? = null,
         val sha256: String? = null,
-        val publisher: String? = null
+        val publisher: String? = null,
+        val categoryFilter: String? = null
     ) : KoColorRoute()
 
     val icon: ImageVector?
