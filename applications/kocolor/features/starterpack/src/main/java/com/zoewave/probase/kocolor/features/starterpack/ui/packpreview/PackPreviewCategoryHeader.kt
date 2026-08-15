@@ -63,7 +63,7 @@ fun PackPreviewCategoryHeader(
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
                         text = "${categoryName.uppercase()} ($selectedCount/$totalCount)",
-                        style = MaterialTheme.typography.titleLarge.copy(fontSize = 26.sp),
+                        style = MaterialTheme.typography.titleLarge.copy(fontSize = 18.sp),
                         fontFamily = FontFamily.Serif,
                         fontWeight = FontWeight.ExtraBold,
                         color = Color.Black
@@ -73,14 +73,14 @@ fun PackPreviewCategoryHeader(
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text(
                         text = "Select All",
-                        style = MaterialTheme.typography.labelLarge.copy(fontSize = 14.sp),
+                        style = MaterialTheme.typography.labelLarge.copy(fontSize = 12.sp),
                         fontWeight = FontWeight.Bold,
                         color = purpleText,
                         modifier = Modifier.clickable { onSelectAll() }
                     )
                     Text(
                         text = "Clear",
-                        style = MaterialTheme.typography.labelLarge.copy(fontSize = 14.sp),
+                        style = MaterialTheme.typography.labelLarge.copy(fontSize = 12.sp),
                         fontWeight = FontWeight.Bold,
                         color = purpleText,
                         modifier = Modifier.clickable { onClear() }

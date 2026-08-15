@@ -107,7 +107,7 @@ fun PackPreviewItemRow(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = item.name,
-                        style = MaterialTheme.typography.titleLarge.copy(fontSize = 24.sp),
+                        style = MaterialTheme.typography.titleLarge.copy(fontSize = 18.sp),
                         fontFamily = FontFamily.Serif,
                         fontWeight = FontWeight.Medium,
                         color = Color(0xFF1A1C1E)
@@ -118,7 +118,7 @@ fun PackPreviewItemRow(
                         shape = CircleShape,
                         color = Color.Transparent,
                         border = BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.5f)),
-                        modifier = Modifier.size(22.dp)
+                        modifier = Modifier.size(18.dp)
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             Text(
@@ -127,7 +127,7 @@ fun PackPreviewItemRow(
                                     fontFamily = FontFamily.Serif,
                                     fontStyle = FontStyle.Italic,
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 12.sp
+                                    fontSize = 10.sp
                                 ),
                                 color = Color.Gray.copy(alpha = 0.6f)
                             )
@@ -146,7 +146,7 @@ fun PackPreviewItemRow(
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 2.dp)) {
                     Text(
                         text = subtitleText ?: "",
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 12.sp),
                         color = Color.Gray,
                         letterSpacing = 0.2.sp
                     )
@@ -154,10 +154,10 @@ fun PackPreviewItemRow(
                     // Color swatch next to name
                     Box(
                         modifier = Modifier
-                            .size(18.dp)
+                            .size(14.dp)
                             .clip(CircleShape)
                             .background(parseHexColor(item.colorHex))
-                            .border(1.dp, Color.Black.copy(alpha = 0.08f), CircleShape)
+                            .border(0.5.dp, Color.Black.copy(alpha = 0.08f), CircleShape)
                     )
                 }
                 
@@ -165,11 +165,11 @@ fun PackPreviewItemRow(
                     Text(
                         text = "$${"%.2f".format(unitPrice)}/ml",
                         style = MaterialTheme.typography.titleLarge.copy(
-                            fontSize = 20.sp,
+                            fontSize = 16.sp,
                             fontWeight = FontWeight.Light
                         ),
                         color = Color(0xFF7CA682),
-                        modifier = Modifier.padding(top = 8.dp)
+                        modifier = Modifier.padding(top = 6.dp)
                     )
                 }
             }
