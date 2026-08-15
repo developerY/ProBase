@@ -14,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -137,13 +138,35 @@ fun PackPreviewItemRow(
                     }
                 }
                 
-                Text(
-                    text = subtitleText ?: "",
-                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp),
-                    color = Color.Gray.copy(alpha = 0.8f),
-                    letterSpacing = 0.2.sp,
-                    modifier = Modifier.padding(top = 2.dp)
-                )
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 2.dp)) {
+                    Text(
+                        text = subtitleText ?: "",
+                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp),
+                        color = Color.Gray.copy(alpha = 0.8f),
+                        letterSpacing = 0.2.sp
+                    )
+                    
+                    Spacer(Modifier.width(10.dp))
+                    
+                    // 3D Color Swatch Circle
+                    Surface(
+                        modifier = Modifier.size(16.dp),
+                        shape = CircleShape,
+                        color = parseHexColor(item.colorHex),
+                        shadowElevation = 3.dp,
+                        border = BorderStroke(0.5.dp, Color.Black.copy(alpha = 0.1f))
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(
+                                    Brush.linearGradient(
+                                        listOf(Color.White.copy(alpha = 0.2f), Color.Transparent)
+                                    )
+                                )
+                        )
+                    }
+                }
                 
                 item.calculatedUnitPrice?.let { unitPrice ->
                     Text(
@@ -168,47 +191,65 @@ fun PackPreviewItemRow(
             color = Color.Black.copy(alpha = 0.1f)
         )
 
-        // --- RIGHT SIDE: SELECTION TARGET (Golden Glow) ---
+        // --- RIGHT SIDE: SELECTION TARGET (Tinted Light) ---
         Box(
             modifier = Modifier
                 .width(64.dp)
                 .fillMaxHeight()
-                .background(Color(0xFFF7F7F7))
+                .background(itemColor.copy(alpha = 0.03f)) // Very light shade of the item color
                 .clickable { onSelectClick() },
             contentAlignment = Alignment.Center
         ) {
             // Glowing Halo background
             val glowBrush = Brush.radialGradient(
                 colors = listOf(
-                    Color(0xFFD4AF37).copy(alpha = if (isSelected) 0.5f else 0.25f),
-                    Color(0xFFD4AF37).copy(alpha = 0.05f),
+                    Color(0xFFD4AF37).copy(alpha = if (isSelected) 0.4f else 0.15f),
+                    Color(0xFFD4AF37).copy(alpha = 0.02f),
                     Color.Transparent
                 )
             )
 
             Box(
                 modifier = Modifier
-                    .size(48.dp)
+                    .size(52.dp)
                     .background(glowBrush, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
+                // 3D Effect Surface (Selection Circle)
                 Surface(
-                    modifier = Modifier.size(28.dp),
+                    modifier = Modifier.size(32.dp),
                     shape = CircleShape,
                     color = Color.White,
-                    border = BorderStroke(1.dp, if (isSelected) Color(0xFFD4AF37) else Color.LightGray.copy(alpha = 0.4f)),
-                    shadowElevation = if (isSelected) 4.dp else 1.dp
+                    border = BorderStroke(
+                        width = 1.dp,
+                        color = if (isSelected) Color(0xFFD4AF37) else Color.LightGray.copy(alpha = 0.3f)
+                    ),
+                    shadowElevation = if (isSelected) 6.dp else 2.dp // More 3D depth
                 ) {
-                    if (isSelected) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(
-                                    Brush.linearGradient(
-                                        listOf(Color(0xFFD4AF37).copy(alpha = 0.2f), Color.Transparent)
+                    // Subtle inner gradient for 3D pillowed look
+                    val buttonGradient = Brush.linearGradient(
+                        colors = listOf(Color.White, Color(0xFFF9F9F9))
+                    )
+                    
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(buttonGradient),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (isSelected) {
+                            Box(
+                                modifier = Modifier
+                                    .size(16.dp)
+                                    .clip(CircleShape)
+                                    .background(
+                                        Brush.radialGradient(
+                                            listOf(Color(0xFFD4AF37), Color(0xFFB8860B))
+                                        )
                                     )
-                                )
-                        )
+                                    .shadow(2.dp, CircleShape)
+                            )
+                        }
                     }
                 }
             }
