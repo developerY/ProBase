@@ -145,27 +145,6 @@ fun PackPreviewItemRow(
                         color = Color.Gray.copy(alpha = 0.8f),
                         letterSpacing = 0.2.sp
                     )
-                    
-                    Spacer(Modifier.width(10.dp))
-                    
-                    // 3D Color Swatch Circle
-                    Surface(
-                        modifier = Modifier.size(16.dp),
-                        shape = CircleShape,
-                        color = parseHexColor(item.colorHex),
-                        shadowElevation = 3.dp,
-                        border = BorderStroke(0.5.dp, Color.Black.copy(alpha = 0.1f))
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(
-                                    Brush.linearGradient(
-                                        listOf(Color.White.copy(alpha = 0.2f), Color.Transparent)
-                                    )
-                                )
-                        )
-                    }
                 }
                 
                 item.calculatedUnitPrice?.let { unitPrice ->
