@@ -1,5 +1,11 @@
 package com.zoewave.probase.kocolor.mobile.features.home.ui
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -10,6 +16,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Checkroom
 import androidx.compose.material.icons.filled.Face
@@ -18,23 +25,28 @@ import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.zoewave.probase.kocolor.mobile.features.home.R
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.LuxuryBrandLogo
 import com.zoewave.probase.core.model.ritual.SavedAnalysis
+import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import java.text.NumberFormat
 import java.util.Locale
@@ -47,6 +59,18 @@ fun CollectionHubScreen(
     onEvent: (HomeEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
+    // --- Shimmer Animation Logic ---
+    val infiniteTransition = rememberInfiniteTransition(label = "shimmer")
+    val shimmerProgress by infiniteTransition.animateFloat(
+        initialValue = -0.5f,
+        targetValue = 1.5f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 3500, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "shimmer"
+    )
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -105,9 +129,21 @@ fun CollectionHubScreen(
             }
 
             LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(20.dp),
-                contentPadding = PaddingValues(bottom = 24.dp)
+                verticalArrangement = Arrangement.spacedBy(24.dp),
+                contentPadding = PaddingValues(top = 8.dp, bottom = 32.dp)
             ) {
+                // 1. GLOW SYNC HUB - COSMETICS
+                item {
+                    SyncHubButton(
+                        title = "Glow Sync Hub",
+                        subtitle = "Cosmetics & Beauty",
+                        backgroundColor = Color(0xFF2E1A2C), // Dark Plum
+                        shimmerProgress = shimmerProgress,
+                        onClick = { navTo(KoColorRoute.StarterPack(filter = "cosmetics")) }
+                    )
+                }
+
+                // 2. THE VANITY
                 item {
                     ArchiveVerticalCard(
                         uiState = ArchiveVerticalUiState(
@@ -125,13 +161,25 @@ fun CollectionHubScreen(
                     )
                 }
 
+                // 3. CLOTHING SYNC HUB
+                item {
+                    SyncHubButton(
+                        title = "Clothing Sync Hub",
+                        subtitle = "Apparel & Fashion",
+                        backgroundColor = Color(0xFF1A1C2E), // Deep Navy
+                        shimmerProgress = shimmerProgress,
+                        onClick = { navTo(KoColorRoute.StarterPack(filter = "clothing")) }
+                    )
+                }
+
+                // 4. THE WARDROBE
                 item {
                     ArchiveVerticalCard(
                         uiState = ArchiveVerticalUiState(
                             title = stringResource(R.string.applications_kocolor_apps_mobile_features_home_hub_wardrobe_title),
                             count = uiState.totalClothing,
                             countLabel = stringResource(R.string.applications_kocolor_apps_mobile_features_home_hub_pieces_curated),
-                            valueLabel = "TOTAL CLOSET INVESTMENT", // TODO: Move to strings
+                            valueLabel = "TOTAL CLOSET INVESTMENT",
                             value = uiState.totalWardrobeValue,
                             imageModel = R.drawable.wardrobe_background,
                             icon = Icons.Default.Checkroom,
@@ -145,10 +193,10 @@ fun CollectionHubScreen(
                 if (uiState.savedSuggestions.isNotEmpty()) {
                     item {
                         Text(
-                            text = stringResource(R.string.applications_kocolor_apps_mobile_features_home_hub_blueprint_history),
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 2.sp,
+                            text = "BLUEPRINT HISTORY",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 1.5.sp,
                             modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
                         )
                     }
@@ -162,6 +210,68 @@ fun CollectionHubScreen(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun SyncHubButton(
+    title: String,
+    subtitle: String,
+    backgroundColor: Color,
+    shimmerProgress: Float,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(112.dp), // Slightly shorter for 4-button layout
+        shape = RoundedCornerShape(24.dp),
+        color = backgroundColor,
+        shadowElevation = 6.dp
+    ) {
+        val shimmerBrush = Brush.linearGradient(
+            colors = listOf(
+                Color.Transparent,
+                Color.White.copy(alpha = 0.05f),
+                Color(0xFFD4AF37).copy(alpha = 0.1f), 
+                Color.White.copy(alpha = 0.05f),
+                Color.Transparent
+            ),
+            start = Offset(x = shimmerProgress * 1200f, y = 0f),
+            end = Offset(x = (shimmerProgress + 0.4f) * 1200f, y = 600f)
+        )
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxSize()
+                .background(shimmerBrush)
+                .padding(horizontal = 24.dp)
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.Serif,
+                    color = Color.White
+                )
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = Color.White.copy(alpha = 0.7f),
+                    letterSpacing = 0.5.sp
+                )
+            }
+            
+            Icon(
+                imageVector = Icons.Default.AutoAwesome,
+                contentDescription = null,
+                tint = Color(0xFFD4AF37),
+                modifier = Modifier.size(48.dp)
+            )
         }
     }
 }
@@ -184,10 +294,11 @@ private fun CuratedCollectionCard(
             .fillMaxWidth()
             .padding(vertical = 4.dp)
             .clickable { onEvent() },
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFF3F2F8)) 
+        shape = RoundedCornerShape(24.dp), // More rounded as per image
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(24.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -195,75 +306,60 @@ private fun CuratedCollectionCard(
             ) {
                 Text(
                     text = dateStr,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = Color.Gray
+                    style = MaterialTheme.typography.labelMedium,
+                    color = Color.Gray.copy(alpha = 0.6f)
                 )
-                Text(
-                    text = analysis.advice.seasonalType.name,
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
-
-            Spacer(Modifier.height(12.dp))
-
-            Row(verticalAlignment = Alignment.Top) {
-                Row(modifier = Modifier.weight(0.4f), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    analysis.advice.faceUri?.let {
-                        AsyncImage(
-                            model = it,
-                            contentDescription = null,
-                            modifier = Modifier
-                                .size(60.dp)
-                                .clip(RoundedCornerShape(8.dp)),
-                            contentScale = ContentScale.Crop
-                        )
-                    }
-                    analysis.advice.hairUri?.let {
-                        AsyncImage(
-                            model = it,
-                            contentDescription = null,
-                            modifier = Modifier
-                                .size(60.dp)
-                                .clip(RoundedCornerShape(8.dp)),
-                            contentScale = ContentScale.Crop
-                        )
-                    }
+                
+                // Seasonal Badge
+                Surface(
+                    color = Color(0xFFF3E5F5), // Light Lavender
+                    shape = RoundedCornerShape(4.dp)
+                ) {
+                    Text(
+                        text = analysis.advice.seasonalType.name.uppercase(),
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Black,
+                        color = Color(0xFF745E7A),
+                        letterSpacing = 1.sp
+                    )
                 }
-
-                Spacer(Modifier.width(12.dp))
-
-                Text(
-                    text = analysis.advice.title ?: stringResource(com.zoewave.probase.kocolor.mobile.features.color.R.string.applications_kocolor_apps_mobile_features_color_curated_look),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black
-                )
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    text = analysis.advice.summary,
-                    style = MaterialTheme.typography.bodySmall,
-                    maxLines = 3,
-                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(0.6f),
-                    color = Color.DarkGray
-                )
             }
 
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(16.dp))
+
+            Text(
+                text = analysis.advice.title ?: "The Personal Collection",
+                style = MaterialTheme.typography.headlineSmall,
+                fontFamily = FontFamily.Serif,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF1A1A1A)
+            )
+            
+            Spacer(Modifier.height(8.dp))
+            
+            Text(
+                text = "Local Architect: ${analysis.advice.summary}",
+                style = MaterialTheme.typography.bodyMedium,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                color = Color.Gray,
+                lineHeight = 20.sp
+            )
+
+            Spacer(Modifier.height(20.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                analysis.advice.recommendedPalette.take(5).forEach { hex ->
+                analysis.advice.recommendedPalette.take(4).forEach { hex ->
                     Box(
                         modifier = Modifier
-                            .size(24.dp)
+                            .size(32.dp)
                             .clip(CircleShape)
-                            .background(com.zoewave.probase.features.graphics.colorpicker.util.parseColor(hex))
-                            .border(0.5.dp, Color.Black.copy(alpha = 0.1f), CircleShape)
+                            .background(parseColor(hex))
+                            .border(1.dp, Color.Black.copy(alpha = 0.05f), CircleShape)
                     )
                 }
             }

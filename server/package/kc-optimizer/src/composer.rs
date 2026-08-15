@@ -62,8 +62,13 @@ pub fn assemble_packages(
                 // Transform KPSS (Authoring) -> KCPS (Wire Object)
                 // We map the fields and INJECT the generated CDN paths and BlurHashes.
 
-                // Heuristic: If it has ingredients and is in a beauty category, it's a cosmetic
-                if source_data.macro_category != "TOPS" && source_data.macro_category != "BOTTOMS" {
+                // Heuristic: Identify if it belongs in the Wardrobe (Clothing) vs Vanity (Cosmetic)
+                let is_clothing = source_data.macro_category == "APPAREL" ||
+                                 source_data.macro_category == "TOPS" ||
+                                 source_data.macro_category == "BOTTOMS" ||
+                                 source_data.macro_category == "SHOES";
+
+                if !is_clothing {
                     let kcps_item = CosmeticItemDto {
                         id: source_data.id.clone(),
                         name: source_data.name.clone(),
@@ -120,6 +125,8 @@ pub fn assemble_packages(
                         thumbnail_url: format!("https://cdn.kocolor.com/inventory/dist/assets/thumb/{}", asset_data.thumb_filename),
                         price: Some(source_data.price),
                         notes: source_data.notes.clone(),
+                        volume: Some(source_data.volume.clone()),
+                        ingredients: source_data.ingredients.clone(),
 
                         // Injected CCT Artifacts
                         blurhash: Some(asset_data.blurhash.clone()),

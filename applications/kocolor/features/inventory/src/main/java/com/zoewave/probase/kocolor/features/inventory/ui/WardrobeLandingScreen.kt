@@ -77,11 +77,13 @@ fun WardrobeLandingScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { navTo(KoColorRoute.ClothingCapture) },
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = Color.White
+                onClick = { navTo(KoColorRoute.StarterPack(filter = "clothing")) },
+                containerColor = Color(0xFF5A3854), // Dark Plum matching image
+                contentColor = Color.White,
+                shape = CircleShape,
+                elevation = FloatingActionButtonDefaults.elevation(8.dp)
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Add Clothing")
+                Icon(Icons.Default.Add, contentDescription = "Discover Fashion")
             }
         },
         modifier = modifier
@@ -186,6 +188,9 @@ fun WardrobeLandingScreen(
                         val sections = listOf(
                             "Tops" to (Color(0xFFF7F2EB) to R.drawable.tops),
                             "Bottoms" to (Color(0xFFF9F6F0) to R.drawable.bottom),
+                            "Outerwear" to (Color(0xFFF1F4F9) to R.drawable.wardrobe_tops),
+                            "Activewear" to (Color(0xFFFDEEF4) to R.drawable.wardrobe_accessories),
+                            "Dresses" to (Color(0xFFF5F2F8) to R.drawable.tops),
                             "Shoes" to (Color(0xFFE8F1FD) to R.drawable.wardrobe_shoes),
                             "Accessories" to (Color(0xFFF3EBFD) to R.drawable.wardrobe_accessories)
                         )

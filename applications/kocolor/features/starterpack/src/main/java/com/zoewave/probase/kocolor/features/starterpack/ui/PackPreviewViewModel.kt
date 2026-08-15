@@ -179,16 +179,18 @@ class PackPreviewViewModel @Inject constructor(
         _uiState.update { it.copy(selectedIds = emptySet()) }
     }
 
-    fun onImportSelected() {
+    fun onImportSelected(onComplete: (isClothing: Boolean) -> Unit) {
         val currentPackId = packId ?: return
         viewModelScope.launch {
             val selectedItems = _uiState.value.items.filter { it.id in _uiState.value.selectedIds }
             if (selectedItems.isNotEmpty()) {
                 _uiState.update { it.copy(isLoading = true) }
                 
-                // Construct a V1 payload for selected items
                 val cosmetics: List<CosmeticItemDto> = selectedItems.mapNotNull { it as? CosmeticItemDto }
                 val clothing: List<ClothingItemDto> = selectedItems.mapNotNull { it as? ClothingItemDto }
+                
+                val isClothing = clothing.isNotEmpty()
+                
                 val payload = KcpsPayload(
                     schemaVersion = 1, 
                     cosmetics = cosmetics, 
@@ -197,6 +199,7 @@ class PackPreviewViewModel @Inject constructor(
                 
                 syncRepository.importSelectedItems(currentPackId, payload)
                 _uiState.update { it.copy(isLoading = false) }
+                onComplete(isClothing)
             }
         }
     }

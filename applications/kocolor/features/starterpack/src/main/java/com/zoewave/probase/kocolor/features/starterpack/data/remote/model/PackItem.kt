@@ -88,6 +88,8 @@ data class ClothingItemDto(
     override val notes: String?,
     val formality: String?,
     val material: String?,
+    val volume: String? = null,
+    val ingredients: List<String> = emptyList(),
     @SerialName("dominant_hex") val dominantHex: String? = null,
     @SerialName("vibrant_hex") val vibrantHex: String? = null,
     @SerialName("muted_hex") val mutedHex: String? = null,

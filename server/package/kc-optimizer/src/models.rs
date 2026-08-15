@@ -65,6 +65,8 @@ pub struct ClothingItemDto {
     pub thumbnail_url: String,
     pub price: Option<f32>,
     pub notes: Option<String>,
+    pub volume: Option<String>,
+    pub ingredients: Vec<String>,
     pub formality: Option<String>,
     pub material: Option<String>,
     pub dominant_hex: Option<String>,

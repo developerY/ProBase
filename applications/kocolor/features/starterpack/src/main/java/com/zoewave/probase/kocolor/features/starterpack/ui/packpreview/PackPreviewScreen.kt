@@ -36,11 +36,12 @@ fun PackPreviewScreen(
     onSelectAll: () -> Unit,
     onDeselectAll: () -> Unit,
     onWipeCollection: () -> Unit,
-    onImportSelected: () -> Unit,
+    onImportSelected: (onComplete: (Boolean) -> Unit) -> Unit,
     onSearchQueryChanged: (String) -> Unit,
     onToggleValueSort: () -> Unit,
     onItemInfoClick: (String) -> Unit,
     onDismissNotes: () -> Unit,
+    onImportSuccess: (Boolean) -> Unit,
     onBack: () -> Unit
 ) {
     val listState = rememberLazyListState()
@@ -105,7 +106,7 @@ fun PackPreviewScreen(
             PackPreviewBottomBar(
                 selectedCount = uiState.selectedIds.size,
                 isLoading = uiState.isLoading,
-                onImportSelected = onImportSelected,
+                onImportSelected = { onImportSelected(onImportSuccess) },
                 onWipe = { showWipeConfirm = true },
                 isWipeVisible = uiState.isInstalled
             )
@@ -285,6 +286,7 @@ private fun PackPreviewScreenPreview() {
             onToggleValueSort = {},
             onItemInfoClick = {},
             onDismissNotes = {},
+            onImportSuccess = {},
             onBack = {}
         )
     }

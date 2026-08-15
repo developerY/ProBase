@@ -13,10 +13,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -71,36 +74,37 @@ fun PackPreviewItemRow(
                 .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Thumbnail with GLOWING border
+            // Thumbnail with IMMERSIVE VIBRANT GLOW
             Box(
                 modifier = Modifier
-                    .padding(vertical = 16.dp)
-                    .size(96.dp),
+                    .padding(vertical = 12.dp)
+                    .size(104.dp), // Slightly larger container for wide glow
                 contentAlignment = Alignment.Center
             ) {
-                // Outer Glow Layer
+                // Multi-layered Radial Glow
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(2.dp)
                         .background(
                             Brush.radialGradient(
-                                colors = listOf(
-                                    itemColor.copy(alpha = 0.4f),
-                                    itemColor.copy(alpha = 0.1f),
-                                    Color.Transparent
-                                )
+                                0.0f to itemColor.copy(alpha = 0.6f),
+                                0.5f to itemColor.copy(alpha = 0.2f),
+                                1.0f to Color.Transparent,
+                                center = Offset.Unspecified,
+                                radius = Float.POSITIVE_INFINITY,
+                                tileMode = TileMode.Clamp
                             ),
-                            shape = RoundedCornerShape(28.dp)
+                            shape = CircleShape
                         )
+                        .alpha(0.8f)
                 )
 
-                // Main Image Box
+                // Main Image Box with high-fidelity chromatic border
                 Box(
                     modifier = Modifier
-                        .size(88.dp)
+                        .size(80.dp)
                         .clip(RoundedCornerShape(24.dp))
-                        .background(Color(0xFFFBF8F5))
+                        .background(Color.White)
                         .border(
                             width = 4.dp,
                             color = itemColor,
@@ -148,20 +152,22 @@ fun PackPreviewItemRow(
                     
                     Spacer(Modifier.width(10.dp))
                     
-                    // 3D Color Swatch Circle
+                    // --- THE LEFT CIRCLE (3D COLOR SWATCH) ---
                     Surface(
-                        modifier = Modifier.size(16.dp),
+                        modifier = Modifier.size(20.dp),
                         shape = CircleShape,
-                        color = parseHexColor(item.colorHex),
-                        shadowElevation = 3.dp,
-                        border = BorderStroke(0.5.dp, Color.Black.copy(alpha = 0.1f))
+                        color = itemColor,
+                        shadowElevation = 6.dp,
+                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.4f))
                     ) {
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .background(
                                     Brush.linearGradient(
-                                        listOf(Color.White.copy(alpha = 0.2f), Color.Transparent)
+                                        0.0f to Color.White.copy(alpha = 0.3f),
+                                        0.5f to Color.Transparent,
+                                        1.0f to Color.Black.copy(alpha = 0.1f)
                                     )
                                 )
                         )
@@ -196,7 +202,7 @@ fun PackPreviewItemRow(
             modifier = Modifier
                 .width(64.dp)
                 .fillMaxHeight()
-                .background(itemColor.copy(alpha = 0.03f)) // Very light shade of the item color
+                .background(itemColor.copy(alpha = 0.01f)) // Much lighter shade
                 .clickable { onSelectClick() },
             contentAlignment = Alignment.Center
         ) {

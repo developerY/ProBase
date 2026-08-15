@@ -47,6 +47,7 @@ import com.zoewave.probase.kocolor.model.KoColorRoute
 @Composable
 fun SyncHubScreen(
     uiState: StarterPackUiState,
+    filter: String? = null,
     onEvent: (StarterPackEvent) -> Unit,
     onNavigateTo: (KoColorRoute) -> Unit,
     onBack: () -> Unit
@@ -54,6 +55,26 @@ fun SyncHubScreen(
     val serifFont = FontFamily.Serif
     var showWipeConfirmByPackId by remember { mutableStateOf<String?>(null) }
     var selectedInfoPack by remember { mutableStateOf<PackInfo?>(null) }
+
+    // --- Filter logic based on the passed category ---
+    val filteredAvailablePacks = remember(uiState.availablePacks, filter) {
+        if (filter.isNullOrBlank()) {
+            uiState.availablePacks
+        } else {
+            val fashionKeywords = listOf("fashion", "outerwear", "active", "dresses")
+            if (filter.lowercase() == "clothing") {
+                uiState.availablePacks.filter { pack -> 
+                    fashionKeywords.any { pack.id.lowercase().contains(it) } 
+                }
+            } else if (filter.lowercase() == "cosmetics") {
+                uiState.availablePacks.filter { pack -> 
+                    !fashionKeywords.any { pack.id.lowercase().contains(it) } 
+                }
+            } else {
+                uiState.availablePacks
+            }
+        }
+    }
 
     if (showWipeConfirmByPackId != null) {
         AlertDialog(
@@ -124,13 +145,20 @@ fun SyncHubScreen(
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             // Hero Section: Core Collection
-            val heroPack = uiState.availablePacks.find { it.id == "com.kocolor.pack.core" }
+            val heroPack = filteredAvailablePacks.find { it.id == "com.kocolor.pack.core" }
             if (heroPack != null) {
                 item {
                     HeroPackageCard(
                         pack = heroPack,
                         status = uiState.installedPacks.find { it.packId == heroPack.id }?.status ?: PackStatus.AVAILABLE,
-                        onImportClick = { onNavigateTo(KoColorRoute.PackPreview(packId = heroPack.id, sha256 = heroPack.sha256, publisher = heroPack.publisher)) },
+                        onImportClick = { 
+                            onNavigateTo(KoColorRoute.PackPreview(
+                                packId = heroPack.id, 
+                                sha256 = heroPack.sha256, 
+                                publisher = heroPack.publisher,
+                                categoryFilter = filter
+                            )) 
+                        },
                         onInfoClick = { selectedInfoPack = heroPack }
                     )
                 }
@@ -139,7 +167,7 @@ fun SyncHubScreen(
             // Section Header
             item {
                 Text(
-                    text = "Seasonal Collections",
+                    text = if (filter?.lowercase() == "clothing") "Fashion Collections" else "Seasonal Collections",
                     style = MaterialTheme.typography.titleLarge,
                     fontFamily = serifFont,
                     fontWeight = FontWeight.Bold,
@@ -148,7 +176,7 @@ fun SyncHubScreen(
             }
 
             // Grid Catalog: Other Packs
-            val otherPacks = uiState.availablePacks.filter { it.id != "com.kocolor.pack.core" }
+            val otherPacks = filteredAvailablePacks.filter { it.id != "com.kocolor.pack.core" }
             items(otherPacks.chunked(2)) { rowPacks ->
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -159,7 +187,14 @@ fun SyncHubScreen(
                         CatalogPackageCard(
                             pack = pack,
                             status = installed?.status ?: PackStatus.AVAILABLE,
-                            onImportClick = { onNavigateTo(KoColorRoute.PackPreview(packId = pack.id, sha256 = pack.sha256, publisher = pack.publisher)) },
+                            onImportClick = { 
+                                onNavigateTo(KoColorRoute.PackPreview(
+                                    packId = pack.id, 
+                                    sha256 = pack.sha256, 
+                                    publisher = pack.publisher,
+                                    categoryFilter = filter
+                                )) 
+                            },
                             onInfoClick = { selectedInfoPack = pack },
                             isLoading = uiState.seedingState is SeedingState.Loading,
                             modifier = Modifier.weight(1f)

@@ -151,14 +151,15 @@ sealed class KoColorRoute {
     data object GoogleXRTest : KoColorRoute()
 
     @Serializable
-    data object StarterPack : KoColorRoute()
+    data class StarterPack(val filter: String? = null) : KoColorRoute()
 
     @Serializable
     data class PackPreview(
         val packId: String, 
         val targetItemId: String? = null,
         val sha256: String? = null,
-        val publisher: String? = null
+        val publisher: String? = null,
+        val categoryFilter: String? = null
     ) : KoColorRoute()
 
     val icon: ImageVector?
