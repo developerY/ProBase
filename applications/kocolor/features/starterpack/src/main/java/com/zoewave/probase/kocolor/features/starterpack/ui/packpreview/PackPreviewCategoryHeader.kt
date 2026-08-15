@@ -10,9 +10,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 @Composable
 fun PackPreviewCategoryHeader(
@@ -24,22 +27,24 @@ fun PackPreviewCategoryHeader(
     onSelectAll: () -> Unit,
     onClear: () -> Unit
 ) {
-    // Top-level surface must be fully opaque to block scrolling items beneath it
+    val lavender = Color(0xFFE6E0F0) // Soft lavender background
+    val purpleText = Color(0xFF745E7A)
+
     Surface(
-        color = MaterialTheme.colorScheme.surface, // 100% opaque surface
+        color = MaterialTheme.colorScheme.surface,
         modifier = Modifier.fillMaxWidth()
     ) {
         Surface(
-            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f), // Darker darkened transparency
-            shape = RoundedCornerShape(8.dp),
+            color = lavender,
+            shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp), // Match image's rounded top
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 4.dp)
+                .padding(top = 8.dp)
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -51,29 +56,35 @@ fun PackPreviewCategoryHeader(
                 ) {
                     Icon(
                         imageVector = if (isCollapsed) Icons.Default.KeyboardArrowRight else Icons.Default.KeyboardArrowDown,
-                        contentDescription = "Expand/Collapse"
+                        contentDescription = "Expand/Collapse",
+                        tint = Color.Black.copy(alpha = 0.7f),
+                        modifier = Modifier.size(24.dp)
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(12.dp))
                     Text(
-                        text = "$categoryName ($selectedCount/$totalCount)",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        text = "${categoryName.uppercase()} ($selectedCount/$totalCount)",
+                        style = MaterialTheme.typography.titleLarge.copy(fontSize = 26.sp),
+                        fontFamily = FontFamily.Serif,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color.Black
                     )
                 }
 
-                Row {
-                    TextButton(
-                        onClick = onSelectAll,
-                        contentPadding = PaddingValues(horizontal = 8.dp)
-                    ) {
-                        Text("Select All", style = MaterialTheme.typography.labelMedium)
-                    }
-                    TextButton(
-                        onClick = onClear,
-                        contentPadding = PaddingValues(horizontal = 8.dp)
-                    ) {
-                        Text("Clear", style = MaterialTheme.typography.labelMedium)
-                    }
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text(
+                        text = "Select All",
+                        style = MaterialTheme.typography.labelLarge.copy(fontSize = 14.sp),
+                        fontWeight = FontWeight.Bold,
+                        color = purpleText,
+                        modifier = Modifier.clickable { onSelectAll() }
+                    )
+                    Text(
+                        text = "Clear",
+                        style = MaterialTheme.typography.labelLarge.copy(fontSize = 14.sp),
+                        fontWeight = FontWeight.Bold,
+                        color = purpleText,
+                        modifier = Modifier.clickable { onClear() }
+                    )
                 }
             }
         }
