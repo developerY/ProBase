@@ -1,5 +1,6 @@
 package com.zoewave.probase.kocolor.features.starterpack.ui.packpreview
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -8,6 +9,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -36,10 +39,19 @@ fun PackPreviewBottomBar(
                 onClick = onImportSelected,
                 modifier = Modifier
                     .weight(1f)
-                    .height(56.dp),
+                    .height(64.dp) // Taller button
+                    .clip(RoundedCornerShape(32.dp))
+                    .background(
+                        Brush.horizontalGradient(
+                            colors = listOf(
+                                Color(0xFFD4AF37).copy(alpha = 0.8f), // Gold
+                                Color(0xFF745E7A).copy(alpha = 0.8f)  // Lavender/Plum
+                            )
+                        )
+                    ),
                 enabled = selectedCount > 0 && !isLoading,
-                shape = RoundedCornerShape(28.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF745E7A).copy(alpha = 0.8f))
+                shape = RoundedCornerShape(32.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)
             ) {
                 if (isLoading) {
                     CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White)
