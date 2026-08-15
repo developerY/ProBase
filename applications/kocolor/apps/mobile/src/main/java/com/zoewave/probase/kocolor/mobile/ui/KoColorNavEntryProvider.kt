@@ -502,6 +502,7 @@ fun koColorNavEntryProvider(
             val state by viewModel.uiState.collectAsStateWithLifecycle()
             SyncHubScreen(
                 uiState = state,
+                filter = route.filter,
                 onEvent = viewModel::onEvent,
                 onNavigateTo = onNavigateTo,
                 onBack = onBack

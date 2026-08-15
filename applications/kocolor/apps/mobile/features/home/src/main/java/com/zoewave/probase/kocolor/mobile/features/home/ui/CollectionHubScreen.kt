@@ -130,57 +130,18 @@ fun CollectionHubScreen(
                 verticalArrangement = Arrangement.spacedBy(24.dp),
                 contentPadding = PaddingValues(top = 8.dp, bottom = 32.dp)
             ) {
-                // --- PROMINENT GLOW SYNC HUB ENTRY ---
+                // 1. GLOW SYNC HUB - COSMETICS
                 item {
-                    Surface(
-                        onClick = { navTo(KoColorRoute.StarterPack) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(140.dp),
-                        shape = RoundedCornerShape(24.dp),
-                        color = Color(0xFF2E1A2C), // Deeper Dark Plum
-                        shadowElevation = 6.dp
-                    ) {
-                        val shimmerBrush = Brush.linearGradient(
-                            colors = listOf(
-                                Color.Transparent,
-                                Color.White.copy(alpha = 0.05f),
-                                Color(0xFFD4AF37).copy(alpha = 0.1f), 
-                                Color.White.copy(alpha = 0.05f),
-                                Color.Transparent
-                            ),
-                            start = Offset(x = shimmerProgress * 1200f, y = 0f),
-                            end = Offset(x = (shimmerProgress + 0.4f) * 1200f, y = 600f)
-                        )
-
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(shimmerBrush)
-                                .padding(horizontal = 24.dp)
-                        ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = "Glow Sync Hub",
-                                    style = MaterialTheme.typography.headlineSmall,
-                                    fontWeight = FontWeight.Medium,
-                                    fontFamily = FontFamily.Serif,
-                                    color = Color.White
-                                )
-                            }
-                            
-                            // Large Gold Stars Icon on the RIGHT
-                            Icon(
-                                imageVector = Icons.Default.AutoAwesome,
-                                contentDescription = null,
-                                tint = Color(0xFFD4AF37),
-                                modifier = Modifier.size(64.dp)
-                            )
-                        }
-                    }
+                    SyncHubButton(
+                        title = "Glow Sync Hub",
+                        subtitle = "Cosmetics & Beauty",
+                        backgroundColor = Color(0xFF2E1A2C), // Dark Plum
+                        shimmerProgress = shimmerProgress,
+                        onClick = { navTo(KoColorRoute.StarterPack(filter = "cosmetics")) }
+                    )
                 }
 
+                // 2. THE VANITY
                 item {
                     ArchiveVerticalCard(
                         uiState = ArchiveVerticalUiState(
@@ -198,13 +159,25 @@ fun CollectionHubScreen(
                     )
                 }
 
+                // 3. CLOTHING SYNC HUB
+                item {
+                    SyncHubButton(
+                        title = "Clothing Sync Hub",
+                        subtitle = "Apparel & Fashion",
+                        backgroundColor = Color(0xFF1A1C2E), // Deep Navy
+                        shimmerProgress = shimmerProgress,
+                        onClick = { navTo(KoColorRoute.StarterPack(filter = "clothing")) }
+                    )
+                }
+
+                // 4. THE WARDROBE
                 item {
                     ArchiveVerticalCard(
                         uiState = ArchiveVerticalUiState(
                             title = stringResource(R.string.applications_kocolor_apps_mobile_features_home_hub_wardrobe_title),
                             count = uiState.totalClothing,
                             countLabel = stringResource(R.string.applications_kocolor_apps_mobile_features_home_hub_pieces_curated),
-                            valueLabel = "TOTAL CLOSET INVESTMENT", // TODO: Move to strings
+                            valueLabel = "TOTAL CLOSET INVESTMENT",
                             value = uiState.totalWardrobeValue,
                             imageModel = R.drawable.wardrobe_background,
                             icon = Icons.Default.Checkroom,
@@ -235,6 +208,68 @@ fun CollectionHubScreen(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun SyncHubButton(
+    title: String,
+    subtitle: String,
+    backgroundColor: Color,
+    shimmerProgress: Float,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(112.dp), // Slightly shorter for 4-button layout
+        shape = RoundedCornerShape(24.dp),
+        color = backgroundColor,
+        shadowElevation = 6.dp
+    ) {
+        val shimmerBrush = Brush.linearGradient(
+            colors = listOf(
+                Color.Transparent,
+                Color.White.copy(alpha = 0.05f),
+                Color(0xFFD4AF37).copy(alpha = 0.1f), 
+                Color.White.copy(alpha = 0.05f),
+                Color.Transparent
+            ),
+            start = Offset(x = shimmerProgress * 1200f, y = 0f),
+            end = Offset(x = (shimmerProgress + 0.4f) * 1200f, y = 600f)
+        )
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxSize()
+                .background(shimmerBrush)
+                .padding(horizontal = 24.dp)
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.Serif,
+                    color = Color.White
+                )
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = Color.White.copy(alpha = 0.7f),
+                    letterSpacing = 0.5.sp
+                )
+            }
+            
+            Icon(
+                imageVector = Icons.Default.AutoAwesome,
+                contentDescription = null,
+                tint = Color(0xFFD4AF37),
+                modifier = Modifier.size(48.dp)
+            )
         }
     }
 }
