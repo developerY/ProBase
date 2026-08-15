@@ -135,9 +135,6 @@ fun VanityLandingScreen(
                     IconButton(onClick = { navTo(KoColorRoute.DiscoveryStatus) }) {
                         Icon(Icons.Default.CloudDone, contentDescription = "Discovery Health", tint = Color.DarkGray)
                     }
-                    IconButton(onClick = { navTo(KoColorRoute.StarterPack) }) { 
-                        Icon(Icons.Default.AutoAwesome, contentDescription = "Glow Sync", tint = Color.DarkGray) 
-                    }
                     IconButton(onClick = { navTo(KoColorRoute.InventoryManagement) }) { 
                         Icon(Icons.Default.Inventory2, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_inventory_title), tint = Color.DarkGray) 
                     }
@@ -259,57 +256,6 @@ fun VanityLandingScreen(
                                 modifier = Modifier.size(36.dp)
                             )
                         }
-                    }
-                }
-            }
-
-            // --- PROMINENT GLOW SYNC HUB ENTRY ---
-            item {
-                Surface(
-                    onClick = { navTo(KoColorRoute.StarterPack) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(140.dp), // Taller as per image
-                    shape = RoundedCornerShape(24.dp),
-                    color = Color(0xFF2E1A2C), // Deeper Dark Plum
-                    shadowElevation = 6.dp
-                ) {
-                    val shimmerBrush = Brush.linearGradient(
-                        colors = listOf(
-                            Color.Transparent,
-                            Color.White.copy(alpha = 0.05f),
-                            Color(0xFFD4AF37).copy(alpha = 0.1f), 
-                            Color.White.copy(alpha = 0.05f),
-                            Color.Transparent
-                        ),
-                        start = Offset(x = shimmerProgress * 1200f, y = 0f),
-                        end = Offset(x = (shimmerProgress + 0.4f) * 1200f, y = 600f)
-                    )
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(shimmerBrush)
-                            .padding(horizontal = 24.dp)
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = "Glow Sync Hub",
-                                style = MaterialTheme.typography.headlineSmall,
-                                fontWeight = FontWeight.Medium,
-                                fontFamily = FontFamily.Serif,
-                                color = Color.White
-                            )
-                        }
-                        
-                        // Large Gold Stars Icon on the RIGHT
-                        Icon(
-                            imageVector = Icons.Default.AutoAwesome,
-                            contentDescription = null,
-                            tint = Color(0xFFD4AF37),
-                            modifier = Modifier.size(64.dp)
-                        )
                     }
                 }
             }

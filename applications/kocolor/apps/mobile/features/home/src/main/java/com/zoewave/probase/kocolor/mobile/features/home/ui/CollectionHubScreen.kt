@@ -1,5 +1,11 @@
 package com.zoewave.probase.kocolor.mobile.features.home.ui
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -10,6 +16,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Checkroom
 import androidx.compose.material.icons.filled.Face
@@ -18,11 +25,14 @@ import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -47,6 +57,18 @@ fun CollectionHubScreen(
     onEvent: (HomeEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
+    // --- Shimmer Animation Logic ---
+    val infiniteTransition = rememberInfiniteTransition(label = "shimmer")
+    val shimmerProgress by infiniteTransition.animateFloat(
+        initialValue = -0.5f,
+        targetValue = 1.5f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 3500, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "shimmer"
+    )
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -105,9 +127,60 @@ fun CollectionHubScreen(
             }
 
             LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(20.dp),
-                contentPadding = PaddingValues(bottom = 24.dp)
+                verticalArrangement = Arrangement.spacedBy(24.dp),
+                contentPadding = PaddingValues(top = 8.dp, bottom = 32.dp)
             ) {
+                // --- PROMINENT GLOW SYNC HUB ENTRY ---
+                item {
+                    Surface(
+                        onClick = { navTo(KoColorRoute.StarterPack) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(140.dp),
+                        shape = RoundedCornerShape(24.dp),
+                        color = Color(0xFF2E1A2C), // Deeper Dark Plum
+                        shadowElevation = 6.dp
+                    ) {
+                        val shimmerBrush = Brush.linearGradient(
+                            colors = listOf(
+                                Color.Transparent,
+                                Color.White.copy(alpha = 0.05f),
+                                Color(0xFFD4AF37).copy(alpha = 0.1f), 
+                                Color.White.copy(alpha = 0.05f),
+                                Color.Transparent
+                            ),
+                            start = Offset(x = shimmerProgress * 1200f, y = 0f),
+                            end = Offset(x = (shimmerProgress + 0.4f) * 1200f, y = 600f)
+                        )
+
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(shimmerBrush)
+                                .padding(horizontal = 24.dp)
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "Glow Sync Hub",
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    fontWeight = FontWeight.Medium,
+                                    fontFamily = FontFamily.Serif,
+                                    color = Color.White
+                                )
+                            }
+                            
+                            // Large Gold Stars Icon on the RIGHT
+                            Icon(
+                                imageVector = Icons.Default.AutoAwesome,
+                                contentDescription = null,
+                                tint = Color(0xFFD4AF37),
+                                modifier = Modifier.size(64.dp)
+                            )
+                        }
+                    }
+                }
+
                 item {
                     ArchiveVerticalCard(
                         uiState = ArchiveVerticalUiState(
