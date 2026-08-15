@@ -39,12 +39,14 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.zoewave.probase.kocolor.mobile.features.home.R
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.LuxuryBrandLogo
 import com.zoewave.probase.core.model.ritual.SavedAnalysis
+import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import java.text.NumberFormat
 import java.util.Locale
@@ -191,10 +193,10 @@ fun CollectionHubScreen(
                 if (uiState.savedSuggestions.isNotEmpty()) {
                     item {
                         Text(
-                            text = stringResource(R.string.applications_kocolor_apps_mobile_features_home_hub_blueprint_history),
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 2.sp,
+                            text = "BLUEPRINT HISTORY",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 1.5.sp,
                             modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
                         )
                     }
@@ -292,10 +294,11 @@ private fun CuratedCollectionCard(
             .fillMaxWidth()
             .padding(vertical = 4.dp)
             .clickable { onEvent() },
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFF3F2F8)) 
+        shape = RoundedCornerShape(24.dp), // More rounded as per image
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(24.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -303,75 +306,60 @@ private fun CuratedCollectionCard(
             ) {
                 Text(
                     text = dateStr,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = Color.Gray
+                    style = MaterialTheme.typography.labelMedium,
+                    color = Color.Gray.copy(alpha = 0.6f)
                 )
-                Text(
-                    text = analysis.advice.seasonalType.name,
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
-
-            Spacer(Modifier.height(12.dp))
-
-            Row(verticalAlignment = Alignment.Top) {
-                Row(modifier = Modifier.weight(0.4f), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    analysis.advice.faceUri?.let {
-                        AsyncImage(
-                            model = it,
-                            contentDescription = null,
-                            modifier = Modifier
-                                .size(60.dp)
-                                .clip(RoundedCornerShape(8.dp)),
-                            contentScale = ContentScale.Crop
-                        )
-                    }
-                    analysis.advice.hairUri?.let {
-                        AsyncImage(
-                            model = it,
-                            contentDescription = null,
-                            modifier = Modifier
-                                .size(60.dp)
-                                .clip(RoundedCornerShape(8.dp)),
-                            contentScale = ContentScale.Crop
-                        )
-                    }
+                
+                // Seasonal Badge
+                Surface(
+                    color = Color(0xFFF3E5F5), // Light Lavender
+                    shape = RoundedCornerShape(4.dp)
+                ) {
+                    Text(
+                        text = analysis.advice.seasonalType.name.uppercase(),
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Black,
+                        color = Color(0xFF745E7A),
+                        letterSpacing = 1.sp
+                    )
                 }
-
-                Spacer(Modifier.width(12.dp))
-
-                Text(
-                    text = analysis.advice.title ?: stringResource(com.zoewave.probase.kocolor.mobile.features.color.R.string.applications_kocolor_apps_mobile_features_color_curated_look),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black
-                )
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    text = analysis.advice.summary,
-                    style = MaterialTheme.typography.bodySmall,
-                    maxLines = 3,
-                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(0.6f),
-                    color = Color.DarkGray
-                )
             }
 
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(16.dp))
+
+            Text(
+                text = analysis.advice.title ?: "The Personal Collection",
+                style = MaterialTheme.typography.headlineSmall,
+                fontFamily = FontFamily.Serif,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF1A1A1A)
+            )
+            
+            Spacer(Modifier.height(8.dp))
+            
+            Text(
+                text = "Local Architect: ${analysis.advice.summary}",
+                style = MaterialTheme.typography.bodyMedium,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                color = Color.Gray,
+                lineHeight = 20.sp
+            )
+
+            Spacer(Modifier.height(20.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                analysis.advice.recommendedPalette.take(5).forEach { hex ->
+                analysis.advice.recommendedPalette.take(4).forEach { hex ->
                     Box(
                         modifier = Modifier
-                            .size(24.dp)
+                            .size(32.dp)
                             .clip(CircleShape)
-                            .background(com.zoewave.probase.features.graphics.colorpicker.util.parseColor(hex))
-                            .border(0.5.dp, Color.Black.copy(alpha = 0.1f), CircleShape)
+                            .background(parseColor(hex))
+                            .border(1.dp, Color.Black.copy(alpha = 0.05f), CircleShape)
                     )
                 }
             }
