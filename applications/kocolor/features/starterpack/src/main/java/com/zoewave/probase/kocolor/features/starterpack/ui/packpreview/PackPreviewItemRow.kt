@@ -23,7 +23,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -73,19 +75,19 @@ fun PackPreviewItemRow(
             modifier = Modifier
                 .weight(1f)
                 .clickable { onInfoClick() }
-                .padding(vertical = 16.dp, horizontal = 16.dp),
+                .padding(vertical = 20.dp, horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Thumbnail with thick colored border
             Box(
                 modifier = Modifier
-                    .size(80.dp) // Slightly larger to match new layout
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(Color(0xFFF5F5F5))
+                    .size(96.dp)
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(Color(0xFFFBF8F5))
                     .border(
                         width = 4.dp,
                         color = parseHexColor(item.colorHex),
-                        shape = RoundedCornerShape(16.dp)
+                        shape = RoundedCornerShape(24.dp)
                     )
             ) {
                 val placeholder = rememberBlurHashPainter(blurHash = item.blurhash)
@@ -99,15 +101,15 @@ fun PackPreviewItemRow(
                 )
             }
 
-            Spacer(Modifier.width(16.dp))
+            Spacer(Modifier.width(20.dp))
 
             Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = item.name,
-                        style = MaterialTheme.typography.titleLarge,
+                        style = MaterialTheme.typography.titleLarge.copy(fontSize = 18.sp),
                         fontFamily = FontFamily.Serif,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.Medium,
                         color = Color(0xFF1A1C1E)
                     )
                     Spacer(Modifier.width(8.dp))
@@ -115,7 +117,7 @@ fun PackPreviewItemRow(
                         onClick = { onInfoClick() },
                         shape = CircleShape,
                         color = Color.Transparent,
-                        border = BorderStroke(1.dp, Color.LightGray),
+                        border = BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.5f)),
                         modifier = Modifier.size(18.dp)
                     ) {
                         Box(contentAlignment = Alignment.Center) {
@@ -127,7 +129,7 @@ fun PackPreviewItemRow(
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 10.sp
                                 ),
-                                color = Color.Gray
+                                color = Color.Gray.copy(alpha = 0.6f)
                             )
                         }
                     }
@@ -140,78 +142,80 @@ fun PackPreviewItemRow(
                         item.brand
                     }
                 }
-                Text(
-                    text = subtitleText ?: "",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Gray,
-                    letterSpacing = 0.2.sp
-                )
                 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically, 
-                    modifier = Modifier.padding(top = 4.dp)
-                ) {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 2.dp)) {
+                    Text(
+                        text = subtitleText ?: "",
+                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 12.sp),
+                        color = Color.Gray,
+                        letterSpacing = 0.2.sp
+                    )
+                    Spacer(Modifier.width(10.dp))
+                    // Color swatch next to name
                     Box(
                         modifier = Modifier
-                            .size(16.dp)
+                            .size(14.dp)
                             .clip(CircleShape)
                             .background(parseHexColor(item.colorHex))
-                            .border(1.dp, Color.Black.copy(alpha = 0.1f), CircleShape)
+                            .border(0.5.dp, Color.Black.copy(alpha = 0.08f), CircleShape)
                     )
-                    
-                    item.calculatedUnitPrice?.let { unitPrice ->
-                        Spacer(Modifier.width(12.dp))
-                        Text(
-                            text = "$${"%.2f".format(unitPrice)}/ml",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = Color(0xFF2E7D32),
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+                }
+                
+                item.calculatedUnitPrice?.let { unitPrice ->
+                    Text(
+                        text = "$${"%.2f".format(unitPrice)}/ml",
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Light
+                        ),
+                        color = Color(0xFF7CA682),
+                        modifier = Modifier.padding(top = 6.dp)
+                    )
                 }
             }
         }
 
-        // --- DIVIDER ---
-        VerticalDivider(
-            modifier = Modifier
-                .fillMaxHeight()
-                .padding(vertical = 12.dp),
-            thickness = 1.dp,
-            color = Color.Black.copy(alpha = 0.05f)
-        )
-
-        // --- RIGHT SIDE: SELECTION TARGET ---
+        // --- RIGHT SIDE: SELECTION TARGET (GLOWING) ---
         Box(
             modifier = Modifier
-                .width(72.dp)
+                .width(88.dp)
                 .fillMaxHeight()
                 .clickable { onSelectClick() },
             contentAlignment = Alignment.Center
         ) {
             val selectionColor = Color(0xFF745E7A)
             
+            val glowBrush = Brush.radialGradient(
+                colors = listOf(
+                    Color(0xFFD4AF37).copy(alpha = 0.35f),
+                    Color(0xFFD4AF37).copy(alpha = 0.05f),
+                    Color.Transparent
+                )
+            )
+
             Box(
                 modifier = Modifier
-                    .size(32.dp)
-                    .clip(CircleShape)
-                    .border(
-                        width = 1.dp,
-                        color = if (isSelected) selectionColor else Color.LightGray,
-                        shape = CircleShape
-                    )
-                    .background(
-                        if (isSelected) selectionColor.copy(alpha = 0.1f) else Color.Transparent
-                    ),
+                    .size(64.dp)
+                    .background(glowBrush, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
-                if (isSelected) {
-                    Box(
-                        modifier = Modifier
-                            .size(16.dp)
-                            .clip(CircleShape)
-                            .background(selectionColor)
-                    )
+                Surface(
+                    modifier = Modifier.size(36.dp),
+                    shape = CircleShape,
+                    color = Color.White,
+                    border = BorderStroke(1.5.dp, if (isSelected) selectionColor else Color.LightGray.copy(alpha = 0.6f)),
+                    shadowElevation = 2.dp
+                ) {
+                    if (isSelected) {
+                        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                            Box(
+                                modifier = Modifier
+                                    .size(18.dp)
+                                    .clip(CircleShape)
+                                    .background(selectionColor)
+                            )
+                        }
+                    }
                 }
             }
         }
