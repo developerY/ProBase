@@ -107,7 +107,7 @@ fun PackPreviewItemRow(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = item.name,
-                        style = MaterialTheme.typography.titleLarge.copy(fontSize = 18.sp),
+                        style = MaterialTheme.typography.titleLarge.copy(fontSize = 16.sp), // Slightly smaller header
                         fontFamily = FontFamily.Serif,
                         fontWeight = FontWeight.Medium,
                         color = Color(0xFF1A1C1E)
@@ -146,7 +146,7 @@ fun PackPreviewItemRow(
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 2.dp)) {
                     Text(
                         text = subtitleText ?: "",
-                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 12.sp),
+                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp), // Increased size
                         color = Color.Gray,
                         letterSpacing = 0.2.sp
                     )
@@ -165,7 +165,7 @@ fun PackPreviewItemRow(
                     Text(
                         text = "$${"%.2f".format(unitPrice)}/ml",
                         style = MaterialTheme.typography.titleLarge.copy(
-                            fontSize = 16.sp,
+                            fontSize = 13.sp, // Decreased size
                             fontWeight = FontWeight.Light
                         ),
                         color = Color(0xFF7CA682),
