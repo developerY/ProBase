@@ -17,6 +17,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.zoewave.probase.core.ui.util.PremiumProductImage
+import com.zoewave.probase.core.ui.util.PremiumProductImage
+import com.zoewave.probase.core.ui.util.parseColor
 import com.zoewave.probase.core.ui.util.rememberBlurHashPainter
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.ProductEditorialNotes
 
@@ -30,7 +32,7 @@ fun ProductEditorialNotesDialog(
     onDismiss: () -> Unit
 ) {
     if (isLoading || notes != null) {
-        val itemColor = colorHex?.let { parseHexColor(it) } ?: Color.Transparent
+        val itemColor = colorHex?.let { parseColor(it) } ?: Color.Transparent
 
         AlertDialog(
             onDismissRequest = onDismiss,
@@ -81,14 +83,6 @@ fun ProductEditorialNotesDialog(
             },
             shape = RoundedCornerShape(28.dp)
         )
-    }
-}
-
-private fun parseHexColor(hex: String): Color {
-    return try {
-        Color(android.graphics.Color.parseColor(if (hex.startsWith("#")) hex else "#$hex"))
-    } catch (e: Exception) {
-        Color.Gray
     }
 }
 

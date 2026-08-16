@@ -30,7 +30,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
+import com.zoewave.probase.core.ui.util.parseColor
 import com.zoewave.probase.core.ui.intelligence.ChromaticDnaBar
 import com.zoewave.probase.core.ui.intelligence.IntelligenceChip
 import com.zoewave.probase.kocolor.features.cosmetics.R

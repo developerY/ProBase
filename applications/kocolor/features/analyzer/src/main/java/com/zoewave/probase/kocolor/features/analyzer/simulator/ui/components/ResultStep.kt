@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.MacroCategory
-import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
+import com.zoewave.probase.core.ui.util.parseColor
 import com.zoewave.probase.kocolor.features.analyzer.R
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.SimulatorEvent
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorUiState

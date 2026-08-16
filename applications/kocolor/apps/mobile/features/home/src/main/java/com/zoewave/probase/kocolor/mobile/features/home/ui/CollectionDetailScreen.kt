@@ -71,7 +71,7 @@ import com.zoewave.probase.core.model.ritual.OutfitSuggestion
 import com.zoewave.probase.core.model.ritual.SavedAnalysis
 import com.zoewave.probase.core.model.ritual.SeasonalType
 import com.zoewave.probase.core.model.ritual.Undertone
-import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
+import com.zoewave.probase.core.ui.util.parseColor
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.VisualBlueprintSection
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.toVisualBlueprintData
 import com.zoewave.probase.kocolor.mobile.features.home.R

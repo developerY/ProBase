@@ -6,11 +6,30 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -20,16 +39,13 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TileMode
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
 import com.zoewave.probase.core.ui.util.PremiumProductImage
-import com.zoewave.probase.core.ui.util.rememberBlurHashPainter
+import com.zoewave.probase.core.ui.util.parseColor
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.CosmeticItemDto
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.PackItemDto
 import kotlinx.coroutines.delay
@@ -65,7 +81,7 @@ fun PackPreviewItemRow(
             .background(backgroundColor),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        val itemColor = parseHexColor(item.colorHex)
+        val itemColor = parseColor(item.colorHex)
 
         // --- LEFT SIDE: INFO NAVIGATION ---
         Row(
@@ -127,7 +143,7 @@ fun PackPreviewItemRow(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = item.name,
-                    style = MaterialTheme.typography.titleLarge.copy(fontSize = 18.sp),
+                    style = MaterialTheme.typography.titleMedium.copy(fontSize = 14.sp),
                     fontFamily = FontFamily.Serif,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF1A1C1E)
@@ -151,37 +167,40 @@ fun PackPreviewItemRow(
                     
                     Spacer(Modifier.width(10.dp))
                     
-                    // --- THE LEFT CIRCLE (3D COLOR SWATCH) ---
+                    // We do not want to use this for now.
+                    // Just a placeholder for now.
+                    // Do not remove
+                    /* --- THE LEFT CIRCLE (3D COLOR SWATCH) ---
                     Surface(
                         modifier = Modifier.size(20.dp),
                         shape = CircleShape,
                         color = itemColor,
-                        shadowElevation = 6.dp,
-                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.4f))
+                        shadowElevation = 8.dp, // Increased elevation for stronger 3D feel
+                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.5f))
                     ) {
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .background(
                                     Brush.linearGradient(
-                                        0.0f to Color.White.copy(alpha = 0.3f),
+                                        0.0f to Color.White.copy(alpha = 0.4f),
                                         0.5f to Color.Transparent,
-                                        1.0f to Color.Black.copy(alpha = 0.1f)
+                                        1.0f to Color.Black.copy(alpha = 0.15f)
                                     )
                                 )
                         )
-                    }
+                    } */
                 }
                 
                 item.calculatedUnitPrice?.let { unitPrice ->
                     Text(
                         text = "$${"%.2f".format(unitPrice)}/ml",
                         style = MaterialTheme.typography.titleLarge.copy(
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Medium
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Light
                         ),
                         color = Color(0xFF7CA682),
-                        modifier = Modifier.padding(top = 8.dp)
+                        modifier = Modifier.padding(top = 6.dp)
                     )
                 }
             }
@@ -196,20 +215,20 @@ fun PackPreviewItemRow(
             color = Color.Black.copy(alpha = 0.1f)
         )
 
-        // --- RIGHT SIDE: SELECTION TARGET (Tinted Light) ---
+        // --- RIGHT SIDE: SELECTION TARGET (Item-Tinted Interaction Zone) ---
         Box(
             modifier = Modifier
-                .width(64.dp)
+                .width(59.dp)
                 .fillMaxHeight()
-                .background(itemColor.copy(alpha = 0.01f)) // Much lighter shade
+                .background(itemColor.copy(alpha = 0.05f)) // Increased tint for better item-matching
                 .clickable { onSelectClick() },
             contentAlignment = Alignment.Center
         ) {
-            // Glowing Halo background
+            // Dynamic Glowing Halo based on item color (Replacing Gold)
             val glowBrush = Brush.radialGradient(
                 colors = listOf(
-                    Color(0xFFD4AF37).copy(alpha = if (isSelected) 0.4f else 0.15f),
-                    Color(0xFFD4AF37).copy(alpha = 0.02f),
+                    itemColor.copy(alpha = if (isSelected) 0.5f else 0.15f),
+                    itemColor.copy(alpha = 0.05f),
                     Color.Transparent
                 )
             )
@@ -227,9 +246,9 @@ fun PackPreviewItemRow(
                     color = Color.White,
                     border = BorderStroke(
                         width = 1.dp,
-                        color = if (isSelected) Color(0xFFD4AF37) else Color.LightGray.copy(alpha = 0.3f)
+                        color = if (isSelected) itemColor else itemColor.copy(alpha = 0.15f) // Subtle item tint for unchecked
                     ),
-                    shadowElevation = if (isSelected) 6.dp else 2.dp // More 3D depth
+                    shadowElevation = if (isSelected) 6.dp else 2.dp
                 ) {
                     // Subtle inner gradient for 3D pillowed look
                     val buttonGradient = Brush.linearGradient(
@@ -249,7 +268,10 @@ fun PackPreviewItemRow(
                                     .clip(CircleShape)
                                     .background(
                                         Brush.radialGradient(
-                                            listOf(Color(0xFFD4AF37), Color(0xFFB8860B))
+                                            listOf(
+                                                itemColor, 
+                                                itemColor.copy(alpha = 0.8f) // High-fidelity item color gradient
+                                            )
                                         )
                                     )
                                     .shadow(2.dp, CircleShape)
@@ -259,14 +281,6 @@ fun PackPreviewItemRow(
                 }
             }
         }
-    }
-}
-
-private fun parseHexColor(hex: String): Color {
-    return try {
-        Color(android.graphics.Color.parseColor(if (hex.startsWith("#")) hex else "#$hex"))
-    } catch (e: Exception) {
-        Color.Gray
     }
 }
 

@@ -81,9 +81,9 @@ import com.zoewave.probase.core.model.ritual.MicroCategory
 import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
 import com.zoewave.probase.features.camera.productcapture.ui.DiscoveryStatusScreen
 import com.zoewave.probase.features.graphics.colorpicker.ui.ColorPickerDialog
-import com.zoewave.probase.features.graphics.colorpicker.util.isColorDark
-import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
-import com.zoewave.probase.features.graphics.colorpicker.util.toHex
+import com.zoewave.probase.core.ui.util.isColorDark
+import com.zoewave.probase.core.ui.util.parseColor
+import com.zoewave.probase.core.ui.util.toHex
 import com.zoewave.probase.kocolor.features.cosmetics.R
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.AtelierExpandableSection
 import com.zoewave.probase.kocolor.model.KoColorRoute
