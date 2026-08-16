@@ -25,6 +25,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.zoewave.probase.core.ui.util.PremiumProductImage
 import com.zoewave.probase.core.ui.util.rememberBlurHashPainter
 import com.zoewave.probase.features.graphics.colorpicker.util.isColorDark
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
@@ -122,7 +123,6 @@ fun WardrobeDetailScreen(
                 .verticalScroll(rememberScrollState())
                 .background(Color.White)
         ) {
-            // 1. Hero Image Section
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -131,13 +131,13 @@ fun WardrobeDetailScreen(
             ) {
                 Box(modifier = Modifier.fillMaxSize()) {
                     if (item.imageUrl != null) {
-                        val placeholder = rememberBlurHashPainter(blurHash = item.blurhash)
-                        AsyncImage(
-                            model = item.imageUrl,
+                        PremiumProductImage(
+                            imageUrl = item.imageUrl,
+                            blurHash = item.blurhash,
                             contentDescription = item.name,
-                            placeholder = placeholder,
                             modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
+                            contentScale = ContentScale.Crop,
+                            fallbackColor = parseColor(item.colorHex ?: "#FFFFFF")
                         )
                     }
                     
