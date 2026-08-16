@@ -284,9 +284,14 @@ fun AtelierWardrobeCard(
         border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
+            val placeholder = rememberBlurHashPainter(
+                blurHash = null, // Backend can be updated later to provide category blurhashes
+                fallbackColor = baseColor
+            )
             AsyncImage(
                 model = imageModel,
                 contentDescription = null,
+                placeholder = placeholder,
                 modifier = Modifier.fillMaxSize().alpha(0.4f),
                 contentScale = ContentScale.Crop
             )

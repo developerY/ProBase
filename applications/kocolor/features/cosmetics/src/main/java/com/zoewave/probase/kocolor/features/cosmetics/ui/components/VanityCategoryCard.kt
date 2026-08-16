@@ -48,6 +48,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.zoewave.probase.core.ui.util.rememberBlurHashPainter
 import com.zoewave.probase.kocolor.features.cosmetics.R
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CategoryMetadata
 import com.zoewave.probase.kocolor.model.KoColorRoute
@@ -162,9 +163,14 @@ fun VanityCategoryCard(
         border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
+            val placeholder = rememberBlurHashPainter(
+                blurHash = metadata?.representativeImageUrl?.let { /* Heuristic for blurhash */ null },
+                fallbackColor = baseColor
+            )
             AsyncImage(
                 model = metadata?.representativeImageUrl ?: fallbackImage,
                 contentDescription = null,
+                placeholder = placeholder,
                 modifier = Modifier.fillMaxSize().alpha(0.3f),
                 contentScale = ContentScale.Crop
             )

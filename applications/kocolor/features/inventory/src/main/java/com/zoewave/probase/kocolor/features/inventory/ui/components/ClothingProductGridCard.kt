@@ -18,6 +18,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.zoewave.probase.core.ui.util.rememberBlurHashPainter
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.kocolor.model.KoColorRoute
@@ -31,18 +32,23 @@ fun ClothingProductGridCard(uiState: ClothingItem, navTo: (KoColorRoute) -> Unit
         shape = RoundedCornerShape(24.dp)
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
+            val itemColor = item.dominantHex?.let { parseColor(it) } 
+                ?: item.colorHex?.let { parseColor(it) } 
+                ?: Color.White
+
             if (item.imageUrl != null) {
+                val placeholder = rememberBlurHashPainter(
+                    blurHash = item.blurhash,
+                    fallbackColor = itemColor.copy(alpha = 0.1f)
+                )
                 AsyncImage(
                     model = item.imageUrl,
                     contentDescription = null,
+                    placeholder = placeholder,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
 
-                val itemColor = item.dominantHex?.let { parseColor(it) } 
-                    ?: item.colorHex?.let { parseColor(it) } 
-                    ?: Color.White
-                
                 Surface(
                     modifier = Modifier
                         .padding(12.dp)
@@ -53,10 +59,7 @@ fun ClothingProductGridCard(uiState: ClothingItem, navTo: (KoColorRoute) -> Unit
                     border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.5f))
                 ) {}
             } else {
-                val itemColor = item.dominantHex?.let { parseColor(it) } 
-                    ?: item.colorHex?.let { parseColor(it) } 
-                    ?: MaterialTheme.colorScheme.surfaceVariant
-                Box(modifier = Modifier.fillMaxSize().background(itemColor))
+                Box(modifier = Modifier.fillMaxSize().background(itemColor.copy(alpha = 0.2f)))
             }
 
             Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.5f)), startY = 200f)))

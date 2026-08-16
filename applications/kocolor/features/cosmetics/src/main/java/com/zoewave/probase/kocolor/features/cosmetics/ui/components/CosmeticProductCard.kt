@@ -54,7 +54,10 @@ fun CosmeticProductCard(
                     contentAlignment = Alignment.Center
                 ) {
                     if (uiState.imageUrl != null) {
-                        val placeholder = rememberBlurHashPainter(blurHash = uiState.blurhash)
+                        val placeholder = rememberBlurHashPainter(
+                            blurHash = uiState.blurhash,
+                            fallbackColor = cardColor.copy(alpha = 0.2f)
+                        )
                         AsyncImage(
                             model = uiState.imageUrl, 
                             contentDescription = null, 
