@@ -28,6 +28,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.zoewave.probase.core.ui.util.PremiumProductImage
 import com.zoewave.probase.core.ui.util.rememberBlurHashPainter
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.CosmeticItemDto
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.PackItemDto
@@ -111,17 +112,12 @@ fun PackPreviewItemRow(
                             shape = RoundedCornerShape(24.dp)
                         )
                 ) {
-                    val placeholder = rememberBlurHashPainter(
+                    PremiumProductImage(
+                        imageUrl = item.thumbnailUrl,
                         blurHash = item.blurhash,
-                        fallbackColor = itemColor.copy(alpha = 0.1f)
-                    )
-
-                    AsyncImage(
-                        model = item.thumbnailUrl,
                         contentDescription = null,
-                        placeholder = placeholder,
                         modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
+                        fallbackColor = itemColor
                     )
                 }
             }

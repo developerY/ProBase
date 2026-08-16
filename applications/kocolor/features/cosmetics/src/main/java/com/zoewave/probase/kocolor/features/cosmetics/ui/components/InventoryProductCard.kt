@@ -22,6 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.zoewave.probase.core.ui.util.PremiumProductImage
 import com.zoewave.probase.core.ui.util.rememberBlurHashPainter
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import com.zoewave.probase.kocolor.features.cosmetics.R
@@ -60,16 +61,12 @@ fun InventoryProductCard(
                     .background(Color(0xFFF5F5F5))
             ) {
                 if (item.imageUrl != null) {
-                    val placeholder = rememberBlurHashPainter(
+                    PremiumProductImage(
+                        imageUrl = item.imageUrl,
                         blurHash = item.blurhash,
-                        fallbackColor = parseColor(item.colorHex).copy(alpha = 0.1f)
-                    )
-                    AsyncImage(
-                        model = item.imageUrl,
                         contentDescription = null,
-                        placeholder = placeholder,
                         modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
+                        fallbackColor = parseColor(item.colorHex)
                     )
                 } else {
                     Icon(

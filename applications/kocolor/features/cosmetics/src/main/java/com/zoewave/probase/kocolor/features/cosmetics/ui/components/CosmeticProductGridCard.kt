@@ -18,6 +18,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.zoewave.probase.core.ui.util.PremiumProductImage
 import com.zoewave.probase.core.ui.util.rememberBlurHashPainter
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import com.zoewave.probase.core.model.ritual.CosmeticItem
@@ -37,16 +38,12 @@ fun CosmeticProductGridCard(
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             if (item.imageUrl != null) {
-                val placeholder = rememberBlurHashPainter(
+                PremiumProductImage(
+                    imageUrl = item.imageUrl,
                     blurHash = item.blurhash,
-                    fallbackColor = parseColor(item.colorHex).copy(alpha = 0.1f)
-                )
-                AsyncImage(
-                    model = item.imageUrl,
                     contentDescription = null,
-                    placeholder = placeholder,
                     modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
+                    fallbackColor = parseColor(item.colorHex)
                 )
             } else {
                 Box(modifier = Modifier.fillMaxSize().background(item.colorHex?.let { Color(android.graphics.Color.parseColor(it)) } ?: MaterialTheme.colorScheme.surfaceVariant))

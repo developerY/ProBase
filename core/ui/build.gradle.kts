@@ -38,6 +38,7 @@ dependencies {
     // ✅ FIXED: Correct accessor matches your TOML (androidx-compose-material-icons-extended)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.google.accompanist.drawablepainter)
+    implementation(libs.coil.compose)
 
     // --- Serialization ---
     implementation(libs.kotlinx.serialization.json)

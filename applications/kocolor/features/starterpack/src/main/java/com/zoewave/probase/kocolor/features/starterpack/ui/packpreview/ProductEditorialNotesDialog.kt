@@ -16,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.zoewave.probase.core.ui.util.PremiumProductImage
 import com.zoewave.probase.core.ui.util.rememberBlurHashPainter
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.ProductEditorialNotes
 
@@ -36,22 +37,18 @@ fun ProductEditorialNotesDialog(
             title = {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     if (thumbnailUrl != null) {
-                        val placeholder = rememberBlurHashPainter(
+                        PremiumProductImage(
+                            imageUrl = thumbnailUrl,
                             blurHash = blurHash,
-                            fallbackColor = itemColor.copy(alpha = 0.1f)
-                        )
-
-                        AsyncImage(
-                            model = thumbnailUrl,
                             contentDescription = null,
-                            placeholder = placeholder,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .aspectRatio(1f)
                                 .clip(RoundedCornerShape(16.dp))
                                 .background(Color(0xFFF5F5F5))
                                 .border(8.dp, itemColor.copy(alpha = 0.8f), RoundedCornerShape(16.dp)),
-                            contentScale = ContentScale.Crop
+                            contentScale = ContentScale.Crop,
+                            fallbackColor = itemColor
                         )
                         Spacer(Modifier.height(24.dp))
                     }

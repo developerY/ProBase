@@ -43,14 +43,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
 import com.zoewave.probase.core.model.ritual.ArchiveStatus
 import com.zoewave.probase.core.model.ritual.ChemistryBase
 import com.zoewave.probase.core.model.ritual.ChemistryPhase
@@ -62,7 +60,7 @@ import com.zoewave.probase.core.model.ritual.InventorySource
 import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.core.model.ritual.MicroCategory
 import com.zoewave.probase.core.ui.components.MakeItMineButton
-import com.zoewave.probase.core.ui.util.rememberBlurHashPainter
+import com.zoewave.probase.core.ui.util.PremiumProductImage
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import com.zoewave.probase.kocolor.features.cosmetics.R
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.ApplicationGuideSection
@@ -355,16 +353,12 @@ fun CosmeticDetailScreen(
             ) {
                 Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(24.dp)) {
                     if (item.imageUrl != null) {
-                        val placeholder = rememberBlurHashPainter(
+                        PremiumProductImage(
+                            imageUrl = item.imageUrl,
                             blurHash = item.blurhash,
-                            fallbackColor = parseColor(item.colorHex).copy(alpha = 0.1f)
-                        )
-                        AsyncImage(
-                            model = item.imageUrl,
                             contentDescription = item.name,
-                            placeholder = placeholder,
                             modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(8.dp)),
-                            contentScale = ContentScale.Crop
+                            fallbackColor = parseColor(item.colorHex)
                         )
                     } else {
                         Icon(Icons.Default.Image, null, modifier = Modifier.size(100.dp), tint = Color.LightGray)
