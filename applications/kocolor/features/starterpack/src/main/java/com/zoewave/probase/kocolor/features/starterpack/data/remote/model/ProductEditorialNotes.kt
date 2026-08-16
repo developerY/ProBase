@@ -5,9 +5,14 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ProductEditorialNotes(
-    val id: String,
-    @SerialName("editorial_title") val editorialTitle: String,
-    @SerialName("usage_notes") val usageNotes: String,
-    @SerialName("expert_tip") val expertTip: String,
-    @SerialName("formulation_insight") val formulationInsight: String? = null
+    @SerialName("product_id") val id: String,
+    @SerialName("card_title") val editorialTitle: String,
+    val description: String? = null,
+    @SerialName("dynamic_attributes") val attributes: List<EditorialAttribute> = emptyList()
+)
+
+@Serializable
+data class EditorialAttribute(
+    val label: String,
+    val body: String
 )
