@@ -13,6 +13,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size 8.5
 - **Composition**: Full Grain Leather, Chunky Rubber Lug Sole
 
+#### Editorial: Artist Notes
+
 ---
 ### Aesthetic Pink Sneakers
 - **ID**: `kc-shoes-501`
@@ -22,6 +24,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $140.0
 - **Size/Volume**: Size 7.5
 - **Composition**: Vegan Leather Upper, EVA Foam Sole
+
+#### Editorial: Artist Notes
 
 ---
 ### Arcadia Blue Denim
@@ -33,6 +37,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size 28
 - **Composition**: 100% Rigid Raw Denim, Copper Hardware
 
+#### Editorial: Artist Notes
+
 ---
 ### Arcadia Blue Oversized Denim Trucker
 - **ID**: `kc-outerwear-705`
@@ -42,6 +48,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $135.0
 - **Size/Volume**: Size M
 - **Composition**: 100% Heavyweight Organic Cotton Denim
+
+#### Editorial: Artist Notes
 
 ---
 ### Arcadia Blue Track Jacket
@@ -53,6 +61,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size M
 - **Composition**: 100% Tricot Polyester, Ribbed Cuffs, Zip Pockets
 
+#### Editorial: Artist Notes
+
 ---
 ### Arcadia Blue Utility Jumpsuit
 - **ID**: `kc-dresses-603`
@@ -62,6 +72,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $135.0
 - **Size/Volume**: Size M
 - **Composition**: 100% Cotton Twill, Brass Zip Closure, Cargo Pockets
+
+#### Editorial: Artist Notes
 
 ---
 ### Camel Ankle Boots
@@ -73,6 +85,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size 9
 - **Composition**: 100% Suede, Wood Block Heel
 
+#### Editorial: Artist Notes
+
 ---
 ### Comforting Khaki Cargo
 - **ID**: `kc-pants-403`
@@ -82,6 +96,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $95.0
 - **Size/Volume**: Size M
 - **Composition**: 100% Cotton Twill
+
+#### Editorial: Artist Notes
 
 ---
 ### Comforting Khaki Ribbed Tank
@@ -93,6 +109,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size S
 - **Composition**: 90% Modal, 10% Spandex, Racerback Design
 
+#### Editorial: Artist Notes
+
 ---
 ### Comforting Khaki Shearling Vest
 - **ID**: `kc-outerwear-709`
@@ -102,6 +120,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $150.0
 - **Size/Volume**: Size M
 - **Composition**: Faux Shearling, Faux Suede Backing
+
+#### Editorial: Artist Notes
 
 ---
 ### Crisp White Denim Dungarees
@@ -113,6 +133,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size M
 - **Composition**: 100% Rigid Organic Denim, Silver-Tone Hardware
 
+#### Editorial: Artist Notes
+
 ---
 ### Crisp White Tennis
 - **ID**: `kc-shoes-508`
@@ -122,6 +144,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $110.0
 - **Size/Volume**: Size 9.5
 - **Composition**: Leather Upper, Orthopedic Insole
+
+#### Editorial: Artist Notes
 
 ---
 ### Crisp White Tennis Skirt
@@ -133,6 +157,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size S
 - **Composition**: 88% Polyester, 12% Spandex, Built-in Compression Shorts
 
+#### Editorial: Artist Notes
+
 ---
 ### Dark Brown Leather
 - **ID**: `kc-pants-402`
@@ -142,6 +168,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $185.0
 - **Size/Volume**: Size 26
 - **Composition**: 100% Vegan Polyurethane Leather, Viscose Lining
+
+#### Editorial: Artist Notes
 
 ---
 ### Deep Obsidian Chelsea
@@ -153,6 +181,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size 8
 - **Composition**: Matte Leather, Elastic Gusset
 
+#### Editorial: Artist Notes
+
 ---
 ### Digital Lavender Oversized Tee
 - **ID**: `kc-shirts-306`
@@ -162,6 +192,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $35.0
 - **Size/Volume**: Size XL
 - **Composition**: 100% Heavyweight Cotton
+
+#### Editorial: Artist Notes
 
 ---
 ### Digital Lavender Ribbed Duster
@@ -173,6 +205,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size M
 - **Composition**: 60% Alpaca Wool, 40% Organic Cotton
 
+#### Editorial: Artist Notes
+
 ---
 ### Digital Lavender Satin Slip
 - **ID**: `kc-dresses-601`
@@ -182,6 +216,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $85.0
 - **Size/Volume**: Size S
 - **Composition**: 100% Mulberry Silk, Adjustable Spaghetti Straps
+
+#### Editorial: Artist Notes
 
 ---
 ### Digital Lavender Sports Bra
@@ -193,6 +229,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size S
 - **Composition**: 75% Nylon, 25% Spandex, Moisture-Wicking Finish
 
+#### Editorial: Artist Notes
+
 ---
 ### Divine Damson Heels
 - **ID**: `kc-shoes-505`
@@ -202,6 +240,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $195.0
 - **Size/Volume**: Size 6.5
 - **Composition**: Patent Leather, Resin Sole
+
+#### Editorial: Artist Notes
 
 ---
 ### Electric Coral Cropped Hoodie
@@ -213,6 +253,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size L
 - **Composition**: 100% French Terry Cotton, Drawstring Hood
 
+#### Editorial: Artist Notes
+
 ---
 ### Electric Coral Utility Windbreaker
 - **ID**: `kc-outerwear-708`
@@ -222,6 +264,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $95.0
 - **Size/Volume**: Size S
 - **Composition**: 100% Ripstop Nylon, Breathable Mesh Lining
+
+#### Editorial: Artist Notes
 
 ---
 ### Hidden Gem Pleated
@@ -233,6 +277,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size 29
 - **Composition**: Wool Blend, Recycled Polyester
 
+#### Editorial: Artist Notes
+
 ---
 ### Mellow Flow Blue Jeans
 - **ID**: `kc-pants-406`
@@ -242,6 +288,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $90.0
 - **Size/Volume**: Size 30
 - **Composition**: 98% Cotton, 2% Elastane
+
+#### Editorial: Artist Notes
 
 ---
 ### Melodious Ivory Culottes
@@ -253,6 +301,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size L
 - **Composition**: 100% Linen
 
+#### Editorial: Artist Notes
+
 ---
 ### Midnight Crimson Maxi
 - **ID**: `kc-dresses-608`
@@ -262,6 +312,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $180.0
 - **Size/Volume**: Size S
 - **Composition**: Silk Chiffon, Off-the-Shoulder Neckline, Fully Lined
+
+#### Editorial: Artist Notes
 
 ---
 ### Midnight Crimson Velvet
@@ -273,6 +325,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size M
 - **Composition**: Silk Velvet Blend, Recycled Polyester
 
+#### Editorial: Artist Notes
+
 ---
 ### Midnight Crimson Wool Overcoat
 - **ID**: `kc-outerwear-706`
@@ -282,6 +336,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $320.0
 - **Size/Volume**: Size S
 - **Composition**: 85% Virgin Wool, 15% Cashmere, Cupro Lining
+
+#### Editorial: Artist Notes
 
 ---
 ### Obsidian High-Waisted Leggings
@@ -293,6 +349,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size M
 - **Composition**: 80% Recycled Polyester, 20% Elastane, Squat-Proof Interlock
 
+#### Editorial: Artist Notes
+
 ---
 ### Obsidian Moto Leather Jacket
 - **ID**: `kc-outerwear-702`
@@ -302,6 +360,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $295.0
 - **Size/Volume**: Size S
 - **Composition**: 100% Supple Lambskin Leather, Silver-Tone Hardware, Satin Lining
+
+#### Editorial: Artist Notes
 
 ---
 ### Obsidian Ribbed Knit
@@ -313,6 +373,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size S
 - **Composition**: Cotton Knit, Elastane
 
+#### Editorial: Artist Notes
+
 ---
 ### Obsidian Void A-Line Mini
 - **ID**: `kc-dresses-609`
@@ -322,6 +384,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $115.0
 - **Size/Volume**: Size S
 - **Composition**: Heavyweight Cotton Ponte, Square Neckline, Hidden Back Zip
+
+#### Editorial: Artist Notes
 
 ---
 ### Olive Spruce Biker Shorts
@@ -333,6 +397,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size M
 - **Composition**: 75% Nylon, 25% Lycra, Seamless Construction
 
+#### Editorial: Artist Notes
+
 ---
 ### Olive Spruce Blazer Dress
 - **ID**: `kc-dresses-605`
@@ -342,6 +408,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $165.0
 - **Size/Volume**: Size S
 - **Composition**: Structured Wool Blend, Satin Lapels, Double-Breasted Buttons
+
+#### Editorial: Artist Notes
 
 ---
 ### Olive Spruce Blouse
@@ -353,6 +421,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size M
 - **Composition**: 100% Mulberry Silk, Eco-friendly Dye
 
+#### Editorial: Artist Notes
+
 ---
 ### Olive Spruce Double-Breasted Blazer
 - **ID**: `kc-outerwear-703`
@@ -362,6 +432,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $185.0
 - **Size/Volume**: Size M
 - **Composition**: 70% Wool, 28% Recycled Polyester, 2% Elastane
+
+#### Editorial: Artist Notes
 
 ---
 ### Pastel Blue Loafers
@@ -373,6 +445,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size 8
 - **Composition**: Suede Leather, Rubber Sole
 
+#### Editorial: Artist Notes
+
 ---
 ### Pure White Oxford
 - **ID**: `kc-shirts-308`
@@ -382,6 +456,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $70.0
 - **Size/Volume**: Size M
 - **Composition**: 100% Supima Cotton
+
+#### Editorial: Artist Notes
 
 ---
 ### Rouge Strappy Sandals
@@ -393,6 +469,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size 7
 - **Composition**: Vegan Silk Satin, Ankle Tie
 
+#### Editorial: Artist Notes
+
 ---
 ### Slow Swing Navy Slacks
 - **ID**: `kc-pants-407`
@@ -402,6 +480,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $130.0
 - **Size/Volume**: Size 28
 - **Composition**: Viscose, Polyester, Elastane
+
+#### Editorial: Artist Notes
 
 ---
 ### Soft Rose Gold Camisole
@@ -413,6 +493,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size S
 - **Composition**: 100% Satin Polyester, Lace Trim
 
+#### Editorial: Artist Notes
+
 ---
 ### Transformative Teal Cropped Puffer
 - **ID**: `kc-outerwear-704`
@@ -422,6 +504,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $165.0
 - **Size/Volume**: Size L
 - **Composition**: 100% Recycled Nylon Shell, 700-Fill Goose Down Insulation
+
+#### Editorial: Artist Notes
 
 ---
 ### Transformative Teal Performance Windshirt
@@ -433,6 +517,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size M
 - **Composition**: 100% Micro-Ripstop Nylon, DWR Water Repellent, Laser-Cut Venting
 
+#### Editorial: Artist Notes
+
 ---
 ### Transformative Teal Turtleneck
 - **ID**: `kc-shirts-303`
@@ -442,6 +528,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $75.0
 - **Size/Volume**: Size M
 - **Composition**: 80% Merino Wool, 20% Cashmere
+
+#### Editorial: Artist Notes
 
 ---
 ### Transformative Teal Wrap Dress
@@ -453,6 +541,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size L
 - **Composition**: Eco-Vero Viscose, Tie-Waist, Ruffle Hem
 
+#### Editorial: Artist Notes
+
 ---
 ### True Black Flared Leggings
 - **ID**: `kc-pants-409`
@@ -462,6 +552,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $65.0
 - **Size/Volume**: Size M
 - **Composition**: 80% Nylon, 20% Spandex
+
+#### Editorial: Artist Notes
 
 ---
 ### Universal Khaki Button-Down
@@ -473,6 +565,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size L
 - **Composition**: 100% European Flax Linen
 
+#### Editorial: Artist Notes
+
 ---
 ### Universal Khaki Oversized Sweatpants
 - **ID**: `kc-active-808`
@@ -482,6 +576,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $60.0
 - **Size/Volume**: Size L
 - **Composition**: 80% Organic Cotton, 20% Recycled Polyester Fleece
+
+#### Editorial: Artist Notes
 
 ---
 ### Universal Khaki Ribbed Midi
@@ -493,6 +589,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size M
 - **Composition**: Cotton Blend Knit, Elastane for Stretch, Side Slit
 
+#### Editorial: Artist Notes
+
 ---
 ### Universal Khaki Trench Coat
 - **ID**: `kc-outerwear-701`
@@ -502,6 +600,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $240.0
 - **Size/Volume**: Size M
 - **Composition**: 100% Cotton Gabardine, Water-Repellent Coating, Horn Buttons
+
+#### Editorial: Artist Notes
 
 ---
 ### Warm Eucalyptus Flats
@@ -513,6 +613,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size 7
 - **Composition**: Organic Cotton Canvas, Jute Trim
 
+#### Editorial: Artist Notes
+
 ---
 ### Warm Mahogany Corduroy
 - **ID**: `kc-pants-405`
@@ -522,6 +624,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $105.0
 - **Size/Volume**: Size 27
 - **Composition**: 100% Cotton Wale Corduroy
+
+#### Editorial: Artist Notes
 
 ---
 ### Warm Terracotta Crop
@@ -533,6 +637,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size S
 - **Composition**: 95% Organic Cotton, 5% Spandex
 
+#### Editorial: Artist Notes
+
 ---
 ### Warm Terracotta Linen Sundress
 - **ID**: `kc-dresses-607`
@@ -542,6 +648,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $90.0
 - **Size/Volume**: Size M
 - **Composition**: 100% European Flax Linen, Smocked Back, Tiered Skirt
+
+#### Editorial: Artist Notes
 
 ---
 ## COMPLEXION
@@ -555,6 +663,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: 15ml
 - **Composition**: Water, Mica, Titanium Dioxide, Manganese Violet
 
+#### Editorial: Artist Notes
+
 ---
 ### Everyday Clear Concealer
 - **ID**: `kc-complexion-02`
@@ -564,6 +674,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $26.0
 - **Size/Volume**: 6ml
 - **Composition**: Water, Dimethicone, Titanium Dioxide, Butylene Glycol, Iron Oxides, Niacinamide
+
+#### Editorial: Artist Notes
 
 ---
 ### Glow Control Primer
@@ -575,6 +687,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: 10ml
 - **Composition**: Water, Titanium Dioxide, Glycerol Stearate
 
+#### Editorial: Artist Notes
+
 ---
 ### Seamless Silk Foundation
 - **ID**: `kc-complexion-01`
@@ -584,6 +698,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $42.0
 - **Size/Volume**: 30ml
 - **Composition**: Water, Cyclopentasiloxane, Titanium Dioxide, Glycerin, Iron Oxides, Silica
+
+#### Editorial: Artist Notes
 
 ---
 ### Velvet Camouflage Concealer
@@ -595,6 +711,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: 6ml
 - **Composition**: Water, Dimethicone, Iron Oxides, Titanium Dioxide
 
+#### Editorial: Artist Notes
+
 ---
 ### Velvet Camouflage Concealer
 - **ID**: `kc-concealer-405`
@@ -604,6 +722,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $24.0
 - **Size/Volume**: 6ml
 - **Composition**: Water, Isononyl Isononanoate, Iron Oxides
+
+#### Editorial: Artist Notes
 
 ---
 ### Velvet Camouflage Concealer
@@ -615,6 +735,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: 6ml
 - **Composition**: Water, Isododecane, Iron Oxides, Silica
 
+#### Editorial: Artist Notes
+
 ---
 ### Velvet Camouflage Concealer
 - **ID**: `kc-concealer-403`
@@ -624,6 +746,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $24.0
 - **Size/Volume**: 6ml
 - **Composition**: Water, Cyclopentasiloxane, Iron Oxides, Mica
+
+#### Editorial: Artist Notes
 
 ---
 ### Velvet Camouflage Concealer
@@ -635,6 +759,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: 6ml
 - **Composition**: Water, Dimethicone, Titanium Dioxide, Glycerin
 
+#### Editorial: Artist Notes
+
 ---
 ### Velvet Camouflage Concealer
 - **ID**: `kc-concealer-406`
@@ -645,6 +771,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: 6ml
 - **Composition**: Water, Caprylyl Methicone, Iron Oxides, Red 40 Lake
 
+#### Editorial: Artist Notes
+
 ---
 ### Velvet Camouflage Concealer
 - **ID**: `kc-concealer-407`
@@ -654,6 +782,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $24.0
 - **Size/Volume**: 6ml
 - **Composition**: Water, Dimethicone, Iron Oxides, Black 2
+
+#### Editorial: Artist Notes
 
 ---
 ## DIMENSION
@@ -667,6 +797,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: 5g
 - **Composition**: Mica, Talc, Dimethicone, Silica, Zinc Stearate, Red 7 Lake, Iron Oxides
 
+#### Editorial: Artist Notes
+
 ---
 ## EYES
 
@@ -679,6 +811,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: 0.1g
 - **Composition**: Synthetic Wax, Hydrogenated Oil, Iron Oxides, Red 40 Lake
 
+#### Editorial: Artist Notes
+
 ---
 ### Architect Brow Pencil
 - **ID**: `kc-eyebrow-302`
@@ -688,6 +822,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $21.0
 - **Size/Volume**: 0.1g
 - **Composition**: Synthetic Wax, Stearic Acid, Iron Oxides, Mica
+
+#### Editorial: Artist Notes
 
 ---
 ### Architect Brow Pencil
@@ -699,6 +835,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: 0.1g
 - **Composition**: Synthetic Wax, Hydrogenated Soybean Oil, Iron Oxides
 
+#### Editorial: Artist Notes
+
 ---
 ### Barely There Velvet Monolith Single
 - **ID**: `kc-eyes-101`
@@ -708,6 +846,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $18.0
 - **Size/Volume**: 1.5g
 - **Composition**: Mica, Talc, Silica, Dimethicone, Iron Oxides
+
+#### Editorial: Artist Notes
 
 ---
 ### Bronze Define Glitter Liner
@@ -719,6 +859,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: 5ml
 - **Composition**: Water, Polyethylene Terephthalate, Mica, Iron Oxides
 
+#### Editorial: Artist Notes
+
 ---
 ### Cobalt Dream Velvet Monolith Single
 - **ID**: `kc-eyes-108`
@@ -728,6 +870,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $18.0
 - **Size/Volume**: 1.5g
 - **Composition**: Talc, Mica, Ultramarines, Ferric Ferrocyanide
+
+#### Editorial: Artist Notes
 
 ---
 ### Deep Plum Define Liner
@@ -739,6 +883,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: 1.2g
 - **Composition**: Manganese Violet, Iron Oxides, Mica, Hydrogenated Oil
 
+#### Editorial: Artist Notes
+
 ---
 ### Duo Brow Powder
 - **ID**: `kc-eyebrow-305`
@@ -748,6 +894,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $21.0
 - **Size/Volume**: 2.5g
 - **Composition**: Talc, Mica, Black 2, Iron Oxides
+
+#### Editorial: Artist Notes
 
 ---
 ### Duo Brow Powder
@@ -759,6 +907,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: 2.5g
 - **Composition**: Talc, Mica, Silica, Iron Oxides
 
+#### Editorial: Artist Notes
+
 ---
 ### Earth Define Pencil
 - **ID**: `kc-eyeliner-203`
@@ -768,6 +918,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $17.0
 - **Size/Volume**: 1.2g
 - **Composition**: Hydrogenated Vegetable Oil, Iron Oxides, Mica
+
+#### Editorial: Artist Notes
 
 ---
 ### Earth Volume Mascara
@@ -779,6 +931,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: 8ml
 - **Composition**: Water, Stearic Acid, Paraffin, Iron Oxides
 
+#### Editorial: Artist Notes
+
 ---
 ### Electric Pop Liner
 - **ID**: `kc-eyeliner-208`
@@ -788,6 +942,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $17.0
 - **Size/Volume**: 5ml
 - **Composition**: Water, Red 6 Lake, Yellow 5 Lake, Xanthan Gum
+
+#### Editorial: Artist Notes
 
 ---
 ### Electric Pop Mascara
@@ -799,6 +955,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: 8ml
 - **Composition**: Water, Synthetic Beeswax, Blue 1 Lake, Ultramarines
 
+#### Editorial: Artist Notes
+
 ---
 ### Emerald Define Mascara
 - **ID**: `kc-mascara-108`
@@ -808,6 +966,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $19.0
 - **Size/Volume**: 8ml
 - **Composition**: Water, Iron Oxides, Chromium Oxide Greens, Mica
+
+#### Editorial: Artist Notes
 
 ---
 ### Emerald Envy Velvet Monolith Single
@@ -819,6 +979,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: 1.5g
 - **Composition**: Mica, Talc, Iron Oxides, Chromium Oxide Greens
 
+#### Editorial: Artist Notes
+
 ---
 ### Emerald Silk Kohl
 - **ID**: `kc-eyeliner-209`
@@ -828,6 +990,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $17.0
 - **Size/Volume**: 1.2g
 - **Composition**: Iron Oxides, Chromium Oxide Greens, Mica, Lanolin
+
+#### Editorial: Artist Notes
 
 ---
 ### Fairy Dust Tinted Gel
@@ -839,6 +1003,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: 5ml
 - **Composition**: Water, Mica, Titanium Dioxide, Manganese Violet
 
+#### Editorial: Artist Notes
+
 ---
 ### Fairy Lash Mascara
 - **ID**: `kc-mascara-106`
@@ -848,6 +1014,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $19.0
 - **Size/Volume**: 8ml
 - **Composition**: Water, Mica, Titanium Dioxide, Manganese Violet
+
+#### Editorial: Artist Notes
 
 ---
 ### Glow Control Brow Gel
@@ -859,6 +1027,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: 5ml
 - **Composition**: Water, PVP, Glycerin, Phenoxyethanol
 
+#### Editorial: Artist Notes
+
 ---
 ### Glow Extension Mascara
 - **ID**: `kc-mascara-107`
@@ -868,6 +1038,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $19.0
 - **Size/Volume**: 8ml
 - **Composition**: Water, Mica, Iron Oxides, Tin Oxide
+
+#### Editorial: Artist Notes
 
 ---
 ### Lash Lift Defining Mascara
@@ -879,6 +1051,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: 8ml
 - **Composition**: Water, Beeswax, Iron Oxides, Copernicia Cerifera (Carnauba) Wax, Stearic Acid, Panthenol
 
+#### Editorial: Artist Notes
+
 ---
 ### Lavender Haze Celestial Chromatic Single
 - **ID**: `kc-eyes-109`
@@ -888,6 +1062,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $18.0
 - **Size/Volume**: 1.5g
 - **Composition**: Mica, Titanium Dioxide, Manganese Violet, Tin Oxide
+
+#### Editorial: Artist Notes
 
 ---
 ### Obsidian Precision Liner
@@ -899,6 +1075,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: 8ml
 - **Composition**: Water, Acrylates Copolymer, Black 2, Butylene Glycol
 
+#### Editorial: Artist Notes
+
 ---
 ### Obsidian Volume Mascara
 - **ID**: `kc-mascara-101`
@@ -908,6 +1086,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $19.0
 - **Size/Volume**: 8ml
 - **Composition**: Water, Acrylates Copolymer, Beeswax, Iron Oxides
+
+#### Editorial: Artist Notes
 
 ---
 ### Pop Art Liquid Liner
@@ -919,6 +1099,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: 5ml
 - **Composition**: Water, Ultramarines, Blue 1 Lake, Glycerin
 
+#### Editorial: Artist Notes
+
 ---
 ### Rose Gold Rush Celestial Chromatic Single
 - **ID**: `kc-eyes-104`
@@ -928,6 +1110,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $18.0
 - **Size/Volume**: 1.5g
 - **Composition**: Mica, Dimethicone, Iron Oxides, Titanium Dioxide
+
+#### Editorial: Artist Notes
 
 ---
 ### Sculpting Tinted Gel
@@ -939,6 +1123,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: 5ml
 - **Composition**: Water, Acrylates Copolymer, Nylon-6, Iron Oxides
 
+#### Editorial: Artist Notes
+
 ---
 ### Silver Lining Celestial Chromatic Single
 - **ID**: `kc-eyes-106`
@@ -948,6 +1134,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $18.0
 - **Size/Volume**: 1.5g
 - **Composition**: Aluminum Powder, Silica, Dimethicone, Mica
+
+#### Editorial: Artist Notes
 
 ---
 ### Smoke Define Gel Liner
@@ -959,6 +1147,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: 1.2g
 - **Composition**: Isododecane, Cyclopentasiloxane, Iron Oxides, Synthetic Wax
 
+#### Editorial: Artist Notes
+
 ---
 ### Smoky Obsidian Velvet Monolith Single
 - **ID**: `kc-eyes-105`
@@ -968,6 +1158,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $18.0
 - **Size/Volume**: 1.5g
 - **Composition**: Talc, Mica, Black 2 (CI 77266), Iron Oxides
+
+#### Editorial: Artist Notes
 
 ---
 ### Soft Definition Mascara
@@ -979,6 +1171,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: 8ml
 - **Composition**: Water, Carnauba Wax, Glycerin, Iron Oxides
 
+#### Editorial: Artist Notes
+
 ---
 ### Starlight Sparkle Celestial Chromatic Single
 - **ID**: `kc-eyes-102`
@@ -988,6 +1182,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $18.0
 - **Size/Volume**: 1.5g
 - **Composition**: Mica, Calcium Aluminum Borosilicate, Silica, Titanium Dioxide
+
+#### Editorial: Artist Notes
 
 ---
 ### Terracotta Sunset Velvet Monolith Single
@@ -999,6 +1195,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: 1.5g
 - **Composition**: Mica, Talc, Synthetic Fluorphlogopite, Iron Oxides, Red 40 Lake
 
+#### Editorial: Artist Notes
+
 ---
 ### Void Prime Liner
 - **ID**: `kc-eyeliner-205`
@@ -1008,6 +1206,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $17.0
 - **Size/Volume**: 1.2g
 - **Composition**: Titanium Dioxide, Caprylic/Capric Triglyceride, Synthetic Wax
+
+#### Editorial: Artist Notes
 
 ---
 ### Void Prime Mascara
@@ -1019,6 +1219,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: 8ml
 - **Composition**: Water, Titanium Dioxide, Glycerol Stearate, Cera Alba
 
+#### Editorial: Artist Notes
+
 ---
 ### Void Prime Tinted Gel
 - **ID**: `kc-eyebrow-308`
@@ -1029,6 +1231,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: 5ml
 - **Composition**: Water, Acrylates Copolymer, Blue 1 Lake, Ultramarines
 
+#### Editorial: Artist Notes
+
 ---
 ### Waterproof Define Mascara
 - **ID**: `kc-mascara-104`
@@ -1038,6 +1242,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $19.0
 - **Size/Volume**: 8ml
 - **Composition**: Isododecane, Trimethylsiloxysilicate, Iron Oxides
+
+#### Editorial: Artist Notes
 
 ---
 ## LIPS
@@ -1051,6 +1257,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: 3.5g
 - **Composition**: Ricinus Communis (Castor) Seed Oil, Dimethicone, Red 33 Lake, Blue 1 Lake, Iron Oxides
 
+#### Editorial: Artist Notes
+
 ---
 ### Blotted Lip Balm
 - **ID**: `kc-lips-02`
@@ -1060,6 +1268,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $21.0
 - **Size/Volume**: 3g
 - **Composition**: Caprylic/Capric Triglyceride, Ricinus Communis (Castor) Seed Oil, Microcrystalline Wax, Red 7 Lake, Shea Butter
+
+#### Editorial: Artist Notes
 
 ---
 ### Concrete Rose Lipstick
@@ -1071,6 +1281,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: 3.5g
 - **Composition**: Ricinus Communis (Castor) Seed Oil, Shea Butter, Titanium Dioxide, Iron Oxides, Blue 1 Lake
 
+#### Editorial: Artist Notes
+
 ---
 ### Dusty Orchid Lipstick
 - **ID**: `kc-lips-107`
@@ -1080,6 +1292,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $28.0
 - **Size/Volume**: 3.5g
 - **Composition**: Caprylic/Capric Triglyceride, Microcrystalline Wax, Titanium Dioxide, Red 7 Lake, Iron Oxides
+
+#### Editorial: Artist Notes
 
 ---
 ### Electric Coral Lipstick
@@ -1091,6 +1305,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: 3.5g
 - **Composition**: Ricinus Communis (Castor) Seed Oil, Carnauba Wax, Red 6 Lake, Yellow 5 Lake, Titanium Dioxide
 
+#### Editorial: Artist Notes
+
 ---
 ### Glow Catalyst Lip Stain
 - **ID**: `kc-lips-01`
@@ -1100,6 +1316,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $24.0
 - **Size/Volume**: 4ml
 - **Composition**: Water, Octyldodecanol, Trimethylsiloxyphenyl Dimethicone, Ethylcellulose, Red 28 Lake, Yellow 6 Lake
+
+#### Editorial: Artist Notes
 
 ---
 ### Midnight Crimson Lipstick
@@ -1111,6 +1329,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: 3.5g
 - **Composition**: Ricinus Communis (Castor) Seed Oil, Carnauba Wax, Dimethicone, Iron Oxides, Red 33 Lake
 
+#### Editorial: Artist Notes
+
 ---
 ### Obsidian Void Lipstick
 - **ID**: `kc-lips-108`
@@ -1120,6 +1340,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $28.0
 - **Size/Volume**: 3.5g
 - **Composition**: Ricinus Communis (Castor) Seed Oil, Beeswax, Black 2, Iron Oxides, Silica
+
+#### Editorial: Artist Notes
 
 ---
 ### Ruby Core Lipstick
@@ -1131,6 +1353,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: 3.5g
 - **Composition**: Ricinus Communis (Castor) Seed Oil, Microcrystalline Wax, Shea Butter, Red 7 Lake, Titanium Dioxide
 
+#### Editorial: Artist Notes
+
 ---
 ### Scarlet Siren Lipstick
 - **ID**: `kc-lips-104`
@@ -1141,6 +1365,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: 3.5g
 - **Composition**: Caprylic/Capric Triglyceride, Microcrystalline Wax, Red 28 Lake, Titanium Dioxide, Tocopherol
 
+#### Editorial: Artist Notes
+
 ---
 ### Terracotta Brick Lipstick
 - **ID**: `kc-lips-103`
@@ -1150,6 +1376,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $28.0
 - **Size/Volume**: 3.5g
 - **Composition**: Ricinus Communis (Castor) Seed Oil, Beeswax, Silica, Iron Oxides, Yellow 6 Lake
+
+#### Editorial: Artist Notes
 
 ---
 ## NAILS
@@ -1163,6 +1391,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: 15ml
 - **Composition**: Ethyl Acetate, Butyl Acetate, Nitrocellulose, Titanium Dioxide, Silica
 
+#### Editorial: Artist Notes
+
 ---
 ### Cobalt Core Polish
 - **ID**: `kc-nails-201`
@@ -1172,6 +1402,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $18.0
 - **Size/Volume**: 15ml
 - **Composition**: Ethyl Acetate, Butyl Acetate, Nitrocellulose, Isopropyl Alcohol, Blue 1 Lake
+
+#### Editorial: Artist Notes
 
 ---
 ### Concrete Slate Polish
@@ -1183,6 +1415,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: 15ml
 - **Composition**: Ethyl Acetate, Butyl Acetate, Nitrocellulose, Titanium Dioxide, Black 2
 
+#### Editorial: Artist Notes
+
 ---
 ### Digital Lavender Polish
 - **ID**: `kc-nails-204`
@@ -1192,6 +1426,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $18.0
 - **Size/Volume**: 15ml
 - **Composition**: Ethyl Acetate, Butyl Acetate, Nitrocellulose, Titanium Dioxide, Manganese Violet
+
+#### Editorial: Artist Notes
 
 ---
 ### Electric Tangerine Polish
@@ -1203,6 +1439,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: 15ml
 - **Composition**: Ethyl Acetate, Butyl Acetate, Nitrocellulose, Red 6 Lake, Yellow 5 Lake
 
+#### Editorial: Artist Notes
+
 ---
 ### Emerald Envy Polish
 - **ID**: `kc-nails-202`
@@ -1212,6 +1450,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $18.0
 - **Size/Volume**: 15ml
 - **Composition**: Ethyl Acetate, Butyl Acetate, Nitrocellulose, Yellow 5 Lake, Blue 1 Lake
+
+#### Editorial: Artist Notes
 
 ---
 ### Obsidian Void Polish
@@ -1223,6 +1463,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: 15ml
 - **Composition**: Ethyl Acetate, Butyl Acetate, Nitrocellulose, Black 2, Iron Oxides
 
+#### Editorial: Artist Notes
+
 ---
 ### Ruby Catalyst Polish
 - **ID**: `kc-nails-207`
@@ -1233,6 +1475,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: 15ml
 - **Composition**: Ethyl Acetate, Butyl Acetate, Nitrocellulose, Isopropyl Alcohol, Red 7 Lake
 
+#### Editorial: Artist Notes
+
 ---
 ### Solar Flare Polish
 - **ID**: `kc-nails-203`
@@ -1242,6 +1486,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $18.0
 - **Size/Volume**: 15ml
 - **Composition**: Ethyl Acetate, Butyl Acetate, Nitrocellulose, Silica, Yellow 5 Lake
+
+#### Editorial: Artist Notes
 
 ---
 ## PREP
@@ -1255,6 +1501,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: 30ml
 - **Composition**: Water, Ascorbic Acid (Vitamin C), Glycerin, Tocopherol, Sodium Hyaluronate
 
+#### Editorial: Artist Notes
+
 ---
 ### Melt-in Milk Sunscreen
 - **ID**: `kc-prep-03`
@@ -1265,6 +1513,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: 50ml
 - **Composition**: Water, Zinc Oxide, Caprylic/Capric Triglyceride, Squalane, Polyhydroxystearic Acid
 
+#### Editorial: Artist Notes
+
 ---
 ### Purifying Gel Cleanser
 - **ID**: `kc-prep-01`
@@ -1274,5 +1524,7 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Investment**: $18.0
 - **Size/Volume**: 150ml
 - **Composition**: Water, Glycerin, Sodium Cocoyl Glycinate, Citric Acid, Niacinamide
+
+#### Editorial: Artist Notes
 
 ---
