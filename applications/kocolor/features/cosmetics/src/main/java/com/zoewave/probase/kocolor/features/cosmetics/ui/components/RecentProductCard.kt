@@ -20,6 +20,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.zoewave.probase.core.ui.util.rememberBlurHashPainter
+import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.core.model.ritual.MicroCategory
@@ -40,7 +42,17 @@ fun RecentProductCard(
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             if (item.imageUrl != null) {
-                AsyncImage(model = item.imageUrl, contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                val placeholder = rememberBlurHashPainter(
+                    blurHash = item.blurhash,
+                    fallbackColor = parseColor(item.colorHex).copy(alpha = 0.1f)
+                )
+                AsyncImage(
+                    model = item.imageUrl, 
+                    contentDescription = null, 
+                    placeholder = placeholder,
+                    modifier = Modifier.fillMaxSize(), 
+                    contentScale = ContentScale.Crop
+                )
             }
             
             Surface(modifier = Modifier.padding(16.dp), color = Color.White.copy(alpha = 0.9f), shape = CircleShape) {

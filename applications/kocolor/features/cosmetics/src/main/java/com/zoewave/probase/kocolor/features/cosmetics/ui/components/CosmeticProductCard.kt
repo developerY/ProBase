@@ -18,6 +18,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.zoewave.probase.core.ui.util.rememberBlurHashPainter
 import com.zoewave.probase.features.graphics.colorpicker.util.isColorDark
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import com.zoewave.probase.kocolor.features.cosmetics.R
@@ -53,7 +54,14 @@ fun CosmeticProductCard(
                     contentAlignment = Alignment.Center
                 ) {
                     if (uiState.imageUrl != null) {
-                        AsyncImage(model = uiState.imageUrl, contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                        val placeholder = rememberBlurHashPainter(blurHash = uiState.blurhash)
+                        AsyncImage(
+                            model = uiState.imageUrl, 
+                            contentDescription = null, 
+                            placeholder = placeholder,
+                            modifier = Modifier.fillMaxSize(), 
+                            contentScale = ContentScale.Crop
+                        )
                     } else {
                         Icon(Icons.Default.AutoAwesome, null, tint = contentColor.copy(alpha = 0.5f))
                     }

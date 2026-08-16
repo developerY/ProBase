@@ -5,6 +5,8 @@ import android.graphics.drawable.BitmapDrawable
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.asImageBitmap
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
@@ -16,21 +18,28 @@ import kotlinx.coroutines.withContext
  * Offloads decoding to Dispatchers.Default to ensure 60fps scrolling.
  */
 @Composable
-fun rememberBlurHashPainter(blurHash: String?, width: Int = 32, height: Int = 32): Painter? {
-    if (blurHash == null) return null
-    
+fun rememberBlurHashPainter(
+    blurHash: String?, 
+    width: Int = 32, 
+    height: Int = 32,
+    fallbackColor: Color? = null
+): Painter? {
     val context = LocalContext.current
     
-    // Produce state runs asynchronously. It starts null and updates when the Bitmap is ready.
+    // Produce state runs asynchronously. It starts with null.
     val bitmapState = produceState<Bitmap?>(initialValue = null, blurHash) {
-        value = withContext(Dispatchers.Default) {
-            BlurHashDecoder.decode(blurHash, width, height)
+        if (blurHash != null) {
+            value = withContext(Dispatchers.Default) {
+                BlurHashDecoder.decode(blurHash, width, height, punch = 1.2f) // Increased punch for vibrancy
+            }
         }
     }
 
-    // Convert the native Bitmap to a Compose-friendly Painter
-    return bitmapState.value?.let { bitmap ->
+    val bitmap = bitmapState.value
+    return if (bitmap != null) {
         val drawable = BitmapDrawable(context.resources, bitmap)
         rememberDrawablePainter(drawable = drawable)
+    } else {
+        fallbackColor?.let { ColorPainter(it) }
     }
 }

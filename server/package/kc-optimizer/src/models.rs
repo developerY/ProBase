@@ -173,6 +173,7 @@ pub struct PackInfo {
     pub schema_version: u32,
     pub encryption: String,
     pub hero_image_url: Option<String>,
+    pub hero_blurhash: Option<String>,
     pub expires_at: Option<u64>,
     pub preview_items: Vec<PreviewItem>,
 }

@@ -63,6 +63,7 @@ import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.core.model.ritual.MicroCategory
 import com.zoewave.probase.core.ui.components.MakeItMineButton
 import com.zoewave.probase.core.ui.util.rememberBlurHashPainter
+import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import com.zoewave.probase.kocolor.features.cosmetics.R
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.ApplicationGuideSection
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.AtelierExpandableSection
@@ -343,7 +344,6 @@ fun CosmeticDetailScreen(
                 )
             }
 
-            // 2. Product Image Section
             Surface(
                 modifier = Modifier
                     .padding(horizontal = 24.dp, vertical = 8.dp)
@@ -355,7 +355,10 @@ fun CosmeticDetailScreen(
             ) {
                 Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(24.dp)) {
                     if (item.imageUrl != null) {
-                        val placeholder = rememberBlurHashPainter(blurHash = item.blurhash)
+                        val placeholder = rememberBlurHashPainter(
+                            blurHash = item.blurhash,
+                            fallbackColor = parseColor(item.colorHex).copy(alpha = 0.1f)
+                        )
                         AsyncImage(
                             model = item.imageUrl,
                             contentDescription = item.name,

@@ -19,6 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.zoewave.probase.core.ui.util.rememberBlurHashPainter
 import com.zoewave.probase.kocolor.db.entity.PackStatus
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.PackInfo
 
@@ -45,9 +46,15 @@ fun CatalogPackageCard(
                 .fillMaxWidth()
                 .height(200.dp)
             ) {
+                val placeholder = rememberBlurHashPainter(
+                    blurHash = pack.heroBlurHash,
+                    fallbackColor = Color.LightGray.copy(alpha = 0.1f)
+                )
+
                 AsyncImage(
                     model = pack.heroImageUrl ?: "https://cdn.kocolor.com/inventory/dist/assets/hero/${pack.id}.webp",
                     contentDescription = null,
+                    placeholder = placeholder,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
