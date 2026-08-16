@@ -19,7 +19,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
+import com.zoewave.probase.core.ui.util.parseColor
 import com.zoewave.probase.core.model.ritual.CosmeticItem
 
 data class RankingStatUiState(

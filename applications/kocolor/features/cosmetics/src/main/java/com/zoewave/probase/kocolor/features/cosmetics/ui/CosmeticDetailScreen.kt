@@ -61,7 +61,7 @@ import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.core.model.ritual.MicroCategory
 import com.zoewave.probase.core.ui.components.MakeItMineButton
 import com.zoewave.probase.core.ui.util.PremiumProductImage
-import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
+import com.zoewave.probase.core.ui.util.parseColor
 import com.zoewave.probase.kocolor.features.cosmetics.R
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.ApplicationGuideSection
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.AtelierExpandableSection

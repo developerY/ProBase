@@ -32,7 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
+import com.zoewave.probase.core.ui.util.parseColor
 
 @Composable
 fun VisualBlueprintSection(

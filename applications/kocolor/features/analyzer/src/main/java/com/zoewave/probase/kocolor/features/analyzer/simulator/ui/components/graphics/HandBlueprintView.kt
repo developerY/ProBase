@@ -30,7 +30,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
+import com.zoewave.probase.core.ui.util.parseColor
 import com.zoewave.probase.kocolor.features.analyzer.R
 
 @Composable

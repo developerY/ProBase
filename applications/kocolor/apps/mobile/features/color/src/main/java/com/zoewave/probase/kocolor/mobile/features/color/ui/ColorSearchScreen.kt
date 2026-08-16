@@ -62,8 +62,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.zoewave.probase.features.graphics.colorpicker.ui.ColorPickerDialog
-import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
-import com.zoewave.probase.features.graphics.colorpicker.util.toHex
+import com.zoewave.probase.core.ui.util.parseColor
+import com.zoewave.probase.core.ui.util.toHex
 import com.zoewave.probase.kocolor.features.colors.util.ColorScienceUtils
 import com.zoewave.probase.kocolor.mobile.features.color.R
 import com.zoewave.probase.kocolor.model.KoColorRoute

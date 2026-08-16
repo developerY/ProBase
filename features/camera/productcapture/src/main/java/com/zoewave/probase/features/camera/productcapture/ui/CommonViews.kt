@@ -25,8 +25,8 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import java.util.Locale
 import com.zoewave.probase.features.graphics.colorpicker.ui.ColorPickerDialog
-import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
-import com.zoewave.probase.features.graphics.colorpicker.util.toHex
+import com.zoewave.probase.core.ui.util.parseColor
+import com.zoewave.probase.core.ui.util.toHex
 
 @Composable
 fun AnalysisView(

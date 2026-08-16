@@ -45,9 +45,9 @@ import androidx.compose.ui.res.stringResource
 import com.zoewave.probase.kocolor.features.cosmetics.R
 import com.zoewave.probase.core.model.ritual.*
 import com.zoewave.probase.kocolor.model.KoColorRoute
-import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
+import com.zoewave.probase.core.ui.util.parseColor
 import com.zoewave.probase.features.graphics.colorpicker.ui.ColorPickerDialog
-import com.zoewave.probase.features.graphics.colorpicker.util.toHex
+import com.zoewave.probase.core.ui.util.toHex
 
 data class CosmeticEditUiState(
     val itemId: Long,

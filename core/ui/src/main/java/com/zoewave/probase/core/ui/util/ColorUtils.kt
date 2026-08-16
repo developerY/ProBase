@@ -1,14 +1,16 @@
-package com.zoewave.probase.features.graphics.colorpicker.util
+package com.zoewave.probase.core.ui.util
 
 import androidx.compose.ui.graphics.Color
 
 /**
  * Parses a hex color string to a Compose Color.
+ * Safely handles missing '#' prefix.
  * Returns [Color.Gray] if parsing fails.
  */
 fun parseColor(hex: String): Color {
     return try {
-        Color(android.graphics.Color.parseColor(hex))
+        val sanitizedHex = if (hex.startsWith("#")) hex else "#$hex"
+        Color(android.graphics.Color.parseColor(sanitizedHex))
     } catch (e: Exception) {
         Color.Gray
     }

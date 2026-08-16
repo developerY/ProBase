@@ -67,8 +67,8 @@ import com.zoewave.probase.features.camera.productcapture.ui.PriceConfirmationVi
 import com.zoewave.probase.features.camera.productcapture.ui.ProductCaptureSessionConfig
 import com.zoewave.probase.features.camera.productcapture.ui.ProductCaptureUiEvent
 import com.zoewave.probase.features.graphics.colorpicker.ui.ColorPickerDialog
-import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
-import com.zoewave.probase.features.graphics.colorpicker.util.toHex
+import com.zoewave.probase.core.ui.util.parseColor
+import com.zoewave.probase.core.ui.util.toHex
 import com.zoewave.probase.kocolor.features.boxcapture.ui.state.BoxCaptureUiState
 import com.zoewave.probase.kocolor.features.boxcapture.ui.state.CaptureMode
 import com.zoewave.probase.kocolor.features.boxcapture.ui.state.CaptureStep
