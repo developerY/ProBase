@@ -20,6 +20,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.zoewave.probase.core.ui.util.rememberBlurHashPainter
 import com.zoewave.probase.kocolor.db.entity.PackStatus
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.PackInfo
 
@@ -41,10 +42,16 @@ fun HeroPackageCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            // Background Image
+            // Background Image with BlurHash placeholder
+            val placeholder = rememberBlurHashPainter(
+                blurHash = pack.heroBlurHash,
+                fallbackColor = Color.LightGray.copy(alpha = 0.1f)
+            )
+
             AsyncImage(
                 model = pack.heroImageUrl ?: "https://cdn.kocolor.com/inventory/dist/assets/hero/kc-prep-01.webp",
                 contentDescription = null,
+                placeholder = placeholder,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
             )

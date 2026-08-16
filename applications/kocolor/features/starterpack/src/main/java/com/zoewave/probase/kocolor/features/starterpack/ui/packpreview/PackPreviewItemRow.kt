@@ -104,14 +104,17 @@ fun PackPreviewItemRow(
                     modifier = Modifier
                         .size(80.dp)
                         .clip(RoundedCornerShape(24.dp))
-                        .background(Color.White)
+                        .background(itemColor.copy(alpha = 0.1f)) // Show product tint while loading
                         .border(
                             width = 4.dp,
                             color = itemColor,
                             shape = RoundedCornerShape(24.dp)
                         )
                 ) {
-                    val placeholder = rememberBlurHashPainter(blurHash = item.blurhash)
+                    val placeholder = rememberBlurHashPainter(
+                        blurHash = item.blurhash,
+                        fallbackColor = itemColor.copy(alpha = 0.1f)
+                    )
 
                     AsyncImage(
                         model = item.thumbnailUrl,

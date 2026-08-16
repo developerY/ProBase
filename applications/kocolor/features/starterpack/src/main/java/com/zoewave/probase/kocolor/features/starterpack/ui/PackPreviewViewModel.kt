@@ -32,6 +32,7 @@ data class PackPreviewUiState(
     val sortByValue: Boolean = false,
     val selectedItemNotes: ProductEditorialNotes? = null,
     val selectedItemThumbnail: String? = null,
+    val selectedItemBlurHash: String? = null,
     val selectedItemColor: String? = null,
     val isNotesLoading: Boolean = false
 )
@@ -216,12 +217,14 @@ class PackPreviewViewModel @Inject constructor(
     fun onItemInfoClick(itemId: String) {
         val item = _uiState.value.items.find { it.id == itemId }
         val thumbnail = item?.thumbnailUrl
+        val blurhash = item?.blurhash
         val color = item?.colorHex
         viewModelScope.launch {
             _uiState.update { it.copy(
                 isNotesLoading = true, 
                 selectedItemNotes = null, 
                 selectedItemThumbnail = thumbnail,
+                selectedItemBlurHash = blurhash,
                 selectedItemColor = color
             ) }
             repository.getProductEditorialNotes(itemId)
@@ -235,6 +238,6 @@ class PackPreviewViewModel @Inject constructor(
     }
 
     fun onDismissNotes() {
-        _uiState.update { it.copy(selectedItemNotes = null, selectedItemThumbnail = null, selectedItemColor = null) }
+        _uiState.update { it.copy(selectedItemNotes = null, selectedItemThumbnail = null, selectedItemBlurHash = null, selectedItemColor = null) }
     }
 }

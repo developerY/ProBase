@@ -35,6 +35,7 @@ data class PackInfo(
     @SerialName("schema_version") val schemaVersion: Int,
     val encryption: String,
     @SerialName("hero_image_url") val heroImageUrl: String? = null,
+    @SerialName("hero_blurhash") val heroBlurHash: String? = null,
     @SerialName("expires_at") val expiresAt: Long? = null,
     @SerialName("preview_items") val previewItems: List<PreviewItem> = emptyList()
 )

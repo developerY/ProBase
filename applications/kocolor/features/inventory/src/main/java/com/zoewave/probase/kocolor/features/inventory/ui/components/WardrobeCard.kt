@@ -21,6 +21,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.zoewave.probase.core.ui.util.rememberBlurHashPainter
 import com.zoewave.probase.kocolor.features.inventory.R
 import com.zoewave.probase.kocolor.features.inventory.util.toComposeColor
 import com.zoewave.probase.core.model.ritual.ClothingCategory
@@ -51,9 +52,14 @@ fun WardrobeCard(
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             if (uiState.imageUrl != null) {
+                val placeholder = rememberBlurHashPainter(
+                    blurHash = uiState.blurhash,
+                    fallbackColor = bgColor.copy(alpha = 0.1f)
+                )
                 AsyncImage(
                     model = uiState.imageUrl,
                     contentDescription = null,
+                    placeholder = placeholder,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )

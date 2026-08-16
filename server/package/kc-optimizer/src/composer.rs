@@ -184,6 +184,10 @@ pub fn assemble_packages(
                 .map(|p| p.thumbnail_url.clone())
                 .or_else(|| package_payload.clothing.first().map(|p| p.thumbnail_url.clone()));
 
+            let hero_blurhash = package_payload.cosmetics.first()
+                .and_then(|p| p.blurhash.clone())
+                .or_else(|| package_payload.clothing.first().and_then(|p| p.blurhash.clone()));
+
             manifest_records.push(PackInfo {
                 id: manifest.package_metadata.id.clone(),
                 name: manifest.package_metadata.name.clone(),
@@ -206,6 +210,7 @@ pub fn assemble_packages(
                 schema_version: 1,
                 encryption: "none".to_string(),
                 hero_image_url,
+                hero_blurhash,
                 expires_at: None,
                 preview_items,
             });
