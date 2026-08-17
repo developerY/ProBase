@@ -1,6 +1,19 @@
 {
   "product_id": "kc-lips-02",
-  "card_title": "Artist Notes",
+  "card_title": "Artist Notes: Blotted Lip Balm",
   "description": null,
-  "dynamic_attributes": []
+  "dynamic_attributes": [
+    {
+      "label": "Usage Notes",
+      "body": "Placeholder balm notes for kc-lips-02. High-fidelity performance ensured."
+    },
+    {
+      "label": "Expert Tip",
+      "body": "For optimal chromatic impact, apply kc-lips-02 to a clean, prepped surface."
+    },
+    {
+      "label": "Formulation Insight",
+      "body": "Advanced balm engineering featuring high-purity pigments and volatile carriers."
+    }
+  ]
 }

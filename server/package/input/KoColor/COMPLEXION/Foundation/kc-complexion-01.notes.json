@@ -1,6 +1,19 @@
 {
   "product_id": "kc-complexion-01",
-  "card_title": "Artist Notes",
+  "card_title": "Artist Notes: Seamless Silk Foundation",
   "description": null,
-  "dynamic_attributes": []
+  "dynamic_attributes": [
+    {
+      "label": "Usage Notes",
+      "body": "Placeholder foundation notes for kc-complexion-01. High-fidelity performance ensured."
+    },
+    {
+      "label": "Expert Tip",
+      "body": "For optimal chromatic impact, apply kc-complexion-01 to a clean, prepped surface."
+    },
+    {
+      "label": "Formulation Insight",
+      "body": "Advanced foundation engineering featuring high-purity pigments and volatile carriers."
+    }
+  ]
 }
