@@ -4,11 +4,11 @@ use std::fs;
 use std::path::Path;
 use walkdir::WalkDir;
 
-pub fn process_and_flatten_assets(input_dir: &Path, dist_dir: &Path) -> Result<()> {
+pub fn process_and_flatten_assets(input_dir: &Path, inventory_dir: &Path) -> Result<()> {
     println!("🧹 Preparing distribution directories...");
 
     // The "Source of Truth" for the ZIP bundle
-    let deployment_dir = dist_dir.join("deployment");
+    let deployment_dir = inventory_dir.join("dist");
 
     // Create flattened structure inside deployment directory
     let hero_dir = deployment_dir.join("assets/hero");

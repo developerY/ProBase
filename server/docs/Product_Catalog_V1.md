@@ -13,7 +13,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size 8.5
 - **Composition**: Full Grain Leather, Chunky Rubber Lug Sole
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Adventurer Plum Platforms
+**Fabric Insight**: High-fidelity composition: Full Grain Leather, Chunky Rubber Lug Sole. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this SHOES with neutral foundational layers to emphasize the Plum Platform Boot profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Aesthetic Pink Sneakers
@@ -25,7 +31,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size 7.5
 - **Composition**: Vegan Leather Upper, EVA Foam Sole
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Aesthetic Pink Sneakers
+**Fabric Insight**: High-fidelity composition: Vegan Leather Upper, EVA Foam Sole. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this SHOES with neutral foundational layers to emphasize the Aesthetic Pink Chunk profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Arcadia Blue Denim
@@ -37,7 +49,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size 28
 - **Composition**: 100% Rigid Raw Denim, Copper Hardware
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Arcadia Blue Denim
+**Fabric Insight**: High-fidelity composition: 100% Rigid Raw Denim, Copper Hardware. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this PANTS with neutral foundational layers to emphasize the Arcadia Wide Leg profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Arcadia Blue Oversized Denim Trucker
@@ -49,7 +67,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size M
 - **Composition**: 100% Heavyweight Organic Cotton Denim
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Arcadia Blue Oversized Denim Trucker
+**Fabric Insight**: High-fidelity composition: 100% Heavyweight Organic Cotton Denim. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this OUTERWEAR with neutral foundational layers to emphasize the Arcadia Denim Trucker profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Arcadia Blue Track Jacket
@@ -61,7 +85,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size M
 - **Composition**: 100% Tricot Polyester, Ribbed Cuffs, Zip Pockets
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Arcadia Blue Track Jacket
+**Fabric Insight**: High-fidelity composition: 100% Tricot Polyester, Ribbed Cuffs, Zip Pockets. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this ACTIVEWEAR with neutral foundational layers to emphasize the Arcadia Blue Track Jacket profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Arcadia Blue Utility Jumpsuit
@@ -73,7 +103,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size M
 - **Composition**: 100% Cotton Twill, Brass Zip Closure, Cargo Pockets
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Arcadia Blue Utility Jumpsuit
+**Fabric Insight**: High-fidelity composition: 100% Cotton Twill, Brass Zip Closure, Cargo Pockets. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this ONE_PIECE with neutral foundational layers to emphasize the Arcadia Utility Jumpsuit profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Camel Ankle Boots
@@ -85,7 +121,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size 9
 - **Composition**: 100% Suede, Wood Block Heel
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Camel Ankle Boots
+**Fabric Insight**: High-fidelity composition: 100% Suede, Wood Block Heel. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this SHOES with neutral foundational layers to emphasize the Camel Desert Boot profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Comforting Khaki Cargo
@@ -97,7 +139,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size M
 - **Composition**: 100% Cotton Twill
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Comforting Khaki Cargo
+**Fabric Insight**: High-fidelity composition: 100% Cotton Twill. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this PANTS with neutral foundational layers to emphasize the Comfort Khaki Cargo profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Comforting Khaki Ribbed Tank
@@ -109,7 +157,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size S
 - **Composition**: 90% Modal, 10% Spandex, Racerback Design
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Comforting Khaki Ribbed Tank
+**Fabric Insight**: High-fidelity composition: 90% Modal, 10% Spandex, Racerback Design. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this ACTIVEWEAR with neutral foundational layers to emphasize the Comfort Khaki Ribbed Tank profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Comforting Khaki Shearling Vest
@@ -121,7 +175,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size M
 - **Composition**: Faux Shearling, Faux Suede Backing
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Comforting Khaki Shearling Vest
+**Fabric Insight**: High-fidelity composition: Faux Shearling, Faux Suede Backing. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this OUTERWEAR with neutral foundational layers to emphasize the Comfort Khaki Shearling Vest profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Crisp White Denim Dungarees
@@ -133,7 +193,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size M
 - **Composition**: 100% Rigid Organic Denim, Silver-Tone Hardware
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Crisp White Denim Dungarees
+**Fabric Insight**: High-fidelity composition: 100% Rigid Organic Denim, Silver-Tone Hardware. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this ONE_PIECE with neutral foundational layers to emphasize the Crisp White Dungarees profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Crisp White Tennis
@@ -145,7 +211,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size 9.5
 - **Composition**: Leather Upper, Orthopedic Insole
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Crisp White Tennis
+**Fabric Insight**: High-fidelity composition: Leather Upper, Orthopedic Insole. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this SHOES with neutral foundational layers to emphasize the Canvas White Court profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Crisp White Tennis Skirt
@@ -157,7 +229,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size S
 - **Composition**: 88% Polyester, 12% Spandex, Built-in Compression Shorts
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Crisp White Tennis Skirt
+**Fabric Insight**: High-fidelity composition: 88% Polyester, 12% Spandex, Built-in Compression Shorts. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this ACTIVEWEAR with neutral foundational layers to emphasize the Crisp White Tennis Skirt profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Dark Brown Leather
@@ -169,7 +247,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size 26
 - **Composition**: 100% Vegan Polyurethane Leather, Viscose Lining
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Dark Brown Leather
+**Fabric Insight**: High-fidelity composition: 100% Vegan Polyurethane Leather, Viscose Lining. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this PANTS with neutral foundational layers to emphasize the Soothing Brown Leather profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Deep Obsidian Chelsea
@@ -181,7 +265,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size 8
 - **Composition**: Matte Leather, Elastic Gusset
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Deep Obsidian Chelsea
+**Fabric Insight**: High-fidelity composition: Matte Leather, Elastic Gusset. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this SHOES with neutral foundational layers to emphasize the Obsidian Chelsea Boot profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Digital Lavender Oversized Tee
@@ -193,7 +283,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size XL
 - **Composition**: 100% Heavyweight Cotton
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Digital Lavender Oversized Tee
+**Fabric Insight**: High-fidelity composition: 100% Heavyweight Cotton. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this SHIRT with neutral foundational layers to emphasize the Digital Lavender Tee profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Digital Lavender Ribbed Duster
@@ -205,7 +301,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size M
 - **Composition**: 60% Alpaca Wool, 40% Organic Cotton
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Digital Lavender Ribbed Duster
+**Fabric Insight**: High-fidelity composition: 60% Alpaca Wool, 40% Organic Cotton. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this OUTERWEAR with neutral foundational layers to emphasize the Digital Lavender Duster profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Digital Lavender Satin Slip
@@ -217,7 +319,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size S
 - **Composition**: 100% Mulberry Silk, Adjustable Spaghetti Straps
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Digital Lavender Satin Slip
+**Fabric Insight**: High-fidelity composition: 100% Mulberry Silk, Adjustable Spaghetti Straps. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this DRESS with neutral foundational layers to emphasize the Digital Lavender Slip profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Digital Lavender Sports Bra
@@ -229,7 +337,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size S
 - **Composition**: 75% Nylon, 25% Spandex, Moisture-Wicking Finish
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Digital Lavender Sports Bra
+**Fabric Insight**: High-fidelity composition: 75% Nylon, 25% Spandex, Moisture-Wicking Finish. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this ACTIVEWEAR with neutral foundational layers to emphasize the Digital Lavender Seamless Bra profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Divine Damson Heels
@@ -241,7 +355,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size 6.5
 - **Composition**: Patent Leather, Resin Sole
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Divine Damson Heels
+**Fabric Insight**: High-fidelity composition: Patent Leather, Resin Sole. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this SHOES with neutral foundational layers to emphasize the Divine Damson Stiletto profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Electric Coral Cropped Hoodie
@@ -253,7 +373,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size L
 - **Composition**: 100% French Terry Cotton, Drawstring Hood
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Electric Coral Cropped Hoodie
+**Fabric Insight**: High-fidelity composition: 100% French Terry Cotton, Drawstring Hood. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this ACTIVEWEAR with neutral foundational layers to emphasize the Electric Coral Zip Hoodie profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Electric Coral Utility Windbreaker
@@ -265,7 +391,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size S
 - **Composition**: 100% Ripstop Nylon, Breathable Mesh Lining
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Electric Coral Utility Windbreaker
+**Fabric Insight**: High-fidelity composition: 100% Ripstop Nylon, Breathable Mesh Lining. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this OUTERWEAR with neutral foundational layers to emphasize the Electric Coral Windbreaker profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Hidden Gem Pleated
@@ -277,7 +409,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size 29
 - **Composition**: Wool Blend, Recycled Polyester
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Hidden Gem Pleated
+**Fabric Insight**: High-fidelity composition: Wool Blend, Recycled Polyester. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this PANTS with neutral foundational layers to emphasize the Hidden Gem Jade Trousers profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Mellow Flow Blue Jeans
@@ -289,7 +427,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size 30
 - **Composition**: 98% Cotton, 2% Elastane
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Mellow Flow Blue Jeans
+**Fabric Insight**: High-fidelity composition: 98% Cotton, 2% Elastane. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this PANTS with neutral foundational layers to emphasize the Mellow Flow Mom Jeans profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Melodious Ivory Culottes
@@ -301,7 +445,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size L
 - **Composition**: 100% Linen
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Melodious Ivory Culottes
+**Fabric Insight**: High-fidelity composition: 100% Linen. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this PANTS with neutral foundational layers to emphasize the Melodious Ivory Culottes profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Midnight Crimson Maxi
@@ -313,7 +463,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size S
 - **Composition**: Silk Chiffon, Off-the-Shoulder Neckline, Fully Lined
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Midnight Crimson Maxi
+**Fabric Insight**: High-fidelity composition: Silk Chiffon, Off-the-Shoulder Neckline, Fully Lined. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this DRESS with neutral foundational layers to emphasize the Midnight Crimson Maxi profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Midnight Crimson Velvet
@@ -325,7 +481,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size M
 - **Composition**: Silk Velvet Blend, Recycled Polyester
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Midnight Crimson Velvet
+**Fabric Insight**: High-fidelity composition: Silk Velvet Blend, Recycled Polyester. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this SHIRT with neutral foundational layers to emphasize the Midnight Crimson Velvet profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Midnight Crimson Wool Overcoat
@@ -337,7 +499,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size S
 - **Composition**: 85% Virgin Wool, 15% Cashmere, Cupro Lining
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Midnight Crimson Wool Overcoat
+**Fabric Insight**: High-fidelity composition: 85% Virgin Wool, 15% Cashmere, Cupro Lining. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this OUTERWEAR with neutral foundational layers to emphasize the Midnight Crimson Overcoat profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Obsidian High-Waisted Leggings
@@ -349,7 +517,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size M
 - **Composition**: 80% Recycled Polyester, 20% Elastane, Squat-Proof Interlock
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Obsidian High-Waisted Leggings
+**Fabric Insight**: High-fidelity composition: 80% Recycled Polyester, 20% Elastane, Squat-Proof Interlock. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this ACTIVEWEAR with neutral foundational layers to emphasize the Obsidian Void Leggings profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Obsidian Moto Leather Jacket
@@ -361,7 +535,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size S
 - **Composition**: 100% Supple Lambskin Leather, Silver-Tone Hardware, Satin Lining
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Obsidian Moto Leather Jacket
+**Fabric Insight**: High-fidelity composition: 100% Supple Lambskin Leather, Silver-Tone Hardware, Satin Lining. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this OUTERWEAR with neutral foundational layers to emphasize the Obsidian Moto Leather profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Obsidian Ribbed Knit
@@ -373,7 +553,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size S
 - **Composition**: Cotton Knit, Elastane
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Obsidian Ribbed Knit
+**Fabric Insight**: High-fidelity composition: Cotton Knit, Elastane. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this SHIRT with neutral foundational layers to emphasize the Obsidian Void Knit profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Obsidian Void A-Line Mini
@@ -385,7 +571,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size S
 - **Composition**: Heavyweight Cotton Ponte, Square Neckline, Hidden Back Zip
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Obsidian Void A-Line Mini
+**Fabric Insight**: High-fidelity composition: Heavyweight Cotton Ponte, Square Neckline, Hidden Back Zip. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this DRESS with neutral foundational layers to emphasize the Obsidian Void Mini profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Olive Spruce Biker Shorts
@@ -397,7 +589,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size M
 - **Composition**: 75% Nylon, 25% Lycra, Seamless Construction
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Olive Spruce Biker Shorts
+**Fabric Insight**: High-fidelity composition: 75% Nylon, 25% Lycra, Seamless Construction. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this ACTIVEWEAR with neutral foundational layers to emphasize the Olive Spruce Biker Short profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Olive Spruce Blazer Dress
@@ -409,7 +607,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size S
 - **Composition**: Structured Wool Blend, Satin Lapels, Double-Breasted Buttons
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Olive Spruce Blazer Dress
+**Fabric Insight**: High-fidelity composition: Structured Wool Blend, Satin Lapels, Double-Breasted Buttons. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this DRESS with neutral foundational layers to emphasize the Olive Spruce Blazer Dress profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Olive Spruce Blouse
@@ -421,7 +625,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size M
 - **Composition**: 100% Mulberry Silk, Eco-friendly Dye
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Olive Spruce Blouse
+**Fabric Insight**: High-fidelity composition: 100% Mulberry Silk, Eco-friendly Dye. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this SHIRT with neutral foundational layers to emphasize the Olive Spruce Silk profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Olive Spruce Double-Breasted Blazer
@@ -433,7 +643,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size M
 - **Composition**: 70% Wool, 28% Recycled Polyester, 2% Elastane
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Olive Spruce Double-Breasted Blazer
+**Fabric Insight**: High-fidelity composition: 70% Wool, 28% Recycled Polyester, 2% Elastane. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this OUTERWEAR with neutral foundational layers to emphasize the Olive Spruce Blazer profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Pastel Blue Loafers
@@ -445,7 +661,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size 8
 - **Composition**: Suede Leather, Rubber Sole
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Pastel Blue Loafers
+**Fabric Insight**: High-fidelity composition: Suede Leather, Rubber Sole. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this SHOES with neutral foundational layers to emphasize the Pastel Blue Loafer profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Pure White Oxford
@@ -457,7 +679,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size M
 - **Composition**: 100% Supima Cotton
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Pure White Oxford
+**Fabric Insight**: High-fidelity composition: 100% Supima Cotton. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this SHIRT with neutral foundational layers to emphasize the Crisp White Oxford profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Rouge Strappy Sandals
@@ -469,7 +697,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size 7
 - **Composition**: Vegan Silk Satin, Ankle Tie
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Rouge Strappy Sandals
+**Fabric Insight**: High-fidelity composition: Vegan Silk Satin, Ankle Tie. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this SHOES with neutral foundational layers to emphasize the Rouge Strappy Heel profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Slow Swing Navy Slacks
@@ -481,7 +715,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size 28
 - **Composition**: Viscose, Polyester, Elastane
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Slow Swing Navy Slacks
+**Fabric Insight**: High-fidelity composition: Viscose, Polyester, Elastane. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this PANTS with neutral foundational layers to emphasize the Slow Swing Slacks profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Soft Rose Gold Camisole
@@ -493,7 +733,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size S
 - **Composition**: 100% Satin Polyester, Lace Trim
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Soft Rose Gold Camisole
+**Fabric Insight**: High-fidelity composition: 100% Satin Polyester, Lace Trim. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this SHIRT with neutral foundational layers to emphasize the Soft Rose Camisole profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Transformative Teal Cropped Puffer
@@ -505,7 +751,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size L
 - **Composition**: 100% Recycled Nylon Shell, 700-Fill Goose Down Insulation
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Transformative Teal Cropped Puffer
+**Fabric Insight**: High-fidelity composition: 100% Recycled Nylon Shell, 700-Fill Goose Down Insulation. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this OUTERWEAR with neutral foundational layers to emphasize the Transformative Teal Puffer profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Transformative Teal Performance Windshirt
@@ -517,7 +769,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size M
 - **Composition**: 100% Micro-Ripstop Nylon, DWR Water Repellent, Laser-Cut Venting
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Transformative Teal Performance Windshirt
+**Fabric Insight**: High-fidelity composition: 100% Micro-Ripstop Nylon, DWR Water Repellent, Laser-Cut Venting. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this ACTIVEWEAR with neutral foundational layers to emphasize the Transformative Teal Windshirt profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Transformative Teal Turtleneck
@@ -529,7 +787,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size M
 - **Composition**: 80% Merino Wool, 20% Cashmere
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Transformative Teal Turtleneck
+**Fabric Insight**: High-fidelity composition: 80% Merino Wool, 20% Cashmere. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this SHIRT with neutral foundational layers to emphasize the Transformative Teal Knit profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Transformative Teal Wrap Dress
@@ -541,7 +805,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size L
 - **Composition**: Eco-Vero Viscose, Tie-Waist, Ruffle Hem
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Transformative Teal Wrap Dress
+**Fabric Insight**: High-fidelity composition: Eco-Vero Viscose, Tie-Waist, Ruffle Hem. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this DRESS with neutral foundational layers to emphasize the Transformative Teal Wrap profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### True Black Flared Leggings
@@ -553,7 +823,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size M
 - **Composition**: 80% Nylon, 20% Spandex
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: True Black Flared Leggings
+**Fabric Insight**: High-fidelity composition: 80% Nylon, 20% Spandex. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this PANTS with neutral foundational layers to emphasize the Obsidian Flare profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Universal Khaki Button-Down
@@ -565,7 +841,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size L
 - **Composition**: 100% European Flax Linen
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Universal Khaki Button-Down
+**Fabric Insight**: High-fidelity composition: 100% European Flax Linen. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this SHIRT with neutral foundational layers to emphasize the Universal Khaki Linen profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Universal Khaki Oversized Sweatpants
@@ -577,7 +859,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size L
 - **Composition**: 80% Organic Cotton, 20% Recycled Polyester Fleece
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Universal Khaki Oversized Sweatpants
+**Fabric Insight**: High-fidelity composition: 80% Organic Cotton, 20% Recycled Polyester Fleece. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this ACTIVEWEAR with neutral foundational layers to emphasize the Universal Khaki Sweatpants profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Universal Khaki Ribbed Midi
@@ -589,7 +877,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size M
 - **Composition**: Cotton Blend Knit, Elastane for Stretch, Side Slit
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Universal Khaki Ribbed Midi
+**Fabric Insight**: High-fidelity composition: Cotton Blend Knit, Elastane for Stretch, Side Slit. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this DRESS with neutral foundational layers to emphasize the Universal Khaki Midi profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Universal Khaki Trench Coat
@@ -601,7 +895,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size M
 - **Composition**: 100% Cotton Gabardine, Water-Repellent Coating, Horn Buttons
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Universal Khaki Trench Coat
+**Fabric Insight**: High-fidelity composition: 100% Cotton Gabardine, Water-Repellent Coating, Horn Buttons. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this OUTERWEAR with neutral foundational layers to emphasize the Universal Khaki Trench profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Warm Eucalyptus Flats
@@ -613,7 +913,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size 7
 - **Composition**: Organic Cotton Canvas, Jute Trim
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Warm Eucalyptus Flats
+**Fabric Insight**: High-fidelity composition: Organic Cotton Canvas, Jute Trim. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this SHOES with neutral foundational layers to emphasize the Eucalyptus Canvas Flat profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Warm Mahogany Corduroy
@@ -625,7 +931,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size 27
 - **Composition**: 100% Cotton Wale Corduroy
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Warm Mahogany Corduroy
+**Fabric Insight**: High-fidelity composition: 100% Cotton Wale Corduroy. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this PANTS with neutral foundational layers to emphasize the Mahogany Corduroy profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Warm Terracotta Crop
@@ -637,7 +949,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size S
 - **Composition**: 95% Organic Cotton, 5% Spandex
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Warm Terracotta Crop
+**Fabric Insight**: High-fidelity composition: 95% Organic Cotton, 5% Spandex. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this SHIRT with neutral foundational layers to emphasize the Warm Terracotta Crop profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ### Warm Terracotta Linen Sundress
@@ -649,7 +967,13 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 - **Size/Volume**: Size M
 - **Composition**: 100% European Flax Linen, Smocked Back, Tiered Skirt
 
-#### Editorial: Artist Notes
+#### Editorial: Style Notes: Warm Terracotta Linen Sundress
+**Fabric Insight**: High-fidelity composition: 100% European Flax Linen, Smocked Back, Tiered Skirt. Engineered for structural integrity and chromatic retention.
+
+**Styling Suggestion**: Pair this DRESS with neutral foundational layers to emphasize the Warm Terracotta Linen profile.
+
+**Sustainability Score**: Scientific Grade A. Ethical sourcing verified via Atelier supply chain protocol.
+
 
 ---
 ## COMPLEXION
