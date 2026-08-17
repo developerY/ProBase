@@ -42,5 +42,11 @@ google-services-zoewave.json
 /server/package/dist/
 /server/package/input
 
+# Image Maker
+/server/utils/ImageSplit/input_images/
+/server/utils/ImageSplit/output_slices/
+/server/utils/ImageSplit/target/
+
+
 # Security & Keys
 **/.env
