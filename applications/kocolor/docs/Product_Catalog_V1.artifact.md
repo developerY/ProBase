@@ -5,6 +5,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 ## APPAREL
 
 ### Adventurer Plum Platforms
+*Priced at $210.0 (Size 8.5), this KoColor SHOES product features a Full Grain Leather, Chunky Rubber Lug Sole composition. Showcasing the Plum Platform Boot color profile (`#593B3F`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-shoes-506`
 - **Brand**: KoColor
 - **Micro Category**: SHOES
@@ -23,6 +25,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Aesthetic Pink Sneakers
+*Priced at $140.0 (Size 7.5), this KoColor SHOES product features a Vegan Leather Upper, EVA Foam Sole composition. Showcasing the Aesthetic Pink Chunk color profile (`#FFC0CB`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-shoes-501`
 - **Brand**: KoColor
 - **Micro Category**: SHOES
@@ -41,6 +45,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Arcadia Blue Denim
+*Priced at $110.0 (Size 28), this KoColor PANTS product features a 100% Rigid Raw Denim, Copper Hardware composition. Showcasing the Arcadia Wide Leg color profile (`#252C58`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-pants-401`
 - **Brand**: KoColor
 - **Micro Category**: PANTS
@@ -59,6 +65,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Arcadia Blue Oversized Denim Trucker
+*Priced at $135.0 (Size M), this KoColor OUTERWEAR product features a 100% Heavyweight Organic Cotton Denim composition. Showcasing the Arcadia Denim Trucker color profile (`#252C58`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-outerwear-705`
 - **Brand**: KoColor
 - **Micro Category**: OUTERWEAR
@@ -77,6 +85,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Arcadia Blue Track Jacket
+*Priced at $85.0 (Size M), this KoColor ACTIVEWEAR product features a 100% Tricot Polyester, Ribbed Cuffs, Zip Pockets composition. Showcasing the Arcadia Blue Track Jacket color profile (`#252C58`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-active-805`
 - **Brand**: KoColor
 - **Micro Category**: ACTIVEWEAR
@@ -95,6 +105,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Arcadia Blue Utility Jumpsuit
+*Priced at $135.0 (Size M), this KoColor ONE_PIECE product features a 100% Cotton Twill, Brass Zip Closure, Cargo Pockets composition. Showcasing the Arcadia Utility Jumpsuit color profile (`#252C58`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-dresses-603`
 - **Brand**: KoColor
 - **Micro Category**: ONE_PIECE
@@ -113,6 +125,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Camel Ankle Boots
+*Priced at $160.0 (Size 9), this KoColor SHOES product features a 100% Suede, Wood Block Heel composition. Showcasing the Camel Desert Boot color profile (`#BDA06A`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-shoes-503`
 - **Brand**: KoColor
 - **Micro Category**: SHOES
@@ -131,6 +145,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Comforting Khaki Cargo
+*Priced at $95.0 (Size M), this KoColor PANTS product features a 100% Cotton Twill composition. Showcasing the Comfort Khaki Cargo color profile (`#DBCAB7`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-pants-403`
 - **Brand**: KoColor
 - **Micro Category**: PANTS
@@ -149,6 +165,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Comforting Khaki Ribbed Tank
+*Priced at $35.0 (Size S), this KoColor ACTIVEWEAR product features a 90% Modal, 10% Spandex, Racerback Design composition. Showcasing the Comfort Khaki Ribbed Tank color profile (`#DBCAB7`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-active-807`
 - **Brand**: KoColor
 - **Micro Category**: ACTIVEWEAR
@@ -167,6 +185,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Comforting Khaki Shearling Vest
+*Priced at $150.0 (Size M), this KoColor OUTERWEAR product features a Faux Shearling, Faux Suede Backing composition. Showcasing the Comfort Khaki Shearling Vest color profile (`#DBCAB7`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-outerwear-709`
 - **Brand**: KoColor
 - **Micro Category**: OUTERWEAR
@@ -185,6 +205,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Crisp White Denim Dungarees
+*Priced at $120.0 (Size M), this KoColor ONE_PIECE product features a 100% Rigid Organic Denim, Silver-Tone Hardware composition. Showcasing the Crisp White Dungarees color profile (`#FFFFFF`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-dresses-606`
 - **Brand**: KoColor
 - **Micro Category**: ONE_PIECE
@@ -203,6 +225,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Crisp White Tennis
+*Priced at $110.0 (Size 9.5), this KoColor SHOES product features a Leather Upper, Orthopedic Insole composition. Showcasing the Canvas White Court color profile (`#FFFFFF`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-shoes-508`
 - **Brand**: KoColor
 - **Micro Category**: SHOES
@@ -221,6 +245,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Crisp White Tennis Skirt
+*Priced at $55.0 (Size S), this KoColor ACTIVEWEAR product features an 88% Polyester, 12% Spandex, Built-in Compression Shorts composition. Showcasing the Crisp White Tennis Skirt color profile (`#FFFFFF`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-active-804`
 - **Brand**: KoColor
 - **Micro Category**: ACTIVEWEAR
@@ -239,6 +265,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Dark Brown Leather
+*Priced at $185.0 (Size 26), this KoColor PANTS product features a 100% Vegan Polyurethane Leather, Viscose Lining composition. Showcasing the Soothing Brown Leather color profile (`#3F2933`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-pants-402`
 - **Brand**: KoColor
 - **Micro Category**: PANTS
@@ -257,6 +285,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Deep Obsidian Chelsea
+*Priced at $180.0 (Size 8), this KoColor SHOES product features a Matte Leather, Elastic Gusset composition. Showcasing the Obsidian Chelsea Boot color profile (`#0F0F0F`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-shoes-509`
 - **Brand**: KoColor
 - **Micro Category**: SHOES
@@ -275,6 +305,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Digital Lavender Oversized Tee
+*Priced at $35.0 (Size XL), this KoColor SHIRT product features a 100% Heavyweight Cotton composition. Showcasing the Digital Lavender Tee color profile (`#E6E6FA`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-shirts-306`
 - **Brand**: KoColor
 - **Micro Category**: SHIRT
@@ -293,6 +325,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Digital Lavender Ribbed Duster
+*Priced at $115.0 (Size M), this KoColor OUTERWEAR product features a 60% Alpaca Wool, 40% Organic Cotton composition. Showcasing the Digital Lavender Duster color profile (`#E6E6FA`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-outerwear-707`
 - **Brand**: KoColor
 - **Micro Category**: OUTERWEAR
@@ -311,6 +345,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Digital Lavender Satin Slip
+*Priced at $85.0 (Size S), this KoColor DRESS product features a 100% Mulberry Silk, Adjustable Spaghetti Straps composition. Showcasing the Digital Lavender Slip color profile (`#E6E6FA`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-dresses-601`
 - **Brand**: KoColor
 - **Micro Category**: DRESS
@@ -329,6 +365,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Digital Lavender Sports Bra
+*Priced at $45.0 (Size S), this KoColor ACTIVEWEAR product features a 75% Nylon, 25% Spandex, Moisture-Wicking Finish composition. Showcasing the Digital Lavender Seamless Bra color profile (`#E6E6FA`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-active-801`
 - **Brand**: KoColor
 - **Micro Category**: ACTIVEWEAR
@@ -347,6 +385,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Divine Damson Heels
+*Priced at $195.0 (Size 6.5), this KoColor SHOES product features a Patent Leather, Resin Sole composition. Showcasing the Divine Damson Stiletto color profile (`#3B1E20`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-shoes-505`
 - **Brand**: KoColor
 - **Micro Category**: SHOES
@@ -365,6 +405,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Electric Coral Cropped Hoodie
+*Priced at $75.0 (Size L), this KoColor ACTIVEWEAR product features a 100% French Terry Cotton, Drawstring Hood composition. Showcasing the Electric Coral Zip Hoodie color profile (`#FF5F1F`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-active-803`
 - **Brand**: KoColor
 - **Micro Category**: ACTIVEWEAR
@@ -383,6 +425,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Electric Coral Utility Windbreaker
+*Priced at $95.0 (Size S), this KoColor OUTERWEAR product features a 100% Ripstop Nylon, Breathable Mesh Lining composition. Showcasing the Electric Coral Windbreaker color profile (`#FF5F1F`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-outerwear-708`
 - **Brand**: KoColor
 - **Micro Category**: OUTERWEAR
@@ -401,6 +445,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Hidden Gem Pleated
+*Priced at $120.0 (Size 29), this KoColor PANTS product features a Wool Blend, Recycled Polyester composition. Showcasing the Hidden Gem Jade Trousers color profile (`#596D69`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-pants-404`
 - **Brand**: KoColor
 - **Micro Category**: PANTS
@@ -419,6 +465,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Mellow Flow Blue Jeans
+*Priced at $90.0 (Size 30), this KoColor PANTS product features a 98% Cotton, 2% Elastane composition. Showcasing the Mellow Flow Mom Jeans color profile (`#95A7B4`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-pants-406`
 - **Brand**: KoColor
 - **Micro Category**: PANTS
@@ -437,6 +485,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Melodious Ivory Culottes
+*Priced at $85.0 (Size L), this KoColor PANTS product features a 100% Linen composition. Showcasing the Melodious Ivory Culottes color profile (`#EDD5B1`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-pants-408`
 - **Brand**: KoColor
 - **Micro Category**: PANTS
@@ -455,6 +505,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Midnight Crimson Maxi
+*Priced at $180.0 (Size S), this KoColor DRESS product features a Silk Chiffon, Off-the-Shoulder Neckline, Fully Lined composition. Showcasing the Midnight Crimson Maxi color profile (`#541624`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-dresses-608`
 - **Brand**: KoColor
 - **Micro Category**: DRESS
@@ -473,6 +525,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Midnight Crimson Velvet
+*Priced at $90.0 (Size M), this KoColor SHIRT product features a Silk Velvet Blend, Recycled Polyester composition. Showcasing the Midnight Crimson Velvet color profile (`#541624`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-shirts-307`
 - **Brand**: KoColor
 - **Micro Category**: SHIRT
@@ -491,6 +545,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Midnight Crimson Wool Overcoat
+*Priced at $320.0 (Size S), this KoColor OUTERWEAR product features an 85% Virgin Wool, 15% Cashmere, Cupro Lining composition. Showcasing the Midnight Crimson Overcoat color profile (`#541624`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-outerwear-706`
 - **Brand**: KoColor
 - **Micro Category**: OUTERWEAR
@@ -509,6 +565,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Obsidian High-Waisted Leggings
+*Priced at $65.0 (Size M), this KoColor ACTIVEWEAR product features an 80% Recycled Polyester, 20% Elastane, Squat-Proof Interlock composition. Showcasing the Obsidian Void Leggings color profile (`#000000`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-active-802`
 - **Brand**: KoColor
 - **Micro Category**: ACTIVEWEAR
@@ -527,6 +585,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Obsidian Moto Leather Jacket
+*Priced at $295.0 (Size S), this KoColor OUTERWEAR product features a 100% Supple Lambskin Leather, Silver-Tone Hardware, Satin Lining composition. Showcasing the Obsidian Moto Leather color profile (`#0F0F0F`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-outerwear-702`
 - **Brand**: KoColor
 - **Micro Category**: OUTERWEAR
@@ -545,6 +605,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Obsidian Ribbed Knit
+*Priced at $60.0 (Size S), this KoColor SHIRT product features a Cotton Knit, Elastane composition. Showcasing the Obsidian Void Knit color profile (`#000000`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-shirts-309`
 - **Brand**: KoColor
 - **Micro Category**: SHIRT
@@ -563,6 +625,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Obsidian Void A-Line Mini
+*Priced at $115.0 (Size S), this KoColor DRESS product features a Heavyweight Cotton Ponte, Square Neckline, Hidden Back Zip composition. Showcasing the Obsidian Void Mini color profile (`#000000`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-dresses-609`
 - **Brand**: KoColor
 - **Micro Category**: DRESS
@@ -581,6 +645,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Olive Spruce Biker Shorts
+*Priced at $40.0 (Size M), this KoColor ACTIVEWEAR product features a 75% Nylon, 25% Lycra, Seamless Construction composition. Showcasing the Olive Spruce Biker Short color profile (`#4A5F3C`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-active-806`
 - **Brand**: KoColor
 - **Micro Category**: ACTIVEWEAR
@@ -599,6 +665,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Olive Spruce Blazer Dress
+*Priced at $165.0 (Size S), this KoColor DRESS product features a Structured Wool Blend, Satin Lapels, Double-Breasted Buttons composition. Showcasing the Olive Spruce Blazer Dress color profile (`#4A5F3C`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-dresses-605`
 - **Brand**: KoColor
 - **Micro Category**: DRESS
@@ -617,6 +685,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Olive Spruce Blouse
+*Priced at $65.0 (Size M), this KoColor SHIRT product features a 100% Mulberry Silk, Eco-friendly Dye composition. Showcasing the Olive Spruce Silk color profile (`#4A5F3C`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-shirts-301`
 - **Brand**: KoColor
 - **Micro Category**: SHIRT
@@ -635,6 +705,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Olive Spruce Double-Breasted Blazer
+*Priced at $185.0 (Size M), this KoColor OUTERWEAR product features a 70% Wool, 28% Recycled Polyester, 2% Elastane composition. Showcasing the Olive Spruce Blazer color profile (`#4A5F3C`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-outerwear-703`
 - **Brand**: KoColor
 - **Micro Category**: OUTERWEAR
@@ -653,6 +725,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Pastel Blue Loafers
+*Priced at $125.0 (Size 8), this KoColor SHOES product features a Suede Leather, Rubber Sole composition. Showcasing the Pastel Blue Loafer color profile (`#AEC6CF`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-shoes-502`
 - **Brand**: KoColor
 - **Micro Category**: SHOES
@@ -671,6 +745,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Pure White Oxford
+*Priced at $70.0 (Size M), this KoColor SHIRT product features a 100% Supima Cotton composition. Showcasing the Crisp White Oxford color profile (`#FFFFFF`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-shirts-308`
 - **Brand**: KoColor
 - **Micro Category**: SHIRT
@@ -689,6 +765,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Rouge Strappy Sandals
+*Priced at $145.0 (Size 7), this KoColor SHOES product features a Vegan Silk Satin, Ankle Tie composition. Showcasing the Rouge Strappy Heel color profile (`#D7727C`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-shoes-507`
 - **Brand**: KoColor
 - **Micro Category**: SHOES
@@ -707,6 +785,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Slow Swing Navy Slacks
+*Priced at $130.0 (Size 28), this KoColor PANTS product features a Viscose, Polyester, Elastane composition. Showcasing the Slow Swing Slacks color profile (`#2C3241`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-pants-407`
 - **Brand**: KoColor
 - **Micro Category**: PANTS
@@ -725,6 +805,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Soft Rose Gold Camisole
+*Priced at $55.0 (Size S), this KoColor SHIRT product features a 100% Satin Polyester, Lace Trim composition. Showcasing the Soft Rose Camisole color profile (`#D7C3B3`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-shirts-304`
 - **Brand**: KoColor
 - **Micro Category**: SHIRT
@@ -743,6 +825,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Transformative Teal Cropped Puffer
+*Priced at $165.0 (Size L), this KoColor OUTERWEAR product features a 100% Recycled Nylon Shell, 700-Fill Goose Down Insulation composition. Showcasing the Transformative Teal Puffer color profile (`#2F6364`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-outerwear-704`
 - **Brand**: KoColor
 - **Micro Category**: OUTERWEAR
@@ -761,6 +845,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Transformative Teal Performance Windshirt
+*Priced at $70.0 (Size M), this KoColor ACTIVEWEAR product features a 100% Micro-Ripstop Nylon, DWR Water Repellent, Laser-Cut Venting composition. Showcasing the Transformative Teal Windshirt color profile (`#2F6364`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-active-809`
 - **Brand**: KoColor
 - **Micro Category**: ACTIVEWEAR
@@ -779,6 +865,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Transformative Teal Turtleneck
+*Priced at $75.0 (Size M), this KoColor SHIRT product features an 80% Merino Wool, 20% Cashmere composition. Showcasing the Transformative Teal Knit color profile (`#2F6364`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-shirts-303`
 - **Brand**: KoColor
 - **Micro Category**: SHIRT
@@ -797,6 +885,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Transformative Teal Wrap Dress
+*Priced at $110.0 (Size L), this KoColor DRESS product features an Eco-Vero Viscose, Tie-Waist, Ruffle Hem composition. Showcasing the Transformative Teal Wrap color profile (`#2F6364`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-dresses-604`
 - **Brand**: KoColor
 - **Micro Category**: DRESS
@@ -815,6 +905,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### True Black Flared Leggings
+*Priced at $65.0 (Size M), this KoColor PANTS product features an 80% Nylon, 20% Spandex composition. Showcasing the Obsidian Flare color profile (`#000000`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-pants-409`
 - **Brand**: KoColor
 - **Micro Category**: PANTS
@@ -833,6 +925,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Universal Khaki Button-Down
+*Priced at $85.0 (Size L), this KoColor SHIRT product features a 100% European Flax Linen composition. Showcasing the Universal Khaki Linen color profile (`#B8A992`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-shirts-305`
 - **Brand**: KoColor
 - **Micro Category**: SHIRT
@@ -851,6 +945,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Universal Khaki Oversized Sweatpants
+*Priced at $60.0 (Size L), this KoColor ACTIVEWEAR product features an 80% Organic Cotton, 20% Recycled Polyester Fleece composition. Showcasing the Universal Khaki Sweatpants color profile (`#B8A992`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-active-808`
 - **Brand**: KoColor
 - **Micro Category**: ACTIVEWEAR
@@ -869,6 +965,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Universal Khaki Ribbed Midi
+*Priced at $95.0 (Size M), this KoColor DRESS product features a Cotton Blend Knit, Elastane for Stretch, Side Slit composition. Showcasing the Universal Khaki Midi color profile (`#B8A992`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-dresses-602`
 - **Brand**: KoColor
 - **Micro Category**: DRESS
@@ -887,6 +985,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Universal Khaki Trench Coat
+*Priced at $240.0 (Size M), this KoColor OUTERWEAR product features a 100% Cotton Gabardine, Water-Repellent Coating, Horn Buttons composition. Showcasing the Universal Khaki Trench color profile (`#B8A992`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-outerwear-701`
 - **Brand**: KoColor
 - **Micro Category**: OUTERWEAR
@@ -905,6 +1005,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Warm Eucalyptus Flats
+*Priced at $55.0 (Size 7), this KoColor SHOES product features an Organic Cotton Canvas, Jute Trim composition. Showcasing the Eucalyptus Canvas Flat color profile (`#7B8473`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-shoes-504`
 - **Brand**: KoColor
 - **Micro Category**: SHOES
@@ -923,6 +1025,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Warm Mahogany Corduroy
+*Priced at $105.0 (Size 27), this KoColor PANTS product features a 100% Cotton Wale Corduroy composition. Showcasing the Mahogany Corduroy color profile (`#744033`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-pants-405`
 - **Brand**: KoColor
 - **Micro Category**: PANTS
@@ -941,6 +1045,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Warm Terracotta Crop
+*Priced at $45.0 (Size S), this KoColor SHIRT product features a 95% Organic Cotton, 5% Spandex composition. Showcasing the Warm Terracotta Crop color profile (`#E2725B`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-shirts-302`
 - **Brand**: KoColor
 - **Micro Category**: SHIRT
@@ -959,6 +1065,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Warm Terracotta Linen Sundress
+*Priced at $90.0 (Size M), this KoColor DRESS product features a 100% European Flax Linen, Smocked Back, Tiered Skirt composition. Showcasing the Warm Terracotta Linen color profile (`#E2725B`), it is engineered for structural integrity and chromatic retention. Best paired with neutral foundational layers, it holds a Scientific Grade A sustainability score verified via the Atelier supply chain protocol.*
+
 - **ID**: `kc-dresses-607`
 - **Brand**: KoColor
 - **Micro Category**: DRESS
@@ -979,6 +1087,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 ## COMPLEXION
 
 ### Celestial Correcting Serum
+*Offered at $24.0 for 15ml, this KoColor Fashion CONCEALER is expertly formulated with Water, Mica, Titanium Dioxide, Manganese Violet. Delivering a high-fidelity Digital Lavender color profile (`#E6E6FA`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-concealer-409`
 - **Brand**: KoColor Fashion
 - **Micro Category**: CONCEALER
@@ -997,6 +1107,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Everyday Clear Concealer
+*Offered at $26.0 for 6ml, this KoColor CONCEALER is expertly formulated with Water, Dimethicone, Titanium Dioxide, Butylene Glycol, Iron Oxides, Niacinamide. Delivering a high-fidelity Honey 210 color profile (`#D4A373`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-complexion-02`
 - **Brand**: KoColor
 - **Micro Category**: CONCEALER
@@ -1015,6 +1127,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Glow Control Primer
+*Offered at $24.0 for 10ml, this KoColor Fashion CONCEALER is expertly formulated with Water, Titanium Dioxide, Glycerol Stearate. Delivering a high-fidelity Void Prime (Clean White) color profile (`#FFFFFF`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-concealer-408`
 - **Brand**: KoColor Fashion
 - **Micro Category**: CONCEALER
@@ -1033,6 +1147,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Seamless Silk Foundation
+*Offered at $42.0 for 30ml, this KoColor FOUNDATION is expertly formulated with Water, Cyclopentasiloxane, Titanium Dioxide, Glycerin, Iron Oxides, Silica. Delivering a high-fidelity Warm Beige 220W color profile (`#E0AC81`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-complexion-01`
 - **Brand**: KoColor
 - **Micro Category**: FOUNDATION
@@ -1051,6 +1167,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Velvet Camouflage Concealer
+*Offered at $24.0 for 6ml, this KoColor Fashion CONCEALER is expertly formulated with Water, Dimethicone, Iron Oxides, Titanium Dioxide. Delivering a high-fidelity Soft Honey (Neutral-Medium) color profile (`#D2B48C`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-concealer-404`
 - **Brand**: KoColor Fashion
 - **Micro Category**: CONCEALER
@@ -1069,6 +1187,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Velvet Camouflage Concealer
+*Offered at $24.0 for 6ml, this KoColor Fashion CONCEALER is expertly formulated with Water, Isononyl Isononanoate, Iron Oxides. Delivering a high-fidelity Deep Ochre (Warm-Medium) color profile (`#C59E76`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-concealer-405`
 - **Brand**: KoColor Fashion
 - **Micro Category**: CONCEALER
@@ -1087,6 +1207,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Velvet Camouflage Concealer
+*Offered at $24.0 for 6ml, this KoColor Fashion CONCEALER is expertly formulated with Water, Isododecane, Iron Oxides, Silica. Delivering a high-fidelity Fair Peach (Neutral) color profile (`#F5DDC3`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-concealer-402`
 - **Brand**: KoColor Fashion
 - **Micro Category**: CONCEALER
@@ -1105,6 +1227,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Velvet Camouflage Concealer
+*Offered at $24.0 for 6ml, this KoColor Fashion CONCEALER is expertly formulated with Water, Cyclopentasiloxane, Iron Oxides, Mica. Delivering a high-fidelity Toasted Almond (Light-Medium) color profile (`#C19A6B`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-concealer-403`
 - **Brand**: KoColor Fashion
 - **Micro Category**: CONCEALER
@@ -1123,6 +1247,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Velvet Camouflage Concealer
+*Offered at $24.0 for 6ml, this KoColor Fashion CONCEALER is expertly formulated with Water, Dimethicone, Titanium Dioxide, Glycerin. Delivering a high-fidelity Alabaster (Very Light) color profile (`#F0E4D3`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-concealer-401`
 - **Brand**: KoColor Fashion
 - **Micro Category**: CONCEALER
@@ -1141,6 +1267,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Velvet Camouflage Concealer
+*Offered at $24.0 for 6ml, this KoColor Fashion CONCEALER is expertly formulated with Water, Caprylyl Methicone, Iron Oxides, Red 40 Lake. Delivering a high-fidelity Terracotta Sunset (Deep-Warm) color profile (`#E2725B`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-concealer-406`
 - **Brand**: KoColor Fashion
 - **Micro Category**: CONCEALER
@@ -1159,6 +1287,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Velvet Camouflage Concealer
+*Offered at $24.0 for 6ml, this KoColor Fashion CONCEALER is expertly formulated with Water, Dimethicone, Iron Oxides, Black 2. Delivering a high-fidelity Deep Espresso (Darkest) color profile (`#4B3621`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-concealer-407`
 - **Brand**: KoColor Fashion
 - **Micro Category**: CONCEALER
@@ -1179,6 +1309,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 ## DIMENSION
 
 ### Petal Touch Flush Blush
+*Offered at $22.0 for 5g, this KoColor BLUSH is expertly formulated with Mica, Talc, Dimethicone, Silica, Zinc Stearate, Red 7 Lake, Iron Oxides. Delivering a high-fidelity Rosewood color profile (`#C86D7C`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-dimension-01`
 - **Brand**: KoColor
 - **Micro Category**: BLUSH
@@ -1199,6 +1331,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 ## EYES
 
 ### Architect Brow Pencil
+*Offered at $21.0 for 0.1g, this KoColor Fashion EYEBROW product is expertly formulated with Synthetic Wax, Hydrogenated Oil, Iron Oxides, Red 40 Lake. Delivering a high-fidelity Dark Auburn (Warm) color profile (`#744033`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-eyebrow-303`
 - **Brand**: KoColor Fashion
 - **Micro Category**: EYEBROW
@@ -1217,6 +1351,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Architect Brow Pencil
+*Offered at $21.0 for 0.1g, this KoColor Fashion EYEBROW product is expertly formulated with Synthetic Wax, Stearic Acid, Iron Oxides, Mica. Delivering a high-fidelity Soft Brown (Neutral) color profile (`#A98467`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-eyebrow-302`
 - **Brand**: KoColor Fashion
 - **Micro Category**: EYEBROW
@@ -1235,6 +1371,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Architect Brow Pencil
+*Offered at $21.0 for 0.1g, this KoColor Fashion EYEBROW product is expertly formulated with Synthetic Wax, Hydrogenated Soybean Oil, Iron Oxides. Delivering a high-fidelity Ash Blonde (Cool) color profile (`#D2B48C`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-eyebrow-301`
 - **Brand**: KoColor Fashion
 - **Micro Category**: EYEBROW
@@ -1253,6 +1391,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Barely There Velvet Monolith Single
+*Offered at $18.0 for 1.5g, this KoColor EYESHADOW is expertly formulated with Mica, Talc, Silica, Dimethicone, Iron Oxides. Delivering a high-fidelity Barely There color profile (`#F5E0D3`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-eyes-101`
 - **Brand**: KoColor
 - **Micro Category**: EYESHADOW
@@ -1271,6 +1411,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Bronze Define Glitter Liner
+*Offered at $17.0 for 5ml, this KoColor Fashion EYELINER is expertly formulated with Water, Polyethylene Terephthalate, Mica, Iron Oxides. Delivering a high-fidelity Gilded Gold color profile (`#D4AF37`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-eyeliner-204`
 - **Brand**: KoColor Fashion
 - **Micro Category**: EYELINER
@@ -1289,6 +1431,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Cobalt Dream Velvet Monolith Single
+*Offered at $18.0 for 1.5g, this KoColor EYESHADOW is expertly formulated with Talc, Mica, Ultramarines, Ferric Ferrocyanide. Delivering a high-fidelity Cobalt Dream color profile (`#0047AB`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-eyes-108`
 - **Brand**: KoColor
 - **Micro Category**: EYESHADOW
@@ -1307,6 +1451,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Deep Plum Define Liner
+*Offered at $17.0 for 1.2g, this KoColor Fashion EYELINER is expertly formulated with Manganese Violet, Iron Oxides, Mica, Hydrogenated Oil. Delivering a high-fidelity Deep Plum (Matte) color profile (`#4B0082`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-eyeliner-206`
 - **Brand**: KoColor Fashion
 - **Micro Category**: EYELINER
@@ -1325,6 +1471,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Duo Brow Powder
+*Offered at $21.0 for 2.5g, this KoColor Fashion EYEBROW product is expertly formulated with Talc, Mica, Black 2, Iron Oxides. Delivering a high-fidelity Espresso Roast (Dark) color profile (`#4B3621`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-eyebrow-305`
 - **Brand**: KoColor Fashion
 - **Micro Category**: EYEBROW
@@ -1343,6 +1491,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Duo Brow Powder
+*Offered at $21.0 for 2.5g, this KoColor Fashion EYEBROW product is expertly formulated with Talc, Mica, Silica, Iron Oxides. Delivering a high-fidelity Toasted Almond (Neutral) color profile (`#C19A6B`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-eyebrow-304`
 - **Brand**: KoColor Fashion
 - **Micro Category**: EYEBROW
@@ -1361,6 +1511,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Earth Define Pencil
+*Offered at $17.0 for 1.2g, this KoColor Fashion EYELINER is expertly formulated with Hydrogenated Vegetable Oil, Iron Oxides, Mica. Delivering a high-fidelity Toasted Almond color profile (`#C19A6B`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-eyeliner-203`
 - **Brand**: KoColor Fashion
 - **Micro Category**: EYELINER
@@ -1379,6 +1531,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Earth Volume Mascara
+*Offered at $19.0 for 8ml, this KoColor Fashion MASCARA is expertly formulated with Water, Stearic Acid, Paraffin, Iron Oxides. Delivering a high-fidelity Coffee Brown color profile (`#4B3621`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-mascara-103`
 - **Brand**: KoColor Fashion
 - **Micro Category**: MASCARA
@@ -1397,6 +1551,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Electric Pop Liner
+*Offered at $17.0 for 5ml, this KoColor Fashion EYELINER is expertly formulated with Water, Red 6 Lake, Yellow 5 Lake, Xanthan Gum. Delivering a high-fidelity Tangerine Sunset color profile (`#FF5F1F`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-eyeliner-208`
 - **Brand**: KoColor Fashion
 - **Micro Category**: EYELINER
@@ -1415,6 +1571,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Electric Pop Mascara
+*Offered at $19.0 for 8ml, this KoColor Fashion MASCARA is expertly formulated with Water, Synthetic Beeswax, Blue 1 Lake, Ultramarines. Delivering a high-fidelity Cobalt Blue color profile (`#0047AB`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-mascara-105`
 - **Brand**: KoColor Fashion
 - **Micro Category**: MASCARA
@@ -1433,6 +1591,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Emerald Define Mascara
+*Offered at $19.0 for 8ml, this KoColor Fashion MASCARA is expertly formulated with Water, Iron Oxides, Chromium Oxide Greens, Mica. Delivering a high-fidelity Emerald Envy color profile (`#008080`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-mascara-108`
 - **Brand**: KoColor Fashion
 - **Micro Category**: MASCARA
@@ -1451,6 +1611,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Emerald Envy Velvet Monolith Single
+*Offered at $18.0 for 1.5g, this KoColor EYESHADOW is expertly formulated with Mica, Talc, Iron Oxides, Chromium Oxide Greens. Delivering a high-fidelity Emerald Envy color profile (`#008080`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-eyes-107`
 - **Brand**: KoColor
 - **Micro Category**: EYESHADOW
@@ -1469,6 +1631,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Emerald Silk Kohl
+*Offered at $17.0 for 1.2g, this KoColor Fashion EYELINER is expertly formulated with Iron Oxides, Chromium Oxide Greens, Mica, Lanolin. Delivering a high-fidelity Emerald Envy (Satin) color profile (`#004D2D`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-eyeliner-209`
 - **Brand**: KoColor Fashion
 - **Micro Category**: EYELINER
@@ -1487,6 +1651,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Fairy Dust Tinted Gel
+*Offered at $21.0 for 5ml, this KoColor Fashion EYEBROW product is expertly formulated with Water, Mica, Titanium Dioxide, Manganese Violet. Delivering a high-fidelity Digital Lavender color profile (`#E6E6FA`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-eyebrow-309`
 - **Brand**: KoColor Fashion
 - **Micro Category**: EYEBROW
@@ -1505,6 +1671,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Fairy Lash Mascara
+*Offered at $19.0 for 8ml, this KoColor Fashion MASCARA is expertly formulated with Water, Mica, Titanium Dioxide, Manganese Violet. Delivering a high-fidelity Digital Lavender color profile (`#E6E6FA`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-mascara-106`
 - **Brand**: KoColor Fashion
 - **Micro Category**: MASCARA
@@ -1523,6 +1691,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Glow Control Brow Gel
+*Offered at $21.0 for 5ml, this KoColor Fashion EYEBROW product is expertly formulated with Water, PVP, Glycerin, Phenoxyethanol. Delivering a high-fidelity Granite (Clear) color profile (`#F0F0F0`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-eyebrow-306`
 - **Brand**: KoColor Fashion
 - **Micro Category**: EYEBROW
@@ -1541,6 +1711,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Glow Extension Mascara
+*Offered at $19.0 for 8ml, this KoColor Fashion MASCARA is expertly formulated with Water, Mica, Iron Oxides, Tin Oxide. Delivering a high-fidelity Rose Gold Rush color profile (`#B76E79`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-mascara-107`
 - **Brand**: KoColor Fashion
 - **Micro Category**: MASCARA
@@ -1559,6 +1731,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Lash Lift Defining Mascara
+*Offered at $20.0 for 8ml, this KoColor MASCARA is expertly formulated with Water, Beeswax, Iron Oxides, Copernicia Cerifera (Carnauba) Wax, Stearic Acid, Panthenol. Delivering a high-fidelity Soft Black color profile (`#1A1A1A`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-eyes-01`
 - **Brand**: KoColor
 - **Micro Category**: MASCARA
@@ -1577,6 +1751,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Lavender Haze Celestial Chromatic Single
+*Offered at $18.0 for 1.5g, this KoColor EYESHADOW is expertly formulated with Mica, Titanium Dioxide, Manganese Violet, Tin Oxide. Delivering a high-fidelity Lavender Haze color profile (`#967BB6`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-eyes-109`
 - **Brand**: KoColor
 - **Micro Category**: EYESHADOW
@@ -1595,6 +1771,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Obsidian Precision Liner
+*Offered at $17.0 for 8ml, this KoColor Fashion EYELINER is expertly formulated with Water, Acrylates Copolymer, Black 2, Butylene Glycol. Delivering a high-fidelity True Black color profile (`#000000`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-eyeliner-201`
 - **Brand**: KoColor Fashion
 - **Micro Category**: EYELINER
@@ -1613,6 +1791,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Obsidian Volume Mascara
+*Offered at $19.0 for 8ml, this KoColor Fashion MASCARA is expertly formulated with Water, Acrylates Copolymer, Beeswax, Iron Oxides. Delivering a high-fidelity True Black color profile (`#000000`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-mascara-101`
 - **Brand**: KoColor Fashion
 - **Micro Category**: MASCARA
@@ -1631,6 +1811,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Pop Art Liquid Liner
+*Offered at $17.0 for 5ml, this KoColor Fashion EYELINER is expertly formulated with Water, Ultramarines, Blue 1 Lake, Glycerin. Delivering a high-fidelity Cobalt Blue color profile (`#0047AB`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-eyeliner-207`
 - **Brand**: KoColor Fashion
 - **Micro Category**: EYELINER
@@ -1649,6 +1831,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Rose Gold Rush Celestial Chromatic Single
+*Offered at $18.0 for 1.5g, this KoColor EYESHADOW is expertly formulated with Mica, Dimethicone, Iron Oxides, Titanium Dioxide. Delivering a high-fidelity Rose Gold Rush color profile (`#B76E79`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-eyes-104`
 - **Brand**: KoColor
 - **Micro Category**: EYESHADOW
@@ -1667,6 +1851,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Sculpting Tinted Gel
+*Offered at $21.0 for 5ml, this KoColor Fashion EYEBROW product is expertly formulated with Water, Acrylates Copolymer, Nylon-6, Iron Oxides. Delivering a high-fidelity Deep Onyx (Black) color profile (`#1C1C1C`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-eyebrow-307`
 - **Brand**: KoColor Fashion
 - **Micro Category**: EYEBROW
@@ -1685,6 +1871,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Silver Lining Celestial Chromatic Single
+*Offered at $18.0 for 1.5g, this KoColor EYESHADOW is expertly formulated with Aluminum Powder, Silica, Dimethicone, Mica. Delivering a high-fidelity Silver Lining color profile (`#C0C0C0`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-eyes-106`
 - **Brand**: KoColor
 - **Micro Category**: EYESHADOW
@@ -1703,6 +1891,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Smoke Define Gel Liner
+*Offered at $17.0 for 1.2g, this KoColor Fashion EYELINER is expertly formulated with Isododecane, Cyclopentasiloxane, Iron Oxides, Synthetic Wax. Delivering a high-fidelity Charcoal Grey color profile (`#36454F`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-eyeliner-202`
 - **Brand**: KoColor Fashion
 - **Micro Category**: EYELINER
@@ -1721,6 +1911,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Smoky Obsidian Velvet Monolith Single
+*Offered at $18.0 for 1.5g, this KoColor EYESHADOW is expertly formulated with Talc, Mica, Black 2 (CI 77266), Iron Oxides. Delivering a high-fidelity Smoky Obsidian color profile (`#1C1C1C`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-eyes-105`
 - **Brand**: KoColor
 - **Micro Category**: EYESHADOW
@@ -1739,6 +1931,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Soft Definition Mascara
+*Offered at $19.0 for 8ml, this KoColor Fashion MASCARA is expertly formulated with Water, Carnauba Wax, Glycerin, Iron Oxides. Delivering a high-fidelity Soft Black-Brown color profile (`#1C1C1C`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-mascara-102`
 - **Brand**: KoColor Fashion
 - **Micro Category**: MASCARA
@@ -1757,6 +1951,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Starlight Sparkle Celestial Chromatic Single
+*Offered at $18.0 for 1.5g, this KoColor EYESHADOW is expertly formulated with Mica, Calcium Aluminum Borosilicate, Silica, Titanium Dioxide. Delivering a high-fidelity Starlight Sparkle color profile (`#F7E7CE`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-eyes-102`
 - **Brand**: KoColor
 - **Micro Category**: EYESHADOW
@@ -1775,6 +1971,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Terracotta Sunset Velvet Monolith Single
+*Offered at $18.0 for 1.5g, this KoColor EYESHADOW is expertly formulated with Mica, Talc, Synthetic Fluorphlogopite, Iron Oxides, Red 40 Lake. Delivering a high-fidelity Terracotta Sunset color profile (`#E2725B`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-eyes-103`
 - **Brand**: KoColor
 - **Micro Category**: EYESHADOW
@@ -1793,6 +1991,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Void Prime Liner
+*Offered at $17.0 for 1.2g, this KoColor Fashion EYELINER is expertly formulated with Titanium Dioxide, Caprylic/Capric Triglyceride, Synthetic Wax. Delivering a high-fidelity Clean White color profile (`#FFFFFF`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-eyeliner-205`
 - **Brand**: KoColor Fashion
 - **Micro Category**: EYELINER
@@ -1811,6 +2011,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Void Prime Mascara
+*Offered at $19.0 for 8ml, this KoColor Fashion MASCARA is expertly formulated with Water, Titanium Dioxide, Glycerol Stearate, Cera Alba. Delivering a high-fidelity Lash Primer (White) color profile (`#FFFFFF`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-mascara-109`
 - **Brand**: KoColor Fashion
 - **Micro Category**: MASCARA
@@ -1829,6 +2031,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Void Prime Tinted Gel
+*Offered at $21.0 for 5ml, this KoColor Fashion EYEBROW product is expertly formulated with Water, Acrylates Copolymer, Blue 1 Lake, Ultramarines. Delivering a high-fidelity Cobalt Dream color profile (`#0047AB`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-eyebrow-308`
 - **Brand**: KoColor Fashion
 - **Micro Category**: EYEBROW
@@ -1847,6 +2051,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Waterproof Define Mascara
+*Offered at $19.0 for 8ml, this KoColor Fashion MASCARA is expertly formulated with Isododecane, Trimethylsiloxysilicate, Iron Oxides. Delivering a high-fidelity Midnight Black color profile (`#000000`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-mascara-104`
 - **Brand**: KoColor Fashion
 - **Micro Category**: MASCARA
@@ -1867,6 +2073,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 ## LIPS
 
 ### Blackberry Bite Lipstick
+*Offered at $28.0 for 3.5g, this KoColor LIPSTICK is expertly formulated with Ricinus Communis (Castor) Seed Oil, Dimethicone, Red 33 Lake, Blue 1 Lake, Iron Oxides. Delivering a high-fidelity Blackberry Bite color profile (`#4A2535`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-lips-106`
 - **Brand**: KoColor
 - **Micro Category**: LIPSTICK
@@ -1885,6 +2093,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Blotted Lip Balm
+*Offered at $21.0 for 3g, this KoColor BALM is expertly formulated with Caprylic/Capric Triglyceride, Ricinus Communis (Castor) Seed Oil, Microcrystalline Wax, Red 7 Lake, Shea Butter. Delivering a high-fidelity Blotted Cherry color profile (`#B72227`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-lips-02`
 - **Brand**: KoColor
 - **Micro Category**: BALM
@@ -1903,6 +2113,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Concrete Rose Lipstick
+*Offered at $28.0 for 3.5g, this KoColor LIPSTICK is expertly formulated with Ricinus Communis (Castor) Seed Oil, Shea Butter, Titanium Dioxide, Iron Oxides, Blue 1 Lake. Delivering a high-fidelity Concrete Rose color profile (`#9F8D85`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-lips-105`
 - **Brand**: KoColor
 - **Micro Category**: LIPSTICK
@@ -1921,6 +2133,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Dusty Orchid Lipstick
+*Offered at $28.0 for 3.5g, this KoColor LIPSTICK is expertly formulated with Caprylic/Capric Triglyceride, Microcrystalline Wax, Titanium Dioxide, Red 7 Lake, Iron Oxides. Delivering a high-fidelity Dusty Orchid color profile (`#B58A94`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-lips-107`
 - **Brand**: KoColor
 - **Micro Category**: LIPSTICK
@@ -1939,6 +2153,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Electric Coral Lipstick
+*Offered at $28.0 for 3.5g, this KoColor LIPSTICK is expertly formulated with Ricinus Communis (Castor) Seed Oil, Carnauba Wax, Red 6 Lake, Yellow 5 Lake, Titanium Dioxide. Delivering a high-fidelity Electric Coral color profile (`#FF4040`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-lips-109`
 - **Brand**: KoColor
 - **Micro Category**: LIPSTICK
@@ -1957,6 +2173,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Glow Catalyst Lip Stain
+*Offered at $24.0 for 4ml, this KoColor STAIN is expertly formulated with Water, Octyldodecanol, Trimethylsiloxyphenyl Dimethicone, Ethylcellulose, Red 28 Lake, Yellow 6 Lake. Delivering a high-fidelity Crimson Catalyst color profile (`#A81C28`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-lips-01`
 - **Brand**: KoColor
 - **Micro Category**: STAIN
@@ -1975,6 +2193,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Midnight Crimson Lipstick
+*Offered at $28.0 for 3.5g, this KoColor LIPSTICK is expertly formulated with Ricinus Communis (Castor) Seed Oil, Carnauba Wax, Dimethicone, Iron Oxides, Red 33 Lake. Delivering a high-fidelity Midnight Crimson color profile (`#541624`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-lips-102`
 - **Brand**: KoColor
 - **Micro Category**: LIPSTICK
@@ -1993,6 +2213,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Obsidian Void Lipstick
+*Offered at $28.0 for 3.5g, this KoColor LIPSTICK is expertly formulated with Ricinus Communis (Castor) Seed Oil, Beeswax, Black 2, Iron Oxides, Silica. Delivering a high-fidelity Obsidian Void color profile (`#2B2B2C`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-lips-108`
 - **Brand**: KoColor
 - **Micro Category**: LIPSTICK
@@ -2011,6 +2233,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Ruby Core Lipstick
+*Offered at $28.0 for 3.5g, this KoColor LIPSTICK is expertly formulated with Ricinus Communis (Castor) Seed Oil, Microcrystalline Wax, Shea Butter, Red 7 Lake, Titanium Dioxide. Delivering a high-fidelity Ruby Core color profile (`#9B111E`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-lips-101`
 - **Brand**: KoColor
 - **Micro Category**: LIPSTICK
@@ -2029,6 +2253,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Scarlet Siren Lipstick
+*Offered at $28.0 for 3.5g, this KoColor LIPSTICK is expertly formulated with Caprylic/Capric Triglyceride, Microcrystalline Wax, Red 28 Lake, Titanium Dioxide, Tocopherol. Delivering a high-fidelity Scarlet Siren color profile (`#C21E56`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-lips-104`
 - **Brand**: KoColor
 - **Micro Category**: LIPSTICK
@@ -2047,6 +2273,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Terracotta Brick Lipstick
+*Offered at $28.0 for 3.5g, this KoColor LIPSTICK is expertly formulated with Ricinus Communis (Castor) Seed Oil, Beeswax, Silica, Iron Oxides, Yellow 6 Lake. Delivering a high-fidelity Terracotta Brick color profile (`#8B3A3A`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-lips-103`
 - **Brand**: KoColor
 - **Micro Category**: LIPSTICK
@@ -2067,6 +2295,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 ## NAILS
 
 ### Canvas White Polish
+*Offered at $18.0 for 15ml, this KoColor POLISH is expertly formulated with Ethyl Acetate, Butyl Acetate, Nitrocellulose, Titanium Dioxide, Silica. Delivering a high-fidelity Canvas White color profile (`#F5F5F5`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-nails-208`
 - **Brand**: KoColor
 - **Micro Category**: POLISH
@@ -2085,6 +2315,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Cobalt Core Polish
+*Offered at $18.0 for 15ml, this KoColor POLISH is expertly formulated with Ethyl Acetate, Butyl Acetate, Nitrocellulose, Isopropyl Alcohol, Blue 1 Lake. Delivering a high-fidelity Cobalt Core color profile (`#0047AB`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-nails-201`
 - **Brand**: KoColor
 - **Micro Category**: POLISH
@@ -2103,6 +2335,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Concrete Slate Polish
+*Offered at $18.0 for 15ml, this KoColor POLISH is expertly formulated with Ethyl Acetate, Butyl Acetate, Nitrocellulose, Titanium Dioxide, Black 2. Delivering a high-fidelity Concrete Slate color profile (`#708090`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-nails-206`
 - **Brand**: KoColor
 - **Micro Category**: POLISH
@@ -2121,6 +2355,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Digital Lavender Polish
+*Offered at $18.0 for 15ml, this KoColor POLISH is expertly formulated with Ethyl Acetate, Butyl Acetate, Nitrocellulose, Titanium Dioxide, Manganese Violet. Delivering a high-fidelity Digital Lavender color profile (`#E6E6FA`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-nails-204`
 - **Brand**: KoColor
 - **Micro Category**: POLISH
@@ -2139,6 +2375,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Electric Tangerine Polish
+*Offered at $18.0 for 15ml, this KoColor POLISH is expertly formulated with Ethyl Acetate, Butyl Acetate, Nitrocellulose, Red 6 Lake, Yellow 5 Lake. Delivering a high-fidelity Electric Tangerine color profile (`#FF5F1F`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-nails-205`
 - **Brand**: KoColor
 - **Micro Category**: POLISH
@@ -2157,6 +2395,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Emerald Envy Polish
+*Offered at $18.0 for 15ml, this KoColor POLISH is expertly formulated with Ethyl Acetate, Butyl Acetate, Nitrocellulose, Yellow 5 Lake, Blue 1 Lake. Delivering a high-fidelity Emerald Envy color profile (`#50C878`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-nails-202`
 - **Brand**: KoColor
 - **Micro Category**: POLISH
@@ -2175,6 +2415,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Obsidian Void Polish
+*Offered at $18.0 for 15ml, this KoColor POLISH is expertly formulated with Ethyl Acetate, Butyl Acetate, Nitrocellulose, Black 2, Iron Oxides. Delivering a high-fidelity Obsidian Void color profile (`#0F0F0F`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-nails-209`
 - **Brand**: KoColor
 - **Micro Category**: POLISH
@@ -2193,6 +2435,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Ruby Catalyst Polish
+*Offered at $18.0 for 15ml, this KoColor POLISH is expertly formulated with Ethyl Acetate, Butyl Acetate, Nitrocellulose, Isopropyl Alcohol, Red 7 Lake. Delivering a high-fidelity Ruby Catalyst color profile (`#9B111E`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-nails-207`
 - **Brand**: KoColor
 - **Micro Category**: POLISH
@@ -2211,6 +2455,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Solar Flare Polish
+*Offered at $18.0 for 15ml, this KoColor POLISH is expertly formulated with Ethyl Acetate, Butyl Acetate, Nitrocellulose, Silica, Yellow 5 Lake. Delivering a high-fidelity Solar Flare color profile (`#FFDB58`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-nails-203`
 - **Brand**: KoColor
 - **Micro Category**: POLISH
@@ -2231,6 +2477,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 ## PREP
 
 ### Luminescent C Serum
+*Offered at $32.0 for 30ml, this KoColor SERUM is expertly formulated with Water, Ascorbic Acid (Vitamin C), Glycerin, Tocopherol, Sodium Hyaluronate. Delivering a high-fidelity Luminous Glow color profile (`#FFF8E7`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-prep-02`
 - **Brand**: KoColor
 - **Micro Category**: SERUM
@@ -2249,6 +2497,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Melt-in Milk Sunscreen
+*Offered at $24.0 for 50ml, this KoColor SPF is expertly formulated with Water, Zinc Oxide, Caprylic/Capric Triglyceride, Squalane, Polyhydroxystearic Acid. Delivering a high-fidelity Invisible Shield color profile (`#FFFFFF`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-prep-03`
 - **Brand**: KoColor
 - **Micro Category**: SPF
@@ -2267,6 +2517,8 @@ This catalog contains **126 high-fidelity products** across beauty and fashion v
 
 ---
 ### Purifying Gel Cleanser
+*Offered at $18.0 for 150ml, this KoColor CLEANSER is expertly formulated with Water, Glycerin, Sodium Cocoyl Glycinate, Citric Acid, Niacinamide. Delivering a high-fidelity Clear Crystal color profile (`#F4F6F0`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.*
+
 - **ID**: `kc-prep-01`
 - **Brand**: KoColor
 - **Micro Category**: CLEANSER
