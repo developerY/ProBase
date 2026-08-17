@@ -1,6 +1,19 @@
 {
   "product_id": "kc-complexion-02",
-  "card_title": "Artist Notes",
+  "card_title": "Artist Notes: Everyday Clear Concealer",
   "description": null,
-  "dynamic_attributes": []
+  "dynamic_attributes": [
+    {
+      "label": "Usage Notes",
+      "body": "Placeholder concealer notes for kc-complexion-02. High-fidelity performance ensured."
+    },
+    {
+      "label": "Expert Tip",
+      "body": "For optimal chromatic impact, apply kc-complexion-02 to a clean, prepped surface."
+    },
+    {
+      "label": "Formulation Insight",
+      "body": "Advanced concealer engineering featuring high-purity pigments and volatile carriers."
+    }
+  ]
 }

@@ -1,6 +1,19 @@
 {
   "product_id": "kc-eyes-01",
-  "card_title": "Artist Notes",
+  "card_title": "Artist Notes: Lash Lift Defining Mascara",
   "description": null,
-  "dynamic_attributes": []
+  "dynamic_attributes": [
+    {
+      "label": "Usage Notes",
+      "body": "Placeholder mascara notes for kc-eyes-01. High-fidelity performance ensured."
+    },
+    {
+      "label": "Expert Tip",
+      "body": "For optimal chromatic impact, apply kc-eyes-01 to a clean, prepped surface."
+    },
+    {
+      "label": "Formulation Insight",
+      "body": "Advanced mascara engineering featuring high-purity pigments and volatile carriers."
+    }
+  ]
 }
