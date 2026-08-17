@@ -88,7 +88,7 @@ fun PackPreviewItemRow(
             modifier = Modifier
                 .weight(1f)
                 .clickable { onInfoClick() }
-                .padding(horizontal = 16.dp),
+                .padding(start = 8.dp, end = 10.dp), // Pushed to left, reduced end padding
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Thumbnail with IMMERSIVE VIBRANT GLOW
@@ -138,7 +138,7 @@ fun PackPreviewItemRow(
                 }
             }
 
-            Spacer(Modifier.width(20.dp))
+            Spacer(Modifier.width(12.dp)) // Reduced spacing to give text more room
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(

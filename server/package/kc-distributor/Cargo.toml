@@ -12,6 +12,9 @@ walkdir = "2.4"
 # Error handling
 anyhow = "1.0"
 
+# Time handling
+chrono = { version = "0.4", features = ["serde"] }
+
 # Image processing (Transcoding to 1024x1024 / 256x256 WebP)
 image = { version = "0.24", default-features = false, features = ["png", "jpeg", "webp"] }
 

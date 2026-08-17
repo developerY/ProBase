@@ -27,11 +27,11 @@ fn main() {
     println!("   ⚠️  Update SecurityConstants.kt in Android with this Public Key for verification to pass.\n");
 
     let raw_assets_dir = "./input";
-    let output_dist_dir = Path::new("./dist/deployment");
-    let assets_dist_dir = output_dist_dir.join("assets");
+    let output_staging_dir = Path::new("./dist/staging/inventory/dist");
+    let assets_dist_dir = output_staging_dir.join("assets");
 
     // Ensure the output directories exist
-    fs::create_dir_all(&assets_dist_dir).expect("Failed to create dist/assets directory");
+    fs::create_dir_all(&assets_dist_dir).expect("Failed to create staging directories");
 
     // --- PASS 1: DATA INGESTION ---
     println!("\n--- PASS 1: DATA INGESTION ---");
@@ -57,7 +57,7 @@ fn main() {
         &canonical_index,
         &optimized_asset_map,
         "./input/package_configs",
-        output_dist_dir,
+        &output_staging_dir,
         &signing_key
     );
 
@@ -89,7 +89,7 @@ fn main() {
     let manifest_json = serde_json::to_string(&envelope)
         .expect("❌ Failed to generate master manifest envelope");
 
-    let manifest_path = output_dist_dir.join("manifest.json");
+    let manifest_path = output_staging_dir.join("manifest.json");
     fs::write(manifest_path, manifest_json).expect("❌ Failed to write manifest.json");
     println!("  📜 master manifest.json written (Compact Binary Trust established).");
 
@@ -112,7 +112,7 @@ fn main() {
     let search_json = serde_json::to_string(&search_index)
         .expect("❌ Failed to generate search index");
 
-    let search_path = output_dist_dir.join("search_index.json");
+    let search_path = output_staging_dir.join("search_index.json");
     fs::write(search_path, search_json).expect("❌ Failed to write search_index.json");
     println!("  🔍 search_index.json written (Compact Map format).");
 
