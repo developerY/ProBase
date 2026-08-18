@@ -1,4 +1,4 @@
-# KoColor V1.1 Inventory Backlog: Synthetic Category Completion
+# KoColor V1.0 Inventory Backlog: Synthetic Category Completion
 
 This document contains full scientific specifications for 55 new products, designed to bridge every remaining gap in the KoColor vertical taxonomy. These items are engineered for "Scientific Beauty" and "Aesthetic DNA" alignment.
 

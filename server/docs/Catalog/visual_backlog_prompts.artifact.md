@@ -1,4 +1,4 @@
-# 🎨 KoColor V1.1 Visual Backlog: Grid Generation Prompts
+# 🎨 KoColor V1.0 Visual Backlog: Grid Generation Prompts
 
 Use the following prompts in the "Create image" tool to generate the missing high-fidelity assets in the required 3x3 format.
 
