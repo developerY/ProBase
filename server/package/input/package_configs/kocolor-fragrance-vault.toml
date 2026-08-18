@@ -1,0 +1,18 @@
+[package_metadata]
+id = "kocolor-fragrance-vault"
+name = "KoColor Fragrance Vault"
+description = "A collection of high-fidelity olfactory signatures, from crisp citrus to deep ambers."
+
+[assortment]
+includes = [
+    "kc-eau-de-parfum-901",
+    "kc-perfume-901",
+    "kc-eau-de-toilette-901",
+    "kc-cologne-901",
+    "kc-body-mist-901",
+    "kc-frag-201",
+    "kc-frag-301",
+    "kc-frag-401",
+    "kc-frag-501",
+    "kc-frag-701"
+]

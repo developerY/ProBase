@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "id": "kc-frag-701",
+  "name": "Aura No. 7: swiftmonster",
+  "brand": "KoColor",
+  "macro_category": "FRAGRANCE",
+  "micro_category": "EAU_DE_PARFUM",
+  "shade_name": "Neon Monster",
+  "color_hex": "#FF1493",
+  "raw_image_input": "./kc-frag-701.png",
+  "price": 95.0,
+  "volume": "50ml",
+  "ingredients": [
+    "Ethanol",
+    "Wild Orchid",
+    "Midnight Jasmine",
+    "Ambroxan"
+  ],
+  "Contains_Fragrance": true,
+  "fda_data_verified": true
+}
