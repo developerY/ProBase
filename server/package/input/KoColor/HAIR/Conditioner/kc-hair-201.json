@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-hair-201",
+  "name": "Cuticle-Seal Moisture Conditioner",
+  "brand": "KoColor",
+  "macro_category": "HAIR",
+  "micro_category": "CONDITIONER",
+  "shade_name": "Soft White",
+  "color_hex": "#FAF0E6",
+  "raw_image_input": "./kc-hair-201.png",
+  "price": 24.0,
+  "volume": "250ml",
+  "ingredients": [
+    "Cetearyl Alcohol",
+    "Behentrimonium Chloride",
+    "Argan Oil"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

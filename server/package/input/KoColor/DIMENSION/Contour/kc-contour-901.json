@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-contour-901",
+  "name": "Architectural Sculpting Stick",
+  "brand": "KoColor",
+  "macro_category": "DIMENSION",
+  "micro_category": "CONTOUR",
+  "shade_name": "Shadow Brown",
+  "color_hex": "#8B4513",
+  "raw_image_input": "./kc-contour-901.png",
+  "price": 30.0,
+  "volume": "6g",
+  "ingredients": [
+    "Caprylic Triglyceride",
+    "Kaolin",
+    "Iron Oxides"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

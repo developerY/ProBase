@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-lip-care-901",
+  "name": "Conditioning Lip Scrub",
+  "brand": "KoColor",
+  "macro_category": "PREP",
+  "micro_category": "LIP_CARE",
+  "shade_name": "Sweet Pink",
+  "color_hex": "#FFB6C1",
+  "raw_image_input": "./kc-lip-care-901.png",
+  "price": 16.0,
+  "volume": "15g",
+  "ingredients": [
+    "Sugar Crystals",
+    "Coconut Oil",
+    "Vitamin E"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

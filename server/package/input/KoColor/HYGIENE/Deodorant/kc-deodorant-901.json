@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "id": "kc-deodorant-901",
+  "name": "Clean-Science Deodorant Stick",
+  "brand": "KoColor",
+  "macro_category": "HYGIENE",
+  "micro_category": "DEODORANT",
+  "shade_name": "Pure Clean",
+  "color_hex": "#FFFFFF",
+  "raw_image_input": "./kc-deodorant-901.png",
+  "price": 14.0,
+  "volume": "75g",
+  "ingredients": [
+    "Magnesium Hydroxide",
+    "Coconut Oil"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

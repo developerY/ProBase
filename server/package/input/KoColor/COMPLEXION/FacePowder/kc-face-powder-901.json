@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-face-powder-901",
+  "name": "Baked Mineral Foundation",
+  "brand": "KoColor",
+  "macro_category": "COMPLEXION",
+  "micro_category": "FACE_POWDER",
+  "shade_name": "Fair Tan",
+  "color_hex": "#D2B48C",
+  "raw_image_input": "./kc-face-powder-901.png",
+  "price": 40.0,
+  "volume": "9g",
+  "ingredients": [
+    "Sericite Mica",
+    "Titanium Dioxide",
+    "Zinc Stearate"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

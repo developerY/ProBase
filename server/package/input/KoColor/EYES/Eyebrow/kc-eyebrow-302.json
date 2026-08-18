@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "kc-eyebrow-302",
+  "name": "Architect Brow Pencil",
+  "brand": "KoColor Fashion",
+  "macro_category": "EYES",
+  "micro_category": "EYEBROW",
+  "shade_name": "Soft Brown (Neutral)",
+  "color_hex": "#A98467",
+  "raw_image_input": "./kc-eyebrow-302.png",
+  "price": 21.0,
+  "volume": "0.1g",
+  "notes": "A versatile neutral defining pencil for popular brown shades.",
+  "ingredients": ["Synthetic Wax", "Stearic Acid", "Iron Oxides", "Mica"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

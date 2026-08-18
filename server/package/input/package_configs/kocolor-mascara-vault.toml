@@ -1,0 +1,11 @@
+[package_metadata]
+id = "kocolor-mascara-vault"
+name = "KoColor Mascara Collection"
+description = "A 9-piece curation of volumizing, lengthening, and defining mascaras, featuring essential blacks and high-impact fashion shades."
+
+[assortment]
+includes = [
+    "kc-mascara-101", "kc-mascara-102", "kc-mascara-103",
+    "kc-mascara-104", "kc-mascara-105", "kc-mascara-106",
+    "kc-mascara-107", "kc-mascara-108", "kc-mascara-109"
+]

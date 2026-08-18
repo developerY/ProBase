@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "kc-lips-102",
+  "name": "Midnight Crimson Lipstick",
+  "brand": "KoColor",
+  "macro_category": "LIPS",
+  "micro_category": "LIPSTICK",
+  "shade_name": "Midnight Crimson",
+  "color_hex": "#541624",
+  "raw_image_input": "./kc-lips-102.png",
+  "price": 28.0,
+  "volume": "3.5g",
+  "ingredients": ["Ricinus Communis (Castor) Seed Oil", "Carnauba Wax", "Dimethicone", "Iron Oxides", "Red 33 Lake"],
+  "Contains_Fragrance": true,
+  "fda_data_verified": true
+}

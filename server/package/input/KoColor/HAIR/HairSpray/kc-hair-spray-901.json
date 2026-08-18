@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "id": "kc-hair-spray-901",
+  "name": "High-Retention Weightless Spray",
+  "brand": "KoColor",
+  "macro_category": "HAIR",
+  "micro_category": "HAIR_SPRAY",
+  "shade_name": "Clear Hold",
+  "color_hex": "#F5F5F5",
+  "raw_image_input": "./kc-hair-spray-901.png",
+  "price": 20.0,
+  "volume": "300ml",
+  "ingredients": [
+    "Alcohol Denat.",
+    "VA/Crotonates Copolymer"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

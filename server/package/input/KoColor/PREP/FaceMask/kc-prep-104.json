@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-prep-104",
+  "name": "Cellular Renewal Face Mask",
+  "brand": "KoColor",
+  "macro_category": "PREP",
+  "micro_category": "FACE_MASK",
+  "shade_name": "Volcanic Ash",
+  "color_hex": "#708090",
+  "raw_image_input": "./kc-prep-104.png",
+  "price": 34.0,
+  "volume": "100ml",
+  "ingredients": [
+    "Kaolin",
+    "Bentonite",
+    "Salicylic Acid"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

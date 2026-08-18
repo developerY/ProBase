@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "kc-dresses-609",
+  "name": "Obsidian Void A-Line Mini",
+  "brand": "KoColor",
+  "macro_category": "APPAREL",
+  "micro_category": "DRESS",
+  "shade_name": "Obsidian Void Mini",
+  "color_hex": "#000000",
+  "raw_image_input": "./kc-dresses-609.png",
+  "price": 115.0,
+  "volume": "Size S",
+  "ingredients": ["Heavyweight Cotton Ponte", "Square Neckline", "Hidden Back Zip"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

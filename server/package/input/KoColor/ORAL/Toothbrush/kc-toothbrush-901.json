@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "id": "kc-toothbrush-901",
+  "name": "High-Frequency Bamboo Brush",
+  "brand": "KoColor",
+  "macro_category": "ORAL",
+  "micro_category": "TOOTHBRUSH",
+  "shade_name": "Natural Wood",
+  "color_hex": "#8B4513",
+  "raw_image_input": "./kc-toothbrush-901.png",
+  "price": 8.0,
+  "volume": "1 Unit",
+  "ingredients": [
+    "Sustainable Bamboo",
+    "Charcoal Bristles"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

@@ -1,0 +1,21 @@
+{
+  "product_id": "kc-hygiene-501",
+  "card_title": "Artist Notes: Clinical-Grade Antiperspirant",
+  "summary": "Absolute moisture lockdown. A maximum-strength roll-on that physically halts sweat production for up to 48 hours.",
+  "description": "Extreme atmospheric defense. Designed for hyperhidrosis or intense physical exertion, this formula utilizes a concentrated aluminum compound to form a temporary, harmless plug within the sweat duct.",
+  "technical_overview": "Offered at $20.0 for 50ml, this KoColor ANTIPERSPIRANT is expertly formulated with Aluminum Zirconium Tetrachlorohydrex Gly (20%) and Cyclopentasiloxane. It delivers a high-fidelity Opaque White color profile (`#FFFFFF`) and leverages glandular duct plugging.",
+  "dynamic_attributes": [
+    {
+      "label": "Usage Notes",
+      "body": "Apply exclusively at night to completely dry underarms before bed."
+    },
+    {
+      "label": "Expert Tip",
+      "body": "Nighttime application is critical; the sweat glands are least active during sleep, allowing the aluminum salts to properly form the barrier block."
+    },
+    {
+      "label": "Formulation Insight",
+      "body": "Cyclopentasiloxane provides a rapidly evaporating base, ensuring the product dries instantly and prevents clothing transfer."
+    }
+  ]
+}

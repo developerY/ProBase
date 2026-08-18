@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-oral-101",
+  "name": "Nano-Hydroxyapatite Toothpaste",
+  "brand": "KoColor",
+  "macro_category": "ORAL",
+  "micro_category": "TOOTHPASTE",
+  "shade_name": "Mint White",
+  "color_hex": "#F5FFFA",
+  "raw_image_input": "./kc-oral-101.png",
+  "price": 18.0,
+  "volume": "100g",
+  "ingredients": [
+    "Nano-Hydroxyapatite",
+    "Xylitol",
+    "Peppermint Oil"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-hygiene-801",
+  "name": "Barrier-Repair Hand Cream",
+  "brand": "KoColor",
+  "macro_category": "HYGIENE",
+  "micro_category": "HAND_CREAM",
+  "shade_name": "Soft Silk",
+  "color_hex": "#FFFAFA",
+  "raw_image_input": "./kc-hygiene-801.png",
+  "price": 20.0,
+  "volume": "75ml",
+  "ingredients": [
+    "Glycerin (20%)",
+    "Shea Butter",
+    "Dimethicone"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

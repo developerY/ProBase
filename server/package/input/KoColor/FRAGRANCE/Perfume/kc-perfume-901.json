@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-perfume-901",
+  "name": "Aura No. 2: Jasmine & Saffron",
+  "brand": "KoColor",
+  "macro_category": "FRAGRANCE",
+  "micro_category": "PERFUME",
+  "shade_name": "Golden Aura",
+  "color_hex": "#DAA520",
+  "raw_image_input": "./kc-perfume-901.png",
+  "price": 120.0,
+  "volume": "50ml",
+  "ingredients": [
+    "Ethanol",
+    "Jasmine Absolut",
+    "Saffron"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

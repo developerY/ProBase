@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "id": "kc-groom-401",
+  "name": "Precision Multi-Blade Razor",
+  "brand": "KoColor",
+  "macro_category": "GROOMING",
+  "micro_category": "RAZOR",
+  "shade_name": "Gunmetal",
+  "color_hex": "#2A3439",
+  "raw_image_input": "./kc-groom-401.png",
+  "price": 45.0,
+  "volume": "1 Handle + 2 Cartridges",
+  "ingredients": [
+    ""
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

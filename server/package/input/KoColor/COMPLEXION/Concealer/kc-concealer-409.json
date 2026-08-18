@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "kc-concealer-409",
+  "name": "Celestial Correcting Serum",
+  "brand": "KoColor Fashion",
+  "macro_category": "COMPLEXION",
+  "micro_category": "CONCEALER",
+  "shade_name": "Digital Lavender",
+  "color_hex": "#E6E6FA",
+  "raw_image_input": "./kc-concealer-409.png",
+  "price": 24.0,
+  "volume": "15ml",
+  "notes": "A color-correcting serum used popular for neutralizing warm/yellow undertones and brightening complexions.",
+  "ingredients": ["Water", "Mica", "Titanium Dioxide", "Manganese Violet"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

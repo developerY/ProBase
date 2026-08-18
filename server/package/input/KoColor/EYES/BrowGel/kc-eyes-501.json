@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-eyes-501",
+  "name": "Structural Hold Brow Gel",
+  "brand": "KoColor",
+  "macro_category": "EYES",
+  "micro_category": "BROW_GEL",
+  "shade_name": "Transparent Hold",
+  "color_hex": "#FFFFFF",
+  "raw_image_input": "./kc-eyes-501.png",
+  "price": 22.0,
+  "volume": "7ml",
+  "ingredients": [
+    "Water",
+    "Polyacrylates",
+    "Panthenol"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "kc-outerwear-708",
+  "name": "Electric Coral Utility Windbreaker",
+  "brand": "KoColor",
+  "macro_category": "APPAREL",
+  "micro_category": "OUTERWEAR",
+  "shade_name": "Electric Coral Windbreaker",
+  "color_hex": "#FF5F1F",
+  "raw_image_input": "./kc-outerwear-708.png",
+  "price": 95.0,
+  "volume": "Size S",
+  "ingredients": ["100% Ripstop Nylon", "Breathable Mesh Lining"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

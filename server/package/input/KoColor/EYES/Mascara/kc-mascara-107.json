@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "kc-mascara-107",
+  "name": "Glow Extension Mascara",
+  "brand": "KoColor Fashion",
+  "macro_category": "EYES",
+  "micro_category": "MASCARA",
+  "shade_name": "Rose Gold Rush",
+  "color_hex": "#B76E79",
+  "raw_image_input": "./kc-mascara-107.png",
+  "price": 19.0,
+  "volume": "8ml",
+  "notes": "Metallic rose gold formula that catches the light while extending lashes.",
+  "ingredients": ["Water", "Mica", "Iron Oxides", "Tin Oxide"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "kc-outerwear-701",
+  "name": "Universal Khaki Trench Coat",
+  "brand": "KoColor",
+  "macro_category": "APPAREL",
+  "micro_category": "OUTERWEAR",
+  "shade_name": "Universal Khaki Trench",
+  "color_hex": "#B8A992",
+  "raw_image_input": "./kc-outerwear-701.png",
+  "price": 240.0,
+  "volume": "Size M",
+  "ingredients": ["100% Cotton Gabardine", "Water-Repellent Coating", "Horn Buttons"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

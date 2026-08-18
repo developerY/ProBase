@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "kc-mascara-108",
+  "name": "Emerald Define Mascara",
+  "brand": "KoColor Fashion",
+  "macro_category": "EYES",
+  "micro_category": "MASCARA",
+  "shade_name": "Emerald Envy",
+  "color_hex": "#008080",
+  "raw_image_input": "./kc-mascara-108.png",
+  "price": 19.0,
+  "volume": "8ml",
+  "notes": "A deep teal/green definition mascara with micro-shimmer.",
+  "ingredients": ["Water", "Iron Oxides", "Chromium Oxide Greens", "Mica"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

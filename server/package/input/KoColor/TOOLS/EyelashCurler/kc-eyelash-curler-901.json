@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "id": "kc-eyelash-curler-901",
+  "name": "Architectural Lash Curler",
+  "brand": "KoColor",
+  "macro_category": "TOOLS",
+  "micro_category": "EYELASH_CURLER",
+  "shade_name": "Dark Gunmetal",
+  "color_hex": "#2F4F4F",
+  "raw_image_input": "./kc-eyelash-curler-901.png",
+  "price": 18.0,
+  "volume": "1 Unit",
+  "ingredients": [
+    "Carbon Steel",
+    "Silicone Pad"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

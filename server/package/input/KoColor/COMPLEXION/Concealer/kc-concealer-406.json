@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "kc-concealer-406",
+  "name": "Velvet Camouflage Concealer",
+  "brand": "KoColor Fashion",
+  "macro_category": "COMPLEXION",
+  "micro_category": "CONCEALER",
+  "shade_name": "Terracotta Sunset (Deep-Warm)",
+  "color_hex": "#E2725B",
+  "raw_image_input": "./kc-concealer-406.png",
+  "price": 24.0,
+  "volume": "6ml",
+  "notes": "Rich defining camouflage concealer for neutralizing deep discolorations on deep skin.",
+  "ingredients": ["Water", "Caprylyl Methicone", "Iron Oxides", "Red 40 Lake"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "id": "kc-eyes-601",
+  "name": "Biomimetic False Lashes",
+  "brand": "KoColor",
+  "macro_category": "EYES",
+  "micro_category": "FALSE_LASHES",
+  "shade_name": "Vantablack",
+  "color_hex": "#000000",
+  "raw_image_input": "./kc-eyes-601.png",
+  "price": 18.0,
+  "volume": "1 Pair",
+  "ingredients": [
+    ""
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

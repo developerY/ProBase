@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "id": "kc-hygiene-601",
+  "name": "pH-Balanced Intimate Wash",
+  "brand": "KoColor",
+  "macro_category": "HYGIENE",
+  "micro_category": "INTIMATE_HYGIENE",
+  "shade_name": "Pure Clear",
+  "color_hex": "#F5FFFA",
+  "raw_image_input": "./kc-hygiene-601.png",
+  "price": 16.0,
+  "volume": "200ml",
+  "ingredients": [
+    "Water",
+    "Lactic Acid",
+    "Aloe Barbadensis",
+    "mild Glucosides"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

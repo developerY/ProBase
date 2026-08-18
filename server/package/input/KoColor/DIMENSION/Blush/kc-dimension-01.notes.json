@@ -1,7 +1,7 @@
 {
   "product_id": "kc-dimension-01",
   "card_title": "Artist Notes: Petal Touch Flush Blush",
-  "description": "Offered at $22.0 for 5g, this KoColor BLUSH is expertly formulated with Mica, Talc, Dimethicone, Silica, Zinc Stearate, Red 7 Lake, Iron Oxides. Delivering a high-fidelity Rosewood color profile (`#C86D7C`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.",
+  "description": "High-fidelity powder engineering. Mica, silica, and zinc stearate are expertly milled with Red 7 Lake to deliver the perfect Rosewood (`#C86D7C`) flush to a prepped surface.",
   "dynamic_attributes": [
     {
       "label": "Usage Notes",
@@ -15,5 +15,7 @@
       "label": "Formulation Insight",
       "body": "Advanced blush engineering featuring high-purity pigments and volatile carriers."
     }
-  ]
+  ],
+  "summary": "A rush of natural color. This finely milled Rosewood powder blends effortlessly into the skin, leaving a soft, romantic, high-fidelity flush that lasts all day.",
+  "technical_overview": "Offered at $22.0 for 5g, this KoColor BLUSH is expertly formulated with Mica, Talc, Dimethicone, Silica, Zinc Stearate, Red 7 Lake, Iron Oxides. Delivering a high-fidelity Rosewood color profile (`#C86D7C`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface."
 }

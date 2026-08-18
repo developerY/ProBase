@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "kc-eyebrow-308",
+  "name": "Void Prime Tinted Gel",
+  "brand": "KoColor Fashion",
+  "macro_category": "EYES",
+  "micro_category": "EYEBROW",
+  "shade_name": "Cobalt Dream",
+  "color_hex": "#0047AB",
+  "raw_image_input": "./kc-eyebrow-308.png",
+  "price": 21.0,
+  "volume": "5ml",
+  "notes": "A unique matte defining blue gel used for trendy editorial brow art.",
+  "ingredients": ["Water", "Acrylates Copolymer", "Blue 1 Lake", "Ultramarines"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "kc-eyeliner-208",
+  "name": "Electric Pop Liner",
+  "brand": "KoColor Fashion",
+  "macro_category": "EYES",
+  "micro_category": "EYELINER",
+  "shade_name": "Tangerine Sunset",
+  "color_hex": "#FF5F1F",
+  "raw_image_input": "./kc-eyeliner-208.png",
+  "price": 17.0,
+  "volume": "5ml",
+  "notes": "A vibrant orange/tangerine liquid liner for bold editorial looks.",
+  "ingredients": ["Water", "Red 6 Lake", "Yellow 5 Lake", "Xanthan Gum"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

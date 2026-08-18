@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-lips-301",
+  "name": "Precision Define Lip Liner",
+  "brand": "KoColor",
+  "macro_category": "LIPS",
+  "micro_category": "LIP_LINER",
+  "shade_name": "Terracotta Core",
+  "color_hex": "#CC4E46",
+  "raw_image_input": "./kc-lips-301.png",
+  "price": 19.0,
+  "volume": "1.2g",
+  "ingredients": [
+    "Synthetic Wax",
+    "Isododecane",
+    "Iron Oxides"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

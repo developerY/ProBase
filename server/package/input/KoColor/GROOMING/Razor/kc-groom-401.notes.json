@@ -1,0 +1,21 @@
+{
+  "product_id": "kc-groom-401",
+  "card_title": "Artist Notes: Precision Multi-Blade Razor",
+  "summary": "Surgical hair removal. A heavy, perfectly balanced aerospace-grade razor handle equipped with a titanium-coated multi-blade cartridge.",
+  "description": "Kinetic clearing technology. Engineered with a heavy center of gravity, the weight of the handle does the cutting work, drastically reducing the required manual pressure and virtually eliminating razor drag and micro-abrasions.",
+  "technical_overview": "Offered at $45.0 for 1 Handle + 2 Cartridges, this KoColor RAZOR is expertly constructed from Solid Machined Zinc Alloy and Titanium-Coated Steel. It delivers a high-fidelity Gunmetal color profile (`#2A3439`) and leverages gravitational mass-balance engineering.",
+  "dynamic_attributes": [
+    {
+      "label": "Usage Notes",
+      "body": "Hold the razor at a 30-degree angle and utilize short, smooth strokes perfectly parallel to the direction of hair growth."
+    },
+    {
+      "label": "Expert Tip",
+      "body": "Never tap the razor against the sink to clear hair; this instantly warps the microscopic edge of the blades. Rinse under high-pressure running water instead."
+    },
+    {
+      "label": "Formulation Insight",
+      "body": "Titanium coating prevents the microscopic rusting and pitting of the steel edge that typically leads to dullness and razor burn."
+    }
+  ]
+}

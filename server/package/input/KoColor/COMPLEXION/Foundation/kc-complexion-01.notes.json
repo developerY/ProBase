@@ -1,7 +1,7 @@
 {
   "product_id": "kc-complexion-01",
   "card_title": "Artist Notes: Seamless Silk Foundation",
-  "description": "Offered at $42.0 for 30ml, this KoColor FOUNDATION is expertly formulated with Water, Cyclopentasiloxane, Titanium Dioxide, Glycerin, Iron Oxides, Silica. Delivering a high-fidelity Warm Beige 220W color profile (`#E0AC81`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.",
+  "description": "Flawless chromatic impact. This foundation suspends high-purity iron oxides and silica in cyclopentasiloxane for a weightless, Warm Beige 220W (`#E0AC81`) finish that mimics pure silk.",
   "dynamic_attributes": [
     {
       "label": "Usage Notes",
@@ -15,5 +15,7 @@
       "label": "Formulation Insight",
       "body": "Advanced foundation engineering featuring high-purity pigments and volatile carriers."
     }
-  ]
+  ],
+  "summary": "Your skin, but better. Experience advanced, high-purity pigments that deliver a weightless, medium-coverage Warm Beige finish that looks like pure, seamless silk.",
+  "technical_overview": "Offered at $42.0 for 30ml, this KoColor FOUNDATION is expertly formulated with Water, Cyclopentasiloxane, Titanium Dioxide, Glycerin, Iron Oxides, Silica. Delivering a high-fidelity Warm Beige 220W color profile (`#E0AC81`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface."
 }

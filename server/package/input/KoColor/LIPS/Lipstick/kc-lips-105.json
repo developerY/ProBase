@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "kc-lips-105",
+  "name": "Concrete Rose Lipstick",
+  "brand": "KoColor",
+  "macro_category": "LIPS",
+  "micro_category": "LIPSTICK",
+  "shade_name": "Concrete Rose",
+  "color_hex": "#9F8D85",
+  "raw_image_input": "./kc-lips-105.png",
+  "price": 28.0,
+  "volume": "3.5g",
+  "ingredients": ["Ricinus Communis (Castor) Seed Oil", "Shea Butter", "Titanium Dioxide", "Iron Oxides", "Blue 1 Lake"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

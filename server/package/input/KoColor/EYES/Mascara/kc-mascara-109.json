@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "kc-mascara-109",
+  "name": "Void Prime Mascara",
+  "brand": "KoColor Fashion",
+  "macro_category": "EYES",
+  "micro_category": "MASCARA",
+  "shade_name": "Lash Primer (White)",
+  "color_hex": "#FFFFFF",
+  "raw_image_input": "./kc-mascara-109.png",
+  "price": 19.0,
+  "volume": "8ml",
+  "notes": "An opaque white mascara base used to boost the volume of top coats.",
+  "ingredients": ["Water", "Titanium Dioxide", "Glycerol Stearate", "Cera Alba"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

@@ -1,0 +1,21 @@
+{
+  "product_id": "kc-groom-201",
+  "card_title": "Artist Notes: Soothing Post-Shave Balm",
+  "summary": "Extinguish the fire. An alcohol-free, cooling emulsion that immediately neutralizes razor burn and rebuilds the disrupted epidermal barrier.",
+  "description": "Dermal triage for freshly shaved skin. Passing a blade over the skin removes the top layer of the stratum corneum. This balm utilizes witch hazel and aloe to instantly halt inflammation and prevent micro-bacterial infection.",
+  "technical_overview": "Offered at $24.0 for 100ml, this KoColor AFTERSHAVE is expertly formulated with Witch Hazel, Aloe Vera Leaf Juice, and Allantoin. It delivers a high-fidelity Cooling Aqua color profile (`#E0FFFF`) and leverages anti-inflammatory vasoconstriction.",
+  "dynamic_attributes": [
+    {
+      "label": "Usage Notes",
+      "body": "Massage a dime-sized amount into freshly shaved areas immediately after patting dry."
+    },
+    {
+      "label": "Expert Tip",
+      "body": "Avoid colognes or perfumes on the neck area for 20 minutes after application to prevent severe chemical irritation of the exposed follicles."
+    },
+    {
+      "label": "Formulation Insight",
+      "body": "Formulated strictly without SD Alcohol to prevent the classic \"stinging\" sensation, which is biologically indicative of cellular damage, not sanitation."
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "product_id": "kc-groom-301",
+  "card_title": "Artist Notes: Nourishing Beard Oil",
+  "summary": "Tame the wire. A lightweight, highly penetrative lipid blend that softens coarse facial hair while eradicating the underlying skin flakiness known as \"beardruff\".",
+  "description": "Structural softening for coarse hair. Facial hair is twice as thick as scalp hair. This oil mimics the skin's natural sebum, absorbing instantly to restore elasticity to the hair shaft and intense hydration to the hidden epidermis below.",
+  "technical_overview": "Offered at $30.0 for 30ml, this KoColor BEARD_CARE is expertly formulated with Argan Oil, Jojoba Oil, and Vitamin E. It delivers a high-fidelity Liquid Gold color profile (`#DAA520`) and leverages bio-mimetic lipid saturation.",
+  "dynamic_attributes": [
+    {
+      "label": "Usage Notes",
+      "body": "Dispense 3-5 drops into palms, rub together, and aggressively massage deep into the beard, ensuring contact with the skin."
+    },
+    {
+      "label": "Expert Tip",
+      "body": "Always apply to a damp beard. The oil seals in the water from your shower, doubling the hydration factor."
+    },
+    {
+      "label": "Formulation Insight",
+      "body": "Jojoba oil is technically a wax ester, making it biologically identical to human sebum, ensuring a 100% absorption rate with zero greasy residue."
+    }
+  ]
+}

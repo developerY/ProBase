@@ -1,0 +1,21 @@
+{
+  "product_id": "kc-soap-901",
+  "card_title": "Artist Notes: Triple-Milled Botanical Bar",
+  "description": "Traditional craft meets scientific purity. The triple-milling process ensures a dense, long-lasting bar with a rich, creamy lather that leaves skin feeling soft and balanced.",
+  "summary": "Elevated cleansing. A luxurious, triple-milled soap bar that gently cleanses while infusing the skin with botanical moisture.",
+  "dynamic_attributes": [
+    {
+      "label": "Usage Notes",
+      "body": "Standard soap protocol for kc-soap-901. Engineered for high-fidelity performance."
+    },
+    {
+      "label": "Expert Tip",
+      "body": "For optimal results, integrate Triple-Milled Botanical Bar into your daily scientific ritual."
+    },
+    {
+      "label": "Formulation Insight",
+      "body": "Advanced Soap engineering featuring medical-grade carriers and high-purity actives."
+    }
+  ],
+  "technical_overview": "Offered at $12.0 for 150g, this KoColor SOAP is expertly formulated with Sodium Palmate, Shea Butter, Lavender Oil. Delivering a high-fidelity Lavender Fields color profile (`#E6E6FA`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface."
+}

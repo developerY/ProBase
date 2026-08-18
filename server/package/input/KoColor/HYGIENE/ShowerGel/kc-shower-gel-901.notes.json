@@ -1,0 +1,21 @@
+{
+  "product_id": "kc-shower-gel-901",
+  "card_title": "Artist Notes: Invigorating Citrus Body Wash",
+  "description": "Atmospheric body care. This gel uses cold-pressed citrus oils to provide an uplifting olfactory experience while the hydrating glycerin base prevents post-shower dryness.",
+  "summary": "Refresh and renew. A zesty, moisture-rich body wash that awakens the senses while gently purifying the skin's surface.",
+  "dynamic_attributes": [
+    {
+      "label": "Usage Notes",
+      "body": "Standard shower gel protocol for kc-shower-gel-901. Engineered for high-fidelity performance."
+    },
+    {
+      "label": "Expert Tip",
+      "body": "For optimal results, integrate Invigorating Citrus Body Wash into your daily scientific ritual."
+    },
+    {
+      "label": "Formulation Insight",
+      "body": "Advanced Shower Gel engineering featuring medical-grade carriers and high-purity actives."
+    }
+  ],
+  "technical_overview": "Offered at $18.0 for 400ml, this KoColor SHOWER_GEL is expertly formulated with Water, Glycerin, Orange Peel Oil. Delivering a high-fidelity Citrus Burst color profile (`#FFA500`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface."
+}

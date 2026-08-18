@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-hair-mask-901",
+  "name": "Deep-Bonding Recovery Mask",
+  "brand": "KoColor",
+  "macro_category": "HAIR",
+  "micro_category": "HAIR_MASK",
+  "shade_name": "Creamy Gold",
+  "color_hex": "#FFF8DC",
+  "raw_image_input": "./kc-hair-mask-901.png",
+  "price": 32.0,
+  "volume": "200ml",
+  "ingredients": [
+    "Water",
+    "Argan Oil",
+    "Panthenol"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

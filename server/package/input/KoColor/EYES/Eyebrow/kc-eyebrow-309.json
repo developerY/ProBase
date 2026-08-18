@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "kc-eyebrow-309",
+  "name": "Fairy Dust Tinted Gel",
+  "brand": "KoColor Fashion",
+  "macro_category": "EYES",
+  "micro_category": "EYEBROW",
+  "shade_name": "Digital Lavender",
+  "color_hex": "#E6E6FA",
+  "raw_image_input": "./kc-eyebrow-309.png",
+  "price": 21.0,
+  "volume": "5ml",
+  "notes": "A popular fashion pop, defining brows in a subtle lavender shimmer.",
+  "ingredients": ["Water", "Mica", "Titanium Dioxide", "Manganese Violet"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

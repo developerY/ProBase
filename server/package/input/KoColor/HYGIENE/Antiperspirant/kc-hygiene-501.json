@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "id": "kc-hygiene-501",
+  "name": "Clinical-Grade Antiperspirant",
+  "brand": "KoColor",
+  "macro_category": "HYGIENE",
+  "micro_category": "ANTIPERSPIRANT",
+  "shade_name": "Opaque White",
+  "color_hex": "#FFFFFF",
+  "raw_image_input": "./kc-hygiene-501.png",
+  "price": 20.0,
+  "volume": "50ml",
+  "ingredients": [
+    "Aluminum Zirconium Tetrachlorohydrex Gly (20%) Cyclopentasiloxane"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

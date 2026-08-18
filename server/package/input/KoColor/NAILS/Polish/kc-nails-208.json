@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "kc-nails-208",
+  "name": "Canvas White Polish",
+  "brand": "KoColor",
+  "macro_category": "NAILS",
+  "micro_category": "POLISH",
+  "shade_name": "Canvas White",
+  "color_hex": "#F5F5F5",
+  "raw_image_input": "./kc-nails-208.png",
+  "price": 18.0,
+  "volume": "15ml",
+  "ingredients": ["Ethyl Acetate", "Butyl Acetate", "Nitrocellulose", "Titanium Dioxide", "Silica"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

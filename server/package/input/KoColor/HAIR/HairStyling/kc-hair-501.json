@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-hair-501",
+  "name": "Flexible-Architecture Hair Styling Clay",
+  "brand": "KoColor",
+  "macro_category": "HAIR",
+  "micro_category": "HAIR_STYLING",
+  "shade_name": "Slate Clay",
+  "color_hex": "#778899",
+  "raw_image_input": "./kc-hair-501.png",
+  "price": 26.0,
+  "volume": "60g",
+  "ingredients": [
+    "Bentonite Clay",
+    "Beeswax",
+    "Castor Oil"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

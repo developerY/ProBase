@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "kc-mascara-102",
+  "name": "Soft Definition Mascara",
+  "brand": "KoColor Fashion",
+  "macro_category": "EYES",
+  "micro_category": "MASCARA",
+  "shade_name": "Soft Black-Brown",
+  "color_hex": "#1C1C1C",
+  "raw_image_input": "./kc-mascara-102.png",
+  "price": 19.0,
+  "volume": "8ml",
+  "notes": "A natural everyday mascara for subtle lengthening and thickening, in a softer tone.",
+  "ingredients": ["Water", "Carnauba Wax", "Glycerin", "Iron Oxides"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

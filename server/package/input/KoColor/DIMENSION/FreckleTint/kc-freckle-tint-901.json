@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-freckle-tint-901",
+  "name": "Natural-Dot Freckle Pen",
+  "brand": "KoColor",
+  "macro_category": "DIMENSION",
+  "micro_category": "FRECKLE_TINT",
+  "shade_name": "Amber Speckle",
+  "color_hex": "#A0522D",
+  "raw_image_input": "./kc-freckle-tint-901.png",
+  "price": 18.0,
+  "volume": "1ml",
+  "ingredients": [
+    "Water",
+    "Glycerin",
+    "Iron Oxides"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

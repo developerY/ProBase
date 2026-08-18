@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-hair-401",
+  "name": "Vivid-Deposit Hair Color",
+  "brand": "KoColor",
+  "macro_category": "HAIR",
+  "micro_category": "HAIR_COLOR",
+  "shade_name": "Vivid Crimson",
+  "color_hex": "#DC143C",
+  "raw_image_input": "./kc-hair-401.png",
+  "price": 22.0,
+  "volume": "150ml",
+  "ingredients": [
+    "Water",
+    "Cetearyl Alcohol",
+    "Basic Red 51"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

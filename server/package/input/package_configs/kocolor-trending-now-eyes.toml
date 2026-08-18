@@ -1,0 +1,17 @@
+[package_metadata]
+id = "kocolor-trending-now-eyes"
+name = "Trending Now: Eyeshadows"
+description = "A 9-piece curation of high-popularity eyeshadow shades, featuring perfect mattes, high-shine celestials, and bold editorial pops."
+
+[assortment]
+includes = [
+    "kc-eyes-101",
+    "kc-eyes-102",
+    "kc-eyes-103",
+    "kc-eyes-104",
+    "kc-eyes-105",
+    "kc-eyes-106",
+    "kc-eyes-107",
+    "kc-eyes-108",
+    "kc-eyes-109"
+]

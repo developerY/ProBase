@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "id": "kc-antiperspirant-901",
+  "name": "Clinical-Strength Roll-On",
+  "brand": "KoColor",
+  "macro_category": "HYGIENE",
+  "micro_category": "ANTIPERSPIRANT",
+  "shade_name": "Invisible Shield",
+  "color_hex": "#F0F0F0",
+  "raw_image_input": "./kc-antiperspirant-901.png",
+  "price": 16.0,
+  "volume": "50ml",
+  "ingredients": [
+    "Aluminum Zirconium",
+    "Water"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

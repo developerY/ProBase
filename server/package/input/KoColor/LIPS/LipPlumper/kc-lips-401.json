@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-lips-401",
+  "name": "Volumizing Peptide Lip Plumper",
+  "brand": "KoColor",
+  "macro_category": "LIPS",
+  "micro_category": "LIP_PLUMPER",
+  "shade_name": "High-Shine Clear",
+  "color_hex": "#FFFFFF",
+  "raw_image_input": "./kc-lips-401.png",
+  "price": 26.0,
+  "volume": "4ml",
+  "ingredients": [
+    "Polybutene",
+    "Palmitoyl Tripeptide-1",
+    "Menthol"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "kc-lips-101",
+  "name": "Ruby Core Lipstick",
+  "brand": "KoColor",
+  "macro_category": "LIPS",
+  "micro_category": "LIPSTICK",
+  "shade_name": "Ruby Core",
+  "color_hex": "#9B111E",
+  "raw_image_input": "./kc-lips-101.png",
+  "price": 28.0,
+  "volume": "3.5g",
+  "ingredients": ["Ricinus Communis (Castor) Seed Oil", "Microcrystalline Wax", "Shea Butter", "Red 7 Lake", "Titanium Dioxide"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

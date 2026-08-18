@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "kc-concealer-408",
+  "name": "Glow Control Primer",
+  "brand": "KoColor Fashion",
+  "macro_category": "COMPLEXION",
+  "micro_category": "CONCEALER",
+  "shade_name": "Void Prime (Clean White)",
+  "color_hex": "#FFFFFF",
+  "raw_image_input": "./kc-concealer-408.png",
+  "price": 24.0,
+  "volume": "10ml",
+  "notes": "An opaque defining white cream concealer used for brightening and creating editorial bases.",
+  "ingredients": ["Water", "Titanium Dioxide", "Glycerol Stearate"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

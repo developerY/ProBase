@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "kc-lips-103",
+  "name": "Terracotta Brick Lipstick",
+  "brand": "KoColor",
+  "macro_category": "LIPS",
+  "micro_category": "LIPSTICK",
+  "shade_name": "Terracotta Brick",
+  "color_hex": "#8B3A3A",
+  "raw_image_input": "./kc-lips-103.png",
+  "price": 28.0,
+  "volume": "3.5g",
+  "ingredients": ["Ricinus Communis (Castor) Seed Oil", "Beeswax", "Silica", "Iron Oxides", "Yellow 6 Lake"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

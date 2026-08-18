@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-complexion-402",
+  "name": "Soft-Focus Face Powder",
+  "brand": "KoColor",
+  "macro_category": "COMPLEXION",
+  "micro_category": "FACE_POWDER",
+  "shade_name": "Neutral Sand",
+  "color_hex": "#E6C2A5",
+  "raw_image_input": "./kc-complexion-402.png",
+  "price": 36.0,
+  "volume": "12g",
+  "ingredients": [
+    "Synthetic Fluorphlogopite",
+    "Zinc Stearate",
+    "Iron Oxides"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

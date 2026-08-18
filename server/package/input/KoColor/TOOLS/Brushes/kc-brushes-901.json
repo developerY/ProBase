@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "id": "kc-brushes-901",
+  "name": "Professional Precision Set",
+  "brand": "KoColor",
+  "macro_category": "TOOLS",
+  "micro_category": "BRUSHES",
+  "shade_name": "Natural Cream",
+  "color_hex": "#F5F5F5",
+  "raw_image_input": "./kc-brushes-901.png",
+  "price": 55.0,
+  "volume": "8 Units",
+  "ingredients": [
+    "Synthetic Taklon",
+    "Bamboo Handles"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

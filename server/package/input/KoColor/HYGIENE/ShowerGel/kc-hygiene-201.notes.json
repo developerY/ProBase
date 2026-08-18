@@ -1,0 +1,21 @@
+{
+  "product_id": "kc-hygiene-201",
+  "card_title": "Artist Notes: Lipid-Restoring Shower Gel",
+  "summary": "Cleanse without compromise. A sulfate-free body wash that respects and replenishes the skin\u2019s natural acid mantle.",
+  "description": "Gentle biological cleansing. This low-foaming gel utilizes mild, coconut-derived surfactants to lift dirt and sweat, while actively depositing skin-identical lipids back into the epidermis during the wash phase.",
+  "technical_overview": "Offered at $22.0 for 300ml, this KoColor SHOWER_GEL is expertly formulated with Water, Sodium Cocoyl Isethionate, Glycerin, and Ceramides. It delivers a high-fidelity Amber Wash color profile (`#FFBF00`) and leverages pH-optimized surfactant technology.",
+  "dynamic_attributes": [
+    {
+      "label": "Usage Notes",
+      "body": "Massage onto wet skin using hands or a biological sea sponge."
+    },
+    {
+      "label": "Expert Tip",
+      "body": "Ditch the harsh plastic loofah; this lipid-rich formula is best applied by hand to ensure maximum absorption of the hydrating actives."
+    },
+    {
+      "label": "Formulation Insight",
+      "body": "Sodium Cocoyl Isethionate offers excellent cleansing power while maintaining a large enough molecular size to prevent penetration and irritation of the skin barrier."
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "kc-eyebrow-301",
+  "name": "Architect Brow Pencil",
+  "brand": "KoColor Fashion",
+  "macro_category": "EYES",
+  "micro_category": "EYEBROW",
+  "shade_name": "Ash Blonde (Cool)",
+  "color_hex": "#D2B48C",
+  "raw_image_input": "./kc-eyebrow-301.png",
+  "price": 21.0,
+  "volume": "0.1g",
+  "notes": "A cool-toned pencil for fine shaping and filling blonde brows.",
+  "ingredients": ["Synthetic Wax", "Hydrogenated Soybean Oil", "Iron Oxides"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

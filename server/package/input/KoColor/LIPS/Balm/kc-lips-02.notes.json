@@ -1,7 +1,7 @@
 {
   "product_id": "kc-lips-02",
   "card_title": "Artist Notes: Blotted Lip Balm",
-  "description": "Offered at $21.0 for 3g, this KoColor BALM is expertly formulated with Caprylic/Capric Triglyceride, Ricinus Communis (Castor) Seed Oil, Microcrystalline Wax, Red 7 Lake, Shea Butter. Delivering a high-fidelity Blotted Cherry color profile (`#B72227`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.",
+  "description": "Hydration and tint. Shea butter and microcrystalline wax deposit a sheer, nourishing Blotted Cherry (`#B72227`) hue.",
   "dynamic_attributes": [
     {
       "label": "Usage Notes",
@@ -15,5 +15,7 @@
       "label": "Formulation Insight",
       "body": "Advanced balm engineering featuring high-purity pigments and volatile carriers."
     }
-  ]
+  ],
+  "summary": "The perfect \"just-bitten\" flush. Nourishing Shea Butter meets a sheer wash of cherry red for a beautifully hydrated, naturally tinted pout.",
+  "technical_overview": "Offered at $21.0 for 3g, this KoColor BALM is expertly formulated with Caprylic/Capric Triglyceride, Ricinus Communis (Castor) Seed Oil, Microcrystalline Wax, Red 7 Lake, Shea Butter. Delivering a high-fidelity Blotted Cherry color profile (`#B72227`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface."
 }

@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "kc-eyeliner-206",
+  "name": "Deep Plum Define Liner",
+  "brand": "KoColor Fashion",
+  "macro_category": "EYES",
+  "micro_category": "EYELINER",
+  "shade_name": "Deep Plum (Matte)",
+  "color_hex": "#4B0082",
+  "raw_image_input": "./kc-eyeliner-206.png",
+  "price": 17.0,
+  "volume": "1.2g",
+  "notes": "A rich, velvety matte defining plum pencil.",
+  "ingredients": ["Manganese Violet", "Iron Oxides", "Mica", "Hydrogenated Oil"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-lip-plumper-901",
+  "name": "Max-Volume Peptide Plumper",
+  "brand": "KoColor",
+  "macro_category": "LIPS",
+  "micro_category": "LIP_PLUMPER",
+  "shade_name": "Icy Pink",
+  "color_hex": "#FFC0CB",
+  "raw_image_input": "./kc-lip-plumper-901.png",
+  "price": 26.0,
+  "volume": "4ml",
+  "ingredients": [
+    "Polybutene",
+    "Peptides",
+    "Capsicum Extract"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

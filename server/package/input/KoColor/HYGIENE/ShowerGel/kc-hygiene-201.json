@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "id": "kc-hygiene-201",
+  "name": "Lipid-Restoring Shower Gel",
+  "brand": "KoColor",
+  "macro_category": "HYGIENE",
+  "micro_category": "SHOWER_GEL",
+  "shade_name": "Amber Wash",
+  "color_hex": "#FFBF00",
+  "raw_image_input": "./kc-hygiene-201.png",
+  "price": 22.0,
+  "volume": "300ml",
+  "ingredients": [
+    "Water",
+    "Sodium Cocoyl Isethionate",
+    "Glycerin",
+    "Ceramides"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

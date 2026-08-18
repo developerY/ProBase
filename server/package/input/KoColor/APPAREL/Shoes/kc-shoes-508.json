@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "kc-shoes-508",
+  "name": "Crisp White Tennis",
+  "brand": "KoColor",
+  "macro_category": "APPAREL",
+  "micro_category": "SHOES",
+  "shade_name": "Canvas White Court",
+  "color_hex": "#FFFFFF",
+  "raw_image_input": "./kc-shoes-508.png",
+  "price": 110.0,
+  "volume": "Size 9.5",
+  "ingredients": ["Leather Upper", "Orthopedic Insole"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-hygiene-101",
+  "name": "Purifying Charcoal Bar Soap",
+  "brand": "KoColor",
+  "macro_category": "HYGIENE",
+  "micro_category": "SOAP",
+  "shade_name": "Carbon Black",
+  "color_hex": "#1A1A1A",
+  "raw_image_input": "./kc-hygiene-101.png",
+  "price": 14.0,
+  "volume": "150g",
+  "ingredients": [
+    "Saponified Oils",
+    "Activated Charcoal",
+    "Shea Butter"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "kc-eyeliner-201",
+  "name": "Obsidian Precision Liner",
+  "brand": "KoColor Fashion",
+  "macro_category": "EYES",
+  "micro_category": "EYELINER",
+  "shade_name": "True Black",
+  "color_hex": "#000000",
+  "raw_image_input": "./kc-eyeliner-201.png",
+  "price": 17.0,
+  "volume": "8ml",
+  "notes": "An ultra-fine tip liquid liner for sharp, intense black definition along the lash line.",
+  "ingredients": ["Water", "Acrylates Copolymer", "Black 2", "Butylene Glycol"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

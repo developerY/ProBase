@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "kc-eyeliner-203",
+  "name": "Earth Define Pencil",
+  "brand": "KoColor Fashion",
+  "macro_category": "EYES",
+  "micro_category": "EYELINER",
+  "shade_name": "Toasted Almond",
+  "color_hex": "#C19A6B",
+  "raw_image_input": "./kc-eyeliner-203.png",
+  "price": 17.0,
+  "volume": "1.2g",
+  "notes": "A natural satin brown pencil for defining the waterline and soft outlines.",
+  "ingredients": ["Hydrogenated Vegetable Oil", "Iron Oxides", "Mica"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

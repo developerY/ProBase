@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "id": "kc-hygiene-701",
+  "name": "Unbleached Organic Cotton Pads",
+  "brand": "KoColor",
+  "macro_category": "HYGIENE",
+  "micro_category": "COTTON_PRODUCT",
+  "shade_name": "Natural Ecru",
+  "color_hex": "#F5F5DC",
+  "raw_image_input": "./kc-hygiene-701.png",
+  "price": 12.0,
+  "volume": "100 Count",
+  "ingredients": [
+    "100% Unbleached Organic Cotton"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

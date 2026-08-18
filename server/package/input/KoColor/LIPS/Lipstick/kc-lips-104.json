@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "kc-lips-104",
+  "name": "Scarlet Siren Lipstick",
+  "brand": "KoColor",
+  "macro_category": "LIPS",
+  "micro_category": "LIPSTICK",
+  "shade_name": "Scarlet Siren",
+  "color_hex": "#C21E56",
+  "raw_image_input": "./kc-lips-104.png",
+  "price": 28.0,
+  "volume": "3.5g",
+  "ingredients": ["Caprylic/Capric Triglyceride", "Microcrystalline Wax", "Red 28 Lake", "Titanium Dioxide", "Tocopherol"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

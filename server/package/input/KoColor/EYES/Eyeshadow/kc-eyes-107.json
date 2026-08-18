@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "kc-eyes-107",
+  "name": "Emerald Envy Velvet Monolith Single",
+  "brand": "KoColor",
+  "macro_category": "EYES",
+  "micro_category": "EYESHADOW",
+  "shade_name": "Emerald Envy",
+  "color_hex": "#008080",
+  "raw_image_input": "./kc-eyes-107.png",
+  "price": 18.0,
+  "volume": "1.5g",
+  "notes": "Rich, deep teal with micro-shimmer. A sophisticated pop of color that flatters all eye colors.",
+  "ingredients": ["Mica", "Talc", "Iron Oxides", "Chromium Oxide Greens"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-frag-401",
+  "name": "Solid State Cologne: Vetiver Base",
+  "brand": "KoColor",
+  "macro_category": "FRAGRANCE",
+  "micro_category": "COLOGNE",
+  "shade_name": "Earth Balm",
+  "color_hex": "#8B4513",
+  "raw_image_input": "./kc-frag-401.png",
+  "price": 45.0,
+  "volume": "15g",
+  "ingredients": [
+    "Beeswax",
+    "Jojoba Oil",
+    "Vetiver Essential Oil"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

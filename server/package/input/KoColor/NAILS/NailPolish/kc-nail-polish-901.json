@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-nail-polish-901",
+  "name": "High-Gloss Pro Lacquer",
+  "brand": "KoColor",
+  "macro_category": "NAILS",
+  "micro_category": "NAIL_POLISH",
+  "shade_name": "Red Pro",
+  "color_hex": "#FF0000",
+  "raw_image_input": "./kc-nail-polish-901.png",
+  "price": 18.0,
+  "volume": "15ml",
+  "ingredients": [
+    "Ethyl Acetate",
+    "Nitrocellulose",
+    "Butyl Acetate"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

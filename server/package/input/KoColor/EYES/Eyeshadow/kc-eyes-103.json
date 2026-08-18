@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "kc-eyes-103",
+  "name": "Terracotta Sunset Velvet Monolith Single",
+  "brand": "KoColor",
+  "macro_category": "EYES",
+  "micro_category": "EYESHADOW",
+  "shade_name": "Terracotta Sunset",
+  "color_hex": "#E2725B",
+  "raw_image_input": "./kc-eyes-103.png",
+  "price": 18.0,
+  "volume": "1.5g",
+  "notes": "A trendy, vibrant burnt orange. Adds instant warmth and definition to the crease for a modern, blown-out look.",
+  "ingredients": ["Mica", "Talc", "Synthetic Fluorphlogopite", "Iron Oxides", "Red 40 Lake"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

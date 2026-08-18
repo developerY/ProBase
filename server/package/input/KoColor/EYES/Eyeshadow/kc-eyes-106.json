@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "kc-eyes-106",
+  "name": "Silver Lining Celestial Chromatic Single",
+  "brand": "KoColor",
+  "macro_category": "EYES",
+  "micro_category": "EYESHADOW",
+  "shade_name": "Silver Lining",
+  "color_hex": "#C0C0C0",
+  "raw_image_input": "./kc-eyes-106.png",
+  "price": 18.0,
+  "volume": "1.5g",
+  "notes": "A cool-toned, reflective bright silver. Creates a futuristic, mirrored effect on the eyes.",
+  "ingredients": ["Aluminum Powder", "Silica", "Dimethicone", "Mica"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

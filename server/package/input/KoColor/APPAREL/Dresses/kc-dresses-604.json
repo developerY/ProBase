@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "kc-dresses-604",
+  "name": "Transformative Teal Wrap Dress",
+  "brand": "KoColor",
+  "macro_category": "APPAREL",
+  "micro_category": "DRESS",
+  "shade_name": "Transformative Teal Wrap",
+  "color_hex": "#2F6364",
+  "raw_image_input": "./kc-dresses-604.png",
+  "price": 110.0,
+  "volume": "Size L",
+  "ingredients": ["Eco-Vero Viscose", "Tie-Waist", "Ruffle Hem"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

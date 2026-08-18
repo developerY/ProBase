@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "kc-shoes-507",
+  "name": "Rouge Strappy Sandals",
+  "brand": "KoColor",
+  "macro_category": "APPAREL",
+  "micro_category": "SHOES",
+  "shade_name": "Rouge Strappy Heel",
+  "color_hex": "#D7727C",
+  "raw_image_input": "./kc-shoes-507.png",
+  "price": 145.0,
+  "volume": "Size 7",
+  "ingredients": ["Vegan Silk Satin", "Ankle Tie"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

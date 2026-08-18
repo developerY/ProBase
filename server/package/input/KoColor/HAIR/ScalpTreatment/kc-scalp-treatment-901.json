@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-scalp-treatment-901",
+  "name": "Revitalizing Peptide Scalp Serum",
+  "brand": "KoColor",
+  "macro_category": "HAIR",
+  "micro_category": "SCALP_TREATMENT",
+  "shade_name": "Arctic Blue",
+  "color_hex": "#AFEEEE",
+  "raw_image_input": "./kc-scalp-treatment-901.png",
+  "price": 38.0,
+  "volume": "60ml",
+  "ingredients": [
+    "Water",
+    "Procapil",
+    "Biotin"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

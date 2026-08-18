@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "kc-pants-404",
+  "name": "Hidden Gem Pleated",
+  "brand": "KoColor",
+  "macro_category": "APPAREL",
+  "micro_category": "PANTS",
+  "shade_name": "Hidden Gem Jade Trousers",
+  "color_hex": "#596D69",
+  "raw_image_input": "./kc-pants-404.png",
+  "price": 120.0,
+  "volume": "Size 29",
+  "ingredients": ["Wool Blend", "Recycled Polyester"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

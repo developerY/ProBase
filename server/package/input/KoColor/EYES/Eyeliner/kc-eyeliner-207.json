@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "kc-eyeliner-207",
+  "name": "Pop Art Liquid Liner",
+  "brand": "KoColor Fashion",
+  "macro_category": "EYES",
+  "micro_category": "EYELINER",
+  "shade_name": "Cobalt Blue",
+  "color_hex": "#0047AB",
+  "raw_image_input": "./kc-eyeliner-207.png",
+  "price": 17.0,
+  "volume": "5ml",
+  "notes": "Strike a pose in this matte cobalt blue graphic liner.",
+  "ingredients": ["Water", "Ultramarines", "Blue 1 Lake", "Glycerin"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

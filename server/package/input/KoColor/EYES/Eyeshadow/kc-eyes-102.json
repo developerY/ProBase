@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "kc-eyes-102",
+  "name": "Starlight Sparkle Celestial Chromatic Single",
+  "brand": "KoColor",
+  "macro_category": "EYES",
+  "micro_category": "EYESHADOW",
+  "shade_name": "Starlight Sparkle",
+  "color_hex": "#F7E7CE",
+  "raw_image_input": "./kc-eyes-102.png",
+  "price": 18.0,
+  "volume": "1.5g",
+  "notes": "High-impact glistening champagne. Captures and reflects light for an ethereal glow on the inner corner or center lid.",
+  "ingredients": ["Mica", "Calcium Aluminum Borosilicate", "Silica", "Titanium Dioxide"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

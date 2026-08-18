@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "kc-lips-109",
+  "name": "Electric Coral Lipstick",
+  "brand": "KoColor",
+  "macro_category": "LIPS",
+  "micro_category": "LIPSTICK",
+  "shade_name": "Electric Coral",
+  "color_hex": "#FF4040",
+  "raw_image_input": "./kc-lips-109.png",
+  "price": 28.0,
+  "volume": "3.5g",
+  "ingredients": ["Ricinus Communis (Castor) Seed Oil", "Carnauba Wax", "Red 6 Lake", "Yellow 5 Lake", "Titanium Dioxide"],
+  "Contains_Fragrance": true,
+  "fda_data_verified": true
+}

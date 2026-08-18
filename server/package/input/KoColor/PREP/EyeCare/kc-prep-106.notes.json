@@ -1,0 +1,21 @@
+{
+  "product_id": "kc-prep-106",
+  "card_title": "Artist Notes: Peptide-Infused Eye Cream",
+  "summary": "Defy structural fatigue. A dense, concentrated cream that targets the micro-circulation around the orbital bone to reduce dark circles and puffiness.",
+  "description": "Targeted dermal support. This advanced formula utilizes biomimetic peptides to stimulate collagen production, reinforcing the delicate, thin skin under the eyes against environmental and structural stressors.",
+  "technical_overview": "Offered at $45.0 for 15ml, this KoColor EYE_CARE is expertly formulated with Matrixyl 3000, Caffeine, and Squalane. It delivers a high-fidelity Cream White color profile (`#FDF5E6`) and leverages micro-vascular constriction technology.",
+  "dynamic_attributes": [
+    {
+      "label": "Usage Notes",
+      "body": "Gently tap a grain-sized amount along the orbital bone using the ring finger."
+    },
+    {
+      "label": "Expert Tip",
+      "body": "Store in a cosmetic refrigerator; the cold temperature dramatically boosts the vasoconstricting effects of the caffeine."
+    },
+    {
+      "label": "Formulation Insight",
+      "body": "Caffeine is encapsulated in liposomes to ensure deep penetration past the stratum corneum."
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "kc-concealer-405",
+  "name": "Velvet Camouflage Concealer",
+  "brand": "KoColor Fashion",
+  "macro_category": "COMPLEXION",
+  "micro_category": "CONCEALER",
+  "shade_name": "Deep Ochre (Warm-Medium)",
+  "color_hex": "#C59E76",
+  "raw_image_input": "./kc-concealer-405.png",
+  "price": 24.0,
+  "volume": "6ml",
+  "notes": "Warm-toned concealer for medium-deep complexions.",
+  "ingredients": ["Water", "Isononyl Isononanoate", "Iron Oxides"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

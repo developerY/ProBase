@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "kc-outerwear-704",
+  "name": "Transformative Teal Cropped Puffer",
+  "brand": "KoColor",
+  "macro_category": "APPAREL",
+  "micro_category": "OUTERWEAR",
+  "shade_name": "Transformative Teal Puffer",
+  "color_hex": "#2F6364",
+  "raw_image_input": "./kc-outerwear-704.png",
+  "price": 165.0,
+  "volume": "Size L",
+  "ingredients": ["100% Recycled Nylon Shell", "700-Fill Goose Down Insulation"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "kc-eyes-108",
+  "name": "Cobalt Dream Velvet Monolith Single",
+  "brand": "KoColor",
+  "macro_category": "EYES",
+  "micro_category": "EYESHADOW",
+  "shade_name": "Cobalt Dream",
+  "color_hex": "#0047AB",
+  "raw_image_input": "./kc-eyes-108.png",
+  "price": 18.0,
+  "volume": "1.5g",
+  "notes": "Strike a pose in this matte cobalt blue. Intense, saturated color for bold editorial looks.",
+  "ingredients": ["Talc", "Mica", "Ultramarines", "Ferric Ferrocyanide"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

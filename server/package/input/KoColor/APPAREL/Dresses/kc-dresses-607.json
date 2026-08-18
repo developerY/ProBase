@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "kc-dresses-607",
+  "name": "Warm Terracotta Linen Sundress",
+  "brand": "KoColor",
+  "macro_category": "APPAREL",
+  "micro_category": "DRESS",
+  "shade_name": "Warm Terracotta Linen",
+  "color_hex": "#E2725B",
+  "raw_image_input": "./kc-dresses-607.png",
+  "price": 90.0,
+  "volume": "Size M",
+  "ingredients": ["100% European Flax Linen", "Smocked Back", "Tiered Skirt"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

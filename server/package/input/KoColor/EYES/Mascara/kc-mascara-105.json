@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "kc-mascara-105",
+  "name": "Electric Pop Mascara",
+  "brand": "KoColor Fashion",
+  "macro_category": "EYES",
+  "micro_category": "MASCARA",
+  "shade_name": "Cobalt Blue",
+  "color_hex": "#0047AB",
+  "raw_image_input": "./kc-mascara-105.png",
+  "price": 19.0,
+  "volume": "8ml",
+  "notes": "A popular vibrant blue that instantly lengthens and colors lashes.",
+  "ingredients": ["Water", "Synthetic Beeswax", "Blue 1 Lake", "Ultramarines"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

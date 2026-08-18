@@ -40,6 +40,7 @@ fun PackPreviewScreen(
     onSearchQueryChanged: (String) -> Unit,
     onToggleValueSort: () -> Unit,
     onItemInfoClick: (String) -> Unit,
+    onBuyItem: (String) -> Unit,
     onDismissNotes: () -> Unit,
     onImportSuccess: (Boolean) -> Unit,
     onBack: () -> Unit
@@ -90,6 +91,7 @@ fun PackPreviewScreen(
         blurHash = uiState.selectedItemBlurHash,
         colorHex = uiState.selectedItemColor,
         isLoading = uiState.isNotesLoading,
+        onBuy = { uiState.selectedItemNotes?.id?.let { onBuyItem(it) } },
         onDismiss = onDismissNotes
     )
 
@@ -286,6 +288,7 @@ private fun PackPreviewScreenPreview() {
             onSearchQueryChanged = {},
             onToggleValueSort = {},
             onItemInfoClick = {},
+            onBuyItem = {},
             onDismissNotes = {},
             onImportSuccess = {},
             onBack = {}

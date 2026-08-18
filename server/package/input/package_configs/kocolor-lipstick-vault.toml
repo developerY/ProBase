@@ -1,0 +1,17 @@
+[package_metadata]
+id = "kocolor-lipstick-vault"
+name = "KoColor Lipstick Vault"
+description = "A 9-piece curation of high-impact classic reds and avant-garde editorial shades."
+
+[assortment]
+includes = [
+    "kc-lips-101",
+    "kc-lips-102",
+    "kc-lips-103",
+    "kc-lips-104",
+    "kc-lips-105",
+    "kc-lips-106",
+    "kc-lips-107",
+    "kc-lips-108",
+    "kc-lips-109"
+]

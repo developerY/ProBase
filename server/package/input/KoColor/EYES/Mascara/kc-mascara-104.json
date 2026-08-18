@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "kc-mascara-104",
+  "name": "Waterproof Define Mascara",
+  "brand": "KoColor Fashion",
+  "macro_category": "EYES",
+  "micro_category": "MASCARA",
+  "shade_name": "Midnight Black",
+  "color_hex": "#000000",
+  "raw_image_input": "./kc-mascara-104.png",
+  "price": 19.0,
+  "volume": "8ml",
+  "notes": "Smudge-proof and waterproof formula for long-wear curl and separation.",
+  "ingredients": ["Isododecane", "Trimethylsiloxysilicate", "Iron Oxides"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

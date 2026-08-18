@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-prep-107",
+  "name": "Ceramide Lip Treatment",
+  "brand": "KoColor",
+  "macro_category": "PREP",
+  "micro_category": "LIP_CARE",
+  "shade_name": "Sheer Pink",
+  "color_hex": "#FFC0CB",
+  "raw_image_input": "./kc-prep-107.png",
+  "price": 18.0,
+  "volume": "10ml",
+  "ingredients": [
+    "Ceramide NP",
+    "Shea Butter",
+    "Phytosqualane"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

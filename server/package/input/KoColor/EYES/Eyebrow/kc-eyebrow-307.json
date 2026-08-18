@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "kc-eyebrow-307",
+  "name": "Sculpting Tinted Gel",
+  "brand": "KoColor Fashion",
+  "macro_category": "EYES",
+  "micro_category": "EYEBROW",
+  "shade_name": "Deep Onyx (Black)",
+  "color_hex": "#1C1C1C",
+  "raw_image_input": "./kc-eyebrow-307.png",
+  "price": 21.0,
+  "volume": "5ml",
+  "notes": "A soft black defining brow gel with micro-fibers to thicken and fill.",
+  "ingredients": ["Water", "Acrylates Copolymer", "Nylon-6", "Iron Oxides"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

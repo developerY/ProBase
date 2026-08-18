@@ -7,7 +7,9 @@ import kotlinx.serialization.Serializable
 data class ProductEditorialNotes(
     @SerialName("product_id") val id: String,
     @SerialName("card_title") val editorialTitle: String,
+    val summary: String? = null,
     val description: String? = null,
+    @SerialName("technical_overview") val technicalOverview: String? = null,
     @SerialName("dynamic_attributes") val attributes: List<EditorialAttribute> = emptyList()
 )
 

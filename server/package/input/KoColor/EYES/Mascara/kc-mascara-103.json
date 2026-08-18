@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "kc-mascara-103",
+  "name": "Earth Volume Mascara",
+  "brand": "KoColor Fashion",
+  "macro_category": "EYES",
+  "micro_category": "MASCARA",
+  "shade_name": "Coffee Brown",
+  "color_hex": "#4B3621",
+  "raw_image_input": "./kc-mascara-103.png",
+  "price": 19.0,
+  "volume": "8ml",
+  "notes": "A warm defining mascara for natural darkening without intense drama.",
+  "ingredients": ["Water", "Stearic Acid", "Paraffin", "Iron Oxides"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

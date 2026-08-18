@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "id": "kc-hygiene-301",
+  "name": "Magnesium-Rich Bath Soak",
+  "brand": "KoColor",
+  "macro_category": "HYGIENE",
+  "micro_category": "BATH_PRODUCT",
+  "shade_name": "Crystalline White",
+  "color_hex": "#FFFFFF",
+  "raw_image_input": "./kc-hygiene-301.png",
+  "price": 28.0,
+  "volume": "500g",
+  "ingredients": [
+    "100% Pure Magnesium Sulfate Eucalyptus Essential Oil"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

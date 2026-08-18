@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "kc-active-804",
+  "name": "Crisp White Tennis Skirt",
+  "brand": "KoColor",
+  "macro_category": "APPAREL",
+  "micro_category": "ACTIVEWEAR",
+  "shade_name": "Crisp White Tennis Skirt",
+  "color_hex": "#FFFFFF",
+  "raw_image_input": "./kc-active-804.png",
+  "price": 55.0,
+  "volume": "Size S",
+  "ingredients": ["88% Polyester", "12% Spandex", "Built-in Compression Shorts"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

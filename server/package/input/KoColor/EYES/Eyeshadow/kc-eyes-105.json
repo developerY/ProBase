@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "kc-eyes-105",
+  "name": "Smoky Obsidian Velvet Monolith Single",
+  "brand": "KoColor",
+  "macro_category": "EYES",
+  "micro_category": "EYESHADOW",
+  "shade_name": "Smoky Obsidian",
+  "color_hex": "#1C1C1C",
+  "raw_image_input": "./kc-eyes-105.png",
+  "price": 18.0,
+  "volume": "1.5g",
+  "notes": "Ultra-pigmented true black. Essential for deep smokey eyes or used wet as a dramatic liner.",
+  "ingredients": ["Talc", "Mica", "Black 2 (CI 77266)", "Iron Oxides"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

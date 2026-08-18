@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-body-mist-901",
+  "name": "Aura No. 5: Vanilla & Orchid",
+  "brand": "KoColor",
+  "macro_category": "FRAGRANCE",
+  "micro_category": "BODY_MIST",
+  "shade_name": "Blush Petal",
+  "color_hex": "#FFE4E1",
+  "raw_image_input": "./kc-body-mist-901.png",
+  "price": 25.0,
+  "volume": "250ml",
+  "ingredients": [
+    "Water",
+    "Ethanol",
+    "Vanilla Extract"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

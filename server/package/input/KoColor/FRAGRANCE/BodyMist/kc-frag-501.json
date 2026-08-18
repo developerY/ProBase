@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-frag-501",
+  "name": "Hydrating Body Mist: Rosewater",
+  "brand": "KoColor",
+  "macro_category": "FRAGRANCE",
+  "micro_category": "BODY_MIST",
+  "shade_name": "Petal Water",
+  "color_hex": "#FFE4E1",
+  "raw_image_input": "./kc-frag-501.png",
+  "price": 28.0,
+  "volume": "250ml",
+  "ingredients": [
+    "Rosa Damascena Distillate",
+    "Water",
+    "Glycerin"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}
