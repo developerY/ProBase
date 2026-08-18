@@ -245,3 +245,4 @@ Here is the advertising copy designed to sell each product, formatted perfectly 
 * **Ergonomic Eyelash Curler (`kc-tools-301`)**: Maximum vertical architecture. A heavy-duty, carbon steel curler designed to fit the exact curvature of the human eye without pinching.
 * **Modular Acrylic Organizer (`kc-tools-401`)**: Aesthetic inventory management. A heavy-weight, crystal-clear storage matrix designed to house the exact dimensions of the KoColor V1.1 collection.
 * **Stainless Steel Cosmetic Spatula (`kc-tools-501`)**: Clinical cross-contamination prevention. A surgical-grade mixing tool designed to safely extract creams and mix foundation shades.
+* **Aura No. 7: swiftmonster (`kc-frag-701`)**: Unleash the beast. A high-voltage floral explosion that balances sweet wild orchid with a predatory, metallic Ambroxan base.
