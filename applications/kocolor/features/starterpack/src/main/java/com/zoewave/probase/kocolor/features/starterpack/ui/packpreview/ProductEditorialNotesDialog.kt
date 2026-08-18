@@ -26,12 +26,14 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -45,7 +47,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -61,6 +62,7 @@ fun ProductEditorialNotesDialog(
     blurHash: String?,
     colorHex: String?,
     isLoading: Boolean,
+    onBuy: () -> Unit,
     onDismiss: () -> Unit
 ) {
     if (isLoading || notes != null) {
@@ -78,24 +80,8 @@ fun ProductEditorialNotesDialog(
                 shape = RoundedCornerShape(32.dp),
                 color = backdropColor
             ) {
-                Box(modifier = Modifier.fillMaxWidth().heightIn(max = 750.dp)) {
-                    // Not used for now. We will add it in the future.
-                    /* 1. --- IMMERSIVE ATMOSPHERIC BACKGROUND BLUR ---
-                    if (thumbnailUrl != null) {
-                        PremiumProductImage(
-                            imageUrl = thumbnailUrl,
-                            blurHash = blurHash,
-                            contentDescription = null,
-                            modifier = Modifier
-                                .matchParentSize()
-                                .blur(45.dp) // Reduced from 60 for better chromatic presence
-                                .alpha(0.3f), // Increased from 0.15 for visibility
-                            contentScale = ContentScale.Crop,
-                            fallbackColor = itemColor.copy(alpha = 0.2f)
-                        )
-                    }*/
-
-                    // 2. --- DIALOG CONTENT ---
+                Box(modifier = Modifier.fillMaxWidth().heightIn(max = 800.dp)) {
+                    // --- DIALOG CONTENT ---
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -149,7 +135,9 @@ fun ProductEditorialNotesDialog(
                                                 contentScale = ContentScale.Crop,
                                                 fallbackColor = itemColor
                                             )
+                                            
                                             Spacer(Modifier.height(12.dp))
+                                            
                                             Text(
                                                 text = notes.editorialTitle.replace("Artist Notes: ", "").replace("Style Notes: ", ""),
                                                 style = MaterialTheme.typography.bodyMedium,
@@ -162,11 +150,22 @@ fun ProductEditorialNotesDialog(
                                                 color = Color.Gray,
                                                 letterSpacing = 1.sp
                                             )
+
+                                            // SUMMARY under the image (Marketing Copy)
+                                            notes.summary?.let { summary ->
+                                                Spacer(Modifier.height(12.dp))
+                                                Text(
+                                                    text = summary,
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    color = Color.DarkGray,
+                                                    lineHeight = 22.sp
+                                                )
+                                            }
                                         }
                                     }
                                 }
 
-                                // B. Scientific Overview Card
+                                // B. SCIENTIFIC OVERVIEW Card (Technical Description) - First in list
                                 notes.description?.let { desc ->
                                     EditorialCard(
                                         label = "Scientific Overview",
@@ -176,7 +175,7 @@ fun ProductEditorialNotesDialog(
                                             text = desc,
                                             style = MaterialTheme.typography.bodyMedium,
                                             color = Color(0xFF333333),
-                                            lineHeight = 20.sp
+                                            lineHeight = 22.sp
                                         )
                                     }
                                 }
@@ -191,7 +190,7 @@ fun ProductEditorialNotesDialog(
                                             text = attribute.body,
                                             style = MaterialTheme.typography.bodyMedium,
                                             color = Color(0xFF333333),
-                                            lineHeight = 20.sp
+                                            lineHeight = 22.sp
                                         )
                                     }
                                 }
@@ -200,15 +199,43 @@ fun ProductEditorialNotesDialog(
 
                         Spacer(Modifier.height(32.dp))
 
-                        // Close Action
-                        TextButton(onClick = onDismiss) {
-                            Text(
-                                "CLOSE",
-                                fontWeight = FontWeight.Bold,
-                                style = MaterialTheme.typography.labelLarge.copy(letterSpacing = 1.2.sp),
-                                color = Color(0xFF1A1C1E),
-                                textDecoration = TextDecoration.Underline
-                            )
+                        // Actions Row: BUY and CLOSE
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Button(
+                                onClick = onBuy,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(56.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1A1C1E)),
+                                shape = RoundedCornerShape(28.dp)
+                            ) {
+                                Text(
+                                    "BUY",
+                                    fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.labelLarge.copy(letterSpacing = 2.sp),
+                                    color = Color.White
+                                )
+                            }
+
+                            OutlinedButton(
+                                onClick = onDismiss,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(56.dp),
+                                border = BorderStroke(1.dp, Color(0xFF1A1C1E).copy(alpha = 0.5f)),
+                                shape = RoundedCornerShape(28.dp),
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF1A1C1E))
+                            ) {
+                                Text(
+                                    "CLOSE",
+                                    fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.labelLarge.copy(letterSpacing = 1.2.sp)
+                                )
+                            }
                         }
                     }
                 }
@@ -230,7 +257,7 @@ private fun EditorialCard(
             .fillMaxWidth()
             .padding(horizontal = 4.dp, vertical = 2.dp)
             .clickable { isExpanded = !isExpanded },
-        color = Color.White,
+        color = Color.White.copy(alpha = 0.95f),
         shape = RoundedCornerShape(20.dp),
         border = BorderStroke(1.dp, Color.White.copy(alpha = 0.5f)),
         shadowElevation = 8.dp,

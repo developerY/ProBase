@@ -534,6 +534,7 @@ fun koColorNavEntryProvider(
                 onSearchQueryChanged = viewModel::onSearchQueryChanged,
                 onToggleValueSort = viewModel::onToggleValueSort,
                 onItemInfoClick = viewModel::onItemInfoClick,
+                onBuyItem = viewModel::onBuyClick,
                 onDismissNotes = viewModel::onDismissNotes,
                 onImportSuccess = { isClothing ->
                     if (route.categoryFilter == "clothing") {

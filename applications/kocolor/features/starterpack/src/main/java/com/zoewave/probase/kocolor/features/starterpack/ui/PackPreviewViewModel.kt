@@ -1,5 +1,6 @@
 package com.zoewave.probase.kocolor.features.starterpack.ui
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.kocolor.db.entity.PackStatus
@@ -239,5 +240,10 @@ class PackPreviewViewModel @Inject constructor(
 
     fun onDismissNotes() {
         _uiState.update { it.copy(selectedItemNotes = null, selectedItemThumbnail = null, selectedItemBlurHash = null, selectedItemColor = null) }
+    }
+
+    fun onBuyClick(itemId: String) {
+        // Logic for payment can go here or be routed back to the UI
+        Log.d("PackPreviewVM", "Buy clicked for item: $itemId")
     }
 }

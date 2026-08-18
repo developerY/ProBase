@@ -8,6 +8,7 @@ data class ProductEditorialNotes(
     @SerialName("product_id") val id: String,
     @SerialName("card_title") val editorialTitle: String,
     val description: String? = null,
+    val summary: String? = null,
     @SerialName("dynamic_attributes") val attributes: List<EditorialAttribute> = emptyList()
 )
 
