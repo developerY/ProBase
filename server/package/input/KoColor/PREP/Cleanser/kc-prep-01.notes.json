@@ -1,7 +1,7 @@
 {
   "product_id": "kc-prep-01",
   "card_title": "Artist Notes: Purifying Gel Cleanser",
-  "description": "High-fidelity cleansing. Sodium cocoyl glycinate and niacinamide gently clear impurities, leaving a Clear Crystal (`#F4F6F0`) finish for optimal subsequent product application.",
+  "description": "High-fidelity cleansing. Sodium cocoyl glycinate and niacinamide gently clear impurities, leaving a Clear Crystal (`#F4F6F0`) finish for optimal subsequent product application.* **Hydra-Lock Balancing Toner (`kc-toner-901`)**: The essential bridge between cleansing and treatment. This pH-balanced formula preps the skin's surface for optimal absorption of active serums while providing a cooling, anti-inflammatory finish.",
   "dynamic_attributes": [
     {
       "label": "Usage Notes",
@@ -16,6 +16,6 @@
       "body": "Advanced cleanser engineering featuring high-purity pigments and volatile carriers."
     }
   ],
-  "summary": "The first step to flawless skin. This refreshing, Niacinamide-infused gel gently foams away impurities, leaving your complexion crystal clear, balanced, and perfectly prepped.",
-  "technical_overview": "Offered at $18.0 for 150ml, this KoColor CLEANSER is expertly formulated with Water, Glycerin, Sodium Cocoyl Glycinate, Citric Acid, Niacinamide. Delivering a high-fidelity Clear Crystal color profile (`#F4F6F0`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface."
+  "summary": "The first step to flawless skin. This refreshing, Niacinamide-infused gel gently foams away impurities, leaving your complexion crystal clear, balanced, and perfectly prepped.* **Hydra-Lock Balancing Toner (`kc-toner-901`)**: Restore equilibrium. This weightless, alcohol-free toner uses rose water and hyaluronic acid to refine pores and lock in essential moisture.",
+  "technical_overview": "Offered at $18.0 for 150ml, this KoColor CLEANSER is expertly formulated with Water, Glycerin, Sodium Cocoyl Glycinate, Citric Acid, Niacinamide. Delivering a high-fidelity Clear Crystal color profile (`#F4F6F0`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.* **Hydra-Lock Balancing Toner (`kc-toner-901`)**: Offered at $22.0 for 200ml, this KoColor TONER is expertly formulated with Rose Water, Hyaluronic Acid, Allantoin. Delivering a high-fidelity Clear Mist color profile (`#F0F8FF`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface."
 }
