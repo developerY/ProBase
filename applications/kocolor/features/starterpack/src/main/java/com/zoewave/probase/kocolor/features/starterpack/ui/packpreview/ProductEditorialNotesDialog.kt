@@ -41,6 +41,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -78,17 +80,35 @@ fun ProductEditorialNotesDialog(
                     .fillMaxWidth()
                     .padding(20.dp),
                 shape = RoundedCornerShape(32.dp),
-                color = backdropColor
+                color = backdropColor,
+                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.5f)),
+                shadowElevation = 12.dp
             ) {
-                Box(modifier = Modifier.fillMaxWidth().heightIn(max = 800.dp)) {
-                    // --- DIALOG CONTENT ---
+                Box(modifier = Modifier.fillMaxWidth().heightIn(max = 850.dp)) {
+                    
+                    // 1. --- IMMERSIVE ATMOSPHERIC BACKGROUND BLUR ---
+                    if (thumbnailUrl != null) {
+                        PremiumProductImage(
+                            imageUrl = thumbnailUrl,
+                            blurHash = blurHash,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .matchParentSize()
+                                .blur(60.dp)
+                                .alpha(0.35f),
+                            contentScale = ContentScale.Crop,
+                            fallbackColor = itemColor.copy(alpha = 0.2f)
+                        )
+                    }
+
+                    // 2. --- DIALOG CONTENT ---
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(24.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        // Product Title
+                        // Header: Title with premium Serif Font
                         Text(
                             text = notes?.editorialTitle ?: "Analyzing Product...",
                             fontFamily = FontFamily.Serif,
@@ -101,7 +121,7 @@ fun ProductEditorialNotesDialog(
                         
                         Spacer(Modifier.height(24.dp))
 
-                        // Scrollable Sections
+                        // Scrollable Modular Card Stack
                         Column(
                             modifier = Modifier
                                 .weight(1f, fill = false)
@@ -113,7 +133,7 @@ fun ProductEditorialNotesDialog(
                                     CircularProgressIndicator(color = Color(0xFF745E7A))
                                 }
                             } else if (notes != null) {
-                                // A. Visual Identity Card
+                                // A. VISUAL IDENTITY CARD (Expanded by Default)
                                 if (thumbnailUrl != null) {
                                     EditorialCard(
                                         label = "Visual Identity",
@@ -136,11 +156,12 @@ fun ProductEditorialNotesDialog(
                                                 fallbackColor = itemColor
                                             )
                                             
-                                            Spacer(Modifier.height(12.dp))
+                                            Spacer(Modifier.height(16.dp))
                                             
+                                            // Product Sub-header & Hex DNA
                                             Text(
                                                 text = notes.editorialTitle.replace("Artist Notes: ", "").replace("Style Notes: ", ""),
-                                                style = MaterialTheme.typography.bodyMedium,
+                                                style = MaterialTheme.typography.bodyLarge,
                                                 fontWeight = FontWeight.Bold,
                                                 color = Color.Black
                                             )
@@ -151,7 +172,7 @@ fun ProductEditorialNotesDialog(
                                                 letterSpacing = 1.sp
                                             )
 
-                                            // SUMMARY under the image (Marketing Copy)
+                                            // Marketing Summary (Hook)
                                             notes.summary?.let { summary ->
                                                 Spacer(Modifier.height(12.dp))
                                                 Text(
@@ -165,7 +186,7 @@ fun ProductEditorialNotesDialog(
                                     }
                                 }
 
-                                // B. DESCRIPTION Card (from description.md) - Between Image and Scientific
+                                // B. BRAND NARRATIVE CARD (Description from description.md)
                                 notes.description?.let { desc ->
                                     EditorialCard(
                                         label = "Description",
@@ -180,7 +201,7 @@ fun ProductEditorialNotesDialog(
                                     }
                                 }
 
-                                // C. SCIENTIFIC OVERVIEW Card (from technical_overview / Product_Description.md)
+                                // C. SCIENTIFIC OVERVIEW CARD (Technical from Product_Description.md)
                                 notes.technicalOverview?.let { tech ->
                                     EditorialCard(
                                         label = "Scientific Overview",
@@ -195,7 +216,7 @@ fun ProductEditorialNotesDialog(
                                     }
                                 }
 
-                                // C. Dynamic Attributes
+                                // D. DYNAMIC ATTRIBUTE CARDS (Usage, Expert Tips, etc.)
                                 notes.attributes.forEach { attribute ->
                                     EditorialCard(
                                         label = attribute.label,
