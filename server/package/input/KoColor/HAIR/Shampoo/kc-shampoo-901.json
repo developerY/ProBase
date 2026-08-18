@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-shampoo-901",
+  "name": "Pure-Clarity Detox Shampoo",
+  "brand": "KoColor",
+  "macro_category": "HAIR",
+  "micro_category": "SHAMPOO",
+  "shade_name": "Slate Grey",
+  "color_hex": "#2F4F4F",
+  "raw_image_input": "./kc-shampoo-901.png",
+  "price": 24.0,
+  "volume": "250ml",
+  "ingredients": [
+    "Water",
+    "Sodium Lauroyl Methyl Isethionate",
+    "Charcoal"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

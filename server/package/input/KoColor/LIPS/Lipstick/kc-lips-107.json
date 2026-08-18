@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "kc-lips-107",
+  "name": "Dusty Orchid Lipstick",
+  "brand": "KoColor",
+  "macro_category": "LIPS",
+  "micro_category": "LIPSTICK",
+  "shade_name": "Dusty Orchid",
+  "color_hex": "#B58A94",
+  "raw_image_input": "./kc-lips-107.png",
+  "price": 28.0,
+  "volume": "3.5g",
+  "ingredients": ["Caprylic/Capric Triglyceride", "Microcrystalline Wax", "Titanium Dioxide", "Red 7 Lake", "Iron Oxides"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

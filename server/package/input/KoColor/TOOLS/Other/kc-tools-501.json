@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "id": "kc-tools-501",
+  "name": "Stainless Steel Cosmetic Spatula",
+  "brand": "KoColor",
+  "macro_category": "TOOLS",
+  "micro_category": "OTHER",
+  "shade_name": "Steel Silver",
+  "color_hex": "#D3D3D3",
+  "raw_image_input": "./kc-tools-501.png",
+  "price": 15.0,
+  "volume": "1 Unit",
+  "ingredients": [
+    "316L Surgical Stainless Steel"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

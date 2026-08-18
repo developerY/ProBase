@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "kc-pants-402",
+  "name": "Dark Brown Leather",
+  "brand": "KoColor",
+  "macro_category": "APPAREL",
+  "micro_category": "PANTS",
+  "shade_name": "Soothing Brown Leather",
+  "color_hex": "#3F2933",
+  "raw_image_input": "./kc-pants-402.png",
+  "price": 185.0,
+  "volume": "Size 26",
+  "ingredients": ["100% Vegan Polyurethane Leather", "Viscose Lining"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

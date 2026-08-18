@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "kc-active-801",
+  "name": "Digital Lavender Sports Bra",
+  "brand": "KoColor",
+  "macro_category": "APPAREL",
+  "micro_category": "ACTIVEWEAR",
+  "shade_name": "Digital Lavender Seamless Bra",
+  "color_hex": "#E6E6FA",
+  "raw_image_input": "./kc-active-801.png",
+  "price": 45.0,
+  "volume": "Size S",
+  "ingredients": ["75% Nylon", "25% Spandex", "Moisture-Wicking Finish"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

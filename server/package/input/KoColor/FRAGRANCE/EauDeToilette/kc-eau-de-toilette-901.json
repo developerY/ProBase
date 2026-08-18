@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-eau-de-toilette-901",
+  "name": "Aura No. 3: Sea Salt & Sage",
+  "brand": "KoColor",
+  "macro_category": "FRAGRANCE",
+  "micro_category": "EAU_DE_TOILETTE",
+  "shade_name": "Ocean Sage",
+  "color_hex": "#7FFFD4",
+  "raw_image_input": "./kc-eau-de-toilette-901.png",
+  "price": 65.0,
+  "volume": "100ml",
+  "ingredients": [
+    "Ethanol",
+    "Sea Salt",
+    "Sage Extract"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

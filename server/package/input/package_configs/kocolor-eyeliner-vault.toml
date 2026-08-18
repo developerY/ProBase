@@ -1,0 +1,11 @@
+[package_metadata]
+id = "kocolor-eyeliner-vault"
+name = "KoColor Eyeliner Collection"
+description = "A 9-piece collection of precision liquid liners and defining gel pencils in a versatile array of artistic tones."
+
+[assortment]
+includes = [
+    "kc-eyeliner-201", "kc-eyeliner-202", "kc-eyeliner-203",
+    "kc-eyeliner-204", "kc-eyeliner-205", "kc-eyeliner-206",
+    "kc-eyeliner-207", "kc-eyeliner-208", "kc-eyeliner-209"
+]

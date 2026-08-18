@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "kc-concealer-404",
+  "name": "Velvet Camouflage Concealer",
+  "brand": "KoColor Fashion",
+  "macro_category": "COMPLEXION",
+  "micro_category": "CONCEALER",
+  "shade_name": "Soft Honey (Neutral-Medium)",
+  "color_hex": "#D2B48C",
+  "raw_image_input": "./kc-concealer-404.png",
+  "price": 24.0,
+  "volume": "6ml",
+  "notes": "A versatile neutral concealer for medium skin tones.",
+  "ingredients": ["Water", "Dimethicone", "Iron Oxides", "Titanium Dioxide"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

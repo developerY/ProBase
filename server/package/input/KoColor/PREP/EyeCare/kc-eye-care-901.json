@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-eye-care-901",
+  "name": "Depuffing Caffeine Eye Cream",
+  "brand": "KoColor",
+  "macro_category": "PREP",
+  "micro_category": "EYE_CARE",
+  "shade_name": "Ivory Glow",
+  "color_hex": "#FFFACD",
+  "raw_image_input": "./kc-eye-care-901.png",
+  "price": 30.0,
+  "volume": "15ml",
+  "ingredients": [
+    "Caffeine",
+    "Peptides",
+    "Vitamin C"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "id": "kc-sponges-901",
+  "name": "High-Density Blending Sponge",
+  "brand": "KoColor",
+  "macro_category": "TOOLS",
+  "micro_category": "SPONGES",
+  "shade_name": "Pink Petal",
+  "color_hex": "#FFB6C1",
+  "raw_image_input": "./kc-sponges-901.png",
+  "price": 12.0,
+  "volume": "1 Unit",
+  "ingredients": [
+    "Hydrophilic Polyurethane"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "kc-dresses-602",
+  "name": "Universal Khaki Ribbed Midi",
+  "brand": "KoColor",
+  "macro_category": "APPAREL",
+  "micro_category": "DRESS",
+  "shade_name": "Universal Khaki Midi",
+  "color_hex": "#B8A992",
+  "raw_image_input": "./kc-dresses-602.png",
+  "price": 95.0,
+  "volume": "Size M",
+  "ingredients": ["Cotton Blend Knit", "Elastane for Stretch", "Side Slit"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "kc-dresses-608",
+  "name": "Midnight Crimson Maxi",
+  "brand": "KoColor",
+  "macro_category": "APPAREL",
+  "micro_category": "DRESS",
+  "shade_name": "Midnight Crimson Maxi",
+  "color_hex": "#541624",
+  "raw_image_input": "./kc-dresses-608.png",
+  "price": 180.0,
+  "volume": "Size S",
+  "ingredients": ["Silk Chiffon", "Off-the-Shoulder Neckline", "Fully Lined"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

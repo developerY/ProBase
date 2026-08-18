@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "kc-nails-203",
+  "name": "Solar Flare Polish",
+  "brand": "KoColor",
+  "macro_category": "NAILS",
+  "micro_category": "POLISH",
+  "shade_name": "Solar Flare",
+  "color_hex": "#FFDB58",
+  "raw_image_input": "./kc-nails-203.png",
+  "price": 18.0,
+  "volume": "15ml",
+  "ingredients": ["Ethyl Acetate", "Butyl Acetate", "Nitrocellulose", "Silica", "Yellow 5 Lake"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

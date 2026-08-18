@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "id": "kc-oral-301",
+  "name": "Sonic-Vibration Toothbrush",
+  "brand": "KoColor",
+  "macro_category": "ORAL",
+  "micro_category": "TOOTHBRUSH",
+  "shade_name": "Matte Obsidian",
+  "color_hex": "#0F0F0F",
+  "raw_image_input": "./kc-oral-301.png",
+  "price": 95.0,
+  "volume": "1 Unit",
+  "ingredients": [
+    ""
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

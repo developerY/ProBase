@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-setting-spray-901",
+  "name": "All-Day Hydro Lock Mist",
+  "brand": "KoColor",
+  "macro_category": "COMPLEXION",
+  "micro_category": "SETTING_SPRAY",
+  "shade_name": "Dewy Mist",
+  "color_hex": "#F0FFFF",
+  "raw_image_input": "./kc-setting-spray-901.png",
+  "price": 28.0,
+  "volume": "100ml",
+  "ingredients": [
+    "Water",
+    "PVP",
+    "Aloe Vera"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

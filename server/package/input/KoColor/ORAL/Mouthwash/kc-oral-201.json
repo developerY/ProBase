@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "id": "kc-oral-201",
+  "name": "Fluoride-Free Balancing Mouthwash",
+  "brand": "KoColor",
+  "macro_category": "ORAL",
+  "micro_category": "MOUTHWASH",
+  "shade_name": "Ice Blue",
+  "color_hex": "#AFEEEE",
+  "raw_image_input": "./kc-oral-201.png",
+  "price": 16.0,
+  "volume": "500ml",
+  "ingredients": [
+    "Water",
+    "Cetylpyridinium Chloride (CPC)",
+    "Xylitol",
+    "Aloe"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

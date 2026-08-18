@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "kc-pants-401",
+  "name": "Arcadia Blue Denim",
+  "brand": "KoColor",
+  "macro_category": "APPAREL",
+  "micro_category": "PANTS",
+  "shade_name": "Arcadia Wide Leg",
+  "color_hex": "#252C58",
+  "raw_image_input": "./kc-pants-401.png",
+  "price": 110.0,
+  "volume": "Size 28",
+  "ingredients": ["100% Rigid Raw Denim", "Copper Hardware"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

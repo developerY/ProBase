@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-highlighter-901",
+  "name": "Starlight Liquid Glow",
+  "brand": "KoColor",
+  "macro_category": "DIMENSION",
+  "micro_category": "HIGHLIGHTER",
+  "shade_name": "Champagne Pop",
+  "color_hex": "#F7E7CE",
+  "raw_image_input": "./kc-highlighter-901.png",
+  "price": 28.0,
+  "volume": "15ml",
+  "ingredients": [
+    "Water",
+    "Mica",
+    "Tin Oxide"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

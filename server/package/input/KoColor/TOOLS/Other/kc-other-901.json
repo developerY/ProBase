@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "id": "kc-other-901",
+  "name": "Hygienic Spatula Set",
+  "brand": "KoColor",
+  "macro_category": "TOOLS",
+  "micro_category": "OTHER",
+  "shade_name": "Mirror Finish",
+  "color_hex": "#C0C0C0",
+  "raw_image_input": "./kc-other-901.png",
+  "price": 10.0,
+  "volume": "3 Units",
+  "ingredients": [
+    "Stainless Steel"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

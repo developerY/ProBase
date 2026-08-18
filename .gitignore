@@ -40,12 +40,13 @@ google-services-zoewave.json
 
 # Distribution Input & Output
 /server/package/dist/
-/server/package/input
 
 # Image Maker
 /server/utils/ImageSplit/input_images/
 /server/utils/ImageSplit/output_slices/
 /server/utils/ImageSplit/target/
+/server/utils/ImageSplit/Holder/
+
 
 
 # Security & Keys

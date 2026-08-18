@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "kc-outerwear-705",
+  "name": "Arcadia Blue Oversized Denim Trucker",
+  "brand": "KoColor",
+  "macro_category": "APPAREL",
+  "micro_category": "OUTERWEAR",
+  "shade_name": "Arcadia Denim Trucker",
+  "color_hex": "#252C58",
+  "raw_image_input": "./kc-outerwear-705.png",
+  "price": 135.0,
+  "volume": "Size M",
+  "ingredients": ["100% Heavyweight Organic Cotton Denim"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

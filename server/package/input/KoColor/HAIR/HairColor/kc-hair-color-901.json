@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-hair-color-901",
+  "name": "Chromatic Intensity Semi-Perm",
+  "brand": "KoColor",
+  "macro_category": "HAIR",
+  "micro_category": "HAIR_COLOR",
+  "shade_name": "Indigo Velvet",
+  "color_hex": "#4B0082",
+  "raw_image_input": "./kc-hair-color-901.png",
+  "price": 28.0,
+  "volume": "150ml",
+  "ingredients": [
+    "Water",
+    "Direct Dyes",
+    "Cetearyl Alcohol"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

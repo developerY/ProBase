@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "id": "kc-complexion-501",
+  "name": "Continuous Hold Setting Spray",
+  "brand": "KoColor",
+  "macro_category": "COMPLEXION",
+  "micro_category": "SETTING_SPRAY",
+  "shade_name": "Clear Mist",
+  "color_hex": "#F0F8FF",
+  "raw_image_input": "./kc-complexion-501.png",
+  "price": 28.0,
+  "volume": "100ml",
+  "ingredients": [
+    "Water",
+    "PVP",
+    "Niacinamide",
+    "Aloe Extract"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

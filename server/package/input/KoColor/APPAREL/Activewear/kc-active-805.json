@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "kc-active-805",
+  "name": "Arcadia Blue Track Jacket",
+  "brand": "KoColor",
+  "macro_category": "APPAREL",
+  "micro_category": "ACTIVEWEAR",
+  "shade_name": "Arcadia Blue Track Jacket",
+  "color_hex": "#252C58",
+  "raw_image_input": "./kc-active-805.png",
+  "price": 85.0,
+  "volume": "Size M",
+  "ingredients": ["100% Tricot Polyester", "Ribbed Cuffs", "Zip Pockets"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

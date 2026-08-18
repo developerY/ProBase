@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-dimension-301",
+  "name": "Architectural Contour Cream",
+  "brand": "KoColor",
+  "macro_category": "DIMENSION",
+  "micro_category": "CONTOUR",
+  "shade_name": "Cool Shadow",
+  "color_hex": "#8B5A2B",
+  "raw_image_input": "./kc-dimension-301.png",
+  "price": 28.0,
+  "volume": "8g",
+  "ingredients": [
+    "Caprylic/Capric Triglyceride",
+    "Dimethicone",
+    "Iron Oxides"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

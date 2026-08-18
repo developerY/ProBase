@@ -1,0 +1,21 @@
+{
+  "product_id": "kc-hygiene-401",
+  "card_title": "Artist Notes: Odor-Neutralizing Deodorant",
+  "summary": "Outsmart the bacteria. An aluminum-free solid that alters the underarm pH to create a hostile environment for odor-causing microbes.",
+  "description": "Biological odor engineering. Rather than masking scent with heavy perfumes, this enzymatic formula utilizes a specialized ferment to break down sweat before bacteria can interact with it, ensuring 24-hour neutrality.",
+  "technical_overview": "Offered at $18.0 for 75g, this KoColor DEODORANT is expertly formulated with Propylene Glycol, Saccharomyces Ferment Filtrate, and Arrowroot Powder. It delivers a high-fidelity Clear Solid color profile (`#F8F8FF`) and leverages enzymatic odor degradation.",
+  "dynamic_attributes": [
+    {
+      "label": "Usage Notes",
+      "body": "Swipe 2-3 times to clean, dry underarms daily."
+    },
+    {
+      "label": "Expert Tip",
+      "body": "Allow a 2-week transition period if switching from antiperspirants, as the body purges trapped aluminum salts."
+    },
+    {
+      "label": "Formulation Insight",
+      "body": "Arrowroot powder acts as a highly effective, natural moisture absorbent without the abrasive texture of baking soda."
+    }
+  ]
+}

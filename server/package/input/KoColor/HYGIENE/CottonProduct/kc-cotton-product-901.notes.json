@@ -1,0 +1,21 @@
+{
+  "product_id": "kc-cotton-product-901",
+  "card_title": "Artist Notes: Premium Dual-Surface Rounds",
+  "description": "Technical cotton engineering. These rounds feature a textured side for gentle exfoliation and a smooth side for delicate product application, ensuring zero lint and maximum efficiency.",
+  "summary": "The ultimate applicator. Soft, dual-textured organic cotton rounds that provide a professional surface for all your skincare needs.",
+  "dynamic_attributes": [
+    {
+      "label": "Usage Notes",
+      "body": "Standard cotton product protocol for kc-cotton-product-901. Engineered for high-fidelity performance."
+    },
+    {
+      "label": "Expert Tip",
+      "body": "For optimal results, integrate Premium Dual-Surface Rounds into your daily scientific ritual."
+    },
+    {
+      "label": "Formulation Insight",
+      "body": "Advanced Cotton Product engineering featuring medical-grade carriers and high-purity actives."
+    }
+  ],
+  "technical_overview": "Offered at $6.0 for 100ct, this KoColor COTTON_PRODUCT is expertly formulated with 100% Organic Cotton. Delivering a high-fidelity Cloud White color profile (`#FFFFFF`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface."
+}

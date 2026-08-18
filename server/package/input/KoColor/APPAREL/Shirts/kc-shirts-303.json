@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "kc-shirts-303",
+  "name": "Transformative Teal Turtleneck",
+  "brand": "KoColor",
+  "macro_category": "APPAREL",
+  "micro_category": "SHIRT",
+  "shade_name": "Transformative Teal Knit",
+  "color_hex": "#2F6364",
+  "raw_image_input": "./kc-shirts-303.png",
+  "price": 75.0,
+  "volume": "Size M",
+  "ingredients": ["80% Merino Wool", "20% Cashmere"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

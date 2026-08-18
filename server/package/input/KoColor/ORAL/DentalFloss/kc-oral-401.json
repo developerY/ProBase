@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "id": "kc-oral-401",
+  "name": "PTFE-Free Dental Floss",
+  "brand": "KoColor",
+  "macro_category": "ORAL",
+  "micro_category": "DENTAL_FLOSS",
+  "shade_name": "Clean White",
+  "color_hex": "#FFFFFF",
+  "raw_image_input": "./kc-oral-401.png",
+  "price": 9.0,
+  "volume": "30m",
+  "ingredients": [
+    "Vegan Wax Ultra-High-Molecular-Weight Polyethylene (UHMWPE)"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

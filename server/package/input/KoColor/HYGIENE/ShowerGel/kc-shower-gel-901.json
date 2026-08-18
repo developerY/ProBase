@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-shower-gel-901",
+  "name": "Invigorating Citrus Body Wash",
+  "brand": "KoColor",
+  "macro_category": "HYGIENE",
+  "micro_category": "SHOWER_GEL",
+  "shade_name": "Citrus Burst",
+  "color_hex": "#FFA500",
+  "raw_image_input": "./kc-shower-gel-901.png",
+  "price": 18.0,
+  "volume": "400ml",
+  "ingredients": [
+    "Water",
+    "Glycerin",
+    "Orange Peel Oil"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

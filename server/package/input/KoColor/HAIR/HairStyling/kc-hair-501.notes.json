@@ -1,0 +1,21 @@
+{
+  "product_id": "kc-hair-501",
+  "card_title": "Artist Notes: Flexible-Architecture Hair Styling Clay",
+  "summary": "Matte texture, absolute control. A high-hold styling clay that provides pliable structure without crunch or shine.",
+  "description": "Sculptural hair engineering. This bentonite-based clay absorbs excess moisture and oils, providing a gritty, textured finish that thickens the hair profile while allowing for restyling throughout the day.",
+  "technical_overview": "Offered at $26.0 for 60g, this KoColor HAIR_STYLING is expertly formulated with Bentonite Clay, Beeswax, and Castor Oil. It delivers a high-fidelity Slate Clay color profile (`#778899`) and leverages moisture-absorbing matte technology.",
+  "dynamic_attributes": [
+    {
+      "label": "Usage Notes",
+      "body": "Emulsify a dime-sized amount completely between palms until warm, then work through dry hair from root to tip."
+    },
+    {
+      "label": "Expert Tip",
+      "body": "Always apply to dry hair; applying to damp hair will dilute the clay and result in an unwanted shiny, heavy finish."
+    },
+    {
+      "label": "Formulation Insight",
+      "body": "Bentonite clay physically swells around the individual hair shafts, instantly expanding the visual density of the hair."
+    }
+  ]
+}

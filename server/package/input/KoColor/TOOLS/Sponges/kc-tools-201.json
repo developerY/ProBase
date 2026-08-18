@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "id": "kc-tools-201",
+  "name": "Micro-Pore Blending Sponge",
+  "brand": "KoColor",
+  "macro_category": "TOOLS",
+  "micro_category": "SPONGES",
+  "shade_name": "Aesthetic Pink",
+  "color_hex": "#FFB6C1",
+  "raw_image_input": "./kc-tools-201.png",
+  "price": 18.0,
+  "volume": "1 Unit",
+  "ingredients": [
+    "Hydrophilic Polyurethane Foam"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

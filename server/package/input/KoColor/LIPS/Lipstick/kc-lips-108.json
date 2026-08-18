@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "kc-lips-108",
+  "name": "Obsidian Void Lipstick",
+  "brand": "KoColor",
+  "macro_category": "LIPS",
+  "micro_category": "LIPSTICK",
+  "shade_name": "Obsidian Void",
+  "color_hex": "#2B2B2C",
+  "raw_image_input": "./kc-lips-108.png",
+  "price": 28.0,
+  "volume": "3.5g",
+  "ingredients": ["Ricinus Communis (Castor) Seed Oil", "Beeswax", "Black 2", "Iron Oxides", "Silica"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

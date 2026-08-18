@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "kc-eyeliner-205",
+  "name": "Void Prime Liner",
+  "brand": "KoColor Fashion",
+  "macro_category": "EYES",
+  "micro_category": "EYELINER",
+  "shade_name": "Clean White",
+  "color_hex": "#FFFFFF",
+  "raw_image_input": "./kc-eyeliner-205.png",
+  "price": 17.0,
+  "volume": "1.2g",
+  "notes": "A crisp white pencil used to define, brighten the waterline, or create a clean graphic base.",
+  "ingredients": ["Titanium Dioxide", "Caprylic/Capric Triglyceride", "Synthetic Wax"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

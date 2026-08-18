@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-moisturizer-901",
+  "name": "Barrier-Shield Daily Moisturizer",
+  "brand": "KoColor",
+  "macro_category": "PREP",
+  "micro_category": "MOISTURIZER",
+  "shade_name": "Silk White",
+  "color_hex": "#FFFFFF",
+  "raw_image_input": "./kc-moisturizer-901.png",
+  "price": 38.0,
+  "volume": "50ml",
+  "ingredients": [
+    "Ceramides",
+    "Squalane",
+    "Shea Butter"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

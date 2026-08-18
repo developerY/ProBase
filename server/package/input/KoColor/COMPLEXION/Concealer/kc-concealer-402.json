@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "kc-concealer-402",
+  "name": "Velvet Camouflage Concealer",
+  "brand": "KoColor Fashion",
+  "macro_category": "COMPLEXION",
+  "micro_category": "CONCEALER",
+  "shade_name": "Fair Peach (Neutral)",
+  "color_hex": "#F5DDC3",
+  "raw_image_input": "./kc-concealer-402.png",
+  "price": 24.0,
+  "volume": "6ml",
+  "notes": "Neutral camouflage concealer with a popular peachy tone to neutralize dark circles.",
+  "ingredients": ["Water", "Isododecane", "Iron Oxides", "Silica"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

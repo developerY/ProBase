@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "id": "kc-tools-401",
+  "name": "Modular Acrylic Organizer",
+  "brand": "KoColor",
+  "macro_category": "TOOLS",
+  "micro_category": "ORGANIZERS",
+  "shade_name": "Crystal Clear",
+  "color_hex": "#FFFFFF",
+  "raw_image_input": "./kc-tools-401.png",
+  "price": 65.0,
+  "volume": "1 Unit",
+  "ingredients": [
+    "100% Cast Acrylic"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

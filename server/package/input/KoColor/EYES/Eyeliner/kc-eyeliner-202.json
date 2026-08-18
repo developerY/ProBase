@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "kc-eyeliner-202",
+  "name": "Smoke Define Gel Liner",
+  "brand": "KoColor Fashion",
+  "macro_category": "EYES",
+  "micro_category": "EYELINER",
+  "shade_name": "Charcoal Grey",
+  "color_hex": "#36454F",
+  "raw_image_input": "./kc-eyeliner-202.png",
+  "price": 17.0,
+  "volume": "1.2g",
+  "notes": "A popular defining gel pencil for smoky, diffused definition.",
+  "ingredients": ["Isododecane", "Cyclopentasiloxane", "Iron Oxides", "Synthetic Wax"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

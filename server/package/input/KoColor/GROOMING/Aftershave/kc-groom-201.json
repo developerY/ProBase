@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-groom-201",
+  "name": "Soothing Post-Shave Balm",
+  "brand": "KoColor",
+  "macro_category": "GROOMING",
+  "micro_category": "AFTERSHAVE",
+  "shade_name": "Cooling Aqua",
+  "color_hex": "#E0FFFF",
+  "raw_image_input": "./kc-groom-201.png",
+  "price": 24.0,
+  "volume": "100ml",
+  "ingredients": [
+    "Witch Hazel",
+    "Aloe Vera Leaf Juice",
+    "Allantoin"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

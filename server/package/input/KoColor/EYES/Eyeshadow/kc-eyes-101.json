@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "kc-eyes-101",
+  "name": "Barely There Velvet Monolith Single",
+  "brand": "KoColor",
+  "macro_category": "EYES",
+  "micro_category": "EYESHADOW",
+  "shade_name": "Barely There",
+  "color_hex": "#F5E0D3",
+  "raw_image_input": "./kc-eyes-101.png",
+  "price": 18.0,
+  "volume": "1.5g",
+  "notes": "The perfect invisible base. A creamy, soft beige that evens out the lid with a seamless matte finish.",
+  "ingredients": ["Mica", "Talc", "Silica", "Dimethicone", "Iron Oxides"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

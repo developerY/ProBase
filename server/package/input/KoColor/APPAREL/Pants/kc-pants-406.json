@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "kc-pants-406",
+  "name": "Mellow Flow Blue Jeans",
+  "brand": "KoColor",
+  "macro_category": "APPAREL",
+  "micro_category": "PANTS",
+  "shade_name": "Mellow Flow Mom Jeans",
+  "color_hex": "#95A7B4",
+  "raw_image_input": "./kc-pants-406.png",
+  "price": 90.0,
+  "volume": "Size 30",
+  "ingredients": ["98% Cotton", "2% Elastane"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

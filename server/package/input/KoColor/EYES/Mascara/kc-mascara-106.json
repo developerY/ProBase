@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "kc-mascara-106",
+  "name": "Fairy Lash Mascara",
+  "brand": "KoColor Fashion",
+  "macro_category": "EYES",
+  "micro_category": "MASCARA",
+  "shade_name": "Digital Lavender",
+  "color_hex": "#E6E6FA",
+  "raw_image_input": "./kc-mascara-106.png",
+  "price": 19.0,
+  "volume": "8ml",
+  "notes": "A trendy pastel lavender with a high-shine finish, popular in fashion circles.",
+  "ingredients": ["Water", "Mica", "Titanium Dioxide", "Manganese Violet"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

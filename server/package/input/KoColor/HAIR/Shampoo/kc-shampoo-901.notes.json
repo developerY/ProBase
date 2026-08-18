@@ -1,0 +1,21 @@
+{
+  "product_id": "kc-shampoo-901",
+  "card_title": "Artist Notes: Pure-Clarity Detox Shampoo",
+  "description": "Scientific scalp health. This clarifying formula uses gentle surfactants and botanical extracts to detoxify the hair follicle, restoring natural bounce, shine, and structural integrity.",
+  "summary": "Reset your scalp. A sulfate-free, deep-cleansing shampoo that removes product buildup and environmental pollutants without stripping natural oils.",
+  "dynamic_attributes": [
+    {
+      "label": "Usage Notes",
+      "body": "Standard shampoo protocol for kc-shampoo-901. Engineered for high-fidelity performance."
+    },
+    {
+      "label": "Expert Tip",
+      "body": "For optimal results, integrate Pure-Clarity Detox Shampoo into your daily scientific ritual."
+    },
+    {
+      "label": "Formulation Insight",
+      "body": "Advanced Shampoo engineering featuring medical-grade carriers and high-purity actives."
+    }
+  ],
+  "technical_overview": "Offered at $24.0 for 250ml, this KoColor SHAMPOO is expertly formulated with Water, Sodium Lauroyl Methyl Isethionate, Charcoal. Delivering a high-fidelity Slate Grey color profile (`#2F4F4F`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface."
+}

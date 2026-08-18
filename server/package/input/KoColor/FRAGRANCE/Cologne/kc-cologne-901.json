@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-cologne-901",
+  "name": "Aura No. 4: Vetiver & Leather",
+  "brand": "KoColor",
+  "macro_category": "FRAGRANCE",
+  "micro_category": "COLOGNE",
+  "shade_name": "Forest Green",
+  "color_hex": "#556B2F",
+  "raw_image_input": "./kc-cologne-901.png",
+  "price": 75.0,
+  "volume": "100ml",
+  "ingredients": [
+    "Ethanol",
+    "Vetiver",
+    "Leather Accord"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "id": "kc-cotton-product-901",
+  "name": "Premium Dual-Surface Rounds",
+  "brand": "KoColor",
+  "macro_category": "HYGIENE",
+  "micro_category": "COTTON_PRODUCT",
+  "shade_name": "Cloud White",
+  "color_hex": "#FFFFFF",
+  "raw_image_input": "./kc-cotton-product-901.png",
+  "price": 6.0,
+  "volume": "100ct",
+  "ingredients": [
+    "100% Organic Cotton"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

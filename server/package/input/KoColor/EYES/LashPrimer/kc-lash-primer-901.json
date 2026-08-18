@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-lash-primer-901",
+  "name": "Lash-Bonding Fiber Primer",
+  "brand": "KoColor",
+  "macro_category": "EYES",
+  "micro_category": "LASH_PRIMER",
+  "shade_name": "Pure White",
+  "color_hex": "#FFFFFF",
+  "raw_image_input": "./kc-lash-primer-901.png",
+  "price": 20.0,
+  "volume": "10ml",
+  "ingredients": [
+    "Water",
+    "Beeswax",
+    "Cellulose Fibers"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

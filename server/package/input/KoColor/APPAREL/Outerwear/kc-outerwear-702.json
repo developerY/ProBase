@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "kc-outerwear-702",
+  "name": "Obsidian Moto Leather Jacket",
+  "brand": "KoColor",
+  "macro_category": "APPAREL",
+  "micro_category": "OUTERWEAR",
+  "shade_name": "Obsidian Moto Leather",
+  "color_hex": "#0F0F0F",
+  "raw_image_input": "./kc-outerwear-702.png",
+  "price": 295.0,
+  "volume": "Size S",
+  "ingredients": ["100% Supple Lambskin Leather", "Silver-Tone Hardware", "Satin Lining"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

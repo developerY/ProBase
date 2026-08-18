@@ -1,0 +1,21 @@
+{
+  "product_id": "kc-hygiene-101",
+  "card_title": "Artist Notes: Purifying Charcoal Bar Soap",
+  "summary": "Draw out the urban grit. A cold-processed, highly porous charcoal bar that magnetically binds to bodily toxins and environmental pollutants.",
+  "description": "Intense dermal purification. This dense, black bar soap utilizes activated carbon to deeply cleanse the pores, while a base of saponified olive and coconut oils ensures the skin barrier remains unstripped.",
+  "technical_overview": "Offered at $14.0 for 150g, this KoColor SOAP is expertly formulated with Saponified Oils, Activated Charcoal, and Shea Butter. It delivers a high-fidelity Carbon Black color profile (`#1A1A1A`) and leverages high-porosity toxin absorption.",
+  "dynamic_attributes": [
+    {
+      "label": "Usage Notes",
+      "body": "Lather between hands and apply to wet skin. Rinse thoroughly."
+    },
+    {
+      "label": "Expert Tip",
+      "body": "Highly effective as a targeted treatment for body acne; leave lather on affected areas for 2 minutes before rinsing."
+    },
+    {
+      "label": "Formulation Insight",
+      "body": "Activated charcoal features millions of micro-pores, vastly increasing its surface area to trap hydrophobic toxins."
+    }
+  ]
+}

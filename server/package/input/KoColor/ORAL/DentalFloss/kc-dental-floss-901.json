@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-dental-floss-901",
+  "name": "Expanding Waxed Dental Tape",
+  "brand": "KoColor",
+  "macro_category": "ORAL",
+  "micro_category": "DENTAL_FLOSS",
+  "shade_name": "Fresh Green",
+  "color_hex": "#F0FFF0",
+  "raw_image_input": "./kc-dental-floss-901.png",
+  "price": 6.0,
+  "volume": "50m",
+  "ingredients": [
+    "Nylon",
+    "Microcrystalline Wax",
+    "Mint"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

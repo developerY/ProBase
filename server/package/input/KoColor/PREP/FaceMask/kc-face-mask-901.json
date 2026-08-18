@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-face-mask-901",
+  "name": "Resurfacing Enzyme Mask",
+  "brand": "KoColor",
+  "macro_category": "PREP",
+  "micro_category": "FACE_MASK",
+  "shade_name": "Enzyme Orange",
+  "color_hex": "#FF8C00",
+  "raw_image_input": "./kc-face-mask-901.png",
+  "price": 45.0,
+  "volume": "75ml",
+  "ingredients": [
+    "Pumpkin Enzyme",
+    "Glycolic Acid",
+    "Honey"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "kc-shirts-302",
+  "name": "Warm Terracotta Crop",
+  "brand": "KoColor",
+  "macro_category": "APPAREL",
+  "micro_category": "SHIRT",
+  "shade_name": "Warm Terracotta Crop",
+  "color_hex": "#E2725B",
+  "raw_image_input": "./kc-shirts-302.png",
+  "price": 45.0,
+  "volume": "Size S",
+  "ingredients": ["95% Organic Cotton", "5% Spandex"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

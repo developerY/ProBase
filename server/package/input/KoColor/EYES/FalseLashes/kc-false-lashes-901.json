@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "id": "kc-false-lashes-901",
+  "name": "High-Definition Silk Lashes",
+  "brand": "KoColor",
+  "macro_category": "EYES",
+  "micro_category": "FALSE_LASHES",
+  "shade_name": "Obsidian Black",
+  "color_hex": "#000000",
+  "raw_image_input": "./kc-false-lashes-901.png",
+  "price": 15.0,
+  "volume": "1 Pair",
+  "ingredients": [
+    "Synthetic Silk Fibers",
+    "Cotton Band"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

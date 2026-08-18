@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-prep-105",
+  "name": "AHA/BHA Liquid Exfoliant",
+  "brand": "KoColor",
+  "macro_category": "PREP",
+  "micro_category": "EXFOLIANT",
+  "shade_name": "Clear Fluid",
+  "color_hex": "#FFFFFF",
+  "raw_image_input": "./kc-prep-105.png",
+  "price": 28.0,
+  "volume": "120ml",
+  "ingredients": [
+    "Glycolic Acid (8%)",
+    "Lactic Acid",
+    "Salicylic Acid (2%)"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

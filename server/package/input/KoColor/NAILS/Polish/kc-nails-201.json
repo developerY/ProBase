@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "kc-nails-201",
+  "name": "Cobalt Core Polish",
+  "brand": "KoColor",
+  "macro_category": "NAILS",
+  "micro_category": "POLISH",
+  "shade_name": "Cobalt Core",
+  "color_hex": "#0047AB",
+  "raw_image_input": "./kc-nails-201.png",
+  "price": 18.0,
+  "volume": "15ml",
+  "ingredients": ["Ethyl Acetate", "Butyl Acetate", "Nitrocellulose", "Isopropyl Alcohol", "Blue 1 Lake"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

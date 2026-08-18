@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "kc-shirts-307",
+  "name": "Midnight Crimson Velvet",
+  "brand": "KoColor",
+  "macro_category": "APPAREL",
+  "micro_category": "SHIRT",
+  "shade_name": "Midnight Crimson Velvet",
+  "color_hex": "#541624",
+  "raw_image_input": "./kc-shirts-307.png",
+  "price": 90.0,
+  "volume": "Size M",
+  "ingredients": ["Silk Velvet Blend", "Recycled Polyester"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

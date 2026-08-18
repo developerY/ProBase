@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-beard-care-901",
+  "name": "Conditioning Beard Oil",
+  "brand": "KoColor",
+  "macro_category": "GROOMING",
+  "micro_category": "BEARD_CARE",
+  "shade_name": "Deep Amber",
+  "color_hex": "#D2691E",
+  "raw_image_input": "./kc-beard-care-901.png",
+  "price": 24.0,
+  "volume": "30ml",
+  "ingredients": [
+    "Argan Oil",
+    "Cedarwood Oil",
+    "Vitamin E"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

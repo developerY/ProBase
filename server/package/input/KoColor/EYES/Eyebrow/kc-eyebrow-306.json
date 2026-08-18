@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "kc-eyebrow-306",
+  "name": "Glow Control Brow Gel",
+  "brand": "KoColor Fashion",
+  "macro_category": "EYES",
+  "micro_category": "EYEBROW",
+  "shade_name": "Granite (Clear)",
+  "color_hex": "#F0F0F0",
+  "raw_image_input": "./kc-eyebrow-306.png",
+  "price": 21.0,
+  "volume": "5ml",
+  "notes": "A popular high-hold clear gel for setting and locking brow shapes.",
+  "ingredients": ["Water", "PVP", "Glycerin", "Phenoxyethanol"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

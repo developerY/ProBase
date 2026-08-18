@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-shaving-cream-901",
+  "name": "Smooth-Glide Shaving Cream",
+  "brand": "KoColor",
+  "macro_category": "GROOMING",
+  "micro_category": "SHAVING_CREAM",
+  "shade_name": "Pearl White",
+  "color_hex": "#F8F8FF",
+  "raw_image_input": "./kc-shaving-cream-901.png",
+  "price": 18.0,
+  "volume": "150ml",
+  "ingredients": [
+    "Water",
+    "Stearic Acid",
+    "Oat Flour"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

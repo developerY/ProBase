@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-complexion-401",
+  "name": "Micro-Blur Setting Powder",
+  "brand": "KoColor",
+  "macro_category": "COMPLEXION",
+  "micro_category": "SETTING_POWDER",
+  "shade_name": "Translucent",
+  "color_hex": "#FFFFFF",
+  "raw_image_input": "./kc-complexion-401.png",
+  "price": 32.0,
+  "volume": "10g",
+  "ingredients": [
+    "Silica",
+    "Mica",
+    "Dimethicone/Vinyl Dimethicone Crosspolymer"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

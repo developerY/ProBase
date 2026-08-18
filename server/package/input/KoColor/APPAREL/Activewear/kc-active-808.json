@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "kc-active-808",
+  "name": "Universal Khaki Oversized Sweatpants",
+  "brand": "KoColor",
+  "macro_category": "APPAREL",
+  "micro_category": "ACTIVEWEAR",
+  "shade_name": "Universal Khaki Sweatpants",
+  "color_hex": "#B8A992",
+  "raw_image_input": "./kc-active-808.png",
+  "price": 60.0,
+  "volume": "Size L",
+  "ingredients": ["80% Organic Cotton", "20% Recycled Polyester Fleece"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

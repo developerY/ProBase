@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-primer-901",
+  "name": "Optical Blur Pore Primer",
+  "brand": "KoColor",
+  "macro_category": "PREP",
+  "micro_category": "PRIMER",
+  "shade_name": "Translucent Cloud",
+  "color_hex": "#F5F5F5",
+  "raw_image_input": "./kc-primer-901.png",
+  "price": 28.0,
+  "volume": "30ml",
+  "ingredients": [
+    "Silica",
+    "Glycerin",
+    "Dimethicone"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

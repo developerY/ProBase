@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "id": "kc-razor-901",
+  "name": "Precision Ergonomic Handle",
+  "brand": "KoColor",
+  "macro_category": "GROOMING",
+  "micro_category": "RAZOR",
+  "shade_name": "Steel Grey",
+  "color_hex": "#C0C0C0",
+  "raw_image_input": "./kc-razor-901.png",
+  "price": 25.0,
+  "volume": "1 Unit",
+  "ingredients": [
+    "Zinc Alloy",
+    "Rubber Grip"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

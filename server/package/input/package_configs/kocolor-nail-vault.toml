@@ -1,0 +1,17 @@
+[package_metadata]
+id = "kocolor-nail-vault"
+name = "KoColor Nail Polish Vault"
+description = "A 9-piece curation of high-gloss nail lacquers spanning vibrant primary hues to deep atmospheric tones."
+
+[assortment]
+includes = [
+    "kc-nails-201",
+    "kc-nails-202",
+    "kc-nails-203",
+    "kc-nails-204",
+    "kc-nails-205",
+    "kc-nails-206",
+    "kc-nails-207",
+    "kc-nails-208",
+    "kc-nails-209"
+]

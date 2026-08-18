@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "kc-eyes-109",
+  "name": "Lavender Haze Celestial Chromatic Single",
+  "brand": "KoColor",
+  "macro_category": "EYES",
+  "micro_category": "EYESHADOW",
+  "shade_name": "Lavender Haze",
+  "color_hex": "#967BB6",
+  "raw_image_input": "./kc-eyes-109.png",
+  "price": 18.0,
+  "volume": "1.5g",
+  "notes": "A soft, pastel lavender infused with silver pearl. The perfect subtle, trendy sheen.",
+  "ingredients": ["Mica", "Titanium Dioxide", "Manganese Violet", "Tin Oxide"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

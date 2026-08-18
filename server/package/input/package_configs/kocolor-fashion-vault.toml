@@ -1,0 +1,22 @@
+[package_metadata]
+id = "kocolor-fashion-vault"
+name = "KoColor Apparel & Footwear Vault"
+description = "A 27-piece curation of trend-forward shirts, pants, and shoes styled exclusively for the KoColor aesthetic."
+
+[assortment]
+includes = [
+    # Tops
+    "kc-shirts-301", "kc-shirts-302", "kc-shirts-303",
+    "kc-shirts-304", "kc-shirts-305", "kc-shirts-306",
+    "kc-shirts-307", "kc-shirts-308", "kc-shirts-309",
+
+    # Bottoms
+    "kc-pants-401", "kc-pants-402", "kc-pants-403",
+    "kc-pants-404", "kc-pants-405", "kc-pants-406",
+    "kc-pants-407", "kc-pants-408", "kc-pants-409",
+
+    # Footwear
+    "kc-shoes-501", "kc-shoes-502", "kc-shoes-503",
+    "kc-shoes-504", "kc-shoes-505", "kc-shoes-506",
+    "kc-shoes-507", "kc-shoes-508", "kc-shoes-509"
+]

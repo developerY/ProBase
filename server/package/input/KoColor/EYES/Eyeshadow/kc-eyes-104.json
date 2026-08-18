@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "kc-eyes-104",
+  "name": "Rose Gold Rush Celestial Chromatic Single",
+  "brand": "KoColor",
+  "macro_category": "EYES",
+  "micro_category": "EYESHADOW",
+  "shade_name": "Rose Gold Rush",
+  "color_hex": "#B76E79",
+  "raw_image_input": "./kc-eyes-104.png",
+  "price": 18.0,
+  "volume": "1.5g",
+  "notes": "A luxurious, molten metallic rose gold. Wet-look shine with intense color payoff in a single swipe.",
+  "ingredients": ["Mica", "Dimethicone", "Iron Oxides", "Titanium Dioxide"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

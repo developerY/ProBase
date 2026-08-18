@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "kc-eyeliner-209",
+  "name": "Emerald Silk Kohl",
+  "brand": "KoColor Fashion",
+  "macro_category": "EYES",
+  "micro_category": "EYELINER",
+  "shade_name": "Emerald Envy (Satin)",
+  "color_hex": "#004D2D",
+  "raw_image_input": "./kc-eyeliner-209.png",
+  "price": 17.0,
+  "volume": "1.2g",
+  "notes": "A deep defining green kohl pencil with a sophisticated satin finish.",
+  "ingredients": ["Iron Oxides", "Chromium Oxide Greens", "Mica", "Lanolin"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

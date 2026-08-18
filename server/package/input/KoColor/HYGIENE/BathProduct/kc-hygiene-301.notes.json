@@ -1,0 +1,21 @@
+{
+  "product_id": "kc-hygiene-301",
+  "card_title": "Artist Notes: Magnesium-Rich Bath Soak",
+  "summary": "Cellular recovery. A high-grade mineral soak engineered to alleviate muscle fatigue and lower systemic cortisol levels.",
+  "description": "Transdermal restoration. This ultra-pure compound of magnesium sulfate draws lactic acid from overworked muscles, facilitating profound physical relaxation and rapid athletic recovery.",
+  "technical_overview": "Offered at $28.0 for 500g, this KoColor BATH_PRODUCT is expertly formulated with 100% Pure Magnesium Sulfate and Eucalyptus Essential Oil. It delivers a high-fidelity Crystalline White color profile (`#FFFFFF`) and leverages transdermal mineral absorption.",
+  "dynamic_attributes": [
+    {
+      "label": "Usage Notes",
+      "body": "Dissolve 2 cups in a warm bath. Soak for a minimum of 20 minutes to allow for optimal transdermal uptake."
+    },
+    {
+      "label": "Expert Tip",
+      "body": "Do not use soap during a magnesium soak, as the surfactants can alter the water's chemistry and impede mineral absorption."
+    },
+    {
+      "label": "Formulation Insight",
+      "body": "Formulated exclusively with USP-grade magnesium sulfate for maximum biological bioavailability."
+    }
+  ]
+}

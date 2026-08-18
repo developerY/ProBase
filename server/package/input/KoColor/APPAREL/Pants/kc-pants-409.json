@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "kc-pants-409",
+  "name": "True Black Flared Leggings",
+  "brand": "KoColor",
+  "macro_category": "APPAREL",
+  "micro_category": "PANTS",
+  "shade_name": "Obsidian Flare",
+  "color_hex": "#000000",
+  "raw_image_input": "./kc-pants-409.png",
+  "price": 65.0,
+  "volume": "Size M",
+  "ingredients": ["80% Nylon", "20% Spandex"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

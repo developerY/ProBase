@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-eau-de-parfum-901",
+  "name": "Aura No. 1: Bergamot & Cedar",
+  "brand": "KoColor",
+  "macro_category": "FRAGRANCE",
+  "micro_category": "EAU_DE_PARFUM",
+  "shade_name": "Amber Gold",
+  "color_hex": "#FFBF00",
+  "raw_image_input": "./kc-eau-de-parfum-901.png",
+  "price": 85.0,
+  "volume": "50ml",
+  "ingredients": [
+    "Ethanol",
+    "Bergamot Oil",
+    "Cedarwood"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

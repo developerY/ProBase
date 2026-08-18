@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-dimension-401",
+  "name": "Prismatic Liquid Highlighter",
+  "brand": "KoColor",
+  "macro_category": "DIMENSION",
+  "micro_category": "HIGHLIGHTER",
+  "shade_name": "Pearlescent Beam",
+  "color_hex": "#FFFDD0",
+  "raw_image_input": "./kc-dimension-401.png",
+  "price": 30.0,
+  "volume": "15ml",
+  "ingredients": [
+    "Isododecane",
+    "Mica",
+    "Synthetic Fluorphlogopite"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

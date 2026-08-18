@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "kc-eyeliner-204",
+  "name": "Bronze Define Glitter Liner",
+  "brand": "KoColor Fashion",
+  "macro_category": "EYES",
+  "micro_category": "EYELINER",
+  "shade_name": "Gilded Gold",
+  "color_hex": "#D4AF37",
+  "raw_image_input": "./kc-eyeliner-204.png",
+  "price": 17.0,
+  "volume": "5ml",
+  "notes": "A warm gold shimmer liquid liner for adding graphic dimension to looks.",
+  "ingredients": ["Water", "Polyethylene Terephthalate", "Mica", "Iron Oxides"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

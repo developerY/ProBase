@@ -1,0 +1,21 @@
+{
+  "product_id": "kc-hair-301",
+  "card_title": "Artist Notes: Keratin-Bond Repair Hair Mask",
+  "summary": "Intensive trauma recovery. A dense treatment mask that repairs broken disulfide bonds in chemically or thermally damaged hair.",
+  "description": "Cellular reconstruction for compromised strands. This high-performance mask penetrates deep into the hair cortex, replacing lost proteins and reinforcing the internal keratin structure for dramatically increased elasticity.",
+  "technical_overview": "Offered at $38.0 for 200ml, this KoColor HAIR_MASK is expertly formulated with Hydrolyzed Keratin, Amino Acids, and Shea Butter. It delivers a high-fidelity Ivory Cream color profile (`#FFFFF0`) and leverages low-molecular-weight protein synthesis.",
+  "dynamic_attributes": [
+    {
+      "label": "Usage Notes",
+      "body": "Apply to towel-dried hair once a week. Leave on for 15-20 minutes before rinsing thoroughly."
+    },
+    {
+      "label": "Expert Tip",
+      "body": "Wrap hair in a warm, damp towel while the mask processes; the heat expands the cuticle for deeper protein penetration."
+    },
+    {
+      "label": "Formulation Insight",
+      "body": "Hydrolyzed keratin is broken down to a molecular size small enough to physically fill the micro-tears in the hair shaft."
+    }
+  ]
+}

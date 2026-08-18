@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-prep-106",
+  "name": "Peptide-Infused Eye Cream",
+  "brand": "KoColor",
+  "macro_category": "PREP",
+  "micro_category": "EYE_CARE",
+  "shade_name": "Cream White",
+  "color_hex": "#FDF5E6",
+  "raw_image_input": "./kc-prep-106.png",
+  "price": 45.0,
+  "volume": "15ml",
+  "ingredients": [
+    "Matrixyl 3000",
+    "Caffeine",
+    "Squalane"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

@@ -1,0 +1,21 @@
+{
+  "product_id": "kc-oral-101",
+  "card_title": "Artist Notes: Nano-Hydroxyapatite Toothpaste",
+  "summary": "Biomimetic enamel repair. A fluoride-free paste that utilizes the exact mineral makeup of human teeth to remineralize micro-cavities and eliminate sensitivity.",
+  "description": "Structural dental engineering. This advanced formula bypasses traditional fluoride, instead deploying nano-sized hydroxyapatite particles that physically bond to the tooth structure, rebuilding the enamel from the outside in.",
+  "technical_overview": "Offered at $18.0 for 100g, this KoColor TOOTHPASTE is expertly formulated with Nano-Hydroxyapatite, Xylitol, and Peppermint Oil. It delivers a high-fidelity Mint White color profile (`#F5FFFA`) and leverages biomimetic enamel synthesis.",
+  "dynamic_attributes": [
+    {
+      "label": "Usage Notes",
+      "body": "Brush thoroughly for 2 minutes, twice daily."
+    },
+    {
+      "label": "Expert Tip",
+      "body": "Do not rinse with water after brushing; spit only. Leaving the residue on the teeth maximizes the remineralization process overnight."
+    },
+    {
+      "label": "Formulation Insight",
+      "body": "Xylitol actively starves Streptococcus mutans (the primary bacteria responsible for tooth decay) by inhibiting their ability to process sugars."
+    }
+  ]
+}

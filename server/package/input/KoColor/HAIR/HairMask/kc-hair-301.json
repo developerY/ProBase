@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-hair-301",
+  "name": "Keratin-Bond Repair Hair Mask",
+  "brand": "KoColor",
+  "macro_category": "HAIR",
+  "micro_category": "HAIR_MASK",
+  "shade_name": "Ivory Cream",
+  "color_hex": "#FFFFF0",
+  "raw_image_input": "./kc-hair-301.png",
+  "price": 38.0,
+  "volume": "200ml",
+  "ingredients": [
+    "Hydrolyzed Keratin",
+    "Amino Acids",
+    "Shea Butter"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

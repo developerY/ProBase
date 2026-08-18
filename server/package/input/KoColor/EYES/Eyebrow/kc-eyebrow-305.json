@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "kc-eyebrow-305",
+  "name": "Duo Brow Powder",
+  "brand": "KoColor Fashion",
+  "macro_category": "EYES",
+  "micro_category": "EYEBROW",
+  "shade_name": "Espresso Roast (Dark)",
+  "color_hex": "#4B3621",
+  "raw_image_input": "./kc-eyebrow-305.png",
+  "price": 21.0,
+  "volume": "2.5g",
+  "notes": "Deepest matte defining brown powder duo for dark brows.",
+  "ingredients": ["Talc", "Mica", "Black 2", "Iron Oxides"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

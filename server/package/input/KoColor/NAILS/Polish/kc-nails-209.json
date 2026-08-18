@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "kc-nails-209",
+  "name": "Obsidian Void Polish",
+  "brand": "KoColor",
+  "macro_category": "NAILS",
+  "micro_category": "POLISH",
+  "shade_name": "Obsidian Void",
+  "color_hex": "#0F0F0F",
+  "raw_image_input": "./kc-nails-209.png",
+  "price": 18.0,
+  "volume": "15ml",
+  "ingredients": ["Ethyl Acetate", "Butyl Acetate", "Nitrocellulose", "Black 2", "Iron Oxides"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

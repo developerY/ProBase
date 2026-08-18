@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-bronzer-901",
+  "name": "Sun-Kissed Mineral Bronzer",
+  "brand": "KoColor",
+  "macro_category": "DIMENSION",
+  "micro_category": "BRONZER",
+  "shade_name": "Golden Sand",
+  "color_hex": "#C68E65",
+  "raw_image_input": "./kc-bronzer-901.png",
+  "price": 26.0,
+  "volume": "8g",
+  "ingredients": [
+    "Mica",
+    "Boron Nitride",
+    "Iron Oxides"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

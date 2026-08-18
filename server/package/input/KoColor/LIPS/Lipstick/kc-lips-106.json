@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "kc-lips-106",
+  "name": "Blackberry Bite Lipstick",
+  "brand": "KoColor",
+  "macro_category": "LIPS",
+  "micro_category": "LIPSTICK",
+  "shade_name": "Blackberry Bite",
+  "color_hex": "#4A2535",
+  "raw_image_input": "./kc-lips-106.png",
+  "price": 28.0,
+  "volume": "3.5g",
+  "ingredients": ["Ricinus Communis (Castor) Seed Oil", "Dimethicone", "Red 33 Lake", "Blue 1 Lake", "Iron Oxides"],
+  "Contains_Fragrance": true,
+  "fda_data_verified": true
+}

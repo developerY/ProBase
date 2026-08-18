@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "kc-concealer-403",
+  "name": "Velvet Camouflage Concealer",
+  "brand": "KoColor Fashion",
+  "macro_category": "COMPLEXION",
+  "micro_category": "CONCEALER",
+  "shade_name": "Toasted Almond (Light-Medium)",
+  "color_hex": "#C19A6B",
+  "raw_image_input": "./kc-concealer-403.png",
+  "price": 24.0,
+  "volume": "6ml",
+  "notes": "Medium-coverage camouflage concealer for natural definition and covering blemishes.",
+  "ingredients": ["Water", "Cyclopentasiloxane", "Iron Oxides", "Mica"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

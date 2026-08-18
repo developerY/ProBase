@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-frag-201",
+  "name": "Extrait de Parfum: Obsidian Core",
+  "brand": "KoColor",
+  "macro_category": "FRAGRANCE",
+  "micro_category": "PERFUME",
+  "shade_name": "Deep Amber",
+  "color_hex": "#FF8C00",
+  "raw_image_input": "./kc-frag-201.png",
+  "price": 160.0,
+  "volume": "30ml",
+  "ingredients": [
+    "High-Concentrate Essential Oils",
+    "Birch Tar",
+    "Iso E Super"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "kc-nails-204",
+  "name": "Digital Lavender Polish",
+  "brand": "KoColor",
+  "macro_category": "NAILS",
+  "micro_category": "POLISH",
+  "shade_name": "Digital Lavender",
+  "color_hex": "#E6E6FA",
+  "raw_image_input": "./kc-nails-204.png",
+  "price": 18.0,
+  "volume": "15ml",
+  "ingredients": ["Ethyl Acetate", "Butyl Acetate", "Nitrocellulose", "Titanium Dioxide", "Manganese Violet"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

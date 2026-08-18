@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "kc-nails-206",
+  "name": "Concrete Slate Polish",
+  "brand": "KoColor",
+  "macro_category": "NAILS",
+  "micro_category": "POLISH",
+  "shade_name": "Concrete Slate",
+  "color_hex": "#708090",
+  "raw_image_input": "./kc-nails-206.png",
+  "price": 18.0,
+  "volume": "15ml",
+  "ingredients": ["Ethyl Acetate", "Butyl Acetate", "Nitrocellulose", "Titanium Dioxide", "Black 2"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

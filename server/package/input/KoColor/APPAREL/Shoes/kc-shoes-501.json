@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "kc-shoes-501",
+  "name": "Aesthetic Pink Sneakers",
+  "brand": "KoColor",
+  "macro_category": "APPAREL",
+  "micro_category": "SHOES",
+  "shade_name": "Aesthetic Pink Chunk",
+  "color_hex": "#FFC0CB",
+  "raw_image_input": "./kc-shoes-501.png",
+  "price": 140.0,
+  "volume": "Size 7.5",
+  "ingredients": ["Vegan Leather Upper", "EVA Foam Sole"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

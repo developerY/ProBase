@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-dimension-501",
+  "name": "Melanin-Mimic Freckle Hint",
+  "brand": "KoColor",
+  "macro_category": "DIMENSION",
+  "micro_category": "FRECKLE_TINT",
+  "shade_name": "Sepia Melanin",
+  "color_hex": "#704214",
+  "raw_image_input": "./kc-dimension-501.png",
+  "price": 20.0,
+  "volume": "3ml",
+  "ingredients": [
+    "Water",
+    "Glycerin",
+    "specialized Dyes"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

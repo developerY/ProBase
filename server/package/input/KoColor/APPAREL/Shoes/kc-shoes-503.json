@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "kc-shoes-503",
+  "name": "Camel Ankle Boots",
+  "brand": "KoColor",
+  "macro_category": "APPAREL",
+  "micro_category": "SHOES",
+  "shade_name": "Camel Desert Boot",
+  "color_hex": "#BDA06A",
+  "raw_image_input": "./kc-shoes-503.png",
+  "price": 160.0,
+  "volume": "Size 9",
+  "ingredients": ["100% Suede", "Wood Block Heel"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

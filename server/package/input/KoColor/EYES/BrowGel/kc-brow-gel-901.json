@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-brow-gel-901",
+  "name": "Volumizing Tinted Brow Gel",
+  "brand": "KoColor",
+  "macro_category": "EYES",
+  "micro_category": "BROW_GEL",
+  "shade_name": "Dark Brown",
+  "color_hex": "#4B3621",
+  "raw_image_input": "./kc-brow-gel-901.png",
+  "price": 22.0,
+  "volume": "5ml",
+  "ingredients": [
+    "Water",
+    "Acrylates Copolymer",
+    "Iron Oxides"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

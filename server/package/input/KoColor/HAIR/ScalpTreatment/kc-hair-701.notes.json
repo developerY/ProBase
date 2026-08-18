@@ -1,0 +1,21 @@
+{
+  "product_id": "kc-hair-701",
+  "card_title": "Artist Notes: Microbiome-Balancing Scalp Treatment",
+  "summary": "Root-level reset. A targeted serum that balances sebum production, reduces flaking, and fosters an optimal environment for hair growth.",
+  "description": "Scientific scalp architecture. This pre-wash treatment uses exfoliating acids and antimicrobial extracts to dissolve follicular buildup and soothe inflammation, restoring the scalp's delicate microbiome.",
+  "technical_overview": "Offered at $32.0 for 50ml, this KoColor SCALP_TREATMENT is expertly formulated with Salicylic Acid, Tea Tree Oil, and Niacinamide. It delivers a high-fidelity Clear Serum color profile (`#F0FFF0`) and leverages keratolytic exfoliation.",
+  "dynamic_attributes": [
+    {
+      "label": "Usage Notes",
+      "body": "Section dry, unwashed hair and apply directly to the scalp. Massage and let sit for 10 minutes before shampooing."
+    },
+    {
+      "label": "Expert Tip",
+      "body": "Use a silicone scalp massager during application to manually break up hardened sebum plugs."
+    },
+    {
+      "label": "Formulation Insight",
+      "body": "Lipophilic salicylic acid penetrates deep into the lipid-rich environment of the hair follicle to dissolve blockages from the inside out."
+    }
+  ]
+}

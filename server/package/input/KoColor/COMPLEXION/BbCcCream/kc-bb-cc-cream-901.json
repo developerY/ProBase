@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-bb-cc-cream-901",
+  "name": "Adaptive Radiance BB Cream",
+  "brand": "KoColor",
+  "macro_category": "COMPLEXION",
+  "micro_category": "BB_CC_CREAM",
+  "shade_name": "Neutral Beige",
+  "color_hex": "#E5C29B",
+  "raw_image_input": "./kc-bb-cc-cream-901.png",
+  "price": 32.0,
+  "volume": "40ml",
+  "ingredients": [
+    "Zinc Oxide",
+    "Niacinamide",
+    "Iron Oxides"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

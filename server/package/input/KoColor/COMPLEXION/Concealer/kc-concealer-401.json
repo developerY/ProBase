@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "kc-concealer-401",
+  "name": "Velvet Camouflage Concealer",
+  "brand": "KoColor Fashion",
+  "macro_category": "COMPLEXION",
+  "micro_category": "CONCEALER",
+  "shade_name": "Alabaster (Very Light)",
+  "color_hex": "#F0E4D3",
+  "raw_image_input": "./kc-concealer-401.png",
+  "price": 24.0,
+  "volume": "6ml",
+  "notes": "A full-coverage camouflage concealer for brightening under-eye circles in porcelain skin.",
+  "ingredients": ["Water", "Dimethicone", "Titanium Dioxide", "Glycerin"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

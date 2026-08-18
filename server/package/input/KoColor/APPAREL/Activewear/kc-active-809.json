@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "kc-active-809",
+  "name": "Transformative Teal Performance Windshirt",
+  "brand": "KoColor",
+  "macro_category": "APPAREL",
+  "micro_category": "ACTIVEWEAR",
+  "shade_name": "Transformative Teal Windshirt",
+  "color_hex": "#2F6364",
+  "raw_image_input": "./kc-active-809.png",
+  "price": 70.0,
+  "volume": "Size M",
+  "ingredients": ["100% Micro-Ripstop Nylon", "DWR Water Repellent", "Laser-Cut Venting"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

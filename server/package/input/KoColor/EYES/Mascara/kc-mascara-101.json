@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "kc-mascara-101",
+  "name": "Obsidian Volume Mascara",
+  "brand": "KoColor Fashion",
+  "macro_category": "EYES",
+  "micro_category": "MASCARA",
+  "shade_name": "True Black",
+  "color_hex": "#000000",
+  "raw_image_input": "./kc-mascara-101.png",
+  "price": 19.0,
+  "volume": "8ml",
+  "notes": "Ultra-pigmented black mascara that darkens, thickens, and extends length in a single coat.",
+  "ingredients": ["Water", "Acrylates Copolymer", "Beeswax", "Iron Oxides"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

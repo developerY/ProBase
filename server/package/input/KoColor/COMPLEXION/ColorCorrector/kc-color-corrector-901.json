@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-color-corrector-901",
+  "name": "Chroma-Correction Mint Gel",
+  "brand": "KoColor",
+  "macro_category": "COMPLEXION",
+  "micro_category": "COLOR_CORRECTOR",
+  "shade_name": "Mint Neutralizer",
+  "color_hex": "#98FB98",
+  "raw_image_input": "./kc-color-corrector-901.png",
+  "price": 24.0,
+  "volume": "10ml",
+  "ingredients": [
+    "Water",
+    "Chromium Oxide Greens",
+    "Centella Asiatica"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

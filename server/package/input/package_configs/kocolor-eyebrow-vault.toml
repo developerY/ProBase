@@ -1,0 +1,11 @@
+[package_metadata]
+id = "kocolor-eyebrow-vault"
+name = "KoColor Eyebrow Collection"
+description = "A 9-piece toolkit for shaping and filling brows, featuring Architect pencils, Duo powders, and sculpting tinted gels."
+
+[assortment]
+includes = [
+    "kc-eyebrow-301", "kc-eyebrow-302", "kc-eyebrow-303",
+    "kc-eyebrow-304", "kc-eyebrow-305", "kc-eyebrow-306",
+    "kc-eyebrow-307", "kc-eyebrow-308", "kc-eyebrow-309"
+]

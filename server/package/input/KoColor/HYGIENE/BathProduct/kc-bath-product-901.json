@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-bath-product-901",
+  "name": "Effervescent Mineral Soak",
+  "brand": "KoColor",
+  "macro_category": "HYGIENE",
+  "micro_category": "BATH_PRODUCT",
+  "shade_name": "Ocean Breeze",
+  "color_hex": "#B0E0E6",
+  "raw_image_input": "./kc-bath-product-901.png",
+  "price": 22.0,
+  "volume": "500g",
+  "ingredients": [
+    "Epsom Salt",
+    "Mica",
+    "Essential Oils"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

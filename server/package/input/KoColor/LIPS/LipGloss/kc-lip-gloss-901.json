@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-lip-gloss-901",
+  "name": "Glass-Reflect High Shine Gloss",
+  "brand": "KoColor",
+  "macro_category": "LIPS",
+  "micro_category": "LIP_GLOSS",
+  "shade_name": "Crystal Clear",
+  "color_hex": "#FDF5E6",
+  "raw_image_input": "./kc-lip-gloss-901.png",
+  "price": 22.0,
+  "volume": "5ml",
+  "ingredients": [
+    "Polybutene",
+    "Jojoba Oil",
+    "Mica"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

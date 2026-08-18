@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "kc-intimate-hygiene-901",
+  "name": "Balanced-pH Gentle Wash",
+  "brand": "KoColor",
+  "macro_category": "HYGIENE",
+  "micro_category": "INTIMATE_HYGIENE",
+  "shade_name": "Soft Rose",
+  "color_hex": "#FFF0F5",
+  "raw_image_input": "./kc-intimate-hygiene-901.png",
+  "price": 15.0,
+  "volume": "200ml",
+  "ingredients": [
+    "Water",
+    "Lactic Acid",
+    "Chamomile"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

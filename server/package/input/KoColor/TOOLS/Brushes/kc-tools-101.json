@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "id": "kc-tools-101",
+  "name": "Synthetic-Bristle Foundation Brush",
+  "brand": "KoColor",
+  "macro_category": "TOOLS",
+  "micro_category": "BRUSHES",
+  "shade_name": "Obsidian Handle",
+  "color_hex": "#000000",
+  "raw_image_input": "./kc-tools-101.png",
+  "price": 35.0,
+  "volume": "1 Unit",
+  "ingredients": [
+    "Vegan Taklon Bristles a Solid Wood Core"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

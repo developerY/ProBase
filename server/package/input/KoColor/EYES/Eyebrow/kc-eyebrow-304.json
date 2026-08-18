@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "kc-eyebrow-304",
+  "name": "Duo Brow Powder",
+  "brand": "KoColor Fashion",
+  "macro_category": "EYES",
+  "micro_category": "EYEBROW",
+  "shade_name": "Toasted Almond (Neutral)",
+  "color_hex": "#C19A6B",
+  "raw_image_input": "./kc-eyebrow-304.png",
+  "price": 21.0,
+  "volume": "2.5g",
+  "notes": "A compact of two neutral brown defining powders for natural shaping and density.",
+  "ingredients": ["Talc", "Mica", "Silica", "Iron Oxides"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

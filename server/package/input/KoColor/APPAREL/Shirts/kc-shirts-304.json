@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "kc-shirts-304",
+  "name": "Soft Rose Gold Camisole",
+  "brand": "KoColor",
+  "macro_category": "APPAREL",
+  "micro_category": "SHIRT",
+  "shade_name": "Soft Rose Camisole",
+  "color_hex": "#D7C3B3",
+  "raw_image_input": "./kc-shirts-304.png",
+  "price": 55.0,
+  "volume": "Size S",
+  "ingredients": ["100% Satin Polyester", "Lace Trim"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

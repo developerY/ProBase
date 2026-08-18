@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "kc-eyebrow-303",
+  "name": "Architect Brow Pencil",
+  "brand": "KoColor Fashion",
+  "macro_category": "EYES",
+  "micro_category": "EYEBROW",
+  "shade_name": "Dark Auburn (Warm)",
+  "color_hex": "#744033",
+  "raw_image_input": "./kc-eyebrow-303.png",
+  "price": 21.0,
+  "volume": "0.1g",
+  "notes": "A warm, rich terracotta define pencil for shaping red/auburn brows.",
+  "ingredients": ["Synthetic Wax", "Hydrogenated Oil", "Iron Oxides", "Red 40 Lake"],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}
