@@ -165,14 +165,29 @@ fun ProductEditorialNotesDialog(
                                     }
                                 }
 
-                                // B. SCIENTIFIC OVERVIEW Card (Technical Description) - First in list
+                                // B. DESCRIPTION Card (from description.md) - Between Image and Scientific
                                 notes.description?.let { desc ->
+                                    EditorialCard(
+                                        label = "Description",
+                                        initiallyExpanded = false
+                                    ) {
+                                        Text(
+                                            text = desc,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = Color(0xFF333333),
+                                            lineHeight = 22.sp
+                                        )
+                                    }
+                                }
+
+                                // C. SCIENTIFIC OVERVIEW Card (from technical_overview / Product_Description.md)
+                                notes.technicalOverview?.let { tech ->
                                     EditorialCard(
                                         label = "Scientific Overview",
                                         initiallyExpanded = false
                                     ) {
                                         Text(
-                                            text = desc,
+                                            text = tech,
                                             style = MaterialTheme.typography.bodyMedium,
                                             color = Color(0xFF333333),
                                             lineHeight = 22.sp

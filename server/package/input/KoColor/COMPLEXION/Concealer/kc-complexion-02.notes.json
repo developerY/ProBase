@@ -1,7 +1,7 @@
 {
   "product_id": "kc-complexion-02",
   "card_title": "Artist Notes: Everyday Clear Concealer",
-  "description": "Offered at $26.0 for 6ml, this KoColor CONCEALER is expertly formulated with Water, Dimethicone, Titanium Dioxide, Butylene Glycol, Iron Oxides, Niacinamide. Delivering a high-fidelity Honey 210 color profile (`#D4A373`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.",
+  "description": "Flawless coverage meets skincare. Infused with Niacinamide, this Honey 210 concealer melts into the skin to blur imperfections while actively improving your skin's texture.",
   "dynamic_attributes": [
     {
       "label": "Usage Notes",
@@ -16,5 +16,6 @@
       "body": "Advanced concealer engineering featuring high-purity pigments and volatile carriers."
     }
   ],
-  "summary": "Flawless coverage meets skincare. Infused with Niacinamide, this Honey 210 concealer melts into the skin to blur imperfections while actively improving your skin's texture."
+  "summary": "Flawless coverage meets skincare. Infused with Niacinamide, this Honey 210 concealer melts into the skin to blur imperfections while actively improving your skin's texture.",
+  "technical_overview": "Offered at $26.0 for 6ml, this KoColor CONCEALER is expertly formulated with Water, Dimethicone, Titanium Dioxide, Butylene Glycol, Iron Oxides, Niacinamide. Delivering a high-fidelity Honey 210 color profile (`#D4A373`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface."
 }

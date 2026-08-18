@@ -1,7 +1,7 @@
 {
   "product_id": "kc-prep-01",
   "card_title": "Artist Notes: Purifying Gel Cleanser",
-  "description": "Offered at $18.0 for 150ml, this KoColor CLEANSER is expertly formulated with Water, Glycerin, Sodium Cocoyl Glycinate, Citric Acid, Niacinamide. Delivering a high-fidelity Clear Crystal color profile (`#F4F6F0`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.",
+  "description": "The first step to flawless skin. This refreshing, Niacinamide-infused gel gently foams away impurities, leaving your complexion crystal clear, balanced, and perfectly prepped.",
   "dynamic_attributes": [
     {
       "label": "Usage Notes",
@@ -16,5 +16,6 @@
       "body": "Advanced cleanser engineering featuring high-purity pigments and volatile carriers."
     }
   ],
-  "summary": "The first step to flawless skin. This refreshing, Niacinamide-infused gel gently foams away impurities, leaving your complexion crystal clear, balanced, and perfectly prepped."
+  "summary": "The first step to flawless skin. This refreshing, Niacinamide-infused gel gently foams away impurities, leaving your complexion crystal clear, balanced, and perfectly prepped.",
+  "technical_overview": "Offered at $18.0 for 150ml, this KoColor CLEANSER is expertly formulated with Water, Glycerin, Sodium Cocoyl Glycinate, Citric Acid, Niacinamide. Delivering a high-fidelity Clear Crystal color profile (`#F4F6F0`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface."
 }

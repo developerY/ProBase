@@ -1,7 +1,7 @@
 {
   "product_id": "kc-eyes-01",
   "card_title": "Artist Notes: Lash Lift Defining Mascara",
-  "description": "Offered at $20.0 for 8ml, this KoColor MASCARA is expertly formulated with Water, Beeswax, Iron Oxides, Copernicia Cerifera (Carnauba) Wax, Stearic Acid, Panthenol. Delivering a high-fidelity Soft Black color profile (`#1A1A1A`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.",
+  "description": "Defy gravity. Formulated with Carnauba Wax and Panthenol, this soft black mascara lifts, separates, and holds your curl for a wide-awake look.",
   "dynamic_attributes": [
     {
       "label": "Usage Notes",
@@ -16,5 +16,6 @@
       "body": "Advanced mascara engineering featuring high-purity pigments and volatile carriers."
     }
   ],
-  "summary": "Defy gravity. Formulated with Carnauba Wax and Panthenol, this soft black mascara lifts, separates, and holds your curl for a wide-awake look."
+  "summary": "Defy gravity. Formulated with Carnauba Wax and Panthenol, this soft black mascara lifts, separates, and holds your curl for a wide-awake look.",
+  "technical_overview": "Offered at $20.0 for 8ml, this KoColor MASCARA is expertly formulated with Water, Beeswax, Iron Oxides, Copernicia Cerifera (Carnauba) Wax, Stearic Acid, Panthenol. Delivering a high-fidelity Soft Black color profile (`#1A1A1A`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface."
 }

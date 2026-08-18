@@ -1,7 +1,7 @@
 {
   "product_id": "kc-lips-01",
   "card_title": "Artist Notes: Glow Catalyst Lip Stain",
-  "description": "Offered at $24.0 for 4ml, this KoColor STAIN is expertly formulated with Water, Octyldodecanol, Trimethylsiloxyphenyl Dimethicone, Ethylcellulose, Red 28 Lake, Yellow 6 Lake. Delivering a high-fidelity Crimson Catalyst color profile (`#A81C28`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface.",
+  "description": "Color that lasts. This crimson stain bonds to your lips, providing a weightless, high-impact wash of red that refuses to fade, feather, or transfer.",
   "dynamic_attributes": [
     {
       "label": "Usage Notes",
@@ -16,5 +16,6 @@
       "body": "Advanced stain engineering featuring high-purity pigments and volatile carriers."
     }
   ],
-  "summary": "Color that lasts. This crimson stain bonds to your lips, providing a weightless, high-impact wash of red that refuses to fade, feather, or transfer."
+  "summary": "Color that lasts. This crimson stain bonds to your lips, providing a weightless, high-impact wash of red that refuses to fade, feather, or transfer.",
+  "technical_overview": "Offered at $24.0 for 4ml, this KoColor STAIN is expertly formulated with Water, Octyldodecanol, Trimethylsiloxyphenyl Dimethicone, Ethylcellulose, Red 28 Lake, Yellow 6 Lake. Delivering a high-fidelity Crimson Catalyst color profile (`#A81C28`), it leverages advanced engineering via high-purity pigments and volatile carriers. For optimal chromatic impact, apply directly to a clean, prepped surface."
 }
