@@ -1,7 +1,7 @@
 [package_metadata]
 id = "kocolor-nails-vault"
 name = "Nail Lacquer Vault"
-description = "High-gloss pro lacquers and chromatic nail treatments."
+description = "High-gloss lacquers and chromatic treatments."
 
 [assortment]
 includes = [

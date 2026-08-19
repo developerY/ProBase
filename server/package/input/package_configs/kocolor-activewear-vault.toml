@@ -1,0 +1,17 @@
+[package_metadata]
+id = "kocolor-activewear-vault"
+name = "The Activewear Vault"
+description = "High-performance leggings, sports bras, and windshirts."
+
+[assortment]
+includes = [
+    "kc-active-801",
+    "kc-active-802",
+    "kc-active-803",
+    "kc-active-804",
+    "kc-active-805",
+    "kc-active-806",
+    "kc-active-807",
+    "kc-active-808",
+    "kc-active-809"
+]

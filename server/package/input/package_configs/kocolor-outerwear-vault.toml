@@ -1,0 +1,17 @@
+[package_metadata]
+id = "kocolor-outerwear-vault"
+name = "The Outerwear Vault"
+description = "Architectural trench coats, leather jackets, and wool overcoats."
+
+[assortment]
+includes = [
+    "kc-outerwear-701",
+    "kc-outerwear-702",
+    "kc-outerwear-703",
+    "kc-outerwear-704",
+    "kc-outerwear-705",
+    "kc-outerwear-706",
+    "kc-outerwear-707",
+    "kc-outerwear-708",
+    "kc-outerwear-709"
+]

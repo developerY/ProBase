@@ -1,0 +1,17 @@
+[package_metadata]
+id = "kocolor-shoes-vault"
+name = "The Footwear Vault"
+description = "Premium leather boots, heels, and aesthetic sneakers."
+
+[assortment]
+includes = [
+    "kc-shoes-501",
+    "kc-shoes-502",
+    "kc-shoes-503",
+    "kc-shoes-504",
+    "kc-shoes-505",
+    "kc-shoes-506",
+    "kc-shoes-507",
+    "kc-shoes-508",
+    "kc-shoes-509"
+]

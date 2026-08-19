@@ -1,7 +1,7 @@
 [package_metadata]
 id = "kocolor-complexion-vault"
 name = "The Complexion Studio"
-description = "High-fidelity bases, concealers, and setting architectures for a flawless finish."
+description = "High-fidelity bases, concealers, and setting architectures."
 
 [assortment]
 includes = [
