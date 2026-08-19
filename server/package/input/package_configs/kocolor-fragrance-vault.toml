@@ -1,18 +1,18 @@
 [package_metadata]
 id = "kocolor-fragrance-vault"
-name = "KoColor Fragrance Vault"
-description = "A collection of high-fidelity olfactory signatures, from crisp citrus to deep ambers."
+name = "The Olfactory DNA"
+description = "High-concentration Auras and Extracts, from Bergamot to Deep Amber."
 
 [assortment]
 includes = [
-    "kc-eau-de-parfum-901",
-    "kc-perfume-901",
-    "kc-eau-de-toilette-901",
-    "kc-cologne-901",
     "kc-body-mist-901",
+    "kc-cologne-901",
+    "kc-eau-de-parfum-901",
+    "kc-eau-de-toilette-901",
     "kc-frag-201",
     "kc-frag-301",
     "kc-frag-401",
     "kc-frag-501",
-    "kc-frag-701"
+    "kc-frag-701",
+    "kc-perfume-901"
 ]

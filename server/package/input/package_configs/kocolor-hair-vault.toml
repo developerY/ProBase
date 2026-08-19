@@ -1,0 +1,21 @@
+[package_metadata]
+id = "kocolor-hair-vault"
+name = "Architectural Hair"
+description = "Bonding treatments, detox shampoos, and structural styling clays."
+
+[assortment]
+includes = [
+    "kc-conditioner-901",
+    "kc-hair-201",
+    "kc-hair-301",
+    "kc-hair-401",
+    "kc-hair-501",
+    "kc-hair-601",
+    "kc-hair-701",
+    "kc-hair-color-901",
+    "kc-hair-mask-901",
+    "kc-hair-spray-901",
+    "kc-hair-styling-901",
+    "kc-scalp-treatment-901",
+    "kc-shampoo-901"
+]

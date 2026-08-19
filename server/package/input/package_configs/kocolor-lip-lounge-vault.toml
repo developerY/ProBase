@@ -1,0 +1,24 @@
+[package_metadata]
+id = "kocolor-lip-lounge-vault"
+name = "The Lip Lounge"
+description = "A spectrum of Luminous Lipsticks, High-Shine Glosses, and Peptide Plumpers."
+
+[assortment]
+includes = [
+    "kc-lip-gloss-901",
+    "kc-lip-liner-901",
+    "kc-lip-plumper-901",
+    "kc-lips-01",
+    "kc-lips-02",
+    "kc-lips-101",
+    "kc-lips-102",
+    "kc-lips-103",
+    "kc-lips-104",
+    "kc-lips-105",
+    "kc-lips-106",
+    "kc-lips-107",
+    "kc-lips-108",
+    "kc-lips-109",
+    "kc-lips-301",
+    "kc-lips-401"
+]

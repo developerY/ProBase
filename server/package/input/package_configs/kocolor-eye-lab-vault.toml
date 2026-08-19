@@ -1,0 +1,50 @@
+[package_metadata]
+id = "kocolor-eye-lab-vault"
+name = "The Eye Lab"
+description = "Precision Mascaras, Eyebrows, and Eyeliner essentials for deep definition."
+
+[assortment]
+includes = [
+    "kc-brow-gel-901",
+    "kc-eyebrow-301",
+    "kc-eyebrow-302",
+    "kc-eyebrow-303",
+    "kc-eyebrow-304",
+    "kc-eyebrow-305",
+    "kc-eyebrow-306",
+    "kc-eyebrow-307",
+    "kc-eyebrow-308",
+    "kc-eyebrow-309",
+    "kc-eyeliner-201",
+    "kc-eyeliner-202",
+    "kc-eyeliner-203",
+    "kc-eyeliner-204",
+    "kc-eyeliner-205",
+    "kc-eyeliner-206",
+    "kc-eyeliner-207",
+    "kc-eyeliner-208",
+    "kc-eyeliner-209",
+    "kc-eyes-01",
+    "kc-eyes-101",
+    "kc-eyes-102",
+    "kc-eyes-103",
+    "kc-eyes-104",
+    "kc-eyes-105",
+    "kc-eyes-106",
+    "kc-eyes-107",
+    "kc-eyes-108",
+    "kc-eyes-109",
+    "kc-eyes-501",
+    "kc-eyes-601",
+    "kc-false-lashes-901",
+    "kc-lash-primer-901",
+    "kc-mascara-101",
+    "kc-mascara-102",
+    "kc-mascara-103",
+    "kc-mascara-104",
+    "kc-mascara-105",
+    "kc-mascara-106",
+    "kc-mascara-107",
+    "kc-mascara-108",
+    "kc-mascara-109"
+]
