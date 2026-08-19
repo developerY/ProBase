@@ -103,7 +103,8 @@ fun SyncHubScreen(
             }
             
             baseFiltered.filter { pack ->
-                pack.id == "com.kocolor.pack.core" || // Always show core in categories
+                pack.id == "com.kocolor.pack.cosmetics.complete" || 
+                pack.id == "com.kocolor.pack.fashion.complete" || 
                 keywords.any { kw -> 
                     pack.id.lowercase().contains(kw) || 
                     pack.name.lowercase().contains(kw) ||
@@ -154,7 +155,9 @@ fun SyncHubScreen(
         modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing),
         topBar = {
             Column {
+                val hubTitle = if (filter?.lowercase() == "clothing") "Explore Fashion" else "Discover Cosmetics"
                 GlowSyncTopAppBar(
+                    title = hubTitle,
                     query = uiState.searchQuery,
                     onQueryChange = { onEvent(StarterPackEvent.SearchQueryChanged(it)) },
                     onBack = onBack
@@ -208,8 +211,10 @@ fun SyncHubScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            // Hero Section: Core Collection
-            val heroPack = filteredAvailablePacks.find { it.id == "com.kocolor.pack.core" }
+            // Hero Section: Complete Collection
+            val heroPackId = if (filter?.lowercase() == "clothing") "com.kocolor.pack.fashion.complete" else "com.kocolor.pack.cosmetics.complete"
+            val heroPack = filteredAvailablePacks.find { it.id == heroPackId }
+            
             if (heroPack != null) {
                 item {
                     HeroPackageCard(
@@ -231,7 +236,7 @@ fun SyncHubScreen(
             // Section Header
             item {
                 Text(
-                    text = if (filter?.lowercase() == "clothing") "Fashion Collections" else "Seasonal Collections",
+                    text = if (filter?.lowercase() == "clothing") "The Fashion Catalog" else "The Cosmetics Catalog",
                     style = MaterialTheme.typography.titleLarge,
                     fontFamily = serifFont,
                     fontWeight = FontWeight.Bold,
