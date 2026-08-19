@@ -1,0 +1,18 @@
+[package_metadata]
+id = "kocolor-tools-vault"
+name = "The Professional Kit"
+description = "High-density brushes, sponges, and modular laboratory organizers."
+
+[assortment]
+includes = [
+    "kc-brushes-901",
+    "kc-eyelash-curler-901",
+    "kc-organizers-901",
+    "kc-other-901",
+    "kc-sponges-901",
+    "kc-tools-101",
+    "kc-tools-201",
+    "kc-tools-301",
+    "kc-tools-401",
+    "kc-tools-501"
+]

@@ -1,0 +1,27 @@
+[package_metadata]
+id = "kocolor-complexion-vault"
+name = "The Complexion Studio"
+description = "High-fidelity bases, concealers, and setting architectures for a flawless finish."
+
+[assortment]
+includes = [
+    "kc-bb-cc-cream-901",
+    "kc-color-corrector-901",
+    "kc-complexion-01",
+    "kc-complexion-02",
+    "kc-complexion-401",
+    "kc-complexion-402",
+    "kc-complexion-501",
+    "kc-concealer-401",
+    "kc-concealer-402",
+    "kc-concealer-403",
+    "kc-concealer-404",
+    "kc-concealer-405",
+    "kc-concealer-406",
+    "kc-concealer-407",
+    "kc-concealer-408",
+    "kc-concealer-409",
+    "kc-face-powder-901",
+    "kc-setting-powder-901",
+    "kc-setting-spray-901"
+]

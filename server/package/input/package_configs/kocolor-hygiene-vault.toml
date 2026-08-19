@@ -1,0 +1,24 @@
+[package_metadata]
+id = "kocolor-hygiene-vault"
+name = "Biological Hygiene"
+description = "Purifying Bar Soaps, Body Washes, and pH-Balanced Essentials."
+
+[assortment]
+includes = [
+    "kc-antiperspirant-901",
+    "kc-bath-product-901",
+    "kc-cotton-product-901",
+    "kc-deodorant-901",
+    "kc-hand-cream-901",
+    "kc-hygiene-101",
+    "kc-hygiene-201",
+    "kc-hygiene-301",
+    "kc-hygiene-401",
+    "kc-hygiene-501",
+    "kc-hygiene-601",
+    "kc-hygiene-701",
+    "kc-hygiene-801",
+    "kc-intimate-hygiene-901",
+    "kc-shower-gel-901",
+    "kc-soap-901"
+]

@@ -1,0 +1,22 @@
+[package_metadata]
+id = "kocolor-prep-vault"
+name = "The Prep Ritual"
+description = "A complete skincare foundation: Cleansers, Toners, Serums, and SPF."
+
+[assortment]
+includes = [
+    "kc-exfoliant-901",
+    "kc-eye-care-901",
+    "kc-face-mask-901",
+    "kc-lip-care-901",
+    "kc-moisturizer-901",
+    "kc-prep-01",
+    "kc-prep-02",
+    "kc-prep-03",
+    "kc-prep-104",
+    "kc-prep-105",
+    "kc-prep-106",
+    "kc-prep-107",
+    "kc-primer-901",
+    "kc-toner-901"
+]

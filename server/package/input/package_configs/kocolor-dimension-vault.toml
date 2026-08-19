@@ -1,0 +1,16 @@
+[package_metadata]
+id = "kocolor-dimension-vault"
+name = "Sculpt & Dimension"
+description = "The geometry of light: Bronzers, Contours, and Prismatic Highlighters."
+
+[assortment]
+includes = [
+    "kc-bronzer-901",
+    "kc-contour-901",
+    "kc-dimension-01",
+    "kc-dimension-301",
+    "kc-dimension-401",
+    "kc-dimension-501",
+    "kc-freckle-tint-901",
+    "kc-highlighter-901"
+]

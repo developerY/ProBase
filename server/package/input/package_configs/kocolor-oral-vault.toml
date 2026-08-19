@@ -1,0 +1,16 @@
+[package_metadata]
+id = "kocolor-oral-vault"
+name = "Dental Architecture"
+description = "Enamel-repair toothpaste and bamboo-fiber dental tools."
+
+[assortment]
+includes = [
+    "kc-dental-floss-901",
+    "kc-mouthwash-901",
+    "kc-oral-101",
+    "kc-oral-201",
+    "kc-oral-301",
+    "kc-oral-401",
+    "kc-toothbrush-901",
+    "kc-toothpaste-901"
+]

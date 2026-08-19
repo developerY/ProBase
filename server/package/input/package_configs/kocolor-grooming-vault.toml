@@ -1,0 +1,15 @@
+[package_metadata]
+id = "kocolor-grooming-vault"
+name = "Grooming Rituals"
+description = "Precision razors, soothing aftershaves, and conditioning beard oils."
+
+[assortment]
+includes = [
+    "kc-aftershave-901",
+    "kc-beard-care-901",
+    "kc-groom-201",
+    "kc-groom-301",
+    "kc-groom-401",
+    "kc-razor-901",
+    "kc-shaving-cream-901"
+]
