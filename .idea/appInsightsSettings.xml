@@ -37,8 +37,8 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="com.zoewave.probase.seaweed" />
-                  <option name="mobileSdkAppId" value="1:786488326984:android:85851adba3a7e76e95517d" />
+                  <option name="appId" value="com.zoewave.probase.photodo" />
+                  <option name="mobileSdkAppId" value="1:786488326984:android:e00be2a9f5c50e8195517d" />
                   <option name="projectId" value="android-zoewave" />
                   <option name="projectNumber" value="786488326984" />
                 </ConnectionSetting>

@@ -16,6 +16,7 @@ import com.zoewave.probase.kocolor.db.dao.InventoryDao
 import com.zoewave.probase.kocolor.db.dao.ProductDao
 import com.zoewave.probase.kocolor.db.dao.RoutineDao
 import com.zoewave.probase.kocolor.db.dao.SavedSuggestionDao
+import com.zoewave.probase.kocolor.db.dao.ShoppingCartDao
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -77,5 +78,8 @@ abstract class DatabaseModule {
 
         @Provides
         fun provideInstalledPackDao(db: KoColorDatabase): InstalledPackDao = db.installedPackDao
+
+        @Provides
+        fun provideShoppingCartDao(db: KoColorDatabase): ShoppingCartDao = db.shoppingCartDao
     }
 }

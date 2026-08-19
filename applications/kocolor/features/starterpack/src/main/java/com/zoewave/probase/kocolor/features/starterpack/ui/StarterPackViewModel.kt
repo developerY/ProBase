@@ -18,6 +18,7 @@ data class StarterPackUiState(
     val seedingState: SeedingState = SeedingState.Idle,
     val isRefreshing: Boolean = false,
     val searchQuery: String = "",
+    val selectedCategory: String = "ALL",
     val filteredSearchIndex: Map<String, List<String>> = emptyMap()
 )
 
@@ -26,6 +27,7 @@ sealed class StarterPackEvent {
     data class OnWipePack(val packId: String) : StarterPackEvent()
     data object RefreshManifest : StarterPackEvent()
     data class SearchQueryChanged(val query: String) : StarterPackEvent()
+    data class CategorySelected(val category: String) : StarterPackEvent()
 }
 
 @HiltViewModel
@@ -37,6 +39,7 @@ class StarterPackViewModel @Inject constructor(
     private val _seedingState = MutableStateFlow<SeedingState>(SeedingState.Idle)
     private val _availablePacks = MutableStateFlow<List<PackInfo>>(emptyList())
     private val _isRefreshing = MutableStateFlow(false)
+    private val _selectedCategory = MutableStateFlow("ALL")
 
     private val _searchQuery = MutableStateFlow("")
     private val _searchIndex = MutableStateFlow<Map<String, List<String>>>(emptyMap())
@@ -58,6 +61,7 @@ class StarterPackViewModel @Inject constructor(
         _seedingState,
         _isRefreshing,
         _searchQuery,
+        _selectedCategory,
         filteredSearchIndex
     ) { args ->
         StarterPackUiState(
@@ -66,7 +70,8 @@ class StarterPackViewModel @Inject constructor(
             seedingState = args[2] as SeedingState,
             isRefreshing = args[3] as Boolean,
             searchQuery = args[4] as String,
-            filteredSearchIndex = args[5] as Map<String, List<String>>
+            selectedCategory = args[5] as String,
+            filteredSearchIndex = args[6] as Map<String, List<String>>
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), StarterPackUiState())
 
@@ -91,6 +96,7 @@ class StarterPackViewModel @Inject constructor(
             is StarterPackEvent.OnWipePack -> wipePack(event.packId)
             StarterPackEvent.RefreshManifest -> refreshManifest()
             is StarterPackEvent.SearchQueryChanged -> _searchQuery.value = event.query
+            is StarterPackEvent.CategorySelected -> _selectedCategory.value = event.category
         }
     }
 

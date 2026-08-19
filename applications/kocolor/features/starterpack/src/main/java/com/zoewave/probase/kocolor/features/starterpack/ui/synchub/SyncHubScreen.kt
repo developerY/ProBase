@@ -9,12 +9,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -22,7 +25,6 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -56,9 +58,9 @@ fun SyncHubScreen(
     var showWipeConfirmByPackId by remember { mutableStateOf<String?>(null) }
     var selectedInfoPack by remember { mutableStateOf<PackInfo?>(null) }
 
-    // --- Filter logic based on the passed category ---
-    val filteredAvailablePacks = remember(uiState.availablePacks, filter) {
-        if (filter.isNullOrBlank()) {
+    // --- Filter logic based on the passed category, UI selector, and Search Query ---
+    val filteredAvailablePacks = remember(uiState.availablePacks, filter, uiState.selectedCategory, uiState.searchQuery) {
+        val baseFiltered = if (filter.isNullOrBlank()) {
             uiState.availablePacks
         } else {
             val fashionKeywords = listOf("fashion", "outerwear", "active", "dresses")
@@ -72,6 +74,53 @@ fun SyncHubScreen(
                 }
             } else {
                 uiState.availablePacks
+            }
+        }
+
+        // Apply Sub-filter by UI Category Selector
+        val categoryFiltered = if (uiState.selectedCategory == "ALL") {
+            baseFiltered
+        } else {
+            val keywords = when (uiState.selectedCategory) {
+                "LIPS" -> listOf("lips", "lipstick", "stain", "balm")
+                "COMPLEXION" -> listOf("complexion", "foundation", "concealer", "powder", "spray", "bb-cc")
+                "DIMENSION" -> listOf("dimension", "bronzer", "contour", "highlighter", "blush", "freckle")
+                "EYES" -> listOf("eyes", "mascara", "eyeliner", "eyebrow", "lashes", "brow")
+                "PREP" -> listOf("prep", "cleanser", "toner", "serum", "spf", "moisturizer", "exfoliant", "mask")
+                "HAIR" -> listOf("hair", "shampoo", "conditioner", "scalp")
+                "HYGIENE" -> listOf("hygiene", "soap", "wash", "deodorant", "antiperspirant", "cotton", "bath")
+                "ORAL" -> listOf("oral", "toothpaste", "mouthwash", "toothbrush", "floss")
+                "FRAGRANCE" -> listOf("frag", "perfume", "cologne", "mist", "aura")
+                "TOOLS" -> listOf("tools", "brush", "sponge", "curler", "organizer", "spatula")
+                // Apparel Keywords
+                "TOPS" -> listOf("top", "shirt", "blouse", "knit", "tee", "camisole", "turtleneck")
+                "BOTTOMS" -> listOf("bottom", "pants", "culottes", "leggings", "jeans", "slacks", "skirt")
+                "DRESSES" -> listOf("dress", "jumpsuit", "dungarees", "slip")
+                "OUTERWEAR" -> listOf("outerwear", "coat", "blazer", "jacket", "vest", "duster", "puffer")
+                "ACTIVEWEAR" -> listOf("active", "hoodie", "leggings", "bra", "tank", "shorts")
+                "SHOES" -> listOf("shoes", "boots", "flats", "heels", "sandals", "sneakers")
+                else -> listOf(uiState.selectedCategory.lowercase())
+            }
+            
+            baseFiltered.filter { pack ->
+                pack.id == "com.kocolor.pack.core" || // Always show core in categories
+                keywords.any { kw -> 
+                    pack.id.lowercase().contains(kw) || 
+                    pack.name.lowercase().contains(kw) ||
+                    pack.description.lowercase().contains(kw)
+                }
+            }
+        }
+
+        // Apply Search Filter (Final)
+        if (uiState.searchQuery.isBlank()) {
+            categoryFiltered
+        } else {
+            val q = uiState.searchQuery.lowercase()
+            categoryFiltered.filter { pack ->
+                pack.name.lowercase().contains(q) ||
+                pack.description.lowercase().contains(q) ||
+                pack.previewItems.any { it.name.lowercase().contains(q) || it.description.lowercase().contains(q) }
             }
         }
     }
@@ -110,29 +159,44 @@ fun SyncHubScreen(
                     onQueryChange = { onEvent(StarterPackEvent.SearchQueryChanged(it)) },
                     onBack = onBack
                 )
+                
                 // Filter Chips
-                ScrollableTabRow(
-                    selectedTabIndex = 0,
-                    edgePadding = 16.dp,
-                    containerColor = Color.Transparent,
-                    divider = {},
-                    indicator = {}
+                val categories = if (filter?.lowercase() == "clothing") {
+                    listOf("ALL", "TOPS", "BOTTOMS", "DRESSES", "OUTERWEAR", "ACTIVEWEAR", "SHOES")
+                } else {
+                    listOf("ALL", "LIPS", "COMPLEXION", "DIMENSION", "EYES", "PREP", "HAIR", "HYGIENE", "ORAL", "FRAGRANCE", "TOOLS")
+                }
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState())
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    val categories = listOf("ALL", "LIPS", "COMPLEXION", "DIMENSION", "PREP", "COOL", "WARM")
+                    Spacer(Modifier.width(16.dp))
                     categories.forEach { cat ->
                         FilterChip(
-                            selected = cat == "ALL",
-                            onClick = { /* Filter logic */ },
-                            label = { Text(cat) },
-                            modifier = Modifier.padding(horizontal = 4.dp),
-                            shape = RoundedCornerShape(12.dp),
+                            selected = uiState.selectedCategory == cat,
+                            onClick = { onEvent(StarterPackEvent.CategorySelected(cat)) },
+                            label = { 
+                                Text(
+                                    text = cat,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = if (uiState.selectedCategory == cat) FontWeight.Bold else FontWeight.Medium
+                                ) 
+                            },
+                            shape = RoundedCornerShape(16.dp),
                             colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = Color(0xFF5A3854).copy(alpha = 0.1f),
-                                selectedLabelColor = Color(0xFF5A3854)
+                                selectedContainerColor = Color(0xFF5A3854).copy(alpha = 0.15f),
+                                selectedLabelColor = Color(0xFF5A3854),
+                                containerColor = Color.Transparent,
+                                labelColor = Color.Gray
                             ),
                             border = null
                         )
                     }
+                    Spacer(Modifier.width(16.dp))
                 }
             }
         }

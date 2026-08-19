@@ -21,6 +21,9 @@ interface ClothingDao {
     @Query("SELECT * FROM clothing_items WHERE internalId = :id")
     fun getClothingById(id: Long): Flow<ClothingItemEntity?>
 
+    @Query("SELECT remoteId FROM clothing_items WHERE remoteId IS NOT NULL")
+    fun getOwnedClothingIds(): Flow<List<String>>
+
     @Query("SELECT * FROM clothing_items WHERE formality >= :minFormality ORDER BY timestamp DESC")
     fun getClothingByMinFormality(minFormality: Formality): Flow<List<ClothingItemEntity>>
 
