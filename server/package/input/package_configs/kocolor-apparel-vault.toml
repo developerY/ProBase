@@ -1,7 +1,7 @@
 [package_metadata]
 id = "kocolor-apparel-vault"
-name = "Apparel & Fashion"
-description = "Curated seasonal pieces: Silk Shirts, Velvet Tops, and Activewear."
+name = "Apparel & Footwear"
+description = "The full KoColor fashion collection: Silk tops, tailored bottoms, and leather footwear."
 
 [assortment]
 includes = [

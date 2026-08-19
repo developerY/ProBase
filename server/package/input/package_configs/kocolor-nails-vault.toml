@@ -1,10 +1,11 @@
 [package_metadata]
-id = "kocolor-nail-vault"
-name = "KoColor Nail Polish Vault"
-description = "A 9-piece curation of high-gloss nail lacquers spanning vibrant primary hues to deep atmospheric tones."
+id = "kocolor-nails-vault"
+name = "Nail Lacquer Vault"
+description = "High-gloss pro lacquers and chromatic nail treatments."
 
 [assortment]
 includes = [
+    "kc-nail-polish-901",
     "kc-nails-201",
     "kc-nails-202",
     "kc-nails-203",
