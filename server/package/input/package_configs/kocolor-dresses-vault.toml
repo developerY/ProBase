@@ -1,0 +1,17 @@
+[package_metadata]
+id = "kocolor-dresses-vault"
+name = "The Dresses Vault"
+description = "Elegant satin slips, wrap dresses, and utility jumpsuits."
+
+[assortment]
+includes = [
+    "kc-dresses-601",
+    "kc-dresses-602",
+    "kc-dresses-603",
+    "kc-dresses-604",
+    "kc-dresses-605",
+    "kc-dresses-606",
+    "kc-dresses-607",
+    "kc-dresses-608",
+    "kc-dresses-609"
+]

@@ -1,0 +1,17 @@
+[package_metadata]
+id = "kocolor-tops-vault"
+name = "The Tops Vault"
+description = "High-fidelity silk shirts, knits, and velvet camisoles."
+
+[assortment]
+includes = [
+    "kc-shirts-301",
+    "kc-shirts-302",
+    "kc-shirts-303",
+    "kc-shirts-304",
+    "kc-shirts-305",
+    "kc-shirts-306",
+    "kc-shirts-307",
+    "kc-shirts-308",
+    "kc-shirts-309"
+]
