@@ -132,10 +132,10 @@ fun CollectionHubScreen(
                 verticalArrangement = Arrangement.spacedBy(24.dp),
                 contentPadding = PaddingValues(top = 8.dp, bottom = 32.dp)
             ) {
-                // 1. GLOW SYNC HUB - COSMETICS
+                // 1. DISCOVER COSMETICS
                 item {
                     SyncHubButton(
-                        title = "Glow Sync Hub",
+                        title = "Discover Cosmetics",
                         subtitle = "Cosmetics & Beauty",
                         backgroundColor = Color(0xFF2E1A2C), // Dark Plum
                         shimmerProgress = shimmerProgress,
@@ -161,10 +161,10 @@ fun CollectionHubScreen(
                     )
                 }
 
-                // 3. CLOTHING SYNC HUB
+                // 3. EXPLORE FASHION
                 item {
                     SyncHubButton(
-                        title = "Clothing Sync Hub",
+                        title = "Explore Fashion",
                         subtitle = "Apparel & Fashion",
                         backgroundColor = Color(0xFF1A1C2E), // Deep Navy
                         shimmerProgress = shimmerProgress,

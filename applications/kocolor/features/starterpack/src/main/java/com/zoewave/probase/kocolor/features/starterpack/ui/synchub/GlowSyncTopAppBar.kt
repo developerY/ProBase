@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.sp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GlowSyncTopAppBar(
+    title: String = "Discover Cosmetics",
     query: String,
     onQueryChange: (String) -> Unit,
     onBack: () -> Unit
@@ -35,7 +36,7 @@ fun GlowSyncTopAppBar(
             Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
         }
         Text(
-            "Glow Sync Hub",
+            title,
             style = MaterialTheme.typography.titleLarge,
             fontFamily = serifFont,
             fontWeight = FontWeight.Bold,
