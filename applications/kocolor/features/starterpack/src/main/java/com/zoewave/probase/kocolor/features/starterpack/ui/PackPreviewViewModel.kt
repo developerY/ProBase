@@ -13,9 +13,12 @@ import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.Produc
 import com.zoewave.probase.kocolor.features.starterpack.data.repository.PackSyncRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -35,7 +38,9 @@ data class PackPreviewUiState(
     val selectedItemThumbnail: String? = null,
     val selectedItemBlurHash: String? = null,
     val selectedItemColor: String? = null,
-    val isNotesLoading: Boolean = false
+    val isNotesLoading: Boolean = false,
+    val cartProductIds: Set<String> = emptySet(),
+    val ownedProductIds: Set<String> = emptySet()
 )
 
 @HiltViewModel
@@ -46,21 +51,35 @@ class PackPreviewViewModel @Inject constructor(
 
     private var packId: String? = null
 
-    private val _uiState = MutableStateFlow(PackPreviewUiState())
-    val uiState: StateFlow<PackPreviewUiState> = _uiState.asStateFlow()
+    private val _baseUiState = MutableStateFlow(PackPreviewUiState())
+    
+    val uiState: StateFlow<PackPreviewUiState> = combine(
+        _baseUiState,
+        syncRepository.cartProductIds,
+        syncRepository.ownedProductIds
+    ) { state, cartIds, ownedIds ->
+        state.copy(
+            cartProductIds = cartIds,
+            ownedProductIds = ownedIds
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = _baseUiState.value
+    )
 
     fun initialize(packId: String, targetItemId: String?, sha256: String?, publisher: String?) {
         if (this.packId != null) return // Already initialized
         
         this.packId = packId
         
-        _uiState.update { it.copy(targetItemId = targetItemId) }
+        _baseUiState.update { it.copy(targetItemId = targetItemId) }
         
         // Check if pack is installed to show Wipe button
         viewModelScope.launch {
             syncRepository.getInstalledPacks().collectLatest { installedPacks ->
                 val isInstalled = installedPacks.any { it.packId == packId && it.status == PackStatus.INSTALLED }
-                _uiState.update { it.copy(isInstalled = isInstalled) }
+                _baseUiState.update { it.copy(isInstalled = isInstalled) }
             }
         }
         
@@ -71,10 +90,10 @@ class PackPreviewViewModel @Inject constructor(
         val currentPackId = packId ?: return
         
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
+            _baseUiState.update { it.copy(isLoading = true) }
             try {
                 val items = repository.getPackItems(currentPackId)
-                _uiState.update { state ->
+                _baseUiState.update { state ->
                     val filtered = applyFilterAndSort(items, state.searchQuery, state.sortByValue)
                     state.copy(
                         items = items, 
@@ -85,13 +104,13 @@ class PackPreviewViewModel @Inject constructor(
                     ) 
                 }
             } catch (e: Exception) {
-                _uiState.update { it.copy(isLoading = false) }
+                _baseUiState.update { it.copy(isLoading = false) }
             }
         }
     }
 
     fun onSearchQueryChanged(query: String) {
-        _uiState.update { state ->
+        _baseUiState.update { state ->
             val filtered = applyFilterAndSort(state.items, query, state.sortByValue)
             state.copy(
                 searchQuery = query,
@@ -102,7 +121,7 @@ class PackPreviewViewModel @Inject constructor(
     }
 
     fun onToggleValueSort() {
-        _uiState.update { state ->
+        _baseUiState.update { state ->
             val newSort = !state.sortByValue
             val filtered = applyFilterAndSort(state.items, state.searchQuery, newSort)
             state.copy(
@@ -136,7 +155,7 @@ class PackPreviewViewModel @Inject constructor(
     }
 
     fun onToggleSelection(itemId: String) {
-        _uiState.update { state ->
+        _baseUiState.update { state ->
             val newSelected = if (state.selectedIds.contains(itemId)) {
                 state.selectedIds - itemId
             } else {
@@ -147,7 +166,7 @@ class PackPreviewViewModel @Inject constructor(
     }
 
     fun onToggleCategoryCollapse(category: String) {
-        _uiState.update { state ->
+        _baseUiState.update { state ->
             val updated = if (state.collapsedCategories.contains(category)) {
                 state.collapsedCategories - category
             } else {
@@ -158,35 +177,35 @@ class PackPreviewViewModel @Inject constructor(
     }
 
     fun onSelectCategoryAll(category: String) {
-        _uiState.update { state ->
+        _baseUiState.update { state ->
             val categoryItemIds = state.groupedItems[category]?.map { it.id }.orEmpty()
             state.copy(selectedIds = state.selectedIds + categoryItemIds)
         }
     }
 
     fun onClearCategory(category: String) {
-        _uiState.update { state ->
+        _baseUiState.update { state ->
             val categoryItemIds = state.groupedItems[category]?.map { it.id }.orEmpty().toSet()
             state.copy(selectedIds = state.selectedIds - categoryItemIds)
         }
     }
 
     fun onSelectAll() {
-        _uiState.update { state ->
+        _baseUiState.update { state ->
             state.copy(selectedIds = state.items.map { it.id }.toSet())
         }
     }
 
     fun onDeselectAll() {
-        _uiState.update { it.copy(selectedIds = emptySet()) }
+        _baseUiState.update { it.copy(selectedIds = emptySet()) }
     }
 
     fun onImportSelected(onComplete: (isClothing: Boolean) -> Unit) {
         val currentPackId = packId ?: return
         viewModelScope.launch {
-            val selectedItems = _uiState.value.items.filter { it.id in _uiState.value.selectedIds }
+            val selectedItems = _baseUiState.value.items.filter { it.id in _baseUiState.value.selectedIds }
             if (selectedItems.isNotEmpty()) {
-                _uiState.update { it.copy(isLoading = true) }
+                _baseUiState.update { it.copy(isLoading = true) }
                 
                 val cosmetics: List<CosmeticItemDto> = selectedItems.mapNotNull { it as? CosmeticItemDto }
                 val clothing: List<ClothingItemDto> = selectedItems.mapNotNull { it as? ClothingItemDto }
@@ -200,7 +219,7 @@ class PackPreviewViewModel @Inject constructor(
                 )
                 
                 syncRepository.importSelectedItems(currentPackId, payload)
-                _uiState.update { it.copy(isLoading = false) }
+                _baseUiState.update { it.copy(isLoading = false) }
                 onComplete(isClothing)
             }
         }
@@ -209,19 +228,19 @@ class PackPreviewViewModel @Inject constructor(
     fun onWipeCollection() {
         val currentPackId = packId ?: return
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
+            _baseUiState.update { it.copy(isLoading = true) }
             syncRepository.wipePack(currentPackId)
-            _uiState.update { it.copy(isLoading = false) }
+            _baseUiState.update { it.copy(isLoading = false) }
         }
     }
 
     fun onItemInfoClick(itemId: String) {
-        val item = _uiState.value.items.find { it.id == itemId }
+        val item = _baseUiState.value.items.find { it.id == itemId }
         val thumbnail = item?.thumbnailUrl
         val blurhash = item?.blurhash
         val color = item?.colorHex
         viewModelScope.launch {
-            _uiState.update { it.copy(
+            _baseUiState.update { it.copy(
                 isNotesLoading = true, 
                 selectedItemNotes = null, 
                 selectedItemThumbnail = thumbnail,
@@ -230,20 +249,35 @@ class PackPreviewViewModel @Inject constructor(
             ) }
             repository.getProductEditorialNotes(itemId)
                 .onSuccess { notes ->
-                    _uiState.update { it.copy(isNotesLoading = false, selectedItemNotes = notes) }
+                    _baseUiState.update { it.copy(isNotesLoading = false, selectedItemNotes = notes) }
                 }
                 .onFailure {
-                    _uiState.update { it.copy(isNotesLoading = false) }
+                    _baseUiState.update { it.copy(isNotesLoading = false) }
                 }
         }
     }
 
     fun onDismissNotes() {
-        _uiState.update { it.copy(selectedItemNotes = null, selectedItemThumbnail = null, selectedItemBlurHash = null, selectedItemColor = null) }
+        _baseUiState.update { it.copy(selectedItemNotes = null, selectedItemThumbnail = null, selectedItemBlurHash = null, selectedItemColor = null) }
     }
 
     fun onBuyClick(itemId: String) {
-        // Logic for payment can go here or be routed back to the UI
-        Log.d("PackPreviewVM", "Buy clicked for item: $itemId")
+        val owned = uiState.value.ownedProductIds
+        val inCart = uiState.value.cartProductIds
+        val currentPackId = packId ?: return
+
+        when {
+            itemId in owned -> { /* Already owned */ }
+            itemId in inCart -> {
+                viewModelScope.launch {
+                    syncRepository.purchaseStagedProduct(itemId)
+                }
+            }
+            else -> {
+                viewModelScope.launch {
+                    syncRepository.toggleCartItem(itemId, currentPackId)
+                }
+            }
+        }
     }
 }

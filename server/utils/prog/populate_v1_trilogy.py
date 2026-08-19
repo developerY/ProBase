@@ -20,11 +20,11 @@ def parse_markdown(file_path):
     return data
 
 def populate():
-    # 1. Source for MARKETING SUMMARY (The Hook)
+    # 1. Catchy marketing blurb for the visual card
     summary_file = "/Users/developer/AndroidStudioProjects/ProBase/server/docs/Catalog/summary.md"
-    # 2. Source for BRAND DESCRIPTION (The Narrative)
+    # 2. Lifestyle/Brand narrative description
     description_file = "/Users/developer/AndroidStudioProjects/ProBase/server/docs/Catalog/description.md"
-    # 3. Source for TECHNICAL OVERVIEW (The Proof)
+    # 3. Detailed technical/scientific specs
     technical_file = "/Users/developer/AndroidStudioProjects/ProBase/server/docs/Catalog/Product_Description.md"
 
     root_dir = "/Users/developer/AndroidStudioProjects/ProBase/server/package/input/KoColor"

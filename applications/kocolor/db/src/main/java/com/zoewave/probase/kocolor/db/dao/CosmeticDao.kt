@@ -28,6 +28,9 @@ interface CosmeticDao {
     @Query("SELECT * FROM cosmetic_items WHERE internalId = :id")
     fun getCosmeticById(id: Long): Flow<CosmeticItemEntity?>
 
+    @Query("SELECT remoteId FROM cosmetic_items WHERE remoteId IS NOT NULL")
+    fun getOwnedCosmeticIds(): Flow<List<String>>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCosmetic(item: CosmeticItemEntity): Long
 

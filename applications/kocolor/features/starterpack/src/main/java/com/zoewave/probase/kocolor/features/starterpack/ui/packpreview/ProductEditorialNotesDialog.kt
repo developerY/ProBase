@@ -20,13 +20,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ExpandLess
-import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -64,12 +64,28 @@ fun ProductEditorialNotesDialog(
     blurHash: String?,
     colorHex: String?,
     isLoading: Boolean,
+    isInCart: Boolean,
+    isOwned: Boolean,
     onBuy: () -> Unit,
     onDismiss: () -> Unit
 ) {
     if (isLoading || notes != null) {
         val itemColor = colorHex?.let { parseColor(it) } ?: Color.Transparent
         val backdropColor = Color(0xFFF3EAF2)
+
+        val buttonLabel = when {
+            isOwned -> "OWNED"
+            isInCart -> "IN CART"
+            else -> "BUY"
+        }
+
+        val buttonIcon = when {
+            isOwned -> Icons.Filled.Inventory
+            isInCart -> Icons.Filled.Check
+            else -> null
+        }
+
+        val buttonEnabled = !isOwned
 
         Dialog(
             onDismissRequest = onDismiss,
@@ -246,15 +262,25 @@ fun ProductEditorialNotesDialog(
                                 modifier = Modifier
                                     .weight(1f)
                                     .height(56.dp),
-                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1A1C1E)),
-                                shape = RoundedCornerShape(28.dp)
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = if (isInCart) Color(0xFF2E7D32) else Color(0xFF1A1C1E),
+                                    disabledContainerColor = Color.Gray.copy(alpha = 0.3f)
+                                ),
+                                shape = RoundedCornerShape(28.dp),
+                                enabled = buttonEnabled
                             ) {
-                                Text(
-                                    "BUY",
-                                    fontWeight = FontWeight.Bold,
-                                    style = MaterialTheme.typography.labelLarge.copy(letterSpacing = 2.sp),
-                                    color = Color.White
-                                )
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    buttonIcon?.let { icon ->
+                                        Icon(icon, null, modifier = Modifier.size(20.dp))
+                                        Spacer(Modifier.width(8.dp))
+                                    }
+                                    Text(
+                                        buttonLabel,
+                                        fontWeight = FontWeight.Bold,
+                                        style = MaterialTheme.typography.labelLarge.copy(letterSpacing = 2.sp),
+                                        color = if (buttonEnabled) Color.White else Color.DarkGray
+                                    )
+                                }
                             }
 
                             OutlinedButton(

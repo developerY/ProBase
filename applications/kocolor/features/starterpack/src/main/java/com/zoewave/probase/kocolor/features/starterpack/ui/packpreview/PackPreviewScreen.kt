@@ -91,6 +91,8 @@ fun PackPreviewScreen(
         blurHash = uiState.selectedItemBlurHash,
         colorHex = uiState.selectedItemColor,
         isLoading = uiState.isNotesLoading,
+        isInCart = uiState.selectedItemNotes?.id in uiState.cartProductIds,
+        isOwned = uiState.selectedItemNotes?.id in uiState.ownedProductIds,
         onBuy = { uiState.selectedItemNotes?.id?.let { onBuyItem(it) } },
         onDismiss = onDismissNotes
     )
