@@ -89,18 +89,11 @@ abstract class KoColorDatabase : RoomDatabase() {
         // Fetch existing usages to increment them
         val existingUsages = garmentRotationDao.getUsagesForProducts(distinctIds)
         
-        // We need the rotationCategoryId (from the clothing items table)
-        // For simplicity in V1, we'll use the canonical Category as the rotation ID
         val updatedUsages = distinctIds.map { pid ->
             val existing = existingUsages.find { it.productId == pid }
             
-            // Try to find the category for this product to set rotationCategoryId
-            // If it's a new entry, we look it up or default to "GENERAL"
-            val category = existing?.rotationCategoryId ?: "GENERAL"
-            
             ClothingUsageEntity(
                 productId = pid,
-                rotationCategoryId = category,
                 useCount = (existing?.useCount ?: 0) + 1,
                 lastUsedTimestamp = timestamp
             )

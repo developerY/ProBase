@@ -18,11 +18,22 @@ interface GarmentRotationDao {
     @Query("SELECT * FROM global_rotation_metrics WHERE metricsId = 0")
     suspend fun getGlobalMetrics(): GlobalRotationMetricsEntity?
 
+    @Query("SELECT * FROM clothing_usage")
+    fun observeAllUsages(): Flow<List<ClothingUsageEntity>>
+
     /**
-     * Fetches usage stats for all items within a specific rotation category.
+     * Fetches usage statistics by joining [ClothingUsageEntity] with 
+     * canonical [ClothingItemEntity] category metadata.
      */
-    @Query("SELECT * FROM clothing_usage WHERE rotationCategoryId = :rotationCategoryId")
-    suspend fun getUsageForCategory(rotationCategoryId: String): List<ClothingUsageEntity>
+    @Query("""
+        SELECT usage.* FROM clothing_usage AS usage
+        INNER JOIN clothing_items AS item ON usage.productId = item.remoteId
+        WHERE item.category = :categoryId
+    """)
+    suspend fun getUsageForCategory(categoryId: String): List<ClothingUsageEntity>
+
+    @Query("SELECT * FROM clothing_usage WHERE productId = :productId LIMIT 1")
+    suspend fun getUsageForProduct(productId: String): ClothingUsageEntity?
 
     @Query("SELECT * FROM clothing_usage WHERE productId IN (:productIds)")
     suspend fun getUsagesForProducts(productIds: List<String>): List<ClothingUsageEntity>

@@ -39,7 +39,6 @@ class RotationScoringUseCaseTest {
         coEvery { repository.observeGlobalMetrics() } returns flowOf(GlobalRotationMetricsEntity(totalOutfitsCommitted = 10))
         val recentUsage = ClothingUsageEntity(
             productId = "item1", 
-            rotationCategoryId = "TOPS",
             useCount = 1, 
             lastUsedTimestamp = System.currentTimeMillis() - 3600000 // 1 hour ago
         )
@@ -56,8 +55,8 @@ class RotationScoringUseCaseTest {
     fun `when item usage share exceeds 35 percent, penalty is 1_0`() = runTest {
         // Given
         coEvery { repository.observeGlobalMetrics() } returns flowOf(GlobalRotationMetricsEntity(totalOutfitsCommitted = 10))
-        val highUsageItem = ClothingUsageEntity(productId = "item1", rotationCategoryId = "TOPS", useCount = 40) // 40% of 100
-        val otherItems = (2..4).map { ClothingUsageEntity(productId = "item$it", rotationCategoryId = "TOPS", useCount = 20) }
+        val highUsageItem = ClothingUsageEntity(productId = "item1", useCount = 40) // 40% of 100
+        val otherItems = (2..4).map { ClothingUsageEntity(productId = "item$it", useCount = 20) }
         
         coEvery { repository.getUsageForCategory("TOPS") } returns (listOf(highUsageItem) + otherItems)
         
@@ -75,11 +74,10 @@ class RotationScoringUseCaseTest {
         // Total usage = 100. Item1 usage = 10. Share = 10%. Threshold = 35%. Expected = 10/35 = 0.285
         val targetItem = ClothingUsageEntity(
             productId = "item1", 
-            rotationCategoryId = "TOPS",
             useCount = 10, 
             lastUsedTimestamp = System.currentTimeMillis() - (100 * 3600000) // 100 hours ago (>48h)
         )
-        val others = listOf(ClothingUsageEntity(productId = "item2", rotationCategoryId = "TOPS", useCount = 90))
+        val others = listOf(ClothingUsageEntity(productId = "item2", useCount = 90))
         
         coEvery { repository.getUsageForCategory("TOPS") } returns (listOf(targetItem) + others)
         
