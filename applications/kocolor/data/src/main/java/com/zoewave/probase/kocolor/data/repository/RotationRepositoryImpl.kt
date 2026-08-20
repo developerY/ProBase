@@ -20,8 +20,12 @@ class RotationRepositoryImpl @Inject constructor(
         return rotationDao.observeGlobalMetrics()
     }
 
-    override suspend fun getUsageForCategory(rotationCategoryId: String): List<ClothingUsageEntity> = withContext(Dispatchers.IO) {
-        rotationDao.getUsageForCategory(rotationCategoryId)
+    override fun observeAllUsages(): Flow<List<ClothingUsageEntity>> {
+        return rotationDao.observeAllUsages()
+    }
+
+    override suspend fun getUsageForCategory(categoryId: String): List<ClothingUsageEntity> = withContext(Dispatchers.IO) {
+        rotationDao.getUsageForCategory(categoryId)
     }
 
     override suspend fun commitOutfit(selectedProductIds: List<String>): Result<Unit> = withContext(Dispatchers.IO) {

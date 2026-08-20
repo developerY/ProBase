@@ -11,7 +11,6 @@ import androidx.room3.PrimaryKey
 @Entity(tableName = "clothing_usage")
 data class ClothingUsageEntity(
     @PrimaryKey val productId: String, // globally unique KCPS product ID
-    val rotationCategoryId: String,  // defined rotation boundary, e.g., "TOPS_MUTUAL"
     val useCount: Long = 0,
     val lastUsedTimestamp: Long? = null
 )
