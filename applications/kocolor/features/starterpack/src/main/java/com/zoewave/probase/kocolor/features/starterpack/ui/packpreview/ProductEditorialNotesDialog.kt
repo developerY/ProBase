@@ -9,36 +9,14 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -87,6 +65,18 @@ fun ProductEditorialNotesDialog(
 
         val buttonEnabled = !isOwned
 
+        // --- EXPANSION STATE MANAGEMENT ---
+        val visualIdentityLabel = "Visual Identity"
+        val descriptionLabel = "Description"
+        val scientificOverviewLabel = "Scientific Overview"
+        
+        var expandedLabels by remember { mutableStateOf(setOf(visualIdentityLabel)) }
+
+        val allLabels = remember(notes) {
+            val dynamic = notes?.attributes?.map { it.label }.orEmpty()
+            setOf(visualIdentityLabel, descriptionLabel, scientificOverviewLabel) + dynamic
+        }
+
         Dialog(
             onDismissRequest = onDismiss,
             properties = DialogProperties(usePlatformDefaultWidth = false)
@@ -134,8 +124,29 @@ fun ProductEditorialNotesDialog(
                             letterSpacing = (-0.5).sp,
                             color = Color(0xFF1A1C1E)
                         )
-                        
-                        Spacer(Modifier.height(24.dp))
+
+                        // EXPAND / COLLAPSE ALL ACTIONS
+                        if (notes != null) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                TextButton(onClick = { expandedLabels = allLabels }) {
+                                    Text("EXPAND ALL", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = Color.Gray)
+                                }
+                                Text(
+                                    " • ", 
+                                    style = MaterialTheme.typography.labelSmall, 
+                                    color = Color.Gray.copy(alpha = 0.5f)
+                                )
+                                TextButton(onClick = { expandedLabels = emptySet() }) {
+                                    Text("COLLAPSE ALL", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = Color.Gray)
+                                }
+                            }
+                        } else {
+                            Spacer(Modifier.height(24.dp))
+                        }
 
                         // Scrollable Modular Card Stack
                         Column(
@@ -149,11 +160,14 @@ fun ProductEditorialNotesDialog(
                                     CircularProgressIndicator(color = Color(0xFF745E7A))
                                 }
                             } else if (notes != null) {
-                                // A. VISUAL IDENTITY CARD (Expanded by Default)
+                                // A. VISUAL IDENTITY CARD
                                 if (thumbnailUrl != null) {
                                     EditorialCard(
-                                        label = "Visual Identity",
-                                        initiallyExpanded = true
+                                        label = visualIdentityLabel,
+                                        isExpanded = expandedLabels.contains(visualIdentityLabel),
+                                        onToggle = { 
+                                            expandedLabels = if (expandedLabels.contains(visualIdentityLabel)) expandedLabels - visualIdentityLabel else expandedLabels + visualIdentityLabel
+                                        }
                                     ) {
                                         Column {
                                             PremiumProductImage(
@@ -205,8 +219,11 @@ fun ProductEditorialNotesDialog(
                                 // B. BRAND NARRATIVE CARD (Description from description.md)
                                 notes.description?.let { desc ->
                                     EditorialCard(
-                                        label = "Description",
-                                        initiallyExpanded = false
+                                        label = descriptionLabel,
+                                        isExpanded = expandedLabels.contains(descriptionLabel),
+                                        onToggle = { 
+                                            expandedLabels = if (expandedLabels.contains(descriptionLabel)) expandedLabels - descriptionLabel else expandedLabels + descriptionLabel
+                                        }
                                     ) {
                                         Text(
                                             text = desc,
@@ -220,8 +237,11 @@ fun ProductEditorialNotesDialog(
                                 // C. SCIENTIFIC OVERVIEW CARD (Technical from Product_Description.md)
                                 notes.technicalOverview?.let { tech ->
                                     EditorialCard(
-                                        label = "Scientific Overview",
-                                        initiallyExpanded = false
+                                        label = scientificOverviewLabel,
+                                        isExpanded = expandedLabels.contains(scientificOverviewLabel),
+                                        onToggle = { 
+                                            expandedLabels = if (expandedLabels.contains(scientificOverviewLabel)) expandedLabels - scientificOverviewLabel else expandedLabels + scientificOverviewLabel
+                                        }
                                     ) {
                                         Text(
                                             text = tech,
@@ -236,7 +256,10 @@ fun ProductEditorialNotesDialog(
                                 notes.attributes.forEach { attribute ->
                                     EditorialCard(
                                         label = attribute.label,
-                                        initiallyExpanded = false
+                                        isExpanded = expandedLabels.contains(attribute.label),
+                                        onToggle = { 
+                                            expandedLabels = if (expandedLabels.contains(attribute.label)) expandedLabels - attribute.label else expandedLabels + attribute.label
+                                        }
                                     ) {
                                         Text(
                                             text = attribute.body,
@@ -309,16 +332,15 @@ fun ProductEditorialNotesDialog(
 @Composable
 private fun EditorialCard(
     label: String,
-    initiallyExpanded: Boolean = false,
+    isExpanded: Boolean,
+    onToggle: () -> Unit,
     content: @Composable () -> Unit
 ) {
-    var isExpanded by remember { mutableStateOf(initiallyExpanded) }
-
     Surface(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 4.dp, vertical = 2.dp)
-            .clickable { isExpanded = !isExpanded },
+            .clickable { onToggle() },
         color = Color.White.copy(alpha = 0.95f),
         shape = RoundedCornerShape(20.dp),
         border = BorderStroke(1.dp, Color.White.copy(alpha = 0.5f)),
