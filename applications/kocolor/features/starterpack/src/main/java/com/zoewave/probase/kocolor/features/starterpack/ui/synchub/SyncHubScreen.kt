@@ -92,6 +92,8 @@ fun SyncHubScreen(
                 "ORAL" -> listOf("oral", "toothpaste", "mouthwash", "toothbrush", "floss")
                 "FRAGRANCE" -> listOf("frag", "perfume", "cologne", "mist", "aura")
                 "TOOLS" -> listOf("tools", "brush", "sponge", "curler", "organizer", "spatula")
+                "GROOMING" -> listOf("grooming", "razor", "aftershave", "beard")
+                "NAILS" -> listOf("nails", "polish", "lacquer")
                 // Apparel Keywords
                 "TOPS" -> listOf("top", "shirt", "blouse", "knit", "tee", "camisole", "turtleneck")
                 "BOTTOMS" -> listOf("bottom", "pants", "culottes", "leggings", "jeans", "slacks", "skirt")
@@ -167,7 +169,7 @@ fun SyncHubScreen(
                 val categories = if (filter?.lowercase() == "clothing") {
                     listOf("ALL", "TOPS", "BOTTOMS", "DRESSES", "OUTERWEAR", "ACTIVEWEAR", "SHOES")
                 } else {
-                    listOf("ALL", "LIPS", "COMPLEXION", "DIMENSION", "EYES", "PREP", "HAIR", "HYGIENE", "ORAL", "FRAGRANCE", "TOOLS")
+                    listOf("ALL", "LIPS", "COMPLEXION", "DIMENSION", "EYES", "PREP", "HAIR", "HYGIENE", "ORAL", "FRAGRANCE", "TOOLS", "GROOMING", "NAILS")
                 }
 
                 Row(

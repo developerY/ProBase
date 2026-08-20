@@ -1,0 +1,17 @@
+[package_metadata]
+id = "kocolor-bottoms-vault"
+name = "The Bottoms Vault"
+description = "Tailored slacks, corduroy pants, and culottes."
+
+[assortment]
+includes = [
+    "kc-pants-401",
+    "kc-pants-402",
+    "kc-pants-403",
+    "kc-pants-404",
+    "kc-pants-405",
+    "kc-pants-406",
+    "kc-pants-407",
+    "kc-pants-408",
+    "kc-pants-409"
+]

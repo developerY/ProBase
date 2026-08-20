@@ -1,7 +1,7 @@
 [package_metadata]
 id = "kocolor-prep-vault"
 name = "The Prep Ritual"
-description = "A complete skincare foundation: Cleansers, Toners, Serums, and SPF."
+description = "Skincare foundation: Cleansers, Toners, Serums, and SPF."
 
 [assortment]
 includes = [
