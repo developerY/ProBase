@@ -220,7 +220,8 @@ class StyleSimulatorEngine @Inject constructor(
                - If UV is high, select an SPF product.
                - If humidity/heat is high, select a matte/long-wear foundation or primer.
             4. Create a 4-color Palette (HEX codes) harmonizing the whole look. The 4th color MUST be the selected Nail color.
-            5. Provide a brief rationale. Mention WHY you selected the specific DEFENSIVE items for the current weather and why you chose the nail color.
+            5. Provide a brief rationale. Mention WHY you selected the specific DEFENSIVE items for the current weather and why you chose the nail color. 
+               - If an item was selected because of a LOW RotationPenalty (never worn), mention that it was chosen to diversify their rotation.
                CRITICAL SYNTAX RULE: When referencing ANY selected item in your rationale, you MUST use the exact inline tag format <ITEM:id>. Do not attempt to guess or describe the item's brand in the text.
             
             Respond ONLY with a valid JSON object matching this schema:

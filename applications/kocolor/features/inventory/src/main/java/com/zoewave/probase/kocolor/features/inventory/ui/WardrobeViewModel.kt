@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
 import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
+import com.zoewave.probase.kocolor.data.repository.RotationRepository
 import com.zoewave.probase.core.model.ritual.ArchiveStatus
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
@@ -52,6 +53,7 @@ sealed class WardrobeEvent {
 @HiltViewModel
 class WardrobeViewModel @Inject constructor(
     private val wardrobeRepository: WardrobeRepository,
+    private val rotationRepository: RotationRepository,
     private val sessionRepository: FashionSessionRepository,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
@@ -101,19 +103,28 @@ class WardrobeViewModel @Inject constructor(
 
     val uiState: StateFlow<WardrobeUiState> = combine(
         wardrobeRepository.getAllClothing(),
+        rotationRepository.observeAllUsages(),
         _draftItem,
         _archiveStatuses
-    ) { models, draft, archiveStatuses ->
-        val totalInvestment = models.sumOf { it.price ?: 0.0 }
-        val itemsByCategory = models.groupBy { it.category.name }.mapValues { it.value.size }
+    ) { models, usages, draft, archiveStatuses ->
+        val enrichedModels = models.map { item ->
+            val usage = usages.find { it.productId == item.remoteId }
+            item.copy(
+                usageCount = usage?.useCount?.toInt() ?: 0,
+                lastUsedTimestamp = usage?.lastUsedTimestamp
+            )
+        }
+
+        val totalInvestment = enrichedModels.sumOf { it.price ?: 0.0 }
+        val itemsByCategory = enrichedModels.groupBy { it.category.name }.mapValues { it.value.size }
         
-        val categoryMetadata = models.groupBy { it.category.name }.mapValues { (name, items) ->
+        val categoryMetadata = enrichedModels.groupBy { it.category.name }.mapValues { (name, items) ->
             val cat = items.firstOrNull()?.category
             val representativeItem = items.filter { it.imageUrl != null }.maxByOrNull { it.timestamp } ?: items.maxByOrNull { it.timestamp }
             val brands = items.mapNotNull { it.brand }.groupBy { it }.mapValues { it.value.size }
             val leadingBrand = brands.maxByOrNull { it.value }?.key
-            val usages = items.map { it.usageCount }
-            val averageUsage = if (usages.isEmpty()) null else usages.average()
+            val usagesCount = items.map { it.usageCount }
+            val averageUsage = if (usagesCount.isEmpty()) null else usagesCount.average()
 
             CategoryMetadata(
                 itemCount = items.size,
@@ -127,11 +138,11 @@ class WardrobeViewModel @Inject constructor(
         }
 
         WardrobeUiState(
-            items = models,
+            items = enrichedModels,
             isLoading = false,
             draftItem = draft,
             totalInvestment = totalInvestment,
-            totalItems = models.size,
+            totalItems = enrichedModels.size,
             itemsByCategory = itemsByCategory,
             categoriesMetadata = categoryMetadata,
             archiveStatuses = archiveStatuses

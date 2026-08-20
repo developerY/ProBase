@@ -79,7 +79,8 @@ data class ClothingItem(
     val searchTokens: List<String> = emptyList(),
 
     // --- Usage & Performance ---
-    val usageCount: Int = 0
+    val usageCount: Int = 0,
+    val lastUsedTimestamp: Long? = null
 ) {
     /** Cost per single wear. */
     val costPerUse: Double?
