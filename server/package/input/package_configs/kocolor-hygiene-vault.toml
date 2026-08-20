@@ -1,7 +1,7 @@
 [package_metadata]
 id = "kocolor-hygiene-vault"
 name = "Biological Hygiene"
-description = "Purifying Bar Soaps, Body Washes, and pH-Balanced Essentials."
+description = "Purifying Bar Soaps and Body Washes."
 
 [assortment]
 includes = [

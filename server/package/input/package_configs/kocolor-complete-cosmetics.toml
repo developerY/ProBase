@@ -1,7 +1,7 @@
 [package_metadata]
 id = "com.kocolor.pack.cosmetics.complete"
 name = "Complete Cosmetics Vault"
-description = "The authoritative scientific catalog for the KoColor cosmetics ecosystem."
+description = "The full V1.0 discovery."
 
 [assortment]
 includes = [
