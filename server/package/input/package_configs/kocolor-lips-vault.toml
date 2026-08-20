@@ -1,10 +1,11 @@
 [package_metadata]
 id = "kocolor-lips-vault"
 name = "The Lip Lounge"
-description = "A spectrum of Luminous Lipsticks, High-Shine Glosses, and Peptide Plumpers."
+description = "Luminous Lipsticks, High-Shine Glosses, and Peptide Treatments."
 
 [assortment]
 includes = [
+    "kc-lip-care-901",
     "kc-lip-gloss-901",
     "kc-lip-liner-901",
     "kc-lip-plumper-901",
@@ -20,5 +21,6 @@ includes = [
     "kc-lips-108",
     "kc-lips-109",
     "kc-lips-301",
-    "kc-lips-401"
+    "kc-lips-401",
+    "kc-prep-107"
 ]

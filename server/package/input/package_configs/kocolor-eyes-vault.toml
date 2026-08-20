@@ -1,11 +1,12 @@
 [package_metadata]
 id = "kocolor-eyes-vault"
 name = "The Eye Lab"
-description = "Precision Mascaras, Eyebrows, and Eyeliner essentials."
+description = "Precision Mascaras, Brows, and Eyeliner essentials."
 
 [assortment]
 includes = [
     "kc-brow-gel-901",
+    "kc-eye-care-901",
     "kc-eyebrow-301",
     "kc-eyebrow-302",
     "kc-eyebrow-303",
@@ -46,5 +47,6 @@ includes = [
     "kc-mascara-106",
     "kc-mascara-107",
     "kc-mascara-108",
-    "kc-mascara-109"
+    "kc-mascara-109",
+    "kc-prep-106"
 ]

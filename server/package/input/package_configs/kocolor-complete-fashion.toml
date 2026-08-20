@@ -1,7 +1,7 @@
 [package_metadata]
 id = "com.kocolor.pack.fashion.complete"
 name = "Complete Fashion Vault"
-description = "The complete KoColor apparel and footwear collection."
+description = "The full V1.0 wardrobe."
 
 [assortment]
 includes = [
