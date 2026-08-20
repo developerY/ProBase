@@ -6,7 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
 import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
-import com.zoewave.probase.kocolor.data.repository.RotationRepository
+import com.zoewave.probase.kocolor.data.mapper.toModel
+import com.zoewave.probase.kocolor.data.usecase.RotationScoringUseCase
 import com.zoewave.probase.core.model.ritual.ArchiveStatus
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
@@ -53,7 +54,7 @@ sealed class WardrobeEvent {
 @HiltViewModel
 class WardrobeViewModel @Inject constructor(
     private val wardrobeRepository: WardrobeRepository,
-    private val rotationRepository: RotationRepository,
+    private val rotationScoringUseCase: RotationScoringUseCase,
     private val sessionRepository: FashionSessionRepository,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
@@ -102,16 +103,14 @@ class WardrobeViewModel @Inject constructor(
     }
 
     val uiState: StateFlow<WardrobeUiState> = combine(
-        wardrobeRepository.getAllClothing(),
-        rotationRepository.observeAllUsages(),
+        rotationScoringUseCase.observeAllClothingWithUsage(),
         _draftItem,
         _archiveStatuses
-    ) { models, usages, draft, archiveStatuses ->
-        val enrichedModels = models.map { item ->
-            val usage = usages.find { it.productId == item.remoteId }
-            item.copy(
-                usageCount = usage?.useCount?.toInt() ?: 0,
-                lastUsedTimestamp = usage?.lastUsedTimestamp
+    ) { itemsWithUsage, draft, archiveStatuses ->
+        val enrichedModels = itemsWithUsage.map { wrapper ->
+            wrapper.garment.copy(
+                usageCount = wrapper.usage?.useCount?.toInt() ?: 0,
+                lastUsedTimestamp = wrapper.usage?.lastUsedTimestamp
             )
         }
 

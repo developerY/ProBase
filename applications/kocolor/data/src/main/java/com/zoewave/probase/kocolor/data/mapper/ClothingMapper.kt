@@ -48,7 +48,8 @@ fun ClothingItemEntity.toModel(): ClothingItem = ClothingItem(
     blurhash = blurhash,
     searchTokens = searchTokens,
     
-    usageCount = usageCount
+    usageCount = usageCount,
+    lastUsedTimestamp = lastUsedTimestamp
 )
 
 fun ClothingItem.toEntity(): ClothingItemEntity = ClothingItemEntity(
@@ -94,5 +95,6 @@ fun ClothingItem.toEntity(): ClothingItemEntity = ClothingItemEntity(
     blurhash = blurhash,
     searchTokens = searchTokens,
     
-    usageCount = usageCount
+    usageCount = usageCount,
+    lastUsedTimestamp = lastUsedTimestamp
 )
