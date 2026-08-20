@@ -212,7 +212,9 @@ class StyleSimulatorEngine @Inject constructor(
             $minifiedManifest
             
             GOAL:
-            1. Select BEST 3 clothing items (Top, Bottom, Shoes) from the wardrobe section of the manifest. Prioritize user anchors.
+            1. Select BEST 3 clothing items (Top, Bottom, Shoes) from the wardrobe section of the manifest. 
+               - CRITICAL: Prioritize items with LOW RotationPenalty (0.0 means never worn). 
+               - AVOID items with high RotationPenalty (> 0.70) unless they are an absolute perfect match for the user's intent.
             2. Select exactly 4 PIGMENT makeup items (1 Eye, 1 Cheek, 1 Lip, 1 Nail) strictly from the cosmetics section of the manifest. Prioritize user anchors.
             3. Select 1-2 DEFENSIVE items (Complexion/Skincare) from the cosmetics section based strictly on the WEATHER/ATMOSPHERIC data. 
                - If UV is high, select an SPF product.
