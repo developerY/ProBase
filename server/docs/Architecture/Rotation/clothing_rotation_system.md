@@ -4,7 +4,7 @@ This document details the architecture and implementation strategy for the KoCol
 
 ## 1. System Goals
 *   **Encourage Variety**: Systematically penalize frequently or recently used items in AI recommendations.
-*   **Category Awareness**: Calculate usage share relative to specific rotation boundaries (e.g., "TOPS_MUTUAL").
+*   **Category Awareness**: Calculate usage share relative to specific rotation boundaries (e.g., "TOPS").
 *   **Cold Start Protection**: Prevent AI erraticism by suppressing penalties until a baseline of usage history exists.
 *   **Data Integrity**: Maintain strict separation between canonical catalog data and user personalization history.
 *   **Atomic Persistence**: Ensure all multi-table updates (global metrics + individual item stats) are transacted safely.
@@ -23,12 +23,12 @@ Stores the personalization metadata for a specific product.
 *   **Crucial**: Separates personalization state from the canonical `ClothingItemEntity`.
 *   **Linkage**: Maps to catalog items via `productId`.
 *   **Metrics**: `useCount` (frequency) and `lastUsedTimestamp` (recency).
-*   **Context**: Scoped by `rotationCategoryId` to define rotation boundaries.
+*   **Note**: This entity does NOT store `categoryId`. Category metadata is retrieved by joining with `ClothingItemEntity`.
 
 ### Data Access Object (DAO)
 The `GarmentRotationDao` provides low-level SQL primitives.
 *   `getGlobalMetrics()`: Retrieves the single-row global state.
-*   `getUsageForCategory(rotationCategoryId)`: Fetches usage stats for specific rotation boundaries.
+*   `getUsageForCategory(categoryId)`: Fetches usage statistics by joining `ClothingUsageEntity` with canonical `ClothingItemEntity` category metadata.
 *   `updateGlobalMetrics()` / `updateGarmentUsages()`: Transactional primitives for the repository.
 
 ## 3. Repository Orchestration
@@ -45,11 +45,12 @@ Updating wardrobe history is a non-trivial multi-step process that must be wrapp
 The `RotationScoringUseCase` transforms raw database counts into a **Rotation Penalty** used by the styling engine.
 
 ### Mathematical Formulation
-The "Rotation Penalty" is derived from two primary factors:
+The "Rotation Penalty" is derived from three primary factors:
 
-1.  **Cold Start Rule**: If `totalOutfitsCommitted < 5`, return a penalty of `0.0`.
+1.  **Cold Start Rule**: If `totalOutfitsCommitted < 5` (configurable threshold), return a penalty of `0.0`.
 2.  **Category Usage Share**: 
     `Share = (Item Use Count) / (Total Category Use Count)`
+    *   *Note*: Category usage is defined as committed garment-selection events within that specific category.
     *   *Threshold*: `highFrequencyShare = 0.35` (35% selection rate).
 3.  **Recency Decay**:
     *   *Window*: `48h` (48 * 60 * 60 * 1000ms).
@@ -60,8 +61,9 @@ The system produces a normalized modifier [0.0 - 1.0].
 `Final Selection Score = StyleCompatibility - (RotationPenalty * WeightingFactor)`
 
 ## 5. UI Layer Integration
-The `OutfitGenerationViewModel` acts as the orchestration boundary.
-*   **Reactivity**: Observes application states derived entirely from the persistent database via Use Cases.
+The `OutfitGenerationViewModel` acts as the UI orchestration boundary.
+*   **Responsibility**: It invokes the outfit-generation/use-case layer and observes the resulting state. 
+*   **Scoring Boundary**: Rotation mathematics and penalty calculation remain entirely within `RotationScoringUseCase`. The ViewModel does NOT perform scoring.
 *   **Action**: `onCommitCurrentOutfit(ids)` triggers the repository transaction and refreshes the UI state.
 
 ## 6. Verification Requirements

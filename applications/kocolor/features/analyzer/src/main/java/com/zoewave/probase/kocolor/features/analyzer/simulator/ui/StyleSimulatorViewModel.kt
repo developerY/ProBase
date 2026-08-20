@@ -10,6 +10,8 @@ import com.zoewave.probase.core.data.repository.AiConfigurationSettings
 import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
 import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
 import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
+import com.zoewave.probase.kocolor.data.repository.RotationRepository
+import com.zoewave.probase.kocolor.data.usecase.RotationScoringUseCase
 import com.zoewave.probase.core.data.repository.weather.AtmosphericRepository
 import com.zoewave.probase.kocolor.features.analyzer.simulator.data.StyleSimulatorEngine
 import com.zoewave.probase.kocolor.features.analyzer.simulator.data.StyleBlueprint
@@ -91,6 +93,8 @@ class StyleSimulatorViewModel @Inject constructor(
     private val sessionRepository: FashionSessionRepository,
     private val simulatorEngine: StyleSimulatorEngine,
     private val atmosphericRepository: AtmosphericRepository,
+    private val rotationRepository: RotationRepository,
+    private val rotationScoringUseCase: RotationScoringUseCase,
     private val aiSettings: AiConfigurationSettings
 ) : ViewModel() {
 
@@ -288,6 +292,11 @@ class StyleSimulatorViewModel @Inject constructor(
 
             val preferredModel = aiSettings.aiModelFlow.first()
 
+            // 1. Calculate Rotation Scores for all items in availableWardrobe
+            val rotationScores = filteredWardrobe.associate { item ->
+                item.remoteId!! to rotationScoringUseCase.calculateRotationPenalty(item.remoteId!!, item.category.name)
+            }
+
             _simulationStep.value = SimulationStep.BIO_MARKERS
             delay(1000)
             _simulationStep.value = SimulationStep.ROUTINE
@@ -302,6 +311,7 @@ class StyleSimulatorViewModel @Inject constructor(
                 weatherContext = weatherContext,
                 availableWardrobe = filteredWardrobe,
                 availableCosmetics = allCosmetics,
+                rotationScores = rotationScores,
                 fashionProfile = skinContext,
                 userPortrait = userPortrait,
                 anchoredClothing = anchoredClothing,
@@ -415,6 +425,13 @@ class StyleSimulatorViewModel @Inject constructor(
                     ?: state.recommendedCosmetics.firstOrNull()?.imageUrl
             )
             fashionRepository.saveSuggestion(advice)
+            
+            // 3. Commit Rotation Metrics for selected items
+            val committedIds = state.recommendedClothing.mapNotNull { it.remoteId }
+            if (committedIds.isNotEmpty()) {
+                rotationRepository.commitOutfit(committedIds)
+            }
+            
             _effect.send(SimulatorEffect.NavigateToHistory)
         }
     }

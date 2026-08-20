@@ -41,6 +41,7 @@ class StyleSimulatorEngine @Inject constructor(
         weatherContext: String,
         availableWardrobe: List<ClothingItem>,
         availableCosmetics: List<CosmeticItem>,
+        rotationScores: Map<String, Double> = emptyMap(), // productId -> normalized penalty [0.0 - 1.0]
         fashionProfile: String? = null,
         userPortrait: android.graphics.Bitmap? = null,
         anchoredClothing: List<ClothingItem> = emptyList(),
@@ -52,7 +53,7 @@ class StyleSimulatorEngine @Inject constructor(
         
         // 1. Manifest Minification (Cloud-Optimization via Tuple Matrix)
         val minifiedManifest = minifyManifest(
-            availableWardrobe, availableCosmetics, anchoredClothing, anchoredCosmetics
+            availableWardrobe, availableCosmetics, anchoredClothing, anchoredCosmetics, rotationScores
         )
         android.util.Log.d("StyleSimulatorEngine", "DATA_OUT (Minified Manifest): $minifiedManifest")
 
@@ -128,7 +129,8 @@ class StyleSimulatorEngine @Inject constructor(
         wardrobe: List<ClothingItem>,
         cosmetics: List<CosmeticItem>,
         anchoredWardrobe: List<ClothingItem>,
-        anchoredCosmetics: List<CosmeticItem>
+        anchoredCosmetics: List<CosmeticItem>,
+        rotationScores: Map<String, Double>
     ): String {
         // Vibe Key: 0=casual, 1=professional, 2=gala, 3=smart-casual, 4=formal, 5=lounge
         fun Formality.toKey(): String = when(this) {
@@ -155,11 +157,20 @@ class StyleSimulatorEngine @Inject constructor(
             } else true
         }
 
-        // Mapping to Lightweight Matrix Tuples [ID, Type, Hex, VibeKey]
+        // Mapping to Lightweight Matrix Tuples [ID, Type, Hex, VibeKey, RotationPenalty]
         val minWardrobe = prunedWardrobe.groupBy { it.category.name.lowercase() }
             .mapValues { (_, items) ->
                 items.distinctBy { "${it.category}_${it.colorFamily}" }
-                    .map { listOf("w_${it.internalId}", it.name.lowercase(), it.colorHex ?: "#000000", it.formality.toKey()) }
+                    .map { 
+                        val penalty = rotationScores[it.remoteId] ?: 0.0
+                        listOf(
+                            "w_${it.internalId}", 
+                            it.name.lowercase(), 
+                            it.colorHex ?: "#000000", 
+                            it.formality.toKey(),
+                            "%.2f".format(penalty)
+                        ) 
+                    }
             }
 
         val minCosmetics = prunedCosmetics.groupBy { it.macroCategory.name.lowercase() }
@@ -192,8 +203,9 @@ class StyleSimulatorEngine @Inject constructor(
             
             AVAILABLE VAULT (MATRIX REPRESENTATION):
             Legend:
-            - Clothing Schema: [ID, Name/Type, ColorHex, VibeKey]
+            - Clothing Schema: [ID, Name/Type, ColorHex, VibeKey, RotationPenalty]
             - VibeKey: 0=casual, 1=professional, 2=gala, 3=smart-casual, 4=formal, 5=lounge
+            - RotationPenalty: normalized [0.0 (fresh) to 1.0 (overused)]. Penalize high scores to ensure variety.
             - Cosmetic Schema: [ID, MicroCategory, ColorHex]
             - IDs: Prefixed with 'w_' for Wardrobe and 'c_' for Cosmetics.
             

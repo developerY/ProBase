@@ -11,6 +11,7 @@ import com.zoewave.probase.kocolor.db.KoColorSettings
 import com.zoewave.probase.kocolor.db.dao.ClothingDao
 import com.zoewave.probase.kocolor.db.dao.CosmeticDao
 import com.zoewave.probase.kocolor.db.dao.FashionProfileDao
+import com.zoewave.probase.kocolor.db.dao.GarmentRotationDao
 import com.zoewave.probase.kocolor.db.dao.InstalledPackDao
 import com.zoewave.probase.kocolor.db.dao.InventoryDao
 import com.zoewave.probase.kocolor.db.dao.ProductDao
@@ -81,5 +82,8 @@ abstract class DatabaseModule {
 
         @Provides
         fun provideShoppingCartDao(db: KoColorDatabase): ShoppingCartDao = db.shoppingCartDao
+
+        @Provides
+        fun provideGarmentRotationDao(db: KoColorDatabase): GarmentRotationDao = db.garmentRotationDao
     }
 }
