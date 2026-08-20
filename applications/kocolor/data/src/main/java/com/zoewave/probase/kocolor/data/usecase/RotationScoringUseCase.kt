@@ -1,6 +1,8 @@
 package com.zoewave.probase.kocolor.data.usecase
 
+import com.zoewave.probase.kocolor.data.model.ClothingWithUsage
 import com.zoewave.probase.kocolor.data.repository.RotationRepository
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -13,6 +15,10 @@ class RotationScoringUseCase @Inject constructor(
     private val minimumOutfitsForPenalty = 5L 
     private val highFrequencyShare = 0.35 // Item used in >35% of category selections
     private val maximumRecencyPenaltyWindowMs = 48 * 60 * 60 * 1000L // 48h
+
+    fun observeAllClothingWithUsage(): Flow<List<ClothingWithUsage>> {
+        return rotationRepository.observeAllClothingWithUsage()
+    }
 
     /**
      * Calculates a normalized rotation penalty [0.0 to 1.0] based on usage frequency

@@ -4,8 +4,10 @@ import androidx.room3.Dao
 import androidx.room3.Insert
 import androidx.room3.OnConflictStrategy
 import androidx.room3.Query
+import androidx.room3.Transaction
 import androidx.room3.Update
 import com.zoewave.probase.kocolor.db.entity.ClothingUsageEntity
+import com.zoewave.probase.kocolor.db.entity.GarmentWithUsage
 import com.zoewave.probase.kocolor.db.entity.GlobalRotationMetricsEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -20,6 +22,10 @@ interface GarmentRotationDao {
 
     @Query("SELECT * FROM clothing_usage")
     fun observeAllUsages(): Flow<List<ClothingUsageEntity>>
+
+    @Transaction
+    @Query("SELECT * FROM clothing_items")
+    fun observeAllClothingWithUsage(): Flow<List<GarmentWithUsage>>
 
     /**
      * Fetches usage statistics by joining [ClothingUsageEntity] with 
