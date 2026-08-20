@@ -67,36 +67,8 @@ abstract class KoColorDatabase : RoomDatabase() {
         if (cosmeticEntities.isNotEmpty()) cosmeticDao.insertCosmetics(cosmeticEntities)
         if (clothingEntities.isNotEmpty()) clothingDao.insertClothingList(clothingEntities)
         shoppingCartDao.deleteByProductId(productId)
-        @Transaction
-    suspend fun commitOutfitUsage(
-        productIds: List<String>,
-        timestamp: Long = System.currentTimeMillis()
-    ) {
-        // 1. Increment Global Metrics
-        val currentMetrics = garmentRotationDao.getGlobalMetrics() ?: GlobalRotationMetricsEntity()
-        garmentRotationDao.updateGlobalMetrics(
-            currentMetrics.copy(
-                totalOutfitsCommitted = currentMetrics.totalOutfitsCommitted + 1,
-                lastOutfitTimestamp = timestamp
-            )
-        )
-
-        // 2. Increment Individual Item Usages
-        val distinctIds = productIds.distinct()
-        val existingUsages = garmentRotationDao.getUsagesForProducts(distinctIds)
-        
-        val updatedUsages = distinctIds.map { pid ->
-            val existing = existingUsages.find { it.productId == pid }
-            ClothingUsageEntity(
-                productId = pid,
-                useCount = (existing?.useCount ?: 0) + 1,
-                lastUsedTimestamp = timestamp
-            )
-        }
-        
-        garmentRotationDao.updateGarmentUsages(updatedUsages)
     }
-}
+
     @Transaction
     suspend fun commitOutfitUsage(
         productIds: List<String>,
@@ -113,12 +85,22 @@ abstract class KoColorDatabase : RoomDatabase() {
 
         // 2. Increment Individual Item Usages
         val distinctIds = productIds.distinct()
+        
+        // Fetch existing usages to increment them
         val existingUsages = garmentRotationDao.getUsagesForProducts(distinctIds)
         
+        // We need the rotationCategoryId (from the clothing items table)
+        // For simplicity in V1, we'll use the canonical Category as the rotation ID
         val updatedUsages = distinctIds.map { pid ->
             val existing = existingUsages.find { it.productId == pid }
+            
+            // Try to find the category for this product to set rotationCategoryId
+            // If it's a new entry, we look it up or default to "GENERAL"
+            val category = existing?.rotationCategoryId ?: "GENERAL"
+            
             ClothingUsageEntity(
                 productId = pid,
+                rotationCategoryId = category,
                 useCount = (existing?.useCount ?: 0) + 1,
                 lastUsedTimestamp = timestamp
             )

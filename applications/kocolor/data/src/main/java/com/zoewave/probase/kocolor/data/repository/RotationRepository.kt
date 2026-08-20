@@ -6,6 +6,6 @@ import kotlinx.coroutines.flow.Flow
 
 interface RotationRepository {
     fun observeGlobalMetrics(): Flow<GlobalRotationMetricsEntity?>
-    suspend fun getUsageForCategory(category: String): List<ClothingUsageEntity>
+    suspend fun getUsageForCategory(rotationCategoryId: String): List<ClothingUsageEntity>
     suspend fun commitOutfit(selectedProductIds: List<String>): Result<Unit>
 }

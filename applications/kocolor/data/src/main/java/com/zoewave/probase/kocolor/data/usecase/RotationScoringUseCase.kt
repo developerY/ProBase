@@ -16,17 +16,17 @@ class RotationScoringUseCase @Inject constructor(
 
     /**
      * Calculates a normalized rotation penalty [0.0 to 1.0] based on usage frequency
-     * and recency within a category.
+     * and recency within a rotation category.
      */
-    suspend fun calculateRotationPenalty(productId: String, categoryId: String): Double {
+    suspend fun calculateRotationPenalty(productId: String, rotationCategoryId: String): Double {
         // 1. Cold Start Rule: check global history
         val globalMetrics = rotationRepository.observeGlobalMetrics().first()
         if ((globalMetrics?.totalOutfitsCommitted ?: 0L) < minimumOutfitsForPenalty) {
             return 0.0
         }
 
-        // 2. Fetch Category Usage State
-        val allItemsInCategory = rotationRepository.getUsageForCategory(categoryId)
+        // 2. Fetch Rotation Category Usage State
+        val allItemsInCategory = rotationRepository.getUsageForCategory(rotationCategoryId)
         val targetItem = allItemsInCategory.find { it.productId == productId }
             ?: return 0.0 // No usage history yet
 
