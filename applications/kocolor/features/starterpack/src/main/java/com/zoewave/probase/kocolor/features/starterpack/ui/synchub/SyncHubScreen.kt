@@ -247,7 +247,7 @@ fun SyncHubScreen(
             }
 
             // Grid Catalog: Other Packs
-            val otherPacks = filteredAvailablePacks.filter { it.id != "com.kocolor.pack.core" }
+            val otherPacks = filteredAvailablePacks.filter { it.id != heroPackId }
             items(otherPacks.chunked(2)) { rowPacks ->
                 Row(
                     modifier = Modifier.fillMaxWidth(),

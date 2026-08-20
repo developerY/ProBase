@@ -18,6 +18,7 @@ dependencies {
     implementation(project(":features:ai:configuration"))
     implementation(project(":features:ai:local"))
 
+    implementation(libs.room.runtime)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)

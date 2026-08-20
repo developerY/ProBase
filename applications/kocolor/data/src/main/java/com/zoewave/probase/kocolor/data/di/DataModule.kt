@@ -7,6 +7,8 @@ import com.zoewave.probase.core.data.repository.BYOKLiveAiRepository
 import com.zoewave.probase.kocolor.data.FashionRepository
 import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
 import com.zoewave.probase.kocolor.data.repository.RitualRepositoryImpl
+import com.zoewave.probase.kocolor.data.repository.RotationRepository
+import com.zoewave.probase.kocolor.data.repository.RotationRepositoryImpl
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -29,6 +31,10 @@ abstract class DataModule {
     @Binds
     @Singleton
     abstract fun bindLiveAiRepository(impl: BYOKLiveAiRepository): LiveAiRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindRotationRepository(impl: RotationRepositoryImpl): RotationRepository
 
     companion object {
         @Provides
