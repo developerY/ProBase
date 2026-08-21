@@ -4,15 +4,35 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.NightlightRound
-import androidx.compose.material3.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -29,16 +49,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.zoewave.probase.core.ui.util.rememberBlurHashPainter
+import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.core.ui.util.parseColor
+import com.zoewave.probase.core.ui.util.rememberBlurHashPainter
 import com.zoewave.probase.kocolor.features.inventory.R
 import com.zoewave.probase.kocolor.features.inventory.ui.CategoryMetadata
 import com.zoewave.probase.kocolor.features.inventory.ui.util.FreshnessState
 import com.zoewave.probase.kocolor.features.inventory.ui.util.getFreshnessState
-import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import java.text.NumberFormat
-import java.util.*
+import java.util.Locale
 
 data class SummaryStatUiState(
     val label: String,
@@ -56,7 +76,7 @@ fun SummaryStatCard(
 ) {
     val isValue = uiState.label.contains("VALUE")
     val charcoal = Color(0xFF2C2420)
-    
+
     val valueBrush = if (isValue) {
         Brush.linearGradient(listOf(Color(0xFF1B5E20), Color(0xFF4CAF50), Color(0xFF1B5E20)))
     } else {
@@ -66,12 +86,14 @@ fun SummaryStatCard(
     val actionBg = if (isValue) {
         Brush.linearGradient(listOf(Color(0xFF003300), Color(0xFF006600), Color(0xFF003300)))
     } else {
-        Brush.linearGradient(listOf(
-            Color(0xFFA0C4FF), Color(0xFFBDB2FF), Color(0xFFFFADAD), 
-            Color(0xFFFFD6A5), Color(0xFFFDFFB6), Color(0xFFCAFFBF)
-        ))
+        Brush.linearGradient(
+            listOf(
+                Color(0xFFA0C4FF), Color(0xFFBDB2FF), Color(0xFFFFADAD),
+                Color(0xFFFFD6A5), Color(0xFFFDFFB6), Color(0xFFCAFFBF)
+            )
+        )
     }
-    
+
     val actionText = if (isValue) "VIEW INVENTORY" else "VIEW INTELLIGENCE"
     val actionContentColor = if (isValue) Color.White else charcoal.copy(alpha = 0.8f)
 
@@ -89,7 +111,9 @@ fun SummaryStatCard(
         onClick = onEvent,
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
-        Column(modifier = Modifier.fillMaxSize().background(glassBg)) {
+        Column(modifier = Modifier
+            .fillMaxSize()
+            .background(glassBg)) {
             Column(
                 modifier = Modifier
                     .weight(1f)
@@ -134,7 +158,7 @@ fun SummaryStatCard(
                         color = charcoal
                     )
                 }
-                
+
                 Text(
                     text = uiState.label,
                     style = MaterialTheme.typography.labelSmall.copy(
@@ -154,7 +178,7 @@ fun SummaryStatCard(
                 contentAlignment = Alignment.Center
             ) {
                 Surface(
-                    color = Color.White.copy(alpha = if (isValue) 0.12f else 0.45f), 
+                    color = Color.White.copy(alpha = if (isValue) 0.12f else 0.45f),
                     border = BorderStroke(0.5.dp, actionContentColor.copy(alpha = 0.2f)),
                     shape = RoundedCornerShape(8.dp)
                 ) {
@@ -191,16 +215,31 @@ fun WardrobeTaxonomyDialog(
 ) {
     AlertDialog(
         onDismissRequest = onEvent,
-        title = { Text(stringResource(R.string.applications_kocolor_features_inventory_architecture_title), style = MaterialTheme.typography.headlineMedium, fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold) },
+        title = {
+            Text(
+                stringResource(R.string.applications_kocolor_features_inventory_architecture_title),
+                style = MaterialTheme.typography.headlineMedium,
+                fontFamily = FontFamily.Serif,
+                fontWeight = FontWeight.Bold
+            )
+        },
         text = {
-            LazyColumn(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(24.dp)) {
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(24.dp)
+            ) {
                 item {
                     TaxonomySection(
                         uiState = TaxonomySectionUiState(
                             level = "Level 1",
                             title = stringResource(R.string.applications_kocolor_features_inventory_verticals_title),
                             description = stringResource(R.string.applications_kocolor_features_inventory_verticals_desc),
-                            items = listOf("Tops" to "Blazers, Shirts, Knitwear.", "Bottoms" to "Trousers, Skirts, Denim.", "Shoes" to "Heels, Flats, Sneakers.", "Accessories" to "Bags, Belts, Jewelry.")
+                            items = listOf(
+                                "Tops" to "Blazers, Shirts, Knitwear.",
+                                "Bottoms" to "Trousers, Skirts, Denim.",
+                                "Shoes" to "Heels, Flats, Sneakers.",
+                                "Accessories" to "Bags, Belts, Jewelry."
+                            )
                         ),
                         onEvent = {},
                         navTo = {}
@@ -208,7 +247,14 @@ fun WardrobeTaxonomyDialog(
                 }
             }
         },
-        confirmButton = { TextButton(onClick = onEvent) { Text("Understand", fontWeight = FontWeight.Bold) } },
+        confirmButton = {
+            TextButton(onClick = onEvent) {
+                Text(
+                    "Understand",
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        },
         shape = RoundedCornerShape(28.dp),
         containerColor = Color(0xFFF9F6F0)
     )
@@ -233,18 +279,55 @@ private fun TaxonomySection(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Column {
-            Text(text = uiState.level.uppercase(), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
-            Text(text = uiState.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-            Text(text = uiState.description, style = MaterialTheme.typography.bodySmall, modifier = Modifier.alpha(0.7f))
+            Text(
+                text = uiState.level.uppercase(),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Black,
+                letterSpacing = 1.sp
+            )
+            Text(
+                text = uiState.title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = uiState.description,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.alpha(0.7f)
+            )
         }
-        Surface(color = Color.White.copy(alpha = 0.5f), shape = RoundedCornerShape(16.dp), border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))) {
-            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Surface(
+            color = Color.White.copy(alpha = 0.5f),
+            shape = RoundedCornerShape(16.dp),
+            border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 uiState.items.forEach { (label, detail) ->
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text(text = "•", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = "•",
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
                         Column {
-                            Text(text = label, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
-                            Text(text = detail, style = MaterialTheme.typography.bodySmall, modifier = Modifier.alpha(0.7f))
+                            Text(
+                                text = label,
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = detail,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.alpha(0.7f)
+                            )
                         }
                     }
                 }
@@ -271,13 +354,13 @@ fun AtelierWardrobeCard(
     val metadata = uiState.metadata
     val baseColor = uiState.baseColor
     val imageModel = uiState.imageModel
-    
+
     val count = metadata?.itemCount ?: 0
     val totalValue = metadata?.totalValue ?: 0.0
     val leadingBrand = metadata?.leadingBrand
     val averageUsage = metadata?.averageUsage ?: 0.0
     val description = metadata?.description ?: "Strategic curated wardrobe collection."
-    
+
     val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale.US) }
 
     Card(
@@ -296,7 +379,9 @@ fun AtelierWardrobeCard(
                 model = imageModel,
                 contentDescription = null,
                 placeholder = placeholder,
-                modifier = Modifier.fillMaxSize().alpha(0.4f),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .alpha(0.4f),
                 contentScale = ContentScale.Crop
             )
 
@@ -305,7 +390,11 @@ fun AtelierWardrobeCard(
                     .fillMaxSize()
                     .background(
                         Brush.horizontalGradient(
-                            colors = listOf(baseColor, baseColor.copy(alpha = 0.6f), Color.Transparent),
+                            colors = listOf(
+                                baseColor,
+                                baseColor.copy(alpha = 0.6f),
+                                Color.Transparent
+                            ),
                             startX = 0f,
                             endX = 1000f
                         )
@@ -333,7 +422,10 @@ fun AtelierWardrobeCard(
                         )
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                text = stringResource(R.string.applications_kocolor_features_inventory_pieces_format, count),
+                                text = stringResource(
+                                    R.string.applications_kocolor_features_inventory_pieces_format,
+                                    count
+                                ),
                                 style = MaterialTheme.typography.bodyLarge,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.alpha(0.8f)
@@ -360,31 +452,55 @@ fun AtelierWardrobeCard(
                 Text(
                     text = description,
                     style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.alpha(0.6f).padding(top = 2.dp),
+                    modifier = Modifier
+                        .alpha(0.6f)
+                        .padding(top = 2.dp),
                     fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
                 )
 
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text(text = stringResource(R.string.applications_kocolor_features_inventory_average_utility), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, modifier = Modifier.alpha(0.8f))
-                        Text(text = stringResource(R.string.applications_kocolor_features_inventory_wears_format_plural, averageUsage.toInt()), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, color = Color(0xFF6B705C))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = stringResource(R.string.applications_kocolor_features_inventory_average_utility),
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.alpha(0.8f)
+                        )
+                        Text(
+                            text = stringResource(
+                                R.string.applications_kocolor_features_inventory_wears_format_plural,
+                                averageUsage.toInt()
+                            ),
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Black,
+                            color = Color(0xFF6B705C)
+                        )
                     }
-                    
-                    val maxWears = 50.0 
+
+                    val maxWears = 50.0
                     val progress = (averageUsage / maxWears).coerceIn(0.0, 1.0)
-                    val statusColor = Color(0xFF6B705C) 
+                    val statusColor = Color(0xFF6B705C)
 
                     LinearProgressIndicator(
                         progress = { progress.toFloat() },
-                        modifier = Modifier.fillMaxWidth().height(6.dp).clip(CircleShape),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(6.dp)
+                            .clip(CircleShape),
                         color = statusColor,
                         trackColor = Color.White.copy(alpha = 0.3f),
                         strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
                     )
-                    
+
                     if (leadingBrand != null) {
                         Text(
-                            text = stringResource(R.string.applications_kocolor_features_inventory_leading_brand_label_format, leadingBrand),
+                            text = stringResource(
+                                R.string.applications_kocolor_features_inventory_leading_brand_label_format,
+                                leadingBrand
+                            ),
                             style = MaterialTheme.typography.bodySmall,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.alpha(0.8f)
@@ -397,21 +513,30 @@ fun AtelierWardrobeCard(
 }
 
 @Composable
-fun RecentClothingCard(uiState: ClothingItem, modifier: Modifier = Modifier, onEvent: (Unit) -> Unit, navTo: (KoColorRoute) -> Unit) {
+fun RecentClothingCard(
+    uiState: ClothingItem,
+    modifier: Modifier = Modifier,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit
+) {
     val item = uiState
     val onClick = { navTo(KoColorRoute.WardrobeDetail(item.internalId)) }
     val freshness = item.getFreshnessState()
-    
+
     Card(
         modifier = modifier
             .width(220.dp)
             .aspectRatio(0.8f)
             .clickable { onClick() }
             .then(
-                if (freshness == FreshnessState.IN_ROTATION) 
-                    Modifier.border(2.dp, Color(0xFFD4AF37), RoundedCornerShape(28.dp)) 
+                if (freshness == FreshnessState.IN_ROTATION)
+                    Modifier.border(2.dp, Color(0xFFD4AF37), RoundedCornerShape(28.dp))
                 else if (freshness == FreshnessState.RESTING)
-                    Modifier.border(2.dp, Color(0xFF5A3854).copy(alpha = 0.5f), RoundedCornerShape(28.dp))
+                    Modifier.border(
+                        2.dp,
+                        Color(0xFF5A3854).copy(alpha = 0.5f),
+                        RoundedCornerShape(28.dp)
+                    )
                 else Modifier
             ),
         shape = RoundedCornerShape(28.dp)
@@ -444,6 +569,7 @@ fun RecentClothingCard(uiState: ClothingItem, modifier: Modifier = Modifier, onE
                                 shadowElevation = 4.dp
                             ) {}
                         }
+
                         FreshnessState.RESTING -> {
                             Icon(
                                 imageVector = Icons.Default.NightlightRound,
@@ -452,14 +578,15 @@ fun RecentClothingCard(uiState: ClothingItem, modifier: Modifier = Modifier, onE
                                 modifier = Modifier.size(16.dp)
                             )
                         }
+
                         FreshnessState.IN_ROTATION -> {}
                     }
                 }
 
-                val itemColor = item.dominantHex?.let { parseColor(it) } 
-                    ?: item.colorHex?.let { parseColor(it) } 
+                val itemColor = item.dominantHex?.let { parseColor(it) }
+                    ?: item.colorHex?.let { parseColor(it) }
                     ?: Color.White
-                
+
                 Surface(
                     modifier = Modifier
                         .padding(16.dp)
@@ -470,14 +597,18 @@ fun RecentClothingCard(uiState: ClothingItem, modifier: Modifier = Modifier, onE
                     border = BorderStroke(1.dp, Color.White.copy(alpha = 0.5f))
                 ) {}
             } else {
-                val itemColor = item.dominantHex?.let { parseColor(it) } 
-                    ?: item.colorHex?.let { parseColor(it) } 
+                val itemColor = item.dominantHex?.let { parseColor(it) }
+                    ?: item.colorHex?.let { parseColor(it) }
                     ?: MaterialTheme.colorScheme.surfaceVariant
-                Box(modifier = Modifier.fillMaxSize().background(itemColor))
+                Box(modifier = Modifier
+                    .fillMaxSize()
+                    .background(itemColor))
             }
-            
+
             Surface(
-                modifier = Modifier.padding(16.dp).align(Alignment.TopStart),
+                modifier = Modifier
+                    .padding(16.dp)
+                    .align(Alignment.TopStart),
                 color = Color.White.copy(alpha = 0.9f),
                 shape = RoundedCornerShape(12.dp)
             ) {
@@ -489,12 +620,76 @@ fun RecentClothingCard(uiState: ClothingItem, modifier: Modifier = Modifier, onE
                 )
             }
 
-            Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.6f)), startY = 300f)))
-            
-            Column(modifier = Modifier.align(Alignment.BottomStart).padding(16.dp)) {
-                Text(text = item.name, style = MaterialTheme.typography.titleMedium, color = Color.White, fontWeight = FontWeight.Bold, maxLines = 1)
-                Text(text = item.brand ?: "", style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.7f))
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(
+                                Color.Transparent,
+                                Color.Black.copy(alpha = 0.6f)
+                            ), startY = 300f
+                        )
+                    )
+            )
+
+            Column(modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(16.dp)) {
+                Text(
+                    text = item.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1
+                )
+                Text(
+                    text = item.brand ?: "",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.White.copy(alpha = 0.7f)
+                )
             }
         }
     }
+
 }
+
+@Composable
+private fun StatIcon(
+    icon: ImageVector,
+    value: String,
+    label: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .clip(RoundedCornerShape(12.dp))
+            .clickable { onClick() }
+            .background(Color(0xFFF5F5F5))
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier = Modifier.size(18.dp),
+            tint = Color(0xFF2C2420).copy(alpha = 0.6f)
+        )
+        Spacer(Modifier.width(12.dp))
+        Column {
+            Text(
+                text = value,
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                color = Color.Black
+            )
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
+                color = Color.Gray,
+                letterSpacing = 0.5.sp
+            )
+        }
+    }
+}
+
