@@ -38,7 +38,9 @@ data class WardrobeUiState(
     val totalItems: Int = 0,
     val itemsByCategory: Map<String, Int> = emptyMap(),
     val categoriesMetadata: Map<String, CategoryMetadata> = emptyMap(),
-    val archiveStatuses: Map<Long, ArchiveStatus> = emptyMap()
+    val archiveStatuses: Map<Long, ArchiveStatus> = emptyMap(),
+    val glowScore: Double = 0.0, // Unique Items Worn / Total Items
+    val diversityIndex: String = "Calculating..."
 )
 
 sealed class WardrobeEvent {
@@ -136,6 +138,15 @@ class WardrobeViewModel @Inject constructor(
             )
         }
 
+        val itemsWithAnyUsage = enrichedModels.count { it.usageCount > 0 }
+        val glowScore = if (enrichedModels.isNotEmpty()) itemsWithAnyUsage.toDouble() / enrichedModels.size else 0.0
+        
+        // Simple Diversity Index: variance in usage across categories
+        val diversityIndex = if (itemsByCategory.size > 1) {
+            val mean = itemsWithAnyUsage.toDouble() / itemsByCategory.size
+            "Strategic" // Placeholder for now
+        } else "Initializing"
+
         WardrobeUiState(
             items = enrichedModels,
             isLoading = false,
@@ -144,7 +155,9 @@ class WardrobeViewModel @Inject constructor(
             totalItems = enrichedModels.size,
             itemsByCategory = itemsByCategory,
             categoriesMetadata = categoryMetadata,
-            archiveStatuses = archiveStatuses
+            archiveStatuses = archiveStatuses,
+            glowScore = glowScore,
+            diversityIndex = diversityIndex
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), WardrobeUiState())
 

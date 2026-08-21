@@ -5,6 +5,7 @@ import com.zoewave.probase.kocolor.db.dao.ClothingDao
 import com.zoewave.probase.kocolor.db.dao.CosmeticDao
 import com.zoewave.probase.kocolor.db.dao.InstalledPackDao
 import com.zoewave.probase.kocolor.db.dao.ShoppingCartDao
+import com.zoewave.probase.kocolor.db.entity.ClothingUsageEntity
 import com.zoewave.probase.kocolor.db.entity.InstalledPackEntity
 import com.zoewave.probase.kocolor.db.entity.PackStatus
 import com.zoewave.probase.kocolor.db.entity.ShoppingCartItemEntity
@@ -41,6 +42,10 @@ class PackSyncRepositoryImpl @Inject constructor(
         clothingDao.getOwnedClothingIds()
     ) { cosmetics, clothing ->
         (cosmetics + clothing).toSet()
+    }
+
+    override fun observeAllUsages(): Flow<List<ClothingUsageEntity>> {
+        return database.garmentRotationDao.observeAllUsages()
     }
 
     override fun getInstalledPacks(): Flow<List<InstalledPackEntity>> {

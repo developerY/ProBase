@@ -1,5 +1,6 @@
 package com.zoewave.probase.kocolor.features.starterpack.data.repository
 
+import com.zoewave.probase.kocolor.db.entity.ClothingUsageEntity
 import com.zoewave.probase.kocolor.db.entity.InstalledPackEntity
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.KcpsPayload
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.PackInfo
@@ -8,6 +9,7 @@ import kotlinx.coroutines.flow.Flow
 interface PackSyncRepository {
     val cartProductIds: Flow<Set<String>>
     val ownedProductIds: Flow<Set<String>>
+    fun observeAllUsages(): Flow<List<ClothingUsageEntity>>
     fun getInstalledPacks(): Flow<List<InstalledPackEntity>>
     suspend fun fetchManifest(): Result<List<PackInfo>>
     suspend fun ingestPack(pack: PackInfo): Result<Unit>

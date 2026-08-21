@@ -93,6 +93,8 @@ fun PackPreviewScreen(
         isLoading = uiState.isNotesLoading,
         isInCart = uiState.selectedItemNotes?.id in uiState.cartProductIds,
         isOwned = uiState.selectedItemNotes?.id in uiState.ownedProductIds,
+        usageCount = uiState.productUsages[uiState.selectedItemNotes?.id] ?: 0,
+        lastUsedTimestamp = uiState.productLastUsed[uiState.selectedItemNotes?.id],
         onBuy = { uiState.selectedItemNotes?.id?.let { onBuyItem(it) } },
         onDismiss = onDismissNotes
     )

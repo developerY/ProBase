@@ -11,7 +11,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Checkroom
+import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.filled.Search
@@ -105,6 +107,35 @@ fun WardrobeLandingScreen(
                         text = stringResource(R.string.applications_kocolor_features_inventory_closet_desc),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                    )
+                }
+            }
+
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    SummaryStatCard(
+                        uiState = SummaryStatUiState(
+                            label = "GLOW SCORE",
+                            value = "${(uiState.glowScore * 100).toInt()}%",
+                            icon = Icons.Default.AutoAwesome
+                        ),
+                        modifier = Modifier.weight(1f),
+                        onEvent = { /* Open detailed rotation analytics */ },
+                        navTo = navTo
+                    )
+                    
+                    SummaryStatCard(
+                        uiState = SummaryStatUiState(
+                            label = "DIVERSITY INDEX",
+                            value = uiState.diversityIndex,
+                            icon = Icons.Default.Explore
+                        ),
+                        modifier = Modifier.weight(1f),
+                        onEvent = { /* Open category breakdown */ },
+                        navTo = navTo
                     )
                 }
             }

@@ -34,6 +34,9 @@ import androidx.compose.ui.window.DialogProperties
 import com.zoewave.probase.core.ui.util.PremiumProductImage
 import com.zoewave.probase.core.ui.util.parseColor
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.ProductEditorialNotes
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun ProductEditorialNotesDialog(
@@ -44,6 +47,8 @@ fun ProductEditorialNotesDialog(
     isLoading: Boolean,
     isInCart: Boolean,
     isOwned: Boolean,
+    usageCount: Int = 0,
+    lastUsedTimestamp: Long? = null,
     onBuy: () -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -243,12 +248,41 @@ fun ProductEditorialNotesDialog(
                                             expandedLabels = if (expandedLabels.contains(scientificOverviewLabel)) expandedLabels - scientificOverviewLabel else expandedLabels + scientificOverviewLabel
                                         }
                                     ) {
-                                        Text(
-                                            text = tech,
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            color = Color(0xFF333333),
-                                            lineHeight = 22.sp
-                                        )
+                                        Column {
+                                            Text(
+                                                text = tech,
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                color = Color(0xFF333333),
+                                                lineHeight = 22.sp
+                                            )
+                                            
+                                            if (isOwned) {
+                                                Spacer(Modifier.height(16.dp))
+                                                HorizontalDivider(color = Color.Black.copy(alpha = 0.05f))
+                                                Spacer(Modifier.height(12.dp))
+                                                
+                                                Text(
+                                                    text = "ROTATION PERFORMANCE",
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    fontWeight = FontWeight.Black,
+                                                    color = Color.Gray
+                                                )
+                                                Spacer(Modifier.height(4.dp))
+                                                Text(
+                                                    text = "Total Wears: $usageCount",
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                                lastUsedTimestamp?.let { ts ->
+                                                    val df = SimpleDateFormat("MMM dd", Locale.getDefault())
+                                                    Text(
+                                                        text = "Last Deployed: ${df.format(Date(ts))}",
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        color = Color.Gray
+                                                    )
+                                                }
+                                            }
+                                        }
                                     }
                                 }
 
