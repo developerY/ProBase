@@ -7,6 +7,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,7 +32,7 @@ fun WardrobeEfficiencyRow(
     uiState: WardrobeEfficiencyUiState,
     modifier: Modifier = Modifier
 ) {
-    val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US)
+    val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale.getDefault()) }
     val displayValue = if (uiState.usePrice) uiState.item.price ?: 0.0 else uiState.item.costPerUse ?: 0.0
     
     Row(

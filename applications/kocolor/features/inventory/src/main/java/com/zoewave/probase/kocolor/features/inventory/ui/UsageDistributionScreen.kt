@@ -118,7 +118,7 @@ fun UsageDistributionScreen(
             item {
                 // Additional insight or description
                 Text(
-                    text = "A high Glow Score indicates that you are utilizing a significant portion of your wardrobe. The distribution above highlights which items are becoming 'Wardrobe Heroes' and which might be ripe for archival or re-styling.",
+                    text = stringResource(R.string.applications_kocolor_features_inventory_glow_score_description),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

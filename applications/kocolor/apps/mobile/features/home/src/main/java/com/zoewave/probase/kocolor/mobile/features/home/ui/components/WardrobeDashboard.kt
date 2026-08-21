@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Checkroom
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -43,7 +44,7 @@ fun WardrobeDashboard(
     onEvent: (Unit) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US)
+    val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale.getDefault()) }
     val mostRecent = uiState.popularClothing.firstOrNull()
 
     ElevatedCard(

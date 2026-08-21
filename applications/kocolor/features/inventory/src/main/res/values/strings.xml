@@ -59,6 +59,7 @@
     <string name="applications_kocolor_features_inventory_not_available">N/A</string>
 
     <string name="applications_kocolor_features_inventory_style_archive_title">Style Archive</string>
+    <string name="applications_kocolor_features_inventory_strategic_diversity_title">Strategic Diversity.</string>
     <string name="applications_kocolor_features_inventory_curated_closet_title">Curated Closet.</string>
     <string name="applications_kocolor_features_inventory_closet_desc">A professional look at style investments.</string>
     <string name="applications_kocolor_features_inventory_total_pieces_label">TOTAL PIECES</string>
@@ -76,4 +77,7 @@
     <string name="applications_kocolor_features_inventory_average_utility">Average Utility</string>
     <string name="applications_kocolor_features_inventory_wears_format_plural">%1$d Wears</string>
     <string name="applications_kocolor_features_inventory_leading_brand_label_format">Leading Brand: %1$s</string>
+    <string name="applications_kocolor_features_inventory_glow_score_label">GLOW SCORE</string>
+    <string name="applications_kocolor_features_inventory_diversity_label">DIVERSITY</string>
+    <string name="applications_kocolor_features_inventory_glow_score_description">A high Glow Score indicates that you are utilizing a significant portion of your wardrobe. The distribution above highlights which items are becoming \'Wardrobe Heroes\' and which might be ripe for archival or re-styling.</string>
 </resources>

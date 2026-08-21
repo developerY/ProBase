@@ -88,7 +88,7 @@ fun VanityCategoryCard(
     }
     
     val currencyFormatter = remember { 
-        NumberFormat.getCurrencyInstance(Locale.US)
+        NumberFormat.getCurrencyInstance(Locale.getDefault())
     }
 
     var showExplanation by remember { mutableStateOf(false) }

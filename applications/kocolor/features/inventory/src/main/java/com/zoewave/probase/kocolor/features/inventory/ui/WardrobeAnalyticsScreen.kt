@@ -128,7 +128,7 @@ fun WardrobeAnalyticsScreen(
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     Text(stringResource(R.string.applications_kocolor_features_inventory_portfolio_performance), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
                     Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                        val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US)
+                        val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale.getDefault()) }
                         AnalyticsStatCard(
                             uiState = AnalyticsStatUiState(
                                 label = stringResource(R.string.applications_kocolor_features_inventory_total_value), 

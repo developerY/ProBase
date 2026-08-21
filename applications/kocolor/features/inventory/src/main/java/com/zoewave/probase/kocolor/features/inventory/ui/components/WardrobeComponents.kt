@@ -365,7 +365,7 @@ fun AtelierWardrobeCard(
     val averageUsage = metadata?.averageUsage ?: 0.0
     val description = metadata?.description ?: "Strategic curated wardrobe collection."
 
-    val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale.US) }
+    val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale.getDefault()) }
 
     Card(
         onClick = { navTo(KoColorRoute.WardrobeCategoryCover(categoryName = name)) },
@@ -663,13 +663,15 @@ fun StatIcon(
     icon: ImageVector,
     value: String,
     label: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null
 ) {
     Row(
         modifier = modifier
             .clip(RoundedCornerShape(12.dp))
-            .clickable { onClick() }
+            .let { 
+                if (onClick != null) it.clickable { onClick() } else it
+            }
             .background(Color(0xFFF5F5F5))
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically

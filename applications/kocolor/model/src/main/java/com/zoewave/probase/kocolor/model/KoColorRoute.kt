@@ -79,6 +79,9 @@ sealed class KoColorRoute {
     data object WardrobeAnalytics : KoColorRoute()
 
     @Serializable
+    data object StrategicDiversity : KoColorRoute()
+
+    @Serializable
     data object UsageDistribution : KoColorRoute()
     
     @Serializable

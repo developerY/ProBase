@@ -226,7 +226,7 @@ fun WardrobeDetailScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US)
+                    val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale.getDefault()) }
                     MetricItem(label = stringResource(R.string.applications_kocolor_features_inventory_investment), value = currencyFormatter.format(item.price ?: 0.0), modifier = Modifier.weight(1f))
                     MetricItem(label = stringResource(R.string.applications_kocolor_features_inventory_cost_per_wear), value = item.costPerUse?.let { currencyFormatter.format(it) } ?: stringResource(R.string.applications_kocolor_features_inventory_not_available), modifier = Modifier.weight(1f))
                     MetricItem(label = stringResource(R.string.applications_kocolor_features_inventory_wears), value = item.usageCount.toString(), modifier = Modifier.weight(1f))

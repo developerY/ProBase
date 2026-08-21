@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -22,7 +23,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.zoewave.probase.core.ui.util.PremiumProductImage
 import com.zoewave.probase.core.ui.util.PremiumProductImage
 import com.zoewave.probase.core.ui.util.parseColor
 import com.zoewave.probase.kocolor.features.cosmetics.R
@@ -41,6 +41,7 @@ fun InventoryProductCard(
     navTo: (KoColorRoute) -> Unit
 ) {
     val item = uiState
+    val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale.getDefault()) }
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -120,7 +121,7 @@ fun InventoryProductCard(
                     
                     Text(
                         text = item.price?.let { 
-                            NumberFormat.getCurrencyInstance(Locale.US).format(it)
+                            currencyFormatter.format(it)
                         } ?: "$0.00",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,

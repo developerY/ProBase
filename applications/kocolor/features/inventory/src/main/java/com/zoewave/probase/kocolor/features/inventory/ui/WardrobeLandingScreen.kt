@@ -174,7 +174,7 @@ fun WardrobeLandingScreen(
                         StatIcon(
                             icon = Icons.Default.AutoAwesome,
                             value = "${(uiState.glowScore * 100).toInt()}%",
-                            label = "GLOW SCORE",
+                            label = stringResource(R.string.applications_kocolor_features_inventory_glow_score_label),
                             onClick = { navTo(KoColorRoute.UsageDistribution) },
                             modifier = Modifier.weight(1f)
                         )
@@ -182,8 +182,8 @@ fun WardrobeLandingScreen(
                         StatIcon(
                             icon = Icons.Default.Explore,
                             value = uiState.diversityIndex,
-                            label = "DIVERSITY",
-                            onClick = { navTo(KoColorRoute.WardrobeAnalytics) },
+                            label = stringResource(R.string.applications_kocolor_features_inventory_diversity_label),
+                            onClick = { navTo(KoColorRoute.StrategicDiversity) },
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -206,7 +206,7 @@ fun WardrobeLandingScreen(
                         navTo = navTo
                     )
 
-                    val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale.US) }
+                    val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale.getDefault()) }
                     SummaryStatCard(
                         uiState = SummaryStatUiState(
                             label = stringResource(R.string.applications_kocolor_features_inventory_total_value_label),

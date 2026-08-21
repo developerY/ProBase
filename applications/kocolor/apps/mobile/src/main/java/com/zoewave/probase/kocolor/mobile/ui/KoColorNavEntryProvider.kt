@@ -41,6 +41,7 @@ import com.zoewave.probase.kocolor.features.cosmetics.ui.StitchProductBuilder
 import com.zoewave.probase.kocolor.features.cosmetics.ui.VanityLandingScreen
 import com.zoewave.probase.kocolor.features.inventory.ui.ColorVerificationRoute
 import com.zoewave.probase.kocolor.features.inventory.ui.ColorVerificationUiState
+import com.zoewave.probase.kocolor.features.inventory.ui.StrategicDiversityScreen
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeAnalyticsScreen
 import com.zoewave.probase.kocolor.features.inventory.ui.UsageDistributionScreen
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeCategoryCoverScreen
@@ -318,6 +319,14 @@ fun koColorNavEntryProvider(
             val viewModel: WardrobeViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()
             WardrobeAnalyticsScreen(
+                uiState = state,
+                navTo = onNavigateTo
+            )
+        }
+        is KoColorRoute.StrategicDiversity -> NavEntry(route) {
+            val viewModel: WardrobeViewModel = hiltViewModel()
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+            StrategicDiversityScreen(
                 uiState = state,
                 navTo = onNavigateTo
             )

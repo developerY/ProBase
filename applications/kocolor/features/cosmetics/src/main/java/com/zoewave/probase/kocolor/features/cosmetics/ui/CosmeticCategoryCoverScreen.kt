@@ -128,7 +128,7 @@ fun CosmeticCategoryCoverScreen(
                     
                     Text(stringResource(R.string.applications_kocolor_features_cosmetics_category_intelligence), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp, modifier = Modifier.padding(bottom = 16.dp))
                     
-                    val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale.US) }
+                    val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale.getDefault()) }
                     
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {

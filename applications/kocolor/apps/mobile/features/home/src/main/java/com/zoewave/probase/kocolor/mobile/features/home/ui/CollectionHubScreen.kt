@@ -385,7 +385,7 @@ private fun ArchiveVerticalCard(
     onEvent: () -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale.US) }
+    val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale.getDefault()) }
 
     Card(
         modifier = modifier
