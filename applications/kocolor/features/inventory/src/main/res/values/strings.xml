@@ -23,6 +23,8 @@
     <string name="applications_kocolor_features_inventory_efficiency_prompt">Log more wear events to calculate wardrobe efficiency.</string>
     <string name="applications_kocolor_features_inventory_per_wear">PER WEAR</string>
     <string name="applications_kocolor_features_inventory_usage_distribution">USAGE DISTRIBUTION</string>
+    <string name="applications_kocolor_features_inventory_usage_metrics_title">Usage Metrics.</string>
+    <string name="applications_kocolor_features_inventory_usage_metrics_desc">Analyzing the rotation frequency of your curated items.</string>
     <string name="applications_kocolor_features_inventory_never_worn">Never</string>
     <string name="applications_kocolor_features_inventory_rarely_worn">1-5</string>
     <string name="applications_kocolor_features_inventory_occasionally_worn">6-10</string>

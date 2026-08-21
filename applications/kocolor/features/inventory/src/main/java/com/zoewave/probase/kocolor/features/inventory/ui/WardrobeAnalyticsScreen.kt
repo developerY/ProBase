@@ -55,8 +55,6 @@ import com.zoewave.probase.kocolor.features.inventory.ui.components.AnalyticsSta
 import com.zoewave.probase.kocolor.features.inventory.ui.components.WardrobeEfficiencyRow
 import com.zoewave.probase.kocolor.features.inventory.ui.components.WardrobeEfficiencyUiState
 import com.zoewave.probase.kocolor.features.inventory.ui.components.WardrobeTaxonomyDialog
-import com.zoewave.probase.kocolor.features.inventory.ui.components.WearRankingRow
-import com.zoewave.probase.kocolor.features.inventory.ui.components.WearRankingUiState
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import java.text.NumberFormat
 import java.util.Locale
@@ -67,7 +65,6 @@ import android.graphics.Color as AndroidColor
 fun WardrobeAnalyticsScreen(
     uiState: WardrobeUiState,
     modifier: Modifier = Modifier,
-    onEvent: (WardrobeEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     var showTaxonomyInfo by remember { mutableStateOf(false) }
@@ -150,29 +147,6 @@ fun WardrobeAnalyticsScreen(
                             modifier = Modifier.weight(1f),
                             onEvent = {}
                         )
-                    }
-                }
-            }
-
-            item {
-                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Text(stringResource(R.string.applications_kocolor_features_inventory_most_worn), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
-                    val topUsed = uiState.items.filter { it.usageCount > 0 }.sortedByDescending { it.usageCount }.take(5)
-                    
-                    if (topUsed.isEmpty()) {
-                        Text(stringResource(R.string.applications_kocolor_features_inventory_no_wear_history), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    } else {
-                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            topUsed.forEachIndexed { index, item ->
-                                WearRankingRow(
-                                    uiState = WearRankingUiState(
-                                        item = item, 
-                                        rank = index + 1, 
-                                        maxUsage = topUsed.first().usageCount
-                                    )
-                                )
-                            }
-                        }
                     }
                 }
             }
@@ -303,7 +277,9 @@ fun WardrobeAnalyticsScreen(
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     Text(stringResource(R.string.applications_kocolor_features_inventory_style_efficiency), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
-                    val bestValue = uiState.items.filter { it.costPerUse != null }.sortedBy { it.costPerUse }.take(5)
+                    val bestValue = remember(uiState.items) {
+                        uiState.items.filter { it.costPerUse != null }.sortedBy { it.costPerUse }.take(5)
+                    }
                     
                     if (bestValue.isEmpty()) {
                         Text(stringResource(R.string.applications_kocolor_features_inventory_efficiency_prompt), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -339,7 +315,6 @@ private fun WardrobeAnalyticsScreenPreview() {
                     ClothingItem(internalId = 2, name = "Denim Jeans", category = ClothingCategory.BOTTOMS, usageCount = 45, colorHex = "#000080", price = 120.0)
                 )
             ),
-            onEvent = {},
             navTo = {}
         )
     }

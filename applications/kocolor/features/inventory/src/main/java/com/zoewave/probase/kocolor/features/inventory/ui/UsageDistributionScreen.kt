@@ -17,6 +17,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
@@ -28,6 +29,8 @@ import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.kocolor.features.inventory.R
 import com.zoewave.probase.kocolor.features.inventory.ui.components.UsageDistributionChart
+import com.zoewave.probase.kocolor.features.inventory.ui.components.WearRankingRow
+import com.zoewave.probase.kocolor.features.inventory.ui.components.WearRankingUiState
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -35,7 +38,6 @@ import com.zoewave.probase.kocolor.model.KoColorRoute
 fun UsageDistributionScreen(
     uiState: WardrobeUiState,
     modifier: Modifier = Modifier,
-    onEvent: (WardrobeEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     Scaffold(
@@ -68,13 +70,13 @@ fun UsageDistributionScreen(
             item {
                 Column {
                     Text(
-                        text = "Usage Metrics.",
+                        text = stringResource(R.string.applications_kocolor_features_inventory_usage_metrics_title),
                         style = MaterialTheme.typography.displaySmall,
                         fontFamily = FontFamily.Serif,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "Analyzing the rotation frequency of your curated items.",
+                        text = stringResource(R.string.applications_kocolor_features_inventory_usage_metrics_desc),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                     )
@@ -86,6 +88,31 @@ fun UsageDistributionScreen(
                     items = uiState.items,
                     modifier = Modifier.fillMaxWidth()
                 )
+            }
+
+            item {
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Text(stringResource(R.string.applications_kocolor_features_inventory_most_worn), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
+                    val topUsed = remember(uiState.items) {
+                        uiState.items.filter { it.usageCount > 0 }.sortedByDescending { it.usageCount }.take(5)
+                    }
+
+                    if (topUsed.isEmpty()) {
+                        Text(stringResource(R.string.applications_kocolor_features_inventory_no_wear_history), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    } else {
+                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            topUsed.forEachIndexed { index, item ->
+                                WearRankingRow(
+                                    uiState = WearRankingUiState(
+                                        item = item,
+                                        rank = index + 1,
+                                        maxUsage = topUsed.first().usageCount
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
             }
             
             item {
@@ -111,7 +138,6 @@ private fun UsageDistributionScreenPreview() {
                     ClothingItem(name = "T-Shirt", category = ClothingCategory.TOPS, usageCount = 45, colorHex = "#FFFFFF")
                 )
             ),
-            onEvent = {},
             navTo = {}
         )
     }
