@@ -5,22 +5,22 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.layout.ContentScale
+import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
-import coil.compose.SubcomposeAsyncImage
-import coil.compose.SubcomposeAsyncImageContent
 
 /**
  * A high-fidelity image loader that uses a "Breathing Blur" effect.
  * It decodes a BlurHash string and applies a subtle alpha pulse animation
  * while the high-resolution asset is fetching from the CDN.
+ * 
+ * NOTE: Switched to AsyncImage (non-subcompose) to support intrinsic measurements
+ * required by layouts like Row(weight) and FlowRow.
  */
 @Composable
 fun PremiumProductImage(
@@ -46,16 +46,21 @@ fun PremiumProductImage(
         label = "alpha_animation"
     )
 
-    SubcomposeAsyncImage(
-        model = imageUrl,
-        contentDescription = contentDescription,
-        modifier = modifier,
-        contentScale = contentScale
-    ) {
-        val state = painter.state
-        
-        if (state is AsyncImagePainter.State.Loading || state is AsyncImagePainter.State.Error) {
-            // -- LOADING/ERROR STATE --
+    var isLoaded by remember { mutableStateOf(false) }
+
+    Box(modifier = modifier) {
+        AsyncImage(
+            model = imageUrl,
+            contentDescription = contentDescription,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = contentScale,
+            onState = { state ->
+                isLoaded = state is AsyncImagePainter.State.Success
+            }
+        )
+
+        if (!isLoaded) {
+            // -- LOADING/ERROR STATE (Placeholder Overlay) --
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -80,9 +85,6 @@ fun PremiumProductImage(
                     )
                 }
             }
-        } else {
-            // -- SUCCESS STATE --
-            SubcomposeAsyncImageContent()
         }
     }
 }
