@@ -301,7 +301,7 @@ class StyleSimulatorEngine @Inject constructor(
         val finalPalette = palette.take(4)
 
         return StyleBlueprint(
-            rationale = "Local Architect: Selected from your vault based on intent.",
+            rationale = "Local Architect: Selected from your vault based on intent and freshness score.",
             selectedClothingIds = selectedItems.map { "w_${it.internalId}" },
             selectedCosmeticIds = selectedCosmetics.map { "c_${it.internalId}" },
             recommendedPalette = finalPalette

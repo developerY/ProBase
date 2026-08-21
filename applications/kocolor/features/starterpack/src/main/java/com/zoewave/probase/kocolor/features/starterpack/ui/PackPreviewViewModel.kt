@@ -40,7 +40,9 @@ data class PackPreviewUiState(
     val selectedItemColor: String? = null,
     val isNotesLoading: Boolean = false,
     val cartProductIds: Set<String> = emptySet(),
-    val ownedProductIds: Set<String> = emptySet()
+    val ownedProductIds: Set<String> = emptySet(),
+    val productUsages: Map<String, Int> = emptyMap(),
+    val productLastUsed: Map<String, Long?> = emptyMap()
 )
 
 @HiltViewModel
@@ -56,11 +58,14 @@ class PackPreviewViewModel @Inject constructor(
     val uiState: StateFlow<PackPreviewUiState> = combine(
         _baseUiState,
         syncRepository.cartProductIds,
-        syncRepository.ownedProductIds
-    ) { state, cartIds, ownedIds ->
+        syncRepository.ownedProductIds,
+        syncRepository.observeAllUsages()
+    ) { state, cartIds, ownedIds, usages ->
         state.copy(
             cartProductIds = cartIds,
-            ownedProductIds = ownedIds
+            ownedProductIds = ownedIds,
+            productUsages = usages.associate { it.productId to it.useCount.toInt() },
+            productLastUsed = usages.associate { it.productId to it.lastUsedTimestamp }
         )
     }.stateIn(
         scope = viewModelScope,

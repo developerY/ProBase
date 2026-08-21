@@ -2,6 +2,7 @@ package com.zoewave.probase.kocolor.features.inventory.ui.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -10,6 +11,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.NightlightRound
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -31,6 +33,8 @@ import com.zoewave.probase.core.ui.util.rememberBlurHashPainter
 import com.zoewave.probase.core.ui.util.parseColor
 import com.zoewave.probase.kocolor.features.inventory.R
 import com.zoewave.probase.kocolor.features.inventory.ui.CategoryMetadata
+import com.zoewave.probase.kocolor.features.inventory.ui.util.FreshnessState
+import com.zoewave.probase.kocolor.features.inventory.ui.util.getFreshnessState
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import java.text.NumberFormat
@@ -396,8 +400,20 @@ fun AtelierWardrobeCard(
 fun RecentClothingCard(uiState: ClothingItem, modifier: Modifier = Modifier, onEvent: (Unit) -> Unit, navTo: (KoColorRoute) -> Unit) {
     val item = uiState
     val onClick = { navTo(KoColorRoute.WardrobeDetail(item.internalId)) }
+    val freshness = item.getFreshnessState()
+    
     Card(
-        modifier = modifier.width(220.dp).aspectRatio(0.8f).clickable { onClick() },
+        modifier = modifier
+            .width(220.dp)
+            .aspectRatio(0.8f)
+            .clickable { onClick() }
+            .then(
+                if (freshness == FreshnessState.IN_ROTATION) 
+                    Modifier.border(2.dp, Color(0xFFD4AF37), RoundedCornerShape(28.dp)) 
+                else if (freshness == FreshnessState.RESTING)
+                    Modifier.border(2.dp, Color(0xFF5A3854).copy(alpha = 0.5f), RoundedCornerShape(28.dp))
+                else Modifier
+            ),
         shape = RoundedCornerShape(28.dp)
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
@@ -410,6 +426,35 @@ fun RecentClothingCard(uiState: ClothingItem, modifier: Modifier = Modifier, onE
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
+
+                // Freshness Indicator
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(16.dp)
+                        .offset(x = 0.dp, y = 30.dp), // Below the category badge or offset
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    when (freshness) {
+                        FreshnessState.FRESH -> {
+                            Surface(
+                                modifier = Modifier.size(10.dp),
+                                color = Color(0xFF00BCD4),
+                                shape = CircleShape,
+                                shadowElevation = 4.dp
+                            ) {}
+                        }
+                        FreshnessState.RESTING -> {
+                            Icon(
+                                imageVector = Icons.Default.NightlightRound,
+                                contentDescription = "Resting",
+                                tint = Color(0xFF5A3854),
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                        FreshnessState.IN_ROTATION -> {}
+                    }
+                }
 
                 val itemColor = item.dominantHex?.let { parseColor(it) } 
                     ?: item.colorHex?.let { parseColor(it) } 

@@ -13,6 +13,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,6 +34,9 @@ import com.zoewave.probase.kocolor.features.inventory.ui.components.DetailRow
 import com.zoewave.probase.kocolor.features.inventory.ui.components.MetricItem
 import com.zoewave.probase.kocolor.features.inventory.ui.components.ProInsightCard
 import com.zoewave.probase.kocolor.features.inventory.ui.components.SectionHeader
+import com.zoewave.probase.kocolor.features.inventory.ui.util.FreshnessState
+import com.zoewave.probase.kocolor.features.inventory.ui.util.color
+import com.zoewave.probase.kocolor.features.inventory.ui.util.getFreshnessState
 import com.zoewave.probase.core.model.ritual.ArchiveStatus
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
@@ -40,6 +44,7 @@ import com.zoewave.probase.core.model.ritual.InventorySource
 import com.zoewave.probase.core.ui.components.MakeItMineButton
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import java.text.NumberFormat
+import java.text.SimpleDateFormat
 import java.util.*
 
 data class WardrobeDetailUiState(
@@ -84,6 +89,7 @@ fun WardrobeDetailScreen(
     navTo: (KoColorRoute) -> Unit
 ) {
     val item = uiState.wardrobeUiState.items.find { it.internalId == uiState.itemId } ?: return
+    val freshness = item.getFreshnessState()
     val atelierBrown = Color(0xFF8B5E3C)
     val archiveStatus = uiState.archiveStatus
 
@@ -152,6 +158,30 @@ fun WardrobeDetailScreen(
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Black
                         )
+                    }
+
+                    // Freshness Badge
+                    Surface(
+                        modifier = Modifier.padding(24.dp).align(Alignment.BottomEnd),
+                        color = freshness.color,
+                        shape = RoundedCornerShape(12.dp),
+                        shadowElevation = 8.dp
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                        ) {
+                            if (freshness == FreshnessState.RESTING) {
+                                Icon(Icons.Default.NightlightRound, null, modifier = Modifier.size(14.dp), tint = Color.White)
+                                Spacer(Modifier.width(6.dp))
+                            }
+                            Text(
+                                text = freshness.name,
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                        }
                     }
                 }
             }
@@ -223,6 +253,12 @@ fun WardrobeDetailScreen(
                 Spacer(Modifier.height(24.dp))
                 
                 SectionHeader(stringResource(R.string.applications_kocolor_features_inventory_archive_notes))
+                
+                val dateFormatter = remember { SimpleDateFormat("MMM dd, yyyy - HH:mm", Locale.getDefault()) }
+                item.lastUsedTimestamp?.let { ts ->
+                    DetailRow(label = "Last Deployed", value = dateFormatter.format(Date(ts)))
+                }
+
                 Text(
                     text = item.notes ?: stringResource(R.string.applications_kocolor_features_inventory_no_notes),
                     style = MaterialTheme.typography.bodyMedium,

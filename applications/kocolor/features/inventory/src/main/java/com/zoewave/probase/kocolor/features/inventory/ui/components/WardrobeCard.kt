@@ -1,12 +1,15 @@
 package com.zoewave.probase.kocolor.features.inventory.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Checkroom
+import androidx.compose.material.icons.filled.NightlightRound
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -27,6 +30,9 @@ import com.zoewave.probase.kocolor.features.inventory.R
 import com.zoewave.probase.kocolor.features.inventory.util.toComposeColor
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
+import com.zoewave.probase.kocolor.features.inventory.ui.util.FreshnessState
+import com.zoewave.probase.kocolor.features.inventory.ui.util.color
+import com.zoewave.probase.kocolor.features.inventory.ui.util.getFreshnessState
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
 private fun isColorDark(color: Color): Boolean {
@@ -45,11 +51,22 @@ fun WardrobeCard(
     val bgColor = itemColor.toComposeColor()
     val isDark = isColorDark(bgColor)
     val contentColor = if (isDark) Color.White else Color.Black
+    
+    val freshness = uiState.getFreshnessState()
 
-    ElevatedCard(
-        modifier = modifier.clickable { navTo(KoColorRoute.WardrobeDetail(uiState.internalId)) },
+    Card(
+        modifier = modifier
+            .clickable { navTo(KoColorRoute.WardrobeDetail(uiState.internalId)) }
+            .then(
+                if (freshness == FreshnessState.IN_ROTATION) 
+                    Modifier.border(2.dp, Color(0xFFD4AF37), RoundedCornerShape(24.dp)) 
+                else if (freshness == FreshnessState.RESTING)
+                    Modifier.border(2.dp, Color(0xFF5A3854).copy(alpha = 0.5f), RoundedCornerShape(24.dp))
+                else Modifier
+            ),
         shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.elevatedCardColors(containerColor = bgColor)
+        colors = CardDefaults.cardColors(containerColor = bgColor),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             if (uiState.imageUrl != null) {
@@ -61,6 +78,36 @@ fun WardrobeCard(
                     fallbackColor = bgColor
                 )
                 
+                // Freshness Indicator
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    when (freshness) {
+                        FreshnessState.FRESH -> {
+                            Surface(
+                                modifier = Modifier.size(10.dp),
+                                color = Color(0xFF00BCD4),
+                                shape = CircleShape,
+                                shadowElevation = 4.dp
+                            ) {}
+                        }
+                        FreshnessState.RESTING -> {
+                            Icon(
+                                imageVector = Icons.Default.NightlightRound,
+                                contentDescription = "Resting",
+                                tint = Color(0xFF5A3854),
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                        FreshnessState.IN_ROTATION -> {
+                            // Border handled by card
+                        }
+                    }
+                }
+
                 // Representative Color Badge
                 Surface(
                     modifier = Modifier
