@@ -22,9 +22,19 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.TrendingDown
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.MonetizationOn
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,15 +46,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.zoewave.probase.core.ui.util.parseColor
-import com.zoewave.probase.kocolor.features.inventory.R
-import com.zoewave.probase.kocolor.features.inventory.ui.components.*
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
+import com.zoewave.probase.core.ui.util.parseColor
+import com.zoewave.probase.kocolor.features.inventory.R
+import com.zoewave.probase.kocolor.features.inventory.ui.components.AnalyticsStatCard
+import com.zoewave.probase.kocolor.features.inventory.ui.components.AnalyticsStatUiState
+import com.zoewave.probase.kocolor.features.inventory.ui.components.WardrobeEfficiencyRow
+import com.zoewave.probase.kocolor.features.inventory.ui.components.WardrobeEfficiencyUiState
+import com.zoewave.probase.kocolor.features.inventory.ui.components.WardrobeTaxonomyDialog
+import com.zoewave.probase.kocolor.features.inventory.ui.components.WearRankingRow
+import com.zoewave.probase.kocolor.features.inventory.ui.components.WearRankingUiState
 import com.zoewave.probase.kocolor.model.KoColorRoute
-import android.graphics.Color as AndroidColor
 import java.text.NumberFormat
-import java.util.*
+import java.util.Locale
+import android.graphics.Color as AndroidColor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
