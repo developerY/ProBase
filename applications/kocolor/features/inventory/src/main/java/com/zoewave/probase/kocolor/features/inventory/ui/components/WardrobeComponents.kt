@@ -659,7 +659,7 @@ fun RecentClothingCard(
 }
 
 @Composable
-private fun StatIcon(
+fun StatIcon(
     icon: ImageVector,
     value: String,
     label: String,
