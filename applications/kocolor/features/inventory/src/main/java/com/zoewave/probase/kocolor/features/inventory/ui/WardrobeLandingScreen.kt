@@ -175,7 +175,7 @@ fun WardrobeLandingScreen(
                             icon = Icons.Default.AutoAwesome,
                             value = "${(uiState.glowScore * 100).toInt()}%",
                             label = "GLOW SCORE",
-                            onClick = { navTo(KoColorRoute.WardrobeAnalytics) },
+                            onClick = { navTo(KoColorRoute.UsageDistribution) },
                             modifier = Modifier.weight(1f)
                         )
 
