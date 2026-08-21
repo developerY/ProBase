@@ -22,6 +22,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.Checkroom
+import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.filled.NightlightRound
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -46,9 +48,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.core.ui.util.parseColor
 import com.zoewave.probase.core.ui.util.rememberBlurHashPainter
@@ -690,6 +694,126 @@ private fun StatIcon(
                 letterSpacing = 0.5.sp
             )
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SummaryStatCardPreview() {
+    MaterialTheme {
+        SummaryStatCard(
+            uiState = SummaryStatUiState(
+                label = "TOTAL PIECES",
+                value = "124",
+                icon = Icons.Default.Checkroom
+            ),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SummaryStatCardValuePreview() {
+    MaterialTheme {
+        SummaryStatCard(
+            uiState = SummaryStatUiState(
+                label = "TOTAL VALUE",
+                value = "$12,450",
+                icon = Icons.Default.MonetizationOn
+            ),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun WardrobeTaxonomyDialogPreview() {
+    MaterialTheme {
+        WardrobeTaxonomyDialog(
+            uiState = Unit,
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun TaxonomySectionPreview() {
+    MaterialTheme {
+        TaxonomySection(
+            uiState = TaxonomySectionUiState(
+                level = "Level 1",
+                title = "Verticals",
+                description = "Primary structural categories of the wardrobe architecture.",
+                items = listOf(
+                    "Tops" to "Blazers, Shirts, Knitwear.",
+                    "Bottoms" to "Trousers, Skirts, Denim.",
+                    "Shoes" to "Heels, Flats, Sneakers."
+                )
+            ),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun AtelierWardrobeCardPreview() {
+    MaterialTheme {
+        AtelierWardrobeCard(
+            uiState = AtelierWardrobeUiState(
+                name = "Tops",
+                metadata = CategoryMetadata(
+                    itemCount = 42,
+                    totalValue = 2840.0,
+                    leadingBrand = "Toteme",
+                    averageUsage = 18.5,
+                    description = "Strategic upper silhouette pieces."
+                ),
+                baseColor = Color(0xFFE5E4E2),
+                imageModel = ""
+            ),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun RecentClothingCardPreview() {
+    MaterialTheme {
+        RecentClothingCard(
+            uiState = ClothingItem(
+                internalId = 1,
+                name = "Silk Slip Dress",
+                brand = "La Perla",
+                category = ClothingCategory.DRESSES,
+                colorHex = "#2C2420",
+                dominantHex = "#2C2420"
+            ),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun StatIconPreview() {
+    MaterialTheme {
+        StatIcon(
+            icon = Icons.Default.Checkroom,
+            value = "124",
+            label = "TOTAL PIECES",
+            onClick = {}
+        )
     }
 }
 
