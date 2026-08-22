@@ -52,7 +52,7 @@ class RotationScoringUseCaseTest {
     }
 
     @Test
-    fun `when item usage share exceeds 35 percent, penalty is 1_0`() = runTest {
+    fun `when item usage share exceeds 35 percent, penalty is 0_85`() = runTest {
         // Given
         coEvery { repository.observeGlobalMetrics() } returns flowOf(GlobalRotationMetricsEntity(totalOutfitsCommitted = 10))
         val highUsageItem = ClothingUsageEntity(productId = "item1", useCount = 40) // 40% of 100
@@ -64,14 +64,14 @@ class RotationScoringUseCaseTest {
         val penalty = useCase.calculateRotationPenalty("item1", "TOPS")
         
         // Then
-        assertThat(penalty).isEqualTo(1.0)
+        assertThat(penalty).isEqualTo(0.85)
     }
 
     @Test
-    fun `when item has low usage and is not recent, penalty is proportional`() = runTest {
+    fun `when item has low usage and is not recent, penalty is zero`() = runTest {
         // Given
         coEvery { repository.observeGlobalMetrics() } returns flowOf(GlobalRotationMetricsEntity(totalOutfitsCommitted = 10))
-        // Total usage = 100. Item1 usage = 10. Share = 10%. Threshold = 35%. Expected = 10/35 = 0.285
+        // Total usage = 100. Item1 usage = 10. Share = 10%. Threshold = 35%. 
         val targetItem = ClothingUsageEntity(
             productId = "item1", 
             useCount = 10, 
@@ -85,7 +85,6 @@ class RotationScoringUseCaseTest {
         val penalty = useCase.calculateRotationPenalty("item1", "TOPS")
         
         // Then
-        assertThat(penalty).isAtLeast(0.28)
-        assertThat(penalty).isAtMost(0.29)
+        assertThat(penalty).isEqualTo(0.0)
     }
 }

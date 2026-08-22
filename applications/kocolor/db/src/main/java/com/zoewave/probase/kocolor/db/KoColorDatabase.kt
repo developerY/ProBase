@@ -5,12 +5,14 @@ import androidx.room3.RoomDatabase
 import androidx.room3.ColumnTypeConverters
 import androidx.room3.Transaction
 import com.zoewave.probase.kocolor.db.converter.FashionConverters
+import com.zoewave.probase.kocolor.db.converter.KoColorTypeConverters
 import com.zoewave.probase.kocolor.db.dao.ClothingDao
 import com.zoewave.probase.kocolor.db.dao.CosmeticDao
 import com.zoewave.probase.kocolor.db.dao.FashionProfileDao
 import com.zoewave.probase.kocolor.db.dao.GarmentRotationDao
 import com.zoewave.probase.kocolor.db.dao.InstalledPackDao
 import com.zoewave.probase.kocolor.db.dao.InventoryDao
+import com.zoewave.probase.kocolor.db.dao.PlaylistDao
 import com.zoewave.probase.kocolor.db.dao.ProductDao
 import com.zoewave.probase.kocolor.db.dao.RoutineDao
 import com.zoewave.probase.kocolor.db.dao.SavedSuggestionDao
@@ -18,6 +20,7 @@ import com.zoewave.probase.kocolor.db.dao.ShoppingCartDao
 import com.zoewave.probase.kocolor.db.entity.ClothingItemEntity
 import com.zoewave.probase.kocolor.db.entity.ClothingUsageEntity
 import com.zoewave.probase.kocolor.db.entity.CosmeticItemEntity
+import com.zoewave.probase.kocolor.db.entity.DailyStylePlanEntity
 import com.zoewave.probase.kocolor.db.entity.FashionProfileEntity
 import com.zoewave.probase.kocolor.db.entity.GlobalRotationMetricsEntity
 import com.zoewave.probase.kocolor.db.entity.InstalledPackEntity
@@ -26,6 +29,9 @@ import com.zoewave.probase.kocolor.db.entity.ProductEntity
 import com.zoewave.probase.kocolor.db.entity.RoutineEntity
 import com.zoewave.probase.kocolor.db.entity.SavedSuggestionEntity
 import com.zoewave.probase.kocolor.db.entity.ShoppingCartItemEntity
+import com.zoewave.probase.kocolor.db.entity.StylePlaylistEntity
+import com.zoewave.probase.kocolor.model.playlist.DailyPlanStatus
+import com.zoewave.probase.kocolor.model.playlist.PlaylistStatus
 
 @Database(
     entities = [
@@ -39,12 +45,14 @@ import com.zoewave.probase.kocolor.db.entity.ShoppingCartItemEntity
         InstalledPackEntity::class,
         ShoppingCartItemEntity::class,
         GlobalRotationMetricsEntity::class,
-        ClothingUsageEntity::class
+        ClothingUsageEntity::class,
+        StylePlaylistEntity::class,
+        DailyStylePlanEntity::class
     ],
     version = 1,
     exportSchema = false
 )
-@ColumnTypeConverters(FashionConverters::class)
+@ColumnTypeConverters(FashionConverters::class, KoColorTypeConverters::class)
 @Suppress("ROOM_MISSING_CONSTRUCTED_BY")
 abstract class KoColorDatabase : RoomDatabase() {
     abstract val fashionProfileDao: FashionProfileDao
@@ -57,6 +65,42 @@ abstract class KoColorDatabase : RoomDatabase() {
     abstract val installedPackDao: InstalledPackDao
     abstract val shoppingCartDao: ShoppingCartDao
     abstract val garmentRotationDao: GarmentRotationDao
+    abstract val playlistDao: PlaylistDao
+
+    @Transaction
+    suspend fun savePlaylist(playlist: StylePlaylistEntity, plans: List<DailyStylePlanEntity>) {
+        playlistDao.insertPlaylist(playlist)
+        playlistDao.insertDailyPlans(plans)
+    }
+
+    @Transaction
+    suspend fun commitDailyStylePlan(
+        planId: String,
+        actuallyWornProductIds: List<String>
+    ) {
+        // 1. Fetch current plan
+        val currentPlan = playlistDao.getDailyPlan(planId) ?: return
+        
+        // 2. Idempotency Check
+        if (currentPlan.status == DailyPlanStatus.COMMITTED) return
+
+        // 3. Write to V1 Historical Memory (Feedback Stream)
+        commitOutfitUsage(actuallyWornProductIds)
+
+        // 4. Mark V2 Daily Plan as COMMITTED
+        playlistDao.updateDailyPlanStatus(planId, DailyPlanStatus.COMMITTED)
+
+        // 5. Evaluate terminal state of the parent Playlist
+        val playlistWithDays = playlistDao.getPlaylistWithDays(currentPlan.playlistId) ?: return
+        val allDaysFinished = playlistWithDays.dailyPlans.all { 
+            it.status == DailyPlanStatus.COMMITTED ||
+            it.status == DailyPlanStatus.SKIPPED
+        }
+        
+        if (allDaysFinished) {
+            playlistDao.updatePlaylistStatus(currentPlan.playlistId, PlaylistStatus.COMPLETED)
+        }
+    }
 
     @Transaction
     suspend fun purchaseStagedProduct(

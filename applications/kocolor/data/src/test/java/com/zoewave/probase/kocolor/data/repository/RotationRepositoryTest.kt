@@ -8,7 +8,8 @@ import com.zoewave.probase.kocolor.db.KoColorDatabase
 import com.zoewave.probase.kocolor.db.dao.GarmentRotationDao
 import kotlinx.coroutines.runBlocking
 import org.junit.After
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -40,7 +41,7 @@ class RotationRepositoryTest {
     fun `commitOutfit success increments global and distinct items`() = runBlocking {
         val selectedOutfit = listOf("item1", "item2", "item3", "item1")
 
-        repository.commitOutfit(selectedOutfit)
+        repository.commitOutfitUsage(selectedOutfit)
 
         val globalMetrics = rotationDao.getGlobalMetrics()
         assertNotNull(globalMetrics)
@@ -56,8 +57,8 @@ class RotationRepositoryTest {
 
     @Test
     fun `commitOutfit increments counts correctly over multiple sessions`() = runBlocking {
-        repository.commitOutfit(listOf("item1"))
-        repository.commitOutfit(listOf("item1", "item2"))
+        repository.commitOutfitUsage(listOf("item1"))
+        repository.commitOutfitUsage(listOf("item1", "item2"))
 
         val metrics = rotationDao.getGlobalMetrics()
         assertEquals(2L, metrics?.totalOutfitsCommitted)

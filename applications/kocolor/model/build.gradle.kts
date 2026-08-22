@@ -14,4 +14,6 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.collections.immutable)
     implementation(libs.androidx.compose.material.icons.extended)
+
+    testImplementation(libs.junit)
 }
