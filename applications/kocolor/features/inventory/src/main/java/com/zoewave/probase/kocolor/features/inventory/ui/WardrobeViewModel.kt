@@ -40,7 +40,7 @@ data class WardrobeUiState(
     val itemsByCategory: Map<String, Int> = emptyMap(),
     val categoriesMetadata: Map<String, CategoryMetadata> = emptyMap(),
     val archiveStatuses: Map<Long, ArchiveStatus> = emptyMap(),
-    val glowScore: Double = 0.0, // Unique Items Worn / Total Items
+    val glowScore: Double? = null, // Unique Items Worn / Total Items. Null if cold start.
     val diversityIndex: String = "Calculating..."
 )
 
@@ -141,12 +141,26 @@ class WardrobeViewModel @Inject constructor(
         }
 
         val itemsWithAnyUsage = enrichedModels.count { it.usageCount > 0 }
-        val glowScore = if (enrichedModels.isNotEmpty()) itemsWithAnyUsage.toDouble() / enrichedModels.size else 0.0
+        val totalOutfits = globalMetrics?.totalOutfitsCommitted ?: 0L
         
-        // Simple Diversity Index: variance in usage across categories
-        val diversityIndex = if (itemsByCategory.size > 1) {
-            "Strategic" // Placeholder for now
-        } else "Initializing"
+        val glowScore = if (totalOutfits < 5) {
+            null // Cold Start
+        } else if (enrichedModels.isNotEmpty()) {
+            itemsWithAnyUsage.toDouble() / enrichedModels.size
+        } else {
+            0.0
+        }
+        
+        // Diversity Index logic based on category distribution
+        val diversityIndex = if (totalOutfits < 5) {
+            "Initializing"
+        } else if (itemsByCategory.size >= 4) {
+            "Eclectic"
+        } else if (itemsByCategory.size >= 2) {
+            "Strategic"
+        } else {
+            "Focused"
+        }
 
         WardrobeUiState(
             items = enrichedModels,
@@ -154,7 +168,7 @@ class WardrobeViewModel @Inject constructor(
             draftItem = draft,
             totalInvestment = totalInvestment,
             totalItems = enrichedModels.size,
-            totalOutfitsCommitted = globalMetrics?.totalOutfitsCommitted ?: 0L,
+            totalOutfitsCommitted = totalOutfits,
             itemsByCategory = itemsByCategory,
             categoriesMetadata = categoryMetadata,
             archiveStatuses = archiveStatuses,

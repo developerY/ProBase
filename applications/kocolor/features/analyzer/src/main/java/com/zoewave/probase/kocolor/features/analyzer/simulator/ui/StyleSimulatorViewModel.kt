@@ -2,28 +2,44 @@ package com.zoewave.probase.kocolor.features.analyzer.simulator.ui
 
 import android.content.Context
 import android.net.Uri
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.zoewave.probase.kocolor.db.dao.RoutineDao
 import com.zoewave.probase.core.data.repository.AiConfigurationSettings
-import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
-import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
-import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
-import com.zoewave.probase.kocolor.data.repository.RotationRepository
-import com.zoewave.probase.kocolor.data.usecase.RotationScoringUseCase
 import com.zoewave.probase.core.data.repository.weather.AtmosphericRepository
-import com.zoewave.probase.kocolor.features.analyzer.simulator.data.StyleSimulatorEngine
+import com.zoewave.probase.core.model.ritual.ClothingCategory
+import com.zoewave.probase.core.model.ritual.ClothingItem
+import com.zoewave.probase.core.model.ritual.ColorFamily
+import com.zoewave.probase.core.model.ritual.CosmeticItem
+import com.zoewave.probase.core.model.ritual.FashionAdvice
+import com.zoewave.probase.core.model.ritual.MacroCategory
+import com.zoewave.probase.core.model.ritual.MakeupSuggestion
+import com.zoewave.probase.core.model.ritual.OutfitSuggestion
+import com.zoewave.probase.core.model.ritual.RoutineTime
+import com.zoewave.probase.core.model.ritual.SeasonalType
+import com.zoewave.probase.core.model.ritual.SuggestedPiece
+import com.zoewave.probase.core.model.ritual.Undertone
+import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
+import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
+import com.zoewave.probase.kocolor.data.repository.RotationRepository
+import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
+import com.zoewave.probase.kocolor.data.usecase.RotationScoringUseCase
+import com.zoewave.probase.kocolor.db.dao.RoutineDao
 import com.zoewave.probase.kocolor.features.analyzer.simulator.data.StyleBlueprint
+import com.zoewave.probase.kocolor.features.analyzer.simulator.data.StyleSimulatorEngine
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.ResultTab
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.VisualBlueprintData
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.mapToVisualBlueprintData
-import com.zoewave.probase.core.model.ritual.*
-import com.zoewave.probase.kocolor.model.KoColorRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -429,7 +445,7 @@ class StyleSimulatorViewModel @Inject constructor(
             // 3. Commit Rotation Metrics for selected items
             val committedIds = state.recommendedClothing.mapNotNull { it.remoteId }
             if (committedIds.isNotEmpty()) {
-                rotationRepository.commitOutfit(committedIds)
+                rotationRepository.commitOutfitUsage(committedIds)
             }
             
             _effect.send(SimulatorEffect.NavigateToHistory)

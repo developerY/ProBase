@@ -5,11 +5,9 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -28,6 +26,7 @@ import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import java.text.NumberFormat
 import java.util.*
+import android.graphics.Color as AndroidColor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,6 +35,8 @@ fun StyleIntelligenceScreen(
     modifier: Modifier = Modifier,
     navTo: (KoColorRoute) -> Unit
 ) {
+    val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale.US) }
+    
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -66,7 +67,35 @@ fun StyleIntelligenceScreen(
             contentPadding = PaddingValues(24.dp),
             verticalArrangement = Arrangement.spacedBy(32.dp)
         ) {
-            // 1. Chromatic Core
+            // 1. Performance Row
+            item {
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Text(
+                        text = "PORTFOLIO PERFORMANCE",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.Gray,
+                        letterSpacing = 1.sp
+                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                        AnalysisSmallCard(
+                            label = "TOTAL VALUE",
+                            value = currencyFormatter.format(uiState.totalInvestment),
+                            modifier = Modifier.weight(1f)
+                        )
+                        val avgCpw = uiState.items.mapNotNull { 
+                            if (it.usageCount > 0 && it.price != null) it.price!! / it.usageCount else null 
+                        }.let { if (it.isEmpty()) null else it.average() }
+                        
+                        AnalysisSmallCard(
+                            label = "AVG CPW",
+                            value = avgCpw?.let { currencyFormatter.format(it) } ?: "N/A",
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+            }
+
+            // 2. Chromatic Core
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     Text(
@@ -81,55 +110,57 @@ fun StyleIntelligenceScreen(
                             .filter { it.colorHex.isNotBlank() }
                             .groupBy { it.colorHex }
                             .toList()
-                            .sortedByDescending { it.second.size }
+                            .sortedWith(compareBy(
+                                { (hex, _) ->
+                                    val hsv = FloatArray(3)
+                                    try {
+                                        AndroidColor.colorToHSV(AndroidColor.parseColor(hex), hsv)
+                                        // Neutrals to the end (Saturation < 0.1)
+                                        if (hsv[1] < 0.1f) 1 else 0 
+                                    } catch (e: Exception) { 1 }
+                                },
+                                { it.second.size * -1 } // Then by count descending
+                            ))
                     }
 
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(48.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                    ) {
-                        colorGroups.forEach { (hex, items) ->
-                            Box(
-                                modifier = Modifier
-                                    .weight(items.size.toFloat())
-                                    .fillMaxHeight()
-                                    .background(Color(android.graphics.Color.parseColor(hex)))
-                                    .border(0.5.dp, Color.White.copy(alpha = 0.2f))
-                            )
+                    if (colorGroups.isNotEmpty()) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(48.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                        ) {
+                            colorGroups.forEach { (hex, items) ->
+                                Box(
+                                    modifier = Modifier
+                                        .weight(items.size.toFloat())
+                                        .fillMaxHeight()
+                                        .background(Color(AndroidColor.parseColor(hex)))
+                                        .border(0.5.dp, Color.White.copy(alpha = 0.2f))
+                                )
+                            }
                         }
+                    } else {
+                        Text("No color data available", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
                     }
                 }
             }
 
-            // 2. Performance Stats
-            item {
-                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    AnalysisSmallCard(
-                        label = "DIVERSITY",
-                        value = uiState.diversityIndex,
-                        modifier = Modifier.weight(1f)
-                    )
-                    AnalysisSmallCard(
-                        label = "UTILIZATION",
-                        value = "${(uiState.glowScore * 100).toInt()}%",
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-            }
-
-            // 3. Cost Per Wear (CPW) Analysis
+            // 3. Style Efficiency List
             item {
                 Text(
-                    text = "COST PER WEAR ANALYSIS",
+                    text = "STYLE EFFICIENCY (CPW)",
                     style = MaterialTheme.typography.labelSmall,
                     color = Color.Gray,
                     letterSpacing = 1.sp
                 )
             }
 
-            items(uiState.items.sortedBy { it.price?.div(it.usageCount.takeIf { it > 0 } ?: 1) ?: Double.MAX_VALUE }) { item ->
+            val efficiencySorted = uiState.items.sortedBy { 
+                it.price?.div(it.usageCount.takeIf { count -> count > 0 } ?: 1) ?: Double.MAX_VALUE 
+            }
+            
+            items(efficiencySorted) { item ->
                 CPWItemCard(item = item)
             }
         }
@@ -229,8 +260,7 @@ fun StyleIntelligenceScreenPreview() {
     MaterialTheme {
         StyleIntelligenceScreen(
             uiState = WardrobeUiState(
-                glowScore = 0.84,
-                diversityIndex = "Strategic",
+                totalInvestment = 1200.0,
                 items = listOf(
                     ClothingItem(name = "Silk Blazer", category = ClothingCategory.TOPS, usageCount = 25, price = 350.0, colorHex = "#000000"),
                     ClothingItem(name = "Linen Pants", category = ClothingCategory.BOTTOMS, usageCount = 0, price = 120.0, colorHex = "#F5F5DC")
