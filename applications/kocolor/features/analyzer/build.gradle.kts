@@ -29,9 +29,18 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
+    implementation(libs.hilt.navigation.compose)
     implementation(libs.coil.compose)
     implementation("androidx.palette:palette-ktx:1.0.0")
     implementation(libs.kotlinx.serialization.json)
+
+    // CameraX
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
+
+    // ML Kit Face Detection
+    implementation(libs.mlkit.face.detection)
 
     // ML Kit - Moved to :features:readers:ocr
     // implementation(libs.mlkit.text.recognition)

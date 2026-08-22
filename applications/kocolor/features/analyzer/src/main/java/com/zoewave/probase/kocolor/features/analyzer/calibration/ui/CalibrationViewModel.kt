@@ -1,0 +1,90 @@
+package com.zoewave.probase.kocolor.features.analyzer.calibration.ui
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.zoewave.probase.kocolor.features.analyzer.calibration.ColorSeasonClassifier
+import com.zoewave.probase.kocolor.features.analyzer.calibration.LightingValidator
+import com.zoewave.probase.kocolor.model.calibration.FacialContrastVector
+import com.zoewave.probase.kocolor.model.calibration.PhenotypeProfile
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+sealed interface CalibrationUiState {
+    data object Idle : CalibrationUiState
+    data object Scanning : CalibrationUiState
+    data class Success(val profile: PhenotypeProfile) : CalibrationUiState
+    data class Error(val message: String) : CalibrationUiState
+}
+
+sealed interface LightingStatus {
+    data object Unknown : LightingStatus
+    data object Poor : LightingStatus
+    data object Optimal : LightingStatus
+}
+
+@HiltViewModel
+class CalibrationViewModel @Inject constructor(
+    private val lightingValidator: LightingValidator,
+    private val seasonClassifier: ColorSeasonClassifier
+) : ViewModel() {
+
+    private val _uiState = MutableStateFlow<CalibrationUiState>(CalibrationUiState.Idle)
+    val uiState: StateFlow<CalibrationUiState> = _uiState.asStateFlow()
+
+    private val _lightingStatus = MutableStateFlow<LightingStatus>(LightingStatus.Unknown)
+    val lightingStatus: StateFlow<LightingStatus> = _lightingStatus.asStateFlow()
+
+    private val _events = MutableSharedFlow<CalibrationEvent>()
+    val events: SharedFlow<CalibrationEvent> = _events.asSharedFlow()
+
+    init {
+        startLightingValidation()
+    }
+
+    private fun startLightingValidation() {
+        lightingValidator.start { lux ->
+            _lightingStatus.update {
+                if (lightingValidator.isLightingOptimal(lux)) LightingStatus.Optimal else LightingStatus.Poor
+            }
+        }
+    }
+
+    fun onScanResult(vector: FacialContrastVector, undertone: Float) {
+        if (_uiState.value !is CalibrationUiState.Scanning) return
+        
+        viewModelScope.launch {
+            val season = seasonClassifier.classify(vector, undertone)
+            val profile = PhenotypeProfile(
+                season = season,
+                undertone = undertone,
+                contrastVector = vector,
+                optimalPaletteHexCodes = seasonClassifier.getOptimalPalette(season)
+            )
+            _uiState.value = CalibrationUiState.Success(profile)
+            _events.emit(CalibrationEvent.NavigateBack)
+        }
+    }
+
+    fun startScan() {
+        if (_lightingStatus.value == LightingStatus.Optimal) {
+            _uiState.value = CalibrationUiState.Scanning
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        lightingValidator.stop()
+    }
+}
+
+sealed interface CalibrationEvent {
+    data object NavigateBack : CalibrationEvent
+}

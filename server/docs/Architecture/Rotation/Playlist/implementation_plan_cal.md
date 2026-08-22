@@ -21,6 +21,7 @@ I will implement the sensors and image analysis logic in the `analyzer` module.
 
 #### [NEW] [ColorExtractionAnalyzer.kt](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/features/analyzer/src/main/java/com/zoewave/probase/kocolor/features/analyzer/calibration/ColorExtractionAnalyzer.kt)
 - Implement `ImageAnalysis.Analyzer`.
+- **CRITICAL**: Configure the `ImageAnalysis.Builder` with `setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)` so that `imageProxy.toBitmap()` works natively without manual YUV conversion scripts.
 - Integrate ML Kit Face Detection to locate landmarks (cheeks, eyes, forehead).
 - Perform RGB/Luminance sampling on in-memory Bitmaps.
 - Fire callbacks with `FacialContrastVector` and `undertone`.
@@ -33,6 +34,7 @@ I will build the premium camera UI and state management.
 
 #### [NEW] [CalibrationCameraScreen.kt](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/features/analyzer/src/main/java/com/zoewave/probase/kocolor/features/analyzer/calibration/ui/CalibrationCameraScreen.kt)
 - Stateless Composable with CameraX `PreviewView`.
+- **Permissions**: Use `rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission())` for handling the Camera permission strictly within the Compose lifecycle.
 - `Canvas` overlay for dashed face reticle and focused dark regions.
 - Floating status pill for real-time lighting feedback.
 
@@ -42,7 +44,8 @@ I will build the premium camera UI and state management.
 
 ### Build Configuration
 #### [MODIFY] [analyzer/build.gradle.kts](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/features/analyzer/build.gradle.kts)
-- Add `com.google.mlkit:face-detection` dependency.
+- Add ML Kit Face Detection: `com.google.mlkit:face-detection`.
+- **CRITICAL**: Add CameraX dependencies (`camera-camera2`, `camera-lifecycle`, `camera-view`) to support the analyzer and preview UI.
 
 ## Verification Plan
 
