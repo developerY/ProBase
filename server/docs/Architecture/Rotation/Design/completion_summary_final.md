@@ -6,7 +6,7 @@ I have completed the V1 implementation and documentation of the KoColor Clothing
 
 ### Data & Domain Layer (Persistence & Logic)
 - **Room Database Integration**: Implemented a dual-table architecture separating immutable catalog data (`ClothingItemEntity`) from user behavioral metrics (`ClothingUsageEntity`).
-- **Atomic Transactions**: Implemented `RotationRepository.commitOutfitUsage()` using `@Transaction` to ensure global counters and individual wear counts increment in perfect sync.
+- **Atomic Transactions**: Implemented `RotationRepository.commitOutfitUsage()` within an atomic Room database transaction, ensuring global counters and individual wear counts increment in perfect sync.
 - **AI Scoring Engine**: Created `RotationScoringUseCase` implementing the V1 Penalty Matrix:
     - **Cold Start**: No penalties applied until 5 outfits are committed.
     - **Hard Cooldown**: 1.0 penalty for items worn < 48 hours.
