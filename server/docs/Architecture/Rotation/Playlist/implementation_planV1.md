@@ -29,7 +29,7 @@ I will implement the Room entities, relations, and DAOs required to store and re
 - Create a dedicated file for the relational POJO containing `@Embedded val playlist: StylePlaylistEntity` and an `@Relation` mapping to the daily plans.
 
 #### [NEW] [KoColorTypeConverters.kt](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/db/src/main/java/com/zoewave/probase/kocolor/db/converter/KoColorTypeConverters.kt)
-- Implement bidirectional converters for `Instant`, `LocalDate`, `List<String>`, and Enums.
+- Implement bidirectional converters for `Instant`, `LocalDate`, `List<String>` **(using `kotlinx.serialization` for JSON conversion)**, and Enums.
 
 #### [NEW] [PlaylistDao.kt](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/db/src/main/java/com/zoewave/probase/kocolor/db/dao/PlaylistDao.kt)
 - Define operations for inserting and updating playlists and daily plans.
@@ -46,7 +46,7 @@ I will implement the repository to manage playlist data with strict transaction 
 - Define the interface for playlist management.
 
 #### [NEW] [PlaylistRepositoryImpl.kt](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/repository/PlaylistRepositoryImpl.kt)
-- Implement `commitDailyOutfit` with idempotency logic and atomic transaction boundary. **It must depend on the V1 `RotationRepository` rather than the DAO to ensure global outfit counters are correctly incremented during the commit.**
+- Implement `commitDailyOutfit` with idempotency logic and atomic transaction boundary. **It must take `KoColorDatabase` as a dependency to use `database.withTransaction { ... }`, and it must depend on the V1 `RotationRepository` rather than the DAO to ensure global outfit counters are correctly incremented during the commit.**
 
 ## Verification Plan
 
