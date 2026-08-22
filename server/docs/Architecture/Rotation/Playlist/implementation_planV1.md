@@ -14,7 +14,7 @@ I will create the necessary data classes and enums to support the playlist orche
 - Define `SelectionRationale` data class for user-facing explainability.
 
 #### [NEW] [ProjectedRotationState.kt](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/model/src/main/java/com/zoewave/probase/kocolor/model/playlist/ProjectedRotationState.kt)
-- Implement `ProjectedRotationState` as an in-memory domain construct for simulating wear events during the 7-day generation loop. moved to `model` module to adhere to Clean Architecture.
+- Implement `ProjectedRotationState` as an in-memory domain construct for simulating wear events during the 7-day generation loop. moved to `model` module to adhere to Clean Architecture. **It must use a pure domain map (e.g., `Map<String, Pair<Int, Long>>` for useCount and lastUsedTimestamp) rather than relying on database entities to maintain strict module independence.**
 
 ### Persistence Layer (Room)
 I will implement the Room entities, relations, and DAOs required to store and retrieve playlists.
@@ -46,14 +46,14 @@ I will implement the repository to manage playlist data with strict transaction 
 - Define the interface for playlist management.
 
 #### [NEW] [PlaylistRepositoryImpl.kt](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/repository/PlaylistRepositoryImpl.kt)
-- Implement `commitDailyOutfit` with idempotency logic and atomic transaction boundary.
+- Implement `commitDailyOutfit` with idempotency logic and atomic transaction boundary. **It must depend on the V1 `RotationRepository` rather than the DAO to ensure global outfit counters are correctly incremented during the commit.**
 
 ## Verification Plan
 
 ### Automated Tests
 - **Unit Tests**:
     - `ProjectedRotationStateTest`: Verify that `simulateWear` correctly updates the in-memory state.
-    - `PlaylistRepositoryTest`: Verify `commitDailyOutfit` idempotency and correct interaction with `RotationDao`.
+    - `PlaylistRepositoryTest`: Verify `commitDailyOutfit` idempotency and correct interaction with the V1 `RotationRepository` (to ensure global outfit counters are still incremented).
     - `KoColorTypeConvertersTest`: Verify that `List<String>` JSON serialization correctly handles empty lists and doesn't deserialize into `[""]` (a list with one empty string).
 - **Database Tests**:
     - Verify Room entity relationships and cascade deletes.
