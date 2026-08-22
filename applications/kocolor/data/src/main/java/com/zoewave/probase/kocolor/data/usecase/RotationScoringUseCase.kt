@@ -20,6 +20,8 @@ class RotationScoringUseCase @Inject constructor(
         return rotationRepository.observeAllClothingWithUsage()
     }
 
+    fun observeGlobalMetrics() = rotationRepository.observeGlobalMetrics()
+
     /**
      * Calculates a normalized rotation penalty [0.0 to 1.0] based on usage frequency
      * and recency within a category.
@@ -45,8 +47,7 @@ class RotationScoringUseCase @Inject constructor(
         val recencyMs = targetItem.lastUsedTimestamp?.let { currentTime - it } ?: Long.MAX_VALUE
 
         // 4. Transform to scoring factors
-        val frequencyPenalty = if (currentUsageShare > highFrequencyShare) 0.85 
-                             else (currentUsageShare / highFrequencyShare)
+        val frequencyPenalty = if (currentUsageShare > highFrequencyShare) 0.85 else 0.0
         
         val recencyPenalty = if (recencyMs < maximumRecencyPenaltyWindowMs) 1.0 
                            else 0.0

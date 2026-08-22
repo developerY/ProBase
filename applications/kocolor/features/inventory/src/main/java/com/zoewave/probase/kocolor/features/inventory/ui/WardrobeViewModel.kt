@@ -36,6 +36,7 @@ data class WardrobeUiState(
     val draftItem: ClothingItem = ClothingItem(name = "", category = ClothingCategory.TOPS, colorHex = "#FFFFFF"),
     val totalInvestment: Double = 0.0,
     val totalItems: Int = 0,
+    val totalOutfitsCommitted: Long = 0,
     val itemsByCategory: Map<String, Int> = emptyMap(),
     val categoriesMetadata: Map<String, CategoryMetadata> = emptyMap(),
     val archiveStatuses: Map<Long, ArchiveStatus> = emptyMap(),
@@ -106,9 +107,10 @@ class WardrobeViewModel @Inject constructor(
 
     val uiState: StateFlow<WardrobeUiState> = combine(
         rotationScoringUseCase.observeAllClothingWithUsage(),
+        rotationScoringUseCase.observeGlobalMetrics(),
         _draftItem,
         _archiveStatuses
-    ) { itemsWithUsage, draft, archiveStatuses ->
+    ) { itemsWithUsage, globalMetrics, draft, archiveStatuses ->
         val enrichedModels = itemsWithUsage.map { wrapper ->
             wrapper.garment.copy(
                 usageCount = wrapper.usage?.useCount?.toInt() ?: 0,
@@ -143,7 +145,6 @@ class WardrobeViewModel @Inject constructor(
         
         // Simple Diversity Index: variance in usage across categories
         val diversityIndex = if (itemsByCategory.size > 1) {
-            val mean = itemsWithAnyUsage.toDouble() / itemsByCategory.size
             "Strategic" // Placeholder for now
         } else "Initializing"
 
@@ -153,6 +154,7 @@ class WardrobeViewModel @Inject constructor(
             draftItem = draft,
             totalInvestment = totalInvestment,
             totalItems = enrichedModels.size,
+            totalOutfitsCommitted = globalMetrics?.totalOutfitsCommitted ?: 0L,
             itemsByCategory = itemsByCategory,
             categoriesMetadata = categoryMetadata,
             archiveStatuses = archiveStatuses,

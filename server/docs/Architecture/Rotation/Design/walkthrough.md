@@ -1,39 +1,55 @@
-# Walkthrough: KoColor Rotation UI & Documentation
+# Walkthrough: V1 Clothing Rotation System & Curated Closet UI
 
-I have implemented the "Curated Closet" dashboard and established the architectural documentation for the Rotation feature suite. This work bridges the gap between the backend rotation engine and the premium fashion-tech user experience.
+I have implemented the foundational architecture and premium UI for the KoColor "Curated Closet" rotation system. This full-stack scaffolding connects behavioral data (wear history) to intelligent styling penalties and a data-driven dashboard.
 
-## 1. Curated Closet Dashboard (`CuratedClosetDashboard.kt`)
+## 1. Data & Domain Layer (Room & Clean Architecture)
 
-I built a stateless Composable that serves as the entry point for wardrobe analytics. It translates raw data into a high-end editorial experience.
+I established a robust data model that separates canonical product data from user-specific behavioral metrics.
 
-### Key Features:
-- **Visual Contrast**: Differentiates between AI-driven intelligence (holographic gradient) and inventory management (dark forest green).
-- **Fashion Typography**: Uses high-contrast Serif fonts for quantitative values to maintain a premium feel.
-- **Cold Start Handling**: Gracefully handles the "Cold Start" phase (< 5 outfits) by showing an infinity symbol (∞) for the Glow Score.
-- **Adaptive Layout**: Implements a 2-row grid with heavy 24dp rounded corners.
+### Key Components:
+- **Room Entities**:
+    - `GlobalRotationMetricsEntity`: Manages the global outfit counter to drive the "Cold Start" rule.
+    - `ClothingUsageEntity`: Tracks `useCount` and `lastUsedTimestamp` per item.
+    - `GarmentWithUsage`: A relation model that joins catalog data with usage metrics to eliminate N+1 queries.
+- **Atomic Transactions**: The `RotationRepository` implements `commitOutfitUsage` inside a database transaction, ensuring that global and individual metrics remain synchronized.
+- **Penalty Matrix (`RotationScoringUseCase`)**: Implemented the core logic for the AI engine:
+    - **Cold Start**: Penalties are ignored until 5 outfits are logged.
+    - **Hard Cooldown**: A 1.0 penalty is applied to any item worn within the last 48 hours.
+    - **Frequency Penalty**: A 0.85 penalty is applied if an item's share of its category usage exceeds 35%.
 
-````carousel
-![Populated Dashboard](file:///Users/developer/Library/Caches/Google/AndroidStudio2026.2.1/projects/probase.459da513/.artifacts/9a033fe5-376d-40d0-b139-57bb8f1ed91d/CuratedClosetDashboardPreview.png)
-<!-- slide -->
-![Cold Start Dashboard](file:///Users/developer/Library/Caches/Google/AndroidStudio2026.2.1/projects/probase.459da513/.artifacts/9a033fe5-376d-40d0-b139-57bb8f1ed91d/CuratedClosetDashboardColdStartPreview.png)
-````
+## 2. Premium Compose UI (The 4-Screen Model)
 
-## 2. Rotation Documentation (`rotation_screens_overview.md`)
+I built a suite of four screens using a premium fashion-tech aesthetic characterized by minimalist backgrounds, heavy rounded corners, and editorial typography.
 
-I created a new architectural overview for the four primary screens in the Rotation system.
+### Curated Closet (The Hub)
+The central dashboard provides high-level "Portfolio" metrics.
+- **Glow Score**: Intelligently switches from a percentage to "CALCULATING" during the Cold Start phase.
+- **Visual Delineation**: Uses a holographic gradient for the "INTELLIGENCE" action and a deep forest green for "INVENTORY".
 
-- **Curated Closet**: The dashboard hub.
-- **Strategic Diversity**: Breakdown of wardrobe architecture and concentration.
-- **Usage Metrics**: Behavioral analysis (Most Worn vs. Underutilized).
-- **Style Intelligence**: AI synthesis of financial performance and "Chromatic Core."
+### Strategic Diversity (The Footprint)
+Focuses on wardrobe architecture.
+- Displays concentration bars showing where the user's financial investment and piece count are concentrated across categories.
 
-## 3. Verification & Bug Fixes
-- **Resolved NoSuchFieldError**: Renamed Glow Score resource IDs to ensure a clean R class generation and resolve render issues in the Preview.
-- **Verified Previews**: Both the populated and empty/cold-start states have been verified via Compose Preview rendering.
+### Usage Metrics (The Behavior)
+A deep dive into garment utility.
+- **Frequency Buckets**: Groups items by wear counts (Never, 1-5, etc.).
+- **Resting State**: Explicitly highlights items currently in the 48-hour cooldown period.
+
+### Style Intelligence (The Analysis)
+The most advanced view, focusing on value and signature colors.
+- **CPW Logic**: Implements the "Cost Per Wear" formula. Unused items are gracefully labeled as **"NOT DEPLOYED"** to avoid mathematical errors.
+- **Chromatic Core**: Visualizes the user's most owned colors as a signature palette.
+
+## 3. Styling & Integration
+- **Visual Language**: All cards use `RoundedCornerShape(24.dp)` with subtle elevation on an off-white (`0xFFF9F9F9`) background.
+- **Typography**: Uses `FontFamily.Serif` for piece counts and currency values to convey a high-end, editorial feel.
+- **Navigation**: Fully integrated into the `KoColorNavEntryProvider` and accessible from the `WardrobeLandingScreen`.
 
 ---
 
 ### Artifacts Created/Modified:
-- [CuratedClosetDashboard.kt](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/features/inventory/src/main/java/com/zoewave/probase/kocolor/features/inventory/ui/CuratedClosetDashboard.kt)
-- [rotation_screens_overview.md](file:///Users/developer/AndroidStudioProjects/ProBase/server/docs/Architecture/Rotation/rotation_screens_overview.md)
-- [strings.xml](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/features/inventory/src/main/res/values/strings.xml)
+- **Entities**: `GlobalRotationMetricsEntity.kt`, `ClothingUsageEntity.kt`, `GarmentWithUsage.kt`
+- **Repository**: `RotationRepository.kt`, `RotationRepositoryImpl.kt`
+- **Use Case**: `RotationScoringUseCase.kt`
+- **Screens**: `CuratedClosetDashboard.kt`, `StrategicDiversityScreen.kt`, `UsageMetricsScreen.kt`, `StyleIntelligenceScreen.kt`
+- **Integration**: `WardrobeLandingScreen.kt`, `KoColorNavEntryProvider.kt`

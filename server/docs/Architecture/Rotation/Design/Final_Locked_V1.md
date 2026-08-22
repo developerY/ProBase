@@ -1,62 +1,34 @@
-# Architecture Specification: Category-Aware Clothing Rotation (V1 Locked)
+# Final Locked Specification: KoColor Rotation V1
 
-This document represents the final, locked architectural specification for the KoColor Clothing Rotation System.
+This document represents the final, implemented state of the KoColor Rotation and Inventory system as of V1.
 
-## 1. Data Layer: Strict Separation of State
+## 1. Domain & Data Contracts
 
-To ensure scalability and data integrity, user-specific personalization is decoupled from the canonical product catalog.
+### Persistent Entities
+- **`GlobalRotationMetricsEntity`**: Primary key `id=1`. Tracks `totalOutfitsCommitted`.
+- **`ClothingUsageEntity`**: Joined to `ClothingItemEntity` by `productId`. Tracks `useCount` (Int) and `lastUsedTimestamp` (Long).
 
-### `ClothingItemEntity` (Canonical)
-*   **Source**: Signed KCPS Vaults.
-*   **Role**: Defines the "Truth" of the garment (Name, Brand, Category, Color DNA).
-*   **Update**: Only during release cycles.
+### Business Logic (`RotationScoringUseCase`)
+The system calculates a `RotationPenalty` [0.0 - 1.0] used by the AI engine to deprioritize items.
+- **Cold Start Rule**: If `totalOutfitsCommitted < 5`, `penalty = 0.0` (System is learning).
+- **Recency Rule (Hard Cooldown)**: If `currentTime - lastUsed < 48h`, `penalty = 1.0`.
+- **Frequency Rule (Category Share)**: If an item's share of category usage `> 35%`, `penalty = 0.85`.
+- **Combination Logic**: `RotationPenalty = max(RecencyPenalty, FrequencyPenalty)`.
 
-### `ClothingUsageEntity` (Personalization)
-*   **Source**: Local User Behavior.
-*   **Role**: Tracks "Usage" metadata (Frequency, Recency).
-*   **Linkage**: Joined with `ClothingItemEntity` via `productId`.
-*   **Note**: Does NOT duplicate category data; category is retrieved via a database join.
+## 2. Presentation Layer
 
----
+### Visual Standards
+- **Corners**: `RoundedCornerShape(24.dp)`.
+- **Background**: `0xFFF9F9F9` (Off-white).
+- **Typography**: `FontFamily.Serif` for piece counts and currency values.
 
-## 2. Mathematical Formulation: Proportional Rotation
+### The 4-Screen Navigation Model
+1. **Curated Closet (Landing)**: High-level dashboard hub.
+2. **Strategic Diversity**: Wardrobe architecture and concentration.
+3. **Usage Metrics**: Behavioral history and frequency distribution.
+4. **Style Intelligence**: CPW analysis and "Chromatic Core" palette.
 
-The rotation engine produces a normalized **Rotation Penalty [0.0 - 1.0]** derived from two primary signals:
-
-### A. Category Usage Share (Frequency)
-The system calculates the item's share of selections within its specific rotation boundary (e.g., "TOPS").
-`Share = (Item Use Count) / (Total Category Use Count)`
-*   **Threshold**: A share > 35% triggers a high penalty.
-
-### B. Recency Decay (48-Hour Hard Window)
-Any item used within the last 48 hours receives a maximum penalty of `1.0`. This ensures that even if an item has a low overall share, it won't be recommended two days in a row.
-
-### C. Cold-Start Protection
-If the user has committed fewer than **5 total outfits**, all rotation penalties are suppressed (`0.0`). This prevents the AI from behaving erratically before a statistically significant baseline is established.
-
----
-
-## 3. Implementation Orchestration
-
-### Domain Layer (`RotationScoringUseCase`)
-All rotation mathematics and penalty calculations reside here. It is independently testable and isolated from UI logic.
-
-### Repository Layer (`KoColorRotationRepository`)
-Handles the **Atomic Transaction**. When an outfit is committed:
-1.  Apply `.distinct()` filter to input IDs to ensure accurate counting.
-2.  Wrapped in `database.withTransaction { ... }`.
-3.  Synchronously update `GlobalRotationMetrics` and individual `ClothingUsage` stats.
-
-### UI Layer (`OutfitGenerationViewModel`)
-Acts as the **UI Orchestrator**. 
-1.  Invokes the Use Case to generate candidate scoring.
-2.  Observes the database via `StateFlow`.
-3.  **Reactive Feedback**: UI badges (e.g., "Wear Count") update instantly upon database commit without manual invalidation.
-
----
-
-## 4. AI Engine Integration: The Selection Priority Rule
-
-The AI Style Architect receives a minified matrix containing the `RotationPenalty`. The system prompt enforces the following rules:
-*   **PRIORITIZE**: Items with **LOW** RotationPenalty (0.0 = "Never Worn").
-*   **AVOID**: Items with **HIGH** RotationPenalty (> 0.70 = "Exhausted") unless they are an absolute perfect match for user intent.
+## 3. Implementation Verification
+- **Atomic Sync**: Increments to `totalOutfitsCommitted` and `useCount` are handled in a single Room `@Transaction`.
+- **Division Safety**: CPW logic uses a nullable state for `useCount == 0`, rendering as **"NOT DEPLOYED"** in the UI.
+- **Cold Start UI**: Glow Score renders as "∞" when the global outfit count is below the threshold.

@@ -139,7 +139,7 @@ fun WardrobeLandingScreen(
                 CuratedClosetDashboard(
                     totalPieces = uiState.totalItems,
                     totalValue = uiState.totalInvestment,
-                    glowScore = uiState.glowScore.toFloat(),
+                    glowScore = if (uiState.totalOutfitsCommitted >= 5) uiState.glowScore.toFloat() else null,
                     diversityLabel = uiState.diversityIndex,
                     onViewIntelligenceClicked = { navTo(KoColorRoute.WardrobeAnalytics) },
                     onViewInventoryClicked = { navTo(KoColorRoute.Wardrobe) },

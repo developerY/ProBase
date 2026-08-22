@@ -1,25 +1,33 @@
 package com.zoewave.probase.kocolor.features.inventory.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zoewave.probase.core.model.ritual.ClothingCategory
+import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.kocolor.model.KoColorRoute
+import java.text.NumberFormat
+import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,20 +64,46 @@ fun StyleIntelligenceScreen(
                 .padding(padding)
                 .fillMaxSize(),
             contentPadding = PaddingValues(24.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+            verticalArrangement = Arrangement.spacedBy(32.dp)
         ) {
+            // 1. Chromatic Core
             item {
-                GlowScoreLargeCard(glowScore = uiState.glowScore)
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Text(
+                        text = "CHROMATIC CORE",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.Gray,
+                        letterSpacing = 1.sp
+                    )
+                    
+                    val colorGroups = remember(uiState.items) {
+                        uiState.items
+                            .filter { it.colorHex.isNotBlank() }
+                            .groupBy { it.colorHex }
+                            .toList()
+                            .sortedByDescending { it.second.size }
+                    }
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                    ) {
+                        colorGroups.forEach { (hex, items) ->
+                            Box(
+                                modifier = Modifier
+                                    .weight(items.size.toFloat())
+                                    .fillMaxHeight()
+                                    .background(Color(android.graphics.Color.parseColor(hex)))
+                                    .border(0.5.dp, Color.White.copy(alpha = 0.2f))
+                            )
+                        }
+                    }
+                }
             }
 
-            item {
-                IntelligenceSection(
-                    title = "ROTATION HEALTH",
-                    description = "Your current wardrobe usage distribution across all categories.",
-                    status = if (uiState.glowScore > 0.7) "OPTIMAL" else "INITIALIZING"
-                )
-            }
-
+            // 2. Performance Stats
             item {
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                     AnalysisSmallCard(
@@ -84,94 +118,75 @@ fun StyleIntelligenceScreen(
                     )
                 }
             }
+
+            // 3. Cost Per Wear (CPW) Analysis
+            item {
+                Text(
+                    text = "COST PER WEAR ANALYSIS",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.Gray,
+                    letterSpacing = 1.sp
+                )
+            }
+
+            items(uiState.items.sortedBy { it.price?.div(it.usageCount.takeIf { it > 0 } ?: 1) ?: Double.MAX_VALUE }) { item ->
+                CPWItemCard(item = item)
+            }
         }
     }
 }
 
 @Composable
-private fun GlowScoreLargeCard(glowScore: Double) {
+private fun CPWItemCard(item: ClothingItem) {
+    val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale.US) }
+    val cpw = if (item.usageCount > 0 && item.price != null) {
+        item.price!! / item.usageCount
+    } else null
+
     Card(
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(200.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            Column(
-                modifier = Modifier
-                    .padding(24.dp)
-                    .align(Alignment.Center),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
+        Row(
+            modifier = Modifier
+                .padding(20.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "${(glowScore * 100).toInt()}",
-                    style = MaterialTheme.typography.displayLarge.copy(
-                        fontFamily = FontFamily.Serif,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 80.sp
-                    ),
+                    text = item.name.uppercase(),
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Bold,
                     color = Color.Black
                 )
                 Text(
-                    text = "GLOW SCORE",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = Color.Gray,
-                    letterSpacing = 2.sp
-                )
-            }
-            
-            Icon(
-                imageVector = Icons.Default.AutoAwesome,
-                contentDescription = null,
-                tint = Color(0xFFFFD700).copy(alpha = 0.2f),
-                modifier = Modifier
-                    .size(120.dp)
-                    .align(Alignment.BottomEnd)
-                    .offset(x = 20.dp, y = 20.dp)
-            )
-        }
-    }
-}
-
-@Composable
-private fun IntelligenceSection(
-    title: String,
-    description: String,
-    status: String
-) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.labelSmall,
-                color = Color.Gray,
-                letterSpacing = 1.sp
-            )
-            Surface(
-                shape = RoundedCornerShape(50),
-                color = Color(0xFFE8F5E9)
-            ) {
-                Text(
-                    text = status,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                    text = "INVESTMENT: ${currencyFormatter.format(item.price ?: 0.0)}",
                     style = MaterialTheme.typography.labelSmall,
-                    color = Color(0xFF2E7D32),
-                    fontWeight = FontWeight.Bold
+                    color = Color.Gray
+                )
+            }
+
+            Column(horizontalAlignment = Alignment.End) {
+                Text(
+                    text = cpw?.let { currencyFormatter.format(it) } ?: "NOT DEPLOYED",
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontFamily = FontFamily.Serif,
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = if (cpw != null) Color(0xFF1B5E20) else Color.Gray
+                )
+                Text(
+                    text = "CPW",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.Gray,
+                    textAlign = TextAlign.End
                 )
             }
         }
-        Spacer(Modifier.height(8.dp))
-        Text(
-            text = description,
-            style = MaterialTheme.typography.bodyMedium,
-            color = Color.DarkGray
-        )
     }
 }
 
@@ -215,7 +230,11 @@ fun StyleIntelligenceScreenPreview() {
         StyleIntelligenceScreen(
             uiState = WardrobeUiState(
                 glowScore = 0.84,
-                diversityIndex = "Strategic"
+                diversityIndex = "Strategic",
+                items = listOf(
+                    ClothingItem(name = "Silk Blazer", category = ClothingCategory.TOPS, usageCount = 25, price = 350.0, colorHex = "#000000"),
+                    ClothingItem(name = "Linen Pants", category = ClothingCategory.BOTTOMS, usageCount = 0, price = 120.0, colorHex = "#F5F5DC")
+                )
             ),
             navTo = {}
         )

@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,6 +28,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoewave.probase.kocolor.features.inventory.ui.components.ProInsightCard
 import com.zoewave.probase.kocolor.model.KoColorRoute
+import java.text.NumberFormat
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -85,7 +88,8 @@ fun StrategicDiversityScreen(
                 PortfolioCategoryRow(
                     name = name,
                     metadata = metadata,
-                    totalItems = uiState.totalItems
+                    totalItems = uiState.totalItems,
+                    totalInvestment = uiState.totalInvestment
                 )
             }
 
@@ -109,9 +113,12 @@ fun StrategicDiversityScreen(
 private fun PortfolioCategoryRow(
     name: String,
     metadata: CategoryMetadata,
-    totalItems: Int
+    totalItems: Int,
+    totalInvestment: Double
 ) {
     val percentage = if (totalItems > 0) metadata.itemCount.toFloat() / totalItems else 0f
+    val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale.US) }
+    val investmentShare = if (totalInvestment > 0) (metadata.totalValue / totalInvestment) * 100 else 0.0
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
@@ -125,7 +132,7 @@ private fun PortfolioCategoryRow(
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = "${metadata.itemCount} Items (${(percentage * 100).toInt()}%)",
+                text = "${metadata.itemCount} Items | ${currencyFormatter.format(metadata.totalValue)} (${investmentShare.toInt()}%)",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
