@@ -7,10 +7,10 @@ This plan details the implementation of a Zero-Cloud facial scanning feature to 
 ### Domain & Data Models
 I will implement the core mathematical and aesthetic models in the `model` module.
 
-#### [NEW] [PhenotypeModels.kt](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/model/src/main/java/com/zoewave/probase/kocolor/model/calibration/PhenotypeModels.kt)
+#### [NEW] [ColorProfileModels.kt](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/model/src/main/java/com/zoewave/probase/kocolor/model/calibration/ColorProfileModels.kt)
 - Define `ColorSeason` enum: `BRIGHT_SPRING`, `TRUE_SPRING`, `LIGHT_SPRING`, `LIGHT_SUMMER`, `TRUE_SUMMER`, `SOFT_SUMMER`, `SOFT_AUTUMN`, `TRUE_AUTUMN`, `DEEP_AUTUMN`, `DEEP_WINTER`, `TRUE_WINTER`, `BRIGHT_WINTER`.
 - Define `FacialContrastVector` data class: `skinLuminance`, `hairLuminance`, `eyeLuminance`, `contrastDelta`.
-- Define `PhenotypeProfile` data class: `season`, `undertone`, `contrastVector`, `optimalPaletteHexCodes`.
+- Define `ColorProfile` data class: `season`, `undertone`, `contrastVector`, `optimalPaletteHexCodes`. Includes `toFashionProfile()` mapper.
 
 ### Hardware & Edge AI Layer
 I will implement the sensors and image analysis logic in the `analyzer` module.
@@ -41,6 +41,7 @@ I will build the premium camera UI and state management.
 #### [NEW] [CalibrationViewModel.kt](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/features/analyzer/src/main/java/com/zoewave/probase/kocolor/features/analyzer/calibration/ui/CalibrationViewModel.kt)
 - Orchestrate UI states (`PermissionsGranted`, `LightingStatus`, `Scanning`, `Success`, `Error`).
 - Manage `ColorExtractionAnalyzer` lifecycle.
+- Automatically saves the resulting `ColorProfile` to `FashionRepository` upon success.
 
 ### Build Configuration
 #### [MODIFY] [analyzer/build.gradle.kts](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/features/analyzer/build.gradle.kts)
@@ -51,8 +52,8 @@ I will build the premium camera UI and state management.
 
 ### Automated Tests
 - **Unit Tests**:
-    - `ColorSeasonClassifierTest`: Verify mathematical mapping for all 12 seasons.
-    - `LightingValidatorTest`: Verify lux threshold logic.
+    - `ColorSeasonClassifierTest`: Verified mathematical mapping for all 12 seasons.
+    - `LightingValidatorTest`: Verified lux threshold logic.
 - **Integration Tests**:
     - Verify `CalibrationViewModel` state transitions during a simulated scan.
 

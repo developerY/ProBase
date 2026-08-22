@@ -61,34 +61,49 @@ fun QuickActions(
     onEvent: (Unit) -> Unit, 
     navTo: (KoColorRoute) -> Unit
 ) {
-    Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            QuickActionCard(
+                uiState = QuickActionUiState(
+                    "Calibration",
+                    "Scan your color profile",
+                    Icons.Default.AutoAwesome,
+                    MaterialTheme.colorScheme.primary,
+                    KoColorRoute.Calibration,
+                    isExperimental = true
+                ),
+                modifier = Modifier.weight(1f),
+                onEvent = {},
+                navTo = navTo
+            )
+            QuickActionCard(
+                uiState = QuickActionUiState(
+                    "Style Playlist",
+                    "7-day style forecast",
+                    Icons.Default.AutoAwesome,
+                    MaterialTheme.colorScheme.secondary,
+                    KoColorRoute.StylePlaylist,
+                    isExperimental = true
+                ),
+                modifier = Modifier.weight(1f),
+                onEvent = {},
+                navTo = navTo
+            )
+        }
+        
         QuickActionCard(
             uiState = QuickActionUiState(
                 stringResource(R.string.applications_kocolor_apps_mobile_features_home_analyze_style), 
                 stringResource(R.string.applications_kocolor_apps_mobile_features_home_ai_visual_analysis), 
                 Icons.Default.AutoAwesome, 
-                MaterialTheme.colorScheme.primary, 
+                MaterialTheme.colorScheme.tertiary, 
                 KoColorRoute.StyleSimulator,
                 isExperimental = true
             ), 
-            modifier = Modifier.weight(1f), 
+            modifier = Modifier.fillMaxWidth(), 
             onEvent = {}, 
             navTo = navTo
         )
-        /* Hide Capture Product for initial release
-        QuickActionCard(
-            uiState = QuickActionUiState(
-                stringResource(R.string.applications_kocolor_apps_mobile_features_home_capture_product), 
-                stringResource(R.string.applications_kocolor_apps_mobile_features_home_gemini_scanner), 
-                Icons.Default.CameraAlt, 
-                MaterialTheme.colorScheme.secondary, 
-                KoColorRoute.Analyzer()
-            ), 
-            modifier = Modifier.weight(1f), 
-            onEvent = {}, 
-            navTo = navTo
-        )
-        */
     }
 }
 

@@ -35,11 +35,11 @@ class StyleSimulatorIntegrationTest {
     }
 
     private val sampleWardrobe = listOf(
-        ClothingItem(id = 1, name = "Power Suit", category = ClothingCategory.TOPS, formality = Formality.PROFESSIONAL, colorHex = "#222222", dominantHex = "#222222"),
-        ClothingItem(id = 2, name = "Office Trousers", category = ClothingCategory.BOTTOMS, formality = Formality.PROFESSIONAL, colorHex = "#333333", dominantHex = "#333333"),
-        ClothingItem(id = 3, name = "Oxfords", category = ClothingCategory.SHOES, formality = Formality.PROFESSIONAL, colorHex = "#111111", dominantHex = "#111111"),
-        ClothingItem(id = 4, name = "Pajama Top", category = ClothingCategory.TOPS, formality = Formality.LOUNGE, colorHex = "#FFFFFF"),
-        ClothingItem(id = 5, name = "Joggers", category = ClothingCategory.BOTTOMS, formality = Formality.LOUNGE, colorHex = "#808080")
+        ClothingItem(internalId = 1, remoteId = "1", name = "Power Suit", category = ClothingCategory.TOPS, formality = Formality.PROFESSIONAL, colorHex = "#222222", dominantHex = "#222222"),
+        ClothingItem(internalId = 2, remoteId = "2", name = "Office Trousers", category = ClothingCategory.BOTTOMS, formality = Formality.PROFESSIONAL, colorHex = "#333333", dominantHex = "#333333"),
+        ClothingItem(internalId = 3, remoteId = "3", name = "Oxfords", category = ClothingCategory.SHOES, formality = Formality.PROFESSIONAL, colorHex = "#111111", dominantHex = "#111111"),
+        ClothingItem(internalId = 4, remoteId = "4", name = "Pajama Top", category = ClothingCategory.TOPS, formality = Formality.LOUNGE, colorHex = "#FFFFFF"),
+        ClothingItem(internalId = 5, remoteId = "5", name = "Joggers", category = ClothingCategory.BOTTOMS, formality = Formality.LOUNGE, colorHex = "#808080")
     )
 
     @Test
@@ -48,7 +48,8 @@ class StyleSimulatorIntegrationTest {
             coEvery { localAi.generateStructuredContent(any(), any()) } returns Result.success("""
                 {
                   "rationale": "Nano Stylist: Selected for professionalism.",
-                  "selectedItemIds": [1, 2, 3],
+                  "selectedClothingIds": ["1", "2", "3"],
+                  "selectedCosmeticIds": [],
                   "recommendedPalette": ["#222222", "#333333", "#111111"]
                 }
             """.trimIndent())
@@ -58,12 +59,14 @@ class StyleSimulatorIntegrationTest {
                 circadianContext = "Morning Defense",
                 routineCompleted = true,
                 wellnessScore = 0.9,
+                weatherContext = "Sunny",
                 availableWardrobe = sampleWardrobe.filter { it.formality >= Formality.PROFESSIONAL },
+                availableCosmetics = emptyList(),
                 apiKey = "" // Blank API key forces bypass of Tier 1
             )
 
             assertThat(blueprint.rationale).contains("Nano Stylist")
-            assertThat(blueprint.selectedItemIds).containsExactly(1L, 2L, 3L)
+            assertThat(blueprint.selectedClothingIds).containsExactly("1", "2", "3")
         }
     }
 
@@ -78,7 +81,9 @@ class StyleSimulatorIntegrationTest {
                 circadianContext = "Evening Recovery",
                 routineCompleted = false,
                 wellnessScore = 0.5,
+                weatherContext = "Rainy",
                 availableWardrobe = sampleWardrobe,
+                availableCosmetics = emptyList(),
                 apiKey = "" 
             )
 
@@ -97,7 +102,9 @@ class StyleSimulatorIntegrationTest {
                 circadianContext = "Morning Defense",
                 routineCompleted = true,
                 wellnessScore = 0.9,
+                weatherContext = "Cloudy",
                 availableWardrobe = sampleWardrobe,
+                availableCosmetics = emptyList(),
                 fashionProfile = skinProfile,
                 apiKey = "" 
             )

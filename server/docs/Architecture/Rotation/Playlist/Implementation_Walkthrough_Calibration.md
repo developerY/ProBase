@@ -63,7 +63,7 @@ I built a high-fidelity camera experience using Jetpack Compose.
 ---
 
 ### Artifacts Created:
-- **Models**: `PhenotypeModels.kt`
+- **Models**: `ColorProfileModels.kt`
 - **Logic**: `LightingValidator.kt`, `ColorExtractionAnalyzer.kt`, `ColorSeasonClassifier.kt`
 - **UI**: `CalibrationCameraScreen.kt`, `CalibrationViewModel.kt`
 - **Config**: Updated `libs.versions.toml` and `analyzer/build.gradle.kts`.

@@ -2,10 +2,11 @@ package com.zoewave.probase.kocolor.features.analyzer.calibration.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.zoewave.probase.kocolor.data.FashionRepository
 import com.zoewave.probase.kocolor.features.analyzer.calibration.ColorSeasonClassifier
 import com.zoewave.probase.kocolor.features.analyzer.calibration.LightingValidator
 import com.zoewave.probase.kocolor.model.calibration.FacialContrastVector
-import com.zoewave.probase.kocolor.model.calibration.PhenotypeProfile
+import com.zoewave.probase.kocolor.model.calibration.ColorProfile
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,7 +21,7 @@ import javax.inject.Inject
 sealed interface CalibrationUiState {
     data object Idle : CalibrationUiState
     data object Scanning : CalibrationUiState
-    data class Success(val profile: PhenotypeProfile) : CalibrationUiState
+    data class Success(val profile: ColorProfile) : CalibrationUiState
     data class Error(val message: String) : CalibrationUiState
 }
 
@@ -33,7 +34,8 @@ sealed interface LightingStatus {
 @HiltViewModel
 class CalibrationViewModel @Inject constructor(
     private val lightingValidator: LightingValidator,
-    private val seasonClassifier: ColorSeasonClassifier
+    private val seasonClassifier: ColorSeasonClassifier,
+    private val fashionRepository: FashionRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<CalibrationUiState>(CalibrationUiState.Idle)
@@ -62,12 +64,16 @@ class CalibrationViewModel @Inject constructor(
         
         viewModelScope.launch {
             val season = seasonClassifier.classify(vector, undertone)
-            val profile = PhenotypeProfile(
+            val profile = ColorProfile(
                 season = season,
                 undertone = undertone,
                 contrastVector = vector,
                 optimalPaletteHexCodes = seasonClassifier.getOptimalPalette(season)
             )
+            
+            // Save to repository
+            fashionRepository.saveProfile(profile.toFashionProfile())
+            
             _uiState.value = CalibrationUiState.Success(profile)
             _events.emit(CalibrationEvent.NavigateBack)
         }

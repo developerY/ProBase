@@ -2,6 +2,19 @@
 
 This document outlines the purpose and content of the four primary screens in the KoColor Rotation system, designed to provide a professional, data-driven view of a curated wardrobe.
 
+## Access Points
+
+Users can access the Rotation and Playlist features through the following entry points:
+
+- **Home Screen Quick Actions**:
+    - **Calibration**: Triggers the Zero-Cloud facial scan to establish the user's color profile.
+    - **Style Playlist**: Opens the 7-day style forecast and orchestration suite.
+- **Wardrobe Landing (Curated Closet)**:
+    - **Intelligence**: Deep dive into CPW and Chromatic Core analysis.
+    - **Inventory**: Full list of garments with freshness indicators.
+    - **Footprint**: Quantitative breakdown of category concentration.
+    - **Behavior**: Usage distribution and "Wardrobe Heroes" ranking.
+
 ---
 
 ## 1. Curated Closet (The Hub) — *"What is the state of my wardrobe?"*
