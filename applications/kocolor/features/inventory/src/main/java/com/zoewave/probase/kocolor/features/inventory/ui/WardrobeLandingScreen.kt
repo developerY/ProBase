@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,22 +19,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.Checkroom
-import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Inventory2
-import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.FloatingActionButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -57,9 +43,6 @@ import com.zoewave.probase.kocolor.features.inventory.R
 import com.zoewave.probase.kocolor.features.inventory.ui.components.AtelierWardrobeCard
 import com.zoewave.probase.kocolor.features.inventory.ui.components.AtelierWardrobeUiState
 import com.zoewave.probase.kocolor.features.inventory.ui.components.RecentClothingCard
-import com.zoewave.probase.kocolor.features.inventory.ui.components.StatIcon
-import com.zoewave.probase.kocolor.features.inventory.ui.components.SummaryStatCard
-import com.zoewave.probase.kocolor.features.inventory.ui.components.SummaryStatUiState
 import com.zoewave.probase.kocolor.features.inventory.ui.components.WardrobeTaxonomyDialog
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import java.text.NumberFormat
@@ -141,83 +124,28 @@ fun WardrobeLandingScreen(
         modifier = modifier
     ) { padding ->
         LazyColumn(
-            modifier = Modifier.padding(padding).fillMaxSize(),
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize(),
             contentPadding = PaddingValues(
                 bottom = 100.dp,
-                start = 24.dp,
-                end = 24.dp,
-                top = 24.dp
+                start = 16.dp,
+                end = 16.dp,
+                top = 16.dp
             ),
-            verticalArrangement = Arrangement.spacedBy(32.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {
-                Column {
-                    Text(
-                        text = stringResource(R.string.applications_kocolor_features_inventory_curated_closet_title),
-                        style = MaterialTheme.typography.headlineLarge,
-                        fontFamily = FontFamily.Serif,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = stringResource(R.string.applications_kocolor_features_inventory_closet_desc),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                    )
-
-                    Spacer(Modifier.height(24.dp))
-
-                    // Compact Clickable Icons for Rotation Analytics
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        StatIcon(
-                            icon = Icons.Default.AutoAwesome,
-                            value = "${(uiState.glowScore * 100).toInt()}%",
-                            label = stringResource(R.string.applications_kocolor_features_inventory_glow_score_label),
-                            onClick = { navTo(KoColorRoute.UsageDistribution) },
-                            modifier = Modifier.weight(1f)
-                        )
-
-                        StatIcon(
-                            icon = Icons.Default.Explore,
-                            value = uiState.diversityIndex,
-                            label = stringResource(R.string.applications_kocolor_features_inventory_diversity_label),
-                            onClick = { navTo(KoColorRoute.StrategicDiversity) },
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                }
-            }
-
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    SummaryStatCard(
-                        uiState = SummaryStatUiState(
-                            label = stringResource(R.string.applications_kocolor_features_inventory_total_pieces_label),
-                            value = uiState.totalItems.toString(),
-                            icon = Icons.Default.Checkroom
-                        ),
-                        modifier = Modifier.weight(1f),
-                        onEvent = { navTo(KoColorRoute.WardrobeAnalytics) },
-                        navTo = navTo
-                    )
-
-                    val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale.getDefault()) }
-                    SummaryStatCard(
-                        uiState = SummaryStatUiState(
-                            label = stringResource(R.string.applications_kocolor_features_inventory_total_value_label),
-                            value = currencyFormatter.format(uiState.totalInvestment),
-                            icon = Icons.Default.MonetizationOn
-                        ),
-                        modifier = Modifier.weight(1f),
-                        onEvent = { navTo(KoColorRoute.Wardrobe) },
-                        navTo = navTo
-                    )
-                }
+                CuratedClosetDashboard(
+                    totalPieces = uiState.totalItems,
+                    totalValue = uiState.totalInvestment,
+                    glowScore = uiState.glowScore.toFloat(),
+                    diversityLabel = uiState.diversityIndex,
+                    onViewIntelligenceClicked = { navTo(KoColorRoute.WardrobeAnalytics) },
+                    onViewInventoryClicked = { navTo(KoColorRoute.Wardrobe) },
+                    onViewFootprintClicked = { navTo(KoColorRoute.StrategicDiversity) },
+                    onViewBehaviorClicked = { navTo(KoColorRoute.UsageDistribution) }
+                )
             }
 
             item {

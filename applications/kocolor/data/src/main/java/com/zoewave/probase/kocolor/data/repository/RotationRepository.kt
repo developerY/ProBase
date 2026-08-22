@@ -10,5 +10,5 @@ interface RotationRepository {
     fun observeAllUsages(): Flow<List<ClothingUsageEntity>>
     fun observeAllClothingWithUsage(): Flow<List<ClothingWithUsage>>
     suspend fun getUsageForCategory(categoryId: String): List<ClothingUsageEntity>
-    suspend fun commitOutfit(selectedProductIds: List<String>): Result<Unit>
+    suspend fun commitOutfitUsage(productIds: List<String>): Result<Unit>
 }

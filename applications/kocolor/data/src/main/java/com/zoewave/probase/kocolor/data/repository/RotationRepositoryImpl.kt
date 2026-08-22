@@ -42,9 +42,9 @@ class RotationRepositoryImpl @Inject constructor(
         rotationDao.getUsageForCategory(categoryId)
     }
 
-    override suspend fun commitOutfit(selectedProductIds: List<String>): Result<Unit> = withContext(Dispatchers.IO) {
+    override suspend fun commitOutfitUsage(productIds: List<String>): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {
-            database.commitOutfitUsage(selectedProductIds)
+            database.commitOutfitUsage(productIds)
         }
     }
 }

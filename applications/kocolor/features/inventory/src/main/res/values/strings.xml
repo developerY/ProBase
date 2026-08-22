@@ -71,6 +71,7 @@
     <string name="applications_kocolor_features_inventory_search">Search</string>
     <string name="applications_kocolor_features_inventory_info_icon">i</string>
     <string name="applications_kocolor_features_inventory_architecture_title">Wardrobe Architecture</string>
+    <string name="applications_kocolor_features_inventory_portfolio_composition">PORTFOLIO COMPOSITION</string>
     <string name="applications_kocolor_features_inventory_verticals_title">Archive Verticals</string>
     <string name="applications_kocolor_features_inventory_verticals_desc">Body-zone mapping for intuitive archival retrieval.</string>
     <string name="applications_kocolor_features_inventory_pieces_format">%1$d Pieces</string>

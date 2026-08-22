@@ -45,7 +45,7 @@ class RotationScoringUseCase @Inject constructor(
         val recencyMs = targetItem.lastUsedTimestamp?.let { currentTime - it } ?: Long.MAX_VALUE
 
         // 4. Transform to scoring factors
-        val frequencyPenalty = if (currentUsageShare > highFrequencyShare) 1.0 
+        val frequencyPenalty = if (currentUsageShare > highFrequencyShare) 0.85 
                              else (currentUsageShare / highFrequencyShare)
         
         val recencyPenalty = if (recencyMs < maximumRecencyPenaltyWindowMs) 1.0 
