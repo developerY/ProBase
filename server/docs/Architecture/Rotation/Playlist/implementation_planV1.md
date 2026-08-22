@@ -14,7 +14,7 @@ I will create the necessary data classes and enums to support the playlist orche
 - Define `SelectionRationale` data class for user-facing explainability.
 
 #### [NEW] [ProjectedRotationState.kt](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/model/src/main/java/com/zoewave/probase/kocolor/model/playlist/ProjectedRotationState.kt)
-- Implement `ProjectedRotationState` as an in-memory domain construct for simulating wear events during the 7-day generation loop. moved to `model` module to adhere to Clean Architecture. **It must use a pure domain map (e.g., `Map<String, Pair<Int, Long>>` for useCount and lastUsedTimestamp) rather than relying on database entities to maintain strict module independence.**
+- Implement `ProjectedRotationState` as an in-memory domain construct for simulating wear events during the 7-day generation loop. moved to `model` module to adhere to Clean Architecture. **It must use a pure domain map (e.g., `Map<String, UsageSnapshot>`, where `data class UsageSnapshot(val useCount: Int, val lastUsedAt: Long?)`) rather than relying on database entities to maintain strict module independence.**
 
 ### Persistence Layer (Room)
 I will implement the Room entities, relations, and DAOs required to store and retrieve playlists.
