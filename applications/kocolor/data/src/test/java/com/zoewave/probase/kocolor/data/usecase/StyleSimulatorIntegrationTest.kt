@@ -1,4 +1,4 @@
-package com.zoewave.probase.kocolor.features.analyzer.simulator.data
+package com.zoewave.probase.kocolor.data.usecase
 
 import android.util.Log
 import com.google.common.truth.Truth.assertThat

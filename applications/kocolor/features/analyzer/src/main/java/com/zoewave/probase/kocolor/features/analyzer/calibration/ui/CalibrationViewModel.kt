@@ -80,9 +80,7 @@ class CalibrationViewModel @Inject constructor(
     }
 
     fun startScan() {
-        if (_lightingStatus.value == LightingStatus.Optimal) {
-            _uiState.value = CalibrationUiState.Scanning
-        }
+        _uiState.value = CalibrationUiState.Scanning
     }
 
     override fun onCleared() {

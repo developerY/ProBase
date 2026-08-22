@@ -81,7 +81,7 @@ fun CalibrationCameraScreen(
             )
 
             Column(
-                modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 64.dp),
+                modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 120.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
@@ -93,9 +93,14 @@ fun CalibrationCameraScreen(
                 Spacer(Modifier.height(24.dp))
                 Button(
                     onClick = { viewModel.startScan() },
-                    enabled = lightingStatus == LightingStatus.Optimal && uiState !is CalibrationUiState.Scanning,
+                    enabled = uiState !is CalibrationUiState.Scanning,
                     shape = RoundedCornerShape(24.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.White, 
+                        contentColor = Color.Black,
+                        disabledContainerColor = Color.White.copy(alpha = 0.3f),
+                        disabledContentColor = Color.Black.copy(alpha = 0.5f)
+                    ),
                     modifier = Modifier.height(56.dp).padding(horizontal = 32.dp)
                 ) {
                     Text(

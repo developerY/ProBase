@@ -23,6 +23,10 @@ interface PlaylistDao {
     suspend fun insertDailyPlans(plans: List<DailyStylePlanEntity>)
 
     @Transaction
+    @Query("SELECT * FROM style_playlists ORDER BY weekStartDate DESC LIMIT 1")
+    fun observeLatestPlaylist(): Flow<PlaylistWithDays?>
+
+    @Transaction
     @Query("SELECT * FROM style_playlists WHERE playlistId = :playlistId")
     fun observePlaylistWithDays(playlistId: String): Flow<PlaylistWithDays?>
 

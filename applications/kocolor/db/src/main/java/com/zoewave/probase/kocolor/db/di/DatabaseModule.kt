@@ -14,6 +14,7 @@ import com.zoewave.probase.kocolor.db.dao.FashionProfileDao
 import com.zoewave.probase.kocolor.db.dao.GarmentRotationDao
 import com.zoewave.probase.kocolor.db.dao.InstalledPackDao
 import com.zoewave.probase.kocolor.db.dao.InventoryDao
+import com.zoewave.probase.kocolor.db.dao.PlaylistDao
 import com.zoewave.probase.kocolor.db.dao.ProductDao
 import com.zoewave.probase.kocolor.db.dao.RoutineDao
 import com.zoewave.probase.kocolor.db.dao.SavedSuggestionDao
@@ -85,5 +86,8 @@ abstract class DatabaseModule {
 
         @Provides
         fun provideGarmentRotationDao(db: KoColorDatabase): GarmentRotationDao = db.garmentRotationDao
+
+        @Provides
+        fun providePlaylistDao(db: KoColorDatabase): PlaylistDao = db.playlistDao
     }
 }

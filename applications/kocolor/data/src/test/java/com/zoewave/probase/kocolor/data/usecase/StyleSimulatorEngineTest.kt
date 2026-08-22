@@ -1,4 +1,4 @@
-package com.zoewave.probase.kocolor.features.analyzer.simulator.data
+package com.zoewave.probase.kocolor.data.usecase
 
 import com.google.common.truth.Truth.assertThat
 import com.zoewave.probase.core.model.ritual.ClothingCategory

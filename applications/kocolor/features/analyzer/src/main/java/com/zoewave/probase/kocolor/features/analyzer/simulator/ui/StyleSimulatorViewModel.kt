@@ -24,8 +24,8 @@ import com.zoewave.probase.kocolor.data.repository.RotationRepository
 import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
 import com.zoewave.probase.kocolor.data.usecase.RotationScoringUseCase
 import com.zoewave.probase.kocolor.db.dao.RoutineDao
-import com.zoewave.probase.kocolor.features.analyzer.simulator.data.StyleBlueprint
-import com.zoewave.probase.kocolor.features.analyzer.simulator.data.StyleSimulatorEngine
+import com.zoewave.probase.kocolor.data.usecase.StyleBlueprint
+import com.zoewave.probase.kocolor.data.usecase.StyleSimulatorEngine
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.ResultTab
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.VisualBlueprintData
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.mapToVisualBlueprintData
