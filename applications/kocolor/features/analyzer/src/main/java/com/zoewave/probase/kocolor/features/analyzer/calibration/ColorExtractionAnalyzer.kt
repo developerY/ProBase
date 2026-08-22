@@ -25,19 +25,15 @@ class ColorExtractionAnalyzer(
 
     @OptIn(androidx.camera.core.ExperimentalGetImage::class)
     override fun analyze(imageProxy: ImageProxy) {
-        val mediaImage = imageProxy.image
-        if (mediaImage == null) {
-            imageProxy.close()
-            return
-        }
-
-        val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
+        // Since we configured CameraX to output RGBA_8888, we can't use fromMediaImage.
+        // We convert to Bitmap first, which CameraX 1.3.0+ handles efficiently for RGBA.
+        val bitmap = imageProxy.toBitmap()
+        val image = InputImage.fromBitmap(bitmap, 0) // toBitmap() already handles rotation
 
         detector.process(image)
             .addOnSuccessListener { faces ->
                 if (faces.isNotEmpty()) {
                     val face = faces[0]
-                    val bitmap = imageProxy.toBitmap()
                     
                     // 1. Skin (Cheek)
                     val cheekLandmark = face.getLandmark(FaceLandmark.LEFT_CHEEK) ?: face.getLandmark(FaceLandmark.RIGHT_CHEEK)
