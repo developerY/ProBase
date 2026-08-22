@@ -15,7 +15,7 @@ The KoColor Clothing Rotation System is a feedback-driven engine designed to enc
 ## 2. Screen Content Specifications
 
 ### Curated Closet (Wardrobe Landing)
-*   **Glow Score (Wardrobe Utilization)**: A 0–100% metric showing the percentage of the owned wardrobe that has been worn. Displays "∞" or "CALCULATING" during the Cold Start phase (< 5 outfits).
+*   **Glow Score (Wardrobe Utilization)**: A 0–100% metric showing the percentage of the owned wardrobe that has been worn. Displays "—" or "CALCULATING" during the Cold Start phase (< 5 outfits).
 *   **Diversity Index (Wardrobe Entropy)**: A qualitative label (e.g., "Strategic", "Eclectic") measuring how broadly usage is distributed across categories.
 *   **Item Count & Value**: High-level summaries of total pieces (Editorial Serif font) and total portfolio investment (Dark Green Serif font).
 *   **Actions**: Dual-path navigation: "VIEW INTELLIGENCE" (Holographic action) and "VIEW INVENTORY" (Forest Green action).

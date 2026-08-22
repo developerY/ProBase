@@ -11,12 +11,12 @@ This document provides the technical and functional specification for the four p
 The central entry point and "Portfolio View" of the user's wardrobe. It frames clothing as a curated collection and financial investment.
 
 ### Functional Requirements
-- **Cold Start Awareness**: Detects if `totalOutfitsCommitted < 5`. If true, Glow Score displays "∞".
+- **Cold Start Awareness**: Detects if `totalOutfitsCommitted < 5`. If true, Glow Score displays "—".
 - **Holographic vs. Grounded UX**: Differentiates between AI-driven intelligence (iridescent gradients) and physical inventory management (forest green).
 - **Premium Typography**: piece counts and currency values must use `FontFamily.Serif` for a high-end, editorial feel.
 
 ### UI Components
-- **Glow Score Card**: 0–100% utilization. Displays "∞" in cold start.
+- **Glow Score Card**: 0–100% utilization. Displays "—" in cold start.
 - **Diversity Index Card**: Textual label (e.g., "Strategic").
 - **Intelligence Vertical Card**: Large card with piece count and "VIEW INTELLIGENCE" holographic footer.
 - **Inventory Vertical Card**: Large card with total USD value and "VIEW INVENTORY →" forest green footer.

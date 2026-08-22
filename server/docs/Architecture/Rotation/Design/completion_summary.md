@@ -16,7 +16,7 @@ I have completed the full-stack implementation and documentation of the KoColor 
 ### Premium Presentation Layer (Jetpack Compose)
 Built a high-end, 4-screen analytical suite with consistent visual standards (24dp corners, off-white editorial background, Serif typography).
 
-1.  **Curated Closet (The Hub)**: Central dashboard with "Cold Start" detection (rendering "∞" for utilization until threshold met). Features holographic and forest green action delineations.
+1.  **Curated Closet (The Hub)**: Central dashboard with "Cold Start" detection (rendering "—" for utilization until threshold met). Features holographic and forest green action delineations.
 2.  **Strategic Diversity (The Footprint)**: Breakdown of wardrobe concentration showing piece count and financial investment share per category.
 3.  **Usage Metrics (The Behavior)**: Visualizes rotation frequency buckets, identifies "Wardrobe Heroes," and explicitly tracks "Resting" items.
 4.  **Style Intelligence (The Analysis)**: Calculates Cost Per Wear (CPW) with "NOT DEPLOYED" safety handling for unused items. Displays the "Chromatic Core" spectral signature.
@@ -35,6 +35,7 @@ I have established a comprehensive documentation tree in `server/docs/Architectu
 - **Bug Fixes**: Resolved `NoSuchFieldError` in Previews by refreshing resource naming and field generation.
 - **UI Polish**: Fixed type mismatches in `Color.parseColor` and handled nullable states in currency/CPW math.
 - **Compose Previews**: Verified all screens (including Cold Start and Populated states) render accurately.
+- **Mathematical Correctness**: Updated the Cold Start placeholder from "∞" to "—" across the code and documentation to ensure accuracy for a percentage-based metric.
 
 ---
 

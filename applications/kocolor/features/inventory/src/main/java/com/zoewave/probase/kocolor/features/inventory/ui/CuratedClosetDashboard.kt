@@ -58,7 +58,7 @@ fun CuratedClosetDashboard(
         ) {
             SmallStatCard(
                 icon = Icons.Default.AutoAwesome,
-                value = glowScore?.let { "${(it * 100).toInt()}%" } ?: "∞",
+                value = glowScore?.let { "${(it * 100).toInt()}%" } ?: "—",
                 label = "BEHAVIOR",
                 onClick = onViewBehaviorClicked,
                 modifier = Modifier.weight(1f)

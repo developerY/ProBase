@@ -31,4 +31,4 @@ The system calculates a `RotationPenalty` [0.0 - 1.0] used by the AI engine to d
 ## 3. Implementation Verification
 - **Atomic Sync**: Increments to `totalOutfitsCommitted` and `useCount` are handled in a single Room `@Transaction`.
 - **Division Safety**: CPW logic uses a nullable state for `useCount == 0`, rendering as **"NOT DEPLOYED"** in the UI.
-- **Cold Start UI**: Glow Score renders as "∞" when the global outfit count is below the threshold.
+- **Cold Start UI**: Glow Score renders as "—" when the global outfit count is below the threshold.
