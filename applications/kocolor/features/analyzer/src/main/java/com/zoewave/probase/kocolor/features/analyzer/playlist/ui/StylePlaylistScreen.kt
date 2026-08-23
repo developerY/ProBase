@@ -2,6 +2,7 @@ package com.zoewave.probase.kocolor.features.analyzer.playlist.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -46,15 +48,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.zoewave.probase.core.model.ritual.ClothingItem
-import com.zoewave.probase.kocolor.db.entity.DailyStylePlanEntity
 import com.zoewave.probase.kocolor.model.playlist.DailyPlanStatus
 import com.zoewave.probase.kocolor.model.playlist.PlaylistStatus
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.shared.BlueprintDetailContent
+import com.zoewave.probase.kocolor.model.KoColorRoute
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
@@ -67,41 +69,86 @@ fun StylePlaylistScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        "STYLE PLAYLIST",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontFamily = FontFamily.Serif,
-                        letterSpacing = 2.sp
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFFF9F9F9)
+    if (uiState.selectedPlanForDetail != null) {
+        val resolvedPlan = uiState.selectedPlanForDetail!!
+        Scaffold(
+            topBar = {
+                CenterAlignedTopAppBar(
+                    title = {
+                        Text(
+                            "DAILY BLUEPRINT",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontFamily = FontFamily.Serif,
+                            letterSpacing = 2.sp
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = { viewModel.onEvent(StylePlaylistEvent.SelectPlanForDetail(null)) }) {
+                            Icon(Icons.Default.Close, contentDescription = "Close")
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFFF9F9F9))
                 )
-            )
-        },
-        containerColor = Color(0xFFF9F9F9)
-    ) { padding ->
-        if (uiState.isLoading) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = Color.Black)
+            },
+            containerColor = Color(0xFFF9F9F9)
+        ) { padding ->
+            Box(modifier = Modifier.padding(padding).padding(horizontal = 24.dp)) {
+                BlueprintDetailContent(
+                    title = resolvedPlan.plan.targetDate.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.US).uppercase(),
+                    rationale = resolvedPlan.plan.rationale.rotationReason,
+                    isLocalResult = true,
+                    recommendedClothing = resolvedPlan.clothingItems,
+                    recommendedCosmetics = resolvedPlan.cosmeticItems,
+                    recommendedPalette = emptyList(),
+                    selectedResultTab = uiState.selectedResultTab,
+                    onTabSelected = { viewModel.onEvent(StylePlaylistEvent.SelectResultTab(it)) },
+                    actionButtonText = if (resolvedPlan.plan.status != DailyPlanStatus.COMMITTED) "I'M WEARING THIS" else null,
+                    onActionClick = { 
+                        viewModel.onEvent(StylePlaylistEvent.CommitDay(resolvedPlan.plan.planId, resolvedPlan.plan.baseOutfitProductIds))
+                        viewModel.onEvent(StylePlaylistEvent.SelectPlanForDetail(null))
+                    },
+                    navTo = {}
+                )
             }
-        } else if (uiState.currentPlaylist.isEmpty()) {
-            EmptyPlaylistState(onGenerate = { viewModel.onEvent(StylePlaylistEvent.GenerateWeekly) })
-        } else {
-            PlaylistContent(
-                uiState = uiState,
-                onCommit = { planId, ids -> viewModel.onEvent(StylePlaylistEvent.CommitDay(planId, ids)) },
-                modifier = Modifier.padding(padding)
-            )
+        }
+    } else {
+        Scaffold(
+            topBar = {
+                CenterAlignedTopAppBar(
+                    title = {
+                        Text(
+                            "STYLE PLAYLIST",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontFamily = FontFamily.Serif,
+                            letterSpacing = 2.sp
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color(0xFFF9F9F9)
+                    )
+                )
+            },
+            containerColor = Color(0xFFF9F9F9)
+        ) { padding ->
+            if (uiState.isLoading) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = Color.Black)
+                }
+            } else if (uiState.currentPlaylist.isEmpty()) {
+                EmptyPlaylistState(onGenerate = { viewModel.onEvent(StylePlaylistEvent.GenerateWeekly) })
+            } else {
+                PlaylistContent(
+                    uiState = uiState,
+                    onCommit = { planId, ids -> viewModel.onEvent(StylePlaylistEvent.CommitDay(planId, ids)) },
+                    onSelect = { viewModel.onEvent(StylePlaylistEvent.SelectPlanForDetail(it)) },
+                    modifier = Modifier.padding(padding)
+                )
+            }
         }
     }
 }
@@ -128,10 +175,9 @@ private fun EmptyPlaylistState(onGenerate: () -> Unit) {
         )
         Text(
             "Generate your 7-day style forecast based on your unique color profile.",
-            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(vertical = 16.dp),
             style = MaterialTheme.typography.bodyMedium,
-            color = Color.Gray,
-            modifier = Modifier.padding(vertical = 16.dp)
+            color = Color.Gray
         )
         Button(
             onClick = onGenerate,
@@ -147,6 +193,7 @@ private fun EmptyPlaylistState(onGenerate: () -> Unit) {
 private fun PlaylistContent(
     uiState: StylePlaylistUiState,
     onCommit: (String, List<String>) -> Unit,
+    onSelect: (ResolvedDailyPlan) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -161,7 +208,8 @@ private fun PlaylistContent(
         items(uiState.currentPlaylist) { resolvedPlan ->
             DailyPlanCard(
                 resolvedPlan = resolvedPlan, 
-                onCommit = { onCommit(resolvedPlan.plan.planId, resolvedPlan.plan.baseOutfitProductIds) }
+                onCommit = { onCommit(resolvedPlan.plan.planId, resolvedPlan.plan.baseOutfitProductIds) },
+                onClick = { onSelect(resolvedPlan) }
             )
         }
     }
@@ -206,7 +254,8 @@ private fun PlaylistHeader(status: PlaylistStatus) {
 @Composable
 private fun DailyPlanCard(
     resolvedPlan: ResolvedDailyPlan,
-    onCommit: () -> Unit
+    onCommit: () -> Unit,
+    onClick: () -> Unit
 ) {
     val plan = resolvedPlan.plan
     val isCommitted = plan.status == DailyPlanStatus.COMMITTED
@@ -217,7 +266,9 @@ private fun DailyPlanCard(
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Row(
@@ -236,7 +287,6 @@ private fun DailyPlanCard(
             
             Spacer(Modifier.height(16.dp))
 
-            // THE OUTFIT ROW
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier.fillMaxWidth()
@@ -294,7 +344,6 @@ private fun GarmentThumbnail(item: ClothingItem) {
                 contentScale = ContentScale.Crop
             )
         } else {
-            // Fallback to color if no image
             Box(
                 modifier = Modifier
                     .size(32.dp)
@@ -304,4 +353,3 @@ private fun GarmentThumbnail(item: ClothingItem) {
         }
     }
 }
-

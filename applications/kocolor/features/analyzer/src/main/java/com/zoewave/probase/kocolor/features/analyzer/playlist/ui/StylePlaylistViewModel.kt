@@ -10,9 +10,14 @@ import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
 import com.zoewave.probase.kocolor.data.usecase.GeneratePlaylistUseCase
 import com.zoewave.probase.kocolor.db.entity.DailyStylePlanEntity
 import com.zoewave.probase.kocolor.db.entity.PlaylistWithDays
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.ResultTab
 import com.zoewave.probase.kocolor.model.playlist.PlaylistStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import javax.inject.Inject
@@ -25,6 +30,8 @@ data class ResolvedDailyPlan(
 
 data class StylePlaylistUiState(
     val currentPlaylist: List<ResolvedDailyPlan> = emptyList(),
+    val selectedPlanForDetail: ResolvedDailyPlan? = null,
+    val selectedResultTab: ResultTab = ResultTab.CLOTHES,
     val playlistStatus: PlaylistStatus? = null,
     val isLoading: Boolean = false,
     val error: String? = null
@@ -33,6 +40,8 @@ data class StylePlaylistUiState(
 sealed interface StylePlaylistEvent {
     data object GenerateWeekly : StylePlaylistEvent
     data class CommitDay(val planId: String, val productIds: List<String>) : StylePlaylistEvent
+    data class SelectPlanForDetail(val plan: ResolvedDailyPlan?) : StylePlaylistEvent
+    data class SelectResultTab(val tab: ResultTab) : StylePlaylistEvent
 }
 
 @HiltViewModel
@@ -45,14 +54,26 @@ class StylePlaylistViewModel @Inject constructor(
 
     private val _isLoading = MutableStateFlow(false)
     private val _error = MutableStateFlow<String?>(null)
+    private val _selectedPlan = MutableStateFlow<ResolvedDailyPlan?>(null)
+    private val _selectedResultTab = MutableStateFlow(ResultTab.CLOTHES)
 
     val uiState: StateFlow<StylePlaylistUiState> = combine(
         playlistRepository.observeLatestPlaylist(),
         wardrobeRepository.getAllClothing(),
         cosmeticRepository.getAllCosmetics(),
         _isLoading,
-        _error
-    ) { playlist, wardrobe, cosmetics, loading, err ->
+        _error,
+        _selectedPlan,
+        _selectedResultTab
+    ) { array ->
+        val playlist = array[0] as PlaylistWithDays?
+        val wardrobe = array[1] as List<ClothingItem>
+        val cosmetics = array[2] as List<CosmeticItem>
+        val loading = array[3] as Boolean
+        val err = array[4] as String?
+        val selected = array[5] as ResolvedDailyPlan?
+        val tab = array[6] as ResultTab
+
         val resolvedPlans = playlist?.dailyPlans?.map { plan ->
             val clothingIds = plan.baseOutfitProductIds.mapNotNull { it.removePrefix("w_").toLongOrNull() }
             val cosmeticIds = plan.cosmeticProductIds.mapNotNull { it.removePrefix("c_").toLongOrNull() }
@@ -66,6 +87,8 @@ class StylePlaylistViewModel @Inject constructor(
 
         StylePlaylistUiState(
             currentPlaylist = resolvedPlans.sortedBy { it.plan.targetDate },
+            selectedPlanForDetail = selected,
+            selectedResultTab = tab,
             playlistStatus = playlist?.playlist?.status,
             isLoading = loading,
             error = err
@@ -80,6 +103,8 @@ class StylePlaylistViewModel @Inject constructor(
         when (event) {
             StylePlaylistEvent.GenerateWeekly -> generate()
             is StylePlaylistEvent.CommitDay -> commit(event.planId, event.productIds)
+            is StylePlaylistEvent.SelectPlanForDetail -> _selectedPlan.value = event.plan
+            is StylePlaylistEvent.SelectResultTab -> _selectedResultTab.value = event.tab
         }
     }
 
