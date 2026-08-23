@@ -93,6 +93,10 @@ class CalibrationViewModel @Inject constructor(
         _uiState.value = CalibrationUiState.Scanning
     }
 
+    fun onError(message: String) {
+        _uiState.value = CalibrationUiState.Error(message)
+    }
+
     override fun onCleared() {
         super.onCleared()
         lightingValidator.stop()

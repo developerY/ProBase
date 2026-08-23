@@ -5,7 +5,9 @@ import android.util.Size
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
-import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.ImageCapture
+import androidx.camera.core.ImageCaptureException
+import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
@@ -71,6 +73,7 @@ import com.zoewave.probase.kocolor.features.analyzer.calibration.ColorExtraction
 import com.zoewave.probase.kocolor.model.calibration.ColorProfile
 import com.zoewave.probase.kocolor.model.calibration.FacialContrastVector
 import java.util.Locale
+import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
 @Composable
@@ -100,6 +103,9 @@ fun CalibrationCameraScreen(
         }
     }
 
+    val cameraExecutor = remember { Executors.newSingleThreadExecutor() }
+    val imageCapture = remember { ImageCapture.Builder().build() }
+
     Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
         if (uiState is CalibrationUiState.Success) {
             CalibrationResultContent(
@@ -109,8 +115,7 @@ fun CalibrationCameraScreen(
         } else {
             if (hasCameraPermission) {
                 CameraPreview(
-                    onScanResult = viewModel::onScanResult,
-                    isScanning = uiState is CalibrationUiState.Scanning
+                    imageCapture = imageCapture
                 )
                 
                 CalibrationOverlay()
@@ -132,7 +137,15 @@ fun CalibrationCameraScreen(
                     )
                     Spacer(Modifier.height(24.dp))
                     Button(
-                        onClick = { viewModel.startScan() },
+                        onClick = { 
+                            viewModel.startScan()
+                            captureAndProcess(
+                                imageCapture = imageCapture,
+                                executor = cameraExecutor,
+                                onResult = viewModel::onScanResult,
+                                onError = { viewModel.onError(it) }
+                            )
+                        },
                         enabled = uiState !is CalibrationUiState.Scanning,
                         shape = RoundedCornerShape(24.dp),
                         colors = ButtonDefaults.buttonColors(
@@ -152,6 +165,29 @@ fun CalibrationCameraScreen(
             }
         }
     }
+}
+
+private fun captureAndProcess(
+    imageCapture: ImageCapture,
+    executor: Executor,
+    onResult: (FacialContrastVector, Float) -> Unit,
+    onError: (String) -> Unit
+) {
+    imageCapture.takePicture(executor, object : ImageCapture.OnImageCapturedCallback() {
+        override fun onCaptureSuccess(image: ImageProxy) {
+            val analyzer = ColorExtractionAnalyzer(
+                isEnabled = { true },
+                onResult = { vector, undertone ->
+                    onResult(vector, undertone)
+                }
+            )
+            analyzer.analyze(image)
+        }
+
+        override fun onError(exception: ImageCaptureException) {
+            onError(exception.message ?: "Capture failed")
+        }
+    })
 }
 
 @Composable
@@ -251,16 +287,11 @@ private fun ResultMetricRow(label: String, value: String) {
 
 @Composable
 private fun CameraPreview(
-    onScanResult: (FacialContrastVector, Float) -> Unit,
-    isScanning: Boolean
+    imageCapture: ImageCapture
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    val cameraExecutor = remember { Executors.newSingleThreadExecutor() }
     val previewView = remember { PreviewView(context) }
-    
-    val currentOnScanResult by rememberUpdatedState(onScanResult)
-    val currentIsScanning by rememberUpdatedState(isScanning)
 
     AndroidView(
         factory = { previewView },
@@ -273,18 +304,6 @@ private fun CameraPreview(
                 it.setSurfaceProvider(view.surfaceProvider)
             }
 
-            val imageAnalysis = ImageAnalysis.Builder()
-                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
-                .build()
-                .also {
-                    it.setAnalyzer(cameraExecutor, ColorExtractionAnalyzer { vector, undertone ->
-                        if (currentIsScanning) {
-                            currentOnScanResult(vector, undertone)
-                        }
-                    })
-                }
-
             val cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
 
             try {
@@ -293,18 +312,12 @@ private fun CameraPreview(
                     lifecycleOwner,
                     cameraSelector,
                     preview,
-                    imageAnalysis
+                    imageCapture
                 )
             } catch (e: Exception) {
                 // Log error
             }
         }, ContextCompat.getMainExecutor(context))
-    }
-    
-    DisposableEffect(Unit) {
-        onDispose {
-            cameraExecutor.shutdown()
-        }
     }
 }
 

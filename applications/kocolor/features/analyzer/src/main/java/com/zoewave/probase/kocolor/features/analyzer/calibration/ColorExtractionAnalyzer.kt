@@ -14,6 +14,7 @@ import com.zoewave.probase.kocolor.model.calibration.FacialContrastVector
 import kotlin.math.abs
 
 class ColorExtractionAnalyzer(
+    private val isEnabled: () -> Boolean,
     private val onResult: (FacialContrastVector, Float) -> Unit
 ) : ImageAnalysis.Analyzer {
 
@@ -26,16 +27,19 @@ class ColorExtractionAnalyzer(
 
     @OptIn(androidx.camera.core.ExperimentalGetImage::class)
     override fun analyze(imageProxy: ImageProxy) {
-        // Since we configured CameraX to output RGBA_8888, we convert to Bitmap.
-        // toBitmap() creates a new Bitmap object (copy), so we can close the proxy immediately.
-        val bitmap = try {
-            imageProxy.toBitmap()
-        } catch (e: Exception) {
-            Log.e("ColorExtractionAnalyzer", "Failed to convert image to bitmap", e)
+        if (!isEnabled()) {
             imageProxy.close()
             return
         }
-        imageProxy.close() // Release buffer back to camera
+
+        // We only process frames if a result is actually needed.
+        val bitmap = try {
+            imageProxy.toBitmap()
+        } catch (e: Exception) {
+            imageProxy.close()
+            return
+        }
+        imageProxy.close() 
 
         val image = InputImage.fromBitmap(bitmap, 0)
 
@@ -58,7 +62,7 @@ class ColorExtractionAnalyzer(
 
                     val contrastDelta = abs(skinLuminance - hairLuminance)
                     
-                    // 4. Undertone Estimation (Simple R vs B comparison for warm/cool)
+                    // 4. Undertone Estimation
                     val undertone = estimateUndertone(bitmap, cheekLandmark?.position?.x?.toInt() ?: face.boundingBox.centerX(), cheekLandmark?.position?.y?.toInt() ?: face.boundingBox.centerY())
 
                     Log.d("ColorExtractionAnalyzer", "Established -> Skin: $skinLuminance, Hair: $hairLuminance, Delta: $contrastDelta, Undertone: $undertone")
