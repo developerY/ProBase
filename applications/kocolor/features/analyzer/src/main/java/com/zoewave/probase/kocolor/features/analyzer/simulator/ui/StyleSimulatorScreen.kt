@@ -38,6 +38,7 @@ import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.Res
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.AnalysisStep
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.MagicBackground
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.list.MessagingStep
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.SimulatorEvent
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
 @OptIn(ExperimentalMaterial3Api::class)

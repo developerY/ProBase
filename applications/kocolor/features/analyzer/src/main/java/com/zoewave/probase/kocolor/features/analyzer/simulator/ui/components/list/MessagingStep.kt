@@ -44,14 +44,19 @@ fun MessagingStep(
 ) {
     var showFindings by remember { mutableStateOf(false) }
 
-    if (showFindings && uiState.fashionProfileLabel != null) {
+    if (showFindings && uiState.userPortraitUri != null) {
         AlertDialog(
             onDismissRequest = { showFindings = false },
             title = { Text("ML Face Detection Findings", style = MaterialTheme.typography.titleLarge) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Established Season: ${uiState.fashionProfileLabel}", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
-                    Text("Your aesthetic identity is being used to ground the AI's stylistic decisions and palette generation.", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
+                    if (uiState.fashionProfileLabel != null) {
+                        Text("Established Season: ${uiState.fashionProfileLabel}", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
+                        Text("Your aesthetic identity is being used to ground the AI's stylistic decisions and palette generation.", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
+                    } else {
+                        CircularProgressIndicator(modifier = Modifier.size(24.dp).align(Alignment.CenterHorizontally))
+                        Text("Analyzing aesthetic DNA...", modifier = Modifier.align(Alignment.CenterHorizontally), style = MaterialTheme.typography.bodyMedium)
+                    }
                 }
             },
             confirmButton = {
@@ -118,12 +123,12 @@ fun MessagingStep(
                     Spacer(Modifier.width(16.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = if (uiState.userPortraitUri != null) "Visual Identity Active" else "No Portrait Detected",
+                            text = if (uiState.fashionProfileLabel != null) "Visual Identity Active" else "No Portrait Detected",
                             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                             color = Color.Black.copy(alpha = 0.8f)
                         )
                         Text(
-                            text = if (uiState.userPortraitUri != null) "Tap to view Edge AI findings" else "Provide a photo to ground the AI",
+                            text = uiState.fashionProfileLabel ?: "Provide a photo to ground the AI",
                             style = MaterialTheme.typography.labelSmall,
                             color = Color.Gray.copy(alpha = 0.7f)
                         )
