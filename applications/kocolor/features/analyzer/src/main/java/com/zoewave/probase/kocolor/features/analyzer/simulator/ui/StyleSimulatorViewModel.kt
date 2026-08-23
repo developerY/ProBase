@@ -26,6 +26,7 @@ import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
 import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
 import com.zoewave.probase.kocolor.data.repository.RotationRepository
 import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
+import com.zoewave.probase.kocolor.data.usecase.GeneratePlaylistUseCase
 import com.zoewave.probase.kocolor.data.usecase.RotationScoringUseCase
 import com.zoewave.probase.kocolor.db.dao.RoutineDao
 import com.zoewave.probase.kocolor.data.usecase.StyleBlueprint
@@ -54,6 +55,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import java.util.Calendar
 import javax.inject.Inject
 import kotlin.math.abs
@@ -96,6 +98,7 @@ enum class SimulationStep {
 sealed class SimulatorEvent {
     data class UpdateMessage(val message: String) : SimulatorEvent()
     data object StartSimulation : SimulatorEvent()
+    data object GeneratePlaylist : SimulatorEvent()
     data object SaveToPalette : SimulatorEvent()
     data object Reset : SimulatorEvent()
     data object CapturePortrait : SimulatorEvent()
@@ -110,6 +113,7 @@ sealed class SimulatorEvent {
 
 sealed class SimulatorEffect {
     data object NavigateToHistory : SimulatorEffect()
+    data object NavigateToPlaylist : SimulatorEffect()
     data class NavigateToCamera(val target: String) : SimulatorEffect()
     data object OpenGalleryPicker : SimulatorEffect()
 }
@@ -123,6 +127,7 @@ class StyleSimulatorViewModel @Inject constructor(
     private val fashionRepository: FashionRepository,
     private val sessionRepository: FashionSessionRepository,
     private val simulatorEngine: StyleSimulatorEngine,
+    private val generatePlaylistUseCase: GeneratePlaylistUseCase,
     private val atmosphericRepository: AtmosphericRepository,
     private val rotationRepository: RotationRepository,
     private val rotationScoringUseCase: RotationScoringUseCase,
@@ -250,6 +255,14 @@ class StyleSimulatorViewModel @Inject constructor(
         when (event) {
             is SimulatorEvent.UpdateMessage -> _userMessage.value = event.message
             SimulatorEvent.StartSimulation -> runSimulation()
+            SimulatorEvent.GeneratePlaylist -> {
+                viewModelScope.launch {
+                    _simulationStep.value = SimulationStep.GENERATING
+                    generatePlaylistUseCase.generateWeeklyPlaylist(LocalDate.now())
+                    _effect.send(SimulatorEffect.NavigateToPlaylist)
+                    _simulationStep.value = SimulationStep.MESSAGING // Reset for next time
+                }
+            }
             SimulatorEvent.SaveToPalette -> saveSelectionToColorTab()
             SimulatorEvent.Reset -> {
                 _userMessage.value = ""
