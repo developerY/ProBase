@@ -76,7 +76,7 @@ fun StylePlaylistScreen(
                 CenterAlignedTopAppBar(
                     title = {
                         Text(
-                            "DAILY BLUEPRINT",
+                            "AI FASHION ADVISOR",
                             style = MaterialTheme.typography.titleLarge,
                             fontFamily = FontFamily.Serif,
                             letterSpacing = 2.sp
@@ -99,7 +99,7 @@ fun StylePlaylistScreen(
                     isLocalResult = true,
                     recommendedClothing = resolvedPlan.clothingItems,
                     recommendedCosmetics = resolvedPlan.cosmeticItems,
-                    recommendedPalette = emptyList(),
+                    recommendedPalette = resolvedPlan.plan.recommendedPalette,
                     selectedResultTab = uiState.selectedResultTab,
                     onTabSelected = { viewModel.onEvent(StylePlaylistEvent.SelectResultTab(it)) },
                     actionButtonText = if (resolvedPlan.plan.status != DailyPlanStatus.COMMITTED) "I'M WEARING THIS" else null,

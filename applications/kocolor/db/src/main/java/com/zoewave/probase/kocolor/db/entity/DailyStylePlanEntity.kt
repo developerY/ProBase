@@ -30,6 +30,7 @@ data class DailyStylePlanEntity(
     val baseOutfitProductIds: List<String>,
     val eveningRemixProductIds: List<String>? = null,
     val cosmeticProductIds: List<String>,
+    val recommendedPalette: List<String> = emptyList(),
     @Embedded(prefix = "rationale_") val rationale: SelectionRationale,
     @Embedded(prefix = "evidence_") val evidence: SelectionEvidence,
     val isPinnedByUser: Boolean = false

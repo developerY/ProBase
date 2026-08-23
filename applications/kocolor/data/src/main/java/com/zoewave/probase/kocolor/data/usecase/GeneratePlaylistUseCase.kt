@@ -89,6 +89,7 @@ class GeneratePlaylistUseCase @Inject constructor(
                     primaryContext = "Planned Rotation",
                     baseOutfitProductIds = dailyBlueprint.selectedClothingIds,
                     cosmeticProductIds = dailyBlueprint.selectedCosmeticIds,
+                    recommendedPalette = dailyBlueprint.recommendedPalette,
                     rationale = SelectionRationale(rotationReason = dailyBlueprint.rationale),
                     evidence = SelectionEvidence(
                         combinedFinalScore = 1.0,

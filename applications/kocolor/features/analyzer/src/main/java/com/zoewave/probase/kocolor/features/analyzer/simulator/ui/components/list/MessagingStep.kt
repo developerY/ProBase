@@ -27,12 +27,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -40,6 +42,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.kocolor.features.analyzer.R
@@ -409,13 +412,21 @@ fun MessagingStep(
 
 @Composable
 fun FaceTelemetryVisualizer(
-    imageUri: String,
+    imageUri: String?,
     telemetry: FaceTelemetryData,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+    val imageRequest = remember(imageUri) {
+        ImageRequest.Builder(context)
+            .data(imageUri)
+            .crossfade(true)
+            .build()
+    }
+
     Box(modifier = modifier.fillMaxWidth().aspectRatio(4f/3f)) { 
         AsyncImage(
-            model = imageUri,
+            model = imageRequest,
             contentDescription = "Analyzed Portrait",
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
@@ -447,6 +458,17 @@ fun FaceTelemetryVisualizer(
                     topLeft = Offset((rect.left * scale) + offsetX, (rect.top * scale) + offsetY),
                     size = Size(rect.width() * scale, rect.height() * scale),
                     style = Stroke(width = 4f, pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f))
+                )
+            }
+
+            // Face Bounding Box
+            telemetry.faceBoundingBox?.let { rect ->
+                drawRoundRect(
+                    color = Color.Cyan.copy(alpha = 0.4f),
+                    topLeft = Offset((rect.left * scale) + offsetX, (rect.top * scale) + offsetY),
+                    size = Size(rect.width() * scale, rect.height() * scale),
+                    cornerRadius = CornerRadius(12.dp.toPx()),
+                    style = Stroke(width = 2f, pathEffect = PathEffect.dashPathEffect(floatArrayOf(5f, 5f), 0f))
                 )
             }
 

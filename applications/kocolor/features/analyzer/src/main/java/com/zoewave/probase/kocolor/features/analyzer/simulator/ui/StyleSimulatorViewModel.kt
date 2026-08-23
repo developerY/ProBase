@@ -68,7 +68,8 @@ data class FaceTelemetryData(
     val imageHeight: Int,
     val cheekPoint: PointF?,
     val eyePoint: PointF?,
-    val hairBoundingBox: Rect?
+    val hairBoundingBox: Rect?,
+    val faceBoundingBox: Rect?
 )
 
 data class StyleSimulatorUiState(
@@ -561,12 +562,18 @@ class StyleSimulatorViewModel @Inject constructor(
                                 imageHeight = image.height,
                                 cheekPoint = cheekLandmark?.position,
                                 eyePoint = eyeLandmark?.position,
-                                hairBoundingBox = hairBox
+                                hairBoundingBox = hairBox,
+                                faceBoundingBox = face.boundingBox
                             )
 
                             // We still need the bitmap for luminance sampling
                             // But we use the ML Kit image resolution as the source of truth for telemetry
-                            val bitmap = loadBitmapFromUri(parsedUri) ?: return@addOnSuccessListener
+                            val bitmap = loadBitmapFromUri(parsedUri) 
+                            if (bitmap == null) {
+                                Log.e("StyleSimulatorVM", "Failed to load bitmap for sampling")
+                                _faceAnalysisError.value = "Internal error: Failed to process biometric source."
+                                return@addOnSuccessListener
+                            }
 
                             val skinLuminance = cheekLandmark?.let { sampleLuminance(bitmap, it.position.x.toInt(), it.position.y.toInt()) } ?: 0.5f
 
