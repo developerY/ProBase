@@ -1,5 +1,6 @@
 package com.zoewave.probase.kocolor.features.analyzer.calibration.ui
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.kocolor.data.FashionRepository
@@ -62,6 +63,8 @@ class CalibrationViewModel @Inject constructor(
     fun onScanResult(vector: FacialContrastVector, undertone: Float) {
         if (_uiState.value !is CalibrationUiState.Scanning) return
         
+        Log.d("CalibrationViewModel", "Scan successful: $vector, undertone: $undertone")
+        
         viewModelScope.launch {
             val season = seasonClassifier.classify(vector, undertone)
             val profile = ColorProfile(
@@ -71,10 +74,17 @@ class CalibrationViewModel @Inject constructor(
                 optimalPaletteHexCodes = seasonClassifier.getOptimalPalette(season)
             )
             
+            Log.d("CalibrationViewModel", "Established Profile: ${profile.season}")
+            
             // Save to repository
             fashionRepository.saveProfile(profile.toFashionProfile())
             
             _uiState.value = CalibrationUiState.Success(profile)
+        }
+    }
+
+    fun dismissResult() {
+        viewModelScope.launch {
             _events.emit(CalibrationEvent.NavigateBack)
         }
     }
