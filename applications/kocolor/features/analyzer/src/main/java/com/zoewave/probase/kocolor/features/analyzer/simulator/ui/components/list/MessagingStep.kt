@@ -1,52 +1,22 @@
 package com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.list
 
+import android.graphics.PointF
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.CalendarToday
-import androidx.compose.material.icons.filled.Checkroom
-import androidx.compose.material.icons.filled.Face
-import androidx.compose.material.icons.filled.FaceRetouchingNatural
-import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.Layers
-import androidx.compose.material.icons.filled.PanTool
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.PhotoCamera
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -57,7 +27,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
@@ -69,6 +43,7 @@ import coil.compose.AsyncImage
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.kocolor.features.analyzer.R
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.FaceTelemetryData
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.SimulatorEvent
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorUiState
 import com.zoewave.probase.kocolor.model.KoColorRoute
@@ -81,13 +56,17 @@ fun MessagingStep(
     navTo: (KoColorRoute) -> Unit
 ) {
     var showFindings by remember { mutableStateOf(false) }
+    var telemetryExpanded by remember { mutableStateOf(false) }
 
     if (showFindings && uiState.userPortraitUri != null) {
         AlertDialog(
-            onDismissRequest = { showFindings = false },
+            onDismissRequest = { 
+                showFindings = false
+                telemetryExpanded = false
+            },
             title = { Text("ML Face Detection Findings", style = MaterialTheme.typography.titleLarge, fontFamily = FontFamily.Serif) },
             text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     if (uiState.faceAnalysisError != null) {
                         Text(
                             text = uiState.faceAnalysisError, 
@@ -95,8 +74,77 @@ fun MessagingStep(
                             style = MaterialTheme.typography.bodyMedium
                         )
                     } else if (uiState.fashionProfileLabel != null) {
+                        
+                        // Interactive Telemetry Visualizer
+                        uiState.faceTelemetry?.let { telemetry ->
+                            FaceTelemetryVisualizer(
+                                imageUri = uiState.userPortraitUri,
+                                telemetry = telemetry,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(200.dp)
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .background(Color.Black)
+                            )
+                            Spacer(Modifier.height(8.dp))
+                        }
+
                         Text("Established Season: ${uiState.fashionProfileLabel}", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
                         Text("Your aesthetic identity is being used to ground the AI's stylistic decisions and palette generation.", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
+                        
+                        HorizontalDivider(
+                            modifier = Modifier.padding(vertical = 4.dp), 
+                            color = Color.LightGray.copy(alpha = 0.5f), 
+                            thickness = 1.dp
+                        )
+                        
+                        // Collapsible Telemetry
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { telemetryExpanded = !telemetryExpanded }
+                                .padding(vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = "ANALYSIS TELEMETRY", 
+                                style = MaterialTheme.typography.labelSmall, 
+                                fontWeight = FontWeight.Bold, 
+                                color = Color.DarkGray,
+                                letterSpacing = 1.sp
+                            )
+                            Icon(
+                                imageVector = if (telemetryExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                                contentDescription = null,
+                                tint = Color.Gray,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                        
+                        AnimatedVisibility(
+                            visible = telemetryExpanded,
+                            enter = expandVertically(),
+                            exit = shrinkVertically()
+                        ) {
+                            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                Text(
+                                    text = "• Format: RGBA_8888 (Native Bitmap mapping, bypassing YUV-to-RGB conversion)", 
+                                    style = MaterialTheme.typography.bodySmall, 
+                                    color = Color.Gray
+                                )
+                                Text(
+                                    text = "• Engine: com.google.mlkit:face-detection (LANDMARK_MODE_ALL)", 
+                                    style = MaterialTheme.typography.bodySmall, 
+                                    color = Color.Gray
+                                )
+                                Text(
+                                    text = "• Vectors: Skin (Cheek sampling), Iris (Eye bounding coords), Hair (Forehead bounding projection)", 
+                                    style = MaterialTheme.typography.bodySmall, 
+                                    color = Color.Gray
+                                )
+                            }
+                        }
                     } else {
                         CircularProgressIndicator(modifier = Modifier.size(24.dp).align(Alignment.CenterHorizontally))
                         Text("Analyzing aesthetic DNA...", modifier = Modifier.align(Alignment.CenterHorizontally), style = MaterialTheme.typography.bodyMedium)
@@ -104,7 +152,10 @@ fun MessagingStep(
                 }
             },
             confirmButton = {
-                TextButton(onClick = { showFindings = false }) {
+                TextButton(onClick = { 
+                    showFindings = false
+                    telemetryExpanded = false
+                }) {
                     Text("CLOSE", fontWeight = FontWeight.Bold)
                 }
             },
@@ -351,6 +402,64 @@ fun MessagingStep(
                     Spacer(Modifier.width(12.dp))
                     Text("Generate 7-Day Playlist", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun FaceTelemetryVisualizer(
+    imageUri: String,
+    telemetry: FaceTelemetryData,
+    modifier: Modifier = Modifier
+) {
+    Box(modifier = modifier) {
+        AsyncImage(
+            model = imageUri,
+            contentDescription = "Analyzed Portrait",
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.FillWidth
+        )
+        
+        Canvas(modifier = Modifier.matchParentSize()) {
+            val scaleX = size.width / telemetry.imageWidth
+            val scaleY = size.height / telemetry.imageHeight
+
+            fun scalePoint(p: PointF): Offset = Offset(p.x * scaleX, p.y * scaleY)
+
+            // Hair Bounding Box
+            telemetry.hairBoundingBox?.let { rect ->
+                drawRect(
+                    color = Color.Yellow.copy(alpha = 0.4f),
+                    topLeft = Offset(rect.left * scaleX, rect.top * scaleY),
+                    size = Size(rect.width() * scaleX, rect.height() * scaleY),
+                    style = Stroke(width = 4f, pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f))
+                )
+            }
+
+            // Cheek Node
+            telemetry.cheekPoint?.let { point ->
+                drawCircle(
+                    color = Color.Cyan,
+                    radius = 12f,
+                    center = scalePoint(point),
+                    style = Stroke(width = 6f)
+                )
+                drawCircle(
+                    color = Color.Cyan.copy(alpha = 0.3f),
+                    radius = 24f,
+                    center = scalePoint(point)
+                )
+            }
+
+            // Eye Node
+            telemetry.eyePoint?.let { point ->
+                drawCircle(
+                    color = Color.Magenta,
+                    radius = 12f,
+                    center = scalePoint(point),
+                    style = Stroke(width = 6f)
+                )
             }
         }
     }

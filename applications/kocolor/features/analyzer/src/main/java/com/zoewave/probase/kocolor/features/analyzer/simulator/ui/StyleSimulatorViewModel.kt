@@ -4,6 +4,8 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.graphics.PointF
+import android.graphics.Rect
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -61,6 +63,14 @@ import java.util.Calendar
 import javax.inject.Inject
 import kotlin.math.abs
 
+data class FaceTelemetryData(
+    val imageWidth: Int,
+    val imageHeight: Int,
+    val cheekPoint: PointF?,
+    val eyePoint: PointF?,
+    val hairBoundingBox: Rect?
+)
+
 data class StyleSimulatorUiState(
     val morningRoutineCompleted: Boolean = false,
     val circadianContext: String = "Defense & Protection",
@@ -75,6 +85,7 @@ data class StyleSimulatorUiState(
     val isLocalResult: Boolean = false,
     val fashionProfileLabel: String? = null,
     val faceAnalysisError: String? = null,
+    val faceTelemetry: FaceTelemetryData? = null,
     val userPortraitUri: String? = null,
     val fullClothingInventory: List<ClothingItem> = emptyList(),
     val fullCosmeticInventory: List<CosmeticItem> = emptyList(),
@@ -146,6 +157,7 @@ class StyleSimulatorViewModel @Inject constructor(
     private val _selectedResultTab = MutableStateFlow(ResultTab.CLOTHES)
     private val _isAnalyzing = MutableStateFlow(false)
     private val _faceAnalysisError = MutableStateFlow<String?>(null)
+    private val _faceTelemetry = MutableStateFlow<FaceTelemetryData?>(null)
 
     private val detector = FaceDetection.getClient(
         FaceDetectorOptions.Builder()
@@ -170,7 +182,8 @@ class StyleSimulatorViewModel @Inject constructor(
         _simulationResult,
         _selectedResultTab,
         _isAnalyzing,
-        _faceAnalysisError
+        _faceAnalysisError,
+        _faceTelemetry
     ) { array ->
         val faceUri = array[0] as String?
         val profile = array[1] as FashionProfile?
@@ -186,6 +199,7 @@ class StyleSimulatorViewModel @Inject constructor(
         val resultTab = array[11] as ResultTab
         val analyzing = array[12] as Boolean
         val analysisError = array[13] as String?
+        val telemetry = array[14] as FaceTelemetryData?
 
         val clothingFamilies = allClothing.filter { it.category == selectedClothingCat }
             .groupBy { it.colorFamily }
@@ -221,6 +235,7 @@ class StyleSimulatorViewModel @Inject constructor(
             selectedResultTab = resultTab,
             isAnalyzing = analyzing,
             faceAnalysisError = analysisError,
+            faceTelemetry = telemetry,
             visualBlueprintData = mapToVisualBlueprintData(
                 cosmetics = recommendedCosmetics,
                 clothing = recommendedClothing,
@@ -519,6 +534,7 @@ class StyleSimulatorViewModel @Inject constructor(
     private fun establishProfileFromPortrait(uri: String) {
         Log.d("StyleSimulatorVM", "Establishing profile from URI: $uri")
         _faceAnalysisError.value = null // Clear previous errors
+        _faceTelemetry.value = null
         
         viewModelScope.launch {
             val bitmap = loadBitmapFromUri(Uri.parse(uri)) 
@@ -538,9 +554,25 @@ class StyleSimulatorViewModel @Inject constructor(
                     if (faces.isNotEmpty()) {
                         val face = faces[0]
                         val cheekLandmark = face.getLandmark(FaceLandmark.LEFT_CHEEK) ?: face.getLandmark(FaceLandmark.RIGHT_CHEEK)
+                        val eyeLandmark = face.getLandmark(FaceLandmark.LEFT_EYE) ?: face.getLandmark(FaceLandmark.RIGHT_EYE)
+                        
+                        val hairBox = Rect(
+                            face.boundingBox.left, 
+                            (face.boundingBox.top - 50).coerceAtLeast(0), 
+                            face.boundingBox.right, 
+                            face.boundingBox.top
+                        )
+
+                        _faceTelemetry.value = FaceTelemetryData(
+                            imageWidth = bitmap.width,
+                            imageHeight = bitmap.height,
+                            cheekPoint = cheekLandmark?.position,
+                            eyePoint = eyeLandmark?.position,
+                            hairBoundingBox = hairBox
+                        )
+
                         val skinLuminance = cheekLandmark?.let { sampleLuminance(bitmap, it.position.x.toInt(), it.position.y.toInt()) } ?: 0.5f
 
-                        val eyeLandmark = face.getLandmark(FaceLandmark.LEFT_EYE) ?: face.getLandmark(FaceLandmark.RIGHT_EYE)
                         val eyeLuminance = eyeLandmark?.let { sampleLuminance(bitmap, it.position.x.toInt(), it.position.y.toInt()) } ?: 0.2f
 
                         val hairLuminance = sampleLuminance(bitmap, face.boundingBox.centerX(), (face.boundingBox.top - 20).coerceAtLeast(0))
@@ -575,6 +607,8 @@ class StyleSimulatorViewModel @Inject constructor(
                     sessionRepository.setFaceUri(null) // Clear the URI
                 }
                 .addOnCompleteListener {
+                    // Do not recycle bitmap if we want to show it in the UI later? 
+                    // Actually AsyncImage will load from URI again.
                     bitmap.recycle()
                 }
         }
