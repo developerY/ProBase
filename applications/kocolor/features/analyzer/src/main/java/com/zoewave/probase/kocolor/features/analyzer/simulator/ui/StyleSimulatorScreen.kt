@@ -60,7 +60,7 @@ fun StyleSimulatorScreen(
             effect.collect { simulatorEffect ->
                 when (simulatorEffect) {
                     SimulatorEffect.NavigateToHistory -> navTo(KoColorRoute.Color)
-                    SimulatorEffect.NavigateToPlaylist -> navTo(KoColorRoute.StylePlaylist)
+                    SimulatorEffect.NavigateToPlaylist -> navTo(KoColorRoute.Color)
                     is SimulatorEffect.NavigateToCamera -> navTo(KoColorRoute.Camera(simulatorEffect.target))
                     SimulatorEffect.OpenGalleryPicker -> {
                         galleryLauncher.launch(

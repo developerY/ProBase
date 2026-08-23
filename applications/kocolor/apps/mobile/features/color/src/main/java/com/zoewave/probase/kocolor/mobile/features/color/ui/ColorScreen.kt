@@ -69,8 +69,12 @@ import com.zoewave.probase.core.model.ritual.SavedAnalysis
 import com.zoewave.probase.core.model.ritual.SeasonalType
 import com.zoewave.probase.core.model.ritual.Undertone
 import com.zoewave.probase.kocolor.mobile.features.color.R
+import com.zoewave.probase.kocolor.db.entity.PlaylistWithDays
 import com.zoewave.probase.kocolor.model.KoColorRoute
+import com.zoewave.probase.kocolor.model.playlist.DailyPlanStatus
 import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
 
@@ -124,23 +128,47 @@ fun ColorScreen(
         containerColor = Color(0xFFF9F6F0),
         modifier = modifier
     ) { padding ->
-        if (uiState.savedSuggestions.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .padding(padding)
-                    .fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(stringResource(R.string.applications_kocolor_apps_mobile_features_color_no_history), style = MaterialTheme.typography.bodyLarge)
+        LazyColumn(
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize(),
+            contentPadding = PaddingValues(20.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp)
+        ) {
+            // Style Playlist Summary
+            item {
+                StylePlaylistSummaryCard(
+                    playlist = uiState.latestPlaylist,
+                    onClick = { navTo(KoColorRoute.StylePlaylist) }
+                )
             }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .padding(padding)
-                    .fillMaxSize(),
-                contentPadding = PaddingValues(20.dp),
-                verticalArrangement = Arrangement.spacedBy(20.dp)
-            ) {
+
+            // Section Divider/Title for History
+            if (uiState.savedSuggestions.isNotEmpty()) {
+                item {
+                    Text(
+                        text = "PAST ANALYSES",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 1.2.sp,
+                        color = Color.Gray,
+                        modifier = Modifier.padding(top = 16.dp)
+                    )
+                }
+            }
+
+            if (uiState.savedSuggestions.isEmpty()) {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 48.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(stringResource(R.string.applications_kocolor_apps_mobile_features_color_no_history), style = MaterialTheme.typography.bodyLarge)
+                    }
+                }
+            } else {
                 items(uiState.savedSuggestions) { analysis ->
                     ColorHistoryCard(
                         uiState = ColorHistoryCardUiState(analysis),
@@ -159,6 +187,102 @@ fun ColorScreen(
         }
     }
 }
+
+@Composable
+private fun StylePlaylistSummaryCard(
+    playlist: PlaylistWithDays?,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
+        shape = RoundedCornerShape(28.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(modifier = Modifier.padding(24.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        "STYLE PLAYLIST",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 1.2.sp,
+                        color = Color(0xFF6750A4)
+                    )
+                    Text(
+                        "7-Day Forecast",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontFamily = FontFamily.Serif,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                Icon(
+                    imageVector = Icons.Default.AutoAwesome,
+                    contentDescription = null,
+                    tint = Color(0xFF6750A4),
+                    modifier = Modifier.size(32.dp)
+                )
+            }
+
+            Spacer(Modifier.height(16.dp))
+
+            if (playlist != null) {
+                val today = LocalDate.now()
+                val todayPlan = playlist.dailyPlans.find { it.targetDate == today }
+                val completedCount = playlist.dailyPlans.count { it.status == DailyPlanStatus.COMMITTED }
+                
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "$completedCount/7 DAYS COMPLETED",
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Gray
+                    )
+                }
+                
+                Spacer(Modifier.height(8.dp))
+                
+                Text(
+                    text = todayPlan?.rationale?.rotationReason ?: "Open to see your daily style recommendations.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    color = Color.DarkGray
+                )
+            } else {
+                Text(
+                    "No active playlist found. Generate your weekly plan to optimize your wardrobe rotation.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Gray
+                )
+            }
+
+            Spacer(Modifier.height(20.dp))
+
+            Surface(
+                color = Color(0xFFF5F5F5),
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Box(modifier = Modifier.padding(12.dp), contentAlignment = Alignment.Center) {
+                    Text(
+                        text = if (playlist != null) "VIEW FULL WEEK" else "START PLAN",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
+                }
+            }
+        }
+    }
+}
+
 
 data class ColorHistoryCardUiState(val analysis: SavedAnalysis)
 
