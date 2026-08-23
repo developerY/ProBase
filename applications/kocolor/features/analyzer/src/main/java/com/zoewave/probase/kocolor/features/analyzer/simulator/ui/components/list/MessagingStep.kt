@@ -148,6 +148,67 @@ fun MessagingStep(
                                 )
                             }
                         }
+
+                        var outputExpanded by remember { mutableStateOf(false) }
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { outputExpanded = !outputExpanded }
+                                .padding(vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = "OUTPUT ANALYSIS", 
+                                style = MaterialTheme.typography.labelSmall, 
+                                fontWeight = FontWeight.Bold, 
+                                color = Color.DarkGray,
+                                letterSpacing = 1.sp
+                            )
+                            Icon(
+                                imageVector = if (outputExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                                contentDescription = null,
+                                tint = Color.Gray,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+
+                        AnimatedVisibility(
+                            visible = outputExpanded,
+                            enter = expandVertically(),
+                            exit = shrinkVertically()
+                        ) {
+                            uiState.faceTelemetry?.let { telemetry ->
+                                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                    Text(
+                                        text = "• Skin Luminance: ${"%.4f".format(telemetry.skinLuminance)}", 
+                                        style = MaterialTheme.typography.bodySmall, 
+                                        color = Color.Gray
+                                    )
+                                    Text(
+                                        text = "• Eye Luminance: ${"%.4f".format(telemetry.eyeLuminance)}", 
+                                        style = MaterialTheme.typography.bodySmall, 
+                                        color = Color.Gray
+                                    )
+                                    Text(
+                                        text = "• Hair Luminance: ${"%.4f".format(telemetry.hairLuminance)}", 
+                                        style = MaterialTheme.typography.bodySmall, 
+                                        color = Color.Gray
+                                    )
+                                    Text(
+                                        text = "• Contrast Delta: ${"%.4f".format(telemetry.contrastDelta)}", 
+                                        style = MaterialTheme.typography.bodySmall, 
+                                        color = Color.Gray
+                                    )
+                                    Text(
+                                        text = "• Undertone Score: ${"%.4f".format(telemetry.undertoneScore)}", 
+                                        style = MaterialTheme.typography.bodySmall, 
+                                        color = Color.Gray
+                                    )
+                                }
+                            }
+                        }
                     } else {
                         CircularProgressIndicator(modifier = Modifier.size(24.dp).align(Alignment.CenterHorizontally))
                         Text("Analyzing aesthetic DNA...", modifier = Modifier.align(Alignment.CenterHorizontally), style = MaterialTheme.typography.bodyMedium)

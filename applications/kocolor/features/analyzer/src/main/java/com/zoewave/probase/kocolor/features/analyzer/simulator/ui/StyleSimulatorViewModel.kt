@@ -69,7 +69,12 @@ data class FaceTelemetryData(
     val cheekPoint: PointF?,
     val eyePoint: PointF?,
     val hairBoundingBox: Rect?,
-    val faceBoundingBox: Rect?
+    val faceBoundingBox: Rect?,
+    val skinLuminance: Float = 0f,
+    val eyeLuminance: Float = 0f,
+    val hairLuminance: Float = 0f,
+    val contrastDelta: Float = 0f,
+    val undertoneScore: Float = 0f
 )
 
 data class StyleSimulatorUiState(
@@ -434,7 +439,7 @@ class StyleSimulatorViewModel @Inject constructor(
         clothing: List<ClothingItem>,
         cosmetics: List<CosmeticItem>
     ): String {
-        // Matches <ITEM:w_16> or <ITEM:c_5>
+        // Matches <ITEM:id> or <ITEM:c_5>
         val tagPattern = "<ITEM:([wc])_(\\d+)>".toRegex()
         var translated = rawRationale
         
@@ -557,15 +562,6 @@ class StyleSimulatorViewModel @Inject constructor(
                                 face.boundingBox.top
                             )
 
-                            _faceTelemetry.value = FaceTelemetryData(
-                                imageWidth = image.width,
-                                imageHeight = image.height,
-                                cheekPoint = cheekLandmark?.position,
-                                eyePoint = eyeLandmark?.position,
-                                hairBoundingBox = hairBox,
-                                faceBoundingBox = face.boundingBox
-                            )
-
                             // We still need the bitmap for luminance sampling
                             // But we use the ML Kit image resolution as the source of truth for telemetry
                             val bitmap = loadBitmapFromUri(parsedUri) 
@@ -582,6 +578,20 @@ class StyleSimulatorViewModel @Inject constructor(
                             val hairLuminance = sampleLuminance(bitmap, face.boundingBox.centerX(), (face.boundingBox.top - 20).coerceAtLeast(0))
                             val contrastDelta = abs(skinLuminance - hairLuminance)
                             val undertone = estimateUndertone(bitmap, cheekLandmark?.position?.x?.toInt() ?: face.boundingBox.centerX(), cheekLandmark?.position?.y?.toInt() ?: face.boundingBox.centerY())
+
+                            _faceTelemetry.value = FaceTelemetryData(
+                                imageWidth = image.width,
+                                imageHeight = image.height,
+                                cheekPoint = cheekLandmark?.position,
+                                eyePoint = eyeLandmark?.position,
+                                hairBoundingBox = hairBox,
+                                faceBoundingBox = face.boundingBox,
+                                skinLuminance = skinLuminance,
+                                eyeLuminance = eyeLuminance,
+                                hairLuminance = hairLuminance,
+                                contrastDelta = contrastDelta,
+                                undertoneScore = undertone
+                            )
 
                             val vector = FacialContrastVector(skinLuminance, hairLuminance, eyeLuminance, contrastDelta)
                             val season = seasonClassifier.classify(vector, undertone)
