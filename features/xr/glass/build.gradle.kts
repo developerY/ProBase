@@ -22,7 +22,6 @@ dependencies {
 
     implementation(project(":features:xr:glass:samples"))
     implementation(project(":features:xr:glass:translation"))
-    implementation(project(":features:xr:glass:vision"))
 
     // CameraX
     implementation(libs.androidx.camera.core)

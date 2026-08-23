@@ -43,7 +43,6 @@ import androidx.xr.glimmer.Text
 import androidx.xr.projected.experimental.ExperimentalProjectedApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.zoewave.probase.features.glass.translation.ui.TranslationScreen
-import com.zoewave.probase.features.glass.vision.ui.VisionRoute
 import com.zoewave.probase.features.xr.glass.samples.ButtonsSamples
 import com.zoewave.probase.features.xr.glass.samples.CardSamples
 import com.zoewave.probase.features.xr.glass.samples.ColorsSamples
@@ -58,7 +57,6 @@ import com.zoewave.probase.features.xr.glass.samples.IconToggleButtonsSamples
 import com.zoewave.probase.features.xr.glass.samples.IndirectPointerGestureSamples
 import com.zoewave.probase.features.xr.glass.samples.ListItemSamples
 import com.zoewave.probase.features.xr.glass.samples.Material3Samples
-import com.zoewave.probase.features.xr.glass.samples.ObjectRecognitionScreen
 import com.zoewave.probase.features.xr.glass.samples.ShapesSamples
 import com.zoewave.probase.features.xr.glass.samples.SpatialNoteOverlay
 import com.zoewave.probase.features.xr.glass.samples.StacksSamples
@@ -150,8 +148,6 @@ fun GlassApp(
                         GlimmerSample.Typography -> TypographySamples()
                         GlimmerSample.VoiceIndicator -> VoiceInputIndicatorSamples(level = { uiState.aiAudioLevel })
                         GlimmerSample.Translation -> TranslationScreen()
-                        GlimmerSample.Vision -> VisionRoute()
-                        GlimmerSample.ObjectRecognition -> ObjectRecognitionScreen()
                         GlimmerSample.SpatialNote -> SpatialNoteOverlay()
                         GlimmerSample.Material3 -> Material3Samples()
                         GlimmerSample.GlimmerComparison -> GlimmerComparisonSamples()
