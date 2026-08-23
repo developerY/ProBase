@@ -2,6 +2,7 @@ package com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.li
 
 import android.graphics.PointF
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
@@ -11,8 +12,10 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
 import androidx.compose.material.icons.filled.*
@@ -60,16 +63,23 @@ fun MessagingStep(
 ) {
     var showFindings by remember { mutableStateOf(false) }
     var telemetryExpanded by remember { mutableStateOf(false) }
+    var outputExpanded by remember { mutableStateOf(false) }
 
     if (showFindings && uiState.userPortraitUri != null) {
         AlertDialog(
             onDismissRequest = { 
                 showFindings = false
                 telemetryExpanded = false
+                outputExpanded = false
             },
             title = { Text("ML Face Detection Findings", style = MaterialTheme.typography.titleLarge, fontFamily = FontFamily.Serif) },
             text = {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Column(
+                    modifier = Modifier
+                        .verticalScroll(rememberScrollState())
+                        .animateContentSize(),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
                     if (uiState.faceAnalysisError != null) {
                         Text(
                             text = uiState.faceAnalysisError, 
@@ -106,7 +116,7 @@ fun MessagingStep(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable { telemetryExpanded = !telemetryExpanded }
-                                .padding(vertical = 4.dp),
+                                .padding(vertical = 8.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
@@ -130,7 +140,10 @@ fun MessagingStep(
                             enter = expandVertically(),
                             exit = shrinkVertically()
                         ) {
-                            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Column(
+                                modifier = Modifier.padding(bottom = 8.dp),
+                                verticalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
                                 Text(
                                     text = "• Format: RGBA_8888 (Native Bitmap mapping, bypassing YUV-to-RGB conversion)", 
                                     style = MaterialTheme.typography.bodySmall, 
@@ -149,13 +162,12 @@ fun MessagingStep(
                             }
                         }
 
-                        var outputExpanded by remember { mutableStateOf(false) }
-
+                        // Collapsible Output
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable { outputExpanded = !outputExpanded }
-                                .padding(vertical = 4.dp),
+                                .padding(vertical = 8.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
@@ -180,7 +192,10 @@ fun MessagingStep(
                             exit = shrinkVertically()
                         ) {
                             uiState.faceTelemetry?.let { telemetry ->
-                                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                Column(
+                                    modifier = Modifier.padding(bottom = 8.dp),
+                                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
                                     Text(
                                         text = "• Skin Luminance: ${"%.4f".format(telemetry.skinLuminance)}", 
                                         style = MaterialTheme.typography.bodySmall, 
@@ -219,6 +234,7 @@ fun MessagingStep(
                 TextButton(onClick = { 
                     showFindings = false
                     telemetryExpanded = false
+                    outputExpanded = false
                 }) {
                     Text("CLOSE", fontWeight = FontWeight.Bold)
                 }
