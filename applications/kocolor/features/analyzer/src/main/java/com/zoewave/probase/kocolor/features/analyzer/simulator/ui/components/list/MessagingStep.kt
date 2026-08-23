@@ -163,6 +163,28 @@ fun MessagingStep(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // TODO: Map currently locked garments here
+                    uiState.anchoredClothingFamilies.forEach { (category, family) ->
+                        val item = uiState.fullClothingInventory.find { it.category == category && it.colorFamily == family }
+                        if (item != null) {
+                            Surface(
+                                modifier = Modifier.size(56.dp),
+                                shape = CircleShape,
+                                color = Color.White,
+                                border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f)),
+                                shadowElevation = 2.dp
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    AsyncImage(
+                                        model = item.imageUrl,
+                                        contentDescription = null,
+                                        modifier = Modifier.fillMaxSize().clip(CircleShape),
+                                        contentScale = ContentScale.Crop
+                                    )
+                                }
+                            }
+                        }
+                    }
+
                     Surface(
                         onClick = { navTo(KoColorRoute.Wardrobe) },
                         modifier = Modifier.size(56.dp),
