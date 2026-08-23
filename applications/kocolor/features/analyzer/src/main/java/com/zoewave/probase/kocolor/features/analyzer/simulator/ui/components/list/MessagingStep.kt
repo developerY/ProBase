@@ -1,5 +1,6 @@
 package com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.list
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -10,6 +11,10 @@ import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -30,12 +35,35 @@ import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.SimulatorEvent
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorUiState
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MessagingStep(
     uiState: StyleSimulatorUiState,
     onEvent: (SimulatorEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
+    var showFindings by remember { mutableStateOf(false) }
+
+    if (showFindings && uiState.fashionProfileLabel != null) {
+        AlertDialog(
+            onDismissRequest = { showFindings = false },
+            title = { Text("ML Face Detection Findings", style = MaterialTheme.typography.titleLarge) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Established Season: ${uiState.fashionProfileLabel}", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
+                    Text("Your aesthetic identity is being used to ground the AI's stylistic decisions and palette generation.", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showFindings = false }) {
+                    Text("CLOSE", fontWeight = FontWeight.Bold)
+                }
+            },
+            shape = RoundedCornerShape(28.dp),
+            containerColor = Color.White
+        )
+    }
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(24.dp),
@@ -53,7 +81,7 @@ fun MessagingStep(
             )
         }
 
-        // Color Profile Indicator
+        // User Portrait Slot (Unified Calibration & Identity)
         item {
             Card(
                 modifier = Modifier
@@ -62,7 +90,8 @@ fun MessagingStep(
                     .shadow(elevation = 8.dp, shape = RoundedCornerShape(24.dp), ambientColor = Color.Black.copy(alpha = 0.1f)),
                 shape = RoundedCornerShape(24.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.95f)),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.5f))
+                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.5f)),
+                onClick = { if (uiState.userPortraitUri != null) showFindings = true }
             ) {
                 Row(
                     modifier = Modifier.padding(12.dp).fillMaxSize(),
@@ -72,42 +101,40 @@ fun MessagingStep(
                         modifier = Modifier
                             .size(64.dp)
                             .clip(CircleShape)
-                            .background(if (uiState.fashionProfileLabel != null) Color(0xFFF0E6FF) else Color(0xFFF5F5F5)),
+                            .background(if (uiState.userPortraitUri != null) Color(0xFFF0E6FF) else Color(0xFFF5F5F5)),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            imageVector = if (uiState.fashionProfileLabel != null) Icons.Default.AutoAwesome else Icons.Default.Science, 
-                            null, 
-                            modifier = Modifier.size(24.dp), 
-                            tint = if (uiState.fashionProfileLabel != null) Color(0xFF6750A4) else Color.LightGray
-                        )
+                        if (uiState.userPortraitUri != null) {
+                            AsyncImage(
+                                model = uiState.userPortraitUri,
+                                contentDescription = null,
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Icon(Icons.Default.Person, null, modifier = Modifier.size(24.dp), tint = Color.LightGray.copy(alpha = 0.5f))
+                        }
                     }
                     Spacer(Modifier.width(16.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = if (uiState.fashionProfileLabel != null) "Color Profile Established" else "Calibration Required",
+                            text = if (uiState.userPortraitUri != null) "Visual Identity Active" else "No Portrait Detected",
                             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                             color = Color.Black.copy(alpha = 0.8f)
                         )
                         Text(
-                            text = uiState.fashionProfileLabel ?: "Run calibration for precise AI grounding",
+                            text = if (uiState.userPortraitUri != null) "Tap to view Edge AI findings" else "Provide a photo to ground the AI",
                             style = MaterialTheme.typography.labelSmall,
                             color = Color.Gray.copy(alpha = 0.7f)
                         )
                     }
                     
-                    if (uiState.fashionProfileLabel == null) {
-                        Button(
-                            onClick = { navTo(KoColorRoute.Calibration) },
-                            shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color.Black),
-                            contentPadding = PaddingValues(horizontal = 12.dp)
-                        ) {
-                            Text("SCAN", style = MaterialTheme.typography.labelSmall, color = Color.White)
+                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        IconButton(onClick = { onEvent(SimulatorEvent.CapturePortrait) }) {
+                            Icon(Icons.Default.PhotoCamera, null, tint = Color.DarkGray.copy(alpha = 0.6f), modifier = Modifier.size(20.dp))
                         }
-                    } else {
-                        IconButton(onClick = { navTo(KoColorRoute.Calibration) }) {
-                            Icon(Icons.Default.Refresh, null, tint = Color.Gray, modifier = Modifier.size(20.dp))
+                        IconButton(onClick = { onEvent(SimulatorEvent.PickPortrait) }) {
+                            Icon(Icons.Default.Image, null, tint = Color.Black.copy(alpha = 0.6f), modifier = Modifier.size(20.dp))
                         }
                     }
                 }

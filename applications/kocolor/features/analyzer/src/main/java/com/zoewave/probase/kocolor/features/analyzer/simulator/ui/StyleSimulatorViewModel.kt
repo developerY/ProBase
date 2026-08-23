@@ -1,6 +1,10 @@
 package com.zoewave.probase.kocolor.features.analyzer.simulator.ui
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Color
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.core.data.repository.AiConfigurationSettings
@@ -26,11 +30,20 @@ import com.zoewave.probase.kocolor.data.usecase.RotationScoringUseCase
 import com.zoewave.probase.kocolor.db.dao.RoutineDao
 import com.zoewave.probase.kocolor.data.usecase.StyleBlueprint
 import com.zoewave.probase.kocolor.data.usecase.StyleSimulatorEngine
+import com.zoewave.probase.kocolor.features.analyzer.calibration.ColorSeasonClassifier
+import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.face.FaceDetection
+import com.google.mlkit.vision.face.FaceDetectorOptions
+import com.google.mlkit.vision.face.FaceLandmark
+import com.zoewave.probase.kocolor.data.FashionRepository
+import com.zoewave.probase.kocolor.model.calibration.ColorProfile
+import com.zoewave.probase.kocolor.model.calibration.FacialContrastVector
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.ResultTab
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.VisualBlueprintData
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.mapToVisualBlueprintData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -41,8 +54,9 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.util.Calendar
 import javax.inject.Inject
-
+import kotlin.math.abs
 
 data class StyleSimulatorUiState(
     val morningRoutineCompleted: Boolean = false,
@@ -57,6 +71,7 @@ data class StyleSimulatorUiState(
     val rationale: String? = null,
     val isLocalResult: Boolean = false,
     val fashionProfileLabel: String? = null,
+    val userPortraitUri: String? = null,
     val fullClothingInventory: List<ClothingItem> = emptyList(),
     val fullCosmeticInventory: List<CosmeticItem> = emptyList(),
     val selectedClothingCategory: ClothingCategory = ClothingCategory.TOPS,
@@ -83,6 +98,9 @@ sealed class SimulatorEvent {
     data object StartSimulation : SimulatorEvent()
     data object SaveToPalette : SimulatorEvent()
     data object Reset : SimulatorEvent()
+    data object CapturePortrait : SimulatorEvent()
+    data object PickPortrait : SimulatorEvent()
+    data class OnPortraitSelected(val uri: String) : SimulatorEvent()
     data class ToggleClothingFamily(val category: ClothingCategory, val family: ColorFamily) : SimulatorEvent()
     data class ToggleCosmeticFamily(val category: MacroCategory, val family: ColorFamily) : SimulatorEvent()
     data class SelectClothingCategory(val category: ClothingCategory) : SimulatorEvent()
@@ -93,6 +111,7 @@ sealed class SimulatorEvent {
 sealed class SimulatorEffect {
     data object NavigateToHistory : SimulatorEffect()
     data class NavigateToCamera(val target: String) : SimulatorEffect()
+    data object OpenGalleryPicker : SimulatorEffect()
 }
 
 @HiltViewModel
@@ -101,7 +120,7 @@ class StyleSimulatorViewModel @Inject constructor(
     private val routineDao: RoutineDao,
     private val wardrobeRepository: WardrobeRepository,
     private val cosmeticRepository: CosmeticInventoryRepository,
-    private val fashionRepository: com.zoewave.probase.kocolor.data.FashionRepository,
+    private val fashionRepository: FashionRepository,
     private val sessionRepository: FashionSessionRepository,
     private val simulatorEngine: StyleSimulatorEngine,
     private val atmosphericRepository: AtmosphericRepository,
@@ -119,7 +138,17 @@ class StyleSimulatorViewModel @Inject constructor(
     private val _simulationResult = MutableStateFlow<StyleBlueprint?>(null)
     private val _selectedResultTab = MutableStateFlow(ResultTab.CLOTHES)
 
+    private val detector = FaceDetection.getClient(
+        FaceDetectorOptions.Builder()
+            .setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_ALL)
+            .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST)
+            .build()
+    )
+    
+    private val seasonClassifier = ColorSeasonClassifier()
+
     val uiState: StateFlow<StyleSimulatorUiState> = combine(
+        sessionRepository.faceUri,
         fashionRepository.getProfile(),
         wardrobeRepository.getAllClothing(),
         cosmeticRepository.getAllCosmetics(),
@@ -132,17 +161,18 @@ class StyleSimulatorViewModel @Inject constructor(
         _simulationResult,
         _selectedResultTab
     ) { array ->
-        val profile = array[0] as FashionProfile?
-        val allClothing = array[1] as List<ClothingItem>
-        val allCosmetics = array[2] as List<CosmeticItem>
-        val selectedClothingCat = array[3] as ClothingCategory
-        val selectedCosmeticCat = array[4] as MacroCategory
-        val userMsg = array[5] as String
-        val anchoredClothing = array[6] as Map<ClothingCategory, ColorFamily>
-        val anchoredCosmetics = array[7] as Map<MacroCategory, ColorFamily>
-        val step = array[8] as SimulationStep
-        val result = array[9] as StyleBlueprint?
-        val resultTab = array[10] as ResultTab
+        val faceUri = array[0] as String?
+        val profile = array[1] as FashionProfile?
+        val allClothing = array[2] as List<ClothingItem>
+        val allCosmetics = array[3] as List<CosmeticItem>
+        val selectedClothingCat = array[4] as ClothingCategory
+        val selectedCosmeticCat = array[5] as MacroCategory
+        val userMsg = array[6] as String
+        val anchoredClothing = array[7] as Map<ClothingCategory, ColorFamily>
+        val anchoredCosmetics = array[8] as Map<MacroCategory, ColorFamily>
+        val step = array[9] as SimulationStep
+        val result = array[10] as StyleBlueprint?
+        val resultTab = array[11] as ResultTab
 
         val clothingFamilies = allClothing.filter { it.category == selectedClothingCat }
             .groupBy { it.colorFamily }
@@ -158,6 +188,7 @@ class StyleSimulatorViewModel @Inject constructor(
         }
 
         StyleSimulatorUiState(
+            userPortraitUri = faceUri,
             fullClothingInventory = allClothing,
             fullCosmeticInventory = allCosmetics,
             selectedClothingCategory = selectedClothingCat,
@@ -187,7 +218,7 @@ class StyleSimulatorViewModel @Inject constructor(
         initialValue = StyleSimulatorUiState()
     )
 
-    private val _effect = kotlinx.coroutines.channels.Channel<SimulatorEffect>()
+    private val _effect = Channel<SimulatorEffect>()
     val effect = _effect.receiveAsFlow()
 
     init {
@@ -206,12 +237,12 @@ class StyleSimulatorViewModel @Inject constructor(
     }
 
     private fun getStartOfDay(timestamp: Long): Long {
-        val cal = java.util.Calendar.getInstance()
+        val cal = Calendar.getInstance()
         cal.timeInMillis = timestamp
-        cal.set(java.util.Calendar.HOUR_OF_DAY, 0)
-        cal.set(java.util.Calendar.MINUTE, 0)
-        cal.set(java.util.Calendar.SECOND, 0)
-        cal.set(java.util.Calendar.MILLISECOND, 0)
+        cal.set(Calendar.HOUR_OF_DAY, 0)
+        cal.set(Calendar.MINUTE, 0)
+        cal.set(Calendar.SECOND, 0)
+        cal.set(Calendar.MILLISECOND, 0)
         return cal.timeInMillis
     }
 
@@ -227,6 +258,20 @@ class StyleSimulatorViewModel @Inject constructor(
                 _simulationStep.value = SimulationStep.MESSAGING
                 _simulationResult.value = null
                 _selectedResultTab.value = ResultTab.CLOTHES
+            }
+            SimulatorEvent.CapturePortrait -> {
+                viewModelScope.launch {
+                    _effect.send(SimulatorEffect.NavigateToCamera("face_simulator"))
+                }
+            }
+            SimulatorEvent.PickPortrait -> {
+                viewModelScope.launch {
+                    _effect.send(SimulatorEffect.OpenGalleryPicker)
+                }
+            }
+            is SimulatorEvent.OnPortraitSelected -> {
+                sessionRepository.setFaceUri(event.uri)
+                establishProfileFromPortrait(event.uri)
             }
             is SimulatorEvent.ToggleClothingFamily -> {
                 val current = _anchoredClothingFamilies.value[event.category]
@@ -354,6 +399,14 @@ class StyleSimulatorViewModel @Inject constructor(
         return translated
     }
 
+    private fun loadBitmapFromUri(uri: Uri): Bitmap? {
+        return try {
+            context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                BitmapFactory.decodeStream(inputStream)
+            }
+        } catch (e: Exception) { null }
+    }
+
     private fun saveSelectionToColorTab() {
         viewModelScope.launch {
             val state = uiState.value
@@ -418,5 +471,59 @@ class StyleSimulatorViewModel @Inject constructor(
             
             _effect.send(SimulatorEffect.NavigateToHistory)
         }
+    }
+
+    private fun establishProfileFromPortrait(uri: String) {
+        viewModelScope.launch {
+            val bitmap = loadBitmapFromUri(Uri.parse(uri)) ?: return@launch
+            val image = InputImage.fromBitmap(bitmap, 0)
+
+            detector.process(image)
+                .addOnSuccessListener { faces ->
+                    if (faces.isNotEmpty()) {
+                        val face = faces[0]
+                        val cheekLandmark = face.getLandmark(FaceLandmark.LEFT_CHEEK) ?: face.getLandmark(FaceLandmark.RIGHT_CHEEK)
+                        val skinLuminance = cheekLandmark?.let { sampleLuminance(bitmap, it.position.x.toInt(), it.position.y.toInt()) } ?: 0.5f
+
+                        val eyeLandmark = face.getLandmark(FaceLandmark.LEFT_EYE) ?: face.getLandmark(FaceLandmark.RIGHT_EYE)
+                        val eyeLuminance = eyeLandmark?.let { sampleLuminance(bitmap, it.position.x.toInt(), it.position.y.toInt()) } ?: 0.2f
+
+                        val hairLuminance = sampleLuminance(bitmap, face.boundingBox.centerX(), (face.boundingBox.top - 20).coerceAtLeast(0))
+                        val contrastDelta = abs(skinLuminance - hairLuminance)
+                        val undertone = estimateUndertone(bitmap, cheekLandmark?.position?.x?.toInt() ?: face.boundingBox.centerX(), cheekLandmark?.position?.y?.toInt() ?: face.boundingBox.centerY())
+
+                        val vector = FacialContrastVector(skinLuminance, hairLuminance, eyeLuminance, contrastDelta)
+                        val season = seasonClassifier.classify(vector, undertone)
+                        
+                        val profile = ColorProfile(
+                            season = season,
+                            undertone = undertone,
+                            contrastVector = vector,
+                            optimalPaletteHexCodes = seasonClassifier.getOptimalPalette(season)
+                        )
+
+                        viewModelScope.launch {
+                            fashionRepository.saveProfile(profile.toFashionProfile())
+                        }
+                    }
+                }
+                .addOnCompleteListener {
+                    bitmap.recycle()
+                }
+        }
+    }
+
+    private fun sampleLuminance(bitmap: Bitmap, x: Int, y: Int): Float {
+        if (x < 0 || x >= bitmap.width || y < 0 || y >= bitmap.height) return 0.5f
+        val pixel = bitmap.getPixel(x, y)
+        return (0.2126f * Color.red(pixel) + 0.7152f * Color.green(pixel) + 0.0722f * Color.blue(pixel)) / 255f
+    }
+
+    private fun estimateUndertone(bitmap: Bitmap, x: Int, y: Int): Float {
+        if (x < 0 || x >= bitmap.width || y < 0 || y >= bitmap.height) return 0f
+        val pixel = bitmap.getPixel(x, y)
+        val r = Color.red(pixel)
+        val b = Color.blue(pixel)
+        return ((r - b).toFloat() / 255f).coerceIn(-1.0f, 1.0f)
     }
 }
