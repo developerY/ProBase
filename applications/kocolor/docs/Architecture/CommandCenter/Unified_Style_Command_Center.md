@@ -2,76 +2,136 @@
 
 This document outlines the convergent architecture of the KoColor Style Simulator, explaining how biometric data, user constraints, and external context flow through a single funnel to generate both immediate and long-term fashion intelligence.
 
----
-
-## 1. The Core Funnel: Three Inputs, Two Paths
-
-We have moved away from a distributed feature model (where "Calibration," "Anchoring," and "Planning" were separate tasks) to a **Convergent Command Center**.
-
-### **The Input Layer (The Funnel)**
-The user provides three distinct layers of context on a single screen:
-1.  **Visual Identity (Edge AI)**:
-    *   The user captures/picks a portrait.
-    *   **On-Device Processing**: ML Kit Face Detection samples skin, hair, and eye luminance.
-    *   **Result**: Establishes the user's "Mathematical Season" (e.g., True Winter) locally. This is saved to the `FashionProfile` in Room.
-2.  **User Anchors (Constraints)**:
-    *   The user explicitly locks certain items (e.g., "I must wear my Silk Blazer today").
-    *   These anchors bypass the AI's selection logic and serve as the foundation of the look.
-3.  **Intent & Calendar (Context)**:
-    *   The user types their intent (e.g., "Boardroom presentation").
-    *   **Future Integration**: The Calendar icon will pull upcoming events to auto-populate the intent and target dates for the playlist.
+At its core, this system operates on a fundamental invariant: **KoColor may predict behavior, but it never records predicted behavior as historical fact.**
 
 ---
 
-## 2. The Branching Engine: Single vs. 7-Day
+## 1. System Architecture Flow
+
+```text
+                   COMMAND CENTER
+                         │
+          ┌──────────────┼──────────────┐
+          │              │              │
+     IDENTITY         ANCHORS         INTENT
+          │              │              │
+          └──────────────┼──────────────┘
+                         │
+                CONTEXT ENRICHMENT
+                         │
+       ┌─────────────────┼─────────────────┐
+       │                 │                 │
+    Calendar          Weather          Location
+       │                 │                 │
+       └─────────────────┼─────────────────┘
+                         │
+                    STYLE ENGINE
+                         │
+              ┌──────────┴──────────┐
+              │                     │
+         SINGLE ADVICE          PLAYLIST
+              │                     │
+              │                 7 DAYS
+              │                     │
+              └──────────┬──────────┘
+                         ▼
+                 STYLE COLLECTION
+                         │
+                    USER WEARS
+                         │
+                      COMMIT
+                         │
+                  V1 ROTATION MEMORY
+                         │
+                         └──────────────►
+                              STYLE ENGINE
+
+```
+
+---
+
+## 2. The Core Funnel: Three User-Facing Inputs, Enriched by Context
+
+We have moved away from a distributed feature model to a **Convergent Command Center**. The UI exposes three explicit user-facing inputs, which the engine internally enriches with a broader contextual stream (Wardrobe, Cosmetics, Location, Weather, and Rotation History).
+
+1. **Visual Identity (Edge AI)**:
+* **Action**: The user captures or picks a portrait.
+* **Processing**: On-device ML Kit Face Detection samples skin, hair, and eye luminance.
+* **Result**: Establishes the user's "Mathematical Season" (e.g., True Winter) locally, saved to the `FashionProfile` in Room.
+
+
+2. **User Anchors (Hard Constraints)**:
+* **Action**: The user explicitly locks certain items (e.g., "I must wear my Blue Silk Blazer today").
+* **Processing**: These anchors *do not* bypass the AI. Instead, they constrain the AI's selection space and become mandatory inputs to the outfit solver. The engine still optimizes what shirt, pants, shoes, and cosmetics perfectly complete the blazer based on weather and rotation constraints.
+
+
+3. **Intent**:
+* **Action**: The user types their intent (e.g., "Boardroom presentation").
+* **Future Integration**: The Calendar icon will automatically pull upcoming events to populate this intent.
+
+
+
+---
+
+## 3. The Branching Engine: Single vs. 7-Day
 
 Once the inputs are set, the architecture forks into two distinct logic paths using the `StyleSimulatorEngine`.
 
 ### **Path A: Single Fashion Advice (Immediate)**
-- **Trigger**: "Get Fashion Advice" button.
-- **Process**: The `StyleSimulatorViewModel` calls the Engine once.
-- **Output**: A `StyleBlueprint` with one outfit, one palette, and one rationale.
-- **Persistence**: Saved as a `SavedAnalysis` (History).
+
+* **Trigger**: "Get Fashion Advice" button.
+* **Process**: The `StyleSimulatorViewModel` calls the Engine once.
+* **Output**: A `StyleBlueprint` with one outfit, one palette, and one rationale.
 
 ### **Path B: Style Playlist (7-Day Forecast)**
-- **Trigger**: "Generate 7-Day Playlist" button.
-- **Process**: The `GeneratePlaylistUseCase` runs a **7-iteration loop** through the Engine.
-- **State Forwarding**:
-    - Day 1 is generated based on the current `RotationRepository` history.
-    - Day 2 is generated by simulating Day 1 as "already worn," applying a **Rotation Penalty** to those items to ensure Day 2 is fresh.
-    - This process repeats until a full, varied week is planned.
-- **Persistence**: Saved as a `StylePlaylistEntity` with seven `DailyStylePlanEntity` children.
+
+* **Trigger**: "Generate 7-Day Playlist" button.
+* **Process**: The `GeneratePlaylistUseCase` runs a **7-iteration loop** through the Engine, heavily relying on the `ProjectedRotationState`.
+* **State Forwarding**:
+* Simulated wear is *never* written to the V1 `ClothingUsageEntity`.
+* **Day 1** is generated -> written to in-memory `Projected Wear`.
+* **Day 2** is generated (penalizing Day 1's items) -> written to `Projected Wear`.
+* This loops through **Day 7** to guarantee a varied week without corrupting historical data.
+
+
 
 ---
 
-## 3. The Unified Sink: The Collection Tab
+## 4. The Unified Sink: The Style Collection Tab
 
-Both results (Path A and Path B) converge in the **Collection Tab**, which now serves as the user's **Unified Style Archive**.
+Both results converge in the **Collection Tab**. This is not a passive archive; it is the user's active **Style Command Center and Playback Surface**.
 
-1.  **The Active Playlist (Top Card)**:
-    - Provides a persistent summary of the current 7-day forecast.
-    - Tracks "Wear Commitment": When the user clicks "I'M WEARING THIS," an atomic transaction increments the wear count in the V1 Closet and sets the 48-hour cooldown.
-2.  **Past Analyses (History List)**:
-    - Below the playlist, all single-advice "Curated Looks" are archived for future reference.
+1. **The Active Playlist (Top Card)**:
+* Provides a persistent summary of the current 7-day forecast.
+* **Execution Semantics**: `PREVIEW` → `ACCEPT / LOCK` → `I'M WEARING THIS` → `COMMITTED ROTATION EVENT`.
+* **Idempotency**: When the user taps "I'M WEARING THIS", an atomic, idempotent transaction increments the wear count (`useCount + 1`) in the V1 Closet and sets the 48-hour cooldown. Double-taps cannot corrupt the ledger.
 
----
 
-## 4. Why This Fits Our Architecture
+2. **Historical Playback**:
+* Houses past Curated Looks, Remixes, rotation history, and future "Style Wrapped" metrics.
 
-- **Privacy-First**: Biometric data (Face) is established via Edge AI. The Cloud AI (Gemini) only receives the *textual profile* (e.g., "Season: Winter"), never the raw image.
-- **V1 -> V2 Bridge**: The Playlist feature is the primary driver for our "Rotation System." It enforces the 48-hour cooldown logic built into the `PlaylistRepository`, effectively digitizing the "Wear & Tear" metrics of the user's physical wardrobe.
-- **Dependency Flow**: By moving the `StyleSimulatorEngine` to the `:data` module, we've enabled it to be consumed by both the UI (for single advice) and the UseCase (for 7-day generation) without circular dependencies.
+
 
 ---
 
-## 5. User Journey Walkthrough
+## 5. Architectural Invariants: The Three States
 
-1.  **Open "Analyze Style"**: User enters the Command Center.
-2.  **Identity**: User taps the portrait card and takes a photo. The app says "True Winter Established."
-3.  **Anchors**: User selects "Top" and taps the "Blue Silk" family to ensure the AI picks a blue shirt.
-4.  **Intent**: User taps the Calendar icon. The AI reads "Meeting with CEO at 2 PM."
-5.  **Action**:
-    - User clicks **"Generate 7-Day Playlist"**.
-    - User is navigated to the **Collection Tab**.
-    - User sees their full week planned out, with the Monday plan specifically tailored for that high-stakes meeting.
-6.  **Engagement**: Monday morning, user taps **"I'M WEARING THIS"**. The shirt's wear count goes up, and it disappears from the AI's rotation for the next 48 hours.
+To keep the system robust across V1 and V2, the architecture strictly isolates three types of state:
+
+| State | Meaning | Persistence |
+| --- | --- | --- |
+| **Context State** | What is true right now / external conditions (Weather, Location, Calendar). | Current Live Data |
+| **Projected State** | What the engine *predicts* will happen over the next 7 days. | Temporary / In-Memory |
+| **Committed State** | What the user *actually* did (historical fact). | V1 Room Database (`ClothingUsageEntity`) |
+
+---
+
+## 6. User Journey Walkthrough
+
+1. **Open "Analyze Style"**: User enters the Command Center.
+2. **Identity**: User taps the portrait card and takes a photo. The app confirms "True Winter Established."
+3. **Anchors**: User selects "Top" and taps the "Blue Silk" family. The engine accepts this as a mandatory constraint for the generation solver.
+4. **Intent**: User taps the Calendar icon. The AI reads "Meeting with CEO at 2 PM."
+5. **Action**: User clicks **"Generate 7-Day Playlist"**.
+6. **Review**: The user is navigated to the **Collection Tab** to preview their upcoming week, with Monday perfectly optimized around the anchor and the CEO meeting.
+7. **Commitment**: Monday morning, user taps **"I'M WEARING THIS"**. The idempotent transaction fires, the items are marked worn, and they are temporarily removed from the AI's rotation for the next 48 hours.
