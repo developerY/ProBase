@@ -1,5 +1,7 @@
 package com.zoewave.probase.kocolor.features.analyzer.playlist.ui
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,7 +14,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -37,13 +41,17 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
+import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.kocolor.db.entity.DailyStylePlanEntity
 import com.zoewave.probase.kocolor.model.playlist.DailyPlanStatus
 import com.zoewave.probase.kocolor.model.playlist.PlaylistStatus
@@ -86,7 +94,7 @@ fun StylePlaylistScreen(
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(color = Color.Black)
             }
-        } else if (uiState.currentPlaylist == null) {
+        } else if (uiState.currentPlaylist.isEmpty()) {
             EmptyPlaylistState(onGenerate = { viewModel.onEvent(StylePlaylistEvent.GenerateWeekly) })
         } else {
             PlaylistContent(
@@ -141,18 +149,20 @@ private fun PlaylistContent(
     onCommit: (String, List<String>) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val playlist = uiState.currentPlaylist!!
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(20.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         item {
-            PlaylistHeader(status = playlist.playlist.status)
+            PlaylistHeader(status = uiState.playlistStatus ?: PlaylistStatus.GENERATED)
         }
         
-        items(playlist.dailyPlans.sortedBy { it.targetDate }) { plan ->
-            DailyPlanCard(plan = plan, onCommit = { onCommit(plan.planId, plan.baseOutfitProductIds) })
+        items(uiState.currentPlaylist) { resolvedPlan ->
+            DailyPlanCard(
+                resolvedPlan = resolvedPlan, 
+                onCommit = { onCommit(resolvedPlan.plan.planId, resolvedPlan.plan.baseOutfitProductIds) }
+            )
         }
     }
 }
@@ -195,9 +205,10 @@ private fun PlaylistHeader(status: PlaylistStatus) {
 
 @Composable
 private fun DailyPlanCard(
-    plan: DailyStylePlanEntity,
+    resolvedPlan: ResolvedDailyPlan,
     onCommit: () -> Unit
 ) {
+    val plan = resolvedPlan.plan
     val isCommitted = plan.status == DailyPlanStatus.COMMITTED
     val dayName = plan.targetDate.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.US).uppercase()
     val dateStr = plan.targetDate.format(DateTimeFormatter.ofPattern("MMM dd"))
@@ -224,6 +235,18 @@ private fun DailyPlanCard(
             }
             
             Spacer(Modifier.height(16.dp))
+
+            // THE OUTFIT ROW
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                items(resolvedPlan.clothingItems) { item ->
+                    GarmentThumbnail(item = item)
+                }
+            }
+
+            Spacer(Modifier.height(16.dp))
             
             Text(
                 text = plan.rationale.rotationReason ?: "Balanced selection for your rotation.",
@@ -246,3 +269,39 @@ private fun DailyPlanCard(
         }
     }
 }
+
+@Composable
+private fun GarmentThumbnail(item: ClothingItem) {
+    val color = try {
+        Color(android.graphics.Color.parseColor(item.colorHex))
+    } catch (e: Exception) {
+        Color.LightGray
+    }
+
+    Box(
+        modifier = Modifier
+            .size(64.dp)
+            .clip(CircleShape)
+            .background(color.copy(alpha = 0.1f))
+            .border(1.dp, Color.Black.copy(alpha = 0.05f), CircleShape),
+        contentAlignment = Alignment.Center
+    ) {
+        if (item.imageUrl != null) {
+            AsyncImage(
+                model = item.imageUrl,
+                contentDescription = item.name,
+                modifier = Modifier.fillMaxSize().clip(CircleShape),
+                contentScale = ContentScale.Crop
+            )
+        } else {
+            // Fallback to color if no image
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(CircleShape)
+                    .background(color)
+            )
+        }
+    }
+}
+

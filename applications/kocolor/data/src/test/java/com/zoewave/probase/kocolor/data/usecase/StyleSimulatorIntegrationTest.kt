@@ -88,7 +88,7 @@ class StyleSimulatorIntegrationTest {
             )
 
             // Verify it fell back to the "Local Architect" (Heuristics)
-            assertThat(blueprint.rationale).contains("Local Architect")
+            assertThat(blueprint.rationale).contains("Optimized for rotation")
         }
     }
 

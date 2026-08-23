@@ -5,8 +5,13 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.face.FaceDetection
+import com.google.mlkit.vision.face.FaceDetectorOptions
+import com.google.mlkit.vision.face.FaceLandmark
 import com.zoewave.probase.core.data.repository.AiConfigurationSettings
 import com.zoewave.probase.core.data.repository.weather.AtmosphericRepository
 import com.zoewave.probase.core.model.ritual.ClothingCategory
@@ -22,26 +27,22 @@ import com.zoewave.probase.core.model.ritual.RoutineTime
 import com.zoewave.probase.core.model.ritual.SeasonalType
 import com.zoewave.probase.core.model.ritual.SuggestedPiece
 import com.zoewave.probase.core.model.ritual.Undertone
+import com.zoewave.probase.kocolor.data.FashionRepository
 import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
 import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
 import com.zoewave.probase.kocolor.data.repository.RotationRepository
 import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
 import com.zoewave.probase.kocolor.data.usecase.GeneratePlaylistUseCase
 import com.zoewave.probase.kocolor.data.usecase.RotationScoringUseCase
-import com.zoewave.probase.kocolor.db.dao.RoutineDao
 import com.zoewave.probase.kocolor.data.usecase.StyleBlueprint
 import com.zoewave.probase.kocolor.data.usecase.StyleSimulatorEngine
+import com.zoewave.probase.kocolor.db.dao.RoutineDao
 import com.zoewave.probase.kocolor.features.analyzer.calibration.ColorSeasonClassifier
-import com.google.mlkit.vision.common.InputImage
-import com.google.mlkit.vision.face.FaceDetection
-import com.google.mlkit.vision.face.FaceDetectorOptions
-import com.google.mlkit.vision.face.FaceLandmark
-import com.zoewave.probase.kocolor.data.FashionRepository
-import com.zoewave.probase.kocolor.model.calibration.ColorProfile
-import com.zoewave.probase.kocolor.model.calibration.FacialContrastVector
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.ResultTab
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.VisualBlueprintData
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.mapToVisualBlueprintData
+import com.zoewave.probase.kocolor.model.calibration.ColorProfile
+import com.zoewave.probase.kocolor.model.calibration.FacialContrastVector
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.Channel
@@ -54,7 +55,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.util.Calendar
@@ -74,6 +74,7 @@ data class StyleSimulatorUiState(
     val rationale: String? = null,
     val isLocalResult: Boolean = false,
     val fashionProfileLabel: String? = null,
+    val faceAnalysisError: String? = null,
     val userPortraitUri: String? = null,
     val fullClothingInventory: List<ClothingItem> = emptyList(),
     val fullCosmeticInventory: List<CosmeticItem> = emptyList(),
@@ -144,6 +145,7 @@ class StyleSimulatorViewModel @Inject constructor(
     private val _simulationResult = MutableStateFlow<StyleBlueprint?>(null)
     private val _selectedResultTab = MutableStateFlow(ResultTab.CLOTHES)
     private val _isAnalyzing = MutableStateFlow(false)
+    private val _faceAnalysisError = MutableStateFlow<String?>(null)
 
     private val detector = FaceDetection.getClient(
         FaceDetectorOptions.Builder()
@@ -167,7 +169,8 @@ class StyleSimulatorViewModel @Inject constructor(
         _simulationStep,
         _simulationResult,
         _selectedResultTab,
-        _isAnalyzing
+        _isAnalyzing,
+        _faceAnalysisError
     ) { array ->
         val faceUri = array[0] as String?
         val profile = array[1] as FashionProfile?
@@ -182,6 +185,7 @@ class StyleSimulatorViewModel @Inject constructor(
         val result = array[10] as StyleBlueprint?
         val resultTab = array[11] as ResultTab
         val analyzing = array[12] as Boolean
+        val analysisError = array[13] as String?
 
         val clothingFamilies = allClothing.filter { it.category == selectedClothingCat }
             .groupBy { it.colorFamily }
@@ -216,6 +220,7 @@ class StyleSimulatorViewModel @Inject constructor(
             fashionProfileLabel = profile?.let { "${it.undertone} ${it.seasonalType}" },
             selectedResultTab = resultTab,
             isAnalyzing = analyzing,
+            faceAnalysisError = analysisError,
             visualBlueprintData = mapToVisualBlueprintData(
                 cosmetics = recommendedCosmetics,
                 clothing = recommendedClothing,
@@ -512,12 +517,24 @@ class StyleSimulatorViewModel @Inject constructor(
     }
 
     private fun establishProfileFromPortrait(uri: String) {
+        Log.d("StyleSimulatorVM", "Establishing profile from URI: $uri")
+        _faceAnalysisError.value = null // Clear previous errors
+        
         viewModelScope.launch {
-            val bitmap = loadBitmapFromUri(Uri.parse(uri)) ?: return@launch
+            val bitmap = loadBitmapFromUri(Uri.parse(uri)) 
+            if (bitmap == null) {
+                Log.e("StyleSimulatorVM", "Failed to load bitmap from URI")
+                _faceAnalysisError.value = "Failed to load image."
+                sessionRepository.setFaceUri(null) // Clear bad URI
+                return@launch
+            }
+            
+            Log.d("StyleSimulatorVM", "Bitmap loaded: ${bitmap.width}x${bitmap.height}")
             val image = InputImage.fromBitmap(bitmap, 0)
 
             detector.process(image)
                 .addOnSuccessListener { faces ->
+                    Log.d("StyleSimulatorVM", "Face detection success: ${faces.size} faces found")
                     if (faces.isNotEmpty()) {
                         val face = faces[0]
                         val cheekLandmark = face.getLandmark(FaceLandmark.LEFT_CHEEK) ?: face.getLandmark(FaceLandmark.RIGHT_CHEEK)
@@ -540,10 +557,22 @@ class StyleSimulatorViewModel @Inject constructor(
                             optimalPaletteHexCodes = seasonClassifier.getOptimalPalette(season)
                         )
 
+                        Log.d("StyleSimulatorVM", "Established Season: $season, Undertone: $undertone")
+                        
                         viewModelScope.launch {
                             fashionRepository.saveProfile(profile.toFashionProfile())
+                            Log.d("StyleSimulatorVM", "Profile saved to repository")
                         }
+                    } else {
+                        Log.w("StyleSimulatorVM", "No faces detected in the provided image")
+                        _faceAnalysisError.value = "No face detected. Please try a clearer photo."
+                        sessionRepository.setFaceUri(null) // Clear the URI so they can try again
                     }
+                }
+                .addOnFailureListener { e ->
+                    Log.e("StyleSimulatorVM", "Face detection failed", e)
+                    _faceAnalysisError.value = "Analysis failed. The AI model may still be downloading."
+                    sessionRepository.setFaceUri(null) // Clear the URI
                 }
                 .addOnCompleteListener {
                     bitmap.recycle()

@@ -295,8 +295,15 @@ class StyleSimulatorEngine @Inject constructor(
         }
         val finalPalette = palette.take(4)
 
+        val itemNames = selectedItems.joinToString(", ") { it.name }
+        val rationale = if (itemNames.isNotBlank()) {
+            "Optimized for rotation. Features your $itemNames."
+        } else {
+            "Local Architect: Selected from your vault based on intent and freshness score."
+        }
+
         return StyleBlueprint(
-            rationale = "Local Architect: Selected from your vault based on intent and freshness score.",
+            rationale = rationale,
             selectedClothingIds = selectedItems.map { "w_${it.internalId}" },
             selectedCosmeticIds = selectedCosmetics.map { "c_${it.internalId}" },
             recommendedPalette = finalPalette

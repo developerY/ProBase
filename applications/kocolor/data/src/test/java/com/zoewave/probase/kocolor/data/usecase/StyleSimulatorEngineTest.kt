@@ -24,7 +24,7 @@ class StyleSimulatorEngineTest {
 
         assertThat(blueprint.selectedClothingIds).isNotEmpty()
         assertThat(blueprint.recommendedPalette).hasSize(4) // Engine pads to 4
-        assertThat(blueprint.rationale).contains("Local Architect")
+        assertThat(blueprint.rationale).contains("Optimized for rotation")
     }
 
     @Test
