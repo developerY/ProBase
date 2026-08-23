@@ -537,80 +537,78 @@ class StyleSimulatorViewModel @Inject constructor(
         _faceTelemetry.value = null
         
         viewModelScope.launch {
-            val bitmap = loadBitmapFromUri(Uri.parse(uri)) 
-            if (bitmap == null) {
-                Log.e("StyleSimulatorVM", "Failed to load bitmap from URI")
-                _faceAnalysisError.value = "Failed to load image."
-                sessionRepository.setFaceUri(null) // Clear bad URI
-                return@launch
-            }
-            
-            Log.d("StyleSimulatorVM", "Bitmap loaded: ${bitmap.width}x${bitmap.height}")
-            val image = InputImage.fromBitmap(bitmap, 0)
+            try {
+                val parsedUri = Uri.parse(uri)
+                val image = InputImage.fromFilePath(context, parsedUri)
 
-            detector.process(image)
-                .addOnSuccessListener { faces ->
-                    Log.d("StyleSimulatorVM", "Face detection success: ${faces.size} faces found")
-                    if (faces.isNotEmpty()) {
-                        val face = faces[0]
-                        val cheekLandmark = face.getLandmark(FaceLandmark.LEFT_CHEEK) ?: face.getLandmark(FaceLandmark.RIGHT_CHEEK)
-                        val eyeLandmark = face.getLandmark(FaceLandmark.LEFT_EYE) ?: face.getLandmark(FaceLandmark.RIGHT_EYE)
-                        
-                        val hairBox = Rect(
-                            face.boundingBox.left, 
-                            (face.boundingBox.top - 50).coerceAtLeast(0), 
-                            face.boundingBox.right, 
-                            face.boundingBox.top
-                        )
+                detector.process(image)
+                    .addOnSuccessListener { faces ->
+                        Log.d("StyleSimulatorVM", "Face detection success: ${faces.size} faces found")
+                        if (faces.isNotEmpty()) {
+                            val face = faces[0]
+                            val cheekLandmark = face.getLandmark(FaceLandmark.LEFT_CHEEK) ?: face.getLandmark(FaceLandmark.RIGHT_CHEEK)
+                            val eyeLandmark = face.getLandmark(FaceLandmark.LEFT_EYE) ?: face.getLandmark(FaceLandmark.RIGHT_EYE)
+                            
+                            val hairBox = Rect(
+                                face.boundingBox.left, 
+                                (face.boundingBox.top - 50).coerceAtLeast(0), 
+                                face.boundingBox.right, 
+                                face.boundingBox.top
+                            )
 
-                        _faceTelemetry.value = FaceTelemetryData(
-                            imageWidth = bitmap.width,
-                            imageHeight = bitmap.height,
-                            cheekPoint = cheekLandmark?.position,
-                            eyePoint = eyeLandmark?.position,
-                            hairBoundingBox = hairBox
-                        )
+                            _faceTelemetry.value = FaceTelemetryData(
+                                imageWidth = image.width,
+                                imageHeight = image.height,
+                                cheekPoint = cheekLandmark?.position,
+                                eyePoint = eyeLandmark?.position,
+                                hairBoundingBox = hairBox
+                            )
 
-                        val skinLuminance = cheekLandmark?.let { sampleLuminance(bitmap, it.position.x.toInt(), it.position.y.toInt()) } ?: 0.5f
+                            // We still need the bitmap for luminance sampling
+                            // But we use the ML Kit image resolution as the source of truth for telemetry
+                            val bitmap = loadBitmapFromUri(parsedUri) ?: return@addOnSuccessListener
 
-                        val eyeLuminance = eyeLandmark?.let { sampleLuminance(bitmap, it.position.x.toInt(), it.position.y.toInt()) } ?: 0.2f
+                            val skinLuminance = cheekLandmark?.let { sampleLuminance(bitmap, it.position.x.toInt(), it.position.y.toInt()) } ?: 0.5f
 
-                        val hairLuminance = sampleLuminance(bitmap, face.boundingBox.centerX(), (face.boundingBox.top - 20).coerceAtLeast(0))
-                        val contrastDelta = abs(skinLuminance - hairLuminance)
-                        val undertone = estimateUndertone(bitmap, cheekLandmark?.position?.x?.toInt() ?: face.boundingBox.centerX(), cheekLandmark?.position?.y?.toInt() ?: face.boundingBox.centerY())
+                            val eyeLuminance = eyeLandmark?.let { sampleLuminance(bitmap, it.position.x.toInt(), it.position.y.toInt()) } ?: 0.2f
 
-                        val vector = FacialContrastVector(skinLuminance, hairLuminance, eyeLuminance, contrastDelta)
-                        val season = seasonClassifier.classify(vector, undertone)
-                        
-                        val profile = ColorProfile(
-                            season = season,
-                            undertone = undertone,
-                            contrastVector = vector,
-                            optimalPaletteHexCodes = seasonClassifier.getOptimalPalette(season)
-                        )
+                            val hairLuminance = sampleLuminance(bitmap, face.boundingBox.centerX(), (face.boundingBox.top - 20).coerceAtLeast(0))
+                            val contrastDelta = abs(skinLuminance - hairLuminance)
+                            val undertone = estimateUndertone(bitmap, cheekLandmark?.position?.x?.toInt() ?: face.boundingBox.centerX(), cheekLandmark?.position?.y?.toInt() ?: face.boundingBox.centerY())
 
-                        Log.d("StyleSimulatorVM", "Established Season: $season, Undertone: $undertone")
-                        
-                        viewModelScope.launch {
-                            fashionRepository.saveProfile(profile.toFashionProfile())
-                            Log.d("StyleSimulatorVM", "Profile saved to repository")
+                            val vector = FacialContrastVector(skinLuminance, hairLuminance, eyeLuminance, contrastDelta)
+                            val season = seasonClassifier.classify(vector, undertone)
+                            
+                            val profile = ColorProfile(
+                                season = season,
+                                undertone = undertone,
+                                contrastVector = vector,
+                                optimalPaletteHexCodes = seasonClassifier.getOptimalPalette(season)
+                            )
+
+                            Log.d("StyleSimulatorVM", "Established Season: $season, Undertone: $undertone")
+                            
+                            viewModelScope.launch {
+                                fashionRepository.saveProfile(profile.toFashionProfile())
+                                Log.d("StyleSimulatorVM", "Profile saved to repository")
+                            }
+                            bitmap.recycle()
+                        } else {
+                            Log.w("StyleSimulatorVM", "No faces detected in the provided image")
+                            _faceAnalysisError.value = "No face detected. Please try a clearer photo."
+                            sessionRepository.setFaceUri(null) // Clear the URI so they can try again
                         }
-                    } else {
-                        Log.w("StyleSimulatorVM", "No faces detected in the provided image")
-                        _faceAnalysisError.value = "No face detected. Please try a clearer photo."
-                        sessionRepository.setFaceUri(null) // Clear the URI so they can try again
                     }
-                }
-                .addOnFailureListener { e ->
-                    Log.e("StyleSimulatorVM", "Face detection failed", e)
-                    _faceAnalysisError.value = "Analysis failed. The AI model may still be downloading."
-                    sessionRepository.setFaceUri(null) // Clear the URI
-                }
-                .addOnCompleteListener {
-                    // Do not recycle bitmap if we want to show it in the UI later? 
-                    // Actually AsyncImage will load from URI again.
-                    bitmap.recycle()
-                }
+                    .addOnFailureListener { e ->
+                        Log.e("StyleSimulatorVM", "Face detection failed", e)
+                        _faceAnalysisError.value = "Analysis failed. The AI model may still be downloading."
+                        sessionRepository.setFaceUri(null) // Clear the URI
+                    }
+            } catch (e: Exception) {
+                Log.e("StyleSimulatorVM", "Failed to load image", e)
+                _faceAnalysisError.value = "Failed to load image."
+                sessionRepository.setFaceUri(null)
+            }
         }
     }
 

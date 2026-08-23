@@ -413,26 +413,39 @@ fun FaceTelemetryVisualizer(
     telemetry: FaceTelemetryData,
     modifier: Modifier = Modifier
 ) {
-    Box(modifier = modifier) {
+    Box(modifier = modifier.fillMaxWidth().aspectRatio(4f/3f)) { 
         AsyncImage(
             model = imageUri,
             contentDescription = "Analyzed Portrait",
             modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.FillWidth
+            contentScale = ContentScale.Crop
         )
         
         Canvas(modifier = Modifier.matchParentSize()) {
-            val scaleX = size.width / telemetry.imageWidth
-            val scaleY = size.height / telemetry.imageHeight
+            val imageW = telemetry.imageWidth.toFloat()
+            val imageH = telemetry.imageHeight.toFloat()
 
-            fun scalePoint(p: PointF): Offset = Offset(p.x * scaleX, p.y * scaleY)
+            // 1. Calculate the exact scale factor used by ContentScale.Crop
+            val scale = maxOf(size.width / imageW, size.height / imageH)
+
+            // 2. Calculate the offset to center the cropped image
+            val offsetX = (size.width - (imageW * scale)) / 2f
+            val offsetY = (size.height - (imageH * scale)) / 2f
+
+            // 3. Apply both scale and translation to the ML Kit coordinates
+            fun scalePoint(p: PointF): Offset {
+                return Offset(
+                    x = (p.x * scale) + offsetX,
+                    y = (p.y * scale) + offsetY
+                )
+            }
 
             // Hair Bounding Box
             telemetry.hairBoundingBox?.let { rect ->
                 drawRect(
-                    color = Color.Yellow.copy(alpha = 0.4f),
-                    topLeft = Offset(rect.left * scaleX, rect.top * scaleY),
-                    size = Size(rect.width() * scaleX, rect.height() * scaleY),
+                    color = Color.Yellow.copy(alpha = 0.6f),
+                    topLeft = Offset((rect.left * scale) + offsetX, (rect.top * scale) + offsetY),
+                    size = Size(rect.width() * scale, rect.height() * scale),
                     style = Stroke(width = 4f, pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f))
                 )
             }
