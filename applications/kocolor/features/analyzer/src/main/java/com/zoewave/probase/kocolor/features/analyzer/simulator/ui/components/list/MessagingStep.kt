@@ -53,7 +53,7 @@ fun MessagingStep(
             )
         }
 
-        // User Portrait Slot
+        // Color Profile Indicator
         item {
             Card(
                 modifier = Modifier
@@ -72,40 +72,42 @@ fun MessagingStep(
                         modifier = Modifier
                             .size(64.dp)
                             .clip(CircleShape)
-                            .background(Color.White),
+                            .background(if (uiState.fashionProfileLabel != null) Color(0xFFF0E6FF) else Color(0xFFF5F5F5)),
                         contentAlignment = Alignment.Center
                     ) {
-                        if (uiState.userPortraitUri != null) {
-                            AsyncImage(
-                                model = uiState.userPortraitUri,
-                                contentDescription = null,
-                                modifier = Modifier.fillMaxSize(),
-                                contentScale = ContentScale.Crop
-                            )
-                        } else {
-                            Icon(Icons.Default.Person, null, modifier = Modifier.size(24.dp), tint = Color.LightGray.copy(alpha = 0.5f))
-                        }
+                        Icon(
+                            imageVector = if (uiState.fashionProfileLabel != null) Icons.Default.AutoAwesome else Icons.Default.Science, 
+                            null, 
+                            modifier = Modifier.size(24.dp), 
+                            tint = if (uiState.fashionProfileLabel != null) Color(0xFF6750A4) else Color.LightGray
+                        )
                     }
                     Spacer(Modifier.width(16.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = if (uiState.userPortraitUri != null) "Visual Identity Active" else "No Portrait Detected",
+                            text = if (uiState.fashionProfileLabel != null) "Color Profile Established" else "Calibration Required",
                             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                             color = Color.Black.copy(alpha = 0.8f)
                         )
                         Text(
-                            text = "Tap to change visual anchor",
+                            text = uiState.fashionProfileLabel ?: "Run calibration for precise AI grounding",
                             style = MaterialTheme.typography.labelSmall,
                             color = Color.Gray.copy(alpha = 0.7f)
                         )
                     }
                     
-                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        IconButton(onClick = { onEvent(SimulatorEvent.CapturePortrait) }) {
-                            Icon(Icons.Default.PhotoCamera, null, tint = Color.DarkGray.copy(alpha = 0.6f), modifier = Modifier.size(20.dp))
+                    if (uiState.fashionProfileLabel == null) {
+                        Button(
+                            onClick = { navTo(KoColorRoute.Calibration) },
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color.Black),
+                            contentPadding = PaddingValues(horizontal = 12.dp)
+                        ) {
+                            Text("SCAN", style = MaterialTheme.typography.labelSmall, color = Color.White)
                         }
-                        IconButton(onClick = { onEvent(SimulatorEvent.PickPortrait) }) {
-                            Icon(Icons.Default.Image, null, tint = Color.Black.copy(alpha = 0.6f), modifier = Modifier.size(20.dp))
+                    } else {
+                        IconButton(onClick = { navTo(KoColorRoute.Calibration) }) {
+                            Icon(Icons.Default.Refresh, null, tint = Color.Gray, modifier = Modifier.size(20.dp))
                         }
                     }
                 }

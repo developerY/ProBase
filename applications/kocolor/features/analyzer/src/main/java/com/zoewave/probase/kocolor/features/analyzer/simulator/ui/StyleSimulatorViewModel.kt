@@ -1,7 +1,6 @@
 package com.zoewave.probase.kocolor.features.analyzer.simulator.ui
 
 import android.content.Context
-import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.core.data.repository.AiConfigurationSettings
@@ -11,6 +10,7 @@ import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.core.model.ritual.ColorFamily
 import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.core.model.ritual.FashionAdvice
+import com.zoewave.probase.core.model.ritual.FashionProfile
 import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.core.model.ritual.MakeupSuggestion
 import com.zoewave.probase.core.model.ritual.OutfitSuggestion
@@ -56,7 +56,7 @@ data class StyleSimulatorUiState(
     val userMessage: String = "",
     val rationale: String? = null,
     val isLocalResult: Boolean = false,
-    val userPortraitUri: String? = null,
+    val fashionProfileLabel: String? = null,
     val fullClothingInventory: List<ClothingItem> = emptyList(),
     val fullCosmeticInventory: List<CosmeticItem> = emptyList(),
     val selectedClothingCategory: ClothingCategory = ClothingCategory.TOPS,
@@ -83,9 +83,6 @@ sealed class SimulatorEvent {
     data object StartSimulation : SimulatorEvent()
     data object SaveToPalette : SimulatorEvent()
     data object Reset : SimulatorEvent()
-    data object CapturePortrait : SimulatorEvent()
-    data object PickPortrait : SimulatorEvent()
-    data class OnPortraitSelected(val uri: String) : SimulatorEvent()
     data class ToggleClothingFamily(val category: ClothingCategory, val family: ColorFamily) : SimulatorEvent()
     data class ToggleCosmeticFamily(val category: MacroCategory, val family: ColorFamily) : SimulatorEvent()
     data class SelectClothingCategory(val category: ClothingCategory) : SimulatorEvent()
@@ -96,7 +93,6 @@ sealed class SimulatorEvent {
 sealed class SimulatorEffect {
     data object NavigateToHistory : SimulatorEffect()
     data class NavigateToCamera(val target: String) : SimulatorEffect()
-    data object OpenGalleryPicker : SimulatorEffect()
 }
 
 @HiltViewModel
@@ -124,7 +120,7 @@ class StyleSimulatorViewModel @Inject constructor(
     private val _selectedResultTab = MutableStateFlow(ResultTab.CLOTHES)
 
     val uiState: StateFlow<StyleSimulatorUiState> = combine(
-        sessionRepository.faceUri,
+        fashionRepository.getProfile(),
         wardrobeRepository.getAllClothing(),
         cosmeticRepository.getAllCosmetics(),
         _selectedClothingCategory,
@@ -136,7 +132,7 @@ class StyleSimulatorViewModel @Inject constructor(
         _simulationResult,
         _selectedResultTab
     ) { array ->
-        val faceUri = array[0] as String?
+        val profile = array[0] as FashionProfile?
         val allClothing = array[1] as List<ClothingItem>
         val allCosmetics = array[2] as List<CosmeticItem>
         val selectedClothingCat = array[3] as ClothingCategory
@@ -162,7 +158,6 @@ class StyleSimulatorViewModel @Inject constructor(
         }
 
         StyleSimulatorUiState(
-            userPortraitUri = faceUri,
             fullClothingInventory = allClothing,
             fullCosmeticInventory = allCosmetics,
             selectedClothingCategory = selectedClothingCat,
@@ -178,6 +173,7 @@ class StyleSimulatorViewModel @Inject constructor(
             recommendedClothing = recommendedClothing,
             recommendedCosmetics = recommendedCosmetics,
             isLocalResult = result?.rationale?.startsWith("Local Architect") ?: false,
+            fashionProfileLabel = profile?.let { "${it.undertone} ${it.seasonalType}" },
             selectedResultTab = resultTab,
             visualBlueprintData = mapToVisualBlueprintData(
                 cosmetics = recommendedCosmetics,
@@ -232,19 +228,6 @@ class StyleSimulatorViewModel @Inject constructor(
                 _simulationResult.value = null
                 _selectedResultTab.value = ResultTab.CLOTHES
             }
-            SimulatorEvent.CapturePortrait -> {
-                viewModelScope.launch {
-                    _effect.send(SimulatorEffect.NavigateToCamera("face_simulator"))
-                }
-            }
-            SimulatorEvent.PickPortrait -> {
-                viewModelScope.launch {
-                    _effect.send(SimulatorEffect.OpenGalleryPicker)
-                }
-            }
-            is SimulatorEvent.OnPortraitSelected -> {
-                sessionRepository.setFaceUri(event.uri)
-            }
             is SimulatorEvent.ToggleClothingFamily -> {
                 val current = _anchoredClothingFamilies.value[event.category]
                 val nextMap = _anchoredClothingFamilies.value.toMutableMap()
@@ -294,11 +277,6 @@ class StyleSimulatorViewModel @Inject constructor(
             val weather = atmosphericRepository.atmosphericState.value
             val weatherContext = "UV: ${weather.environmentalContext?.uvIndex ?: "Unknown"}, Temp: ${weather.weather?.main?.temp ?: "Unknown"}C"
 
-            val portraitUri = sessionRepository.faceUri.value
-            val userPortrait = portraitUri?.let { uri ->
-                loadBitmapFromUri(Uri.parse(uri))
-            }
-
             val anchoredClothing = state.anchoredClothingFamilies.flatMap { (cat, family) ->
                 state.fullClothingInventory.filter { it.category == cat && it.colorFamily == family }
             }
@@ -329,7 +307,6 @@ class StyleSimulatorViewModel @Inject constructor(
                 availableCosmetics = allCosmetics,
                 rotationScores = rotationScores,
                 fashionProfile = skinContext,
-                userPortrait = userPortrait,
                 anchoredClothing = anchoredClothing,
                 anchoredCosmetics = anchoredCosmetics,
                 apiKey = apiKey,
@@ -343,7 +320,6 @@ class StyleSimulatorViewModel @Inject constructor(
                 state.fullCosmeticInventory
             )
 
-            userPortrait?.recycle()
             _simulationResult.value = blueprint.copy(rationale = translatedRationale)
             _simulationStep.value = SimulationStep.RESULT
         }
@@ -376,14 +352,6 @@ class StyleSimulatorViewModel @Inject constructor(
             translated = translated.replace(fullTag, richName ?: "this item")
         }
         return translated
-    }
-
-    private fun loadBitmapFromUri(uri: Uri): android.graphics.Bitmap? {
-        return try {
-            context.contentResolver.openInputStream(uri)?.use { inputStream ->
-                android.graphics.BitmapFactory.decodeStream(inputStream)
-            }
-        } catch (e: Exception) { null }
     }
 
     private fun saveSelectionToColorTab() {

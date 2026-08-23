@@ -698,7 +698,7 @@ fun koColorNavEntryProvider(
                     if (result.startsWith("result_ok:")) {
                         val uri = result.substringAfter("result_ok:")
                         when (route.target) {
-                            "face", "face_simulator" -> onFaceCaptured(uri)
+                            "face" -> onFaceCaptured(uri)
                             "hair" -> onHairCaptured(uri)
                             "shoes" -> onShoesCaptured(uri)
                             "clothes" -> onClothesCaptured(uri)
