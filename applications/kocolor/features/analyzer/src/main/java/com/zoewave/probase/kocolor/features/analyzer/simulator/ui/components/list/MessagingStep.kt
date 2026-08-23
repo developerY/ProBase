@@ -47,7 +47,7 @@ fun MessagingStep(
     if (showFindings && uiState.userPortraitUri != null) {
         AlertDialog(
             onDismissRequest = { showFindings = false },
-            title = { Text("ML Face Detection Findings", style = MaterialTheme.typography.titleLarge) },
+            title = { Text("ML Face Detection Findings", style = MaterialTheme.typography.titleLarge, fontFamily = FontFamily.Serif) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     if (uiState.fashionProfileLabel != null) {
@@ -78,10 +78,10 @@ fun MessagingStep(
             Spacer(Modifier.height(24.dp))
             Text(
                 text = stringResource(R.string.applications_kocolor_features_analyzer_simulator_intent_title),
-                style = MaterialTheme.typography.displayMedium.copy(fontSize = 44.sp),
+                style = MaterialTheme.typography.displayMedium.copy(fontSize = 40.sp),
                 fontFamily = FontFamily.Serif,
                 fontWeight = FontWeight.Normal,
-                lineHeight = 52.sp,
+                lineHeight = 48.sp,
                 color = Color.Black
             )
         }
@@ -123,7 +123,7 @@ fun MessagingStep(
                     Spacer(Modifier.width(16.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = if (uiState.fashionProfileLabel != null) "Visual Identity Active" else "No Portrait Detected",
+                            text = if (uiState.userPortraitUri != null) "Visual Identity Active" else "No Portrait Detected",
                             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                             color = Color.Black.copy(alpha = 0.8f)
                         )
@@ -146,7 +146,46 @@ fun MessagingStep(
             }
         }
 
-        // Clothing Anchors
+        // Anchor Constraints Section
+        item {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(
+                    text = "ANCHOR CONSTRAINTS",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 1.2.sp,
+                    fontFamily = FontFamily.Serif,
+                    color = Color.Gray
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // TODO: Map currently locked garments here
+                    Surface(
+                        onClick = { navTo(KoColorRoute.Wardrobe) },
+                        modifier = Modifier.size(56.dp),
+                        shape = CircleShape,
+                        color = Color.White,
+                        border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f)),
+                        shadowElevation = 2.dp
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(Icons.Default.Add, null, tint = Color.Black.copy(alpha = 0.6f))
+                        }
+                    }
+                    
+                    Text(
+                        text = "Add anchor garment",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray
+                    )
+                }
+            }
+        }
+
+        // Clothing Anchors (Color Family Based)
         item {
             AnchorSection(
                 title = stringResource(R.string.applications_kocolor_features_analyzer_simulator_clothing_anchors),
@@ -188,7 +227,7 @@ fun MessagingStep(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(24.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.85f)),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.5f))
+                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.5f))
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),

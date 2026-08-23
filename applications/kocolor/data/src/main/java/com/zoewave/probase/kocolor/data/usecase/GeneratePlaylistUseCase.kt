@@ -1,5 +1,7 @@
 package com.zoewave.probase.kocolor.data.usecase
 
+import com.zoewave.probase.core.model.ritual.ClothingItem
+import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
 import com.zoewave.probase.kocolor.data.repository.PlaylistRepository
 import com.zoewave.probase.kocolor.data.repository.RotationRepository
@@ -10,7 +12,7 @@ import com.zoewave.probase.kocolor.db.entity.SelectionRationale
 import com.zoewave.probase.kocolor.db.entity.StylePlaylistEntity
 import com.zoewave.probase.kocolor.model.playlist.PlaylistStatus
 import com.zoewave.probase.kocolor.model.playlist.ProjectedRotationState
-import com.zoewave.probase.kocolor.model.playlist.UsageSnapshot
+import com.zoewave.probase.kocolor.model.playlist.ProjectedUsage
 import kotlinx.coroutines.flow.first
 import java.time.Instant
 import java.time.LocalDate
@@ -27,12 +29,16 @@ class GeneratePlaylistUseCase @Inject constructor(
     private val simulatorEngine: StyleSimulatorEngine,
     private val playlistRepository: PlaylistRepository
 ) {
-    suspend fun generateWeeklyPlaylist(startDate: LocalDate): Result<String> {
+    suspend fun generateWeeklyPlaylist(
+        startDate: LocalDate,
+        day1Anchors: List<ClothingItem> = emptyList(),
+        day1CosmeticAnchors: List<CosmeticItem> = emptyList()
+    ): Result<String> {
         val playlistId = UUID.randomUUID().toString()
         val wardrobe = wardrobeRepository.getAllClothing().first()
         val cosmetics = cosmeticRepository.getAllCosmetics().first()
         val initialHistory = rotationRepository.observeAllUsages().first().associate { 
-            it.productId to UsageSnapshot(it.useCount.toInt(), it.lastUsedTimestamp)
+            it.productId to ProjectedUsage(it.useCount.toInt(), it.lastUsedTimestamp)
         }
         
         val projectedState = ProjectedRotationState(initialHistory)
@@ -41,17 +47,39 @@ class GeneratePlaylistUseCase @Inject constructor(
         // 7-day loop
         for (i in 0 until 7) {
             val targetDate = startDate.plusDays(i.toLong())
-            val dailyBlueprint = simulatorEngine.architectLocalBlueprint(
-                userIntent = "Weekly Rotation", // In a real app, this would come from the calendar
+            
+            // Only apply user-funnel anchors to Day 1
+            val currentAnchors = if (i == 0) day1Anchors else emptyList()
+            val currentCosmeticAnchors = if (i == 0) day1CosmeticAnchors else emptyList()
+
+            // Calculate rotation scores based on current PROJECTED state
+            val rotationScores = wardrobe.associate { item ->
+                val usage = projectedState.getUsage(item.remoteId!!)
+                item.remoteId!! to rotationScoringUseCase.calculateRotationPenalty(
+                    productId = item.remoteId!!,
+                    category = item.category.name,
+                    customUseCount = usage?.useCount,
+                    customLastUsed = usage?.lastUsedTimestamp
+                )
+            }
+
+            val dailyBlueprint = simulatorEngine.architectStyleBlueprint(
+                userIntent = "Weekly Rotation",
+                circadianContext = "Defense & Protection",
+                routineCompleted = false,
+                wellnessScore = 0.85,
+                weatherContext = "Dynamic Weather", // Placeholder
                 availableWardrobe = wardrobe,
-                availableCosmetics = cosmetics
+                availableCosmetics = cosmetics,
+                rotationScores = rotationScores,
+                anchoredClothing = currentAnchors,
+                anchoredCosmetics = currentCosmeticAnchors
             )
 
-            // Update projected state for subsequent days
+            // COMPLETE State Forwarding: Simulate EVERY item picked into the projected state
             dailyBlueprint.selectedClothingIds.forEach { id ->
-                // Strip the "w_" prefix added by the engine if necessary
                 val cleanId = id.removePrefix("w_")
-                projectedState.simulateWear(cleanId, Instant.now()) // Approximation
+                projectedState.simulateWear(cleanId, Instant.now()) 
             }
 
             dailyPlans.add(
@@ -62,7 +90,10 @@ class GeneratePlaylistUseCase @Inject constructor(
                     baseOutfitProductIds = dailyBlueprint.selectedClothingIds,
                     cosmeticProductIds = dailyBlueprint.selectedCosmeticIds,
                     rationale = SelectionRationale(rotationReason = dailyBlueprint.rationale),
-                    evidence = SelectionEvidence(combinedFinalScore = 1.0)
+                    evidence = SelectionEvidence(
+                        combinedFinalScore = 1.0,
+                        scoringVersion = "rotation-v1.0"
+                    )
                 )
             )
         }
@@ -72,7 +103,7 @@ class GeneratePlaylistUseCase @Inject constructor(
             generatedAt = Instant.now(),
             weekStartDate = startDate,
             engineVersion = "v1.0",
-            scoringVersion = "v1.0",
+            scoringVersion = "rotation-v1.0",
             status = PlaylistStatus.GENERATED
         )
 

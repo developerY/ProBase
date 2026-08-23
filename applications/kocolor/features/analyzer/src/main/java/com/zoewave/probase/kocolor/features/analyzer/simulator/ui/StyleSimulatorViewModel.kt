@@ -54,6 +54,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.util.Calendar
@@ -142,6 +143,7 @@ class StyleSimulatorViewModel @Inject constructor(
     private val _simulationStep = MutableStateFlow(SimulationStep.MESSAGING)
     private val _simulationResult = MutableStateFlow<StyleBlueprint?>(null)
     private val _selectedResultTab = MutableStateFlow(ResultTab.CLOTHES)
+    private val _isAnalyzing = MutableStateFlow(false)
 
     private val detector = FaceDetection.getClient(
         FaceDetectorOptions.Builder()
@@ -164,7 +166,8 @@ class StyleSimulatorViewModel @Inject constructor(
         _anchoredCosmeticFamilies,
         _simulationStep,
         _simulationResult,
-        _selectedResultTab
+        _selectedResultTab,
+        _isAnalyzing
     ) { array ->
         val faceUri = array[0] as String?
         val profile = array[1] as FashionProfile?
@@ -178,6 +181,7 @@ class StyleSimulatorViewModel @Inject constructor(
         val step = array[9] as SimulationStep
         val result = array[10] as StyleBlueprint?
         val resultTab = array[11] as ResultTab
+        val analyzing = array[12] as Boolean
 
         val clothingFamilies = allClothing.filter { it.category == selectedClothingCat }
             .groupBy { it.colorFamily }
@@ -211,6 +215,7 @@ class StyleSimulatorViewModel @Inject constructor(
             isLocalResult = result?.rationale?.startsWith("Local Architect") ?: false,
             fashionProfileLabel = profile?.let { "${it.undertone} ${it.seasonalType}" },
             selectedResultTab = resultTab,
+            isAnalyzing = analyzing,
             visualBlueprintData = mapToVisualBlueprintData(
                 cosmetics = recommendedCosmetics,
                 clothing = recommendedClothing,
@@ -256,11 +261,27 @@ class StyleSimulatorViewModel @Inject constructor(
             is SimulatorEvent.UpdateMessage -> _userMessage.value = event.message
             SimulatorEvent.StartSimulation -> runSimulation()
             SimulatorEvent.GeneratePlaylist -> {
+                if (_isAnalyzing.value) return
                 viewModelScope.launch {
+                    _isAnalyzing.value = true
                     _simulationStep.value = SimulationStep.GENERATING
-                    generatePlaylistUseCase.generateWeeklyPlaylist(LocalDate.now())
+                    
+                    val state = uiState.value
+                    val anchoredClothing = state.anchoredClothingFamilies.flatMap { (cat, family) ->
+                        state.fullClothingInventory.filter { it.category == cat && it.colorFamily == family }
+                    }
+                    val anchoredCosmetics = state.anchoredCosmeticFamilies.flatMap { (cat, family) ->
+                        state.fullCosmeticInventory.filter { it.macroCategory == cat && it.colorFamily == family }
+                    }
+
+                    generatePlaylistUseCase.generateWeeklyPlaylist(
+                        startDate = LocalDate.now(),
+                        day1Anchors = anchoredClothing,
+                        day1CosmeticAnchors = anchoredCosmetics
+                    )
                     _effect.send(SimulatorEffect.NavigateToPlaylist)
                     _simulationStep.value = SimulationStep.MESSAGING // Reset for next time
+                    _isAnalyzing.value = false
                 }
             }
             SimulatorEvent.SaveToPalette -> saveSelectionToColorTab()
@@ -319,7 +340,10 @@ class StyleSimulatorViewModel @Inject constructor(
     }
 
     private fun runSimulation() {
+        if (_isAnalyzing.value) return
+        
         viewModelScope.launch {
+            _isAnalyzing.value = true
             val apiKey = aiSettings.getGeminiApiKey()
             val state = uiState.value
             val userIntent = state.userMessage
@@ -380,6 +404,7 @@ class StyleSimulatorViewModel @Inject constructor(
 
             _simulationResult.value = blueprint.copy(rationale = translatedRationale)
             _simulationStep.value = SimulationStep.RESULT
+            _isAnalyzing.value = false
         }
     }
 
