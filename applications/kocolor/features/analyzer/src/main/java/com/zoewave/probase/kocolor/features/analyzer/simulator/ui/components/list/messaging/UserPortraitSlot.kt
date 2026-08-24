@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -41,7 +42,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -64,67 +67,59 @@ fun UserPortraitSlot(
         modifier = Modifier
             .fillMaxWidth()
             .animateContentSize()
-            .shadow(elevation = 2.dp, shape = RoundedCornerShape(24.dp), ambientColor = Color.Black.copy(alpha = 0.05f)),
-        shape = RoundedCornerShape(24.dp),
+            .shadow(elevation = 8.dp, shape = RoundedCornerShape(32.dp), ambientColor = Color.Black.copy(alpha = 0.08f)),
+        shape = RoundedCornerShape(32.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))
+        border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.03f))
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 20.dp),
+            modifier = Modifier.fillMaxWidth().padding(top = 28.dp, bottom = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Header Row: [Combined Text] --- [Portrait with Glow] --- [Icons Column]
+            // Header Row
             Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                // 1. Text Component on the Left (Visual ID + Active Label)
-                Column(modifier = Modifier.weight(1.1f)) {
+                // 1. Text Component
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = "Visual ID",
-                        style = MaterialTheme.typography.headlineSmall.copy(fontSize = 18.sp),
-                        fontFamily = FontFamily.Serif
+                        style = MaterialTheme.typography.headlineMedium.copy(fontSize = 34.sp),
+                        fontFamily = FontFamily.Serif,
+                        color = Color.Black
                     )
+                    Spacer(Modifier.height(4.dp))
                     Text(
                         text = "ACTIVE:",
-                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 12.sp),
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 0.5.sp,
-                        color = Color.Black.copy(alpha = 0.7f)
+                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 12.sp, fontWeight = FontWeight.Bold),
+                        color = Color.Gray
                     )
                     Text(
-                        text = "${uiState.fashionProfileLabel?.uppercase() ?: "ANALYZING"}",
-                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 12.sp),
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 0.5.sp,
-                        //color = Color.Black.copy(alpha = 0.5f)
+                        text = uiState.fashionProfileLabel?.uppercase() ?: "ANALYZING",
+                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 14.sp, fontWeight = FontWeight.ExtraBold),
+                        color = Color.Black
                     )
                 }
                 
-                // 2. Portrait in the Center with Multi-Layered Glow
+                // 2. Portrait Hub
                 Box(
                     contentAlignment = Alignment.Center,
-                    modifier = Modifier.weight(1.2f)
+                    modifier = Modifier.padding(horizontal = 12.dp)
                 ) {
-                    // Outer soft glow
+                    // Vibrant Glowing Halo
                     Surface(
-                        modifier = Modifier.size(117.dp),
+                        modifier = Modifier.size(108.dp),
                         shape = CircleShape,
-                        color = Color(0xFF6750A4).copy(alpha = 0.04f)
-                    ) {}
-                    // Inner soft glow
-                    Surface(
-                        modifier = Modifier.size(104.dp),
-                        shape = CircleShape,
-                        color = Color(0xFF6750A4).copy(alpha = 0.08f)
+                        color = Color(0xFFB9A0FF).copy(alpha = 0.4f), // Soft outer vibrant aura
                     ) {}
                     
                     Box(
                         modifier = Modifier
                             .size(92.dp)
                             .clip(CircleShape)
-                            .border(1.5.dp, Color(0xFF6750A4).copy(alpha = 0.25f), CircleShape)
+                            .border(3.dp, Color(0xFFC5B0FF), CircleShape) // Crisp vibrant purple ring
                             .background(if (uiState.userPortraitUri != null) Color.Transparent else Color(0xFFF5F5F5))
                             .clickable { onPortraitClick() },
                         contentAlignment = Alignment.Center
@@ -137,72 +132,71 @@ fun UserPortraitSlot(
                                 contentScale = ContentScale.Crop
                             )
                         } else {
-                            Icon(Icons.Default.Person, null, modifier = Modifier.size(36.dp), tint = Color.LightGray)
+                            Icon(Icons.Default.Person, null, modifier = Modifier.size(40.dp), tint = Color.LightGray)
                         }
                     }
                 }
 
-                // 3. Icons on the Right in a Column (Now Bigger)
+                // 3. Nested Circle Action Icons
                 Column(
-                    modifier = Modifier.weight(0.7f),
+                    modifier = Modifier.width(64.dp),
                     horizontalAlignment = Alignment.End,
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    Surface(
-                        onClick = { onEvent(SimulatorEvent.CapturePortrait) },
-                        modifier = Modifier.size(47.dp),
-                        shape = CircleShape,
-                        color = Color(0xFFFDFDFD),
-                        border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(Icons.Default.PhotoCamera, null, modifier = Modifier.size(22.dp), tint = Color.Black.copy(alpha = 0.6f))
-                        }
-                    }
-                    Surface(
-                        onClick = { onEvent(SimulatorEvent.PickPortrait) },
-                        modifier = Modifier.size(47.dp),
-                        shape = CircleShape,
-                        color = Color(0xFFFDFDFD),
-                        border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(Icons.Default.Image, null, modifier = Modifier.size(22.dp), tint = Color.Black.copy(alpha = 0.6f))
-                        }
-                    }
+                    NeumorphicIconButton(
+                        icon = Icons.Default.PhotoCamera,
+                        onClick = { onEvent(SimulatorEvent.CapturePortrait) }
+                    )
+                    NeumorphicIconButton(
+                        icon = Icons.Default.Image,
+                        onClick = { onEvent(SimulatorEvent.PickPortrait) }
+                    )
                 }
             }
 
-            Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.height(28.dp))
 
-            // Seasonal Mapping Collapsible Section (Smaller Text)
+            // 4. Gold Gradient Expansion Bar
+            val goldBrush = Brush.linearGradient(
+                listOf(Color(0xFFD4C097), Color(0xFFF2E7D5), Color(0xFFD4C097))
+            )
+
             Card(
                 onClick = { if (uiState.faceTelemetry != null) plotExpanded = !plotExpanded },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                shape = RoundedCornerShape(8.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFF9F9F9)),
-                border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.08f))
+                    .padding(horizontal = 24.dp)
+                    .height(56.dp),
+                shape = RoundedCornerShape(12.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
-                Row(
+                Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 14.dp, vertical = 10.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                        .fillMaxSize()
+                        .background(goldBrush),
+                    contentAlignment = Alignment.CenterStart
                 ) {
-                    Text(
-                        text = "SEASONAL MAPPING",
-                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.sp
-                    )
-                    Icon(
-                        imageVector = if (plotExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "SEASONAL MAPPING",
+                            style = MaterialTheme.typography.labelLarge.copy(fontSize = 13.sp),
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 1.sp,
+                            color = Color.Black
+                        )
+                        Icon(
+                            imageVector = if (plotExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp),
+                            tint = Color.Black
+                        )
+                    }
                 }
             }
 
@@ -215,10 +209,10 @@ fun UserPortraitSlot(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 12.dp, start = 16.dp, end = 16.dp)
-                            .background(Color(0xFFF9F9F9), RoundedCornerShape(8.dp))
-                            .border(1.dp, Color.Black.copy(alpha = 0.08f), RoundedCornerShape(8.dp))
-                            .padding(12.dp)
+                            .padding(top = 16.dp, start = 24.dp, end = 24.dp)
+                            .background(Color(0xFFF9F9F9), RoundedCornerShape(12.dp))
+                            .border(1.dp, Color.Black.copy(alpha = 0.05f), RoundedCornerShape(12.dp))
+                            .padding(16.dp)
                     ) {
                         SeasonalQuadrantMap(
                             season = uiState.fashionProfileLabel ?: "",
@@ -234,11 +228,47 @@ fun UserPortraitSlot(
     }
 }
 
+@Composable
+private fun NeumorphicIconButton(
+    icon: ImageVector,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        modifier = Modifier.size(52.dp),
+        shape = CircleShape,
+        color = Color.White,
+        border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f)),
+        shadowElevation = 4.dp
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            // Nested Inner Circle for Depth
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .border(1.dp, Color.Black.copy(alpha = 0.02f), CircleShape)
+                    .background(Color(0xFFFDFDFD), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(22.dp),
+                    tint = Color.Black.copy(alpha = 0.6f)
+                )
+            }
+        }
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 private fun UserPortraitSlotPreview() {
     MaterialTheme {
-        Box(modifier = Modifier.padding(16.dp).background(Color(0xFFF0F0F0))) {
+        Box(modifier = Modifier.padding(16.dp).background(Color(0xFFE5E5E5))) {
             UserPortraitSlot(
                 uiState = MessagingPreviewData.sampleUiState,
                 onEvent = {},
