@@ -88,14 +88,14 @@ fun UserPortraitSlot(
                     )
                     Text(
                         text = "ACTIVE:",
-                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
+                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 12.sp),
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 0.5.sp,
                         color = Color.Black.copy(alpha = 0.7f)
                     )
                     Text(
                         text = "${uiState.fashionProfileLabel?.uppercase() ?: "ANALYZING"}",
-                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
+                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 12.sp),
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 0.5.sp,
                         //color = Color.Black.copy(alpha = 0.5f)
@@ -109,7 +109,7 @@ fun UserPortraitSlot(
                 ) {
                     // Outer soft glow
                     Surface(
-                        modifier = Modifier.size(116.dp),
+                        modifier = Modifier.size(117.dp),
                         shape = CircleShape,
                         color = Color(0xFF6750A4).copy(alpha = 0.04f)
                     ) {}
@@ -150,7 +150,7 @@ fun UserPortraitSlot(
                 ) {
                     Surface(
                         onClick = { onEvent(SimulatorEvent.CapturePortrait) },
-                        modifier = Modifier.size(44.dp),
+                        modifier = Modifier.size(47.dp),
                         shape = CircleShape,
                         color = Color(0xFFFDFDFD),
                         border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))
@@ -161,7 +161,7 @@ fun UserPortraitSlot(
                     }
                     Surface(
                         onClick = { onEvent(SimulatorEvent.PickPortrait) },
-                        modifier = Modifier.size(44.dp),
+                        modifier = Modifier.size(47.dp),
                         shape = CircleShape,
                         color = Color(0xFFFDFDFD),
                         border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))
