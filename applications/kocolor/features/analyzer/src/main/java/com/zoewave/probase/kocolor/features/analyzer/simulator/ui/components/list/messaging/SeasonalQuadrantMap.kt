@@ -1,13 +1,20 @@
 package com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.list.messaging
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -20,76 +27,78 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun SeasonalQuadrantMap(
-    season: String, // Source of truth for clamping
-    undertoneScore: Float, // X-Axis: Cool (-1.0) to Warm (1.0)
-    hairLuminance: Float, 
-    eyeLuminance: Float,   
+    season: String,
+    undertoneScore: Float,
+    hairLuminance: Float,
+    eyeLuminance: Float,
     modifier: Modifier = Modifier
 ) {
-    // 1. Determine the target quadrant based on the source of truth (the Classifier)
     val isWarm = season.contains("SPRING", ignoreCase = true) || season.contains("AUTUMN", ignoreCase = true)
     val isLight = season.contains("SPRING", ignoreCase = true) || season.contains("SUMMER", ignoreCase = true)
 
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .aspectRatio(1f) // Balanced square grid
+            .aspectRatio(1f)
     ) {
-        // 1. The Grid & Data Point
-        Canvas(
-            modifier = Modifier.fillMaxSize()
-        ) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
             val canvasW = size.width
             val canvasH = size.height
             val quadW = canvasW / 2f
             val quadH = canvasH / 2f
-            val border = 2.dp.toPx() // Minimal border/gap between quadrants
+
+            // 1. Define the uniform gap and corner radius for the "white space" look
+            val gap = 7.dp.toPx() // This applies to all 4 sides of each box
+            val corner = CornerRadius(18.dp.toPx(), 18.dp.toPx())
 
             // --- DRAW QUADRANTS WITH GRADIENTS ---
-            
-            // Summer (Top Left): Cool / Light
-            // Flow: Cool-Light (Top-Left) to deeper neutral (Bottom-Right of quad)
-            drawRect(
+
+            // Summer (Top Left)
+            drawRoundRect(
                 brush = Brush.linearGradient(
                     colors = listOf(Color(0xFFE3F2FD), Color(0xFFF3E5F5)),
                     start = Offset(0f, 0f),
                     end = Offset(quadW, quadH)
                 ),
-                topLeft = Offset(0f, 0f),
-                size = Size(quadW - border/2, quadH - border/2)
+                topLeft = Offset(gap, gap),
+                size = Size(quadW - (gap * 2), quadH - (gap * 2)),
+                cornerRadius = corner
             )
 
-            // Spring (Top Right): Warm / Light
-            drawRect(
+            // Spring (Top Right)
+            drawRoundRect(
                 brush = Brush.linearGradient(
                     colors = listOf(Color(0xFFFFFDE7), Color(0xFFFFF59D)),
                     start = Offset(quadW, 0f),
                     end = Offset(canvasW, quadH)
                 ),
-                topLeft = Offset(quadW + border/2, 0f),
-                size = Size(quadW - border/2, quadH - border/2)
+                topLeft = Offset(quadW + gap, gap),
+                size = Size(quadW - (gap * 2), quadH - (gap * 2)),
+                cornerRadius = corner
             )
 
-            // Winter (Bottom Left): Cool / Deep
-            drawRect(
+            // Winter (Bottom Left)
+            drawRoundRect(
                 brush = Brush.linearGradient(
                     colors = listOf(Color(0xFFBBDEFB), Color(0xFF311B92)),
                     start = Offset(0f, quadH),
                     end = Offset(quadW, canvasH)
                 ),
-                topLeft = Offset(0f, quadH + border/2),
-                size = Size(quadW - border/2, quadH - border/2)
+                topLeft = Offset(gap, quadH + gap),
+                size = Size(quadW - (gap * 2), quadH - (gap * 2)),
+                cornerRadius = corner
             )
 
-            // Autumn (Bottom Right): Warm / Deep
-            drawRect(
+            // Autumn (Bottom Right)
+            drawRoundRect(
                 brush = Brush.linearGradient(
                     colors = listOf(Color(0xFFFFE0B2), Color(0xFFBF360C)),
                     start = Offset(quadW, quadH),
                     end = Offset(canvasW, canvasH)
                 ),
-                topLeft = Offset(quadW + border/2, quadH + border/2),
-                size = Size(quadW - border/2, quadH - border/2)
+                topLeft = Offset(quadW + gap, quadH + gap),
+                size = Size(quadW - (gap * 2), quadH - (gap * 2)),
+                cornerRadius = corner
             )
 
             // --- PLOT INDICATOR ---
@@ -101,7 +110,7 @@ fun SeasonalQuadrantMap(
             val clampedY = if (isLight) rawY.coerceIn(0.55f, 0.95f) else rawY.coerceIn(0.05f, 0.45f)
 
             val plotX = clampedX * canvasW
-            val plotY = (1f - clampedY) * canvasH 
+            val plotY = (1f - clampedY) * canvasH
             val userPoint = Offset(plotX, plotY)
 
             // White Glowing Indicator
@@ -118,42 +127,22 @@ fun SeasonalQuadrantMap(
         }
 
         // --- OVERLAY AXIS LABELS ---
-        val axisLabelStyle = MaterialTheme.typography.labelSmall.copy(
-            color = Color.Black.copy(alpha = 0.4f),
-            fontWeight = FontWeight.Medium,
-            fontSize = 10.sp
+        val axisLabelStyle = MaterialTheme.typography.labelMedium.copy(
+            color = Color.Black.copy(alpha = 0.7f),
+            fontWeight = FontWeight.Bold,
+            fontSize = 18.sp
         )
 
-        Text("Light", style = axisLabelStyle, modifier = Modifier.align(Alignment.TopCenter).padding(top = 4.dp))
-        Text("Deep", style = axisLabelStyle, modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 4.dp))
-        Text("Cool", style = axisLabelStyle, modifier = Modifier.align(Alignment.CenterStart).padding(start = 6.dp))
-        Text("Warm", style = axisLabelStyle, modifier = Modifier.align(Alignment.CenterEnd).padding(end = 6.dp))
+        Text("Light", style = axisLabelStyle, modifier = Modifier.align(Alignment.TopCenter).padding(top = 2.dp))
+        Text("Deep", style = axisLabelStyle, modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 2.dp))
+        Text("Cool", style = axisLabelStyle, modifier = Modifier.align(Alignment.CenterStart).padding(start = 4.dp))
+        Text("Warm", style = axisLabelStyle, modifier = Modifier.align(Alignment.CenterEnd).padding(end = 4.dp))
 
         // --- OVERLAY QUADRANT LABELS ---
-        QuadrantLabelBox(
-            title = "Summer",
-            subtitle = "Cool/Light",
-            modifier = Modifier.align(Alignment.TopStart),
-            isDark = false
-        )
-        QuadrantLabelBox(
-            title = "Spring",
-            subtitle = "Warm/Light",
-            modifier = Modifier.align(Alignment.TopEnd),
-            isDark = false
-        )
-        QuadrantLabelBox(
-            title = "Winter",
-            subtitle = "Cool/Deep",
-            modifier = Modifier.align(Alignment.BottomStart),
-            isDark = true
-        )
-        QuadrantLabelBox(
-            title = "Autumn",
-            subtitle = "Warm/Deep",
-            modifier = Modifier.align(Alignment.BottomEnd),
-            isDark = true
-        )
+        QuadrantLabelBox("Summer", "Cool/Light", Modifier.align(Alignment.TopStart), false)
+        QuadrantLabelBox("Spring", "Warm/Light", Modifier.align(Alignment.TopEnd), false)
+        QuadrantLabelBox("Winter", "Cool/Deep", Modifier.align(Alignment.BottomStart), true)
+        QuadrantLabelBox("Autumn", "Warm/Deep", Modifier.align(Alignment.BottomEnd), true)
     }
 }
 
