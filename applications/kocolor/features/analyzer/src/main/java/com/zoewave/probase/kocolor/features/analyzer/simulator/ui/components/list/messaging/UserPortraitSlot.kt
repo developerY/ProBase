@@ -74,7 +74,7 @@ fun UserPortraitSlot(
         border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.03f))
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth().padding(top = 28.dp, bottom = 24.dp),
+            modifier = Modifier.fillMaxWidth().padding(top = 25.dp, bottom = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Header Row: Clustered to the Left
@@ -103,7 +103,7 @@ fun UserPortraitSlot(
                     )
                 }
                 
-                Spacer(Modifier.width(24.dp))
+                Spacer(Modifier.width(12.dp))
                 
                 // 2. Portrait Hub (Larger)
                 Box(
@@ -111,7 +111,7 @@ fun UserPortraitSlot(
                 ) {
                     // Vibrant Glowing Halo
                     Surface(
-                        modifier = Modifier.size(126.dp),
+                        modifier = Modifier.size(127.dp),
                         shape = CircleShape,
                         color = Color(0xFFB9A0FF).copy(alpha = 0.4f),
                     ) {}
@@ -138,7 +138,7 @@ fun UserPortraitSlot(
                     }
                 }
 
-                Spacer(Modifier.width(20.dp))
+                Spacer(Modifier.width(12.dp))
 
                 // 3. Action Icons (Larger)
                 Column(
