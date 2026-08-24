@@ -6,6 +6,8 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,20 +18,19 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -42,9 +43,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.SimulatorEvent
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorUiState
@@ -61,66 +64,145 @@ fun UserPortraitSlot(
         modifier = Modifier
             .fillMaxWidth()
             .animateContentSize()
-            .shadow(elevation = 8.dp, shape = RoundedCornerShape(24.dp), ambientColor = Color.Black.copy(alpha = 0.1f)),
+            .shadow(elevation = 2.dp, shape = RoundedCornerShape(24.dp), ambientColor = Color.Black.copy(alpha = 0.05f)),
         shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.95f)),
-        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.5f)),
-        onClick = onPortraitClick
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))
     ) {
-        Column {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(vertical = 20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Header Row: [Combined Text] --- [Portrait with Glow] --- [Icons Column]
             Row(
-                modifier = Modifier.padding(12.dp).fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(64.dp)
-                        .clip(CircleShape)
-                        .background(if (uiState.userPortraitUri != null) Color(0xFFF0E6FF) else Color(0xFFF5F5F5)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (uiState.userPortraitUri != null) {
-                        AsyncImage(
-                            model = uiState.userPortraitUri,
-                            contentDescription = null,
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
-                        )
-                    } else {
-                        Icon(Icons.Default.Person, null, modifier = Modifier.size(24.dp), tint = Color.LightGray.copy(alpha = 0.5f))
-                    }
-                }
-                Spacer(Modifier.width(16.dp))
-                Column(modifier = Modifier.weight(1f)) {
+                // 1. Text Component on the Left (Visual ID + Active Label)
+                Column(modifier = Modifier.weight(1.1f)) {
                     Text(
-                        text = if (uiState.fashionProfileLabel != null) "Visual Identity Active" else "No Portrait Detected",
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                        color = Color.Black.copy(alpha = 0.8f)
+                        text = "Visual ID",
+                        style = MaterialTheme.typography.headlineSmall.copy(fontSize = 18.sp),
+                        fontFamily = FontFamily.Serif
                     )
                     Text(
-                        text = uiState.fashionProfileLabel ?: "Provide a photo to ground the AI",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Color.Gray.copy(alpha = 0.7f)
+                        text = "ACTIVE:",
+                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 0.5.sp,
+                        color = Color.Black.copy(alpha = 0.7f)
+                    )
+                    Text(
+                        text = "${uiState.fashionProfileLabel?.uppercase() ?: "ANALYZING"}",
+                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 0.5.sp,
+                        //color = Color.Black.copy(alpha = 0.5f)
                     )
                 }
                 
-                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    if (uiState.fashionProfileLabel != null) {
-                        IconButton(onClick = { plotExpanded = !plotExpanded }) {
-                            Icon(
-                                imageVector = if (plotExpanded) Icons.Default.ExpandLess else Icons.Default.AutoAwesome, 
-                                null, 
-                                tint = Color(0xFF6750A4), 
-                                modifier = Modifier.size(20.dp)
+                // 2. Portrait in the Center with Multi-Layered Glow
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.weight(1.2f)
+                ) {
+                    // Outer soft glow
+                    Surface(
+                        modifier = Modifier.size(116.dp),
+                        shape = CircleShape,
+                        color = Color(0xFF6750A4).copy(alpha = 0.04f)
+                    ) {}
+                    // Inner soft glow
+                    Surface(
+                        modifier = Modifier.size(104.dp),
+                        shape = CircleShape,
+                        color = Color(0xFF6750A4).copy(alpha = 0.08f)
+                    ) {}
+                    
+                    Box(
+                        modifier = Modifier
+                            .size(92.dp)
+                            .clip(CircleShape)
+                            .border(1.5.dp, Color(0xFF6750A4).copy(alpha = 0.25f), CircleShape)
+                            .background(if (uiState.userPortraitUri != null) Color.Transparent else Color(0xFFF5F5F5))
+                            .clickable { onPortraitClick() },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (uiState.userPortraitUri != null) {
+                            AsyncImage(
+                                model = uiState.userPortraitUri,
+                                contentDescription = null,
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
                             )
+                        } else {
+                            Icon(Icons.Default.Person, null, modifier = Modifier.size(36.dp), tint = Color.LightGray)
                         }
                     }
-                    IconButton(onClick = { onEvent(SimulatorEvent.CapturePortrait) }) {
-                        Icon(Icons.Default.PhotoCamera, null, tint = Color.DarkGray.copy(alpha = 0.6f), modifier = Modifier.size(20.dp))
+                }
+
+                // 3. Icons on the Right in a Column (Now Bigger)
+                Column(
+                    modifier = Modifier.weight(0.7f),
+                    horizontalAlignment = Alignment.End,
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Surface(
+                        onClick = { onEvent(SimulatorEvent.CapturePortrait) },
+                        modifier = Modifier.size(44.dp),
+                        shape = CircleShape,
+                        color = Color(0xFFFDFDFD),
+                        border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(Icons.Default.PhotoCamera, null, modifier = Modifier.size(22.dp), tint = Color.Black.copy(alpha = 0.6f))
+                        }
                     }
-                    IconButton(onClick = { onEvent(SimulatorEvent.PickPortrait) }) {
-                        Icon(Icons.Default.Image, null, tint = Color.Black.copy(alpha = 0.6f), modifier = Modifier.size(20.dp))
+                    Surface(
+                        onClick = { onEvent(SimulatorEvent.PickPortrait) },
+                        modifier = Modifier.size(44.dp),
+                        shape = CircleShape,
+                        color = Color(0xFFFDFDFD),
+                        border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(Icons.Default.Image, null, modifier = Modifier.size(22.dp), tint = Color.Black.copy(alpha = 0.6f))
+                        }
                     }
+                }
+            }
+
+            Spacer(Modifier.height(20.dp))
+
+            // Seasonal Mapping Collapsible Section (Smaller Text)
+            Card(
+                onClick = { if (uiState.faceTelemetry != null) plotExpanded = !plotExpanded },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                shape = RoundedCornerShape(8.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFF9F9F9)),
+                border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.08f))
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 14.dp, vertical = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "SEASONAL MAPPING",
+                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.sp
+                    )
+                    Icon(
+                        imageVector = if (plotExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
                 }
             }
 
@@ -130,16 +212,20 @@ fun UserPortraitSlot(
                 exit = shrinkVertically()
             ) {
                 uiState.faceTelemetry?.let { telemetry ->
-                    Box(modifier = Modifier
-                            .padding(horizontal = 24.dp)
-                            .padding(bottom = 24.dp)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 12.dp, start = 16.dp, end = 16.dp)
+                            .background(Color(0xFFF9F9F9), RoundedCornerShape(8.dp))
+                            .border(1.dp, Color.Black.copy(alpha = 0.08f), RoundedCornerShape(8.dp))
+                            .padding(12.dp)
                     ) {
                         SeasonalQuadrantMap(
                             season = uiState.fashionProfileLabel ?: "",
                             undertoneScore = telemetry.undertoneScore,
                             hairLuminance = telemetry.hairLuminance,
                             eyeLuminance = telemetry.eyeLuminance,
-                            modifier = Modifier.height(220.dp)
+                            modifier = Modifier.height(240.dp)
                         )
                     }
                 }
@@ -152,7 +238,7 @@ fun UserPortraitSlot(
 @Composable
 private fun UserPortraitSlotPreview() {
     MaterialTheme {
-        Box(modifier = Modifier.padding(16.dp)) {
+        Box(modifier = Modifier.padding(16.dp).background(Color(0xFFF0F0F0))) {
             UserPortraitSlot(
                 uiState = MessagingPreviewData.sampleUiState,
                 onEvent = {},
