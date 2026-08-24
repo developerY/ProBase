@@ -138,7 +138,7 @@ fun UserPortraitSlot(
                             undertoneScore = telemetry.undertoneScore,
                             hairLuminance = telemetry.hairLuminance,
                             eyeLuminance = telemetry.eyeLuminance,
-                            modifier = Modifier.height(200.dp)
+                            modifier = Modifier.height(220.dp)
                         )
                     }
                 }
