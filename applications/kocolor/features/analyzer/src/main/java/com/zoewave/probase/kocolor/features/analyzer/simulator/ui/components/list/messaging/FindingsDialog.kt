@@ -140,6 +140,7 @@ fun FindingsDialog(
 
                                 // --- THE VISUALIZATION (The "Why") ---
                                 SeasonalQuadrantMap(
+                                    season = uiState.fashionProfileLabel,
                                     undertoneScore = telemetry.undertoneScore,
                                     hairLuminance = telemetry.hairLuminance,
                                     eyeLuminance = telemetry.eyeLuminance

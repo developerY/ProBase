@@ -135,6 +135,7 @@ fun UserPortraitSlot(
                             .padding(bottom = 24.dp)
                     ) {
                         SeasonalQuadrantMap(
+                            season = uiState.fashionProfileLabel ?: "",
                             undertoneScore = telemetry.undertoneScore,
                             hairLuminance = telemetry.hairLuminance,
                             eyeLuminance = telemetry.eyeLuminance,

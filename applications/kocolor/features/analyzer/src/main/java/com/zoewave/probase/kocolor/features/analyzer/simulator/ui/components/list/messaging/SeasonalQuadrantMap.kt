@@ -26,16 +26,15 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun SeasonalQuadrantMap(
+    season: String, // Source of truth for clamping
     undertoneScore: Float, // X-Axis: Cool (-1.0) to Warm (1.0)
     hairLuminance: Float, 
     eyeLuminance: Float,   
     modifier: Modifier = Modifier
 ) {
-    // Calculate Depth for Y-Axis: 0.0 (Dark) to 1.0 (Light)
-    val depthScore = ((hairLuminance + eyeLuminance) / 2f).coerceIn(0f, 1f)
-    
-    // Normalize undertone to 0.0 - 1.0 for the Canvas (assuming -1.0 to 1.0 range)
-    val normalizedUndertone = ((undertoneScore + 1f) / 2f).coerceIn(0f, 1f)
+    // 1. Determine the target quadrant based on the source of truth (the Classifier)
+    val isWarm = season.contains("SPRING", ignoreCase = true) || season.contains("AUTUMN", ignoreCase = true)
+    val isLight = season.contains("SPRING", ignoreCase = true) || season.contains("SUMMER", ignoreCase = true)
 
     Box(
         modifier = modifier
@@ -95,9 +94,21 @@ fun SeasonalQuadrantMap(
             drawLine(axisColor, Offset(canvasW / 2f, -12.dp.toPx()), Offset(canvasW / 2f, canvasH + 12.dp.toPx()), 2f)
             drawLine(axisColor, Offset(-12.dp.toPx(), canvasH / 2f), Offset(canvasW + 12.dp.toPx(), canvasH / 2f), 2f)
 
-            // Plot the User's Coordinate
-            val plotX = normalizedUndertone * canvasW
-            val plotY = (1f - depthScore) * canvasH 
+            // 2. Calculate the raw normalized scores (0.0 to 1.0)
+            val rawX = ((undertoneScore + 1f) / 2f).coerceIn(0f, 1f)
+            val rawY = ((hairLuminance + eyeLuminance) / 2f).coerceIn(0f, 1f) // 0=Dark, 1=Light
+
+            // 3. Clamp the coordinates into the correct bounding box
+            // If Warm, force it to the right half (0.55 to 0.95). If Cool, left half (0.05 to 0.45).
+            val clampedX = if (isWarm) rawX.coerceIn(0.55f, 0.95f) else rawX.coerceIn(0.05f, 0.45f)
+            
+            // If Light, force it to the top half (0.55 to 0.95). If Deep, bottom half (0.05 to 0.45).
+            val clampedY = if (isLight) rawY.coerceIn(0.55f, 0.95f) else rawY.coerceIn(0.05f, 0.45f)
+
+            // 4. Final Plot Calculation
+            val plotX = clampedX * canvasW
+            // Invert Y because Canvas 0,0 is top-left, but Y=1.0 should be the top
+            val plotY = (1f - clampedY) * canvasH 
             val userPoint = Offset(plotX, plotY)
 
             // Glowing Indicator
@@ -156,9 +167,10 @@ private fun SeasonalQuadrantMapPreview() {
     MaterialTheme {
         Surface(modifier = Modifier.padding(16.dp), color = Color.White) {
             SeasonalQuadrantMap(
+                season = "NEUTRAL SPRING",
                 undertoneScore = 0.2235f,
-                hairLuminance = 0.5515f,
-                eyeLuminance = 0.6121f
+                hairLuminance = 0.1515f, // Dark hair
+                eyeLuminance = 0.2121f   // Dark eyes
             )
         }
     }
