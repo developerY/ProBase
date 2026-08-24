@@ -8,9 +8,20 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -18,8 +29,37 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.Checkroom
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.FaceRetouchingNatural
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Layers
+import androidx.compose.material.icons.filled.PanTool
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,6 +81,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -194,33 +235,73 @@ fun MessagingStep(
                             uiState.faceTelemetry?.let { telemetry ->
                                 Column(
                                     modifier = Modifier.padding(bottom = 8.dp),
-                                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                                    verticalArrangement = Arrangement.spacedBy(12.dp)
                                 ) {
+                                    // 1. Aesthetic Profile (The Meaning)
                                     Text(
-                                        text = "• Skin Luminance: ${"%.4f".format(telemetry.skinLuminance)}", 
-                                        style = MaterialTheme.typography.bodySmall, 
-                                        color = Color.Gray
+                                        text = "AESTHETIC PROFILE", 
+                                        style = MaterialTheme.typography.labelSmall, 
+                                        fontWeight = FontWeight.Bold, 
+                                        color = Color.DarkGray,
+                                        letterSpacing = 1.sp
                                     )
+                                    
+                                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                        Text(
+                                            text = "• Temperature: ${getTemperatureProfile(telemetry.undertoneScore)}", 
+                                            style = MaterialTheme.typography.bodySmall, 
+                                            color = Color.DarkGray
+                                        )
+                                        Text(
+                                            text = "• Contrast: ${getContrastProfile(telemetry.contrastDelta)}", 
+                                            style = MaterialTheme.typography.bodySmall, 
+                                            color = Color.DarkGray
+                                        )
+                                        Text(
+                                            text = "• Depth: ${getDepthProfile(telemetry.hairLuminance, telemetry.eyeLuminance)}", 
+                                            style = MaterialTheme.typography.bodySmall, 
+                                            color = Color.DarkGray
+                                        )
+                                    }
+
+                                    Spacer(modifier = Modifier.height(4.dp))
+
+                                    // 2. Raw Telemetry (The Math)
                                     Text(
-                                        text = "• Eye Luminance: ${"%.4f".format(telemetry.eyeLuminance)}", 
-                                        style = MaterialTheme.typography.bodySmall, 
-                                        color = Color.Gray
+                                        text = "RAW TELEMETRY", 
+                                        style = MaterialTheme.typography.labelSmall, 
+                                        fontWeight = FontWeight.Bold, 
+                                        color = Color.Gray,
+                                        letterSpacing = 1.sp
                                     )
-                                    Text(
-                                        text = "• Hair Luminance: ${"%.4f".format(telemetry.hairLuminance)}", 
-                                        style = MaterialTheme.typography.bodySmall, 
-                                        color = Color.Gray
-                                    )
-                                    Text(
-                                        text = "• Contrast Delta: ${"%.4f".format(telemetry.contrastDelta)}", 
-                                        style = MaterialTheme.typography.bodySmall, 
-                                        color = Color.Gray
-                                    )
-                                    Text(
-                                        text = "• Undertone Score: ${"%.4f".format(telemetry.undertoneScore)}", 
-                                        style = MaterialTheme.typography.bodySmall, 
-                                        color = Color.Gray
-                                    )
+
+                                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                        Text(
+                                            text = "• Skin Luminance: ${"%.4f".format(telemetry.skinLuminance)}", 
+                                            style = MaterialTheme.typography.bodySmall, 
+                                            color = Color.Gray
+                                        )
+                                        Text(
+                                            text = "• Eye Luminance: ${"%.4f".format(telemetry.eyeLuminance)}", 
+                                            style = MaterialTheme.typography.bodySmall, 
+                                            color = Color.Gray
+                                        )
+                                        Text(
+                                            text = "• Hair Luminance: ${"%.4f".format(telemetry.hairLuminance)}", 
+                                            style = MaterialTheme.typography.bodySmall, 
+                                            color = Color.Gray
+                                        )
+                                        Text(
+                                            text = "• Contrast Delta: ${"%.4f".format(telemetry.contrastDelta)}", 
+                                            style = MaterialTheme.typography.bodySmall, 
+                                            color = Color.Gray
+                                        )
+                                        Text(
+                                            text = "• Undertone Score: ${"%.4f".format(telemetry.undertoneScore)}", 
+                                            style = MaterialTheme.typography.bodySmall, 
+                                            color = Color.Gray
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -264,58 +345,93 @@ fun MessagingStep(
 
         // User Portrait Slot (Unified Calibration & Identity)
         item {
+            var plotExpanded by remember { mutableStateOf(false) }
+
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(100.dp)
+                    .animateContentSize()
                     .shadow(elevation = 8.dp, shape = RoundedCornerShape(24.dp), ambientColor = Color.Black.copy(alpha = 0.1f)),
                 shape = RoundedCornerShape(24.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.95f)),
                 border = BorderStroke(1.dp, Color.White.copy(alpha = 0.5f)),
                 onClick = { if (uiState.userPortraitUri != null) showFindings = true }
             ) {
-                Row(
-                    modifier = Modifier.padding(12.dp).fillMaxSize(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(64.dp)
-                            .clip(CircleShape)
-                            .background(if (uiState.userPortraitUri != null) Color(0xFFF0E6FF) else Color(0xFFF5F5F5)),
-                        contentAlignment = Alignment.Center
+                Column {
+                    Row(
+                        modifier = Modifier.padding(12.dp).fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        if (uiState.userPortraitUri != null) {
-                            AsyncImage(
-                                model = uiState.userPortraitUri,
-                                contentDescription = null,
-                                modifier = Modifier.fillMaxSize(),
-                                contentScale = ContentScale.Crop
+                        Box(
+                            modifier = Modifier
+                                .size(64.dp)
+                                .clip(CircleShape)
+                                .background(if (uiState.userPortraitUri != null) Color(0xFFF0E6FF) else Color(0xFFF5F5F5)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (uiState.userPortraitUri != null) {
+                                AsyncImage(
+                                    model = uiState.userPortraitUri,
+                                    contentDescription = null,
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Crop
+                                )
+                            } else {
+                                Icon(Icons.Default.Person, null, modifier = Modifier.size(24.dp), tint = Color.LightGray.copy(alpha = 0.5f))
+                            }
+                        }
+                        Spacer(Modifier.width(16.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = if (uiState.userPortraitUri != null) "Visual Identity Active" else "No Portrait Detected",
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                                color = Color.Black.copy(alpha = 0.8f)
                             )
-                        } else {
-                            Icon(Icons.Default.Person, null, modifier = Modifier.size(24.dp), tint = Color.LightGray.copy(alpha = 0.5f))
+                            Text(
+                                text = uiState.fashionProfileLabel ?: "Provide a photo to ground the AI",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Color.Gray.copy(alpha = 0.7f)
+                            )
+                        }
+                        
+                        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            if (uiState.fashionProfileLabel != null) {
+                                IconButton(onClick = { plotExpanded = !plotExpanded }) {
+                                    Icon(
+                                        imageVector = if (plotExpanded) Icons.Default.ExpandLess else Icons.Default.AutoAwesome, 
+                                        null, 
+                                        tint = Color(0xFF6750A4), 
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                            }
+                            IconButton(onClick = { onEvent(SimulatorEvent.CapturePortrait) }) {
+                                Icon(Icons.Default.PhotoCamera, null, tint = Color.DarkGray.copy(alpha = 0.6f), modifier = Modifier.size(20.dp))
+                            }
+                            IconButton(onClick = { onEvent(SimulatorEvent.PickPortrait) }) {
+                                Icon(Icons.Default.Image, null, tint = Color.Black.copy(alpha = 0.6f), modifier = Modifier.size(20.dp))
+                            }
                         }
                     }
-                    Spacer(Modifier.width(16.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = if (uiState.userPortraitUri != null) "Visual Identity Active" else "No Portrait Detected",
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                            color = Color.Black.copy(alpha = 0.8f)
-                        )
-                        Text(
-                            text = uiState.fashionProfileLabel ?: "Provide a photo to ground the AI",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = Color.Gray.copy(alpha = 0.7f)
-                        )
-                    }
-                    
-                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        IconButton(onClick = { onEvent(SimulatorEvent.CapturePortrait) }) {
-                            Icon(Icons.Default.PhotoCamera, null, tint = Color.DarkGray.copy(alpha = 0.6f), modifier = Modifier.size(20.dp))
-                        }
-                        IconButton(onClick = { onEvent(SimulatorEvent.PickPortrait) }) {
-                            Icon(Icons.Default.Image, null, tint = Color.Black.copy(alpha = 0.6f), modifier = Modifier.size(20.dp))
+
+                    AnimatedVisibility(
+                        visible = plotExpanded && uiState.faceTelemetry != null,
+                        enter = expandVertically(),
+                        exit = shrinkVertically()
+                    ) {
+                        uiState.faceTelemetry?.let { telemetry ->
+                            Box(
+                                modifier = Modifier
+                                    .padding(horizontal = 24.dp)
+                                    .padding(bottom = 24.dp)
+                            ) {
+                                SeasonalQuadrantMap(
+                                    undertoneScore = telemetry.undertoneScore,
+                                    hairLuminance = telemetry.hairLuminance,
+                                    eyeLuminance = telemetry.eyeLuminance,
+                                    modifier = Modifier.height(200.dp)
+                                )
+                            }
                         }
                     }
                 }
@@ -585,4 +701,107 @@ fun MessagingStepPreview() {
         onEvent = {},
         navTo = {}
     )
+}
+
+@Composable
+fun SeasonalQuadrantMap(
+    undertoneScore: Float, // X-Axis: Cool (-1.0) to Warm (1.0)
+    hairLuminance: Float, 
+    eyeLuminance: Float,   
+    modifier: Modifier = Modifier
+) {
+    // Calculate Depth for Y-Axis: 0.0 (Dark) to 1.0 (Light)
+    val depthScore = ((hairLuminance + eyeLuminance) / 2f).coerceIn(0f, 1f)
+    
+    // Normalize undertone to 0.0 - 1.0 for the Canvas (assuming -1.0 to 1.0 range)
+    val normalizedUndertone = ((undertoneScore + 1f) / 2f).coerceIn(0f, 1f)
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .aspectRatio(1.2f)
+            .padding(vertical = 16.dp)
+    ) {
+        // 1. The Labels
+        val labelStyle = MaterialTheme.typography.labelSmall.copy(
+            color = Color.Gray.copy(alpha = 0.7f),
+            letterSpacing = 1.sp,
+            fontWeight = FontWeight.Bold
+        )
+        
+        Text("SUMMER\n(Cool/Light)", style = labelStyle, modifier = Modifier.align(Alignment.TopStart))
+        Text("SPRING\n(Warm/Light)", style = labelStyle, textAlign = TextAlign.End, modifier = Modifier.align(Alignment.TopEnd))
+        Text("WINTER\n(Cool/Deep)", style = labelStyle, modifier = Modifier.align(Alignment.BottomStart))
+        Text("AUTUMN\n(Warm/Deep)", style = labelStyle, textAlign = TextAlign.End, modifier = Modifier.align(Alignment.BottomEnd))
+
+        // 2. The Grid & Data Point
+        Canvas(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 32.dp, bottom = 32.dp, start = 16.dp, end = 16.dp) // Inset the grid from labels
+        ) {
+            val canvasW = size.width
+            val canvasH = size.height
+            val centerX = canvasW / 2f
+            val centerY = canvasH / 2f
+
+            // Draw Quadrant Crosshairs
+            drawLine(
+                color = Color.LightGray.copy(alpha = 0.5f),
+                start = Offset(centerX, 0f),
+                end = Offset(centerX, canvasH),
+                strokeWidth = 2f,
+                pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
+            )
+            drawLine(
+                color = Color.LightGray.copy(alpha = 0.5f),
+                start = Offset(0f, centerY),
+                end = Offset(canvasW, centerY),
+                strokeWidth = 2f,
+                pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
+            )
+
+            // Plot the User's Coordinate
+            // X: Left (0.0/Cool) to Right (1.0/Warm)
+            // Y: Bottom (0.0/Dark) to Top (1.0/Light) -> Invert Y so Light is Top
+            val plotX = normalizedUndertone * canvasW
+            val plotY = (1f - depthScore) * canvasH 
+            val userPoint = Offset(plotX, plotY)
+
+            // Glowing Indicator
+            drawCircle(
+                color = Color(0xFF6750A4).copy(alpha = 0.2f), // Brand purple glow
+                radius = 24f,
+                center = userPoint
+            )
+            drawCircle(
+                color = Color(0xFF6750A4), // Solid center
+                radius = 8f,
+                center = userPoint
+            )
+        }
+    }
+}
+
+// --- Translation Logic Helpers ---
+
+private fun getContrastProfile(delta: Float): String = when {
+    delta > 0.5f -> "High (Striking / Clear)"
+    delta > 0.3f -> "Medium (Balanced)"
+    else -> "Low (Blended / Muted)"
+}
+
+private fun getTemperatureProfile(score: Float): String = when {
+    score > 0.05f -> "Warm (Golden / Peach base)"
+    score < -0.05f -> "Cool (Pink / Blue base)"
+    else -> "Neutral (Balanced / Olive base)"
+}
+
+private fun getDepthProfile(hairLuminance: Float, eyeLuminance: Float): String {
+    val avgDarkness = (hairLuminance + eyeLuminance) / 2f
+    return when {
+        avgDarkness < 0.2f -> "Deep (Anchors dark colors well)"
+        avgDarkness < 0.5f -> "Moderate (Versatile depth)"
+        else -> "Light (Favors airy, pastel palettes)"
+    }
 }
