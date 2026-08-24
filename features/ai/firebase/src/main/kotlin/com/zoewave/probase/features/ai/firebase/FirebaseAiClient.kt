@@ -1,9 +1,9 @@
 package com.zoewave.probase.features.ai.firebase
 
 import com.google.firebase.Firebase
+import com.google.firebase.ai.GenerativeModel
 import com.google.firebase.ai.ai
-import com.google.firebase.ai.GenerativeBackend
-import com.google.firebase.ai.type.GenerativeModel
+import com.google.firebase.ai.type.GenerativeBackend
 import javax.inject.Inject
 import javax.inject.Singleton
 
