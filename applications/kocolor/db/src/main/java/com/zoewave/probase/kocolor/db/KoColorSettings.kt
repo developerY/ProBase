@@ -32,6 +32,7 @@ class KoColorSettings @Inject constructor(
         val COLOR_PALETTE = stringPreferencesKey("color_palette")
         val HYDRATION_GOAL = androidx.datastore.preferences.core.doublePreferencesKey("hydration_goal")
         val TEMPERATURE_UNIT = stringPreferencesKey("temperature_unit")
+        val USE_FIREBASE_VERTEX_AI = booleanPreferencesKey("use_firebase_vertex_ai")
     }
 
     val appThemeFlow: Flow<String> = context.dataStore.data.map { preferences ->
@@ -109,6 +110,16 @@ class KoColorSettings @Inject constructor(
             secureApiKeyRepository.deleteKey()
         } else {
             secureApiKeyRepository.saveKey(apiKey)
+        }
+    }
+
+    override val useFirebaseVertexAi: Flow<Boolean> = context.dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.USE_FIREBASE_VERTEX_AI] ?: true // Default to true for security
+    }
+
+    override suspend fun saveUseFirebaseVertexAi(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.USE_FIREBASE_VERTEX_AI] = enabled
         }
     }
 }

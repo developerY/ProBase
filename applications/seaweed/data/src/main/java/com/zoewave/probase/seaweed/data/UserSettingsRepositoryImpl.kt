@@ -54,4 +54,11 @@ class UserSettingsRepositoryImpl @Inject constructor(
 
     override val userApiKeyFlow: Flow<String?> = isGeminiApiKeySetFlow.map { if (it) getGeminiApiKey() else null }
     override val userAiModelFlow: Flow<String> = aiModelFlow
+
+    override val useFirebaseVertexAi: Flow<Boolean> = getUserSettings().map { it.useFirebaseVertexAi }
+
+    override suspend fun saveUseFirebaseVertexAi(enabled: Boolean) {
+        val current = getUserSettings().first()
+        saveUserSettings(current.copy(useFirebaseVertexAi = enabled))
+    }
 }

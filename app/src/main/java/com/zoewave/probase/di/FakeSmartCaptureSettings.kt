@@ -21,4 +21,7 @@ class FakeSmartCaptureSettings @Inject constructor() : SmartCaptureSettings, AiC
     override fun getGeminiApiKey(): String? = null
     override val isGeminiApiKeySetFlow: Flow<Boolean> = flowOf(false)
     override suspend fun saveGeminiApiKey(apiKey: String?) {}
+
+    override val useFirebaseVertexAi: Flow<Boolean> = flowOf(true)
+    override suspend fun saveUseFirebaseVertexAi(enabled: Boolean) {}
 }

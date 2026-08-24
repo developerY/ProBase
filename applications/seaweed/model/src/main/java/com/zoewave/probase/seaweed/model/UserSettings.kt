@@ -22,5 +22,6 @@ data class UserSettings(
     val themeConfig: SeaweedThemeConfig = SeaweedThemeConfig.DEFAULT,
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val isAiEnabled: Boolean = false,
-    val aiModel: String = "gemini-1.5-flash"
+    val aiModel: String = "gemini-1.5-flash",
+    val useFirebaseVertexAi: Boolean = true
 )

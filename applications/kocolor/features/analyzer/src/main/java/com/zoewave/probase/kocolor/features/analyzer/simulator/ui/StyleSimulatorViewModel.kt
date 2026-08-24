@@ -29,6 +29,7 @@ import com.zoewave.probase.core.model.ritual.RoutineTime
 import com.zoewave.probase.core.model.ritual.SeasonalType
 import com.zoewave.probase.core.model.ritual.SuggestedPiece
 import com.zoewave.probase.core.model.ritual.Undertone
+import com.zoewave.probase.features.ai.firebase.models.Appearance
 import com.zoewave.probase.kocolor.data.FashionRepository
 import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
 import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
@@ -371,6 +372,7 @@ class StyleSimulatorViewModel @Inject constructor(
         viewModelScope.launch {
             _isAnalyzing.value = true
             val apiKey = aiSettings.getGeminiApiKey()
+            val useFirebase = aiSettings.useFirebaseVertexAi.first()
             val state = uiState.value
             val userIntent = state.userMessage
             
@@ -382,6 +384,8 @@ class StyleSimulatorViewModel @Inject constructor(
                 "Undertone: ${it.undertone}, Seasonal Type: ${it.seasonalType}"
             } ?: "Unknown"
             
+            val appearance = state.faceTelemetry?.let { getAppearanceTelemetry(it) }
+
             val weather = atmosphericRepository.atmosphericState.value
             val weatherContext = "UV: ${weather.environmentalContext?.uvIndex ?: "Unknown"}, Temp: ${weather.weather?.main?.temp ?: "Unknown"}C"
 
@@ -417,6 +421,8 @@ class StyleSimulatorViewModel @Inject constructor(
                 fashionProfile = skinContext,
                 anchoredClothing = anchoredClothing,
                 anchoredCosmetics = anchoredCosmetics,
+                appearance = appearance,
+                useFirebase = useFirebase,
                 apiKey = apiKey,
                 modelName = preferredModel
             )
@@ -641,5 +647,22 @@ class StyleSimulatorViewModel @Inject constructor(
         val r = Color.red(pixel)
         val b = Color.blue(pixel)
         return ((r - b).toFloat() / 255f).coerceIn(-1.0f, 1.0f)
+    }
+
+    private fun getDimensionalExplanation(telemetry: FaceTelemetryData): String {
+        val appearance = getAppearanceTelemetry(telemetry)
+        return "${appearance.temperature} • ${appearance.depth} • ${appearance.contrast}"
+    }
+
+    private fun getAppearanceTelemetry(telemetry: FaceTelemetryData): Appearance {
+        val contrast = if (telemetry.contrastDelta > 0.4f) "High Contrast" else "Balanced"
+        val undertone = if (telemetry.undertoneScore > 0.1f) "Warm" else if (telemetry.undertoneScore < -0.1f) "Cool" else "Neutral"
+        val luminance = if (telemetry.skinLuminance > 0.6f) "Light" else "Deep"
+        
+        return Appearance(
+            temperature = undertone,
+            depth = luminance,
+            contrast = contrast
+        )
     }
 }

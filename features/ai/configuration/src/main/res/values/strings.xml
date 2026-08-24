@@ -21,4 +21,6 @@
     <string name="features_ai_configuration_verify_model_title">Step 2: Verify Model Functionality</string>
     <string name="features_ai_configuration_verify_model_desc">Ping the selected model to confirm it responds.</string>
     <string name="features_ai_configuration_ping_model">Ping Selected Model</string>
+    <string name="features_ai_configuration_use_firebase_title">Enterprise Security (Firebase)</string>
+    <string name="features_ai_configuration_use_firebase_desc">Route requests through a secure Firebase proxy. Protects your quota and ensures data privacy via App Check.</string>
 </resources>

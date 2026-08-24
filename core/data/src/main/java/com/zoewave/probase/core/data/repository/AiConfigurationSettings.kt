@@ -17,4 +17,8 @@ interface AiConfigurationSettings {
     fun getGeminiApiKey(): String?
     val isGeminiApiKeySetFlow: Flow<Boolean>
     suspend fun saveGeminiApiKey(apiKey: String?)
+
+    // Firebase Vertex AI
+    val useFirebaseVertexAi: Flow<Boolean>
+    suspend fun saveUseFirebaseVertexAi(enabled: Boolean)
 }

@@ -1,6 +1,7 @@
 plugins {
     id("composetemplate.android.library")
     id("composetemplate.android.hilt")
+    id("composetemplate.kotlin.serialization")
 }
 
 android {
@@ -15,4 +16,5 @@ dependencies {
     implementation(libs.firebase.ai)
     implementation(libs.firebase.appcheck.playintegrity)
     implementation(libs.firebase.appcheck.debug)
+    implementation(libs.kotlinx.serialization.json)
 }

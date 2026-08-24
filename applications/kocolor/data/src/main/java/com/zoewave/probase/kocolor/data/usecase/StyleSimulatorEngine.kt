@@ -1,13 +1,17 @@
 package com.zoewave.probase.kocolor.data.usecase
 
-import com.google.ai.client.generativeai.GenerativeModel
+import android.util.Log
 import com.google.ai.client.generativeai.type.content
 import com.google.ai.client.generativeai.type.generationConfig
+import com.google.firebase.ai.GenerativeModel as FirebaseGenerativeModel
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.core.model.ritual.Formality
 import com.zoewave.probase.core.model.ritual.MacroCategory
+import com.zoewave.probase.features.ai.firebase.FirebaseAiClient
+import com.zoewave.probase.features.ai.firebase.models.Appearance
+import com.zoewave.probase.features.ai.firebase.models.StyleTelemetry
 import com.zoewave.probase.features.ai.local.data.LocalAiEngine
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -16,7 +20,8 @@ import javax.inject.Singleton
 
 @Singleton
 class StyleSimulatorEngine @Inject constructor(
-    private val localAi: LocalAiEngine
+    private val localAi: LocalAiEngine,
+    private val firebaseAiClient: FirebaseAiClient
 ) {
 
     private val json = Json { 
@@ -45,8 +50,10 @@ class StyleSimulatorEngine @Inject constructor(
         fashionProfile: String? = null,
         anchoredClothing: List<ClothingItem> = emptyList(),
         anchoredCosmetics: List<CosmeticItem> = emptyList(),
+        appearance: Appearance? = null,
+        useFirebase: Boolean = true,
         apiKey: String? = null,
-        modelName: String = "gemini-1.5-flash"
+        modelName: String = "gemini-3.5-flash-lite"
     ): StyleBlueprint {
         val startTime = System.currentTimeMillis()
         
@@ -56,11 +63,31 @@ class StyleSimulatorEngine @Inject constructor(
         )
         android.util.Log.d("StyleSimulatorEngine", "DATA_OUT (Minified Manifest): $minifiedManifest")
 
+        val telemetryLabel = appearance?.let { "${it.temperature} • ${it.depth} • ${it.contrast}" } ?: fashionProfile ?: "Unknown"
+
         val prompt = buildArchitectPrompt(
             userIntent, circadianContext, routineCompleted, wellnessScore, weatherContext, 
-            minifiedManifest, fashionProfile
+            minifiedManifest, telemetryLabel
         )
-        android.util.Log.d("StyleSimulatorEngine", "DATA_OUT (Full Prompt):\n$prompt")
+        Log.d("StyleSimulatorEngine", "DATA_OUT (Full Prompt):\n$prompt")
+
+        // Tier 0: Enterprise Production Route (Firebase AI Logic + App Check)
+        if (useFirebase && appearance != null) {
+            Log.d("StyleSimulatorEngine", "THINKING: Attempting Tier 0 (Firebase AI Logic)...")
+            try {
+                val styleTelemetry = StyleTelemetry(
+                    appearance = appearance,
+                    vaultManifest = minifiedManifest,
+                    weatherContext = weatherContext,
+                    circadianContext = circadianContext
+                )
+                val jsonText = firebaseAiClient.getStyleAdvice(styleTelemetry, userIntent)
+                Log.d("StyleSimulatorEngine", "SUCCESS: Blueprint generated via Tier 0 in ${System.currentTimeMillis() - startTime}ms")
+                return sanitizeAndDecode(jsonText)
+            } catch (e: Exception) {
+                Log.e("StyleSimulatorEngine", "THINKING: Tier 0 failed, falling back...", e)
+            }
+        }
 
         // Tier 1.5: Local LLM (Gemini Nano) - PREFERRED Tier for speed/cost
         android.util.Log.d("StyleSimulatorEngine", "THINKING: Attempting Tier 1.5 (On-Device Gemini Nano)...")

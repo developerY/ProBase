@@ -143,6 +143,19 @@ fun AiConfigurationCardContent(
 
                     Spacer(modifier = Modifier.padding(vertical = 8.dp))
 
+                    ListItem(
+                        headlineContent = { Text(stringResource(R.string.features_ai_configuration_use_firebase_title)) },
+                        supportingContent = { Text(stringResource(R.string.features_ai_configuration_use_firebase_desc)) },
+                        trailingContent = {
+                            Switch(
+                                checked = uiState.useFirebaseVertexAi,
+                                onCheckedChange = { onEvent(AiConfigurationEvent.OnUseFirebaseVertexAiToggled(it)) }
+                            )
+                        }
+                    )
+
+                    Spacer(modifier = Modifier.padding(vertical = 8.dp))
+
                     Text(
                         text = stringResource(R.string.features_ai_configuration_byok_title),
                         style = MaterialTheme.typography.labelMedium,
