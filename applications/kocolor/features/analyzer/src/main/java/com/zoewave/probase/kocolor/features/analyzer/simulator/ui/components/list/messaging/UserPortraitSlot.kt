@@ -86,11 +86,11 @@ fun UserPortraitSlot(
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = "Visual ID",
-                        style = MaterialTheme.typography.headlineMedium.copy(fontSize = 34.sp),
+                        style = MaterialTheme.typography.headlineMedium.copy(fontSize = 25.sp),
                         fontFamily = FontFamily.Serif,
                         color = Color.Black
                     )
-                    Spacer(Modifier.height(4.dp))
+                    Spacer(Modifier.height(7.dp))
                     Text(
                         text = "ACTIVE:",
                         style = MaterialTheme.typography.labelSmall.copy(fontSize = 12.sp, fontWeight = FontWeight.Bold),
