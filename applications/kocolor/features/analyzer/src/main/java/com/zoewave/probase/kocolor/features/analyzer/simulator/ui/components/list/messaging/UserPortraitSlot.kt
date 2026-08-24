@@ -49,6 +49,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -76,50 +77,50 @@ fun UserPortraitSlot(
             modifier = Modifier.fillMaxWidth().padding(top = 28.dp, bottom = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Header Row
+            // Header Row: Clustered to the Left
             Row(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                // 1. Text Component
-                Column(modifier = Modifier.weight(1f)) {
+                // 1. Text Component (Smaller)
+                Column {
                     Text(
                         text = "Visual ID",
-                        style = MaterialTheme.typography.headlineMedium.copy(fontSize = 25.sp),
+                        style = MaterialTheme.typography.headlineMedium.copy(fontSize = 20.sp),
                         fontFamily = FontFamily.Serif,
                         color = Color.Black
                     )
-                    Spacer(Modifier.height(7.dp))
+                    Spacer(Modifier.height(4.dp))
                     Text(
                         text = "ACTIVE:",
-                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 12.sp, fontWeight = FontWeight.Bold),
+                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.Bold),
                         color = Color.Gray
                     )
                     Text(
                         text = uiState.fashionProfileLabel?.uppercase() ?: "ANALYZING",
-                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 14.sp, fontWeight = FontWeight.ExtraBold),
+                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 12.sp, fontWeight = FontWeight.ExtraBold),
                         color = Color.Black
                     )
                 }
                 
-                // 2. Portrait Hub
+                Spacer(Modifier.width(24.dp))
+                
+                // 2. Portrait Hub (Larger)
                 Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier.padding(horizontal = 12.dp)
+                    contentAlignment = Alignment.Center
                 ) {
                     // Vibrant Glowing Halo
                     Surface(
-                        modifier = Modifier.size(108.dp),
+                        modifier = Modifier.size(126.dp),
                         shape = CircleShape,
-                        color = Color(0xFFB9A0FF).copy(alpha = 0.4f), // Soft outer vibrant aura
+                        color = Color(0xFFB9A0FF).copy(alpha = 0.4f),
                     ) {}
                     
                     Box(
                         modifier = Modifier
-                            .size(92.dp)
+                            .size(110.dp)
                             .clip(CircleShape)
-                            .border(3.dp, Color(0xFFC5B0FF), CircleShape) // Crisp vibrant purple ring
+                            .border(3.5.dp, Color(0xFFC5B0FF), CircleShape)
                             .background(if (uiState.userPortraitUri != null) Color.Transparent else Color(0xFFF5F5F5))
                             .clickable { onPortraitClick() },
                         contentAlignment = Alignment.Center
@@ -132,31 +133,41 @@ fun UserPortraitSlot(
                                 contentScale = ContentScale.Crop
                             )
                         } else {
-                            Icon(Icons.Default.Person, null, modifier = Modifier.size(40.dp), tint = Color.LightGray)
+                            Icon(Icons.Default.Person, null, modifier = Modifier.size(48.dp), tint = Color.LightGray)
                         }
                     }
                 }
 
-                // 3. Nested Circle Action Icons
+                Spacer(Modifier.width(20.dp))
+
+                // 3. Action Icons (Larger)
                 Column(
-                    modifier = Modifier.width(64.dp),
-                    horizontalAlignment = Alignment.End,
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
                     NeumorphicIconButton(
                         icon = Icons.Default.PhotoCamera,
+                        size = 62.dp,
+                        innerSize = 52.dp,
+                        iconSize = 26.dp,
                         onClick = { onEvent(SimulatorEvent.CapturePortrait) }
                     )
                     NeumorphicIconButton(
                         icon = Icons.Default.Image,
+                        size = 62.dp,
+                        innerSize = 52.dp,
+                        iconSize = 26.dp,
                         onClick = { onEvent(SimulatorEvent.PickPortrait) }
                     )
                 }
+                
+                // 4. Spacer to push everything to the left
+                Spacer(Modifier.weight(1f))
             }
 
             Spacer(Modifier.height(28.dp))
 
-            // 4. Gold Gradient Expansion Bar
+            // Gold Gradient Expansion Bar (Smaller Text)
             val goldBrush = Brush.linearGradient(
                 listOf(Color(0xFFD4C097), Color(0xFFF2E7D5), Color(0xFFD4C097))
             )
@@ -166,7 +177,7 @@ fun UserPortraitSlot(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp)
-                    .height(56.dp),
+                    .height(54.dp),
                 shape = RoundedCornerShape(12.dp),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
@@ -185,7 +196,7 @@ fun UserPortraitSlot(
                     ) {
                         Text(
                             text = "SEASONAL MAPPING",
-                            style = MaterialTheme.typography.labelLarge.copy(fontSize = 13.sp),
+                            style = MaterialTheme.typography.labelLarge.copy(fontSize = 11.sp),
                             fontWeight = FontWeight.Black,
                             letterSpacing = 1.sp,
                             color = Color.Black
@@ -193,7 +204,7 @@ fun UserPortraitSlot(
                         Icon(
                             imageVector = if (plotExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
                             contentDescription = null,
-                            modifier = Modifier.size(24.dp),
+                            modifier = Modifier.size(22.dp),
                             tint = Color.Black
                         )
                     }
@@ -231,11 +242,14 @@ fun UserPortraitSlot(
 @Composable
 private fun NeumorphicIconButton(
     icon: ImageVector,
+    size: Dp = 52.dp,
+    innerSize: Dp = 44.dp,
+    iconSize: Dp = 22.dp,
     onClick: () -> Unit
 ) {
     Surface(
         onClick = onClick,
-        modifier = Modifier.size(52.dp),
+        modifier = Modifier.size(size),
         shape = CircleShape,
         color = Color.White,
         border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f)),
@@ -245,10 +259,9 @@ private fun NeumorphicIconButton(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            // Nested Inner Circle for Depth
             Box(
                 modifier = Modifier
-                    .size(44.dp)
+                    .size(innerSize)
                     .border(1.dp, Color.Black.copy(alpha = 0.02f), CircleShape)
                     .background(Color(0xFFFDFDFD), CircleShape),
                 contentAlignment = Alignment.Center
@@ -256,7 +269,7 @@ private fun NeumorphicIconButton(
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    modifier = Modifier.size(22.dp),
+                    modifier = Modifier.size(iconSize),
                     tint = Color.Black.copy(alpha = 0.6f)
                 )
             }
