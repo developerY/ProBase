@@ -18,6 +18,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.material3.Surface
 
 @Composable
 fun SeasonalQuadrantMap(
@@ -96,3 +98,18 @@ fun SeasonalQuadrantMap(
         }
     }
 }
+
+@Preview(showBackground = true)
+@Composable
+private fun SeasonalQuadrantMapPreview() {
+    MaterialTheme {
+        Surface(modifier = Modifier.padding(16.dp)) {
+            SeasonalQuadrantMap(
+                undertoneScore = 0.2235f,
+                hairLuminance = 0.1515f,
+                eyeLuminance = 0.2121f
+            )
+        }
+    }
+}
+

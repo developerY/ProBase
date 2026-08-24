@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.FaceTelemetryData
+import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun FaceTelemetryVisualizer(
@@ -111,3 +112,13 @@ fun FaceTelemetryVisualizer(
         }
     }
 }
+
+@Preview(showBackground = true)
+@Composable
+private fun FaceTelemetryVisualizerPreview() {
+    FaceTelemetryVisualizer(
+        imageUri = null,
+        telemetry = MessagingPreviewData.sampleTelemetry
+    )
+}
+

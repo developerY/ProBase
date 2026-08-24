@@ -43,6 +43,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.SimulatorEvent
@@ -129,8 +130,7 @@ fun UserPortraitSlot(
                 exit = shrinkVertically()
             ) {
                 uiState.faceTelemetry?.let { telemetry ->
-                    Box(
-                        modifier = Modifier
+                    Box(modifier = Modifier
                             .padding(horizontal = 24.dp)
                             .padding(bottom = 24.dp)
                     ) {
@@ -143,6 +143,20 @@ fun UserPortraitSlot(
                     }
                 }
             }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun UserPortraitSlotPreview() {
+    MaterialTheme {
+        Box(modifier = Modifier.padding(16.dp)) {
+            UserPortraitSlot(
+                uiState = MessagingPreviewData.sampleUiState,
+                onEvent = {},
+                onPortraitClick = {}
+            )
         }
     }
 }

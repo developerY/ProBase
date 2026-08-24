@@ -41,6 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorUiState
+import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun FindingsDialog(
@@ -180,6 +181,18 @@ fun FindingsDialog(
         containerColor = Color.White
     )
 }
+
+@Preview(showBackground = true)
+@Composable
+private fun FindingsDialogPreview() {
+    MaterialTheme {
+        FindingsDialog(
+            uiState = MessagingPreviewData.sampleUiState,
+            onDismiss = {}
+        )
+    }
+}
+
 
 @Composable
 private fun CollapsibleSection(

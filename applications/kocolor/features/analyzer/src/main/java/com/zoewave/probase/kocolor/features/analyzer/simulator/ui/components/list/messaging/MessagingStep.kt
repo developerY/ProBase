@@ -238,9 +238,12 @@ fun MessagingStep(
 @Preview(showBackground = true)
 @Composable
 fun MessagingStepPreview() {
-    MessagingStep(
-        uiState = StyleSimulatorUiState(),
-        onEvent = {},
-        navTo = {}
-    )
+    MaterialTheme {
+        MessagingStep(
+            uiState = MessagingPreviewData.sampleUiState,
+            onEvent = {},
+            navTo = {}
+        )
+    }
 }
+
