@@ -60,11 +60,15 @@ This document details the architectural plan to optimize token usage and network
   )
   ```
 - **Storage**: Use an in-memory `LruCache` for near-instant local retrieval of repeated simulations.
-- **Cache Policy**: A change to any fingerprint input (including weather or versioning) produces a **cache miss** and triggers a new AI request, creating a new cache entry.
+- **Cache Policy**: 
+  - Bounded `LruCache` with configurable maximum entries.
+  - A change to any fingerprint input (including weather or versioning) produces a **cache miss** and triggers a new AI request.
+  - Least-recently-used entries are evicted automatically to manage memory.
+  - **NO raw images** are ever stored in the cache.
 
 #### [StyleSimulatorEngine.kt](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/usecase/StyleSimulatorEngine.kt)
 - **Check Cache**: Before Tier 0 (Firebase) execution, consult `PromptCacheRepository`.
-- **Skip Network**: If hit, return cached `StyleBlueprint` with no cloud AI cost.
+- **Skip Network**: If hit, return cached `StyleBlueprint` with no cloud AI cost and near-instant local retrieval.
 
 ---
 
@@ -74,7 +78,7 @@ This document details the architectural plan to optimize token usage and network
 
 #### [StyleSimulatorEngine.kt](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/usecase/StyleSimulatorEngine.kt)
 - **Token Preflight**: Use `model.countTokens(prompt)` on the **exact model/configuration** that will execute to estimate usage.
-- **Circuit Breaker**: If `estimatedInputTokens > MAX_CLOUD_INPUT_TOKENS` (default `3,000`), cancel Cloud Tier 0 and force Fallback to Tier 1.5 (Local Gemini Nano) to protect billing.
+- **Circuit Breaker**: If `estimatedInputTokens > MAX_CLOUD_INPUT_TOKENS` (default `3,000`), **skip Cloud Tier 0 and route directly to Tier 1.5 (Local Gemini Nano)** to protect billing.
 
 ### [Observability]
 
@@ -82,7 +86,7 @@ This document details the architectural plan to optimize token usage and network
 Upon each request, log a comprehensive metric set:
 ```text
 - cache_hit: Boolean
-- cache_key: String (Shortened hash)
+- cache_key: String (Shortened, non-sensitive hash identifier)
 - vault_size: Int
 - eligible_count: Int
 - candidates_sent: Int
@@ -95,6 +99,7 @@ Upon each request, log a comprehensive metric set:
 - model: String
 - prompt_version: String
 ```
+**Privacy Note**: Never include raw prompt text or full telemetry payloads in production logs.
 
 ---
 
