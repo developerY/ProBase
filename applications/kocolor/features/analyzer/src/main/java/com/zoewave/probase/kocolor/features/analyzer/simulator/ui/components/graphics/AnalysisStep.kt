@@ -67,7 +67,7 @@ fun AnalysisStep(
             )
             Icon(
                 imageVector = when (uiState.simulationStep) {
-                    SimulationStep.BIO_MARKERS -> Icons.Default.Favorite
+                    SimulationStep.APPEARANCE_ANALYSIS -> Icons.Default.Favorite
                     SimulationStep.ROUTINE -> Icons.Default.AutoAwesome
                     else -> Icons.Default.Grain
                 },
@@ -81,7 +81,7 @@ fun AnalysisStep(
         
         Text(
             text = when (uiState.simulationStep) {
-                SimulationStep.BIO_MARKERS -> stringResource(R.string.applications_kocolor_features_analyzer_simulator_reading_bio)
+                SimulationStep.APPEARANCE_ANALYSIS -> stringResource(R.string.applications_kocolor_features_analyzer_simulator_reading_appearance)
                 SimulationStep.ROUTINE -> stringResource(R.string.applications_kocolor_features_analyzer_simulator_syncing_rituals)
                 SimulationStep.GENERATING -> stringResource(R.string.applications_kocolor_features_analyzer_simulator_architecting_style)
                 else -> stringResource(R.string.applications_kocolor_features_analyzer_simulator_magic)
@@ -108,7 +108,7 @@ fun AnalysisStep(
 fun AnalysisStepPreview() {
     MaterialTheme {
         AnalysisStep(
-            uiState = StyleSimulatorUiState(simulationStep = SimulationStep.BIO_MARKERS),
+            uiState = StyleSimulatorUiState(simulationStep = SimulationStep.APPEARANCE_ANALYSIS),
             onEvent = {},
             navTo = {}
         )

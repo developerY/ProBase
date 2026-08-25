@@ -8,5 +8,6 @@ data class AiConfigurationUiState(
     val isTestingKey: Boolean = false,
     val keyTestResult: String? = null,
     val isTestingModel: Boolean = false,
-    val modelTestResult: String? = null
+    val modelTestResult: String? = null,
+    val useFirebaseVertexAi: Boolean = true
 )

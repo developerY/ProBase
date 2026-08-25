@@ -29,6 +29,8 @@ import com.zoewave.probase.core.model.ritual.RoutineTime
 import com.zoewave.probase.core.model.ritual.SeasonalType
 import com.zoewave.probase.core.model.ritual.SuggestedPiece
 import com.zoewave.probase.core.model.ritual.Undertone
+import com.zoewave.probase.features.ai.firebase.FirebaseAiAuthManager
+import com.zoewave.probase.features.ai.firebase.models.Appearance
 import com.zoewave.probase.kocolor.data.FashionRepository
 import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
 import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
@@ -111,7 +113,7 @@ data class StyleSimulatorUiState(
 )
 
 enum class SimulationStep {
-    MESSAGING, BIO_MARKERS, ROUTINE, GENERATING, RESULT
+    MESSAGING, APPEARANCE_ANALYSIS, ROUTINE, GENERATING, RESULT
 }
 
 sealed class SimulatorEvent {
@@ -150,7 +152,8 @@ class StyleSimulatorViewModel @Inject constructor(
     private val atmosphericRepository: AtmosphericRepository,
     private val rotationRepository: RotationRepository,
     private val rotationScoringUseCase: RotationScoringUseCase,
-    private val aiSettings: AiConfigurationSettings
+    private val aiSettings: AiConfigurationSettings,
+    private val authManager: FirebaseAiAuthManager
 ) : ViewModel() {
 
     private val _selectedClothingCategory = MutableStateFlow(ClothingCategory.TOPS)
@@ -370,7 +373,12 @@ class StyleSimulatorViewModel @Inject constructor(
         
         viewModelScope.launch {
             _isAnalyzing.value = true
+            
+            // Ensure anonymous authentication is active for Tier 0
+            authManager.signInAnonymously()
+            
             val apiKey = aiSettings.getGeminiApiKey()
+            val useFirebase = aiSettings.useFirebaseVertexAi.first()
             val state = uiState.value
             val userIntent = state.userMessage
             
@@ -382,6 +390,8 @@ class StyleSimulatorViewModel @Inject constructor(
                 "Undertone: ${it.undertone}, Seasonal Type: ${it.seasonalType}"
             } ?: "Unknown"
             
+            val appearance = state.faceTelemetry?.let { getAppearanceTelemetry(it) }
+
             val weather = atmosphericRepository.atmosphericState.value
             val weatherContext = "UV: ${weather.environmentalContext?.uvIndex ?: "Unknown"}, Temp: ${weather.weather?.main?.temp ?: "Unknown"}C"
 
@@ -399,7 +409,7 @@ class StyleSimulatorViewModel @Inject constructor(
                 item.remoteId!! to rotationScoringUseCase.calculateRotationPenalty(item.remoteId!!, item.category.name)
             }
 
-            _simulationStep.value = SimulationStep.BIO_MARKERS
+            _simulationStep.value = SimulationStep.APPEARANCE_ANALYSIS
             delay(1000)
             _simulationStep.value = SimulationStep.ROUTINE
             delay(1000)
@@ -417,6 +427,9 @@ class StyleSimulatorViewModel @Inject constructor(
                 fashionProfile = skinContext,
                 anchoredClothing = anchoredClothing,
                 anchoredCosmetics = anchoredCosmetics,
+                appearance = appearance,
+                portrait = state.userPortraitUri?.let { loadBitmapFromUri(Uri.parse(it)) },
+                useFirebase = useFirebase,
                 apiKey = apiKey,
                 modelName = preferredModel
             )
@@ -567,7 +580,7 @@ class StyleSimulatorViewModel @Inject constructor(
                             val bitmap = loadBitmapFromUri(parsedUri) 
                             if (bitmap == null) {
                                 Log.e("StyleSimulatorVM", "Failed to load bitmap for sampling")
-                                _faceAnalysisError.value = "Internal error: Failed to process biometric source."
+                                _faceAnalysisError.value = "Internal error: Failed to process appearance source."
                                 return@addOnSuccessListener
                             }
 
@@ -641,5 +654,22 @@ class StyleSimulatorViewModel @Inject constructor(
         val r = Color.red(pixel)
         val b = Color.blue(pixel)
         return ((r - b).toFloat() / 255f).coerceIn(-1.0f, 1.0f)
+    }
+
+    private fun getDimensionalExplanation(telemetry: FaceTelemetryData): String {
+        val appearance = getAppearanceTelemetry(telemetry)
+        return "${appearance.temperature} • ${appearance.depth} • ${appearance.contrast}"
+    }
+
+    private fun getAppearanceTelemetry(telemetry: FaceTelemetryData): Appearance {
+        val contrast = if (telemetry.contrastDelta > 0.4f) "High Contrast" else "Balanced"
+        val undertone = if (telemetry.undertoneScore > 0.1f) "Warm" else if (telemetry.undertoneScore < -0.1f) "Cool" else "Neutral"
+        val luminance = if (telemetry.skinLuminance > 0.6f) "Light" else "Deep"
+        
+        return Appearance(
+            temperature = undertone,
+            depth = luminance,
+            contrast = contrast
+        )
     }
 }

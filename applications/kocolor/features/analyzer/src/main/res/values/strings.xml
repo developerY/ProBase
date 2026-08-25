@@ -37,7 +37,7 @@
     <string name="applications_kocolor_features_analyzer_simulator_intent_title">Define Your Intent.</string>
     <string name="applications_kocolor_features_analyzer_simulator_intent_placeholder">e.g. A crisp look for high-stakes negotiation.</string>
     <string name="applications_kocolor_features_analyzer_simulator_begin_action">Get Fashion Advice</string>
-    <string name="applications_kocolor_features_analyzer_simulator_reading_bio">Analyzing Bio-Markers...</string>
+    <string name="applications_kocolor_features_analyzer_simulator_reading_appearance">Analyzing Appearance Telemetry...</string>
     <string name="applications_kocolor_features_analyzer_simulator_syncing_rituals">Synchronizing Rituals...</string>
     <string name="applications_kocolor_features_analyzer_simulator_architecting_style">Architecting Style...</string>
     <string name="applications_kocolor_features_analyzer_simulator_magic">Curating...</string>

@@ -31,6 +31,7 @@ class AiConfigurationViewModel @Inject constructor(
         settings.isGeminiApiKeySetFlow,
         settings.isAiEnabledFlow,
         settings.aiModelFlow,
+        settings.useFirebaseVertexAi,
         _isTestingKey,
         _keyTestResult,
         _isTestingModel,
@@ -41,11 +42,12 @@ class AiConfigurationViewModel @Inject constructor(
             isApiKeySet = args[0] as Boolean,
             isAiEnabled = args[1] as Boolean,
             currentAiModel = args[2] as String,
-            isTestingKey = args[3] as Boolean,
-            keyTestResult = args[4] as String?,
-            isTestingModel = args[5] as Boolean,
-            modelTestResult = args[6] as String?,
-            availableModels = (args[7] as List<String>?) ?: emptyList()
+            useFirebaseVertexAi = args[3] as Boolean,
+            isTestingKey = args[4] as Boolean,
+            keyTestResult = args[5] as String?,
+            isTestingModel = args[6] as Boolean,
+            modelTestResult = args[7] as String?,
+            availableModels = (args[8] as List<String>?) ?: emptyList()
         )
     }.stateIn(
         scope = viewModelScope,
@@ -63,6 +65,9 @@ class AiConfigurationViewModel @Inject constructor(
             }
             is AiConfigurationEvent.OnAiModelSelected -> {
                 viewModelScope.launch { settings.saveAiModel(event.model) }
+            }
+            is AiConfigurationEvent.OnUseFirebaseVertexAiToggled -> {
+                viewModelScope.launch { settings.saveUseFirebaseVertexAi(event.enabled) }
             }
             is AiConfigurationEvent.OnTestApiKeyClicked -> {
                 testApiKey()

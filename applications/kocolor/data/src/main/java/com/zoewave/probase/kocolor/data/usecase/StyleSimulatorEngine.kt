@@ -1,14 +1,19 @@
 package com.zoewave.probase.kocolor.data.usecase
 
+import android.graphics.Bitmap
+import android.util.Log
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.content
 import com.google.ai.client.generativeai.type.generationConfig
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.core.model.ritual.CosmeticItem
-import com.zoewave.probase.core.model.ritual.Formality
 import com.zoewave.probase.core.model.ritual.MacroCategory
+import com.zoewave.probase.features.ai.firebase.FirebaseAiClient
+import com.zoewave.probase.features.ai.firebase.models.Appearance
+import com.zoewave.probase.features.ai.firebase.models.StyleTelemetry
 import com.zoewave.probase.features.ai.local.data.LocalAiEngine
+import com.zoewave.probase.features.ai.local.data.PromptCacheRepository
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
@@ -16,8 +21,18 @@ import javax.inject.Singleton
 
 @Singleton
 class StyleSimulatorEngine @Inject constructor(
-    private val localAi: LocalAiEngine
+    private val localAi: LocalAiEngine,
+    private val firebaseAiClient: FirebaseAiClient,
+    private val cache: PromptCacheRepository
 ) {
+
+    companion object {
+        private const val MAX_ROTATION_PENALTY = 0.70
+        private const val MAX_CLOUD_INPUT_TOKENS = 3000
+        private const val RETRIEVAL_POLICY_VERSION = "1.0"
+        private const val PROMPT_VERSION = "1.0"
+        private val NOISE_CATEGORIES = setOf("oral", "tools", "fragrance", "grooming", "organizers")
+    }
 
     private val json = Json { 
         ignoreUnknownKeys = true 
@@ -33,6 +48,9 @@ class StyleSimulatorEngine @Inject constructor(
         }
     """.trimIndent()
 
+    /**
+     * Cascading execution with Type-Safe Boundaries as per Secure Vertex AI Integration plan.
+     */
     suspend fun architectStyleBlueprint(
         userIntent: String,
         circadianContext: String,
@@ -41,66 +59,283 @@ class StyleSimulatorEngine @Inject constructor(
         weatherContext: String,
         availableWardrobe: List<ClothingItem>,
         availableCosmetics: List<CosmeticItem>,
-        rotationScores: Map<String, Double> = emptyMap(), // productId -> normalized penalty [0.0 - 1.0]
+        rotationScores: Map<String, Double> = emptyMap(),
         fashionProfile: String? = null,
         anchoredClothing: List<ClothingItem> = emptyList(),
         anchoredCosmetics: List<CosmeticItem> = emptyList(),
+        appearance: Appearance? = null,
+        portrait: Bitmap? = null,
+        useFirebase: Boolean = true,
         apiKey: String? = null,
-        modelName: String = "gemini-1.5-flash"
+        modelName: String = "gemini-3.5-flash-lite"
     ): StyleBlueprint {
         val startTime = System.currentTimeMillis()
-        
-        // 1. Manifest Minification (Cloud-Optimization via Tuple Matrix)
-        val minifiedManifest = minifyManifest(
+        var executionTier = "Tier 2"
+        var fallbackReason: String? = null
+        var estimatedInputTokens = 0
+        var actualPromptTokens = 0
+        var completionTokens = 0
+        var totalTokens = 0
+        var modelUsed = modelName
+
+        // 1. Manifest Minification (Phase 2)
+        val minResult = minifyManifest(
             availableWardrobe, availableCosmetics, anchoredClothing, anchoredCosmetics, rotationScores
         )
-        android.util.Log.d("StyleSimulatorEngine", "DATA_OUT (Minified Manifest): $minifiedManifest")
+        val minifiedManifest = minResult.manifest
 
-        val prompt = buildArchitectPrompt(
-            userIntent, circadianContext, routineCompleted, wellnessScore, weatherContext, 
-            minifiedManifest, fashionProfile
+        // 2. Semantic Caching (Phase 3)
+        val fingerprint = cache.generateFingerprint(
+            promptVersion = PROMPT_VERSION,
+            modelVersion = modelUsed,
+            retrievalPolicyVersion = RETRIEVAL_POLICY_VERSION,
+            appearanceTelemetry = appearance?.toString() ?: "no_appearance",
+            weatherState = weatherContext,
+            userIntent = userIntent,
+            minifiedManifest = minifiedManifest
         )
-        android.util.Log.d("StyleSimulatorEngine", "DATA_OUT (Full Prompt):\n$prompt")
 
-        // Tier 1.5: Local LLM (Gemini Nano) - PREFERRED Tier for speed/cost
-        android.util.Log.d("StyleSimulatorEngine", "THINKING: Attempting Tier 1.5 (On-Device Gemini Nano)...")
-        try {
-            val localAiResult = localAi.generateStructuredContent(prompt, BLUEPRINT_SCHEMA)
-            if (localAiResult.isSuccess) {
-                val jsonText = localAiResult.getOrThrow()
-                android.util.Log.d("StyleSimulatorEngine", "SUCCESS: Blueprint generated via Tier 1.5 in ${System.currentTimeMillis() - startTime}ms")
-                return sanitizeAndDecode(jsonText)
-            }
-        } catch (e: Exception) {
-            android.util.Log.w("StyleSimulatorEngine", "THINKING: Tier 1.5 failed (${e.message}), checking Tier 1 fallback...")
+        val cachedResponse = cache.get(fingerprint)
+        if (cachedResponse != null) {
+            executionTier = "Cache"
+            logTelemetry(
+                cacheHit = true,
+                fingerprint = fingerprint,
+                minResult = minResult,
+                estTokens = 0,
+                actPrompt = 0,
+                compTokens = 0,
+                totTokens = 0,
+                tier = executionTier,
+                reason = null,
+                model = modelUsed
+            )
+            return sanitizeAndDecode(cachedResponse)
         }
 
-        // Tier 1: Probabilistic (Cloud Gemini BYOK Multimodal) - FALLBACK for Nano failures
-        if (!apiKey.isNullOrBlank()) {
-            android.util.Log.d("StyleSimulatorEngine", "THINKING: Attempting Tier 1 (Cloud Gemini $modelName Fallback)...")
+        // 3. Token Budgeting & Telemetry (Phase 4)
+        
+        // Tier 0: Enterprise Production Route (Firebase AI Logic)
+        if (useFirebase && appearance != null) {
+            val styleTelemetry = StyleTelemetry(
+                appearance = appearance,
+                vaultManifest = minifiedManifest,
+                weatherContext = weatherContext,
+                circadianContext = circadianContext
+            )
+
             try {
-                val cloudResult = architectCloudBlueprint(prompt, apiKey, modelName)
-                if (cloudResult != null) {
-                    android.util.Log.d("StyleSimulatorEngine", "SUCCESS: Blueprint generated via Tier 1 ($modelName) in ${System.currentTimeMillis() - startTime}ms")
-                    return cloudResult
+                estimatedInputTokens = firebaseAiClient.estimateTokens(styleTelemetry, userIntent)
+                if (estimatedInputTokens <= MAX_CLOUD_INPUT_TOKENS) {
+                    Log.d("StyleSimulatorEngine", "THINKING: Attempting Tier 0 (Firebase AI Logic)...")
+                    val response = firebaseAiClient.getStyleAdvice(styleTelemetry, userIntent)
+                    cache.put(fingerprint, response.text)
+                    executionTier = "Tier 0"
+                    actualPromptTokens = response.promptTokens
+                    completionTokens = response.completionTokens
+                    totalTokens = response.totalTokens
+                    modelUsed = response.modelName
+                    
+                    logTelemetry(false, fingerprint, minResult, estimatedInputTokens, 
+                                 actualPromptTokens, completionTokens, totalTokens, executionTier, null, modelUsed)
+                    return sanitizeAndDecode(response.text)
+                } else {
+                    fallbackReason = "TOKEN_BUDGET"
+                    Log.w("StyleSimulatorEngine", "Tier 0 skipped: TOKEN_BUDGET ($estimatedInputTokens > $MAX_CLOUD_INPUT_TOKENS)")
                 }
             } catch (e: Exception) {
-                android.util.Log.e("StyleSimulatorEngine", "THINKING: Tier 1 fallback ($modelName) failed", e)
+                fallbackReason = "NETWORK_FAILURE"
+                Log.e("StyleSimulatorEngine", "Tier 0 failed, falling back to Tier 1.5...", e)
+            }
+        }
+
+        // Tier 1.5: Local LLM (Gemini Nano)
+        Log.d("StyleSimulatorEngine", "THINKING: Attempting Tier 1.5 (On-Device Gemini Nano)...")
+        try {
+            val localPrompt = buildArchitectPrompt(
+                userIntent, circadianContext, routineCompleted, wellnessScore, weatherContext, 
+                minifiedManifest, fashionProfile
+            )
+            
+            // Token Preflight for Local AI
+            val localTokens = localAi.estimateTokens(localPrompt)
+            
+            val result = if (portrait != null) {
+                localAi.generateMultimodalContent(localPrompt, portrait, BLUEPRINT_SCHEMA)
+            } else {
+                localAi.generateStructuredContent(localPrompt, BLUEPRINT_SCHEMA)
+            }
+
+            val text = result.getOrNull()
+            if (text != null) {
+                cache.put(fingerprint, text)
+                executionTier = "Tier 1.5"
+                modelUsed = "gemini-nano"
+                logTelemetry(false, fingerprint, minResult, localTokens, 0, 0, 0, executionTier, fallbackReason, modelUsed)
+                Log.d("StyleSimulatorEngine", "SUCCESS: Blueprint generated via Tier 1.5 in ${System.currentTimeMillis() - startTime}ms")
+                return sanitizeAndDecode(text)
+            } else {
+                Log.w("StyleSimulatorEngine", "Tier 1.5 returned null result")
+            }
+        } catch (e: Exception) {
+            Log.w("StyleSimulatorEngine", "Tier 1.5 failed, checking Tier 1 fallback...", e)
+        }
+
+        // Tier 1: Probabilistic (Cloud Gemini BYOK) - Deep Fallback
+        if (!apiKey.isNullOrBlank()) {
+            Log.d("StyleSimulatorEngine", "THINKING: Attempting Tier 1 (Cloud Gemini Fallback)...")
+            try {
+                val prompt = buildArchitectPrompt(
+                    userIntent, circadianContext, routineCompleted, wellnessScore, weatherContext, 
+                    minifiedManifest, fashionProfile
+                )
+                val cloudResponse = architectCloudBlueprint(prompt, apiKey, modelName)
+                if (cloudResponse != null) {
+                    executionTier = "Tier 1"
+                    actualPromptTokens = cloudResponse.promptTokens
+                    completionTokens = cloudResponse.completionTokens
+                    totalTokens = cloudResponse.totalTokens
+                    
+                    logTelemetry(false, fingerprint, minResult, 0, actualPromptTokens, completionTokens, totalTokens, executionTier, fallbackReason, modelName)
+                    Log.d("StyleSimulatorEngine", "SUCCESS: Blueprint generated via Tier 1 in ${System.currentTimeMillis() - startTime}ms")
+                    return sanitizeAndDecode(cloudResponse.text)
+                }
+            } catch (e: Exception) {
+                Log.e("StyleSimulatorEngine", "Tier 1 fallback failed", e)
             }
         }
 
         // Tier 2: Deterministic (Local Heuristics) - Final Safety Net
-        android.util.Log.d("StyleSimulatorEngine", "THINKING: Attempting Tier 2 (Local Heuristic Architect)...")
-        val localResult = architectLocalBlueprint(userIntent, availableWardrobe, availableCosmetics)
-        android.util.Log.d("StyleSimulatorEngine", "SUCCESS: Blueprint generated via Tier 2 in ${System.currentTimeMillis() - startTime}ms")
+        Log.d("StyleSimulatorEngine", "THINKING: Attempting Tier 2 (Local Heuristic Architect)...")
+        val localResult = getDeterministicAdvice(userIntent, availableWardrobe, availableCosmetics)
+        logTelemetry(false, fingerprint, minResult, 0, 0, 0, 0, "Tier 2", fallbackReason, "heuristic")
+        Log.d("StyleSimulatorEngine", "SUCCESS: Blueprint generated via Tier 2 in ${System.currentTimeMillis() - startTime}ms")
         return localResult
     }
+
+    private fun logTelemetry(
+        cacheHit: Boolean,
+        fingerprint: String,
+        minResult: MinifiedResult,
+        estTokens: Int,
+        actPrompt: Int,
+        compTokens: Int,
+        totTokens: Int,
+        tier: String,
+        reason: String?,
+        model: String
+    ) {
+        Log.d("KoColor_Telemetry", """
+            - cache_hit: $cacheHit
+            - cache_key: ${fingerprint.take(8)}
+            - vault_size: ${minResult.vaultSize}
+            - eligible_count: ${minResult.eligibleCount}
+            - candidates_sent: ${minResult.candidatesSent}
+            - estimated_input_tokens: $estTokens
+            - actual_prompt_tokens: $actPrompt
+            - completion_tokens: $compTokens
+            - total_tokens: $totTokens
+            - execution_tier: $tier
+            - fallback_reason: $reason
+            - model: $model
+            - prompt_version: $PROMPT_VERSION
+            - retrieval_policy_version: $RETRIEVAL_POLICY_VERSION
+        """.trimIndent())
+    }
+
+    private data class MinifiedResult(
+        val manifest: String,
+        val vaultSize: Int,
+        val eligibleCount: Int,
+        val candidatesSent: Int
+    )
+
+    private fun minifyManifest(
+        wardrobe: List<ClothingItem>,
+        cosmetics: List<CosmeticItem>,
+        anchoredWardrobe: List<ClothingItem>,
+        anchoredCosmetics: List<CosmeticItem>,
+        rotationScores: Map<String, Double>
+    ): MinifiedResult {
+        val vaultSize = wardrobe.size + cosmetics.size
+
+        // Pruning noise categories and low-rotation candidates
+        val eligibleWardrobe = wardrobe.filter { item ->
+            val penalty = rotationScores[item.remoteId] ?: 0.0
+            penalty < MAX_ROTATION_PENALTY
+        }
+
+        val eligibleCosmetics = cosmetics.filter { item ->
+            val category = item.macroCategory.name.lowercase()
+            !NOISE_CATEGORIES.contains(category)
+        }
+        
+        val eligibleCount = eligibleWardrobe.size + eligibleCosmetics.size
+
+        // Further pruning based on anchors
+        val anchoredCategories = anchoredWardrobe.map { it.category }.toSet()
+        val prunedWardrobe = eligibleWardrobe.filter { item ->
+            if (anchoredCategories.contains(item.category)) {
+                anchoredWardrobe.any { it.internalId == item.internalId }
+            } else true
+        }
+
+        val anchoredCosmeticMacros = anchoredCosmetics.map { it.macroCategory }.toSet()
+        val prunedCosmetics = eligibleCosmetics.filter { item ->
+            if (anchoredCosmeticMacros.contains(item.macroCategory)) {
+                anchoredCosmetics.any { it.internalId == item.internalId }
+            } else true
+        }
+        
+        val candidatesSent = prunedWardrobe.size + prunedCosmetics.size
+
+        // Mapping to [ID, SemanticType, HexColor]
+        val minWardrobe = prunedWardrobe.groupBy { it.category.name.lowercase() }
+            .mapValues { (_, items) ->
+                items.map { 
+                    listOf(
+                        "w_${it.internalId}", 
+                        it.name.lowercase(), 
+                        it.colorHex ?: "#000000"
+                    ) 
+                }
+            }
+
+        val minCosmetics = prunedCosmetics.groupBy { it.macroCategory.name.lowercase() }
+            .mapValues { (_, items) ->
+                items.map { 
+                    listOf(
+                        "c_${it.internalId}", 
+                        it.microCategory.name.lowercase(), 
+                        it.colorHex ?: "#000000"
+                    ) 
+                }
+            }
+
+        val manifest = json.encodeToString(CloudManifest(minWardrobe, minCosmetics))
+        return MinifiedResult(manifest, vaultSize, eligibleCount, candidatesSent)
+    }
+
+    private fun getDeterministicAdvice(
+        userIntent: String,
+        availableWardrobe: List<ClothingItem>,
+        availableCosmetics: List<CosmeticItem>
+    ): StyleBlueprint {
+        return architectLocalBlueprint(userIntent, availableWardrobe, availableCosmetics)
+    }
+
+    private data class InternalAiResponse(
+        val text: String,
+        val promptTokens: Int,
+        val completionTokens: Int,
+        val totalTokens: Int
+    )
 
     private suspend fun architectCloudBlueprint(
         prompt: String,
         apiKey: String,
         modelName: String
-    ): StyleBlueprint? {
+    ): InternalAiResponse? {
         // Strip "models/" prefix if present, as the SDK handles it
         val sanitizedModelName = modelName.removePrefix("models/")
         
@@ -116,67 +351,27 @@ class StyleSimulatorEngine @Inject constructor(
             text(prompt)
         }
 
+        // Execute Tier 1 BYOK Request with Logging
+        Log.d("KoColorAI_IO", ">>> REQUEST TO GEMINI (BYOK):\n$prompt")
+
         val response = generativeModel.generateContent(inputContent)
         val jsonText = response.text ?: return null
-        android.util.Log.d("StyleSimulatorEngine", "DATA_IN (Cloud Response Raw): $jsonText")
-        return sanitizeAndDecode(jsonText)
-    }
 
-    private fun minifyManifest(
-        wardrobe: List<ClothingItem>,
-        cosmetics: List<CosmeticItem>,
-        anchoredWardrobe: List<ClothingItem>,
-        anchoredCosmetics: List<CosmeticItem>,
-        rotationScores: Map<String, Double>
-    ): String {
-        // Vibe Key: 0=casual, 1=professional, 2=gala, 3=smart-casual, 4=formal, 5=lounge
-        fun Formality.toKey(): String = when(this) {
-            Formality.CASUAL -> "0"
-            Formality.PROFESSIONAL -> "1"
-            Formality.GALA -> "2"
-            Formality.SMART_CASUAL -> "3"
-            Formality.FORMAL -> "4"
-            Formality.LOUNGE -> "5"
+        Log.d("KoColorAI_IO", "^^^ RESPONSE FROM GEMINI (BYOK):\n$jsonText")
+
+        val metadata = response.usageMetadata
+        if (metadata != null) {
+            Log.d("KoColorAI_IO", "TOKEN USAGE (BYOK): Prompt=${metadata.promptTokenCount}, Candidates=${metadata.candidatesTokenCount}, Total=${metadata.totalTokenCount}")
         }
 
-        // Pruning: If a category is anchored, only include those items.
-        val anchoredCategories = anchoredWardrobe.map { it.category }.toSet()
-        val prunedWardrobe = wardrobe.filter { item ->
-            if (anchoredCategories.contains(item.category)) {
-                anchoredWardrobe.any { it.internalId == item.internalId }
-            } else true
-        }
-
-        val anchoredCosmeticMacros = anchoredCosmetics.map { it.macroCategory }.toSet()
-        val prunedCosmetics = cosmetics.filter { item ->
-            if (anchoredCosmeticMacros.contains(item.macroCategory)) {
-                anchoredCosmetics.any { it.internalId == item.internalId }
-            } else true
-        }
-
-        // Mapping to Lightweight Matrix Tuples [ID, Type, Hex, VibeKey, RotationPenalty]
-        val minWardrobe = prunedWardrobe.groupBy { it.category.name.lowercase() }
-            .mapValues { (_, items) ->
-                items.distinctBy { "${it.category}_${it.colorFamily}" }
-                    .map { 
-                        val penalty = rotationScores[it.remoteId] ?: 0.0
-                        listOf(
-                            "w_${it.internalId}", 
-                            it.name.lowercase(), 
-                            it.colorHex ?: "#000000", 
-                            it.formality.toKey(),
-                            "%.2f".format(penalty)
-                        ) 
-                    }
-            }
-
-        val minCosmetics = prunedCosmetics.groupBy { it.macroCategory.name.lowercase() }
-            .mapValues { (_, items) ->
-                items.distinctBy { "${it.microCategory}_${it.colorFamily}" }
-                    .map { listOf("c_${it.internalId}", it.microCategory.name.lowercase(), it.colorHex ?: "#000000") }
-            }
-
-        return json.encodeToString(CloudManifest(minWardrobe, minCosmetics))
+        Log.d("StyleSimulatorEngine", "DATA_IN (Cloud Response Raw): $jsonText")
+        
+        return InternalAiResponse(
+            text = jsonText,
+            promptTokens = metadata?.promptTokenCount ?: 0,
+            completionTokens = metadata?.candidatesTokenCount ?: 0,
+            totalTokens = metadata?.totalTokenCount ?: 0
+        )
     }
 
     private fun buildArchitectPrompt(
@@ -189,18 +384,16 @@ class StyleSimulatorEngine @Inject constructor(
         fashionProfile: String?
     ): String {
         return """
-            You are the KoColor Style Architect AI. Generate a "Style Blueprint" that is both stylistically harmonic and biologically protective.
+            You are the KoColor Style Architect AI. Generate a "Style Blueprint" that is both stylistically harmonic and protective.
             
             USER INTENT: $userIntent
-            BIOLOGICAL CONTEXT: $circadianContext (Wellness: ${"%.2f".format(wellnessScore)}, Ritual Done: $routineCompleted)
+            CIRCADIAN & WELLNESS CONTEXT: $circadianContext (Wellness: ${"%.2f".format(wellnessScore)}, Ritual Done: $routineCompleted)
             WEATHER/ATMOSPHERIC: $weatherContext
             SKIN PROFILE: ${fashionProfile ?: "Unknown"}
             
             AVAILABLE VAULT (MATRIX REPRESENTATION):
             Legend:
-            - Clothing Schema: [ID, Name/Type, ColorHex, VibeKey, RotationPenalty]
-            - VibeKey: 0=casual, 1=professional, 2=gala, 3=smart-casual, 4=formal, 5=lounge
-            - RotationPenalty: normalized [0.0 (fresh) to 1.0 (overused)]. Penalize high scores to ensure variety.
+            - Clothing Schema: [ID, Name/Type, ColorHex]
             - Cosmetic Schema: [ID, MicroCategory, ColorHex]
             - IDs: Prefixed with 'w_' for Wardrobe and 'c_' for Cosmetics.
             
@@ -208,16 +401,14 @@ class StyleSimulatorEngine @Inject constructor(
             
             GOAL:
             1. Select BEST 3 clothing items (Top, Bottom, Shoes) from the wardrobe section of the manifest. 
-               - CRITICAL: Prioritize items with LOW RotationPenalty (0.0 means never worn). 
-               - AVOID items with high RotationPenalty (> 0.70) unless they are an absolute perfect match for the user's intent.
             2. Select exactly 4 PIGMENT makeup items (1 Eye, 1 Cheek, 1 Lip, 1 Nail) strictly from the cosmetics section of the manifest. Prioritize user anchors.
             3. Select 1-2 DEFENSIVE items (Complexion/Skincare) from the cosmetics section based strictly on the WEATHER/ATMOSPHERIC data. 
                - If UV is high, select an SPF product.
                - If humidity/heat is high, select a matte/long-wear foundation or primer.
             4. Create a 4-color Palette (HEX codes) harmonizing the whole look. The 4th color MUST be the selected Nail color.
             5. Provide a brief rationale. Mention WHY you selected the specific DEFENSIVE items for the current weather and why you chose the nail color. 
-               - If an item was selected because of a LOW RotationPenalty (never worn), mention that it was chosen to diversify their rotation.
                CRITICAL SYNTAX RULE: When referencing ANY selected item in your rationale, you MUST use the exact inline tag format <ITEM:id>. Do not attempt to guess or describe the item's brand in the text.
+               EXAMPLE RATIONALE: "The <ITEM:w_55> is selected because the weather requires <ITEM:c_151>."
             
             Respond ONLY with a valid JSON object matching this schema:
             {

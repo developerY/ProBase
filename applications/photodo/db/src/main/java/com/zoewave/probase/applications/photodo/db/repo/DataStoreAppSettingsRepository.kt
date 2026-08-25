@@ -103,4 +103,14 @@ class DataStoreAppSettingsRepository @Inject constructor(
             preferences[ANIMATIONS_ENABLED_KEY] = enabled
         }
     }
+
+    override val useFirebaseVertexAi: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[booleanPreferencesKey("use_firebase_vertex_ai")] ?: true
+    }
+
+    override suspend fun saveUseFirebaseVertexAi(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[booleanPreferencesKey("use_firebase_vertex_ai")] = enabled
+        }
+    }
 }

@@ -97,6 +97,14 @@ class DataStoreAppSettingsRepository @Inject constructor(
         dataStore.edit { it[SettingsPrefsKeys.AI_MODEL] = model }
     }
 
+    override val useFirebaseVertexAi: Flow<Boolean> = dataStore.data.map {
+        it[booleanPreferencesKey("use_firebase_vertex_ai")] ?: true
+    }
+
+    override suspend fun saveUseFirebaseVertexAi(enabled: Boolean) {
+        dataStore.edit { it[booleanPreferencesKey("use_firebase_vertex_ai")] = enabled }
+    }
+
     override fun getGeminiApiKey(): String? = secureApiKeyRepository.getKey()
 
     override val isGeminiApiKeySetFlow: Flow<Boolean> = secureApiKeyRepository.isKeySetFlow

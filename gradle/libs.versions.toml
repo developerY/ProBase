@@ -111,7 +111,7 @@ playServicesCodeScanner = "16.1.0"
 playServicesWallet = "20.0.0"
 stripe = "23.13.1"
 composePayButton = "1.2.0"
-firebaseBom = "34.16.0"
+firebaseBom = "34.18.0"
 googleGmsGoogleServices = "4.5.0"
 googleFirebaseCrashlytics = "3.0.7"
 
@@ -281,7 +281,10 @@ androidx-xr-scenecore = { group = "androidx.xr.scenecore", name = "scenecore", v
 # -- Firebase & ML --
 google-play-age-signals = { group = "com.google.android.play", name = "age-signals", version.ref = "playAgeSignals" }
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
-# firebase-ai = { group = "com.google.firebase", name = "firebase-ai" }
+firebase-ai = { group = "com.google.firebase", name = "firebase-ai" }
+firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
+firebase-appcheck-playintegrity = { group = "com.google.firebase", name = "firebase-appcheck-playintegrity" }
+firebase-appcheck-debug = { group = "com.google.firebase", name = "firebase-appcheck-debug" }
 firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }
 firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
 firebase-installations = { group = "com.google.firebase", name = "firebase-installations" }

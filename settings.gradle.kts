@@ -90,6 +90,7 @@ include(":features:graphics")
 include(":features:ai:capture")
 include(":features:ai:vision")
 include(":features:ai:local")
+include(":features:ai:firebase")
 include(":features:ai:configuration")
 
 

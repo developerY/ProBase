@@ -4,6 +4,7 @@ sealed interface AiConfigurationEvent {
     data class OnAiEnabledToggled(val enabled: Boolean) : AiConfigurationEvent
     data class OnGeminiApiKeyChanged(val apiKey: String?) : AiConfigurationEvent
     data class OnAiModelSelected(val model: String) : AiConfigurationEvent
+    data class OnUseFirebaseVertexAiToggled(val enabled: Boolean) : AiConfigurationEvent
     data object OnTestApiKeyClicked : AiConfigurationEvent
     data object OnTestModelClicked : AiConfigurationEvent
 }

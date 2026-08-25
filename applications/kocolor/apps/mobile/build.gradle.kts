@@ -1,6 +1,7 @@
 plugins {
     id("composetemplate.android.application")
     id("composetemplate.android.application.compose")
+    id("composetemplate.android.application.firebase")
     id("composetemplate.android.hilt")
     id("composetemplate.kotlin.serialization")
     alias(libs.plugins.ksp)
@@ -73,6 +74,7 @@ dependencies {
     
     implementation(project(":features:ai:configuration"))
     implementation(project(":features:ai:capture"))
+    implementation(project(":features:ai:firebase"))
     implementation(project(":features:camera"))
     implementation(project(":features:health:core"))
     implementation(project(":features:health:hydration"))
