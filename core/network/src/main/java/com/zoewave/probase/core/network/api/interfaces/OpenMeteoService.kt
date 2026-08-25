@@ -29,7 +29,8 @@ interface OpenMeteoService {
         @Query("longitude") lon: Double,
         @Query("current") currentFields: String = "temperature_2m,relative_humidity_2m,is_day,weather_code,uv_index",
         @Query("hourly") hourlyFields: String = "uv_index",
-        @Query("timezone") timezone: String = "auto"
+        @Query("timezone") timezone: String = "auto",
+        @Query("forecast_days") forecastDays: Int = 1
     ): OpenMeteoResponse
 
     companion object {

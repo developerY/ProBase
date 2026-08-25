@@ -11,34 +11,44 @@ import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
 
+data class AiResponse(
+    val text: String,
+    val promptTokens: Int,
+    val completionTokens: Int,
+    val totalTokens: Int,
+    val modelName: String
+)
+
 interface FirebaseAiClient {
     /**
      * Enforced Architectural Boundary: Only accepts StyleTelemetry and intent string.
      * Prevents raw appearance data from ever leaving the device.
      */
-    suspend fun getStyleAdvice(telemetry: StyleTelemetry, intent: String): String
+    suspend fun getStyleAdvice(telemetry: StyleTelemetry, intent: String): AiResponse
+
+    /**
+     * Estimates the number of tokens for a given prompt without executing the model.
+     */
+    suspend fun estimateTokens(telemetry: StyleTelemetry, intent: String): Int
 }
 
 @Singleton
 class FirebaseAiClientImpl @Inject constructor() : FirebaseAiClient {
+
+    private val MODEL_NAME = "gemini-3.5-flash-lite"
     
-    override suspend fun getStyleAdvice(telemetry: StyleTelemetry, intent: String): String {
-        // 1. Initialize Firebase AI Logic (Requires valid App Check token)
-        val generativeModel = Firebase.ai(
-            backend = GenerativeBackend.googleAI(),
-            useLimitedUseAppCheckTokens = true
-        ).generativeModel(
-            modelName = "gemini-3.5-flash-lite",
-            generationConfig = generationConfig {
-                responseMimeType = "application/json"
-            }
-        )
+    private fun getModel() = Firebase.ai(
+        backend = GenerativeBackend.googleAI(),
+        useLimitedUseAppCheckTokens = true
+    ).generativeModel(
+        modelName = MODEL_NAME,
+        generationConfig = generationConfig {
+            responseMimeType = "application/json"
+        }
+    )
 
-        // 2. Serialize the safe telemetry data for debug logging or if we wanted to pass raw json to prompt
-        // val telemetryJson = Json.encodeToString(telemetry)
-
-        // 3. Construct the deterministic prompt using the enforced boundary data
-        val prompt = """
+    private fun buildPrompt(telemetry: StyleTelemetry, intent: String): String {
+        return """
             You are the KoColor Style Engine. Analyze the following Appearance and Context:
             
             APPEARANCE:
@@ -72,18 +82,37 @@ class FirebaseAiClientImpl @Inject constructor() : FirebaseAiClient {
               "recommendedPalette": ["#HEX", "#HEX", "#HEX", "#HEX"]
             }
         """.trimIndent()
+    }
+
+    override suspend fun estimateTokens(telemetry: StyleTelemetry, intent: String): Int {
+        val prompt = buildPrompt(telemetry, intent)
+        return getModel().countTokens(prompt).totalTokens
+    }
+
+    override suspend fun getStyleAdvice(telemetry: StyleTelemetry, intent: String): AiResponse {
+        val prompt = buildPrompt(telemetry, intent)
 
         // 4. Execute Tier 0 Cloud Request with Logging
         Log.d("KoColorAI_IO", ">>> REQUEST TO GEMINI:\n$prompt")
         
-        val response = generativeModel.generateContent(prompt)
+        val response = getModel().generateContent(prompt)
         
         Log.d("KoColorAI_IO", "^^^ RESPONSE FROM GEMINI:\n${response.text ?: "EMPTY_RESPONSE"}")
         
-        response.usageMetadata?.let { metadata ->
+        val metadata = response.usageMetadata
+        if (metadata != null) {
             Log.d("KoColorAI_IO", "TOKEN USAGE: Prompt=${metadata.promptTokenCount}, Candidates=${metadata.candidatesTokenCount}, Total=${metadata.totalTokenCount}")
         }
         
-        return response.text ?: throw IllegalStateException("Empty response from Firebase AI Logic")
+        val text = response.text ?: throw IllegalStateException("Empty response from Firebase AI Logic")
+        
+        return AiResponse(
+            text = text,
+            promptTokens = metadata?.promptTokenCount ?: 0,
+            completionTokens = metadata?.candidatesTokenCount ?: 0,
+            totalTokens = metadata?.totalTokenCount ?: 0,
+            modelName = MODEL_NAME
+        )
     }
 }
+

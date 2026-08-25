@@ -129,6 +129,23 @@ class LocalAiEngine @Inject constructor() {
     }
 
     /**
+     * Estimates the number of tokens for a given prompt using Gemini Nano on-device.
+     */
+    suspend fun estimateTokens(prompt: String): Int = withContext(Dispatchers.Default) {
+        try {
+            val capability = checkCapability()
+            if (capability == NanoState.Unsupported) return@withContext 0
+            
+            val request = GenerateContentRequest.builder(content { text(prompt) }).build()
+            val response = localModel.countTokens(request)
+            response.totalTokens
+        } catch (e: Exception) {
+            Log.w("LocalAiEngine", "Token estimation failed: ${e.message}")
+            0
+        }
+    }
+
+    /**
      * Generic structured content generation via Gemini Nano.
      * Uses deterministic timeouts and handles requires-cloud handoffs.
      */
