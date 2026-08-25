@@ -146,12 +146,16 @@ class LocalAiEngine @Inject constructor() {
                 "$prompt\n\nReturn ONLY a valid JSON object matching this schema:\n$jsonSchema"
             } else prompt
 
+            Log.d("KoColorAI_IO", ">>> REQUEST TO GEMINI (Local Nano):\n$finalPrompt")
+
             val response = withTimeout(10000) {
                 localModel.generateContent(finalPrompt)
             }
             
             val text = response.candidates.firstOrNull()?.text 
                 ?: return@withContext Result.failure(Exception("Empty AI response"))
+
+            Log.d("KoColorAI_IO", "^^^ RESPONSE FROM GEMINI (Local Nano):\n$text")
 
             Result.success(text)
         } catch (e: Exception) {
@@ -183,6 +187,8 @@ class LocalAiEngine @Inject constructor() {
                 text(finalPrompt)
             }
 
+            Log.d("KoColorAI_IO", ">>> REQUEST TO GEMINI (Local Multimodal):\n$finalPrompt")
+
             val response = withTimeout(15000) { // Slightly longer timeout for vision
                 localModel.generateContent(
                     GenerateContentRequest.builder(inputContent).build()
@@ -191,6 +197,8 @@ class LocalAiEngine @Inject constructor() {
             
             val text = response.candidates.firstOrNull()?.text 
                 ?: return@withContext Result.failure(Exception("Empty AI response"))
+
+            Log.d("KoColorAI_IO", "^^^ RESPONSE FROM GEMINI (Local Multimodal):\n$text")
 
             Result.success(text)
         } catch (e: Exception) {

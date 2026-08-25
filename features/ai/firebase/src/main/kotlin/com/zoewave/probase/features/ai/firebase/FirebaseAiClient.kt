@@ -1,5 +1,6 @@
 package com.zoewave.probase.features.ai.firebase
 
+import android.util.Log
 import com.google.firebase.Firebase
 import com.google.firebase.ai.ai
 import com.google.firebase.ai.type.GenerativeBackend
@@ -52,6 +53,15 @@ class FirebaseAiClientImpl @Inject constructor() : FirebaseAiClient {
             AVAILABLE VAULT (MATRIX REPRESENTATION):
             ${telemetry.vaultManifest}
             
+            GOAL:
+            1. Select BEST 3 clothing items (Top, Bottom, Shoes) from the wardrobe section of the manifest. 
+            2. Select exactly 4 PIGMENT makeup items (1 Eye, 1 Cheek, 1 Lip, 1 Nail) strictly from the cosmetics section of the manifest.
+            3. Select 1-2 DEFENSIVE items (Complexion/Skincare) from the cosmetics section based strictly on the WEATHER context.
+            4. Create a 4-color Palette (HEX codes) harmonizing the whole look.
+            
+            CRITICAL SYNTAX RULE: When referencing ANY selected item in your rationale, you MUST use the exact inline tag format <ITEM:id>.
+            EXAMPLE RATIONALE: "The <ITEM:w_55> is selected because the weather requires <ITEM:c_151>."
+            
             Provide a styling blueprint optimized for this intent: "$intent".
             
             Respond ONLY with a valid JSON object matching this schema:
@@ -63,8 +73,13 @@ class FirebaseAiClientImpl @Inject constructor() : FirebaseAiClient {
             }
         """.trimIndent()
 
-        // 4. Execute Tier 0 Cloud Request
+        // 4. Execute Tier 0 Cloud Request with Logging
+        Log.d("KoColorAI_IO", ">>> REQUEST TO GEMINI:\n$prompt")
+        
         val response = generativeModel.generateContent(prompt)
+        
+        Log.d("KoColorAI_IO", "^^^ RESPONSE FROM GEMINI:\n${response.text ?: "EMPTY_RESPONSE"}")
+        
         return response.text ?: throw IllegalStateException("Empty response from Firebase AI Logic")
     }
 }

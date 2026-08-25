@@ -189,8 +189,14 @@ class StyleSimulatorEngine @Inject constructor(
             text(prompt)
         }
 
+        // Execute Tier 1 BYOK Request with Logging
+        Log.d("KoColorAI_IO", ">>> REQUEST TO GEMINI (BYOK):\n$prompt")
+
         val response = generativeModel.generateContent(inputContent)
         val jsonText = response.text ?: return null
+
+        Log.d("KoColorAI_IO", "^^^ RESPONSE FROM GEMINI (BYOK):\n$jsonText")
+
         android.util.Log.d("StyleSimulatorEngine", "DATA_IN (Cloud Response Raw): $jsonText")
         return sanitizeAndDecode(jsonText)
     }
@@ -291,6 +297,7 @@ class StyleSimulatorEngine @Inject constructor(
             5. Provide a brief rationale. Mention WHY you selected the specific DEFENSIVE items for the current weather and why you chose the nail color. 
                - If an item was selected because of a LOW RotationPenalty (never worn), mention that it was chosen to diversify their rotation.
                CRITICAL SYNTAX RULE: When referencing ANY selected item in your rationale, you MUST use the exact inline tag format <ITEM:id>. Do not attempt to guess or describe the item's brand in the text.
+               EXAMPLE RATIONALE: "The <ITEM:w_55> is selected because the weather requires <ITEM:c_151>."
             
             Respond ONLY with a valid JSON object matching this schema:
             {
