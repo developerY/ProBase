@@ -29,6 +29,7 @@ import com.zoewave.probase.core.model.ritual.RoutineTime
 import com.zoewave.probase.core.model.ritual.SeasonalType
 import com.zoewave.probase.core.model.ritual.SuggestedPiece
 import com.zoewave.probase.core.model.ritual.Undertone
+import com.zoewave.probase.features.ai.firebase.FirebaseAiAuthManager
 import com.zoewave.probase.features.ai.firebase.models.Appearance
 import com.zoewave.probase.kocolor.data.FashionRepository
 import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
@@ -151,7 +152,8 @@ class StyleSimulatorViewModel @Inject constructor(
     private val atmosphericRepository: AtmosphericRepository,
     private val rotationRepository: RotationRepository,
     private val rotationScoringUseCase: RotationScoringUseCase,
-    private val aiSettings: AiConfigurationSettings
+    private val aiSettings: AiConfigurationSettings,
+    private val authManager: FirebaseAiAuthManager
 ) : ViewModel() {
 
     private val _selectedClothingCategory = MutableStateFlow(ClothingCategory.TOPS)
@@ -371,6 +373,10 @@ class StyleSimulatorViewModel @Inject constructor(
         
         viewModelScope.launch {
             _isAnalyzing.value = true
+            
+            // Ensure anonymous authentication is active for Tier 0
+            authManager.signInAnonymously()
+            
             val apiKey = aiSettings.getGeminiApiKey()
             val useFirebase = aiSettings.useFirebaseVertexAi.first()
             val state = uiState.value

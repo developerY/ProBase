@@ -17,6 +17,7 @@ The architecture maximizes AI capability without compromising the network bounda
 2. **Tier 0 (Firebase AI Logic)**: Secure cloud execution over restricted mathematical data.
    - **Payload**: `StyleTelemetry` (JSON) only.
    - **Capability**: Enterprise-grade, attested cloud routing.
+3. **Authentication**: All cloud requests require **Firebase Anonymous Authentication** to satisfy "Authenticated-Users Mode" security policies.
 
 ---
 
