@@ -197,6 +197,10 @@ class StyleSimulatorEngine @Inject constructor(
 
         Log.d("KoColorAI_IO", "^^^ RESPONSE FROM GEMINI (BYOK):\n$jsonText")
 
+        response.usageMetadata?.let { metadata ->
+            Log.d("KoColorAI_IO", "TOKEN USAGE (BYOK): Prompt=${metadata.promptTokenCount}, Candidates=${metadata.candidatesTokenCount}, Total=${metadata.totalTokenCount}")
+        }
+
         android.util.Log.d("StyleSimulatorEngine", "DATA_IN (Cloud Response Raw): $jsonText")
         return sanitizeAndDecode(jsonText)
     }

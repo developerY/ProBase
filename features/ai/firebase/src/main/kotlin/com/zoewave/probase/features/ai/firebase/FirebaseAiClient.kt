@@ -80,6 +80,10 @@ class FirebaseAiClientImpl @Inject constructor() : FirebaseAiClient {
         
         Log.d("KoColorAI_IO", "^^^ RESPONSE FROM GEMINI:\n${response.text ?: "EMPTY_RESPONSE"}")
         
+        response.usageMetadata?.let { metadata ->
+            Log.d("KoColorAI_IO", "TOKEN USAGE: Prompt=${metadata.promptTokenCount}, Candidates=${metadata.candidatesTokenCount}, Total=${metadata.totalTokenCount}")
+        }
+        
         return response.text ?: throw IllegalStateException("Empty response from Firebase AI Logic")
     }
 }
