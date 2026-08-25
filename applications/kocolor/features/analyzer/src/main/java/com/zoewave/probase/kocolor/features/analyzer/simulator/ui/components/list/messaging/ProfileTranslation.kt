@@ -1,7 +1,7 @@
 package com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.list.messaging
 
 /**
- * Translates biometric math into professional color theory terms.
+ * Translates appearance math into professional color theory terms.
  */
 internal fun getContrastProfile(delta: Float): String = when {
     delta > 0.5f -> "High (Striking / Clear)"

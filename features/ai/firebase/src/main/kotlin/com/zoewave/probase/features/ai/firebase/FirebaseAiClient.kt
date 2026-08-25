@@ -13,7 +13,7 @@ import javax.inject.Singleton
 interface FirebaseAiClient {
     /**
      * Enforced Architectural Boundary: Only accepts StyleTelemetry and intent string.
-     * Prevents raw biometric data from ever leaving the device.
+     * Prevents raw appearance data from ever leaving the device.
      */
     suspend fun getStyleAdvice(telemetry: StyleTelemetry, intent: String): String
 }

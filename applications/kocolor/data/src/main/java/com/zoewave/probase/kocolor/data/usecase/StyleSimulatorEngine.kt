@@ -1,9 +1,10 @@
 package com.zoewave.probase.kocolor.data.usecase
 
+import android.graphics.Bitmap
 import android.util.Log
+import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.content
 import com.google.ai.client.generativeai.type.generationConfig
-import com.google.firebase.ai.GenerativeModel as FirebaseGenerativeModel
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.core.model.ritual.CosmeticItem
@@ -38,6 +39,9 @@ class StyleSimulatorEngine @Inject constructor(
         }
     """.trimIndent()
 
+    /**
+     * Cascading execution with Type-Safe Boundaries as per Secure Vertex AI Integration plan.
+     */
     suspend fun architectStyleBlueprint(
         userIntent: String,
         circadianContext: String,
@@ -46,11 +50,12 @@ class StyleSimulatorEngine @Inject constructor(
         weatherContext: String,
         availableWardrobe: List<ClothingItem>,
         availableCosmetics: List<CosmeticItem>,
-        rotationScores: Map<String, Double> = emptyMap(), // productId -> normalized penalty [0.0 - 1.0]
+        rotationScores: Map<String, Double> = emptyMap(),
         fashionProfile: String? = null,
         anchoredClothing: List<ClothingItem> = emptyList(),
         anchoredCosmetics: List<CosmeticItem> = emptyList(),
         appearance: Appearance? = null,
+        portrait: Bitmap? = null,
         useFirebase: Boolean = true,
         apiKey: String? = null,
         modelName: String = "gemini-3.5-flash-lite"
@@ -61,66 +66,107 @@ class StyleSimulatorEngine @Inject constructor(
         val minifiedManifest = minifyManifest(
             availableWardrobe, availableCosmetics, anchoredClothing, anchoredCosmetics, rotationScores
         )
-        android.util.Log.d("StyleSimulatorEngine", "DATA_OUT (Minified Manifest): $minifiedManifest")
+        Log.d("StyleSimulatorEngine", "DATA_OUT (Minified Manifest): $minifiedManifest")
 
-        val telemetryLabel = appearance?.let { "${it.temperature} • ${it.depth} • ${it.contrast}" } ?: fashionProfile ?: "Unknown"
-
-        val prompt = buildArchitectPrompt(
-            userIntent, circadianContext, routineCompleted, wellnessScore, weatherContext, 
-            minifiedManifest, telemetryLabel
-        )
-        Log.d("StyleSimulatorEngine", "DATA_OUT (Full Prompt):\n$prompt")
+        val styleTelemetry = if (appearance != null) {
+            StyleTelemetry(
+                appearance = appearance,
+                vaultManifest = minifiedManifest,
+                weatherContext = weatherContext,
+                circadianContext = circadianContext
+            )
+        } else null
 
         // Tier 0: Enterprise Production Route (Firebase AI Logic + App Check)
-        if (useFirebase && appearance != null) {
+        // Privacy Invariant: NO raw imagery leaves the device. Only structured telemetry.
+        if (useFirebase && styleTelemetry != null) {
             Log.d("StyleSimulatorEngine", "THINKING: Attempting Tier 0 (Firebase AI Logic)...")
             try {
-                val styleTelemetry = StyleTelemetry(
-                    appearance = appearance,
-                    vaultManifest = minifiedManifest,
-                    weatherContext = weatherContext,
-                    circadianContext = circadianContext
-                )
-                val jsonText = firebaseAiClient.getStyleAdvice(styleTelemetry, userIntent)
-                Log.d("StyleSimulatorEngine", "SUCCESS: Blueprint generated via Tier 0 in ${System.currentTimeMillis() - startTime}ms")
-                return sanitizeAndDecode(jsonText)
+                return getCloudAdvice(styleTelemetry, userIntent)
             } catch (e: Exception) {
-                Log.e("StyleSimulatorEngine", "THINKING: Tier 0 failed, falling back...", e)
+                Log.e("StyleSimulatorEngine", "THINKING: Tier 0 failed, falling back to Tier 1.5...", e)
             }
         }
 
-        // Tier 1.5: Local LLM (Gemini Nano) - PREFERRED Tier for speed/cost
-        android.util.Log.d("StyleSimulatorEngine", "THINKING: Attempting Tier 1.5 (On-Device Gemini Nano)...")
+        // Tier 1.5: Local LLM (Gemini Nano) - Multimodal capable
+        // This tier CAN ingest the raw portrait for on-device reasoning.
+        Log.d("StyleSimulatorEngine", "THINKING: Attempting Tier 1.5 (On-Device Gemini Nano)...")
         try {
-            val localAiResult = localAi.generateStructuredContent(prompt, BLUEPRINT_SCHEMA)
-            if (localAiResult.isSuccess) {
-                val jsonText = localAiResult.getOrThrow()
-                android.util.Log.d("StyleSimulatorEngine", "SUCCESS: Blueprint generated via Tier 1.5 in ${System.currentTimeMillis() - startTime}ms")
-                return sanitizeAndDecode(jsonText)
+            if (styleTelemetry != null) {
+                val result = getLocalAdvice(portrait, styleTelemetry, userIntent, routineCompleted, wellnessScore)
+                if (result != null) {
+                    Log.d("StyleSimulatorEngine", "SUCCESS: Blueprint generated via Tier 1.5 in ${System.currentTimeMillis() - startTime}ms")
+                    return result
+                }
             }
         } catch (e: Exception) {
-            android.util.Log.w("StyleSimulatorEngine", "THINKING: Tier 1.5 failed (${e.message}), checking Tier 1 fallback...")
+            Log.w("StyleSimulatorEngine", "THINKING: Tier 1.5 failed (${e.message}), checking Tier 1 fallback...")
         }
 
-        // Tier 1: Probabilistic (Cloud Gemini BYOK Multimodal) - FALLBACK for Nano failures
+        // Tier 1: Probabilistic (Cloud Gemini BYOK Multimodal) - Deep Fallback
         if (!apiKey.isNullOrBlank()) {
-            android.util.Log.d("StyleSimulatorEngine", "THINKING: Attempting Tier 1 (Cloud Gemini $modelName Fallback)...")
+            Log.d("StyleSimulatorEngine", "THINKING: Attempting Tier 1 (Cloud Gemini $modelName Fallback)...")
             try {
+                val prompt = buildArchitectPrompt(
+                    userIntent, circadianContext, routineCompleted, wellnessScore, weatherContext, 
+                    minifiedManifest, fashionProfile
+                )
                 val cloudResult = architectCloudBlueprint(prompt, apiKey, modelName)
                 if (cloudResult != null) {
-                    android.util.Log.d("StyleSimulatorEngine", "SUCCESS: Blueprint generated via Tier 1 ($modelName) in ${System.currentTimeMillis() - startTime}ms")
+                    Log.d("StyleSimulatorEngine", "SUCCESS: Blueprint generated via Tier 1 ($modelName) in ${System.currentTimeMillis() - startTime}ms")
                     return cloudResult
                 }
             } catch (e: Exception) {
-                android.util.Log.e("StyleSimulatorEngine", "THINKING: Tier 1 fallback ($modelName) failed", e)
+                Log.e("StyleSimulatorEngine", "THINKING: Tier 1 fallback ($modelName) failed", e)
             }
         }
 
         // Tier 2: Deterministic (Local Heuristics) - Final Safety Net
-        android.util.Log.d("StyleSimulatorEngine", "THINKING: Attempting Tier 2 (Local Heuristic Architect)...")
-        val localResult = architectLocalBlueprint(userIntent, availableWardrobe, availableCosmetics)
-        android.util.Log.d("StyleSimulatorEngine", "SUCCESS: Blueprint generated via Tier 2 in ${System.currentTimeMillis() - startTime}ms")
+        Log.d("StyleSimulatorEngine", "THINKING: Attempting Tier 2 (Local Heuristic Architect)...")
+        val localResult = getDeterministicAdvice(userIntent, availableWardrobe, availableCosmetics)
+        Log.d("StyleSimulatorEngine", "SUCCESS: Blueprint generated via Tier 2 in ${System.currentTimeMillis() - startTime}ms")
         return localResult
+    }
+
+    private suspend fun getCloudAdvice(telemetry: StyleTelemetry, intent: String): StyleBlueprint {
+        val jsonText = firebaseAiClient.getStyleAdvice(telemetry, intent)
+        return sanitizeAndDecode(jsonText)
+    }
+
+    private suspend fun getLocalAdvice(
+        image: Bitmap?,
+        telemetry: StyleTelemetry,
+        intent: String,
+        routineCompleted: Boolean,
+        wellnessScore: Double
+    ): StyleBlueprint? {
+        val prompt = buildArchitectPrompt(
+            intent,
+            telemetry.circadianContext,
+            routineCompleted,
+            wellnessScore,
+            telemetry.weatherContext,
+            telemetry.vaultManifest,
+            "${telemetry.appearance.temperature} • ${telemetry.appearance.depth} • ${telemetry.appearance.contrast}"
+        )
+
+        val jsonText = if (image != null) {
+            val result = localAi.generateMultimodalContent(prompt, image, BLUEPRINT_SCHEMA)
+            result.getOrNull()
+        } else {
+            val result = localAi.generateStructuredContent(prompt, BLUEPRINT_SCHEMA)
+            result.getOrNull()
+        }
+
+        return jsonText?.let { sanitizeAndDecode(it) }
+    }
+
+    private fun getDeterministicAdvice(
+        userIntent: String,
+        availableWardrobe: List<ClothingItem>,
+        availableCosmetics: List<CosmeticItem>
+    ): StyleBlueprint {
+        return architectLocalBlueprint(userIntent, availableWardrobe, availableCosmetics)
     }
 
     private suspend fun architectCloudBlueprint(
@@ -216,10 +262,10 @@ class StyleSimulatorEngine @Inject constructor(
         fashionProfile: String?
     ): String {
         return """
-            You are the KoColor Style Architect AI. Generate a "Style Blueprint" that is both stylistically harmonic and biologically protective.
+            You are the KoColor Style Architect AI. Generate a "Style Blueprint" that is both stylistically harmonic and protective.
             
             USER INTENT: $userIntent
-            BIOLOGICAL CONTEXT: $circadianContext (Wellness: ${"%.2f".format(wellnessScore)}, Ritual Done: $routineCompleted)
+            CIRCADIAN & WELLNESS CONTEXT: $circadianContext (Wellness: ${"%.2f".format(wellnessScore)}, Ritual Done: $routineCompleted)
             WEATHER/ATMOSPHERIC: $weatherContext
             SKIN PROFILE: ${fashionProfile ?: "Unknown"}
             

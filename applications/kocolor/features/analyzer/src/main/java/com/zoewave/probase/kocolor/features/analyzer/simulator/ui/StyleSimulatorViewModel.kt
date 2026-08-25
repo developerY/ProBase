@@ -112,7 +112,7 @@ data class StyleSimulatorUiState(
 )
 
 enum class SimulationStep {
-    MESSAGING, BIO_MARKERS, ROUTINE, GENERATING, RESULT
+    MESSAGING, APPEARANCE_ANALYSIS, ROUTINE, GENERATING, RESULT
 }
 
 sealed class SimulatorEvent {
@@ -403,7 +403,7 @@ class StyleSimulatorViewModel @Inject constructor(
                 item.remoteId!! to rotationScoringUseCase.calculateRotationPenalty(item.remoteId!!, item.category.name)
             }
 
-            _simulationStep.value = SimulationStep.BIO_MARKERS
+            _simulationStep.value = SimulationStep.APPEARANCE_ANALYSIS
             delay(1000)
             _simulationStep.value = SimulationStep.ROUTINE
             delay(1000)
@@ -422,6 +422,7 @@ class StyleSimulatorViewModel @Inject constructor(
                 anchoredClothing = anchoredClothing,
                 anchoredCosmetics = anchoredCosmetics,
                 appearance = appearance,
+                portrait = state.userPortraitUri?.let { loadBitmapFromUri(Uri.parse(it)) },
                 useFirebase = useFirebase,
                 apiKey = apiKey,
                 modelName = preferredModel
@@ -573,7 +574,7 @@ class StyleSimulatorViewModel @Inject constructor(
                             val bitmap = loadBitmapFromUri(parsedUri) 
                             if (bitmap == null) {
                                 Log.e("StyleSimulatorVM", "Failed to load bitmap for sampling")
-                                _faceAnalysisError.value = "Internal error: Failed to process biometric source."
+                                _faceAnalysisError.value = "Internal error: Failed to process appearance source."
                                 return@addOnSuccessListener
                             }
 

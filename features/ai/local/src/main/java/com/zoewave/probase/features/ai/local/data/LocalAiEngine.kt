@@ -1,5 +1,6 @@
 package com.zoewave.probase.features.ai.local.data
 
+import android.graphics.Bitmap
 import android.util.Log
 import com.google.mlkit.genai.common.DownloadStatus
 import com.google.mlkit.genai.prompt.Generation
@@ -8,6 +9,8 @@ import com.google.mlkit.genai.prompt.GenerativeModel
 import com.google.mlkit.genai.prompt.ModelConfig
 import com.google.mlkit.genai.prompt.ModelPreference
 import com.google.mlkit.genai.prompt.ModelReleaseStage
+import com.google.mlkit.genai.prompt.GenerateContentRequest
+import com.google.mlkit.genai.prompt.content
 import com.google.mlkit.genai.prompt.generationConfig
 import com.zoewave.probase.features.ai.local.domain.router.GeminiPipelineRouter
 import com.zoewave.probase.features.ai.local.domain.router.RequiresCloudException
@@ -153,6 +156,45 @@ class LocalAiEngine @Inject constructor() {
             Result.success(text)
         } catch (e: Exception) {
             val reason = e.message ?: "Local AI generation failed"
+            Result.failure(RequiresCloudException(reason))
+        }
+    }
+
+    /**
+     * Multimodal structured content generation via Gemini Nano.
+     */
+    suspend fun generateMultimodalContent(
+        prompt: String,
+        bitmap: Bitmap,
+        jsonSchema: String? = null
+    ): Result<String> = withContext(Dispatchers.Default) {
+        try {
+            val capability = checkCapability()
+            if (capability != NanoState.MultimodalAvailable) {
+                return@withContext Result.failure(RequiresCloudException("Multimodal hardware not supported or ready"))
+            }
+
+            val finalPrompt = if (jsonSchema != null) {
+                "$prompt\n\nReturn ONLY a valid JSON object matching this schema:\n$jsonSchema"
+            } else prompt
+
+            val inputContent = content {
+                image(bitmap)
+                text(finalPrompt)
+            }
+
+            val response = withTimeout(15000) { // Slightly longer timeout for vision
+                localModel.generateContent(
+                    GenerateContentRequest.builder(inputContent).build()
+                )
+            }
+            
+            val text = response.candidates.firstOrNull()?.text 
+                ?: return@withContext Result.failure(Exception("Empty AI response"))
+
+            Result.success(text)
+        } catch (e: Exception) {
+            val reason = e.message ?: "Local multimodal generation failed"
             Result.failure(RequiresCloudException(reason))
         }
     }

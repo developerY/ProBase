@@ -105,7 +105,7 @@ fun StyleSimulatorScreen(
                             onEvent = onEvent,
                             navTo = navTo
                         )
-                        SimulationStep.BIO_MARKERS, SimulationStep.ROUTINE, SimulationStep.GENERATING -> AnalysisStep(
+                        SimulationStep.APPEARANCE_ANALYSIS, SimulationStep.ROUTINE, SimulationStep.GENERATING -> AnalysisStep(
                             uiState = uiState,
                             onEvent = onEvent,
                             navTo = navTo
