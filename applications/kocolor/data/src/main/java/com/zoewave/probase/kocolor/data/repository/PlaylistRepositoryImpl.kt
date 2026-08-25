@@ -19,6 +19,10 @@ class PlaylistRepositoryImpl @Inject constructor(
         return playlistDao.observePlaylistWithDays(playlistId)
     }
 
+    override fun observeLatestPlaylist(): Flow<PlaylistWithDays?> {
+        return playlistDao.observeLatestPlaylist()
+    }
+
     override suspend fun savePlaylist(playlist: StylePlaylistEntity, plans: List<DailyStylePlanEntity>) {
         database.savePlaylist(playlist, plans)
     }

@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -101,10 +102,14 @@ fun BlueprintCallout(
                     }
                 } else {
                     Text(
-                        text = "Details",
-                        style = MaterialTheme.typography.labelMedium.copy(fontSize = 11.sp),
+                        text = productName,
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            fontSize = 11.sp,
+                            fontFamily = FontFamily.Serif
+                        ),
                         color = Color.Black,
-                        textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }

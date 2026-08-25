@@ -48,22 +48,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.xr.projected.ProjectedContext
 import androidx.xr.projected.experimental.ExperimentalProjectedApi
 import com.zoewave.probase.features.glass.translation.ui.UnifiedTranslationScreen
-import com.zoewave.probase.features.glass.vision.ui.UnifiedVisionRoute
-import com.zoewave.probase.features.glass.vision.ui.VisionUiEvent
-import com.zoewave.probase.features.glass.vision.ui.VisionViewModel
 import com.zoewave.probase.features.xr.glass.GlassesMainActivity
 import com.zoewave.probase.features.xr.glass.SystemAlertActivity
 
-@androidx.annotation.OptIn(ExperimentalLensFacing::class)
-@OptIn(
-    ExperimentalMaterial3Api::class, 
-    ExperimentalProjectedApi::class
-)
 @Composable
 fun GlassXRDemosPhoneRoute(
     onBack: () -> Unit,
-    viewModel: GlassXRDemosViewModel = hiltViewModel(),
-    visionViewModel: VisionViewModel = hiltViewModel()
+    viewModel: GlassXRDemosViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val isConnected by viewModel.isConnected.collectAsStateWithLifecycle()
@@ -71,13 +62,11 @@ fun GlassXRDemosPhoneRoute(
 
     LaunchedEffect(Unit) {
         viewModel.checkConnection(context)
-        visionViewModel.onEvent(VisionUiEvent.CheckPermissions(context))
     }
 
     GlassXRDemosPhoneScreen(
         isConnected = isConnected,
         activeSample = activeSample,
-        visionViewModel = visionViewModel,
         onBack = onBack,
         onSampleSelected = { sample ->
             viewModel.updateActiveSample(sample)
@@ -97,7 +86,6 @@ fun GlassXRDemosPhoneRoute(
 fun GlassXRDemosPhoneScreen(
     isConnected: Boolean,
     activeSample: GlimmerSample?,
-    visionViewModel: VisionViewModel,
     onBack: () -> Unit,
     onSampleSelected: (GlimmerSample) -> Unit,
     onStopDemo: () -> Unit,
@@ -110,7 +98,7 @@ fun GlassXRDemosPhoneScreen(
     Scaffold(
         modifier = modifier,
         topBar = {
-            if (activeSample != GlimmerSample.Translation && activeSample != GlimmerSample.Vision) {
+            if (activeSample != GlimmerSample.Translation) {
                 TopAppBar(
                     title = { Text("Glass XR Demos") },
                     navigationIcon = {
@@ -133,7 +121,7 @@ fun GlassXRDemosPhoneScreen(
         },
         bottomBar = {
             activeSample?.let { sample ->
-                if (sample != GlimmerSample.Translation && sample != GlimmerSample.Vision) {
+                if (sample != GlimmerSample.Translation) {
                     Surface(
                         tonalElevation = 8.dp,
                         shadowElevation = 8.dp,
@@ -183,21 +171,6 @@ fun GlassXRDemosPhoneScreen(
                     modifier = Modifier.align(Alignment.TopEnd).padding(16.dp)
                 ) {
                     Icon(Icons.Default.Close, contentDescription = "Close Hub")
-                }
-            }
-        } else if (activeSample == GlimmerSample.Vision) {
-            Box(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
-                UnifiedVisionRoute(
-                    viewModel = visionViewModel,
-                    onNavigateToSettings = { /* No-op for now */ },
-                    onBack = onStopDemo
-                )
-                // Floating Close Button for the demo
-                IconButton(
-                    onClick = onStopDemo,
-                    modifier = Modifier.align(Alignment.TopEnd).padding(16.dp)
-                ) {
-                    Icon(Icons.Default.Close, contentDescription = "Close Hub", tint = MaterialTheme.colorScheme.onSurface)
                 }
             }
         } else {

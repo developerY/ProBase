@@ -2,6 +2,7 @@ package com.zoewave.probase.kocolor.features.analyzer.calibration
 
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.util.Log
 import androidx.annotation.OptIn
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
@@ -13,6 +14,7 @@ import com.zoewave.probase.kocolor.model.calibration.FacialContrastVector
 import kotlin.math.abs
 
 class ColorExtractionAnalyzer(
+    private val isEnabled: () -> Boolean,
     private val onResult: (FacialContrastVector, Float) -> Unit
 ) : ImageAnalysis.Analyzer {
 
@@ -25,14 +27,26 @@ class ColorExtractionAnalyzer(
 
     @OptIn(androidx.camera.core.ExperimentalGetImage::class)
     override fun analyze(imageProxy: ImageProxy) {
-        // Since we configured CameraX to output RGBA_8888, we can't use fromMediaImage.
-        // We convert to Bitmap first, which CameraX 1.3.0+ handles efficiently for RGBA.
-        val bitmap = imageProxy.toBitmap()
-        val image = InputImage.fromBitmap(bitmap, 0) // toBitmap() already handles rotation
+        if (!isEnabled()) {
+            imageProxy.close()
+            return
+        }
+
+        // We only process frames if a result is actually needed.
+        val bitmap = try {
+            imageProxy.toBitmap()
+        } catch (e: Exception) {
+            imageProxy.close()
+            return
+        }
+        imageProxy.close() 
+
+        val image = InputImage.fromBitmap(bitmap, 0)
 
         detector.process(image)
             .addOnSuccessListener { faces ->
                 if (faces.isNotEmpty()) {
+                    Log.d("ColorExtractionAnalyzer", "Face detected: ${faces.size} faces")
                     val face = faces[0]
                     
                     // 1. Skin (Cheek)
@@ -44,12 +58,14 @@ class ColorExtractionAnalyzer(
                     val eyeLuminance = eyeLandmark?.let { sampleLuminance(bitmap, it.position.x.toInt(), it.position.y.toInt()) } ?: 0.2f
 
                     // 3. Hair Root (Above forehead)
-                    val hairLuminance = sampleLuminance(bitmap, face.boundingBox.centerX(), face.boundingBox.top - 20)
+                    val hairLuminance = sampleLuminance(bitmap, face.boundingBox.centerX(), (face.boundingBox.top - 20).coerceAtLeast(0))
 
                     val contrastDelta = abs(skinLuminance - hairLuminance)
                     
-                    // 4. Undertone Estimation (Simple R vs B comparison for warm/cool)
+                    // 4. Undertone Estimation
                     val undertone = estimateUndertone(bitmap, cheekLandmark?.position?.x?.toInt() ?: face.boundingBox.centerX(), cheekLandmark?.position?.y?.toInt() ?: face.boundingBox.centerY())
+
+                    Log.d("ColorExtractionAnalyzer", "Established -> Skin: $skinLuminance, Hair: $hairLuminance, Delta: $contrastDelta, Undertone: $undertone")
 
                     onResult(
                         FacialContrastVector(
@@ -60,10 +76,12 @@ class ColorExtractionAnalyzer(
                         ),
                         undertone
                     )
+                } else {
+                    Log.v("ColorExtractionAnalyzer", "Landmark scanning... no face found")
                 }
             }
-            .addOnCompleteListener {
-                imageProxy.close()
+            .addOnFailureListener { e ->
+                Log.e("ColorExtractionAnalyzer", "Face detection failed", e)
             }
     }
 

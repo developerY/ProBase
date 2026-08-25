@@ -1,4 +1,4 @@
-package com.zoewave.probase.kocolor.features.analyzer.simulator.data
+package com.zoewave.probase.kocolor.data.usecase
 
 import android.util.Log
 import com.google.common.truth.Truth.assertThat
@@ -88,7 +88,7 @@ class StyleSimulatorIntegrationTest {
             )
 
             // Verify it fell back to the "Local Architect" (Heuristics)
-            assertThat(blueprint.rationale).contains("Local Architect")
+            assertThat(blueprint.rationale).contains("Optimized for rotation")
         }
     }
 

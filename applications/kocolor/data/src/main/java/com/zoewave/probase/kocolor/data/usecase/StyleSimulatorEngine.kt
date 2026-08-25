@@ -1,4 +1,4 @@
-package com.zoewave.probase.kocolor.features.analyzer.simulator.data
+package com.zoewave.probase.kocolor.data.usecase
 
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.content
@@ -43,7 +43,6 @@ class StyleSimulatorEngine @Inject constructor(
         availableCosmetics: List<CosmeticItem>,
         rotationScores: Map<String, Double> = emptyMap(), // productId -> normalized penalty [0.0 - 1.0]
         fashionProfile: String? = null,
-        userPortrait: android.graphics.Bitmap? = null,
         anchoredClothing: List<ClothingItem> = emptyList(),
         anchoredCosmetics: List<CosmeticItem> = emptyList(),
         apiKey: String? = null,
@@ -80,7 +79,7 @@ class StyleSimulatorEngine @Inject constructor(
         if (!apiKey.isNullOrBlank()) {
             android.util.Log.d("StyleSimulatorEngine", "THINKING: Attempting Tier 1 (Cloud Gemini $modelName Fallback)...")
             try {
-                val cloudResult = architectCloudBlueprint(prompt, userPortrait, apiKey, modelName)
+                val cloudResult = architectCloudBlueprint(prompt, apiKey, modelName)
                 if (cloudResult != null) {
                     android.util.Log.d("StyleSimulatorEngine", "SUCCESS: Blueprint generated via Tier 1 ($modelName) in ${System.currentTimeMillis() - startTime}ms")
                     return cloudResult
@@ -99,7 +98,6 @@ class StyleSimulatorEngine @Inject constructor(
 
     private suspend fun architectCloudBlueprint(
         prompt: String,
-        userPortrait: android.graphics.Bitmap?,
         apiKey: String,
         modelName: String
     ): StyleBlueprint? {
@@ -115,7 +113,6 @@ class StyleSimulatorEngine @Inject constructor(
         )
 
         val inputContent = content {
-            userPortrait?.let { image(it) }
             text(prompt)
         }
 
@@ -198,8 +195,6 @@ class StyleSimulatorEngine @Inject constructor(
             BIOLOGICAL CONTEXT: $circadianContext (Wellness: ${"%.2f".format(wellnessScore)}, Ritual Done: $routineCompleted)
             WEATHER/ATMOSPHERIC: $weatherContext
             SKIN PROFILE: ${fashionProfile ?: "Unknown"}
-            
-            IMAGE DATA: I have provided a portrait of the user. Use this as the source of truth for their visual canvas.
             
             AVAILABLE VAULT (MATRIX REPRESENTATION):
             Legend:
@@ -300,8 +295,15 @@ class StyleSimulatorEngine @Inject constructor(
         }
         val finalPalette = palette.take(4)
 
+        val itemNames = selectedItems.joinToString(", ") { it.name }
+        val rationale = if (itemNames.isNotBlank()) {
+            "Optimized for rotation. Features your $itemNames."
+        } else {
+            "Local Architect: Selected from your vault based on intent and freshness score."
+        }
+
         return StyleBlueprint(
-            rationale = "Local Architect: Selected from your vault based on intent and freshness score.",
+            rationale = rationale,
             selectedClothingIds = selectedItems.map { "w_${it.internalId}" },
             selectedCosmeticIds = selectedCosmetics.map { "c_${it.internalId}" },
             recommendedPalette = finalPalette

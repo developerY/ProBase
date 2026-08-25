@@ -62,41 +62,12 @@ fun QuickActions(
     navTo: (KoColorRoute) -> Unit
 ) {
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            QuickActionCard(
-                uiState = QuickActionUiState(
-                    "Calibration",
-                    "Scan your color profile",
-                    Icons.Default.AutoAwesome,
-                    MaterialTheme.colorScheme.primary,
-                    KoColorRoute.Calibration,
-                    isExperimental = true
-                ),
-                modifier = Modifier.weight(1f),
-                onEvent = {},
-                navTo = navTo
-            )
-            QuickActionCard(
-                uiState = QuickActionUiState(
-                    "Style Playlist",
-                    "7-day style forecast",
-                    Icons.Default.AutoAwesome,
-                    MaterialTheme.colorScheme.secondary,
-                    KoColorRoute.StylePlaylist,
-                    isExperimental = true
-                ),
-                modifier = Modifier.weight(1f),
-                onEvent = {},
-                navTo = navTo
-            )
-        }
-        
         QuickActionCard(
             uiState = QuickActionUiState(
                 stringResource(R.string.applications_kocolor_apps_mobile_features_home_analyze_style), 
                 stringResource(R.string.applications_kocolor_apps_mobile_features_home_ai_visual_analysis), 
                 Icons.Default.AutoAwesome, 
-                MaterialTheme.colorScheme.tertiary, 
+                MaterialTheme.colorScheme.primary, 
                 KoColorRoute.StyleSimulator,
                 isExperimental = true
             ), 

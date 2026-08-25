@@ -1,4 +1,4 @@
-package com.zoewave.probase.kocolor.features.analyzer.simulator.data
+package com.zoewave.probase.kocolor.data.usecase
 
 import com.google.common.truth.Truth.assertThat
 import com.zoewave.probase.core.model.ritual.ClothingCategory
@@ -24,7 +24,7 @@ class StyleSimulatorEngineTest {
 
         assertThat(blueprint.selectedClothingIds).isNotEmpty()
         assertThat(blueprint.recommendedPalette).hasSize(4) // Engine pads to 4
-        assertThat(blueprint.rationale).contains("Local Architect")
+        assertThat(blueprint.rationale).contains("Optimized for rotation")
     }
 
     @Test

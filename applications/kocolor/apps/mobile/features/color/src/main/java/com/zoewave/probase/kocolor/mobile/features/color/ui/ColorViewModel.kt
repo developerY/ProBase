@@ -4,16 +4,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.kocolor.data.FashionRepository
 import com.zoewave.probase.core.model.ritual.SavedAnalysis
+import com.zoewave.probase.kocolor.data.repository.PlaylistRepository
+import com.zoewave.probase.kocolor.db.entity.PlaylistWithDays
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class ColorUiState(
-    val savedSuggestions: List<SavedAnalysis> = emptyList()
+    val savedSuggestions: List<SavedAnalysis> = emptyList(),
+    val latestPlaylist: PlaylistWithDays? = null
 )
 
 sealed class ColorEvent {
@@ -22,16 +26,23 @@ sealed class ColorEvent {
 
 @HiltViewModel
 class ColorViewModel @Inject constructor(
-    private val fashionRepository: FashionRepository
+    private val fashionRepository: FashionRepository,
+    private val playlistRepository: PlaylistRepository
 ) : ViewModel() {
 
-    val uiState: StateFlow<ColorUiState> = fashionRepository.getSavedSuggestions()
-        .map { list -> ColorUiState(savedSuggestions = list) }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = ColorUiState()
+    val uiState: StateFlow<ColorUiState> = combine(
+        fashionRepository.getSavedSuggestions(),
+        playlistRepository.observeLatestPlaylist()
+    ) { suggestions, playlist ->
+        ColorUiState(
+            savedSuggestions = suggestions,
+            latestPlaylist = playlist
         )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = ColorUiState()
+    )
 
     fun onEvent(event: ColorEvent) {
         when (event) {

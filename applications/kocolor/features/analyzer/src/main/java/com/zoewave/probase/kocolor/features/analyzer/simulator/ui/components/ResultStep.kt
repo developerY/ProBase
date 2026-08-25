@@ -31,9 +31,7 @@ import com.zoewave.probase.core.ui.util.parseColor
 import com.zoewave.probase.kocolor.features.analyzer.R
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.SimulatorEvent
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorUiState
-import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.*
-import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.list.PlaceholderResultCard
-import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.list.ResultCard
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.shared.BlueprintDetailContent
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
 @Composable
@@ -42,132 +40,17 @@ fun ResultStep(
     onEvent: (SimulatorEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(24.dp),
-        contentPadding = PaddingValues(bottom = 32.dp)
-    ) {
-        // 1. Header & Rationale
-        item {
-            Column {
-                Text(
-                    text = stringResource(R.string.applications_kocolor_features_analyzer_simulator_blueprint),
-                    style = MaterialTheme.typography.displaySmall,
-                    fontFamily = FontFamily.Serif,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(Modifier.height(8.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(8.dp)
-                            .clip(CircleShape)
-                            .background(if (uiState.isLocalResult) Color.Gray else Color.Green)
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        text = if (uiState.isLocalResult) stringResource(R.string.applications_kocolor_features_analyzer_simulator_local_calc) else stringResource(R.string.applications_kocolor_features_analyzer_simulator_ai_optimized),
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Black,
-                        letterSpacing = 1.sp
-                    )
-                }
-
-                uiState.rationale?.let {
-                    Spacer(Modifier.height(16.dp))
-                    Text(
-                        text = it,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Black.copy(alpha = 0.7f),
-                        lineHeight = 22.sp
-                    )
-                }
-            }
-        }
-
-        // 2. The Visual Blueprint (Side-by-Side)
-        item {
-            VisualBlueprintSection(
-                data = uiState.visualBlueprintData,
-                initialTab = uiState.selectedResultTab,
-                onTabSelected = { onEvent(SimulatorEvent.SelectResultTab(it)) }
-            )
-        }
-
-        // 3. The Atelier List
-        item {
-            val label = when (uiState.selectedResultTab) {
-                ResultTab.FACE -> "COSMETIC ATELIER"
-                ResultTab.CLOTHES -> "CLOTHING ATELIER"
-                ResultTab.NAILS -> "NAIL ATELIER"
-            }
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 2.sp),
-                fontWeight = FontWeight.Black,
-                color = Color.Black.copy(alpha = 0.8f)
-            )
-        }
-
-        when (uiState.selectedResultTab) {
-            ResultTab.CLOTHES -> {
-                if (uiState.recommendedClothing.isEmpty()) {
-                    items(3) { i ->
-                        PlaceholderResultCard(label = when (i) {
-                            0 -> "Top"
-                            1 -> "Bottom"
-                            else -> "Shoes"
-                        })
-                    }
-                } else {
-                    items(uiState.recommendedClothing) { item ->
-                        ResultCard(clothingItem = item, onEvent = {}, navTo = navTo)
-                    }
-                }
-            }
-            ResultTab.NAILS -> {
-                val nailItems = uiState.recommendedCosmetics.filter { it.macroCategory == MacroCategory.NAILS }
-                if (nailItems.isEmpty()) {
-                    item { PlaceholderResultCard(label = "Nails") }
-                } else {
-                    items(nailItems) { item ->
-                        ResultCard(cosmeticItem = item, onEvent = {}, navTo = navTo)
-                    }
-                }
-            }
-            else -> {
-                val nonNailCosmetics = uiState.recommendedCosmetics.filter { it.macroCategory != MacroCategory.NAILS }
-                if (nonNailCosmetics.isEmpty()) {
-                    items(3) { i ->
-                        PlaceholderResultCard(label = when (i) {
-                            0 -> "Eyes"
-                            1 -> "Cheeks"
-                            else -> "Lips"
-                        })
-                    }
-                } else {
-                    items(nonNailCosmetics) { item ->
-                        ResultCard(cosmeticItem = item, onEvent = {}, navTo = navTo)
-                    }
-                }
-            }
-        }
-
-        item {
-            Button(
-                onClick = { onEvent(SimulatorEvent.SaveToPalette) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(64.dp),
-                shape = RoundedCornerShape(32.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
-            ) {
-                Text(
-                    stringResource(R.string.applications_kocolor_features_analyzer_simulator_lock_palette),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        }
-    }
+    BlueprintDetailContent(
+        title = stringResource(R.string.applications_kocolor_features_analyzer_simulator_blueprint),
+        rationale = uiState.rationale,
+        isLocalResult = uiState.isLocalResult,
+        recommendedClothing = uiState.recommendedClothing,
+        recommendedCosmetics = uiState.recommendedCosmetics,
+        recommendedPalette = uiState.recommendedPalette,
+        selectedResultTab = uiState.selectedResultTab,
+        onTabSelected = { onEvent(SimulatorEvent.SelectResultTab(it)) },
+        actionButtonText = stringResource(R.string.applications_kocolor_features_analyzer_simulator_lock_palette),
+        onActionClick = { onEvent(SimulatorEvent.SaveToPalette) },
+        navTo = navTo
+    )
 }

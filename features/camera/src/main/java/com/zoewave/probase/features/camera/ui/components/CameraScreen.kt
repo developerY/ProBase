@@ -15,6 +15,7 @@ import androidx.camera.core.Preview
 import androidx.camera.core.SurfaceRequest
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.lifecycle.awaitInstance
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,6 +37,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -146,6 +154,11 @@ fun CameraScreen(
                         modifier = Modifier.fillMaxSize()
                     )
                 }
+
+                // Conditional Face Reticle Overlay
+                if (uiState.target == "face" || uiState.target == "face_simulator") {
+                    FaceReticleOverlay()
+                }
             }
 
             // Capture Button & Actions
@@ -238,6 +251,40 @@ fun CameraScreen(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun FaceReticleOverlay() {
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        val strokeWidth = 2.dp.toPx()
+        val dashEffect = PathEffect.dashPathEffect(floatArrayOf(20f, 10f), 0f)
+        
+        // Dark translucent overlay
+        drawRect(color = Color.Black.copy(alpha = 0.4f))
+        
+        // Face reticle (clear area)
+        val reticleWidth = size.width * 0.7f
+        val reticleHeight = size.height * 0.5f
+        val left = (size.width - reticleWidth) / 2
+        val top = (size.height - reticleHeight) / 3
+        
+        drawRoundRect(
+            color = Color.Transparent,
+            topLeft = Offset(left, top),
+            size = Size(reticleWidth, reticleHeight),
+            cornerRadius = CornerRadius(24.dp.toPx()),
+            blendMode = BlendMode.Clear
+        )
+        
+        // Dashed border
+        drawRoundRect(
+            color = Color.White.copy(alpha = 0.8f),
+            topLeft = Offset(left, top),
+            size = androidx.compose.ui.geometry.Size(reticleWidth, reticleHeight),
+            cornerRadius = CornerRadius(24.dp.toPx()),
+            style = Stroke(width = strokeWidth, pathEffect = dashEffect)
+        )
     }
 }
 

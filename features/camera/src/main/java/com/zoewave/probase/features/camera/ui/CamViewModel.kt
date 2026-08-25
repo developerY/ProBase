@@ -38,9 +38,9 @@ class CamViewModel @Inject constructor(
         }
         _uiState.update { current ->
             when (current) {
-                is CamUIState.Active -> current.copy(cameraSelector = selector)
-                is CamUIState.Loading -> current.copy(cameraSelector = selector)
-                is CamUIState.Error -> current.copy(cameraSelector = selector)
+                is CamUIState.Active -> current.copy(cameraSelector = selector, target = target)
+                is CamUIState.Loading -> current.copy(cameraSelector = selector, target = target)
+                is CamUIState.Error -> current.copy(cameraSelector = selector, target = target)
             }
         }
     }

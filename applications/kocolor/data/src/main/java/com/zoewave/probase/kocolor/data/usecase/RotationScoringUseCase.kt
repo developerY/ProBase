@@ -25,8 +25,14 @@ class RotationScoringUseCase @Inject constructor(
     /**
      * Calculates a normalized rotation penalty [0.0 to 1.0] based on usage frequency
      * and recency within a category.
+     * Supports custom override values for in-memory 'Projected' state simulations.
      */
-    suspend fun calculateRotationPenalty(productId: String, categoryId: String): Double {
+    suspend fun calculateRotationPenalty(
+        productId: String, 
+        category: String,
+        customUseCount: Int? = null,
+        customLastUsed: Long? = null
+    ): Double {
         // 1. Cold Start Rule: check global history
         val globalMetrics = rotationRepository.observeGlobalMetrics().first()
         if ((globalMetrics?.totalOutfitsCommitted ?: 0L) < minimumOutfitsForPenalty) {
@@ -34,17 +40,21 @@ class RotationScoringUseCase @Inject constructor(
         }
 
         // 2. Fetch Category Usage State (Joins at DAO level)
-        val allItemsInCategory = rotationRepository.getUsageForCategory(categoryId)
+        val allItemsInCategory = rotationRepository.getUsageForCategory(category)
         val targetItem = allItemsInCategory.find { it.productId == productId }
             ?: return 0.0 // No usage history yet
 
         val totalCategoryUsage = allItemsInCategory.sumOf { it.useCount }
         if (totalCategoryUsage == 0L) return 0.0
 
+        // Use custom overrides if provided (for simulation/projection)
+        val effectiveUseCount = customUseCount?.toLong() ?: targetItem.useCount
+        val effectiveLastUsed = customLastUsed ?: targetItem.lastUsedTimestamp
+
         // 3. Derived Metrics calculation
-        val currentUsageShare = targetItem.useCount.toDouble() / totalCategoryUsage
+        val currentUsageShare = effectiveUseCount.toDouble() / totalCategoryUsage
         val currentTime = System.currentTimeMillis()
-        val recencyMs = targetItem.lastUsedTimestamp?.let { currentTime - it } ?: Long.MAX_VALUE
+        val recencyMs = effectiveLastUsed?.let { currentTime - it } ?: Long.MAX_VALUE
 
         // 4. Transform to scoring factors
         val frequencyPenalty = if (currentUsageShare > highFrequencyShare) 0.85 else 0.0

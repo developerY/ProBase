@@ -37,7 +37,7 @@ import com.zoewave.probase.kocolor.features.analyzer.R
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.ResultStep
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.AnalysisStep
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.MagicBackground
-import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.list.MessagingStep
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.list.messaging.MessagingStep
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,6 +60,7 @@ fun StyleSimulatorScreen(
             effect.collect { simulatorEffect ->
                 when (simulatorEffect) {
                     SimulatorEffect.NavigateToHistory -> navTo(KoColorRoute.Color)
+                    SimulatorEffect.NavigateToPlaylist -> navTo(KoColorRoute.Color)
                     is SimulatorEffect.NavigateToCamera -> navTo(KoColorRoute.Camera(simulatorEffect.target))
                     SimulatorEffect.OpenGalleryPicker -> {
                         galleryLauncher.launch(
