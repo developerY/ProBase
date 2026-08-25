@@ -43,32 +43,35 @@ This document details the architectural plan to optimize token usage and network
 
 ---
 
-## Phase 3: Deterministic Prompt Caching
+## Phase 3: Semantic AI Caching
 
-### [AI Feature Module]
+### [AI Orchestration Layer]
 
-#### [PromptCacheRepository.kt](file:///Users/developer/AndroidStudioProjects/ProBase/features/ai/firebase/src/main/kotlin/com/zoewave/probase/features/ai/firebase/PromptCacheRepository.kt) [NEW]
-- **Semantic Fingerprinting**: Generate a `SHA-256` hash to memoize responses.
+#### [PromptCacheRepository.kt](file:///Users/developer/AndroidStudioProjects/ProBase/features/ai/local/src/main/java/com/zoewave/probase/features/ai/local/data/PromptCacheRepository.kt) [NEW]
+> [!NOTE]
+> Relocated to the local AI module to serve as a provider-agnostic caching layer for all execution tiers (Firebase and Nano).
+
+- **Semantic Fingerprinting**: Generate a `SHA-256` hash to memoize deterministic `StyleBlueprint` results.
   ```text
   SHA-256(
       promptVersion +
       modelVersion +
+      retrievalPolicyVersion +
       appearanceTelemetry +
       weatherState +
       userIntent +
       minifiedManifest
   )
   ```
-- **Storage**: Use an in-memory `LruCache` for near-instant local retrieval of repeated simulations.
-- **Cache Policy**: 
+- **Storage & Policy**: 
   - Bounded `LruCache` with configurable maximum entries.
-  - A change to any fingerprint input (including weather or versioning) produces a **cache miss** and triggers a new AI request.
   - Least-recently-used entries are evicted automatically to manage memory.
-  - **NO raw images** are ever stored in the cache.
+  - A change to any fingerprint input produces a **cache miss** and triggers a new AI request.
+  - **NO raw images** are ever stored in the cache; only the derived blueprint and metadata.
 
 #### [StyleSimulatorEngine.kt](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/usecase/StyleSimulatorEngine.kt)
-- **Check Cache**: Before Tier 0 (Firebase) execution, consult `PromptCacheRepository`.
-- **Skip Network**: If hit, return cached `StyleBlueprint` with no cloud AI cost and near-instant local retrieval.
+- **Check Cache**: Before initiating any AI execution (Tier 0 or Tier 1.5), consult `PromptCacheRepository`.
+- **Skip Network**: If a valid result is found, return the cached `StyleBlueprint` with no cloud AI cost and near-instant local retrieval.
 
 ---
 
@@ -98,6 +101,7 @@ Upon each request, log a comprehensive metric set:
 - fallback_reason: String? (e.g., "TOKEN_BUDGET", "NETWORK_FAILURE")
 - model: String
 - prompt_version: String
+- retrieval_policy_version: String
 ```
 **Privacy Note**: Never include raw prompt text or full telemetry payloads in production logs.
 
@@ -108,5 +112,5 @@ Upon each request, log a comprehensive metric set:
 1. **Token Audit**: Run simulation with full wardrobe and verify `candidates_sent` is a focused subset of `vault_size`.
 2. **Network Audit**: Inspect Logcat for `OpenMeteo` responses to verify `forecast_days=1` is applied.
 3. **Cache Test**: Trigger same intent twice within stable weather and verify `cache_hit: true` and near-instant local retrieval.
-4. **Budget Test**: Inject a fake massive manifest and verify the system correctly trips the 3,000 token circuit breaker and logs `fallback_reason=TOKEN_BUDGET`.
-5. **Fingerprint Test**: Change the `promptVersion` in code and verify the cache is correctly bypassed.
+4. **Budget Test**: Inject a fake massive manifest and verify the system correctly **skips Cloud Tier 0** and logs `fallback_reason=TOKEN_BUDGET`.
+5. **Fingerprint Test**: Change the `retrievalPolicyVersion` in code and verify the cache is correctly bypassed.
