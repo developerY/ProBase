@@ -1,4 +1,4 @@
-# Implementation Plan: Token Optimization & Local RAG
+# Implementation Plan: Token Optimization, Local RAG & Semantic AI Caching
 
 This document details the architectural plan to optimize token usage and network efficiency for the KoColor AI pipeline, transitioning to a scalable Local RAG (Retrieval-Augmented Generation) pattern.
 
@@ -6,7 +6,7 @@ This document details the architectural plan to optimize token usage and network
 - **Reduce Costs**: Minimize prompt tokens sent to Gemini.
 - **Improve Latency**: Faster responses via pre-filtering and semantic caching.
 - **Privacy First**: Maintain mathematical telemetry boundaries while allowing rich local analysis.
-- **Observability**: Rigorous tracking of token budgets and execution tiers.
+- **Observability**: Rigorous tracking of token budgets, fallback reasons, and execution tiers.
 
 ---
 
@@ -33,8 +33,8 @@ This document details the architectural plan to optimize token usage and network
 #### [StyleSimulatorEngine.kt](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/usecase/StyleSimulatorEngine.kt)
 - **Local Retrieval Pipeline**: Before building the manifest, candidates are filtered through multiple local dimensions:
   - **Category Eligibility**: Entirely strip noise categories (`Oral`, `Tools`, `Fragrance`, `Grooming`, `Organizers`).
-  - **Rotation Penalty**: Exclude items with `RotationPenalty >= 0.70`.
-  - **Context Suitability**: Apply deterministic filters for weather (e.g., no parkas in 30°C) and color compatibility.
+  - **Rotation Penalty**: Exclude items where `RotationPenalty >= MAX_ROTATION_PENALTY` (default `0.70`). This is a retrieval policy, not an AI rule.
+  - **Context Suitability**: Apply deterministic filters for weather (e.g., no parkas in 30°C), color compatibility, and **user intent / occasion**.
 - **Semantic Minification**:
   - Map items to a compact representation: `[ID, SemanticType, HexColor]`.
   - **CRITICAL**: Retain stable database IDs (e.g., `w_55`) for UI hydration.
@@ -59,7 +59,8 @@ This document details the architectural plan to optimize token usage and network
       minifiedManifest
   )
   ```
-- **Storage**: Use an in-memory `LruCache` for near-instant local retrieval of repeated simulations. The cache is invalidated if any input parameter (including weather) changes the fingerprint.
+- **Storage**: Use an in-memory `LruCache` for near-instant local retrieval of repeated simulations.
+- **Cache Policy**: A change to any fingerprint input (including weather or versioning) produces a **cache miss** and triggers a new AI request, creating a new cache entry.
 
 #### [StyleSimulatorEngine.kt](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/usecase/StyleSimulatorEngine.kt)
 - **Check Cache**: Before Tier 0 (Firebase) execution, consult `PromptCacheRepository`.
@@ -72,8 +73,8 @@ This document details the architectural plan to optimize token usage and network
 ### [AI / Engine Layer]
 
 #### [StyleSimulatorEngine.kt](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/usecase/StyleSimulatorEngine.kt)
-- **Token Preflight**: Use `model.countTokens(prompt)` to estimate usage before sending.
-- **Circuit Breaker**: If `estimatedInputTokens > 3000`, cancel Cloud Tier 0 and force Fallback to Tier 1.5 (Local Gemini Nano) to protect billing.
+- **Token Preflight**: Use `model.countTokens(prompt)` on the **exact model/configuration** that will execute to estimate usage.
+- **Circuit Breaker**: If `estimatedInputTokens > MAX_CLOUD_INPUT_TOKENS` (default `3,000`), cancel Cloud Tier 0 and force Fallback to Tier 1.5 (Local Gemini Nano) to protect billing.
 
 ### [Observability]
 
@@ -81,6 +82,7 @@ This document details the architectural plan to optimize token usage and network
 Upon each request, log a comprehensive metric set:
 ```text
 - cache_hit: Boolean
+- cache_key: String (Shortened hash)
 - vault_size: Int
 - eligible_count: Int
 - candidates_sent: Int
@@ -89,6 +91,7 @@ Upon each request, log a comprehensive metric set:
 - completion_tokens: Int
 - total_tokens: Int
 - execution_tier: String (Tier 0 | Tier 1.5 | Tier 2)
+- fallback_reason: String? (e.g., "TOKEN_BUDGET", "NETWORK_FAILURE")
 - model: String
 - prompt_version: String
 ```
@@ -99,6 +102,6 @@ Upon each request, log a comprehensive metric set:
 
 1. **Token Audit**: Run simulation with full wardrobe and verify `candidates_sent` is a focused subset of `vault_size`.
 2. **Network Audit**: Inspect Logcat for `OpenMeteo` responses to verify `forecast_days=1` is applied.
-3. **Cache Test**: Trigger same intent twice within stable weather and verify `cache_hit: true` and zero network activity.
-4. **Budget Test**: Inject a fake massive manifest and verify the system correctly trips the 3,000 token circuit breaker.
+3. **Cache Test**: Trigger same intent twice within stable weather and verify `cache_hit: true` and near-instant local retrieval.
+4. **Budget Test**: Inject a fake massive manifest and verify the system correctly trips the 3,000 token circuit breaker and logs `fallback_reason=TOKEN_BUDGET`.
 5. **Fingerprint Test**: Change the `promptVersion` in code and verify the cache is correctly bypassed.
