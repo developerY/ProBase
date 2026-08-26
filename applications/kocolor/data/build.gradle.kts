@@ -18,6 +18,7 @@ dependencies {
     implementation(project(":features:ai:configuration"))
     implementation(project(":features:ai:local"))
     implementation(project(":features:ai:firebase"))
+    implementation(project(":features:ai:core"))
 
     implementation(libs.room.runtime)
     implementation(libs.kotlinx.coroutines.android)

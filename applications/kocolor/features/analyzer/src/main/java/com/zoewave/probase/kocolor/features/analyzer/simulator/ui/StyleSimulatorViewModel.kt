@@ -39,6 +39,7 @@ import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
 import com.zoewave.probase.kocolor.data.usecase.GeneratePlaylistUseCase
 import com.zoewave.probase.kocolor.data.usecase.RotationScoringUseCase
 import com.zoewave.probase.kocolor.data.usecase.StyleBlueprint
+import com.zoewave.probase.kocolor.data.usecase.StyleRequestContext
 import com.zoewave.probase.kocolor.data.usecase.StyleSimulatorEngine
 import com.zoewave.probase.kocolor.db.dao.RoutineDao
 import com.zoewave.probase.kocolor.features.analyzer.calibration.ColorSeasonClassifier
@@ -415,24 +416,19 @@ class StyleSimulatorViewModel @Inject constructor(
             delay(1000)
             _simulationStep.value = SimulationStep.GENERATING
             
-            val blueprint = simulatorEngine.architectStyleBlueprint(
-                userIntent = userIntent,
-                circadianContext = "Defense & Protection",
-                routineCompleted = false,
-                wellnessScore = 0.85,
-                weatherContext = weatherContext,
-                availableWardrobe = filteredWardrobe,
-                availableCosmetics = allCosmetics,
-                rotationScores = rotationScores,
+            val requestContext = StyleRequestContext(
+                intent = userIntent,
+                weather = weatherContext,
+                appearanceTelemetry = appearance?.let { "${it.temperature} • ${it.depth} • ${it.contrast}" } ?: "Unknown",
                 fashionProfile = skinContext,
-                anchoredClothing = anchoredClothing,
-                anchoredCosmetics = anchoredCosmetics,
-                appearance = appearance,
-                portrait = state.userPortraitUri?.let { loadBitmapFromUri(Uri.parse(it)) },
-                useFirebase = useFirebase,
-                apiKey = apiKey,
-                modelName = preferredModel
-            )
+                rotationScores = rotationScores,
+                anchoredClothingIds = anchoredClothing.map { "w_${it.internalId}" },
+                anchoredCosmeticIds = anchoredCosmetics.map { "c_${it.internalId}" }
+            ).apply {
+                portrait = state.userPortraitUri?.let { loadBitmapFromUri(Uri.parse(it)) }
+            }
+
+            val blueprint = simulatorEngine.generateBlueprint(requestContext)
             
             // Translate Rationale: Swap <ITEM:id> tags for rich names
             val translatedRationale = translateRationale(
