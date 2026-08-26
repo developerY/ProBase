@@ -423,12 +423,11 @@ class StyleSimulatorViewModel @Inject constructor(
                 fashionProfile = skinContext,
                 rotationScores = rotationScores,
                 anchoredClothingIds = anchoredClothing.map { "w_${it.internalId}" },
-                anchoredCosmeticIds = anchoredCosmetics.map { "c_${it.internalId}" }
-            ).apply {
-                portrait = state.userPortraitUri?.let { loadBitmapFromUri(Uri.parse(it)) }
-            }
+                anchoredCosmeticIds = anchoredCosmetics.map { "c_${it.internalId}" },
+                localImageBitmap = state.userPortraitUri?.let { loadBitmapFromUri(Uri.parse(it)) }
+            )
 
-            val blueprint = simulatorEngine.generateBlueprint(requestContext)
+            val blueprint = simulatorEngine.generateBlueprint(filteredWardrobe, requestContext)
             
             // Translate Rationale: Swap <ITEM:id> tags for rich names
             val translatedRationale = translateRationale(

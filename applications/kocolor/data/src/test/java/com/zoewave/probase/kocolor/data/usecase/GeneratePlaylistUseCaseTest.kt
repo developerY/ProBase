@@ -53,21 +53,21 @@ class GeneratePlaylistUseCaseTest {
         
         val blueprint = StyleBlueprint("Rationale", listOf("w_1"), emptyList(), emptyList())
         coEvery { 
-            simulatorEngine.generateBlueprint(any())
+            simulatorEngine.generateBlueprint(any(), any())
         } returns blueprint
 
         useCase.generateWeeklyPlaylist(startDate, day1Anchors = anchors)
 
         // Verify day 1 was called with anchors
         coVerify { 
-            simulatorEngine.generateBlueprint(match { 
+            simulatorEngine.generateBlueprint(any(), match { 
                 it.anchoredClothingIds.contains("w_1")
             })
         }
         
         // Verify subsequent days were called WITHOUT anchors
         coVerify(exactly = 6) { 
-            simulatorEngine.generateBlueprint(match { 
+            simulatorEngine.generateBlueprint(any(), match { 
                 it.anchoredClothingIds.isEmpty()
             })
         }

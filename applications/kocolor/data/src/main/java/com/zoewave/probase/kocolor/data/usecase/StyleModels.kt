@@ -14,12 +14,9 @@ data class StyleRequestContext(
     val anchoredClothingIds: List<String> = emptyList(),
     val anchoredCosmeticIds: List<String> = emptyList(),
     val rotationScores: Map<String, Double> = emptyMap(),
-    val fashionProfile: String? = null
-) {
-    // Non-serializable portrait data for on-device multimodal reasoning
-    @Transient
-    var portrait: Bitmap? = null
-}
+    val fashionProfile: String? = null,
+    @Transient val localImageBitmap: Bitmap? = null
+)
 
 @Serializable
 data class StyleBlueprint(

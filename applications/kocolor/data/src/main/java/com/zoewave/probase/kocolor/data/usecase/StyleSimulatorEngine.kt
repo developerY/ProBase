@@ -1,6 +1,7 @@
 package com.zoewave.probase.kocolor.data.usecase
 
 import android.util.Log
+import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.features.ai.core.AiProvider
 import com.zoewave.probase.features.ai.core.StylePromptRequest
 import com.zoewave.probase.features.ai.local.data.PromptCacheRepository
@@ -31,14 +32,17 @@ class StyleSimulatorEngine @Inject constructor(
     /**
      * Entry point for generating a style blueprint using the best available AI provider.
      */
-    suspend fun generateBlueprint(requestContext: StyleRequestContext): StyleBlueprint {
+    suspend fun generateBlueprint(
+        inventory: List<ClothingItem>,
+        requestContext: StyleRequestContext
+    ): StyleBlueprint {
         val providers = capabilityRouter.getRankedAvailableProviders()
         
         for (provider in providers) {
             val providerStartTime = System.currentTimeMillis()
             Log.d("StyleSimulatorEngine", "Attempting provider: ${provider.capability.displayName}")
             
-            val fitResult = adaptContextToProvider(provider, requestContext)
+            val fitResult = adaptContextToProvider(provider, inventory, requestContext)
             
             if (fitResult != null) {
                 // Phase 3: Deterministic Cache Check
@@ -172,6 +176,7 @@ class StyleSimulatorEngine @Inject constructor(
      */
     private suspend fun adaptContextToProvider(
         provider: AiProvider,
+        inventory: List<ClothingItem>,
         context: StyleRequestContext
     ): AdaptiveFitResult? {
         val cap = provider.capability
@@ -179,12 +184,13 @@ class StyleSimulatorEngine @Inject constructor(
         var detailLevel = SerializationDetailLevel.EXPANDED
 
         while (currentK >= cap.minTopK) {
-            val candidates = candidateFilter.getCandidates(context, limit = currentK)
+            val candidates = candidateFilter.getCandidates(inventory, context, limit = currentK)
             val manifest = serializer.serialize(candidates, detailLevel)
             
             val candidatePrompt = promptAssembler.buildExactRequest(
                 context = context,
-                compactManifest = manifest
+                compactManifest = manifest,
+                providerCapability = cap
             )
             
             val tokenCount = provider.countTokens(candidatePrompt)

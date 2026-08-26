@@ -65,9 +65,9 @@ class StyleSimulatorEngineTest {
         coEvery { provider1.execute(any()) } returns Result.success("{\"rationale\": \"P1 result\", \"selectedClothingIds\": [], \"selectedCosmeticIds\": [], \"recommendedPalette\": []}")
         
         coEvery { capabilityRouter.getRankedAvailableProviders() } returns listOf(provider1, provider2)
-        coEvery { candidateFilter.getCandidates(any(), any()) } returns emptyList()
+        coEvery { candidateFilter.getCandidates(any(), any(), any()) } returns emptyList()
 
-        val result = engine.generateBlueprint(context)
+        val result = engine.generateBlueprint(emptyList(), context)
 
         assertThat(result.rationale).isEqualTo("P1 result")
     }
@@ -79,7 +79,7 @@ class StyleSimulatorEngineTest {
         coEvery { capabilityRouter.getRankedAvailableProviders() } returns emptyList()
         every { fallbackEngine.generate(context) } returns StyleBlueprint("Fallback", emptyList(), emptyList(), emptyList())
 
-        val result = engine.generateBlueprint(context)
+        val result = engine.generateBlueprint(emptyList(), context)
 
         assertThat(result.rationale).isEqualTo("Fallback")
     }
@@ -113,10 +113,10 @@ class StyleSimulatorEngineTest {
         coEvery { provider.execute(any()) } returns Result.success("{\"rationale\": \"Success\", \"selectedClothingIds\": [], \"selectedCosmeticIds\": [], \"recommendedPalette\": []}")
         
         coEvery { capabilityRouter.getRankedAvailableProviders() } returns listOf(provider)
-        coEvery { candidateFilter.getCandidates(any(), any()) } answers { items.take(it.invocation.args[1] as Int) }
+        coEvery { candidateFilter.getCandidates(any(), any(), any()) } answers { items.take(it.invocation.args[2] as Int) }
         every { fallbackEngine.generate(any()) } returns StyleBlueprint("Fallback", emptyList(), emptyList(), emptyList())
 
-        val result = engine.generateBlueprint(context)
+        val result = engine.generateBlueprint(items, context)
 
         assertThat(result.rationale).isEqualTo("Success")
     }
