@@ -14,7 +14,6 @@ import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetectorOptions
 import com.google.mlkit.vision.face.FaceLandmark
-import com.zoewave.probase.core.data.repository.AiConfigurationSettings
 import com.zoewave.probase.core.data.repository.weather.AtmosphericRepository
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
@@ -29,7 +28,6 @@ import com.zoewave.probase.core.model.ritual.RoutineTime
 import com.zoewave.probase.core.model.ritual.SeasonalType
 import com.zoewave.probase.core.model.ritual.SuggestedPiece
 import com.zoewave.probase.core.model.ritual.Undertone
-import com.zoewave.probase.features.ai.firebase.FirebaseAiAuthManager
 import com.zoewave.probase.features.ai.firebase.models.Appearance
 import com.zoewave.probase.kocolor.data.FashionRepository
 import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
@@ -152,9 +150,7 @@ class StyleSimulatorViewModel @Inject constructor(
     private val generatePlaylistUseCase: GeneratePlaylistUseCase,
     private val atmosphericRepository: AtmosphericRepository,
     private val rotationRepository: RotationRepository,
-    private val rotationScoringUseCase: RotationScoringUseCase,
-    private val aiSettings: AiConfigurationSettings,
-    private val authManager: FirebaseAiAuthManager
+    private val rotationScoringUseCase: RotationScoringUseCase
 ) : ViewModel() {
 
     private val _selectedClothingCategory = MutableStateFlow(ClothingCategory.TOPS)
@@ -375,16 +371,10 @@ class StyleSimulatorViewModel @Inject constructor(
         viewModelScope.launch {
             _isAnalyzing.value = true
             
-            // Ensure anonymous authentication is active for Tier 0
-            authManager.signInAnonymously()
-            
-            val apiKey = aiSettings.getGeminiApiKey()
-            val useFirebase = aiSettings.useFirebaseVertexAi.first()
             val state = uiState.value
             val userIntent = state.userMessage
             
             val filteredWardrobe = wardrobeRepository.getShortlistByIntent(userIntent).first()
-            val allCosmetics = state.fullCosmeticInventory
 
             val profile = fashionRepository.getProfile().first()
             val skinContext = profile?.let { 
@@ -402,8 +392,6 @@ class StyleSimulatorViewModel @Inject constructor(
             val anchoredCosmetics = state.anchoredCosmeticFamilies.flatMap { (cat, family) ->
                 state.fullCosmeticInventory.filter { it.macroCategory == cat && it.colorFamily == family }
             }
-
-            val preferredModel = aiSettings.aiModelFlow.first()
 
             // 1. Calculate Rotation Scores for all items in availableWardrobe
             val rotationScores = filteredWardrobe.associate { item ->

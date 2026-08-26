@@ -1,6 +1,7 @@
 package com.zoewave.probase.kocolor.data.usecase
 
 import com.zoewave.probase.features.ai.core.AiProvider
+import com.zoewave.probase.features.ai.core.ByokAiProvider
 import com.zoewave.probase.features.ai.firebase.FirebaseAiProvider
 import com.zoewave.probase.features.ai.local.data.LocalNanoAiProvider
 import javax.inject.Inject
@@ -9,7 +10,8 @@ import javax.inject.Singleton
 @Singleton
 class CapabilityRouterImpl @Inject constructor(
     private val localProvider: LocalNanoAiProvider,
-    private val firebaseProvider: FirebaseAiProvider
+    private val firebaseProvider: FirebaseAiProvider,
+    private val byokProvider: ByokAiProvider
 ) : CapabilityRouter {
 
     override suspend fun getRankedAvailableProviders(): List<AiProvider> {
@@ -23,6 +25,11 @@ class CapabilityRouterImpl @Inject constructor(
         // Priority 2: Firebase AI Logic (Managed Cloud)
         if (firebaseProvider.isAvailable()) {
             providers.add(firebaseProvider)
+        }
+        
+        // Priority 3: BYOK (Deep Fallback)
+        if (byokProvider.isAvailable()) {
+            providers.add(byokProvider)
         }
         
         return providers

@@ -8,7 +8,8 @@ import javax.inject.Singleton
 
 @Singleton
 class FirebaseAiProvider @Inject constructor(
-    private val client: FirebaseAiClient
+    private val client: FirebaseAiClient,
+    private val authManager: FirebaseAiAuthManager
 ) : AiProvider {
 
     override val capability = AiProviderCapability(
@@ -33,6 +34,7 @@ class FirebaseAiProvider @Inject constructor(
 
     override suspend fun execute(request: StylePromptRequest): Result<String> {
         return try {
+            authManager.signInAnonymously()
             val response = client.generateContent(request.exactPromptString)
             Result.success(response.text)
         } catch (e: Exception) {
