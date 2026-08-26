@@ -1,14 +1,16 @@
 package com.zoewave.probase.kocolor.data.usecase
 
-import com.google.common.truth.Truth.assertThat
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
 import com.zoewave.probase.kocolor.data.repository.PlaylistRepository
 import com.zoewave.probase.kocolor.data.repository.RotationRepository
 import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
-import com.zoewave.probase.kocolor.model.playlist.ProjectedUsage
-import io.mockk.*
+import io.mockk.Runs
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.just
+import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -51,61 +53,23 @@ class GeneratePlaylistUseCaseTest {
         
         val blueprint = StyleBlueprint("Rationale", listOf("w_1"), emptyList(), emptyList())
         coEvery { 
-            simulatorEngine.architectStyleBlueprint(
-                userIntent = any(),
-                circadianContext = any(),
-                routineCompleted = any(),
-                wellnessScore = any(),
-                weatherContext = any(),
-                availableWardrobe = any(),
-                availableCosmetics = any(),
-                rotationScores = any(),
-                fashionProfile = any(),
-                anchoredClothing = any(),
-                anchoredCosmetics = any(),
-                apiKey = any(),
-                modelName = any()
-            ) 
+            simulatorEngine.generateBlueprint(any())
         } returns blueprint
 
         useCase.generateWeeklyPlaylist(startDate, day1Anchors = anchors)
 
         // Verify day 1 was called with anchors
         coVerify { 
-            simulatorEngine.architectStyleBlueprint(
-                userIntent = any(),
-                circadianContext = any(),
-                routineCompleted = any(),
-                wellnessScore = any(),
-                weatherContext = any(),
-                availableWardrobe = any(),
-                availableCosmetics = any(),
-                rotationScores = any(),
-                fashionProfile = any(),
-                anchoredClothing = anchors, // Anchors for Day 1
-                anchoredCosmetics = emptyList(),
-                apiKey = any(),
-                modelName = any()
-            )
+            simulatorEngine.generateBlueprint(match { 
+                it.anchoredClothingIds.contains("w_1")
+            })
         }
         
         // Verify subsequent days were called WITHOUT anchors
         coVerify(exactly = 6) { 
-            simulatorEngine.architectStyleBlueprint(
-                userIntent = any(),
-                circadianContext = any(),
-                routineCompleted = any(),
-                wellnessScore = any(),
-                weatherContext = any(),
-                availableWardrobe = any(),
-                availableCosmetics = any(),
-                rotationScores = any(),
-                fashionProfile = any(),
-                anchoredClothing = emptyList(), // No anchors for subsequent days
-                anchoredCosmetics = emptyList(),
-                apiKey = any(),
-                modelName = any()
-            )
+            simulatorEngine.generateBlueprint(match { 
+                it.anchoredClothingIds.isEmpty()
+            })
         }
     }
 }

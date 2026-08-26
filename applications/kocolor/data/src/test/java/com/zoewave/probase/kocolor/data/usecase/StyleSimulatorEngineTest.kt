@@ -6,12 +6,13 @@ import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.features.ai.core.AiProvider
 import com.zoewave.probase.features.ai.core.AiProviderCapability
 import com.zoewave.probase.features.ai.core.StylePromptRequest
-import io.mockk.coEvery
-import io.mockk.every
-import io.mockk.mockk
+import com.zoewave.probase.features.ai.local.data.PromptCacheRepository
+import io.mockk.*
+import io.mockk.mockkStatic
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
+import android.util.Log
 
 class StyleSimulatorEngineTest {
 
@@ -19,17 +20,31 @@ class StyleSimulatorEngineTest {
     private val serializer = CompactManifestSerializer()
     private val promptAssembler = PromptAssembler()
     private val capabilityRouter = mockk<CapabilityRouter>()
+    private val cache = mockk<PromptCacheRepository>()
     private val fallbackEngine = mockk<DeterministicStyleEngine>()
     
     private lateinit var engine: StyleSimulatorEngine
 
     @Before
     fun setup() {
+        mockkStatic(Log::class)
+        every { Log.v(any(), any()) } returns 0
+        every { Log.d(any(), any()) } returns 0
+        every { Log.i(any(), any()) } returns 0
+        every { Log.w(any(), any<String>()) } returns 0
+        every { Log.e(any(), any(), any()) } returns 0
+        every { Log.e(any(), any()) } returns 0
+
+        every { cache.generateFingerprint(any(), any(), any(), any(), any(), any(), any(), any()) } returns "test_hash"
+        every { cache.get(any()) } returns null
+        every { cache.put(any(), any()) } just Runs
+
         engine = StyleSimulatorEngine(
             candidateFilter,
             serializer,
             promptAssembler,
             capabilityRouter,
+            cache,
             fallbackEngine
         )
     }
@@ -85,13 +100,21 @@ class StyleSimulatorEngineTest {
         every { provider.capability } returns capability
         coEvery { provider.countTokens(any()) } answers {
             val prompt = (it.invocation.args[0] as StylePromptRequest).exactPromptString
-            // Simulate that expanded manifest with 10 items is > 50 tokens, but minimal/fewer items is < 50
-            if (prompt.contains("Cotton")) 100 else if (prompt.lines().size > 5) 60 else 30
+            // Simulate:
+            // 1. Expanded (with Cotton) is 100 tokens
+            // 2. Balanced (more than 4 bars '|') is 60 tokens
+            // 3. Minimal (exactly 3 bars '|') is 30 tokens
+            when {
+                prompt.contains("Cotton") -> 100
+                prompt.count { it == '|' } > 40 -> 60 // 10 items * 5 or 6 bars
+                else -> 30
+            }
         }
         coEvery { provider.execute(any()) } returns Result.success("{\"rationale\": \"Success\", \"selectedClothingIds\": [], \"selectedCosmeticIds\": [], \"recommendedPalette\": []}")
         
         coEvery { capabilityRouter.getRankedAvailableProviders() } returns listOf(provider)
         coEvery { candidateFilter.getCandidates(any(), any()) } answers { items.take(it.invocation.args[1] as Int) }
+        every { fallbackEngine.generate(any()) } returns StyleBlueprint("Fallback", emptyList(), emptyList(), emptyList())
 
         val result = engine.generateBlueprint(context)
 

@@ -70,7 +70,7 @@ class ProjectedVsCommittedIsolationTest {
         ))
         coEvery { cosmeticRepository.getAllCosmetics() } returns flowOf(emptyList())
         coEvery { 
-            simulatorEngine.architectStyleBlueprint(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) 
+            simulatorEngine.generateBlueprint(any()) 
         } returns StyleBlueprint("Rationale", listOf("w_1"), emptyList(), emptyList())
 
         // 2. Generate Playlist
