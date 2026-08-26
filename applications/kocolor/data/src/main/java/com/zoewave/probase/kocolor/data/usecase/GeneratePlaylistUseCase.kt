@@ -63,18 +63,16 @@ class GeneratePlaylistUseCase @Inject constructor(
                 )
             }
 
-            val dailyBlueprint = simulatorEngine.architectStyleBlueprint(
-                userIntent = "Weekly Rotation",
-                circadianContext = "Defense & Protection",
-                routineCompleted = false,
-                wellnessScore = 0.85,
-                weatherContext = "Dynamic Weather", // Placeholder
-                availableWardrobe = wardrobe,
-                availableCosmetics = cosmetics,
+            val context = StyleRequestContext(
+                intent = "Weekly Rotation",
+                weather = "Dynamic Weather", // Placeholder
+                appearanceTelemetry = "Neutral", // Placeholder
                 rotationScores = rotationScores,
-                anchoredClothing = currentAnchors,
-                anchoredCosmetics = currentCosmeticAnchors
+                anchoredClothingIds = currentAnchors.map { "w_${it.internalId}" },
+                anchoredCosmeticIds = currentCosmeticAnchors.map { "c_${it.internalId}" }
             )
+
+            val dailyBlueprint = simulatorEngine.generateBlueprint(context)
 
             // COMPLETE State Forwarding: Simulate EVERY item picked into the projected state
             dailyBlueprint.selectedClothingIds.forEach { id ->
