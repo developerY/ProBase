@@ -28,7 +28,7 @@ class StyleSimulatorEngine @Inject constructor(
 
     companion object {
         private const val MAX_ROTATION_PENALTY = 0.70
-        private const val MAX_CLOUD_INPUT_TOKENS = 3000
+        private const val MAX_CLOUD_INPUT_TOKENS = 4000
         private const val RETRIEVAL_POLICY_VERSION = "1.0"
         private const val PROMPT_VERSION = "1.0"
         private val NOISE_CATEGORIES = setOf("oral", "tools", "fragrance", "grooming", "organizers")

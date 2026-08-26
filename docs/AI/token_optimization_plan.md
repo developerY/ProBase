@@ -81,7 +81,7 @@ This document details the architectural plan to optimize token usage and network
 
 #### [StyleSimulatorEngine.kt](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/usecase/StyleSimulatorEngine.kt)
 - **Token Preflight**: Use `model.countTokens(prompt)` on the **exact model/configuration** that will execute to estimate usage.
-- **Circuit Breaker**: If `estimatedInputTokens > MAX_CLOUD_INPUT_TOKENS` (default `3,000`), **skip Cloud Tier 0 and route directly to Tier 1.5 (Local Gemini Nano)** to protect billing.
+- **Circuit Breaker**: If `estimatedInputTokens > MAX_CLOUD_INPUT_TOKENS` (default `4,000`), **skip Cloud Tier 0 and route directly to Tier 1.5 (Local Gemini Nano)** to protect billing.
 
 ### [Observability]
 
@@ -112,5 +112,5 @@ Upon each request, log a comprehensive metric set:
 1. **Token Audit**: Run simulation with full wardrobe and verify `candidates_sent` is a focused subset of `vault_size`.
 2. **Network Audit**: Inspect Logcat for `OpenMeteo` responses to verify `forecast_days=1` is applied.
 3. **Cache Test**: Trigger same intent twice within stable weather and verify `cache_hit: true` and near-instant local retrieval.
-4. **Budget Test**: Inject a fake massive manifest and verify the system correctly **skips Cloud Tier 0** and logs `fallback_reason=TOKEN_BUDGET`.
+4. **Budget Test**: Inject a fake massive manifest and verify the system correctly **skips Cloud Tier 0** and logs `fallback_reason=TOKEN_BUDGET` when exceeding 4,000 tokens.
 5. **Fingerprint Test**: Change the `retrievalPolicyVersion` in code and verify the cache is correctly bypassed.
