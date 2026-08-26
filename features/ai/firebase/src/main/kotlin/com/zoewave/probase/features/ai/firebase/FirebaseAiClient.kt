@@ -21,15 +21,15 @@ data class AiResponse(
 
 interface FirebaseAiClient {
     /**
-     * Enforced Architectural Boundary: Only accepts StyleTelemetry and intent string.
+     * Enforced Architectural Boundary: Only accepts StyleTelemetry.
      * Prevents raw appearance data from ever leaving the device.
      */
-    suspend fun getStyleAdvice(telemetry: StyleTelemetry, intent: String): AiResponse
+    suspend fun getStyleAdvice(telemetry: StyleTelemetry): AiResponse
 
     /**
      * Estimates the number of tokens for a given prompt without executing the model.
      */
-    suspend fun estimateTokens(telemetry: StyleTelemetry, intent: String): Int
+    suspend fun estimateTokens(telemetry: StyleTelemetry): Int
 }
 
 @Singleton
@@ -47,7 +47,7 @@ class FirebaseAiClientImpl @Inject constructor() : FirebaseAiClient {
         }
     )
 
-    private fun buildPrompt(telemetry: StyleTelemetry, intent: String): String {
+    private fun buildPrompt(telemetry: StyleTelemetry): String {
         return """
             You are the KoColor Style Engine. Analyze the following Appearance and Context:
             
@@ -72,7 +72,7 @@ class FirebaseAiClientImpl @Inject constructor() : FirebaseAiClient {
             CRITICAL SYNTAX RULE: When referencing ANY selected item in your rationale, you MUST use the exact inline tag format <ITEM:id>.
             EXAMPLE RATIONALE: "The <ITEM:w_55> is selected because the weather requires <ITEM:c_151>."
             
-            Provide a styling blueprint optimized for this intent: "$intent".
+            Provide a styling blueprint optimized for this intent: "${telemetry.userIntent}".
             
             Respond ONLY with a valid JSON object matching this schema:
             {
@@ -84,13 +84,13 @@ class FirebaseAiClientImpl @Inject constructor() : FirebaseAiClient {
         """.trimIndent()
     }
 
-    override suspend fun estimateTokens(telemetry: StyleTelemetry, intent: String): Int {
-        val prompt = buildPrompt(telemetry, intent)
+    override suspend fun estimateTokens(telemetry: StyleTelemetry): Int {
+        val prompt = buildPrompt(telemetry)
         return getModel().countTokens(prompt).totalTokens
     }
 
-    override suspend fun getStyleAdvice(telemetry: StyleTelemetry, intent: String): AiResponse {
-        val prompt = buildPrompt(telemetry, intent)
+    override suspend fun getStyleAdvice(telemetry: StyleTelemetry): AiResponse {
+        val prompt = buildPrompt(telemetry)
 
         // 4. Execute Tier 0 Cloud Request with Logging
         Log.d("KoColorAI_IO", ">>> REQUEST TO GEMINI:\n$prompt")

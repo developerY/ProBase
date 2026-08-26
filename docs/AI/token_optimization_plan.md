@@ -43,17 +43,18 @@ This document details the architectural plan to optimize token usage and network
 
 ---
 
-## Phase 3: Semantic AI Caching
+## Phase 3: Deterministic AI Result Caching
 
 ### [AI Orchestration Layer]
 
-#### [PromptCacheRepository.kt](file:///Users/developer/AndroidStudioProjects/ProBase/features/ai/local/src/main/java/com/zoewave/probase/features/ai/local/data/PromptCacheRepository.kt) [NEW]
+#### [PromptCacheRepository.kt](file:///Users/developer/AndroidStudioProjects/ProBase/features/ai/local/src/main/java/com/zoewave/probase/features/ai/local/data/PromptCacheRepository.kt)
 > [!NOTE]
 > Relocated to the local AI module to serve as a provider-agnostic caching layer for all execution tiers (Firebase and Nano).
 
-- **Semantic Fingerprinting**: Generate a `SHA-256` hash to memoize deterministic `StyleBlueprint` results.
+- **Execution-Aware Fingerprinting**: Generate a `SHA-256` hash to memoize deterministic `StyleBlueprint` results. The fingerprint includes the intended execution tier to prevent cross-tier result collision.
   ```text
   SHA-256(
+      executionTier +
       promptVersion +
       modelVersion +
       retrievalPolicyVersion +
@@ -70,8 +71,10 @@ This document details the architectural plan to optimize token usage and network
   - **NO raw images** are ever stored in the cache; only the derived blueprint and metadata.
 
 #### [StyleSimulatorEngine.kt](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/usecase/StyleSimulatorEngine.kt)
-- **Check Cache**: Before initiating any AI execution (Tier 0 or Tier 1.5), consult `PromptCacheRepository`.
-- **Skip Network**: If a valid result is found, return the cached `StyleBlueprint` with no cloud AI cost and near-instant local retrieval.
+- **Multi-Tier Cache Check**: 
+  - Check for a **Tier 0 (Cloud)** cached result first.
+  - If Tier 0 execution is skipped (budget) or fails, check for a **Tier 1.5 (Nano)** cached result before executing local inference.
+- **Skip AI**: If a valid result is found for the active tier, return it with no AI cost and near-instant local retrieval.
 
 ---
 

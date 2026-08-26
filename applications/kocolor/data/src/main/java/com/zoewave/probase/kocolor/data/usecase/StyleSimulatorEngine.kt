@@ -32,21 +32,20 @@ class StyleSimulatorEngine @Inject constructor(
         private const val RETRIEVAL_POLICY_VERSION = "1.0"
         private const val PROMPT_VERSION = "1.0"
         private val NOISE_CATEGORIES = setOf("oral", "tools", "fragrance", "grooming", "organizers")
+        private const val BLUEPRINT_SCHEMA = """
+            {
+              "rationale": "string",
+              "selectedClothingIds": ["String", "String", "String"],
+              "selectedCosmeticIds": ["String", "String", "String", ...],
+              "recommendedPalette": ["#HEX", "#HEX", "#HEX", "#HEX"]
+            }
+        """
     }
 
     private val json = Json { 
         ignoreUnknownKeys = true 
         coerceInputValues = true
     }
-
-    private val BLUEPRINT_SCHEMA = """
-        {
-          "rationale": "string",
-          "selectedClothingIds": ["String", "String", "String"],
-          "selectedCosmeticIds": ["String", "String", "String", ...],
-          "recommendedPalette": ["#HEX", "#HEX", "#HEX", "#HEX"]
-        }
-    """.trimIndent()
 
     /**
      * Cascading execution with Type-Safe Boundaries as per Secure Vertex AI Integration plan.
@@ -78,67 +77,65 @@ class StyleSimulatorEngine @Inject constructor(
         var totalTokens = 0
         var modelUsed = modelName
 
-        // 1. Manifest Minification (Phase 2)
+        // 1. Manifest Minification (Phase 2 & Refined Context Filtering)
         val minResult = minifyManifest(
-            availableWardrobe, availableCosmetics, anchoredClothing, anchoredCosmetics, rotationScores
+            availableWardrobe, 
+            availableCosmetics, 
+            anchoredClothing, 
+            anchoredCosmetics, 
+            rotationScores,
+            weatherContext,
+            userIntent,
+            fashionProfile // Pass profile for color suitability
         )
         val minifiedManifest = minResult.manifest
 
-        // 2. Semantic Caching (Phase 3)
-        val fingerprint = cache.generateFingerprint(
-            promptVersion = PROMPT_VERSION,
-            modelVersion = modelUsed,
-            retrievalPolicyVersion = RETRIEVAL_POLICY_VERSION,
-            appearanceTelemetry = appearance?.toString() ?: "no_appearance",
-            weatherState = weatherContext,
-            userIntent = userIntent,
-            minifiedManifest = minifiedManifest
-        )
-
-        val cachedResponse = cache.get(fingerprint)
-        if (cachedResponse != null) {
-            executionTier = "Cache"
-            logTelemetry(
-                cacheHit = true,
-                fingerprint = fingerprint,
-                minResult = minResult,
-                estTokens = 0,
-                actPrompt = 0,
-                compTokens = 0,
-                totTokens = 0,
-                tier = executionTier,
-                reason = null,
-                model = modelUsed
+        val styleTelemetry = if (appearance != null) {
+            StyleTelemetry(
+                appearance = appearance,
+                vaultManifest = minifiedManifest,
+                weatherContext = weatherContext,
+                circadianContext = circadianContext,
+                userIntent = userIntent
             )
-            return sanitizeAndDecode(cachedResponse)
+        } else null
+
+        // 2. Deterministic AI Result Caching (Phase 3 Refinement)
+        // Check for Tier 0 (Cloud) cached result first
+        val tier0Fingerprint = styleTelemetry?.let {
+            cache.generateFingerprint(
+                executionTier = "Tier 0",
+                promptVersion = PROMPT_VERSION,
+                modelVersion = modelUsed,
+                retrievalPolicyVersion = RETRIEVAL_POLICY_VERSION,
+                appearanceTelemetry = appearance.toString(),
+                weatherState = weatherContext,
+                userIntent = userIntent,
+                minifiedManifest = minifiedManifest
+            )
+        }
+
+        if (tier0Fingerprint != null) {
+            val cachedTier0 = cache.get(tier0Fingerprint)
+            if (cachedTier0 != null) {
+                executionTier = "Cache (Tier 0)"
+                logTelemetry(true, tier0Fingerprint, minResult, 0, 0, 0, 0, executionTier, null, modelUsed)
+                return sanitizeAndDecode(cachedTier0)
+            }
         }
 
         // 3. Token Budgeting & Telemetry (Phase 4)
         
         // Tier 0: Enterprise Production Route (Firebase AI Logic)
-        if (useFirebase && appearance != null) {
-            val styleTelemetry = StyleTelemetry(
-                appearance = appearance,
-                vaultManifest = minifiedManifest,
-                weatherContext = weatherContext,
-                circadianContext = circadianContext
-            )
-
+        if (useFirebase && styleTelemetry != null) {
             try {
-                estimatedInputTokens = firebaseAiClient.estimateTokens(styleTelemetry, userIntent)
+                estimatedInputTokens = firebaseAiClient.estimateTokens(styleTelemetry)
                 if (estimatedInputTokens <= MAX_CLOUD_INPUT_TOKENS) {
                     Log.d("StyleSimulatorEngine", "THINKING: Attempting Tier 0 (Firebase AI Logic)...")
-                    val response = firebaseAiClient.getStyleAdvice(styleTelemetry, userIntent)
-                    cache.put(fingerprint, response.text)
-                    executionTier = "Tier 0"
-                    actualPromptTokens = response.promptTokens
-                    completionTokens = response.completionTokens
-                    totalTokens = response.totalTokens
-                    modelUsed = response.modelName
+                    val result = getCloudAdvice(styleTelemetry)
+                    tier0Fingerprint?.let { cache.put(it, json.encodeToString(StyleBlueprint.serializer(), result)) }
                     
-                    logTelemetry(false, fingerprint, minResult, estimatedInputTokens, 
-                                 actualPromptTokens, completionTokens, totalTokens, executionTier, null, modelUsed)
-                    return sanitizeAndDecode(response.text)
+                    return result
                 } else {
                     fallbackReason = "TOKEN_BUDGET"
                     Log.w("StyleSimulatorEngine", "Tier 0 skipped: TOKEN_BUDGET ($estimatedInputTokens > $MAX_CLOUD_INPUT_TOKENS)")
@@ -150,35 +147,41 @@ class StyleSimulatorEngine @Inject constructor(
         }
 
         // Tier 1.5: Local LLM (Gemini Nano)
+        // Check cache for Tier 1.5 before execution
+        val tier15Fingerprint = styleTelemetry?.let {
+            cache.generateFingerprint(
+                executionTier = "Tier 1.5",
+                promptVersion = PROMPT_VERSION,
+                modelVersion = "gemini-nano",
+                retrievalPolicyVersion = RETRIEVAL_POLICY_VERSION,
+                appearanceTelemetry = appearance.toString(),
+                weatherState = weatherContext,
+                userIntent = userIntent,
+                minifiedManifest = minifiedManifest
+            )
+        }
+
+        if (tier15Fingerprint != null) {
+            val cachedTier15 = cache.get(tier15Fingerprint)
+            if (cachedTier15 != null) {
+                executionTier = "Cache (Tier 1.5)"
+                logTelemetry(true, tier15Fingerprint, minResult, 0, 0, 0, 0, executionTier, fallbackReason, "gemini-nano")
+                return sanitizeAndDecode(cachedTier15)
+            }
+        }
+
         Log.d("StyleSimulatorEngine", "THINKING: Attempting Tier 1.5 (On-Device Gemini Nano)...")
         try {
-            val localPrompt = buildArchitectPrompt(
-                userIntent, circadianContext, routineCompleted, wellnessScore, weatherContext, 
-                minifiedManifest, fashionProfile
-            )
-            
-            // Token Preflight for Local AI
-            val localTokens = localAi.estimateTokens(localPrompt)
-            
-            val result = if (portrait != null) {
-                localAi.generateMultimodalContent(localPrompt, portrait, BLUEPRINT_SCHEMA)
-            } else {
-                localAi.generateStructuredContent(localPrompt, BLUEPRINT_SCHEMA)
-            }
-
-            val text = result.getOrNull()
-            if (text != null) {
-                cache.put(fingerprint, text)
-                executionTier = "Tier 1.5"
-                modelUsed = "gemini-nano"
-                logTelemetry(false, fingerprint, minResult, localTokens, 0, 0, 0, executionTier, fallbackReason, modelUsed)
-                Log.d("StyleSimulatorEngine", "SUCCESS: Blueprint generated via Tier 1.5 in ${System.currentTimeMillis() - startTime}ms")
-                return sanitizeAndDecode(text)
-            } else {
-                Log.w("StyleSimulatorEngine", "Tier 1.5 returned null result")
+            if (styleTelemetry != null) {
+                val result = getLocalAdvice(portrait, styleTelemetry, routineCompleted, wellnessScore)
+                if (result != null) {
+                    tier15Fingerprint?.let { cache.put(it, json.encodeToString(StyleBlueprint.serializer(), result)) }
+                    Log.d("StyleSimulatorEngine", "SUCCESS: Blueprint generated via Tier 1.5 in ${System.currentTimeMillis() - startTime}ms")
+                    return result
+                }
             }
         } catch (e: Exception) {
-            Log.w("StyleSimulatorEngine", "Tier 1.5 failed, checking Tier 1 fallback...", e)
+            Log.w("StyleSimulatorEngine", "THINKING: Tier 1.5 failed (${e.message}), checking Tier 1 fallback...")
         }
 
         // Tier 1: Probabilistic (Cloud Gemini BYOK) - Deep Fallback
@@ -196,7 +199,7 @@ class StyleSimulatorEngine @Inject constructor(
                     completionTokens = cloudResponse.completionTokens
                     totalTokens = cloudResponse.totalTokens
                     
-                    logTelemetry(false, fingerprint, minResult, 0, actualPromptTokens, completionTokens, totalTokens, executionTier, fallbackReason, modelName)
+                    logTelemetry(false, tier0Fingerprint ?: "tier1_fallback", minResult, 0, actualPromptTokens, completionTokens, totalTokens, executionTier, fallbackReason, modelName)
                     Log.d("StyleSimulatorEngine", "SUCCESS: Blueprint generated via Tier 1 in ${System.currentTimeMillis() - startTime}ms")
                     return sanitizeAndDecode(cloudResponse.text)
                 }
@@ -208,7 +211,7 @@ class StyleSimulatorEngine @Inject constructor(
         // Tier 2: Deterministic (Local Heuristics) - Final Safety Net
         Log.d("StyleSimulatorEngine", "THINKING: Attempting Tier 2 (Local Heuristic Architect)...")
         val localResult = getDeterministicAdvice(userIntent, availableWardrobe, availableCosmetics)
-        logTelemetry(false, fingerprint, minResult, 0, 0, 0, 0, "Tier 2", fallbackReason, "heuristic")
+        logTelemetry(false, tier0Fingerprint ?: "tier2_fallback", minResult, 0, 0, 0, 0, "Tier 2", fallbackReason, "heuristic")
         Log.d("StyleSimulatorEngine", "SUCCESS: Blueprint generated via Tier 2 in ${System.currentTimeMillis() - startTime}ms")
         return localResult
     }
@@ -225,13 +228,14 @@ class StyleSimulatorEngine @Inject constructor(
         reason: String?,
         model: String
     ) {
+        val estimatedTokens = if (estTokens > 0) estTokens.toString() else "N/A"
         Log.d("KoColor_Telemetry", """
             - cache_hit: $cacheHit
             - cache_key: ${fingerprint.take(8)}
             - vault_size: ${minResult.vaultSize}
             - eligible_count: ${minResult.eligibleCount}
             - candidates_sent: ${minResult.candidatesSent}
-            - estimated_input_tokens: $estTokens
+            - estimated_input_tokens: $estimatedTokens
             - actual_prompt_tokens: $actPrompt
             - completion_tokens: $compTokens
             - total_tokens: $totTokens
@@ -255,24 +259,68 @@ class StyleSimulatorEngine @Inject constructor(
         cosmetics: List<CosmeticItem>,
         anchoredWardrobe: List<ClothingItem>,
         anchoredCosmetics: List<CosmeticItem>,
-        rotationScores: Map<String, Double>
+        rotationScores: Map<String, Double>,
+        weatherContext: String,
+        userIntent: String,
+        fashionProfile: String?
     ): MinifiedResult {
         val vaultSize = wardrobe.size + cosmetics.size
 
-        // Pruning noise categories and low-rotation candidates
-        val eligibleWardrobe = wardrobe.filter { item ->
+        // 1. Pruning noise categories and low-rotation candidates
+        var eligibleWardrobe = wardrobe.filter { item ->
             val penalty = rotationScores[item.remoteId] ?: 0.0
             penalty < MAX_ROTATION_PENALTY
         }
 
-        val eligibleCosmetics = cosmetics.filter { item ->
+        var eligibleCosmetics = cosmetics.filter { item ->
             val category = item.macroCategory.name.lowercase()
             !NOISE_CATEGORIES.contains(category)
+        }
+
+        // 2. Context Suitability Filtering (Weather)
+        // Extract temperature if possible: "UV: X, Temp: YC"
+        val tempRegex = """Temp:\s*([-\d.]+)\s*C""".toRegex()
+        val tempMatch = tempRegex.find(weatherContext)
+        val currentTemp = tempMatch?.groupValues?.get(1)?.toDoubleOrNull()
+
+        if (currentTemp != null) {
+            eligibleWardrobe = eligibleWardrobe.filter { item ->
+                when {
+                    currentTemp > 25.0 -> !item.name.contains("coat", true) && !item.name.contains("jacket", true)
+                    currentTemp < 10.0 -> !item.name.contains("shorts", true) && !item.name.contains("tank", true)
+                    else -> true
+                }
+            }
+        }
+
+        // 3. Color Suitability Filtering
+        if (fashionProfile != null) {
+            val season = fashionProfile.lowercase()
+            eligibleWardrobe = eligibleWardrobe.filter { item ->
+                // Basic heuristic: if item name mentions a season that isn't ours, skip
+                val seasons = listOf("summer", "winter", "spring", "autumn")
+                val itemSeason = seasons.find { item.name.lowercase().contains(it) }
+                if (itemSeason != null) {
+                    season.contains(itemSeason)
+                } else true
+            }
+        }
+
+        // 4. Intent Filtering
+        val intentKeywords = userIntent.lowercase().split(" ", ",", ".").filter { it.length > 3 }
+        if (intentKeywords.isNotEmpty()) {
+            // Priority filtering: filter for items that specifically mention the intent in notes/name
+            val intentMatches = eligibleWardrobe.filter { item ->
+                intentKeywords.any { kw -> item.name.contains(kw, true) || (item.notes?.contains(kw, true) ?: false) }
+            }
+            if (intentMatches.isNotEmpty()) {
+                eligibleWardrobe = intentMatches
+            }
         }
         
         val eligibleCount = eligibleWardrobe.size + eligibleCosmetics.size
 
-        // Further pruning based on anchors
+        // 5. Further pruning based on anchors
         val anchoredCategories = anchoredWardrobe.map { it.category }.toSet()
         val prunedWardrobe = eligibleWardrobe.filter { item ->
             if (anchoredCategories.contains(item.category)) {
@@ -314,6 +362,38 @@ class StyleSimulatorEngine @Inject constructor(
 
         val manifest = json.encodeToString(CloudManifest(minWardrobe, minCosmetics))
         return MinifiedResult(manifest, vaultSize, eligibleCount, candidatesSent)
+    }
+
+    private suspend fun getCloudAdvice(telemetry: StyleTelemetry): StyleBlueprint {
+        val response = firebaseAiClient.getStyleAdvice(telemetry)
+        // Log telemetry for Cloud Tier 0 success
+        Log.d("KoColor_Telemetry", "Cloud Tier 0 Success: ${response.totalTokens} tokens used")
+        return sanitizeAndDecode(response.text)
+    }
+
+    private suspend fun getLocalAdvice(
+        image: Bitmap?,
+        telemetry: StyleTelemetry,
+        routineCompleted: Boolean,
+        wellnessScore: Double
+    ): StyleBlueprint? {
+        val prompt = buildArchitectPrompt(
+            telemetry.userIntent,
+            telemetry.circadianContext,
+            routineCompleted,
+            wellnessScore,
+            telemetry.weatherContext,
+            telemetry.vaultManifest,
+            "${telemetry.appearance.temperature} • ${telemetry.appearance.depth} • ${telemetry.appearance.contrast}"
+        )
+
+        val result = if (image != null) {
+            localAi.generateMultimodalContent(prompt, image, BLUEPRINT_SCHEMA)
+        } else {
+            localAi.generateStructuredContent(prompt, BLUEPRINT_SCHEMA)
+        }
+
+        return result.getOrNull()?.let { sanitizeAndDecode(it) }
     }
 
     private fun getDeterministicAdvice(

@@ -30,9 +30,10 @@ class PromptCacheRepository @Inject constructor() {
 
     /**
      * Generates a SHA-256 fingerprint from the deterministic inputs to the AI model.
-     * Any change in these inputs (e.g., weather, wardrobe, intent) will result in a cache miss.
+     * Any change in these inputs (e.g., tier, weather, wardrobe, intent) will result in a cache miss.
      */
     fun generateFingerprint(
+        executionTier: String,
         promptVersion: String,
         modelVersion: String,
         retrievalPolicyVersion: String,
@@ -42,6 +43,7 @@ class PromptCacheRepository @Inject constructor() {
         minifiedManifest: String
     ): String {
         val input = StringBuilder().apply {
+            append(executionTier)
             append(promptVersion)
             append(modelVersion)
             append(retrievalPolicyVersion)
