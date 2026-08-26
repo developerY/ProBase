@@ -7,7 +7,8 @@ data class StyleTelemetry(
     val appearance: Appearance,
     val vaultManifest: String,
     val weatherContext: String,
-    val circadianContext: String
+    val circadianContext: String,
+    val userIntent: String
 )
 
 @Serializable
