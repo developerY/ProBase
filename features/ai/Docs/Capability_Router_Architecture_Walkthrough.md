@@ -22,6 +22,7 @@ The new core module defines the unified contract for all AI backends.
 *   **`AiProvider`**: A common interface for Gemini Nano (Local), Firebase AI (Cloud), and BYOK.
 *   **`AiProviderCapability`**: A metadata model describing a provider's limits (Max Tokens, Timeout, Top-K capacity).
 *   **`AiExecutionFailure`**: A unified sealed interface for error handling (ContextLimitExceeded, Timeout, etc.).
+*   **Type-Safe Privacy Invariant**: Cloud provider interfaces are strictly typed to accept only `StyleTelemetry`, making the transmission of raw imagery architecturally impossible.
 
 ### B. Local Candidate RAG (`WardrobeCandidateFilter`)
 A multi-stage pipeline that prunes $N=300+$ items down to a manageable Top-$K$ set:
