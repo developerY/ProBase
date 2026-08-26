@@ -23,23 +23,18 @@ class FirebaseAiProvider @Inject constructor(
     )
 
     override suspend fun isAvailable(): Boolean {
-        // In a real app, check network and Firebase status
+        // In a real app, check network status
         return true 
     }
 
     override suspend fun countTokens(request: StylePromptRequest): Int {
-        // We can reuse the countTokens logic from the client if exposed
-        // For now, let's assume it's exposed or we can estimate
-        return (request.exactPromptString.length / 4) // Rough estimation if countTokens is not available
+        return client.countTokens(request.exactPromptString)
     }
 
     override suspend fun execute(request: StylePromptRequest): Result<String> {
         return try {
-            // Note: FirebaseAiClient currently uses StyleTelemetry.
-            // This wrapper needs to be updated if we want to use the raw prompt.
-            // For now, we'll just return a failure or a dummy response to satisfy the interface.
-            // Ideally, we'd refactor the client to accept the raw prompt too.
-            Result.failure(Exception("FirebaseAiProvider needs refactoring to accept raw prompts"))
+            val response = client.generateContent(request.exactPromptString)
+            Result.success(response.text)
         } catch (e: Exception) {
             Result.failure(e)
         }

@@ -30,6 +30,16 @@ interface FirebaseAiClient {
      * Estimates the number of tokens for a given prompt without executing the model.
      */
     suspend fun estimateTokens(telemetry: StyleTelemetry): Int
+
+    /**
+     * Executes a raw prompt.
+     */
+    suspend fun generateContent(prompt: String): AiResponse
+
+    /**
+     * Estimates tokens for a raw prompt.
+     */
+    suspend fun countTokens(prompt: String): Int
 }
 
 @Singleton
@@ -91,13 +101,20 @@ class FirebaseAiClientImpl @Inject constructor() : FirebaseAiClient {
 
     override suspend fun getStyleAdvice(telemetry: StyleTelemetry): AiResponse {
         val prompt = buildPrompt(telemetry)
+        return generateContent(prompt)
+    }
 
-        // 4. Execute Tier 0 Cloud Request with Logging
-        Log.d("KoColorAI_IO", ">>> REQUEST TO GEMINI:\n$prompt")
+    override suspend fun countTokens(prompt: String): Int {
+        return getModel().countTokens(prompt).totalTokens
+    }
+
+    override suspend fun generateContent(prompt: String): AiResponse {
+        // 4. Execute Cloud Request with Logging
+        Log.d("KoColorAI_IO", ">>> REQUEST TO GEMINI (RAW):\n$prompt")
         
         val response = getModel().generateContent(prompt)
         
-        Log.d("KoColorAI_IO", "^^^ RESPONSE FROM GEMINI:\n${response.text ?: "EMPTY_RESPONSE"}")
+        Log.d("KoColorAI_IO", "^^^ RESPONSE FROM GEMINI (RAW):\n${response.text ?: "EMPTY_RESPONSE"}")
         
         val metadata = response.usageMetadata
         if (metadata != null) {
