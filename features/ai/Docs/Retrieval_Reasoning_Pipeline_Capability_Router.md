@@ -8,10 +8,12 @@ This document serves as the formal architectural reference for the KoColor **Ret
 
 We enforce a strict separation between **Deterministic Retrieval** and **Generative Reasoning**. This ensures maximum performance, privacy, and token efficiency.
 
-*   **85% Local Deterministic (The "Retrieval" Phase):** 
-    Database queries, weather-gating, laundry status, and rotation scoring are handled entirely by on-device Kotlin code.
-*   **15% Generative Reasoning (The "Reasoning" Phase):** 
-    The AI is only invoked to solve the "aesthetic coordination problem"—constructing a harmonic style from a pre-qualified shortlist of candidates.
+*   **KoColor Local (Retrieval):** Determines what works, what is relevant, and what is missing. All database queries, weather-gating, laundry status, chroma-weighted color math, and role-gap analysis are handled entirely by on-device Kotlin code.
+*   **Generative AI (Synthesis):** Determines how to creatively assemble and explain the final style using a role-allocated Reasoning Set.
+
+### Information Elimination Principle
+Token optimization begins **before tokenization**. KoColor does not attempt to compress an unnecessarily large wardrobe prompt; it first eliminates information that has no reasonable bearing on the current styling decision. The local engine progressively transforms:
+`Entire Inventory → Eligible Inventory → Compatible Inventory → Ranked Inventory → Role-Complete Candidate Set → Compact AI Context`
 
 ---
 

@@ -31,10 +31,11 @@ Located in [`ColorHarmonyEngine.kt`](file:///Users/developer/AndroidStudioProjec
 *   **Perceptual Shield**: Uses CIEDE2000 ($\Delta E_{00}$) as a continuous feature to evaluate perceptual relationships and contrast.
 *   **Contrast Balancing**: Ensures candidates align with the user's contrast requirement (`ColorTelemetry.contrastScore`).
 
-### Phase 3: Role-Aware Diversity
-The engine ensures the AI receives a solvable puzzle. It balances the Top-$K$ candidates to include:
-*   **Wardrobe**: 3–4 Tops, 3–4 Bottoms, 2–3 Shoes, 1–2 Outerwear.
-*   **Cosmetics**: 1–2 Eyes, 1 Cheek, 1–2 Lips, 1 Nail.
+### Phase 3: Role-Aware Candidate Allocations
+The engine ensures the AI receives a solvable, structurally complete puzzle by distributing the provider's `maxCandidateBudget` across missing role requirements (`RoleRequirement` with min/max bounds):
+*   **Wardrobe Allocations**: e.g., 3–4 Tops, 3–4 Bottoms, 2–3 Shoes, 1–2 Outerwear.
+*   **Cosmetics Allocations**: e.g., 1–2 Eyes, 1 Cheek, 1–2 Lips, 1 Nail.
+Candidates are selected from the highest-scoring items *within* each role bucket rather than taking global top scores.
 
 ---
 
