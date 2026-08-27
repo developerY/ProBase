@@ -22,7 +22,12 @@ import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.kocolor.features.analyzer.R
-import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.*
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.CollapsibleFashionistaScoreCard
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.FashionistaScoreGauge
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.ResultTab
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.VisualBlueprintData
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.VisualBlueprintSection
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.mapToVisualBlueprintData
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.list.PlaceholderResultCard
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.list.ResultCard
 import com.zoewave.probase.kocolor.model.KoColorRoute
