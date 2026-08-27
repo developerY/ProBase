@@ -60,8 +60,9 @@ Every request passes through an **Adaptive Fit Engine** in the [`StyleSimulatorE
 *   **Local Tier (Multimodal)**: On-device providers (Gemini Nano) accept `AiInput.Multimodal` for texture/drape analysis because the data never leaves the NPU.
 
 ### Multi-Tier Deterministic Caching
-The [`PromptCacheRepository`](file:///Users/developer/AndroidStudioProjects/ProBase/features/ai/local/src/main/java/com/zoewave/probase/features/ai/local/data/PromptCacheRepository.kt) stores results indexed by a SHA-256 fingerprint including:
-`Tier + RetrievalPolicy + PromptVersion + Telemetry + Weather + Intent + Manifest`.
+The [`PromptCacheRepository`](file:///Users/developer/AndroidStudioProjects/ProBase/features/ai/local/src/main/java/com/zoewave/probase/features/ai/local/data/PromptCacheRepository.kt) stores results indexed by a SHA-256 fingerprint derived from post-retrieval deterministic state:
+`Selected IDs + missingRoleRequirements + occasion + weatherTempC + uvIndex + telemetry + providerId`.
+This guarantees that different occasions (e.g., casual morning vs formal evening) or weather conditions generating different role gaps produce distinct cache keys even when locking the same shirt.
 
 ---
 
