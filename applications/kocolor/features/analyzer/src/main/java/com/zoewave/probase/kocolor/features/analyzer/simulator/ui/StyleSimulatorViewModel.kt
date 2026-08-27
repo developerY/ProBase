@@ -270,7 +270,7 @@ class StyleSimulatorViewModel @Inject constructor(
                     anchoredCosmetics[item.macroCategory] == item.colorFamily
                 },
                 palette = result?.recommendedPalette ?: emptyList(),
-                isComplete = step == SimulationStep.RESULT
+                isComplete = (step == SimulationStep.RESULT || result != null)
             )
         )
     }.stateIn(

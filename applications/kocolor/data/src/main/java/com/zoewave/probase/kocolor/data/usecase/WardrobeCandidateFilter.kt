@@ -3,6 +3,7 @@ package com.zoewave.probase.kocolor.data.usecase
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.core.model.ritual.CosmeticItem
+import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
@@ -112,9 +113,32 @@ class WardrobeCandidateFilter @Inject constructor(
         }.sortedByDescending { it.second }
          .map { it.first }
 
-        // Stage 3: Pool Truncation
-        val combined = (anchoredItems + rankedRemaining).distinctBy { it.internalId }
-        return combined.take(limit)
+        // Stage 3: Category-Diverse Candidate Allocation (Ensuring EYES, DIMENSION, LIPS, NAILS are represented)
+        val targetCategories = setOf(
+            MacroCategory.EYES,
+            MacroCategory.DIMENSION,
+            MacroCategory.LIPS,
+            MacroCategory.NAILS
+        )
+
+        val diverseSet = mutableListOf<CosmeticItem>()
+        diverseSet.addAll(anchoredItems)
+
+        // Ensure at least 2 candidates for each target category if available
+        for (category in targetCategories) {
+            val categoryMatches = rankedRemaining.filter { it.macroCategory == category }
+            diverseSet.addAll(categoryMatches.take(2))
+        }
+
+        // Fill remaining limit with highest-scored items
+        for (item in rankedRemaining) {
+            if (diverseSet.size >= limit) break
+            if (item !in diverseSet) {
+                diverseSet.add(item)
+            }
+        }
+
+        return diverseSet.take(limit)
     }
 
     private fun calculateCosmeticScore(item: CosmeticItem, context: StyleRequestContext): Double {
