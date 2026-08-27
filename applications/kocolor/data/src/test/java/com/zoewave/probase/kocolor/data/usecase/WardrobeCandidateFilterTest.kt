@@ -34,7 +34,7 @@ class WardrobeCandidateFilterTest {
 
         coEvery { repository.getAllClothing() } returns flowOf(items)
 
-        val result = filter.getCandidates(context, limit = 10)
+        val result = filter.getCandidates(items, context, limit = 10)
 
         assertThat(result).hasSize(1)
         assertThat(result[0].remoteId).isEqualTo("2")
@@ -53,7 +53,7 @@ class WardrobeCandidateFilterTest {
 
         coEvery { repository.getAllClothing() } returns flowOf(items)
 
-        val result = filter.getCandidates(context, limit = 10)
+        val result = filter.getCandidates(items, context, limit = 10)
 
         assertThat(result).hasSize(2)
         assertThat(result[0].internalId).isEqualTo(2L) // Anchored item first
@@ -68,7 +68,7 @@ class WardrobeCandidateFilterTest {
 
         coEvery { repository.getAllClothing() } returns flowOf(items)
 
-        val result = filter.getCandidates(context, limit = 5)
+        val result = filter.getCandidates(items, context, limit = 5)
 
         assertThat(result).hasSize(5)
     }

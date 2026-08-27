@@ -4,20 +4,23 @@ import android.util.Log
 import com.google.common.truth.Truth.assertThat
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
-import com.zoewave.probase.core.model.ritual.Formality
-import com.zoewave.probase.features.ai.local.data.LocalAiEngine
-import com.zoewave.probase.features.ai.local.domain.router.RequiresCloudException
-import io.mockk.coEvery
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.mockkStatic
-import kotlinx.coroutines.runBlocking
+import com.zoewave.probase.features.ai.core.AiProvider
+import com.zoewave.probase.features.ai.core.AiProviderCapability
+import com.zoewave.probase.features.ai.local.data.PromptCacheRepository
+import io.mockk.*
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 
 class StyleSimulatorIntegrationTest {
 
-    private lateinit var localAi: LocalAiEngine
+    private val candidateFilter = mockk<WardrobeCandidateFilter>()
+    private val serializer = CompactManifestSerializer()
+    private val promptAssembler = PromptAssembler()
+    private val capabilityRouter = mockk<CapabilityRouter>()
+    private val cache = mockk<PromptCacheRepository>()
+    private val fallbackEngine = mockk<DeterministicStyleEngine>()
+    
     private lateinit var engine: StyleSimulatorEngine
 
     @Before
@@ -30,85 +33,54 @@ class StyleSimulatorIntegrationTest {
         every { Log.e(any(), any(), any()) } returns 0
         every { Log.e(any(), any()) } returns 0
 
-        localAi = mockk()
-        engine = StyleSimulatorEngine(localAi)
-    }
+        every { cache.generateFingerprint(any(), any(), any(), any(), any(), any(), any(), any()) } returns "test_hash"
+        every { cache.get(any()) } returns null
+        every { cache.put(any(), any()) } just Runs
 
-    private val sampleWardrobe = listOf(
-        ClothingItem(internalId = 1, remoteId = "1", name = "Power Suit", category = ClothingCategory.TOPS, formality = Formality.PROFESSIONAL, colorHex = "#222222", dominantHex = "#222222"),
-        ClothingItem(internalId = 2, remoteId = "2", name = "Office Trousers", category = ClothingCategory.BOTTOMS, formality = Formality.PROFESSIONAL, colorHex = "#333333", dominantHex = "#333333"),
-        ClothingItem(internalId = 3, remoteId = "3", name = "Oxfords", category = ClothingCategory.SHOES, formality = Formality.PROFESSIONAL, colorHex = "#111111", dominantHex = "#111111"),
-        ClothingItem(internalId = 4, remoteId = "4", name = "Pajama Top", category = ClothingCategory.TOPS, formality = Formality.LOUNGE, colorHex = "#FFFFFF"),
-        ClothingItem(internalId = 5, remoteId = "5", name = "Joggers", category = ClothingCategory.BOTTOMS, formality = Formality.LOUNGE, colorHex = "#808080")
-    )
-
-    @Test
-    fun `Tier 1 (Cloud) should be preferred if API key is present`() {
-        runBlocking {
-            coEvery { localAi.generateStructuredContent(any(), any()) } returns Result.success("""
-                {
-                  "rationale": "Nano Stylist: Selected for professionalism.",
-                  "selectedClothingIds": ["1", "2", "3"],
-                  "selectedCosmeticIds": [],
-                  "recommendedPalette": ["#222222", "#333333", "#111111"]
-                }
-            """.trimIndent())
-
-            val blueprint = engine.architectStyleBlueprint(
-                userIntent = "Boardroom negotiation",
-                circadianContext = "Morning Defense",
-                routineCompleted = true,
-                wellnessScore = 0.9,
-                weatherContext = "Sunny",
-                availableWardrobe = sampleWardrobe.filter { it.formality >= Formality.PROFESSIONAL },
-                availableCosmetics = emptyList(),
-                apiKey = "" // Blank API key forces bypass of Tier 1
-            )
-
-            assertThat(blueprint.rationale).contains("Nano Stylist")
-            assertThat(blueprint.selectedClothingIds).containsExactly("1", "2", "3")
-        }
+        engine = StyleSimulatorEngine(
+            candidateFilter,
+            serializer,
+            promptAssembler,
+            capabilityRouter,
+            cache,
+            fallbackEngine
+        )
     }
 
     @Test
-    fun `Tier 1_5 (Nano) should fallback to Tier 2 (Heuristics) on hardware lockout`() {
-        runBlocking {
-            // Mock Nano reporting a hardware bypass/lockout
-            coEvery { localAi.generateStructuredContent(any(), any()) } returns Result.failure(RequiresCloudException("A-series silicon bypass"))
+    fun `full pipeline test with successful provider`() = runTest {
+        val context = StyleRequestContext(intent = "party", weather = "warm", appearanceTelemetry = "warm")
+        val provider = mockk<AiProvider>()
+        val capability = AiProviderCapability(
+            id = "test_ai", displayName = "Test AI", maxInputTokens = 1000, maxOutputTokens = 500, timeoutMillis = 2000,
+            isLocal = true
+        )
+        val items = listOf(
+            ClothingItem(internalId = 1, name = "Silk Top", category = ClothingCategory.TOPS, colorHex = "#FF0000")
+        )
 
-            val blueprint = engine.architectStyleBlueprint(
-                userIntent = "Relaxing at home",
-                circadianContext = "Evening Recovery",
-                routineCompleted = false,
-                wellnessScore = 0.5,
-                weatherContext = "Rainy",
-                availableWardrobe = sampleWardrobe,
-                availableCosmetics = emptyList(),
-                apiKey = "" 
-            )
+        every { provider.capability } returns capability
+        coEvery { provider.countTokens(any()) } returns 200
+        coEvery { provider.execute(any()) } returns Result.success("{\"rationale\": \"Harmonic look\", \"selectedClothingIds\": [\"w_1\"], \"selectedCosmeticIds\": [], \"recommendedPalette\": [\"#FF0000\"]}")
+        
+        coEvery { capabilityRouter.getRankedAvailableProviders() } returns listOf(provider)
+        coEvery { candidateFilter.getCandidates(any(), any(), any()) } returns items
 
-            // Verify it fell back to the "Local Architect" (Heuristics)
-            assertThat(blueprint.rationale).contains("Optimized for rotation")
-        }
+        val result = engine.generateBlueprint(items, context)
+
+        assertThat(result.rationale).isEqualTo("Harmonic look")
+        assertThat(result.selectedClothingIds).contains("w_1")
     }
 
     @Test
-    fun `verify Biological Anchoring is present in the prompt generation`() {
-        val skinProfile = "Undertone: COOL, Seasonal: WINTER"
-        runBlocking {
-            // Smoke test to ensure the engine parameters are wired
-            val blueprint = engine.architectStyleBlueprint(
-                userIntent = "fancy night",
-                circadianContext = "Morning Defense",
-                routineCompleted = true,
-                wellnessScore = 0.9,
-                weatherContext = "Cloudy",
-                availableWardrobe = sampleWardrobe,
-                availableCosmetics = emptyList(),
-                fashionProfile = skinProfile,
-                apiKey = "" 
-            )
-            assertThat(blueprint).isNotNull()
-        }
+    fun `full pipeline test fallback logic`() = runTest {
+        val context = StyleRequestContext(intent = "party", weather = "warm", appearanceTelemetry = "warm")
+        
+        coEvery { capabilityRouter.getRankedAvailableProviders() } returns emptyList()
+        every { fallbackEngine.generate(context) } returns StyleBlueprint("Fallback Rationale", emptyList(), emptyList(), emptyList())
+
+        val result = engine.generateBlueprint(emptyList(), context)
+
+        assertThat(result.rationale).isEqualTo("Fallback Rationale")
     }
 }

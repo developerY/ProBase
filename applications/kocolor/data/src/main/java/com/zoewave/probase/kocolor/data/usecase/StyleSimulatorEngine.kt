@@ -1,8 +1,10 @@
 package com.zoewave.probase.kocolor.data.usecase
 
 import android.util.Log
+import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.features.ai.core.AiProvider
 import com.zoewave.probase.features.ai.core.StylePromptRequest
+import com.zoewave.probase.features.ai.local.data.PromptCacheRepository
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -13,8 +15,14 @@ class StyleSimulatorEngine @Inject constructor(
     private val serializer: CompactManifestSerializer,
     private val promptAssembler: PromptAssembler,
     private val capabilityRouter: CapabilityRouter,
+    private val cache: PromptCacheRepository,
     private val fallbackEngine: DeterministicStyleEngine
 ) {
+
+    companion object {
+        private const val RETRIEVAL_POLICY_VERSION = "2.0" // Router-based RAG
+        private const val PROMPT_VERSION = "2.0"
+    }
 
     private val json = Json { 
         ignoreUnknownKeys = true 
@@ -24,60 +32,171 @@ class StyleSimulatorEngine @Inject constructor(
     /**
      * Entry point for generating a style blueprint using the best available AI provider.
      */
-    suspend fun generateBlueprint(requestContext: StyleRequestContext): StyleBlueprint {
+    suspend fun generateBlueprint(
+        inventory: List<ClothingItem>,
+        requestContext: StyleRequestContext
+    ): StyleBlueprint {
         val providers = capabilityRouter.getRankedAvailableProviders()
         
         for (provider in providers) {
+            val providerStartTime = System.currentTimeMillis()
             Log.d("StyleSimulatorEngine", "Attempting provider: ${provider.capability.displayName}")
-            val fitResult = adaptContextToProvider(provider, requestContext)
+            
+            val fitResult = adaptContextToProvider(provider, inventory, requestContext)
             
             if (fitResult != null) {
-                val executionResult = provider.execute(fitResult)
-                if (executionResult.isSuccess) {
-                    val rawResult = executionResult.getOrThrow()
+                // Phase 3: Deterministic Cache Check
+                val fingerprint = cache.generateFingerprint(
+                    executionTier = provider.capability.id,
+                    promptVersion = PROMPT_VERSION,
+                    modelVersion = provider.capability.id,
+                    retrievalPolicyVersion = RETRIEVAL_POLICY_VERSION,
+                    appearanceTelemetry = requestContext.appearanceTelemetry,
+                    weatherState = requestContext.weather,
+                    userIntent = requestContext.intent,
+                    minifiedManifest = fitResult.request.exactPromptString
+                )
+
+                val cachedResponse = cache.get(fingerprint)
+                if (cachedResponse != null) {
                     return try {
-                        decodeBlueprint(rawResult)
+                        val blueprint = decodeBlueprint(cachedResponse)
+                        logTelemetry(
+                            tier = "CACHE_${provider.capability.id}",
+                            kLimit = fitResult.kLimit,
+                            detail = fitResult.detailLevel,
+                            tokens = 0,
+                            latency = System.currentTimeMillis() - providerStartTime,
+                            success = true
+                        )
+                        blueprint
                     } catch (e: Exception) {
-                        Log.e("StyleSimulatorEngine", "Failed to decode result from ${provider.capability.id}", e)
-                        continue // Try next provider
+                        Log.e("StyleSimulatorEngine", "Failed to decode cached result", e)
+                        // Continue to execute if cache is corrupt
+                        executeAndCache(provider, fitResult, fingerprint, providerStartTime) ?: continue
                     }
-                } else {
-                    Log.w("StyleSimulatorEngine", "Provider ${provider.capability.id} failed: ${executionResult.exceptionOrNull()?.message}")
                 }
+
+                val blueprint = executeAndCache(provider, fitResult, fingerprint, providerStartTime)
+                if (blueprint != null) return blueprint
             } else {
                 Log.w("StyleSimulatorEngine", "Could not fit context into provider ${provider.capability.id} budget")
+                logTelemetry(
+                    tier = provider.capability.id,
+                    kLimit = provider.capability.initialTopK,
+                    detail = SerializationDetailLevel.EXPANDED,
+                    tokens = 0,
+                    latency = System.currentTimeMillis() - providerStartTime,
+                    success = false,
+                    reason = "CONTEXT_OVERFLOW"
+                )
             }
         }
         
         // Indestructible baseline
+        val fallbackStartTime = System.currentTimeMillis()
         Log.i("StyleSimulatorEngine", "All providers failed. Falling back to deterministic engine.")
-        return fallbackEngine.generate(requestContext)
+        val blueprint = fallbackEngine.generate(requestContext)
+        
+        logTelemetry(
+            tier = "DETERMINISTIC_FALLBACK",
+            kLimit = 0,
+            detail = SerializationDetailLevel.MINIMAL,
+            tokens = 0,
+            latency = System.currentTimeMillis() - fallbackStartTime,
+            success = true
+        )
+        
+        return blueprint
     }
+
+    private suspend fun executeAndCache(
+        provider: AiProvider,
+        fitResult: AdaptiveFitResult,
+        fingerprint: String,
+        startTime: Long
+    ): StyleBlueprint? {
+        val executionResult = provider.execute(fitResult.request)
+        val latency = System.currentTimeMillis() - startTime
+
+        return if (executionResult.isSuccess) {
+            val rawResult = executionResult.getOrThrow()
+            try {
+                val blueprint = decodeBlueprint(rawResult)
+                cache.put(fingerprint, rawResult)
+                logTelemetry(
+                    tier = provider.capability.id,
+                    kLimit = fitResult.kLimit,
+                    detail = fitResult.detailLevel,
+                    tokens = fitResult.tokenCount,
+                    latency = latency,
+                    success = true
+                )
+                blueprint
+            } catch (e: Exception) {
+                Log.e("StyleSimulatorEngine", "Failed to decode result from ${provider.capability.id}", e)
+                logTelemetry(
+                    tier = provider.capability.id,
+                    kLimit = fitResult.kLimit,
+                    detail = fitResult.detailLevel,
+                    tokens = fitResult.tokenCount,
+                    latency = latency,
+                    success = false,
+                    reason = "DECODE_ERROR"
+                )
+                null
+            }
+        } else {
+            val failure = executionResult.exceptionOrNull()
+            val reason = failure?.let { it::class.simpleName } ?: "UNKNOWN_FAILURE"
+            Log.w("StyleSimulatorEngine", "Provider ${provider.capability.id} failed: ${failure?.message}")
+            
+            logTelemetry(
+                tier = provider.capability.id,
+                kLimit = fitResult.kLimit,
+                detail = fitResult.detailLevel,
+                tokens = fitResult.tokenCount,
+                latency = latency,
+                success = false,
+                reason = reason
+            )
+            null
+        }
+    }
+
+    private data class AdaptiveFitResult(
+        val request: StylePromptRequest,
+        val kLimit: Int,
+        val detailLevel: SerializationDetailLevel,
+        val tokenCount: Int
+    )
 
     /**
      * Step-down strategy to fit the request into a provider's token budget.
      */
     private suspend fun adaptContextToProvider(
         provider: AiProvider,
+        inventory: List<ClothingItem>,
         context: StyleRequestContext
-    ): StylePromptRequest? {
+    ): AdaptiveFitResult? {
         val cap = provider.capability
         var currentK = cap.initialTopK
         var detailLevel = SerializationDetailLevel.EXPANDED
 
         while (currentK >= cap.minTopK) {
-            val candidates = candidateFilter.getCandidates(context, limit = currentK)
+            val candidates = candidateFilter.getCandidates(inventory, context, limit = currentK)
             val manifest = serializer.serialize(candidates, detailLevel)
             
             val candidatePrompt = promptAssembler.buildExactRequest(
                 context = context,
-                compactManifest = manifest
+                compactManifest = manifest,
+                providerCapability = cap
             )
             
             val tokenCount = provider.countTokens(candidatePrompt)
             if (tokenCount <= cap.maxInputTokens) {
                 Log.d("StyleSimulatorEngine", "Adapted context: K=$currentK, Detail=$detailLevel, Tokens=$tokenCount")
-                return candidatePrompt
+                return AdaptiveFitResult(candidatePrompt, currentK, detailLevel, tokenCount)
             }
 
             // Step-down strategy:
@@ -98,6 +217,26 @@ class StyleSimulatorEngine @Inject constructor(
             }
         }
         return null // Cannot fit within provider budget
+    }
+
+    private fun logTelemetry(
+        tier: String,
+        kLimit: Int,
+        detail: SerializationDetailLevel,
+        tokens: Int,
+        latency: Long,
+        success: Boolean,
+        reason: String? = null
+    ) {
+        Log.d("KoColor_Telemetry", """
+            - execution_tier_used: $tier
+            - retrieval_k_limit: $kLimit
+            - serialization_strategy: ${detail.name}
+            - tokens_used: $tokens
+            - latency_ms: $latency
+            - success: $success
+            - fallback_reason: $reason
+        """.trimIndent())
     }
 
     private fun decodeBlueprint(jsonText: String): StyleBlueprint {

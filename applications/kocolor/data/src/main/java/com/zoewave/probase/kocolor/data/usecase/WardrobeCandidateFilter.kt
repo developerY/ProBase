@@ -15,11 +15,12 @@ class WardrobeCandidateFilter @Inject constructor(
      * Local Candidate RAG Engine (The 85/15 Local-First split).
      * Reduces the full wardrobe inventory to an initial ranked candidate pool.
      */
-    suspend fun getCandidates(context: StyleRequestContext, limit: Int): List<ClothingItem> {
-        val allItems = repository.getAllClothing().first()
-
-        // Stage 1: Hard Pruning (Deterministic)
-        val eligibleItems = allItems.filter { item ->
+    suspend fun getCandidates(
+        inventory: List<ClothingItem>,
+        context: StyleRequestContext,
+        limit: Int
+    ): List<ClothingItem> {
+        val eligibleItems = inventory.filter { item ->
             isAvailable(item) && 
             isWeatherCompatible(item, context.weather) && 
             !isRotationViolated(item, context.rotationScores)

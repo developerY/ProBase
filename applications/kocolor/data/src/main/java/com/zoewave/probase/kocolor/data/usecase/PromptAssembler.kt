@@ -1,5 +1,6 @@
 package com.zoewave.probase.kocolor.data.usecase
 
+import com.zoewave.probase.features.ai.core.AiProviderCapability
 import com.zoewave.probase.features.ai.core.StylePromptRequest
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -9,10 +10,12 @@ class PromptAssembler @Inject constructor() {
 
     /**
      * Combines system instructions, telemetry, context, and the compact manifest into a final prompt.
+     * Enforces the privacy invariant by stripping localImageBitmap if not supported by the provider.
      */
     fun buildExactRequest(
         context: StyleRequestContext,
-        compactManifest: String
+        compactManifest: String,
+        providerCapability: AiProviderCapability
     ): StylePromptRequest {
         val prompt = """
             You are the KoColor Style Architect AI. Generate a "Style Blueprint" that is both stylistically harmonic and protective.
@@ -38,6 +41,11 @@ class PromptAssembler @Inject constructor() {
             }
         """.trimIndent()
         
-        return StylePromptRequest(prompt)
+        return StylePromptRequest(
+            exactPromptString = prompt,
+            localImageBitmap = if (providerCapability.supportsLocalImageIngestion) {
+                context.localImageBitmap
+            } else null
+        )
     }
 }

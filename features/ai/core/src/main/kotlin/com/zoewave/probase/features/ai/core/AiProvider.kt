@@ -1,5 +1,7 @@
 package com.zoewave.probase.features.ai.core
 
+import android.graphics.Bitmap
+
 /**
  * Capability description for an AI Provider.
  */
@@ -30,7 +32,10 @@ sealed interface AiExecutionFailure {
 /**
  * Wrapper for the assembled prompt.
  */
-data class StylePromptRequest(val exactPromptString: String)
+data class StylePromptRequest(
+    val exactPromptString: String,
+    val localImageBitmap: Bitmap? = null
+)
 
 /**
  * Common interface for all AI Providers (Local Nano, Firebase AI, BYOK Cloud, etc.)
