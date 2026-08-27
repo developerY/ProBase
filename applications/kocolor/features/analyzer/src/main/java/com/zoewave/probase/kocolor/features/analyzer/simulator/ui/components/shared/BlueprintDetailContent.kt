@@ -160,7 +160,7 @@ fun BlueprintDetailContent(
         }
 
         item {
-            FashionistaScoreGauge(score = data.koColorScore)
+            CollapsibleFashionistaScoreCard(score = data.koColorScore)
         }
 
         if (actionButtonText != null && onActionClick != null) {
