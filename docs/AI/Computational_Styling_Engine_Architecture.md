@@ -70,6 +70,7 @@ This guarantees that different occasions (e.g., casual morning vs formal evening
 
 To solve the "Last Mile" problem, we implemented **Greedy Rehydration** in [`VisualBlueprintModels.kt`](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/features/analyzer/src/main/java/com/zoewave/probase/kocolor/features/analyzer/simulator/ui/components/graphics/VisualBlueprintModels.kt):
 
+*   **Anchor Fail-Safe**: If the Generative AI accidentally omits a `LOCKED` or `FORCED` anchor from its final JSON blueprint array, the rehydrator intercepts the result and manually re-injects the locked item into the `VisualBlueprintData`, ensuring the "user is always correct" invariant holds at the presentation layer.
 *   **Keyword Fallback**: If a product's primary category is generic (e.g., `ACTIVEWEAR`), the mapper scans the name for "tank", "pant", "eye", etc.
 *   **No Item Left Behind**: Any item returned by the AI that doesn't fit a primary slot is greedily assigned to an available empty slot to ensure 100% visualization.
 *   **Outerwear Support**: Added a dedicated `OUTER` slot and anchor point to the body silhouette for complex layering.

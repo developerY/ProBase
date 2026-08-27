@@ -157,7 +157,8 @@ The engine is built on the principle of **Information Elimination**: all computa
 ### Module 7: UI Rehydration & Mapping (`:applications:kocolor:features:analyzer`)
 
 - **`GreedyRehydrator`**:
-  - `fun mapToVisualBlueprintData(cosmetics: List<CosmeticItem>, clothing: List<ClothingItem>, palette: List<String>, isComplete: Boolean): VisualBlueprintData`
+  - `fun mapToVisualBlueprintData(cosmetics: List<CosmeticItem>, clothing: List<ClothingItem>, palette: List<String>, isComplete: Boolean, activeClothingAnchors: List<ClothingItem> = emptyList(), activeCosmeticAnchors: List<CosmeticItem> = emptyList()): VisualBlueprintData`
+  - **The Anchor Fail-Safe**: If the Generative AI hallucinates and omits a `LOCKED` or `FORCED` anchor from its JSON response (`selectedClothingIds` or `selectedCosmeticIds`), the `GreedyRehydrator` intercepts the response and manually re-injects the anchor item (clothing or cosmetic) back into `VisualBlueprintData`. This guarantees the "user is always correct" invariant holds true at the UI layer regardless of LLM behavior.
   - **Keyword Fallback**: If an item's primary category is generic (e.g., `ACTIVEWEAR`), scans product name for keywords ("tank" $\to$ Top, "pants" $\to$ Bottom, "jacket" $\to$ Outerwear).
   - **No Item Left Behind**: Greedily assigns leftover recommended items to empty slots so the Compose UI state machine never hangs on "Pending...".
   - **Completion State**: When `isComplete == true`, sets unassigned slots to "None" / "Not required" instead of "Pending...".
