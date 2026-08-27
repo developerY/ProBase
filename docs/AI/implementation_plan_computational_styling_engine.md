@@ -5,15 +5,16 @@ This document defines the architectural standard for KoColor's styling pipeline.
 > [!IMPORTANT]
 > **Core Principle**: The AI is not the wardrobe search engine. KoColor's local mathematical engine is the wardrobe search engine.
 >
-> The local system determines which garments are physically, contextually, and chromatically viable. AI receives only that constrained candidate set and performs the higher-order aesthetic reasoning that deterministic algorithms cannot reliably provide.
+> **Information Elimination**: Token optimization is achieved by reducing irrelevant information *before* it becomes tokens. The local system determines which garments are physically, contextually, and chromatically viable. AI receives only that constrained candidate set and performs the higher-order aesthetic reasoning that deterministic algorithms cannot reliably provide.
 
 ## 1. Deterministic-First Architecture
 
-All objectively computable constraints, mathematical color analysis, candidate retrieval, and filtering are performed locally on the device. AI is strictly reserved for higher-order aesthetic synthesis, spatial reasoning, and stylistic rationale.
+All objectively computable constraints, mathematical color analysis, candidate retrieval, and filtering are performed locally on the device. AI is strictly reserved for higher-order aesthetic synthesis, visual/multimodal reasoning, and stylistic rationale.
 
 **The Golden Rules:**
-1.  **Context Constriction**: AI never receives the user's entire wardrobe. AI receives only the locally retrieved, mathematically compatible reasoning set (Top 8–16 candidates).
-2.  **The Privacy Invariant**: Raw images may be consumed by on-device multimodal AI (e.g., Gemini Nano) to analyze drape and texture, but are never included in cloud-tier requests. Cloud requests receive only semantic manifests and biometric telemetry.
+1.  **Context Constriction**: AI never receives the user's entire wardrobe. AI receives only the locally retrieved, mathematically compatible reasoning set.
+2.  **Dynamic Top-K**: The candidate pool size is governed by the active AI provider's policy (maximum 16), ensuring a high reasoning-per-token ratio.
+3.  **The Privacy Invariant**: Raw images may be consumed by on-device multimodal AI (e.g., Gemini Nano) to analyze drape and texture, but are never included in cloud-tier requests. Cloud requests receive only semantic manifests and biometric telemetry.
 
 ---
 
@@ -28,10 +29,8 @@ All objectively computable constraints, mathematical color analysis, candidate r
     3.  `CIELAB` (Human vision space) $\to$
     4.  `ΔE00` (Perceptual distance/clash prevention) $\to$
     5.  **Harmony Score**
-- **Harmony Checks**:
-    - `isComplementary`: Hue distance $\approx 180^\circ$.
-    - `isAnalogous`: Hue distance $\approx \pm 30^\circ$.
-    - `isMonochromatic`: Hue $\approx$ same, Saturation/Lightness vary.
+- **Harmony Checks**: Compute geometric relationships on the color wheel:
+    - `isComplementary`, `isAnalogous`, `isMonochromatic`.
 
 ---
 
@@ -39,25 +38,34 @@ All objectively computable constraints, mathematical color analysis, candidate r
 
 ### [NEW] `DeterministicContextEngine.kt`
 - **Location**: `applications:kocolor:data:usecase`
-- **Responsibility**: Orchestrates the retrieval pipeline to prune 300+ items down to a "Reasoning Set" of 8–16 items.
+- **Responsibility**: Orchestrates the retrieval pipeline to prune 300+ items down to a "Reasoning Set" (Top-K) items.
+
+#### Hard Constraints (Elimination)
+Before scoring, the engine immediately prunes the inventory based on binary criteria:
+-   **Availability**: Exclude items where `isHidden: true` or status is unavailable.
+-   **Weather Gating**: Filter by thermal weight vs. ambient temperature.
+-   **Rotation Lockout**: Exclude items worn in the last 3 days.
+-   **Occasion Mismatch**: Strict category eligibility for the selected intent.
 
 #### Anchor Selection Policy
-The engine establishes an "Anchor" garment (typically a top or bottom) using a strict, deterministic fallback sequence:
-1.  **User-Locked Item**: Explicitly pinned in the UI.
-2.  **User-Selected Item**: Manually chosen or focused.
-3.  **Highest Context-Fit**: Best thermal match for weather and occasion.
-4.  **Highest Color-Profile Compatibility**: Aligns perfectly with user seasonal profile.
-5.  **Best Freshness Score**: Based on rotation/wear history (exclude if worn < 3 days).
-6.  **Deterministic Tie-breaker**: Alphanumeric ID fallback.
+The engine establishes an "Anchor" garment (typically a top or bottom) that must first pass Hard Constraints, using this hierarchy:
+1.  **User-Locked Item**: Strictly honored (bypasses constraints if forced).
+2.  **User-Selected Item**: Recently tapped or focused.
+3.  **Context-Eligible Garment**: Highest weather/occasion fit score.
+4.  **Color-Profile Compatibility**: Aligns perfectly with user seasonal profile.
+5.  **Freshness / Rotation Adherence**.
+6.  **Stable ID Tie-breaker**.
 
-#### Continuous Compatibility Scoring
-Rather than binary elimination, every candidate garment receives a weighted composite score:
-- `Context Fit` (Weather/Occasion)
-- `Hue Harmony` (Analogous/Complementary/Monochromatic)
-- `ΔE / Perceptual Distance` (Clash prevention)
-- `Contrast Balance` (Aligns with user contrast telemetry)
-- `Appearance Fit` (Complements user skin undertone)
-- `Freshness Score` (Rotation adherence)
+#### Continuous Compatibility Scoring (Ranking)
+The remaining eligible items are ranked relative to the Anchor using a weighted composite score:
+- `Context Fit` + `Hue Harmony` + `ΔE Distance` + `Contrast Balance` + `Appearance Fit` + `Freshness Score`.
+
+#### Role-Aware Candidate Diversity
+Ensures the Reasoning Set contains useful combinations rather than just high-scoring colors. A 12-item set balances into:
+-   3–4 Tops
+-   3–4 Bottoms
+-   2–3 Footwear
+-   1–2 Outerwear/Accessories
 
 ---
 
@@ -76,25 +84,19 @@ Rather than binary elimination, every candidate garment receives a weighted comp
 ## 5. Phase 4: Token Optimization & Privacy
 
 ### Context-Aware Serialization
-- **Target**: Substantially reduce token footprint versus the existing JSON representation; measure the actual reduction through `countTokens()`.
+- **Target**: Measure actual reduction through `countTokens()`.
 - Use the `CompactManifestSerializer` to convert the Top-K items into dense, low-token tuples.
-- **Example**: `[w55|Top|Khaki Trench|#B8A992|Warm|Deep|Cotton]`
-
-### Type-Safe Privacy Boundary
-- **Invariant**: No raw pixels leave the device for cloud tiers.
-- Cloud prompts receive only the `StyleTelemetry` vector and the compact manifest.
 
 ---
 
 ## 6. Verification Plan
 
 ### 1. Mathematical Accuracy
-- Unit test the `ColorHarmonyEngine` with known harmonic pairs (e.g., Red and Green should be `isComplementary: true`).
-- Verify `CIEDE2000` correctly flags "clashing" muddy colors.
+- Unit test `ColorHarmonyEngine` with known harmonic pairs and clashing thresholds.
 
 ### 2. Retrieval Invariants
-- **Candidate Invariant**: Ensure the AI never receives more than the policy maximum (e.g., 16 candidates).
-- Verify the **Anchor** is always included at the top of the manifest.
+- **Diversity Check**: Verify Reasoning Sets contain multiple garment roles (Tops, Bottoms, Shoes).
+- **Anchor Stability**: Ensure the Anchor is always included at index 0 of the manifest.
 
 ### 3. Fault Tolerance
-- Simulate AI model failure and verify the `HeuristicFallbackEngine` produces a coherent result based on the same mathematical color logic.
+- Verify `HeuristicFallbackEngine` produces a coherent result using the same colorimetry logic when AI fails.
