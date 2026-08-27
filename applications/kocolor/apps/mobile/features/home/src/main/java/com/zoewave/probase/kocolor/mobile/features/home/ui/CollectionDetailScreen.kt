@@ -72,6 +72,7 @@ import com.zoewave.probase.core.model.ritual.SavedAnalysis
 import com.zoewave.probase.core.model.ritual.SeasonalType
 import com.zoewave.probase.core.model.ritual.Undertone
 import com.zoewave.probase.core.ui.util.parseColor
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.CollapsibleFashionistaScoreCard
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.VisualBlueprintSection
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.toVisualBlueprintData
 import com.zoewave.probase.kocolor.mobile.features.home.R
@@ -134,6 +135,8 @@ fun CollectionDetailScreen(
             )
         }
     ) { padding ->
+        val visualBlueprintData = remember(advice) { advice.toVisualBlueprintData() }
+
         LazyColumn(
             modifier = Modifier
                 .padding(padding)
@@ -284,7 +287,14 @@ fun CollectionDetailScreen(
             if (expandedSections.contains("BLUEPRINT")) {
                 item {
                     VisualBlueprintSection(
-                        data = advice.toVisualBlueprintData()
+                        data = visualBlueprintData
+                    )
+                }
+                item {
+                    Spacer(Modifier.height(12.dp))
+                    CollapsibleFashionistaScoreCard(
+                        score = visualBlueprintData.koColorScore,
+                        initialExpanded = false
                     )
                 }
             }
