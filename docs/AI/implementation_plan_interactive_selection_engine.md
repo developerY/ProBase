@@ -1,4 +1,4 @@
-# Implementation Plan: Interactive Parametric Selection Mode & Deterministic Engine
+# Implementation Plan: Interactive Selection Mode & Deterministic Engine
 
 This document details the refined technical specifications for KoColor's **Interactive Parametric Selection System** and **Deterministic-First Computational Styling Engine**.
 
@@ -10,11 +10,13 @@ The engine is built on the principle of **Information Elimination**: all computa
 
 ### Non-Negotiable System Invariants
 
-1. **Top-K Candidate Separation:** User-locked anchors **never** consume the active AI provider's Top-K limit. The prompt inventory formula is strictly: `Locked Context + Candidate Budget (K) = Total Prompt Inventory`.
-2. **Type-Safe Privacy Boundary:** The AI input model uses `sealed interface AiInput`. Cloud AI providers strictly accept `TextOnly`. Raw images/bitmaps are encapsulated in `Multimodal` and can only be routed to local on-device providers (`supportsLocalImageIngestion = true`).
-3. **Retrieval Invariant:** The AI never performs wardrobe retrieval. The local engine ranks the *entire* eligible candidate pool. The AI provider merely dictates how much of that ranked pool it can afford to see (the $K$-slice) based on its token budget.
-4. **Circular Hue Mathematics:** `CompositeColorProfile` must use circular statistics (vector addition) to calculate dominant hues. Arithmetic averaging of hues ($359^\circ$ and $1^\circ \to 180^\circ$) is mathematically invalid and strictly forbidden.
-5. **Progressive Selection State:** Every user selection updates a first-class `StyleSelectionState`, dynamically recalculating the composite profile, missing roles, and the ranked candidate pool before the AI is invoked.
+1. **Top-K Separation (`CandidateAdditions`):** User-locked anchors **never** consume the active AI provider's retrieval budget. The prompt inventory formula is strictly: `Locked Context + Candidate Additions (K) = Total Prompt Inventory`.
+2. **Type-Safe Privacy Boundary:** The AI input model uses `sealed interface AiInput`. Cloud AI providers strictly accept `TextOnly`. Raw images/bitmaps are encapsulated in `Multimodal` and can only be routed to local on-device providers (`supportsLocalImageIngestion = true`). Cloud requests receive only derived `StyleTelemetry` and semantic text manifests.
+3. **Retrieval Invariant:** The AI never performs wardrobe retrieval. The local engine ranks the *entire* eligible candidate pool. The AI provider merely dictates how much of that ranked pool it can afford to see (the $K$-slice of additions) based on its token budget.
+4. **Chroma-Weighted Circular Hue Mathematics:** `CompositeColorProfile` must calculate dominant hues using circular statistics weighted by chroma and saturation ($x = \Sigma (\text{chroma} \times \text{weight} \times \cos(\theta))$, $y = \Sigma (\text{chroma} \times \text{weight} \times \sin(\theta))$, $\text{meanHue} = \text{atan2}(y, x)$). Arithmetic averaging of hues ($359^\circ$ and $1^\circ \to 180^\circ$) is mathematically invalid and strictly forbidden.
+5. **Unified Anchor & Selection Pipeline:**
+   - **Interactive Styling:** User-locked/selected items become immutable anchors. User-forced items must be preserved even if violating normal deterministic rules (record the violation in `CandidateProvenance`).
+   - **Free Styling (No Locks):** If no locked items exist, the engine deterministically selects an anchor item (User-Locked $\to$ User-Selected $\to$ Context-Fit $\to$ Color-Fit $\to$ Freshness $\to$ Tie-breaker), builds the profile, and retrieves the candidate pool.
 6. **Continuous Color Scoring:** Color compatibility is a weighted continuous score ($0.0\text{--}1.0$) combining Hue geometry, $\Delta E_{00}$, lightness, saturation, and contrast balance—not a rigid binary filter.
 7. **Signature Item Bypass:** Cosmetics and accessories marked `isSignature = true` bypass rotation cooldowns while still tracking usage analytics.
 
@@ -32,7 +34,7 @@ The engine is built on the principle of **Information Elimination**: all computa
 - **`StyleSelectionState`**:
   - `val lockedAnchors: List<ClothingItem>`
   - `val missingRoles: List<String>`
-  - `val compositeProfile: CompositeColorProfile?`
+  - `val compositeProfile: CompositeColorProfile`
   - `val fullRankedCandidatePool: List<CandidateProvenance>`
 - **`CandidateProvenance`**: Holds `clothingItem: ClothingItem?`, `cosmeticItem: CosmeticItem?`, `contextScore: Float`, `colorScore: Float`, `appearanceScore: Float`, `freshnessScore: Float`, `compositeScore: Float`, and `retrievalReason: String`.
 
@@ -44,12 +46,12 @@ The engine is built on the principle of **Information Elimination**: all computa
   - `dominantHues: List<Float>`, `secondaryHues: List<Float>`
   - `temperatureDistribution: Map<String, Float>`, `contrastRange: Float`
 - **`ColorHarmonyEngine`**:
-  - `fun calculateCompositeProfile(items: List<ClothingItem>): CompositeColorProfile`: Uses circular mean statistics for hue calculations to prevent wrap-around errors.
+  - `fun calculateCompositeProfile(items: List<ClothingItem>): CompositeColorProfile`: Uses chroma-weighted circular statistics ($x = \Sigma (\text{chroma} \times \text{weight} \times \cos(\theta))$, $y = \Sigma (\text{chroma} \times \text{weight} \times \sin(\theta))$, $\text{meanHue} = \text{atan2}(y, x)$) to prevent hue wrap-around errors and prevent low-chroma grays from skewing dominant hues.
   - `fun scoreCandidateAgainstComposite(candidateHsl: Triple<Float, Float, Float>, composite: CompositeColorProfile, telemetry: ColorTelemetry): Float`: Continuous compatibility scoring ($0.0\text{--}1.0$).
   - **Color Math Utilities**:
     - RGB $\leftrightarrow$ HSL $\leftrightarrow$ CIELAB color space conversions.
     - Continuous Hue Harmony geometry: Complementary ($\pm 180^\circ$), Analogous ($\pm 30^\circ$), Triadic ($\pm 120^\circ$).
-    - Perceptual color distance using the $\Delta E_{00}$ (CIEDE2000) formula.
+    - Perceptual color distance using the $\Delta E_{00}$ (CIEDE2000) formula as a continuous feature rather than a binary clash filter.
     - Contrast ratio validation against user `ColorTelemetry.contrastScore`.
 
 ---
@@ -64,13 +66,14 @@ The engine is built on the principle of **Information Elimination**: all computa
   - Instantly returns `0.0f` if `isSignature == true`. Otherwise computes recency decay ($>0.70$ prunes item).
 - **`DeterministicContextEngine`**:
   - Inject `RoleGapAnalyzer`, `ColorHarmonyEngine`, and `RotationScoringUseCase`.
-  - `suspend fun generateSelectionState(inventory: List<ClothingItem>, lockedItems: List<ClothingItem>, context: StyleRequestContext): StyleSelectionState`
+  - `suspend fun generateSelectionState(inventory: List<ClothingItem>, lockedConstraints: List<LockedConstraint>, context: StyleRequestContext): StyleSelectionState`
   - **Pipeline**:
-    1. Calculate `CompositeColorProfile` from `lockedItems` using circular statistics.
-    2. Identify `missingRoles` via `RoleGapAnalyzer`.
-    3. Hard Filter remaining inventory (weather temperature gating, availability, rotation penalty).
-    4. Soft Score all eligible items against `CompositeColorProfile` and `ColorTelemetry`.
-    5. Return the full `StyleSelectionState` containing the comprehensively ranked candidate pool.
+    1. Resolve anchors. If `lockedConstraints` is empty, deterministically select an anchor. If `isUserForced == true`, preserve the item and tag `CandidateProvenance` with the constraint violation.
+    2. Calculate `CompositeColorProfile` from anchors using chroma-weighted circular statistics.
+    3. Identify `missingRoles` via `RoleGapAnalyzer`.
+    4. Hard Filter remaining inventory (weather temperature gating, availability, rotation penalty).
+    5. Soft Score all eligible additions against `CompositeColorProfile` and `ColorTelemetry`.
+    6. Return the full `StyleSelectionState` containing the comprehensively ranked candidate pool.
 
 ---
 
@@ -83,7 +86,7 @@ The engine is built on the principle of **Information Elimination**: all computa
     - `MINIMAL`: `[id|category|name|hex|LOCKED/CANDIDATE]`
     - `BALANCED`: `[id|category|name|hex|temp|depth|LOCKED/CANDIDATE]`
     - `EXPANDED`: `[id|category|name|hex|temp|depth|material|LOCKED/CANDIDATE]`
-- **`AiProviderCapability`**: `id`, `displayName`, `maxInputTokens`, `maxOutputTokens`, `timeoutMillis`, `maxTopK: Int = 16`, `minTopK: Int = 6`, `isLocal: Boolean`, `supportsLocalImageIngestion: Boolean = false`.
+- **`AiProviderCapability`**: `id`, `displayName`, `maxInputTokens`, `maxOutputTokens`, `timeoutMillis`, `maxCandidateAdditions: Int = 12`, `minCandidateAdditions: Int = 4`, `isLocal: Boolean`, `supportsLocalImageIngestion: Boolean = false`.
 - **`sealed interface AiExecutionFailure`**: `Unavailable`, `ContextTooLarge`, `QuotaExceeded`, `Timeout`, `NetworkError`, `ExecutionError(val t: Throwable)`.
 - **`interface AiProvider`**:
   - `val capability: AiProviderCapability`
@@ -97,7 +100,7 @@ The engine is built on the principle of **Information Elimination**: all computa
 
 - **`PromptAssembler`**:
   - `fun buildRequest(state: StyleSelectionState, additionsK: Int, detailLevel: SerializationDetailLevel, supportsImage: Boolean, context: StyleRequestContext): AiInput`
-  - Takes the Top-K slice from `state.fullRankedCandidatePool`.
+  - Takes `state.fullRankedCandidatePool.take(additionsK)`.
   - Generates `TextOnly` or `Multimodal` strictly based on `supportsImage`.
   - Explicitly prompts the AI to complete the locked anchors by filling `state.missingRoles` using candidate additions without replacing locked items.
 - **`StyleSimulatorEngine`**:
@@ -105,12 +108,12 @@ The engine is built on the principle of **Information Elimination**: all computa
   - `suspend fun generateBlueprint(inventory: List<ClothingItem>, context: StyleRequestContext): StyleBlueprint`
   - Iterates ranked providers (`Local Multimodal` $\to$ `BYOK` $\to$ `Firebase Cloud` $\to$ `Deterministic Fallback`).
   - **Adaptive Step-Down Loop**:
-    - Starts with `K = provider.capability.maxTopK` and `EXPANDED` detail.
+    - Starts with `K = provider.capability.maxCandidateAdditions` and `EXPANDED` detail.
     - While token limit exceeded (must call `countTokens()` on the exact assembled `AiInput` every loop):
       1. `EXPANDED` $\to$ `BALANCED`
       2. `BALANCED` $\to$ `MINIMAL`
-      3. `K -= 2` (reduces additions only; locked anchors remain intact).
-      4. If $K$ hits `minTopK` and still fails, return `AiExecutionFailure.ContextTooLarge` and route to next provider.
+      3. `K -= 2` (reduces candidate additions only; locked anchors remain intact).
+      4. If $K$ hits `minCandidateAdditions` and still fails, return `AiExecutionFailure.ContextTooLarge` and route to next provider.
 
 ---
 
@@ -128,7 +131,9 @@ The engine is built on the principle of **Information Elimination**: all computa
 
 ## 3. Verification Plan
 
-1. **Interactive Selection Audit**: Verify that user-locked items are never replaced or omitted by the engine, and that candidate retrieval only pulls from missing roles.
-2. **Circular Hue Test**: Verify `CompositeColorProfile` correctly calculates circular mean for hues across $350^\circ$ and $10^\circ$ boundary $\to$ $0^\circ$ (not $180^\circ$).
-3. **Top-K Separation & Preflight**: Confirm that locked items do not decrement the candidate $K$ budget during preflight step-down iterations.
+1. **Selection Cascade Test**:
+   - Start with 300 wardrobe items. Lock "Black Trousers". Verify it remains immutable, composite profile generates, and engine identifies missing TOP.
+   - Lock "Burgundy Jacket". Verify both remain immutable, roles recalculate, candidate rankings dynamically update, and irrelevant items are removed.
+2. **Circular Hue Test**: Verify `CompositeColorProfile` correctly calculates chroma-weighted circular mean for hues across $350^\circ$ and $10^\circ$ boundary $\to$ $0^\circ$ (not $180^\circ$), and low-chroma gray items don't skew the dominant hue.
+3. **Candidate Additions Separation & Preflight**: Confirm that locked items do not decrement the candidate $K$ budget during preflight step-down iterations.
 4. **Type-Safe Privacy & App Check Audit**: Verify `AiInput` guarantees `Multimodal` inputs are never passed to cloud `AiProvider` implementations.

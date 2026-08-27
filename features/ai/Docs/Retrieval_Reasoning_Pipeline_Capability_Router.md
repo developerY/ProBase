@@ -40,12 +40,12 @@ The [`CapabilityRouter`](file:///Users/developer/AndroidStudioProjects/ProBase/a
 
 The [`StyleSimulatorEngine`](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/usecase/StyleSimulatorEngine.kt) performs a **Preflight Token Audit** before every request. If the prompt exceeds the provider's `maxInputTokens`, it adaptively compresses the context:
 
-1.  **Assemble Prompt:** Build the exact final prompt string.
-2.  **Audit Tokens:** Call `provider.countTokens()`.
+1.  **Assemble Prompt:** Build the exact final `AiInput` request.
+2.  **Audit Tokens:** Call `provider.countTokens(input)`.
 3.  **Step-Down Logic:**
     -   **Attempt A:** Downgrade `EXPANDED` manifest to `BALANCED`.
     -   **Attempt B:** Downgrade `BALANCED` to `MINIMAL`.
-    -   **Attempt C:** Reduce `Top-K` candidate count (e.g., $16 \to 14 \to 12$).
+    -   **Attempt C:** Reduce candidate additions $K$ (e.g., $12 \to 10 \to 8$) without affecting locked anchors.
     -   **Attempt D:** Failover to the next best provider.
 
 ---

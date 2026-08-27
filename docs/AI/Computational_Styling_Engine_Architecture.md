@@ -26,9 +26,10 @@ The "Anchor" (typically a Top or Bottom) sets the mathematical center of the out
 ### Phase 2: The Color Harmony Engine
 Located in [`ColorHarmonyEngine.kt`](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/color/ColorHarmonyEngine.kt), this handles perceptual color math:
 *   **Space Conversion**: RGB $\to$ HSL $\to$ CIELAB.
+*   **Chroma-Weighted Circular Hues**: Uses circular statistics ($x = \Sigma (\text{chroma} \times \text{weight} \times \cos(\theta))$, $y = \Sigma (\text{chroma} \times \text{weight} \times \sin(\theta))$, $\text{meanHue} = \text{atan2}(y, x)$) to prevent hue wrap-around errors and prevent low-chroma grays from skewing dominant hues.
 *   **Geometry**: Calculates Complementary, Analogous, and Monochromatic distances.
-*   **Perceptual Shield**: Uses delta-E heuristics to prevent "muddy" or accidental clashing.
-*   **Contrast Balancing**: Ensures candidates align with the user's biometric contrast requirement (e.g., Light/Deep).
+*   **Perceptual Shield**: Uses CIEDE2000 ($\Delta E_{00}$) as a continuous feature to evaluate perceptual relationships and contrast.
+*   **Contrast Balancing**: Ensures candidates align with the user's contrast requirement (`ColorTelemetry.contrastScore`).
 
 ### Phase 3: Role-Aware Diversity
 The engine ensures the AI receives a solvable puzzle. It balances the Top-$K$ candidates to include:
@@ -53,8 +54,8 @@ Every request passes through an **Adaptive Fit Engine** in the [`StyleSimulatorE
 ## 4. Privacy & Security Invariants
 
 ### Type-Safe Data Bifurcation
-*   **Cloud Tier**: Strictly typed to accept only `StyleTelemetry` (mathematical vectors) and text manifests. Transmission of raw pixels to the cloud is impossible.
-*   **Local Tier (Multimodal)**: On-device providers (Gemini Nano) are permitted to ingest raw Bitmaps for texture/drape analysis because the data never leaves the NPU.
+*   **Cloud Tier**: Strictly typed to accept only `AiInput.TextOnly` (containing `ColorTelemetry` / `AppearanceProfile` vectors and text manifests). Transmission of raw pixels to the cloud is compile-time impossible.
+*   **Local Tier (Multimodal)**: On-device providers (Gemini Nano) accept `AiInput.Multimodal` for texture/drape analysis because the data never leaves the NPU.
 
 ### Multi-Tier Deterministic Caching
 The [`PromptCacheRepository`](file:///Users/developer/AndroidStudioProjects/ProBase/features/ai/local/src/main/java/com/zoewave/probase/features/ai/local/data/PromptCacheRepository.kt) stores results indexed by a SHA-256 fingerprint including:
