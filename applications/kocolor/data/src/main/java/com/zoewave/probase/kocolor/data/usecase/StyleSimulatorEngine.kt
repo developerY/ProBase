@@ -2,26 +2,31 @@ package com.zoewave.probase.kocolor.data.usecase
 
 import android.util.Log
 import com.zoewave.probase.core.model.ritual.ClothingItem
+import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.features.ai.core.AiProvider
 import com.zoewave.probase.features.ai.core.StylePromptRequest
 import com.zoewave.probase.features.ai.local.data.PromptCacheRepository
+import com.zoewave.probase.kocolor.data.color.CandidateProvenance
+import com.zoewave.probase.kocolor.data.telemetry.StyleAuditLogger
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class StyleSimulatorEngine @Inject constructor(
+    private val contextEngine: DeterministicContextEngine,
     private val candidateFilter: WardrobeCandidateFilter,
     private val serializer: CompactManifestSerializer,
     private val promptAssembler: PromptAssembler,
     private val capabilityRouter: CapabilityRouter,
     private val cache: PromptCacheRepository,
+    private val auditLogger: StyleAuditLogger,
     private val fallbackEngine: DeterministicStyleEngine
 ) {
 
     companion object {
-        private const val RETRIEVAL_POLICY_VERSION = "2.0" // Router-based RAG
-        private const val PROMPT_VERSION = "2.0"
+        private const val RETRIEVAL_POLICY_VERSION = "3.0" // Anchor-Driven Pipeline
+        private const val PROMPT_VERSION = "3.0"
     }
 
     private val json = Json { 
@@ -33,16 +38,18 @@ class StyleSimulatorEngine @Inject constructor(
      * Entry point for generating a style blueprint using the best available AI provider.
      */
     suspend fun generateBlueprint(
-        inventory: List<ClothingItem>,
+        wardrobe: List<ClothingItem>,
+        cosmetics: List<CosmeticItem>,
         requestContext: StyleRequestContext
     ): StyleBlueprint {
+        auditLogger.startRequest(requestContext.requestId)
         val providers = capabilityRouter.getRankedAvailableProviders()
         
         for (provider in providers) {
             val providerStartTime = System.currentTimeMillis()
             Log.d("StyleSimulatorEngine", "Attempting provider: ${provider.capability.displayName}")
             
-            val fitResult = adaptContextToProvider(provider, inventory, requestContext)
+            val fitResult = adaptContextToProvider(provider, wardrobe, cosmetics, requestContext)
             
             if (fitResult != null) {
                 // Phase 3: Deterministic Cache Check
@@ -51,7 +58,7 @@ class StyleSimulatorEngine @Inject constructor(
                     promptVersion = PROMPT_VERSION,
                     modelVersion = provider.capability.id,
                     retrievalPolicyVersion = RETRIEVAL_POLICY_VERSION,
-                    appearanceTelemetry = requestContext.appearanceTelemetry,
+                    appearanceTelemetry = requestContext.appearanceTelemetry.toString(),
                     weatherState = requestContext.weather,
                     userIntent = requestContext.intent,
                     minifiedManifest = fitResult.request.exactPromptString
@@ -61,6 +68,13 @@ class StyleSimulatorEngine @Inject constructor(
                 if (cachedResponse != null) {
                     return try {
                         val blueprint = decodeBlueprint(cachedResponse)
+                        auditLogger.logAiExecution(
+                            requestId = requestContext.requestId,
+                            providerId = "CACHE_${provider.capability.id}",
+                            tokens = 0,
+                            blueprint = blueprint
+                        )
+                        auditLogger.printAuditTrail(requestContext.requestId)
                         logTelemetry(
                             tier = "CACHE_${provider.capability.id}",
                             kLimit = fitResult.kLimit,
@@ -73,12 +87,15 @@ class StyleSimulatorEngine @Inject constructor(
                     } catch (e: Exception) {
                         Log.e("StyleSimulatorEngine", "Failed to decode cached result", e)
                         // Continue to execute if cache is corrupt
-                        executeAndCache(provider, fitResult, fingerprint, providerStartTime) ?: continue
+                        executeAndCache(provider, fitResult, fingerprint, providerStartTime, requestContext.requestId) ?: continue
                     }
                 }
 
-                val blueprint = executeAndCache(provider, fitResult, fingerprint, providerStartTime)
-                if (blueprint != null) return blueprint
+                val blueprint = executeAndCache(provider, fitResult, fingerprint, providerStartTime, requestContext.requestId)
+                if (blueprint != null) {
+                    auditLogger.printAuditTrail(requestContext.requestId)
+                    return blueprint
+                }
             } else {
                 Log.w("StyleSimulatorEngine", "Could not fit context into provider ${provider.capability.id} budget")
                 logTelemetry(
@@ -98,6 +115,14 @@ class StyleSimulatorEngine @Inject constructor(
         Log.i("StyleSimulatorEngine", "All providers failed. Falling back to deterministic engine.")
         val blueprint = fallbackEngine.generate(requestContext)
         
+        auditLogger.logAiExecution(
+            requestId = requestContext.requestId,
+            providerId = "DETERMINISTIC_FALLBACK",
+            tokens = 0,
+            blueprint = blueprint
+        )
+        auditLogger.printAuditTrail(requestContext.requestId)
+        
         logTelemetry(
             tier = "DETERMINISTIC_FALLBACK",
             kLimit = 0,
@@ -114,7 +139,8 @@ class StyleSimulatorEngine @Inject constructor(
         provider: AiProvider,
         fitResult: AdaptiveFitResult,
         fingerprint: String,
-        startTime: Long
+        startTime: Long,
+        requestId: String
     ): StyleBlueprint? {
         val executionResult = provider.execute(fitResult.request)
         val latency = System.currentTimeMillis() - startTime
@@ -124,6 +150,13 @@ class StyleSimulatorEngine @Inject constructor(
             try {
                 val blueprint = decodeBlueprint(rawResult)
                 cache.put(fingerprint, rawResult)
+                auditLogger.logAiExecution(
+                    requestId = requestId,
+                    providerId = provider.capability.id,
+                    tokens = fitResult.tokenCount,
+                    blueprint = blueprint
+                )
+                // auditLogger.printAuditTrail(...)
                 logTelemetry(
                     tier = provider.capability.id,
                     kLimit = fitResult.kLimit,
@@ -176,7 +209,8 @@ class StyleSimulatorEngine @Inject constructor(
      */
     private suspend fun adaptContextToProvider(
         provider: AiProvider,
-        inventory: List<ClothingItem>,
+        wardrobe: List<ClothingItem>,
+        cosmetics: List<CosmeticItem>,
         context: StyleRequestContext
     ): AdaptiveFitResult? {
         val cap = provider.capability
@@ -184,8 +218,26 @@ class StyleSimulatorEngine @Inject constructor(
         var detailLevel = SerializationDetailLevel.EXPANDED
 
         while (currentK >= cap.minTopK) {
-            val candidates = candidateFilter.getCandidates(inventory, context, limit = currentK)
-            val manifest = serializer.serialize(candidates, detailLevel)
+            // Phase 2: Anchor-Driven Retrieval
+            val wCandidates = contextEngine.buildReasoningSet(wardrobe, context, limit = currentK)
+            val cItems = candidateFilter.getCosmeticCandidates(cosmetics, context, limit = currentK)
+            
+            // Map cosmetics to provenance for audit logging
+            val cCandidates = cItems.map { item ->
+                CandidateProvenance(
+                    cosmeticItem = item,
+                    contextScore = 0.5f, // Simplified for now
+                    colorScore = 0.8f,
+                    appearanceScore = 0.8f,
+                    freshnessScore = 1.0f,
+                    retrievalReason = if (item.isSignature) "[Signature Item] Rotation bypassed." else "Role diversity match"
+                )
+            }
+            
+            // Log combined reasoning set
+            auditLogger.logReasoningSet(context.requestId, wCandidates + cCandidates)
+
+            val manifest = serializer.serialize(wCandidates, cItems, detailLevel)
             
             val candidatePrompt = promptAssembler.buildExactRequest(
                 context = context,

@@ -125,7 +125,7 @@ fun HandBlueprintView(
 
         BlueprintCallout(
             label = "NAILS",
-            productName = data.nailsItem?.name ?: "Pending...",
+            productName = data.nailsItem?.name ?: if (data.isComplete) "Not required" else "Pending...",
             colorHex = data.nailsItem?.colorHex,
             isExpanded = expandedCategory == "NAILS",
             onExpandToggle = { expandedCategory = if (expandedCategory == "NAILS") null else "NAILS" },

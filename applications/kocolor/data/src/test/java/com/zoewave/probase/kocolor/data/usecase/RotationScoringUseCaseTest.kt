@@ -22,6 +22,18 @@ class RotationScoringUseCaseTest {
     }
 
     @Test
+    fun `when item is signature, penalty is always 0`() = runTest {
+        // Given
+        coEvery { repository.observeGlobalMetrics() } returns flowOf(GlobalRotationMetricsEntity(totalOutfitsCommitted = 10))
+        
+        // When
+        val penalty = useCase.calculateRotationPenalty("item1", "TOPS", isSignature = true)
+        
+        // Then
+        assertThat(penalty).isEqualTo(0.0)
+    }
+
+    @Test
     fun `when global outfits less than 5, penalty is always 0 (Cold Start Rule)`() = runTest {
         // Given
         coEvery { repository.observeGlobalMetrics() } returns flowOf(GlobalRotationMetricsEntity(totalOutfitsCommitted = 3))

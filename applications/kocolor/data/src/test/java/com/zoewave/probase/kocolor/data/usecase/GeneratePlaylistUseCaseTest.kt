@@ -51,23 +51,23 @@ class GeneratePlaylistUseCaseTest {
         coEvery { rotationScoringUseCase.calculateRotationPenalty(any(), any(), any(), any()) } returns 0.0
         coEvery { playlistRepository.savePlaylist(any(), any()) } just Runs
         
-        val blueprint = StyleBlueprint("Rationale", listOf("w_1"), emptyList(), emptyList())
+        val blueprint = StyleBlueprint("Rationale", listOf("w_1"), listOf("c_1", "c_2", "c_3", "c_4"), emptyList())
         coEvery { 
-            simulatorEngine.generateBlueprint(any(), any())
+            simulatorEngine.generateBlueprint(any(), any(), any())
         } returns blueprint
 
         useCase.generateWeeklyPlaylist(startDate, day1Anchors = anchors)
 
         // Verify day 1 was called with anchors
         coVerify { 
-            simulatorEngine.generateBlueprint(any(), match { 
+            simulatorEngine.generateBlueprint(any(), any(), match { 
                 it.anchoredClothingIds.contains("w_1")
             })
         }
         
         // Verify subsequent days were called WITHOUT anchors
         coVerify(exactly = 6) { 
-            simulatorEngine.generateBlueprint(any(), match { 
+            simulatorEngine.generateBlueprint(any(), any(), match { 
                 it.anchoredClothingIds.isEmpty()
             })
         }

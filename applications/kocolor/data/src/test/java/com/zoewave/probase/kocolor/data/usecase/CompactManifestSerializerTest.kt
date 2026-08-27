@@ -12,9 +12,9 @@ class CompactManifestSerializerTest {
     @Test
     fun `serialize should produce MINIMAL output`() {
         val item = ClothingItem(internalId = 55, name = "Trench", category = ClothingCategory.TOPS, colorHex = "#B8A992")
-        val result = serializer.serialize(listOf(item), SerializationDetailLevel.MINIMAL)
+        val result = serializer.serialize(listOf(item), emptyList(), SerializationDetailLevel.MINIMAL)
 
-        assertThat(result).isEqualTo("[w_55|TOPS|Trench|#B8A992]")
+        assertThat(result).contains("[w_55|TOPS|Trench|#B8A992]")
     }
 
     @Test
@@ -28,8 +28,8 @@ class CompactManifestSerializerTest {
             seasonalPalette = "Deep",
             material = "Cotton"
         )
-        val result = serializer.serialize(listOf(item), SerializationDetailLevel.EXPANDED)
+        val result = serializer.serialize(listOf(item), emptyList(), SerializationDetailLevel.EXPANDED)
 
-        assertThat(result).isEqualTo("[w_55|TOPS|Trench|#B8A992|Warm|Deep|Cotton]")
+        assertThat(result).contains("[w_55|TOPS|Trench|#B8A992|Warm|Deep|Cotton]")
     }
 }

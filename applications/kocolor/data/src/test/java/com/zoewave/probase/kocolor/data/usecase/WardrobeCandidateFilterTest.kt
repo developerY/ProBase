@@ -18,7 +18,7 @@ class WardrobeCandidateFilterTest {
 
     @Before
     fun setup() {
-        filter = WardrobeCandidateFilter(repository)
+        filter = WardrobeCandidateFilter()
     }
 
     @Test

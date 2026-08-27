@@ -62,12 +62,13 @@ class StyleSimulatorEngineTest {
         
         every { provider1.capability } returns capability1
         coEvery { provider1.countTokens(any()) } returns 50
-        coEvery { provider1.execute(any()) } returns Result.success("{\"rationale\": \"P1 result\", \"selectedClothingIds\": [], \"selectedCosmeticIds\": [], \"recommendedPalette\": []}")
+        coEvery { provider1.execute(any()) } returns Result.success("{\"rationale\": \"P1 result\", \"selectedClothingIds\": [], \"selectedCosmeticIds\": [\"c_1\", \"c_2\", \"c_3\", \"c_4\"], \"recommendedPalette\": []}")
         
         coEvery { capabilityRouter.getRankedAvailableProviders() } returns listOf(provider1, provider2)
         coEvery { candidateFilter.getCandidates(any(), any(), any()) } returns emptyList()
+        coEvery { candidateFilter.getCosmeticCandidates(any(), any(), any()) } returns emptyList()
 
-        val result = engine.generateBlueprint(emptyList(), context)
+        val result = engine.generateBlueprint(emptyList(), emptyList(), context)
 
         assertThat(result.rationale).isEqualTo("P1 result")
     }
@@ -79,7 +80,7 @@ class StyleSimulatorEngineTest {
         coEvery { capabilityRouter.getRankedAvailableProviders() } returns emptyList()
         every { fallbackEngine.generate(context) } returns StyleBlueprint("Fallback", emptyList(), emptyList(), emptyList())
 
-        val result = engine.generateBlueprint(emptyList(), context)
+        val result = engine.generateBlueprint(emptyList(), emptyList(), context)
 
         assertThat(result.rationale).isEqualTo("Fallback")
     }
@@ -114,9 +115,10 @@ class StyleSimulatorEngineTest {
         
         coEvery { capabilityRouter.getRankedAvailableProviders() } returns listOf(provider)
         coEvery { candidateFilter.getCandidates(any(), any(), any()) } answers { items.take(it.invocation.args[2] as Int) }
+        coEvery { candidateFilter.getCosmeticCandidates(any(), any(), any()) } returns emptyList()
         every { fallbackEngine.generate(any()) } returns StyleBlueprint("Fallback", emptyList(), emptyList(), emptyList())
 
-        val result = engine.generateBlueprint(items, context)
+        val result = engine.generateBlueprint(items, emptyList(), context)
 
         assertThat(result.rationale).isEqualTo("Success")
     }
