@@ -222,7 +222,21 @@ class StyleSimulatorEngine @Inject constructor(
             val selectionState = contextEngine.generateSelectionState(wardrobe, context.lockedConstraints, context)
             val cCandidates = candidateFilter.getCosmeticCandidates(cosmetics, context, limit = currentK)
             
-            val manifest = serializer.serialize(selectionState.fullRankedCandidatePool.take(currentK), cCandidates, detailLevel)
+            // Map cosmetics to provenance for audit logging
+            val cCandidatesProv = cCandidates.map { item ->
+                CandidateProvenance(
+                    cosmeticItem = item,
+                    contextScore = 0.5f,
+                    colorScore = 0.8f,
+                    appearanceScore = 0.8f,
+                    freshnessScore = 1.0f,
+                    retrievalReason = if (item.isSignature) "[Signature Item] Rotation bypassed." else "Role diversity match"
+                )
+            }
+            val topWardrobeProv = selectionState.fullRankedCandidatePool.take(currentK)
+            auditLogger.logReasoningSet(context.requestId, topWardrobeProv + cCandidatesProv)
+
+            val manifest = serializer.serialize(topWardrobeProv, cCandidates, detailLevel)
             
             val candidateInput = promptAssembler.buildExactRequest(
                 context = context,
