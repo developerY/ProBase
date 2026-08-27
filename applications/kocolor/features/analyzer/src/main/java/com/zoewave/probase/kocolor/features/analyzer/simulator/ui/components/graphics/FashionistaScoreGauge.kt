@@ -207,7 +207,7 @@ fun FashionistaScoreGauge(
 
                 // 3. Inner Dial Track
                 val trackRadius = outerRadius - 18.dp.toPx()
-                val trackStrokeWidth = 5.dp.toPx()
+                val trackStrokeWidth = 6.dp.toPx()
 
                 // Inactive Subtle Track
                 drawCircle(
@@ -217,14 +217,39 @@ fun FashionistaScoreGauge(
                     style = Stroke(width = trackStrokeWidth)
                 )
 
-                // Active Dark Slate Progress Arc
+                // Silver-Blue Metallic Brush
+                val silverBlueBrush = Brush.linearGradient(
+                    colors = listOf(
+                        Color(0xFF8E9AAF), // Metallic Silver
+                        Color(0xFFA2D2FF), // Ice Blue
+                        Color(0xFF48CAE4), // Sapphire Cyan
+                        Color(0xFFBDE0FE), // Platinum Light Blue
+                        Color(0xFF6C5CE7)  // Deep Ice Iris
+                    ),
+                    start = Offset(center.x - trackRadius, center.y - trackRadius),
+                    end = Offset(center.x + trackRadius, center.y + trackRadius)
+                )
+
                 val sweepAngle = animatedProgress * 360f
+
+                // Outer Glowing Blue Aura (Wide stroke with soft alpha)
                 drawArc(
-                    color = Color(0xFF2C3E3A), // Deep Slate / Metallic Teal
+                    color = Color(0xFF48CAE4).copy(alpha = 0.45f),
                     startAngle = -90f,
                     sweepAngle = sweepAngle,
                     useCenter = false,
-                    style = Stroke(width = trackStrokeWidth + 1f, cap = StrokeCap.Round),
+                    style = Stroke(width = trackStrokeWidth + 6.dp.toPx(), cap = StrokeCap.Round),
+                    topLeft = Offset(center.x - trackRadius, center.y - trackRadius),
+                    size = Size(trackRadius * 2, trackRadius * 2)
+                )
+
+                // Core Silver-Blue Progress Arc
+                drawArc(
+                    brush = silverBlueBrush,
+                    startAngle = -90f,
+                    sweepAngle = sweepAngle,
+                    useCenter = false,
+                    style = Stroke(width = trackStrokeWidth, cap = StrokeCap.Round),
                     topLeft = Offset(center.x - trackRadius, center.y - trackRadius),
                     size = Size(trackRadius * 2, trackRadius * 2)
                 )
