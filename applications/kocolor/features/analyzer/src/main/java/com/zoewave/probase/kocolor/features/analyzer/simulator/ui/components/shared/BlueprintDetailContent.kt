@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoewave.probase.core.model.ritual.ClothingItem
@@ -36,11 +37,12 @@ fun BlueprintDetailContent(
     recommendedPalette: List<String>,
     selectedResultTab: ResultTab,
     onTabSelected: (ResultTab) -> Unit,
+    visualBlueprintData: VisualBlueprintData? = null,
     actionButtonText: String? = null,
     onActionClick: (() -> Unit)? = null,
     navTo: (KoColorRoute) -> Unit
 ) {
-    val visualBlueprintData = mapToVisualBlueprintData(
+    val data = visualBlueprintData ?: mapToVisualBlueprintData(
         cosmetics = recommendedCosmetics,
         clothing = recommendedClothing,
         palette = recommendedPalette
@@ -92,7 +94,7 @@ fun BlueprintDetailContent(
         // 2. The Visual Blueprint (Side-by-Side)
         item {
             VisualBlueprintSection(
-                data = visualBlueprintData,
+                data = data,
                 initialTab = selectedResultTab,
                 onTabSelected = onTabSelected
             )
@@ -159,19 +161,35 @@ fun BlueprintDetailContent(
 
         if (actionButtonText != null && onActionClick != null) {
             item {
-                Button(
-                    onClick = onActionClick,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(64.dp),
-                    shape = RoundedCornerShape(32.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    Spacer(Modifier.height(16.dp))
                     Text(
-                        actionButtonText,
+                        text = "KoColor Fashionista Score: ${data.koColorScore}/100",
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
                     )
+                    Spacer(Modifier.height(24.dp))
+                    Button(
+                        onClick = onActionClick,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
+                        shape = RoundedCornerShape(50),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
+                    ) {
+                        Text(
+                            actionButtonText,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                    }
                 }
             }
         }

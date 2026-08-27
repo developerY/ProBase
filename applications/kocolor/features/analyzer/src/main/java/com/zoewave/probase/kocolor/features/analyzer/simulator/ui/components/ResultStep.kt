@@ -49,6 +49,7 @@ fun ResultStep(
         recommendedPalette = uiState.recommendedPalette,
         selectedResultTab = uiState.selectedResultTab,
         onTabSelected = { onEvent(SimulatorEvent.SelectResultTab(it)) },
+        visualBlueprintData = uiState.visualBlueprintData,
         actionButtonText = stringResource(R.string.applications_kocolor_features_analyzer_simulator_lock_palette),
         onActionClick = { onEvent(SimulatorEvent.SaveToPalette) },
         navTo = navTo
