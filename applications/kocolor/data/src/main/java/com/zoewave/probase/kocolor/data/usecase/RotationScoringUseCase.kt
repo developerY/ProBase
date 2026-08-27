@@ -14,7 +14,8 @@ class RotationScoringUseCase @Inject constructor(
     // Thresholds and Policy Constants
     private val minimumOutfitsForPenalty = 5L 
     private val highFrequencyShare = 0.35 // Item used in >35% of category selections
-    private val maximumRecencyPenaltyWindowMs = 48 * 60 * 60 * 1000L // 48h
+    private val maximumClothingRecencyWindowMs = 3 * 24 * 60 * 60 * 1000L // 3 days
+    private val maximumCosmeticRecencyWindowMs = 24 * 60 * 60 * 1000L // 24h
 
     fun observeAllClothingWithUsage(): Flow<List<ClothingWithUsage>> {
         return rotationRepository.observeAllClothingWithUsage()
@@ -30,9 +31,16 @@ class RotationScoringUseCase @Inject constructor(
     suspend fun calculateRotationPenalty(
         productId: String, 
         category: String,
+        isSignature: Boolean = false,
+        isCosmetic: Boolean = false,
         customUseCount: Int? = null,
         customLastUsed: Long? = null
     ): Double {
+        // 0. Signature Item Bypass Logic
+        if (isSignature) {
+            return 0.0
+        }
+
         // 1. Cold Start Rule: check global history
         val globalMetrics = rotationRepository.observeGlobalMetrics().first()
         if ((globalMetrics?.totalOutfitsCommitted ?: 0L) < minimumOutfitsForPenalty) {
@@ -59,7 +67,8 @@ class RotationScoringUseCase @Inject constructor(
         // 4. Transform to scoring factors
         val frequencyPenalty = if (currentUsageShare > highFrequencyShare) 0.85 else 0.0
         
-        val recencyPenalty = if (recencyMs < maximumRecencyPenaltyWindowMs) 1.0 
+        val recencyWindow = if (isCosmetic) maximumCosmeticRecencyWindowMs else maximumClothingRecencyWindowMs
+        val recencyPenalty = if (recencyMs < recencyWindow) 1.0 
                            else 0.0
 
         // Combine factors: Recency is a heavy immediate penalty, frequency is long-term.

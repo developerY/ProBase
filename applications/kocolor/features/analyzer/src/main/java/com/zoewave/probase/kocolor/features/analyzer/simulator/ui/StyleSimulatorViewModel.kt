@@ -396,7 +396,11 @@ class StyleSimulatorViewModel @Inject constructor(
 
             // 1. Calculate Rotation Scores for all items in availableWardrobe
             val rotationScores = filteredWardrobe.associate { item ->
-                item.remoteId!! to rotationScoringUseCase.calculateRotationPenalty(item.remoteId!!, item.category.name)
+                item.remoteId!! to rotationScoringUseCase.calculateRotationPenalty(
+                    productId = item.remoteId!!,
+                    category = item.category.name,
+                    isSignature = item.isSignature
+                )
             }
 
             _simulationStep.value = SimulationStep.APPEARANCE_ANALYSIS

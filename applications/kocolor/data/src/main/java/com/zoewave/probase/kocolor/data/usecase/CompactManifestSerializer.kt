@@ -21,7 +21,7 @@ class CompactManifestSerializer @Inject constructor() {
         detailLevel: SerializationDetailLevel = SerializationDetailLevel.BALANCED
     ): String {
         val wManifest = wardrobeProvenance.joinToString(separator = "\n") { prov ->
-            val item = prov.item
+            val item = prov.clothingItem ?: return@joinToString ""
             val id = "w_${item.internalId}"
             val category = item.category.name
             val name = item.name

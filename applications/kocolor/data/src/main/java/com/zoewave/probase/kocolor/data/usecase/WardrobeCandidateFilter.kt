@@ -9,7 +9,9 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class WardrobeCandidateFilter @Inject constructor() {
+class WardrobeCandidateFilter @Inject constructor(
+    private val rotationScoringUseCase: RotationScoringUseCase
+) {
 
     /**
      * Local Candidate RAG Engine (The 85/15 Local-First split).
@@ -96,7 +98,8 @@ class WardrobeCandidateFilter @Inject constructor() {
         
         val eligibleItems = inventory.filter { item ->
             !item.isHidden && 
-            !noiseCategories.contains(item.macroCategory.name.lowercase())
+            !noiseCategories.contains(item.macroCategory.name.lowercase()) &&
+            !isCosmeticRotationViolated(item)
         }
 
         // Priority for anchored items
@@ -125,5 +128,15 @@ class WardrobeCandidateFilter @Inject constructor() {
             score += 20.0
         }
         return score
+    }
+
+    private suspend fun isCosmeticRotationViolated(item: CosmeticItem): Boolean {
+        val penalty = rotationScoringUseCase.calculateRotationPenalty(
+            productId = item.remoteId ?: "c_${item.internalId}",
+            category = item.macroCategory.name,
+            isSignature = item.isSignature,
+            isCosmetic = true
+        )
+        return penalty >= 0.7
     }
 }

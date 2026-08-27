@@ -282,6 +282,7 @@ data class CosmeticItem(
     val provenance: Provenance? = null,
     val parentItemId: String? = null,
     val isHidden: Boolean = false,
+    val isSignature: Boolean = false,
 
     // Engine Enrichment (Calculated at Compile Time) ---
     val calculatedChemistryPhase: String? = null,

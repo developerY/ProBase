@@ -14,6 +14,7 @@ import javax.inject.Singleton
 @Singleton
 class DeterministicContextEngine @Inject constructor(
     private val colorEngine: ColorHarmonyEngine,
+    private val rotationScoringUseCase: RotationScoringUseCase,
     private val repository: WardrobeRepository,
     private val auditLogger: StyleAuditLogger
 ) {
@@ -62,13 +63,16 @@ class DeterministicContextEngine @Inject constructor(
             val contextScore = calculateContextScore(item, context)
             val freshnessScore = calculateFreshnessScore(item, context)
             
+            val baseReason = "Mathematically harmonic with ${anchor.name}"
+            val finalReason = if (item.isSignature) "[Signature Item] Rotation bypassed. $baseReason" else baseReason
+
             CandidateProvenance(
-                item = item,
+                clothingItem = item,
                 contextScore = contextScore,
                 colorScore = colorScore,
                 appearanceScore = 0.8f, // Matching appearance profile logic
                 freshnessScore = freshnessScore,
-                retrievalReason = "Mathematically harmonic with ${anchor.name}"
+                retrievalReason = finalReason
             )
         }
 
@@ -76,12 +80,8 @@ class DeterministicContextEngine @Inject constructor(
         val diverseCandidates = enforceRoleDiversity(anchor, scoredCandidates, context)
 
         // Phase 5: Truncate & Prepend Anchor
-        val anchorProvenance = CandidateProvenance(anchor, 1f, 1f, 1f, 1f, "Primary Anchor")
-        val finalReasoningSet = (listOf(anchorProvenance) + diverseCandidates).take(limit)
-        
-        auditLogger.logReasoningSet(context.requestId, finalReasoningSet)
-        
-        return finalReasoningSet
+        val anchorProvenance = CandidateProvenance(clothingItem = anchor, contextScore = 1f, colorScore = 1f, appearanceScore = 1f, freshnessScore = 1f, retrievalReason = "Primary Anchor")
+        return (listOf(anchorProvenance) + diverseCandidates).take(limit)
     }
 
     private fun selectAnchor(inventory: List<ClothingItem>, context: StyleRequestContext): ClothingItem? {
@@ -116,8 +116,12 @@ class DeterministicContextEngine @Inject constructor(
     private fun isContextuallyViable(item: ClothingItem, context: StyleRequestContext): Boolean {
         // Weather Gating, Laundry/Hidden, Rotation Lockout
         if (item.isHidden) return false
-        val penalty = context.rotationScores[item.remoteId] ?: 0.0
-        if (penalty >= 0.7) return false
+        
+        // Bypass rotation penalty for signature items
+        if (!item.isSignature) {
+            val penalty = context.rotationScores[item.remoteId] ?: 0.0
+            if (penalty >= 0.7) return false
+        }
         
         // Basic weather check
         val isHot = context.weather.contains("Temp: 2", ignoreCase = true) || context.weather.contains("Temp: 3", ignoreCase = true)
@@ -151,11 +155,12 @@ class DeterministicContextEngine @Inject constructor(
         
         // Greedy diversity selection
         for (prov in sorted) {
-            if (prov.item.category in rolesNeeded) {
+            val item = prov.clothingItem ?: continue
+            if (item.category in rolesNeeded) {
                 result.add(prov)
                 // We keep needing more of a role until we have enough, say 3 per primary category
-                if (result.count { it.item.category == prov.item.category } >= 3) {
-                    rolesNeeded.remove(prov.item.category)
+                if (result.count { it.clothingItem?.category == item.category } >= 3) {
+                    rolesNeeded.remove(item.category)
                 }
             } else if (result.size < 12) {
                 result.add(prov)

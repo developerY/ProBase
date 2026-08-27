@@ -69,9 +69,8 @@ class StyleAuditLogger @Inject constructor() {
 
             appendLine("[3] MATHEMATICAL COLOR & ROLE SCORING (Top ${trail.reasoningSet?.size ?: 0})")
             trail.reasoningSet?.forEach { prov ->
-                val id = "w_${prov.item.internalId}"
                 val score = "%.2f".format(prov.totalScore)
-                appendLine("    - [$id] \"${prov.item.name}\" (Score: $score) -> Reason: ${prov.retrievalReason}")
+                appendLine("    - [${prov.id}] \"${prov.name}\" (Score: $score) -> Reason: ${prov.retrievalReason}")
             }
             appendLine()
 

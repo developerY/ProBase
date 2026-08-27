@@ -6,6 +6,7 @@ import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.features.ai.core.AiProvider
 import com.zoewave.probase.features.ai.core.StylePromptRequest
 import com.zoewave.probase.features.ai.local.data.PromptCacheRepository
+import com.zoewave.probase.kocolor.data.color.CandidateProvenance
 import com.zoewave.probase.kocolor.data.telemetry.StyleAuditLogger
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
@@ -219,8 +220,24 @@ class StyleSimulatorEngine @Inject constructor(
         while (currentK >= cap.minTopK) {
             // Phase 2: Anchor-Driven Retrieval
             val wCandidates = contextEngine.buildReasoningSet(wardrobe, context, limit = currentK)
-            val cCandidates = candidateFilter.getCosmeticCandidates(cosmetics, context, limit = currentK)
-            val manifest = serializer.serialize(wCandidates, cCandidates, detailLevel)
+            val cItems = candidateFilter.getCosmeticCandidates(cosmetics, context, limit = currentK)
+            
+            // Map cosmetics to provenance for audit logging
+            val cCandidates = cItems.map { item ->
+                CandidateProvenance(
+                    cosmeticItem = item,
+                    contextScore = 0.5f, // Simplified for now
+                    colorScore = 0.8f,
+                    appearanceScore = 0.8f,
+                    freshnessScore = 1.0f,
+                    retrievalReason = if (item.isSignature) "[Signature Item] Rotation bypassed." else "Role diversity match"
+                )
+            }
+            
+            // Log combined reasoning set
+            auditLogger.logReasoningSet(context.requestId, wCandidates + cCandidates)
+
+            val manifest = serializer.serialize(wCandidates, cItems, detailLevel)
             
             val candidatePrompt = promptAssembler.buildExactRequest(
                 context = context,

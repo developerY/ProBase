@@ -59,6 +59,7 @@ class GeneratePlaylistUseCase @Inject constructor(
                 item.remoteId!! to rotationScoringUseCase.calculateRotationPenalty(
                     productId = item.remoteId!!,
                     category = item.category.name,
+                    isSignature = item.isSignature,
                     customUseCount = usage?.useCount,
                     customLastUsed = usage?.lastUsedTimestamp
                 )
