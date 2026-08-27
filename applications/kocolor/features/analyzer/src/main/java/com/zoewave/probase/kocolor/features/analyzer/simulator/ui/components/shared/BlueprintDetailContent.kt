@@ -159,37 +159,26 @@ fun BlueprintDetailContent(
             }
         }
 
+        item {
+            FashionistaScoreGauge(score = data.koColorScore)
+        }
+
         if (actionButtonText != null && onActionClick != null) {
             item {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                Button(
+                    onClick = onActionClick,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    shape = RoundedCornerShape(50),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
                 ) {
-                    Spacer(Modifier.height(16.dp))
                     Text(
-                        text = "KoColor Fashionista Score: ${data.koColorScore}/100",
+                        actionButtonText,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = Color.Black,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
+                        color = Color.White
                     )
-                    Spacer(Modifier.height(24.dp))
-                    Button(
-                        onClick = onActionClick,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp),
-                        shape = RoundedCornerShape(50),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
-                    ) {
-                        Text(
-                            actionButtonText,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        )
-                    }
                 }
             }
         }
