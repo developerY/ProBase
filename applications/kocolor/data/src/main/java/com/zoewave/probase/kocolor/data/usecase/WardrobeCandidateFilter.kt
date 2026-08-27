@@ -74,8 +74,8 @@ class WardrobeCandidateFilter @Inject constructor(
     private fun calculateScore(item: ClothingItem, context: StyleRequestContext): Double {
         var score = 0.0
         
-        // 1. Match against AppearanceTelemetry (undertone match, contrast delta)
-        val appearanceString = "${context.appearanceTelemetry.temperature} • ${context.appearanceTelemetry.depth} • ${context.appearanceTelemetry.contrast}"
+        // 1. Match against AppearanceProfile (undertone match, contrast delta)
+        val appearanceString = "${context.appearanceProfile.undertone} • ${context.appearanceProfile.depth} • ${context.appearanceProfile.contrast}"
         if (appearanceString.contains(item.colorTemperature ?: "", ignoreCase = true)) {
             score += 10.0
         }
@@ -119,7 +119,7 @@ class WardrobeCandidateFilter @Inject constructor(
 
     private fun calculateCosmeticScore(item: CosmeticItem, context: StyleRequestContext): Double {
         var score = 0.0
-        val appearanceString = "${context.appearanceTelemetry.temperature} • ${context.appearanceTelemetry.depth} • ${context.appearanceTelemetry.contrast}"
+        val appearanceString = "${context.appearanceProfile.undertone} • ${context.appearanceProfile.depth} • ${context.appearanceProfile.contrast}"
         if (appearanceString.contains(item.temperature.name, ignoreCase = true)) {
             score += 10.0
         }

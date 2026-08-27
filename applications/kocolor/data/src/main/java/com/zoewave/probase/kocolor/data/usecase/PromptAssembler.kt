@@ -1,34 +1,31 @@
 package com.zoewave.probase.kocolor.data.usecase
 
+import com.zoewave.probase.features.ai.core.AiInput
 import com.zoewave.probase.features.ai.core.AiProviderCapability
-import com.zoewave.probase.features.ai.core.StylePromptRequest
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class PromptAssembler @Inject constructor() {
 
-    /**
-     * Combines system instructions, telemetry, context, and the compact manifest into a final prompt.
-     * Enforces the privacy invariant by stripping localImageBitmap if not supported by the provider.
-     */
     fun buildExactRequest(
         context: StyleRequestContext,
         compactManifest: String,
         providerCapability: AiProviderCapability
-    ): StylePromptRequest {
-        val app = context.appearanceTelemetry
+    ): AiInput {
+        val profile = context.appearanceProfile
         val prompt = """
             You are the KoColor Style Architect AI. Generate a "Style Blueprint" that is both stylistically harmonic and protective.
             
             APPEARANCE TELEMETRY:
-            - Temperature: ${app.temperature}
-            - Depth: ${app.depth}
-            - Contrast: ${app.contrast}
+            - Temperature: ${profile.undertone}
+            - Depth: ${profile.depth}
+            - Contrast: ${profile.contrast}
             
-            WEATHER/ATMOSPHERIC: ${context.weather}
+            WEATHER/ATMOSPHERIC: ${context.weather} (Temp: ${context.weatherTempC}°C, UV: ${context.uvIndex})
             CIRCADIAN CONTEXT: ${context.circadianContext} (Wellness Score: ${context.wellnessScore})
             USER INTENT: ${context.intent}
+            OCCASION: ${context.occasion}
             
             AVAILABLE CANDIDATES (COMPACT MANIFEST):
             $compactManifest
@@ -46,12 +43,12 @@ class PromptAssembler @Inject constructor() {
               "recommendedPalette": ["#HEX", "#HEX", "#HEX", "#HEX"]
             }
         """.trimIndent()
-        
-        return StylePromptRequest(
-            exactPromptString = prompt,
-            localImageBitmap = if (providerCapability.supportsLocalImageIngestion) {
-                context.localImageBitmap
-            } else null
-        )
+
+        val bitmap = context.localImageBitmap
+        return if (providerCapability.supportsLocalImageIngestion && bitmap != null) {
+            AiInput.Multimodal(promptString = prompt, localImage = bitmap)
+        } else {
+            AiInput.TextOnly(promptString = prompt)
+        }
     }
 }

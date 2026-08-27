@@ -3,6 +3,7 @@ package com.zoewave.probase.kocolor.data.usecase
 import com.google.common.truth.Truth.assertThat
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
+import com.zoewave.probase.kocolor.data.color.CandidateProvenance
 import org.junit.Test
 
 class CompactManifestSerializerTest {
@@ -12,7 +13,8 @@ class CompactManifestSerializerTest {
     @Test
     fun `serialize should produce MINIMAL output`() {
         val item = ClothingItem(internalId = 55, name = "Trench", category = ClothingCategory.TOPS, colorHex = "#B8A992")
-        val result = serializer.serialize(listOf(item), emptyList(), SerializationDetailLevel.MINIMAL)
+        val prov = CandidateProvenance(clothingItem = item)
+        val result = serializer.serialize(listOf(prov), emptyList(), SerializationDetailLevel.MINIMAL)
 
         assertThat(result).contains("[w_55|TOPS|Trench|#B8A992]")
     }
@@ -28,7 +30,8 @@ class CompactManifestSerializerTest {
             seasonalPalette = "Deep",
             material = "Cotton"
         )
-        val result = serializer.serialize(listOf(item), emptyList(), SerializationDetailLevel.EXPANDED)
+        val prov = CandidateProvenance(clothingItem = item)
+        val result = serializer.serialize(listOf(prov), emptyList(), SerializationDetailLevel.EXPANDED)
 
         assertThat(result).contains("[w_55|TOPS|Trench|#B8A992|Warm|Deep|Cotton]")
     }

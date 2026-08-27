@@ -7,6 +7,7 @@ import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.features.ai.core.AiProvider
 import com.zoewave.probase.features.ai.core.AiProviderCapability
 import com.zoewave.probase.features.ai.local.data.PromptCacheRepository
+import com.zoewave.probase.kocolor.data.telemetry.StyleAuditLogger
 import io.mockk.*
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -14,11 +15,13 @@ import org.junit.Test
 
 class StyleSimulatorIntegrationTest {
 
+    private val contextEngine = mockk<DeterministicContextEngine>()
     private val candidateFilter = mockk<WardrobeCandidateFilter>()
     private val serializer = CompactManifestSerializer()
     private val promptAssembler = PromptAssembler()
     private val capabilityRouter = mockk<CapabilityRouter>()
     private val cache = mockk<PromptCacheRepository>()
+    private val auditLogger = mockk<StyleAuditLogger>(relaxed = true)
     private val fallbackEngine = mockk<DeterministicStyleEngine>()
     
     private lateinit var engine: StyleSimulatorEngine
@@ -38,18 +41,20 @@ class StyleSimulatorIntegrationTest {
         every { cache.put(any(), any()) } just Runs
 
         engine = StyleSimulatorEngine(
+            contextEngine,
             candidateFilter,
             serializer,
             promptAssembler,
             capabilityRouter,
             cache,
+            auditLogger,
             fallbackEngine
         )
     }
 
     @Test
     fun `full pipeline test with successful provider`() = runTest {
-        val context = StyleRequestContext(intent = "party", weather = "warm", appearanceTelemetry = "warm")
+        val context = StyleRequestContext(intent = "party", weather = "warm", appearanceTelemetry = ColorTelemetry())
         val provider = mockk<AiProvider>()
         val capability = AiProviderCapability(
             id = "test_ai", displayName = "Test AI", maxInputTokens = 1000, maxOutputTokens = 500, timeoutMillis = 2000,
@@ -64,7 +69,7 @@ class StyleSimulatorIntegrationTest {
         coEvery { provider.execute(any()) } returns Result.success("{\"rationale\": \"Harmonic look\", \"selectedClothingIds\": [\"w_1\"], \"selectedCosmeticIds\": [\"c_1\", \"c_2\", \"c_3\", \"c_4\"], \"recommendedPalette\": [\"#FF0000\"]}")
         
         coEvery { capabilityRouter.getRankedAvailableProviders() } returns listOf(provider)
-        coEvery { candidateFilter.getCandidates(any(), any(), any()) } returns items
+        coEvery { contextEngine.generateSelectionState(any(), any(), any()) } returns StyleSelectionState()
         coEvery { candidateFilter.getCosmeticCandidates(any(), any(), any()) } returns emptyList()
 
         val result = engine.generateBlueprint(items, emptyList(), context)
@@ -75,7 +80,7 @@ class StyleSimulatorIntegrationTest {
 
     @Test
     fun `full pipeline test fallback logic`() = runTest {
-        val context = StyleRequestContext(intent = "party", weather = "warm", appearanceTelemetry = "warm")
+        val context = StyleRequestContext(intent = "party", weather = "warm", appearanceTelemetry = ColorTelemetry())
         
         coEvery { capabilityRouter.getRankedAvailableProviders() } returns emptyList()
         every { fallbackEngine.generate(context) } returns StyleBlueprint("Fallback Rationale", emptyList(), emptyList(), emptyList())

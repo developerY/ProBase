@@ -12,8 +12,8 @@ class ByokAiProvider @Inject constructor() : AiProvider {
         maxInputTokens = 4096,
         maxOutputTokens = 1024,
         timeoutMillis = 5000L,
-        initialTopK = 16,
-        minTopK = 8,
+        maxCandidateAdditions = 16,
+        minCandidateAdditions = 8,
         isLocal = false
     )
 
@@ -22,11 +22,11 @@ class ByokAiProvider @Inject constructor() : AiProvider {
         return false // Implementation pending
     }
 
-    override suspend fun countTokens(request: StylePromptRequest): Int {
-        return request.exactPromptString.length / 4
+    override suspend fun countTokens(input: AiInput): Int {
+        return input.promptString.length / 4
     }
 
-    override suspend fun execute(request: StylePromptRequest): Result<String> {
+    override suspend fun execute(input: AiInput): Result<String> {
         return Result.failure(Exception("BYOK Provider not configured"))
     }
 }

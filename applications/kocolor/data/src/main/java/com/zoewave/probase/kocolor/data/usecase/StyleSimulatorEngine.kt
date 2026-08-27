@@ -3,8 +3,8 @@ package com.zoewave.probase.kocolor.data.usecase
 import android.util.Log
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.core.model.ritual.CosmeticItem
+import com.zoewave.probase.features.ai.core.AiInput
 import com.zoewave.probase.features.ai.core.AiProvider
-import com.zoewave.probase.features.ai.core.StylePromptRequest
 import com.zoewave.probase.features.ai.local.data.PromptCacheRepository
 import com.zoewave.probase.kocolor.data.color.CandidateProvenance
 import com.zoewave.probase.kocolor.data.telemetry.StyleAuditLogger
@@ -58,10 +58,10 @@ class StyleSimulatorEngine @Inject constructor(
                     promptVersion = PROMPT_VERSION,
                     modelVersion = provider.capability.id,
                     retrievalPolicyVersion = RETRIEVAL_POLICY_VERSION,
-                    appearanceTelemetry = requestContext.appearanceTelemetry.toString(),
+                    appearanceTelemetry = requestContext.appearanceProfile.toString(),
                     weatherState = requestContext.weather,
                     userIntent = requestContext.intent,
-                    minifiedManifest = fitResult.request.exactPromptString
+                    minifiedManifest = fitResult.request.promptString
                 )
 
                 val cachedResponse = cache.get(fingerprint)
@@ -100,7 +100,7 @@ class StyleSimulatorEngine @Inject constructor(
                 Log.w("StyleSimulatorEngine", "Could not fit context into provider ${provider.capability.id} budget")
                 logTelemetry(
                     tier = provider.capability.id,
-                    kLimit = provider.capability.initialTopK,
+                    kLimit = provider.capability.maxCandidateAdditions,
                     detail = SerializationDetailLevel.EXPANDED,
                     tokens = 0,
                     latency = System.currentTimeMillis() - providerStartTime,
@@ -142,7 +142,8 @@ class StyleSimulatorEngine @Inject constructor(
         startTime: Long,
         requestId: String
     ): StyleBlueprint? {
-        val executionResult = provider.execute(fitResult.request)
+        val input = fitResult.request
+        val executionResult = provider.execute(input)
         val latency = System.currentTimeMillis() - startTime
 
         return if (executionResult.isSuccess) {
@@ -198,7 +199,7 @@ class StyleSimulatorEngine @Inject constructor(
     }
 
     private data class AdaptiveFitResult(
-        val request: StylePromptRequest,
+        val request: AiInput,
         val kLimit: Int,
         val detailLevel: SerializationDetailLevel,
         val tokenCount: Int
@@ -214,47 +215,27 @@ class StyleSimulatorEngine @Inject constructor(
         context: StyleRequestContext
     ): AdaptiveFitResult? {
         val cap = provider.capability
-        var currentK = cap.initialTopK
+        var currentK = cap.maxCandidateAdditions
         var detailLevel = SerializationDetailLevel.EXPANDED
 
-        while (currentK >= cap.minTopK) {
-            // Phase 2: Anchor-Driven Retrieval
-            val wCandidates = contextEngine.buildReasoningSet(wardrobe, context, limit = currentK)
-            val cItems = candidateFilter.getCosmeticCandidates(cosmetics, context, limit = currentK)
+        while (currentK >= cap.minCandidateAdditions) {
+            val selectionState = contextEngine.generateSelectionState(wardrobe, context.lockedConstraints, context)
+            val cCandidates = candidateFilter.getCosmeticCandidates(cosmetics, context, limit = currentK)
             
-            // Map cosmetics to provenance for audit logging
-            val cCandidates = cItems.map { item ->
-                CandidateProvenance(
-                    cosmeticItem = item,
-                    contextScore = 0.5f, // Simplified for now
-                    colorScore = 0.8f,
-                    appearanceScore = 0.8f,
-                    freshnessScore = 1.0f,
-                    retrievalReason = if (item.isSignature) "[Signature Item] Rotation bypassed." else "Role diversity match"
-                )
-            }
+            val manifest = serializer.serialize(selectionState.fullRankedCandidatePool.take(currentK), cCandidates, detailLevel)
             
-            // Log combined reasoning set
-            auditLogger.logReasoningSet(context.requestId, wCandidates + cCandidates)
-
-            val manifest = serializer.serialize(wCandidates, cItems, detailLevel)
-            
-            val candidatePrompt = promptAssembler.buildExactRequest(
+            val candidateInput = promptAssembler.buildExactRequest(
                 context = context,
                 compactManifest = manifest,
                 providerCapability = cap
             )
             
-            val tokenCount = provider.countTokens(candidatePrompt)
+            val tokenCount = provider.countTokens(candidateInput)
             if (tokenCount <= cap.maxInputTokens) {
                 Log.d("StyleSimulatorEngine", "Adapted context: K=$currentK, Detail=$detailLevel, Tokens=$tokenCount")
-                return AdaptiveFitResult(candidatePrompt, currentK, detailLevel, tokenCount)
+                return AdaptiveFitResult(candidateInput, currentK, detailLevel, tokenCount)
             }
 
-            // Step-down strategy:
-            // 1. If EXPANDED -> downgrade to BALANCED.
-            // 2. Else if BALANCED -> downgrade to MINIMAL.
-            // 3. Else -> reduce currentK by 2 and reset detail level to BALANCED.
             when (detailLevel) {
                 SerializationDetailLevel.EXPANDED -> {
                     detailLevel = SerializationDetailLevel.BALANCED

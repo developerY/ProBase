@@ -2,7 +2,6 @@ package com.zoewave.probase.kocolor.data.usecase
 
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.core.model.ritual.CosmeticItem
-import com.zoewave.probase.features.ai.firebase.models.Appearance
 import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
 import com.zoewave.probase.kocolor.data.repository.PlaylistRepository
 import com.zoewave.probase.kocolor.data.repository.RotationRepository
@@ -68,7 +67,7 @@ class GeneratePlaylistUseCase @Inject constructor(
             val context = StyleRequestContext(
                 intent = "Weekly Rotation",
                 weather = "Dynamic Weather", // Placeholder
-                appearanceTelemetry = Appearance("Neutral", "Neutral", "Balanced"),
+                appearanceProfile = AppearanceProfile("Neutral", "Neutral", "Balanced"),
                 rotationScores = rotationScores,
                 anchoredClothingIds = currentAnchors.map { "w_${it.internalId}" },
                 anchoredCosmeticIds = currentCosmeticAnchors.map { "c_${it.internalId}" }

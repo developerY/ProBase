@@ -1,26 +1,29 @@
 package com.zoewave.probase.kocolor.data.usecase
 
+import android.util.Log
 import com.google.common.truth.Truth.assertThat
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
+import com.zoewave.probase.features.ai.core.AiInput
 import com.zoewave.probase.features.ai.core.AiProvider
 import com.zoewave.probase.features.ai.core.AiProviderCapability
-import com.zoewave.probase.features.ai.core.StylePromptRequest
 import com.zoewave.probase.features.ai.local.data.PromptCacheRepository
+import com.zoewave.probase.kocolor.data.color.CandidateProvenance
+import com.zoewave.probase.kocolor.data.telemetry.StyleAuditLogger
 import io.mockk.*
-import io.mockk.mockkStatic
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
-import android.util.Log
 
 class StyleSimulatorEngineTest {
 
+    private val contextEngine = mockk<DeterministicContextEngine>()
     private val candidateFilter = mockk<WardrobeCandidateFilter>()
     private val serializer = CompactManifestSerializer()
     private val promptAssembler = PromptAssembler()
     private val capabilityRouter = mockk<CapabilityRouter>()
     private val cache = mockk<PromptCacheRepository>()
+    private val auditLogger = mockk<StyleAuditLogger>(relaxed = true)
     private val fallbackEngine = mockk<DeterministicStyleEngine>()
     
     private lateinit var engine: StyleSimulatorEngine
@@ -40,23 +43,25 @@ class StyleSimulatorEngineTest {
         every { cache.put(any(), any()) } just Runs
 
         engine = StyleSimulatorEngine(
+            contextEngine,
             candidateFilter,
             serializer,
             promptAssembler,
             capabilityRouter,
             cache,
+            auditLogger,
             fallbackEngine
         )
     }
 
     @Test
     fun `generateBlueprint should return result from first successful provider`() = runTest {
-        val context = StyleRequestContext(intent = "party", weather = "warm", appearanceTelemetry = "warm")
+        val context = StyleRequestContext(intent = "party", weather = "warm", appearanceTelemetry = ColorTelemetry())
         val provider1 = mockk<AiProvider>()
         val provider2 = mockk<AiProvider>()
         
         val capability1 = AiProviderCapability(
-            id = "p1", displayName = "P1", maxInputTokens = 100, maxOutputTokens = 10, timeoutMillis = 1000,
+            id = "p1", displayName = "P1", maxInputTokens = 1000, maxOutputTokens = 10, timeoutMillis = 1000,
             isLocal = true
         )
         
@@ -65,7 +70,7 @@ class StyleSimulatorEngineTest {
         coEvery { provider1.execute(any()) } returns Result.success("{\"rationale\": \"P1 result\", \"selectedClothingIds\": [], \"selectedCosmeticIds\": [\"c_1\", \"c_2\", \"c_3\", \"c_4\"], \"recommendedPalette\": []}")
         
         coEvery { capabilityRouter.getRankedAvailableProviders() } returns listOf(provider1, provider2)
-        coEvery { candidateFilter.getCandidates(any(), any(), any()) } returns emptyList()
+        coEvery { contextEngine.generateSelectionState(any(), any(), any()) } returns StyleSelectionState()
         coEvery { candidateFilter.getCosmeticCandidates(any(), any(), any()) } returns emptyList()
 
         val result = engine.generateBlueprint(emptyList(), emptyList(), context)
@@ -75,7 +80,7 @@ class StyleSimulatorEngineTest {
 
     @Test
     fun `generateBlueprint should fallback to deterministic engine if all providers fail`() = runTest {
-        val context = StyleRequestContext(intent = "party", weather = "warm", appearanceTelemetry = "warm")
+        val context = StyleRequestContext(intent = "party", weather = "warm", appearanceTelemetry = ColorTelemetry())
         
         coEvery { capabilityRouter.getRankedAvailableProviders() } returns emptyList()
         every { fallbackEngine.generate(context) } returns StyleBlueprint("Fallback", emptyList(), emptyList(), emptyList())
@@ -87,34 +92,27 @@ class StyleSimulatorEngineTest {
 
     @Test
     fun `generateBlueprint should step-down context if provider budget exceeded`() = runTest {
-        val context = StyleRequestContext(intent = "party", weather = "warm", appearanceTelemetry = "warm")
+        val context = StyleRequestContext(intent = "party", weather = "warm", appearanceTelemetry = ColorTelemetry())
         val provider = mockk<AiProvider>()
         val capability = AiProviderCapability(
-            id = "p1", displayName = "P1", maxInputTokens = 50, maxOutputTokens = 10, timeoutMillis = 1000,
-            initialTopK = 10, minTopK = 2, isLocal = true
+            id = "p1", displayName = "P1", maxInputTokens = 500, maxOutputTokens = 10, timeoutMillis = 1000,
+            maxCandidateAdditions = 10, minCandidateAdditions = 2, isLocal = true
         )
         
         val items = List(10) { 
             ClothingItem(internalId = it.toLong(), name = "Item $it", category = ClothingCategory.TOPS, colorHex = "#000000")
         }
+        val provList = items.map { CandidateProvenance(clothingItem = it) }
 
         every { provider.capability } returns capability
         coEvery { provider.countTokens(any()) } answers {
-            val prompt = (it.invocation.args[0] as StylePromptRequest).exactPromptString
-            // Simulate:
-            // 1. Expanded (with Cotton) is 100 tokens
-            // 2. Balanced (more than 4 bars '|') is 60 tokens
-            // 3. Minimal (exactly 3 bars '|') is 30 tokens
-            when {
-                prompt.contains("Cotton") -> 100
-                prompt.count { it == '|' } > 40 -> 60 // 10 items * 5 or 6 bars
-                else -> 30
-            }
+            val input = it.invocation.args[0] as AiInput
+            if (input.promptString.contains("Cotton")) 1000 else 200
         }
         coEvery { provider.execute(any()) } returns Result.success("{\"rationale\": \"Success\", \"selectedClothingIds\": [], \"selectedCosmeticIds\": [], \"recommendedPalette\": []}")
         
         coEvery { capabilityRouter.getRankedAvailableProviders() } returns listOf(provider)
-        coEvery { candidateFilter.getCandidates(any(), any(), any()) } answers { items.take(it.invocation.args[2] as Int) }
+        coEvery { contextEngine.generateSelectionState(any(), any(), any()) } returns StyleSelectionState(fullRankedCandidatePool = provList)
         coEvery { candidateFilter.getCosmeticCandidates(any(), any(), any()) } returns emptyList()
         every { fallbackEngine.generate(any()) } returns StyleBlueprint("Fallback", emptyList(), emptyList(), emptyList())
 

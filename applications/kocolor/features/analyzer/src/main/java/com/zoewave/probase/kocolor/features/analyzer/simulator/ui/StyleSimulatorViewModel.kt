@@ -34,6 +34,8 @@ import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
 import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
 import com.zoewave.probase.kocolor.data.repository.RotationRepository
 import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
+import com.zoewave.probase.kocolor.data.usecase.AppearanceProfile
+import com.zoewave.probase.kocolor.data.usecase.ColorTelemetry
 import com.zoewave.probase.kocolor.data.usecase.GeneratePlaylistUseCase
 import com.zoewave.probase.kocolor.data.usecase.RotationScoringUseCase
 import com.zoewave.probase.kocolor.data.usecase.StyleBlueprint
@@ -412,7 +414,8 @@ class StyleSimulatorViewModel @Inject constructor(
             val requestContext = StyleRequestContext(
                 intent = userIntent,
                 weather = weatherContext,
-                appearanceTelemetry = appearance ?: Appearance("Neutral", "Neutral", "Balanced"),
+                appearanceProfile = appearance?.let { AppearanceProfile(it.temperature, it.depth, it.contrast) } ?: AppearanceProfile(),
+                appearanceTelemetry = ColorTelemetry(),
                 fashionProfile = skinContext,
                 rotationScores = rotationScores,
                 anchoredClothingIds = anchoredClothing.map { "w_${it.internalId}" },
