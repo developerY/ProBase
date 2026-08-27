@@ -6,6 +6,7 @@ import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.features.ai.core.AiProvider
 import com.zoewave.probase.features.ai.core.StylePromptRequest
 import com.zoewave.probase.features.ai.local.data.PromptCacheRepository
+import com.zoewave.probase.kocolor.data.telemetry.StyleAuditLogger
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -18,6 +19,7 @@ class StyleSimulatorEngine @Inject constructor(
     private val promptAssembler: PromptAssembler,
     private val capabilityRouter: CapabilityRouter,
     private val cache: PromptCacheRepository,
+    private val auditLogger: StyleAuditLogger,
     private val fallbackEngine: DeterministicStyleEngine
 ) {
 
@@ -39,6 +41,7 @@ class StyleSimulatorEngine @Inject constructor(
         cosmetics: List<CosmeticItem>,
         requestContext: StyleRequestContext
     ): StyleBlueprint {
+        auditLogger.startRequest(requestContext.requestId)
         val providers = capabilityRouter.getRankedAvailableProviders()
         
         for (provider in providers) {
@@ -64,6 +67,13 @@ class StyleSimulatorEngine @Inject constructor(
                 if (cachedResponse != null) {
                     return try {
                         val blueprint = decodeBlueprint(cachedResponse)
+                        auditLogger.logAiExecution(
+                            requestId = requestContext.requestId,
+                            providerId = "CACHE_${provider.capability.id}",
+                            tokens = 0,
+                            blueprint = blueprint
+                        )
+                        auditLogger.printAuditTrail(requestContext.requestId)
                         logTelemetry(
                             tier = "CACHE_${provider.capability.id}",
                             kLimit = fitResult.kLimit,
@@ -76,12 +86,15 @@ class StyleSimulatorEngine @Inject constructor(
                     } catch (e: Exception) {
                         Log.e("StyleSimulatorEngine", "Failed to decode cached result", e)
                         // Continue to execute if cache is corrupt
-                        executeAndCache(provider, fitResult, fingerprint, providerStartTime) ?: continue
+                        executeAndCache(provider, fitResult, fingerprint, providerStartTime, requestContext.requestId) ?: continue
                     }
                 }
 
-                val blueprint = executeAndCache(provider, fitResult, fingerprint, providerStartTime)
-                if (blueprint != null) return blueprint
+                val blueprint = executeAndCache(provider, fitResult, fingerprint, providerStartTime, requestContext.requestId)
+                if (blueprint != null) {
+                    auditLogger.printAuditTrail(requestContext.requestId)
+                    return blueprint
+                }
             } else {
                 Log.w("StyleSimulatorEngine", "Could not fit context into provider ${provider.capability.id} budget")
                 logTelemetry(
@@ -101,6 +114,14 @@ class StyleSimulatorEngine @Inject constructor(
         Log.i("StyleSimulatorEngine", "All providers failed. Falling back to deterministic engine.")
         val blueprint = fallbackEngine.generate(requestContext)
         
+        auditLogger.logAiExecution(
+            requestId = requestContext.requestId,
+            providerId = "DETERMINISTIC_FALLBACK",
+            tokens = 0,
+            blueprint = blueprint
+        )
+        auditLogger.printAuditTrail(requestContext.requestId)
+        
         logTelemetry(
             tier = "DETERMINISTIC_FALLBACK",
             kLimit = 0,
@@ -117,7 +138,8 @@ class StyleSimulatorEngine @Inject constructor(
         provider: AiProvider,
         fitResult: AdaptiveFitResult,
         fingerprint: String,
-        startTime: Long
+        startTime: Long,
+        requestId: String
     ): StyleBlueprint? {
         val executionResult = provider.execute(fitResult.request)
         val latency = System.currentTimeMillis() - startTime
@@ -127,6 +149,13 @@ class StyleSimulatorEngine @Inject constructor(
             try {
                 val blueprint = decodeBlueprint(rawResult)
                 cache.put(fingerprint, rawResult)
+                auditLogger.logAiExecution(
+                    requestId = requestId,
+                    providerId = provider.capability.id,
+                    tokens = fitResult.tokenCount,
+                    blueprint = blueprint
+                )
+                // auditLogger.printAuditTrail(...)
                 logTelemetry(
                     tier = provider.capability.id,
                     kLimit = fitResult.kLimit,

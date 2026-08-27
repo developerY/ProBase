@@ -4,9 +4,11 @@ import android.graphics.Bitmap
 import com.zoewave.probase.features.ai.firebase.models.Appearance
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
+import java.util.UUID
 
 @Serializable
 data class StyleRequestContext(
+    val requestId: String = UUID.randomUUID().toString(),
     val intent: String,
     val occasion: String = "Daily",
     val weather: String,

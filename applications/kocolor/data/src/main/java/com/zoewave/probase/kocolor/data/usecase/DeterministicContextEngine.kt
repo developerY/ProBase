@@ -5,13 +5,17 @@ import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.kocolor.data.color.CandidateProvenance
 import com.zoewave.probase.kocolor.data.color.ColorHarmonyEngine
 import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
+import com.zoewave.probase.kocolor.data.telemetry.AnchorSource
+import com.zoewave.probase.kocolor.data.telemetry.PruningRecord
+import com.zoewave.probase.kocolor.data.telemetry.StyleAuditLogger
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class DeterministicContextEngine @Inject constructor(
     private val colorEngine: ColorHarmonyEngine,
-    private val repository: WardrobeRepository
+    private val repository: WardrobeRepository,
+    private val auditLogger: StyleAuditLogger
 ) {
 
     /**
@@ -22,14 +26,32 @@ class DeterministicContextEngine @Inject constructor(
         context: StyleRequestContext,
         limit: Int
     ): List<CandidateProvenance> {
+        val initialCount = inventory.size
+
         // Phase 1: Anchor Selection
         val anchor = selectAnchor(inventory, context) ?: return emptyList()
 
         // Phase 2: Hard Constraints & Filtering
+        val afterWeather = inventory.filter { item ->
+            // Simulating steps for pruning log
+            val isHot = context.weather.contains("Temp: 2", ignoreCase = true) || context.weather.contains("Temp: 3", ignoreCase = true)
+            !(isHot && item.category == ClothingCategory.OUTERWEAR)
+        }.size
+
         val eligibleItems = inventory.filter { item ->
             item.id != anchor.id && 
             isContextuallyViable(item, context)
         }
+        
+        auditLogger.logDeterministicPruning(
+            context.requestId,
+            PruningRecord(
+                initialCount = initialCount,
+                afterWeather = afterWeather,
+                afterRotation = eligibleItems.size,
+                finalEligible = eligibleItems.size
+            )
+        )
 
         // Phase 3: Continuous Scoring
         val anchorHsl = colorEngine.hexToHsl(anchor.colorHex)
@@ -55,24 +77,40 @@ class DeterministicContextEngine @Inject constructor(
 
         // Phase 5: Truncate & Prepend Anchor
         val anchorProvenance = CandidateProvenance(anchor, 1f, 1f, 1f, 1f, "Primary Anchor")
-        return (listOf(anchorProvenance) + diverseCandidates).take(limit)
+        val finalReasoningSet = (listOf(anchorProvenance) + diverseCandidates).take(limit)
+        
+        auditLogger.logReasoningSet(context.requestId, finalReasoningSet)
+        
+        return finalReasoningSet
     }
 
     private fun selectAnchor(inventory: List<ClothingItem>, context: StyleRequestContext): ClothingItem? {
         // 1. User-Locked Item
         context.userLockedAnchorId?.let { id ->
-            inventory.find { "w_${it.internalId}" == id }?.let { return it }
+            inventory.find { "w_${it.internalId}" == id }?.let { 
+                auditLogger.logAnchorResolution(context.requestId, it, AnchorSource.USER_LOCKED, "Explicitly forced by user")
+                return it 
+            }
         }
         
         // 2. User-Selected Item
         context.userSelectedAnchorId?.let { id ->
-            inventory.find { "w_${it.internalId}" == id }?.let { return it }
+            inventory.find { "w_${it.internalId}" == id }?.let { 
+                auditLogger.logAnchorResolution(context.requestId, it, AnchorSource.USER_SELECTED, "Manually selected in UI")
+                return it 
+            }
         }
         
         // 3. Automatic Anchor (pass hard constraints)
-        return inventory.filter { isContextuallyViable(it, context) }
+        val anchor = inventory.filter { isContextuallyViable(it, context) }
             .sortedByDescending { calculateContextScore(it, context) + calculateFreshnessScore(it, context) }
             .firstOrNull()
+            
+        anchor?.let {
+            auditLogger.logAnchorResolution(context.requestId, it, AnchorSource.AUTOMATIC_CONTEXT, "Highest context + freshness score")
+        }
+        
+        return anchor
     }
 
     private fun isContextuallyViable(item: ClothingItem, context: StyleRequestContext): Boolean {
