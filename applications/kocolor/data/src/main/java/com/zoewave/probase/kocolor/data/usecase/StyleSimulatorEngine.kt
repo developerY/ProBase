@@ -12,6 +12,7 @@ import javax.inject.Singleton
 
 @Singleton
 class StyleSimulatorEngine @Inject constructor(
+    private val contextEngine: DeterministicContextEngine,
     private val candidateFilter: WardrobeCandidateFilter,
     private val serializer: CompactManifestSerializer,
     private val promptAssembler: PromptAssembler,
@@ -21,8 +22,8 @@ class StyleSimulatorEngine @Inject constructor(
 ) {
 
     companion object {
-        private const val RETRIEVAL_POLICY_VERSION = "2.0" // Router-based RAG
-        private const val PROMPT_VERSION = "2.0"
+        private const val RETRIEVAL_POLICY_VERSION = "3.0" // Anchor-Driven Pipeline
+        private const val PROMPT_VERSION = "3.0"
     }
 
     private val json = Json { 
@@ -53,7 +54,7 @@ class StyleSimulatorEngine @Inject constructor(
                     promptVersion = PROMPT_VERSION,
                     modelVersion = provider.capability.id,
                     retrievalPolicyVersion = RETRIEVAL_POLICY_VERSION,
-                    appearanceTelemetry = requestContext.appearanceTelemetry,
+                    appearanceTelemetry = requestContext.appearanceTelemetry.toString(),
                     weatherState = requestContext.weather,
                     userIntent = requestContext.intent,
                     minifiedManifest = fitResult.request.exactPromptString
@@ -187,7 +188,8 @@ class StyleSimulatorEngine @Inject constructor(
         var detailLevel = SerializationDetailLevel.EXPANDED
 
         while (currentK >= cap.minTopK) {
-            val wCandidates = candidateFilter.getCandidates(wardrobe, context, limit = currentK)
+            // Phase 2: Anchor-Driven Retrieval
+            val wCandidates = contextEngine.buildReasoningSet(wardrobe, context, limit = currentK)
             val cCandidates = candidateFilter.getCosmeticCandidates(cosmetics, context, limit = currentK)
             val manifest = serializer.serialize(wCandidates, cCandidates, detailLevel)
             

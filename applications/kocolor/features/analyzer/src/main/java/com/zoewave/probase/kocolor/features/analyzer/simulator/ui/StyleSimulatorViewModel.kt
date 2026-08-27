@@ -408,7 +408,7 @@ class StyleSimulatorViewModel @Inject constructor(
             val requestContext = StyleRequestContext(
                 intent = userIntent,
                 weather = weatherContext,
-                appearanceTelemetry = appearance?.let { "${it.temperature} • ${it.depth} • ${it.contrast}" } ?: "Unknown",
+                appearanceTelemetry = appearance ?: Appearance("Neutral", "Neutral", "Balanced"),
                 fashionProfile = skinContext,
                 rotationScores = rotationScores,
                 anchoredClothingIds = anchoredClothing.map { "w_${it.internalId}" },

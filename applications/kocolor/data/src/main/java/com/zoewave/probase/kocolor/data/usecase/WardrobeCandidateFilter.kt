@@ -73,7 +73,8 @@ class WardrobeCandidateFilter @Inject constructor() {
         var score = 0.0
         
         // 1. Match against AppearanceTelemetry (undertone match, contrast delta)
-        if (context.appearanceTelemetry.contains(item.colorTemperature ?: "", ignoreCase = true)) {
+        val appearanceString = "${context.appearanceTelemetry.temperature} • ${context.appearanceTelemetry.depth} • ${context.appearanceTelemetry.contrast}"
+        if (appearanceString.contains(item.colorTemperature ?: "", ignoreCase = true)) {
             score += 10.0
         }
         
@@ -115,7 +116,8 @@ class WardrobeCandidateFilter @Inject constructor() {
 
     private fun calculateCosmeticScore(item: CosmeticItem, context: StyleRequestContext): Double {
         var score = 0.0
-        if (context.appearanceTelemetry.contains(item.temperature.name, ignoreCase = true)) {
+        val appearanceString = "${context.appearanceTelemetry.temperature} • ${context.appearanceTelemetry.depth} • ${context.appearanceTelemetry.contrast}"
+        if (appearanceString.contains(item.temperature.name, ignoreCase = true)) {
             score += 10.0
         }
         val keywords = context.intent.lowercase().split(" ", ",", ".")

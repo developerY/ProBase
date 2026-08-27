@@ -2,6 +2,7 @@ package com.zoewave.probase.kocolor.data.usecase
 
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.core.model.ritual.CosmeticItem
+import com.zoewave.probase.kocolor.data.color.CandidateProvenance
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -15,11 +16,12 @@ enum class SerializationDetailLevel {
 class CompactManifestSerializer @Inject constructor() {
 
     fun serialize(
-        wardrobe: List<ClothingItem>,
+        wardrobeProvenance: List<CandidateProvenance>,
         cosmetics: List<CosmeticItem>,
         detailLevel: SerializationDetailLevel = SerializationDetailLevel.BALANCED
     ): String {
-        val wManifest = wardrobe.joinToString(separator = "\n") { item ->
+        val wManifest = wardrobeProvenance.joinToString(separator = "\n") { prov ->
+            val item = prov.item
             val id = "w_${item.internalId}"
             val category = item.category.name
             val name = item.name

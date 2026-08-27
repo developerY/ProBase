@@ -17,10 +17,15 @@ class PromptAssembler @Inject constructor() {
         compactManifest: String,
         providerCapability: AiProviderCapability
     ): StylePromptRequest {
+        val app = context.appearanceTelemetry
         val prompt = """
             You are the KoColor Style Architect AI. Generate a "Style Blueprint" that is both stylistically harmonic and protective.
             
-            APPEARANCE TELEMETRY: ${context.appearanceTelemetry}
+            APPEARANCE TELEMETRY:
+            - Temperature: ${app.temperature}
+            - Depth: ${app.depth}
+            - Contrast: ${app.contrast}
+            
             WEATHER/ATMOSPHERIC: ${context.weather}
             CIRCADIAN CONTEXT: ${context.circadianContext} (Wellness Score: ${context.wellnessScore})
             USER INTENT: ${context.intent}
