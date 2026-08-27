@@ -34,6 +34,8 @@ import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
 import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
 import com.zoewave.probase.kocolor.data.repository.RotationRepository
 import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
+import com.zoewave.probase.kocolor.data.usecase.AppearanceProfile
+import com.zoewave.probase.kocolor.data.usecase.ColorTelemetry
 import com.zoewave.probase.kocolor.data.usecase.GeneratePlaylistUseCase
 import com.zoewave.probase.kocolor.data.usecase.RotationScoringUseCase
 import com.zoewave.probase.kocolor.data.usecase.StyleBlueprint
@@ -43,7 +45,6 @@ import com.zoewave.probase.kocolor.db.dao.RoutineDao
 import com.zoewave.probase.kocolor.features.analyzer.calibration.ColorSeasonClassifier
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.ResultTab
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.VisualBlueprintData
-import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.mapToVisualBlueprintData
 import com.zoewave.probase.kocolor.model.calibration.ColorProfile
 import com.zoewave.probase.kocolor.model.calibration.FacialContrastVector
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -150,7 +151,8 @@ class StyleSimulatorViewModel @Inject constructor(
     private val generatePlaylistUseCase: GeneratePlaylistUseCase,
     private val atmosphericRepository: AtmosphericRepository,
     private val rotationRepository: RotationRepository,
-    private val rotationScoringUseCase: RotationScoringUseCase
+    private val rotationScoringUseCase: RotationScoringUseCase,
+    private val greedyRehydrator: GreedyRehydrator
 ) : ViewModel() {
 
     private val _selectedClothingCategory = MutableStateFlow(ClothingCategory.TOPS)
@@ -242,9 +244,17 @@ class StyleSimulatorViewModel @Inject constructor(
             isAnalyzing = analyzing,
             faceAnalysisError = analysisError,
             faceTelemetry = telemetry,
-            visualBlueprintData = mapToVisualBlueprintData(
-                cosmetics = recommendedCosmetics,
-                clothing = recommendedClothing,
+            visualBlueprintData = greedyRehydrator.mapToVisualBlueprintData(
+                aiSelectedClothingIds = result?.selectedClothingIds ?: emptyList(),
+                aiSelectedCosmeticIds = result?.selectedCosmeticIds ?: emptyList(),
+                inventory = allClothing,
+                cosmetics = allCosmetics,
+                activeClothingAnchors = allClothing.filter { item ->
+                    anchoredClothing[item.category] == item.colorFamily
+                },
+                activeCosmeticAnchors = allCosmetics.filter { item ->
+                    anchoredCosmetics[item.macroCategory] == item.colorFamily
+                },
                 palette = result?.recommendedPalette ?: emptyList(),
                 isComplete = step == SimulationStep.RESULT
             )
@@ -412,7 +422,8 @@ class StyleSimulatorViewModel @Inject constructor(
             val requestContext = StyleRequestContext(
                 intent = userIntent,
                 weather = weatherContext,
-                appearanceTelemetry = appearance ?: Appearance("Neutral", "Neutral", "Balanced"),
+                appearanceProfile = appearance?.let { AppearanceProfile(it.temperature, it.depth, it.contrast) } ?: AppearanceProfile(),
+                appearanceTelemetry = ColorTelemetry(),
                 fashionProfile = skinContext,
                 rotationScores = rotationScores,
                 anchoredClothingIds = anchoredClothing.map { "w_${it.internalId}" },

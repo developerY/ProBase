@@ -1,8 +1,9 @@
 package com.zoewave.probase.features.ai.firebase
 
+import com.zoewave.probase.features.ai.core.AiExecutionFailure
+import com.zoewave.probase.features.ai.core.AiInput
 import com.zoewave.probase.features.ai.core.AiProvider
 import com.zoewave.probase.features.ai.core.AiProviderCapability
-import com.zoewave.probase.features.ai.core.StylePromptRequest
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -18,8 +19,8 @@ class FirebaseAiProvider @Inject constructor(
         maxInputTokens = 1536,
         maxOutputTokens = 512,
         timeoutMillis = 3000L,
-        initialTopK = 12,
-        minTopK = 6,
+        maxCandidateAdditions = 12,
+        minCandidateAdditions = 6,
         isLocal = false
     )
 
@@ -28,14 +29,23 @@ class FirebaseAiProvider @Inject constructor(
         return true 
     }
 
-    override suspend fun countTokens(request: StylePromptRequest): Int {
-        return client.countTokens(request.exactPromptString)
+    override suspend fun countTokens(input: AiInput): Int {
+        return client.countTokens(input.promptString)
     }
 
-    override suspend fun execute(request: StylePromptRequest): Result<String> {
+    override suspend fun execute(input: AiInput): Result<String> {
+        // Defense-in-Depth Privacy Enforcement
+        if (input is AiInput.Multimodal) {
+            return Result.failure(
+                AiExecutionFailure.ExecutionError(
+                    IllegalArgumentException("Cloud providers strictly reject Multimodal image inputs.")
+                ).let { Exception(it.throwable) }
+            )
+        }
+
         return try {
             authManager.signInAnonymously()
-            val response = client.generateContent(request.exactPromptString)
+            val response = client.generateContent(input.promptString)
             Result.success(response.text)
         } catch (e: Exception) {
             Result.failure(e)

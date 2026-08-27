@@ -1,8 +1,8 @@
 package com.zoewave.probase.features.ai.local.data
 
+import com.zoewave.probase.features.ai.core.AiInput
 import com.zoewave.probase.features.ai.core.AiProvider
 import com.zoewave.probase.features.ai.core.AiProviderCapability
-import com.zoewave.probase.features.ai.core.StylePromptRequest
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -17,8 +17,8 @@ class LocalNanoAiProvider @Inject constructor(
         maxInputTokens = 768,
         maxOutputTokens = 256,
         timeoutMillis = 1200L,
-        initialTopK = 8,
-        minTopK = 4,
+        maxCandidateAdditions = 8,
+        minCandidateAdditions = 4,
         isLocal = true,
         supportsLocalImageIngestion = true
     )
@@ -30,11 +30,18 @@ class LocalNanoAiProvider @Inject constructor(
         }
     }
 
-    override suspend fun countTokens(request: StylePromptRequest): Int {
-        return engine.estimateTokens(request.exactPromptString)
+    override suspend fun countTokens(input: AiInput): Int {
+        return engine.estimateTokens(input.promptString)
     }
 
-    override suspend fun execute(request: StylePromptRequest): Result<String> {
-        return engine.generateStructuredContent(request.exactPromptString)
+    override suspend fun execute(input: AiInput): Result<String> {
+        return when (input) {
+            is AiInput.Multimodal -> {
+                engine.generateMultimodalContent(input.promptString, input.localImage)
+            }
+            is AiInput.TextOnly -> {
+                engine.generateStructuredContent(input.promptString)
+            }
+        }
     }
 }

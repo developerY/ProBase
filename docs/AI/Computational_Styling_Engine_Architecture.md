@@ -19,9 +19,10 @@ The engine operates as a state machine that establishes a foundation and compute
 
 ### Phase 1: Anchor Selection Policy
 The "Anchor" (typically a Top or Bottom) sets the mathematical center of the outfit.
-1.  **User-Locked**: Explicitly pinned in UI.
-2.  **User-Selected**: Recently tapped or focused.
-3.  **Deterministic**: Highest context-fit + freshness match.
+1.  **FORCED**: User explicitly forced this item. Must be included even if it violates a normal constraint (recorded as a constraint violation in provenance).
+2.  **LOCKED**: User explicitly locked this item in UI as an immutable anchor.
+3.  **SELECTED**: User is actively exploring or focused on this item.
+4.  **Automatic**: Highest context-fit + freshness match.
 
 ### Phase 2: The Color Harmony Engine
 Located in [`ColorHarmonyEngine.kt`](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/color/ColorHarmonyEngine.kt), this handles perceptual color math:
@@ -59,8 +60,9 @@ Every request passes through an **Adaptive Fit Engine** in the [`StyleSimulatorE
 *   **Local Tier (Multimodal)**: On-device providers (Gemini Nano) accept `AiInput.Multimodal` for texture/drape analysis because the data never leaves the NPU.
 
 ### Multi-Tier Deterministic Caching
-The [`PromptCacheRepository`](file:///Users/developer/AndroidStudioProjects/ProBase/features/ai/local/src/main/java/com/zoewave/probase/features/ai/local/data/PromptCacheRepository.kt) stores results indexed by a SHA-256 fingerprint including:
-`Tier + RetrievalPolicy + PromptVersion + Telemetry + Weather + Intent + Manifest`.
+The [`PromptCacheRepository`](file:///Users/developer/AndroidStudioProjects/ProBase/features/ai/local/src/main/java/com/zoewave/probase/features/ai/local/data/PromptCacheRepository.kt) stores results indexed by a SHA-256 fingerprint derived from post-retrieval deterministic state:
+`Selected IDs + missingRoleRequirements + occasion + weatherTempC + uvIndex + telemetry + providerId`.
+This guarantees that different occasions (e.g., casual morning vs formal evening) or weather conditions generating different role gaps produce distinct cache keys even when locking the same shirt.
 
 ---
 
@@ -68,6 +70,7 @@ The [`PromptCacheRepository`](file:///Users/developer/AndroidStudioProjects/ProB
 
 To solve the "Last Mile" problem, we implemented **Greedy Rehydration** in [`VisualBlueprintModels.kt`](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/features/analyzer/src/main/java/com/zoewave/probase/kocolor/features/analyzer/simulator/ui/components/graphics/VisualBlueprintModels.kt):
 
+*   **Anchor Fail-Safe**: If the Generative AI accidentally omits a `LOCKED` or `FORCED` anchor (clothing or cosmetic) from its final JSON blueprint array, the rehydrator intercepts the result and manually re-injects the locked item back into the `VisualBlueprintData`, ensuring the "user is always correct" invariant holds at the presentation layer.
 *   **Keyword Fallback**: If a product's primary category is generic (e.g., `ACTIVEWEAR`), the mapper scans the name for "tank", "pant", "eye", etc.
 *   **No Item Left Behind**: Any item returned by the AI that doesn't fit a primary slot is greedily assigned to an available empty slot to ensure 100% visualization.
 *   **Outerwear Support**: Added a dedicated `OUTER` slot and anchor point to the body silhouette for complex layering.

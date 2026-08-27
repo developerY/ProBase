@@ -14,90 +14,131 @@ import javax.inject.Singleton
 @Singleton
 class DeterministicContextEngine @Inject constructor(
     private val colorEngine: ColorHarmonyEngine,
+    private val roleGapAnalyzer: RoleGapAnalyzer,
     private val rotationScoringUseCase: RotationScoringUseCase,
     private val repository: WardrobeRepository,
     private val auditLogger: StyleAuditLogger
 ) {
 
     /**
-     * Builds the "Reasoning Set" for the AI by performing deterministic retrieval and color scoring.
+     * Generates a full [StyleSelectionState] with locked anchors, missing roles, composite profile,
+     * and the fully ranked candidate pool.
      */
-    suspend fun buildReasoningSet(
+    suspend fun generateSelectionState(
         inventory: List<ClothingItem>,
-        context: StyleRequestContext,
-        limit: Int
-    ): List<CandidateProvenance> {
+        lockedConstraints: List<UserConstraint>,
+        context: StyleRequestContext
+    ): StyleSelectionState {
         val initialCount = inventory.size
 
-        // Phase 1: Anchor Selection
-        val anchor = selectAnchor(inventory, context) ?: return emptyList()
-
-        // Phase 2: Hard Constraints & Filtering
-        val afterWeather = inventory.filter { item ->
-            // Simulating steps for pruning log
-            val isHot = context.weather.contains("Temp: 2", ignoreCase = true) || context.weather.contains("Temp: 3", ignoreCase = true)
-            !(isHot && item.category == ClothingCategory.OUTERWEAR)
-        }.size
-
-        val eligibleItems = inventory.filter { item ->
-            item.id != anchor.id && 
-            isContextuallyViable(item, context)
-        }
+        // 1. Resolve Anchors
+        val lockedAnchors = resolveAnchors(inventory, lockedConstraints, context)
         
+        // 2. Calculate Composite Profile from Anchors
+        val compositeProfile = colorEngine.calculateCompositeProfile(lockedAnchors)
+
+        // 3. Identify Missing Role Requirements
+        val missingRoles = roleGapAnalyzer.determineRoleRequirements(
+            anchors = lockedAnchors,
+            occasion = context.occasion,
+            weatherTempC = context.weatherTempC
+        )
+
+        // 4. Hard Constraints (Eliminate impossible items)
+        val lockedIds = lockedAnchors.map { it.id }.toSet()
+        val eligibleItems = inventory.filter { item ->
+            item.id !in lockedIds && isContextuallyViable(item, context)
+        }
+
         auditLogger.logDeterministicPruning(
             context.requestId,
             PruningRecord(
                 initialCount = initialCount,
-                afterWeather = afterWeather,
+                afterWeather = eligibleItems.size,
                 afterRotation = eligibleItems.size,
                 finalEligible = eligibleItems.size
             )
         )
 
-        // Phase 3: Continuous Scoring
-        val anchorHsl = colorEngine.hexToHsl(anchor.colorHex)
-        val scoredCandidates = eligibleItems.map { item ->
-            val candidateHsl = colorEngine.hexToHsl(item.colorHex)
-            
-            val colorScore = colorEngine.calculateCompatibility(anchorHsl, candidateHsl, context.appearanceTelemetry)
+        // 5. Soft Scoring & Ranking
+        val rankedPool = eligibleItems.map { item ->
+            val lch = colorEngine.hexToLCh(item.colorHex)
+            val colorScore = colorEngine.scoreCandidate(lch, compositeProfile, context.appearanceTelemetry)
             val contextScore = calculateContextScore(item, context)
             val freshnessScore = calculateFreshnessScore(item, context)
-            
-            val baseReason = "Mathematically harmonic with ${anchor.name}"
+
+            val baseReason = if (lockedAnchors.isNotEmpty()) {
+                "Harmonic with locked ${lockedAnchors.first().name}"
+            } else {
+                "Contextually compatible"
+            }
             val finalReason = if (item.isSignature) "[Signature Item] Rotation bypassed. $baseReason" else baseReason
 
             CandidateProvenance(
                 clothingItem = item,
                 contextScore = contextScore,
                 colorScore = colorScore,
-                appearanceScore = 0.8f, // Matching appearance profile logic
+                appearanceScore = 0.8f,
                 freshnessScore = freshnessScore,
+                compositeScore = (colorScore * 0.4f + contextScore * 0.3f + freshnessScore * 0.3f),
                 retrievalReason = finalReason
             )
+        }.sortedByDescending { it.compositeScore }
+
+        return StyleSelectionState(
+            activeAnchors = lockedAnchors,
+            missingRoleRequirements = missingRoles,
+            compositeProfile = compositeProfile,
+            fullRankedCandidatePool = rankedPool
+        )
+    }
+
+    private fun resolveAnchors(
+        inventory: List<ClothingItem>,
+        constraints: List<UserConstraint>,
+        context: StyleRequestContext
+    ): List<ClothingItem> {
+        val anchors = mutableListOf<ClothingItem>()
+        val lockedIds = constraints.map { it.itemId }.toSet()
+
+        // 1. FORCED or LOCKED constraints from user
+        constraints.forEach { constraint ->
+            inventory.find { "w_${it.internalId}" == constraint.itemId || it.remoteId == constraint.itemId }?.let { item ->
+                anchors.add(item)
+                val tierName = constraint.tier.name
+                auditLogger.logAnchorResolution(
+                    context.requestId,
+                    item,
+                    if (constraint.tier == SelectionTier.FORCED) AnchorSource.USER_LOCKED else AnchorSource.USER_SELECTED,
+                    "Constraint [$tierName] applied"
+                )
+            }
         }
 
-        // Phase 4: Adaptive Role-Aware Diversity
-        val diverseCandidates = enforceRoleDiversity(anchor, scoredCandidates, context)
+        // 2. Free styling automatic anchor if no locked items exist
+        if (anchors.isEmpty()) {
+            selectAnchor(inventory, context)?.let { autoAnchor ->
+                anchors.add(autoAnchor)
+            }
+        }
 
-        // Phase 5: Truncate & Prepend Anchor
-        val anchorProvenance = CandidateProvenance(clothingItem = anchor, contextScore = 1f, colorScore = 1f, appearanceScore = 1f, freshnessScore = 1f, retrievalReason = "Primary Anchor")
-        return (listOf(anchorProvenance) + diverseCandidates).take(limit)
+        return anchors.distinctBy { it.internalId }
     }
 
     private fun selectAnchor(inventory: List<ClothingItem>, context: StyleRequestContext): ClothingItem? {
-        // 1. User-Locked Item
-        context.userLockedAnchorId?.let { id ->
-            inventory.find { "w_${it.internalId}" == id }?.let { 
+        // 1. User-Locked or FORCED Item
+        context.lockedConstraints.find { it.tier == SelectionTier.LOCKED || it.tier == SelectionTier.FORCED }?.let { constraint ->
+            inventory.find { "w_${it.internalId}" == constraint.itemId || it.remoteId == constraint.itemId }?.let {
                 auditLogger.logAnchorResolution(context.requestId, it, AnchorSource.USER_LOCKED, "Explicitly forced by user")
-                return it 
+                return it
             }
         }
         
         // 2. User-Selected Item
-        context.userSelectedAnchorId?.let { id ->
-            inventory.find { "w_${it.internalId}" == id }?.let { 
+        context.lockedConstraints.find { it.tier == SelectionTier.SELECTED }?.let { constraint ->
+            inventory.find { "w_${it.internalId}" == constraint.itemId || it.remoteId == constraint.itemId }?.let {
                 auditLogger.logAnchorResolution(context.requestId, it, AnchorSource.USER_SELECTED, "Manually selected in UI")
-                return it 
+                return it
             }
         }
         
