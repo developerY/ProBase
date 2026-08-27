@@ -19,9 +19,10 @@ The engine operates as a state machine that establishes a foundation and compute
 
 ### Phase 1: Anchor Selection Policy
 The "Anchor" (typically a Top or Bottom) sets the mathematical center of the outfit.
-1.  **User-Locked**: Explicitly pinned in UI.
-2.  **User-Selected**: Recently tapped or focused.
-3.  **Deterministic**: Highest context-fit + freshness match.
+1.  **FORCED**: User explicitly forced this item. Must be included even if it violates a normal constraint (recorded as a constraint violation in provenance).
+2.  **LOCKED**: User explicitly locked this item in UI as an immutable anchor.
+3.  **SELECTED**: User is actively exploring or focused on this item.
+4.  **Automatic**: Highest context-fit + freshness match.
 
 ### Phase 2: The Color Harmony Engine
 Located in [`ColorHarmonyEngine.kt`](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/color/ColorHarmonyEngine.kt), this handles perceptual color math:
