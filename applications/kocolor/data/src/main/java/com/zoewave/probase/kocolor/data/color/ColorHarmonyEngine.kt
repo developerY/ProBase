@@ -1,6 +1,7 @@
 package com.zoewave.probase.kocolor.data.color
 
 import com.zoewave.probase.core.model.ritual.ClothingItem
+import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.kocolor.data.usecase.ColorTelemetry
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -149,5 +150,82 @@ class ColorHarmonyEngine @Inject constructor() {
         val dC = lch1.c - lch2.c
         val dH = abs(lch1.h - lch2.h)
         return sqrt(dL * dL + dC * dC + dH * dH)
+    }
+
+    /**
+     * Calculates the post-synthesis "KoColor Fashionista Score" (0 to 100) for a completed outfit & cosmetics selection.
+     */
+    fun calculateFashionistaScore(
+        finalOutfit: List<ClothingItem>,
+        finalCosmetics: List<CosmeticItem>,
+        telemetry: ColorTelemetry
+    ): Int {
+        val clothingPalette = finalOutfit.map { hexToLCh(it.colorHex) }
+        val cosmeticPalette = finalCosmetics.map { hexToLCh(it.colorHex) }
+        val fullPalette = clothingPalette + cosmeticPalette
+
+        if (fullPalette.isEmpty()) return 85 // Baseline score if empty
+
+        // 1. Geometric Hue Cohesion (0 to 40 pts)
+        val hueScore = evaluatePaletteGeometry(fullPalette)
+
+        // 2. Biometric Contrast Adherence (0 to 40 pts)
+        val contrastScore = evaluateContrastAdherence(fullPalette, telemetry)
+
+        // 3. Anchor Gravity & Neutral Balance (0 to 20 pts)
+        val balanceScore = evaluateNeutralGrounding(fullPalette)
+
+        return (hueScore + contrastScore + balanceScore).coerceIn(0, 100)
+    }
+
+    private fun evaluatePaletteGeometry(palette: List<LCh>): Int {
+        val chromaticColors = palette.filter { it.c >= 10f }
+        if (chromaticColors.size <= 1) return 38 // Monochromatic or single color baseline is high
+
+        var minHueDeltaSum = 0f
+        var pairs = 0
+
+        for (i in 0 until chromaticColors.size - 1) {
+            for (j in i + 1 until chromaticColors.size) {
+                val h1 = chromaticColors[i].h
+                val h2 = chromaticColors[j].h
+                val delta = abs(h1 - h2)
+                val minDelta = Math.min(delta, 360f - delta)
+                minHueDeltaSum += minDelta
+                pairs++
+            }
+        }
+
+        val avgDelta = if (pairs > 0) minHueDeltaSum / pairs else 0f
+
+        return when {
+            avgDelta <= 30f -> 40 // Analogous / Monochromatic perfection
+            abs(avgDelta - 180f) <= 30f -> 38 // Complementary contrast
+            abs(avgDelta - 120f) <= 30f -> 35 // Triadic harmony
+            else -> 28 // Mixed palette
+        }
+    }
+
+    private fun evaluateContrastAdherence(palette: List<LCh>, telemetry: ColorTelemetry): Int {
+        val minL = palette.minOfOrNull { it.l } ?: 50f
+        val maxL = palette.maxOfOrNull { it.l } ?: 50f
+        val lShift = (maxL - minL) / 100f // 0.0 to 1.0
+
+        val idealContrast = telemetry.contrastScore
+        val contrastDiff = abs(lShift - idealContrast)
+
+        return (40 - (contrastDiff * 20)).toInt().coerceIn(15, 40)
+    }
+
+    private fun evaluateNeutralGrounding(palette: List<LCh>): Int {
+        val hasNeutral = palette.any { it.c < 10f }
+        val hasStatement = palette.any { it.c >= 25f }
+
+        return when {
+            hasNeutral && hasStatement -> 20 // Perfect grounding
+            hasStatement -> 16
+            hasNeutral -> 18
+            else -> 14
+        }
     }
 }

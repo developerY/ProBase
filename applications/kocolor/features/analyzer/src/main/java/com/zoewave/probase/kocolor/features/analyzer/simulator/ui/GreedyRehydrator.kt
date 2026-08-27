@@ -5,6 +5,8 @@ import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.core.model.ritual.MicroCategory
+import com.zoewave.probase.kocolor.data.color.ColorHarmonyEngine
+import com.zoewave.probase.kocolor.data.usecase.ColorTelemetry
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.BlueprintItem
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.VisualBlueprintData
 import javax.inject.Inject
@@ -13,10 +15,12 @@ import javax.inject.Singleton
 /**
  * Final interceptor before AI Blueprint data hits the ViewModel/UI.
  * Guarantees the "user is always correct" invariant via Anchor Fail-Safes,
- * resolves ambiguous categories using keyword fallbacks, and prevents Compose UI hangs.
+ * resolves ambiguous categories using keyword fallbacks, and calculates the post-synthesis Fashionista Score.
  */
 @Singleton
-class GreedyRehydrator @Inject constructor() {
+class GreedyRehydrator @Inject constructor(
+    private val colorHarmonyEngine: ColorHarmonyEngine
+) {
 
     fun mapToVisualBlueprintData(
         aiSelectedClothingIds: List<String>,
@@ -26,6 +30,7 @@ class GreedyRehydrator @Inject constructor() {
         activeClothingAnchors: List<ClothingItem> = emptyList(),
         activeCosmeticAnchors: List<CosmeticItem> = emptyList(),
         palette: List<String> = emptyList(),
+        telemetry: ColorTelemetry = ColorTelemetry(),
         isComplete: Boolean = false
     ): VisualBlueprintData {
         // 1. Initial Resolution
@@ -39,8 +44,16 @@ class GreedyRehydrator @Inject constructor() {
         resolvedClothing = enforceClothingFailSafe(resolvedClothing, activeClothingAnchors)
         resolvedCosmetics = enforceCosmeticFailSafe(resolvedCosmetics, activeCosmeticAnchors)
 
-        // 4. Slot Assignment & Greedy Rehydration
-        return assignToSlots(resolvedClothing, resolvedCosmetics, palette, isComplete)
+        // 4. Calculate Post-Synthesis Fashionista Score (0-100)
+        val fashionistaScore = colorHarmonyEngine.calculateFashionistaScore(
+            finalOutfit = resolvedClothing,
+            finalCosmetics = resolvedCosmetics,
+            telemetry = telemetry
+        )
+
+        // 5. Slot Assignment & Greedy Rehydration
+        val blueprint = assignToSlots(resolvedClothing, resolvedCosmetics, palette, isComplete)
+        return blueprint.copy(koColorScore = fashionistaScore)
     }
 
     private fun resolveClothing(ids: List<String>, inventory: List<ClothingItem>): List<ClothingItem> {
