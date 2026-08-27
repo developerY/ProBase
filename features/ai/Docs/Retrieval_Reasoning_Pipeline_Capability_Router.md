@@ -53,9 +53,9 @@ The [`StyleSimulatorEngine`](file:///Users/developer/AndroidStudioProjects/ProBa
 ## 4. Security & Privacy Invariants
 
 ### Type-Safe Privacy Boundary
-The system enforces privacy at the architectural level:
--   **Cloud-Impossible Images:** The [`PromptAssembler`](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/usecase/PromptAssembler.kt) explicitly nullifies image data if the provider's `supportsLocalImageIngestion` capability is false.
--   **Telemetry Only:** Cloud providers strictly receive `StyleTelemetry` (mathematical vectors) and compact text manifests.
+The system enforces privacy at the architectural level using the `AiInput` sealed interface:
+-   **Compile-Time Type Safety:** Cloud providers strictly accept `AiInput.TextOnly`. Raw images are encapsulated in `AiInput.Multimodal` and are only constructible for providers with `supportsLocalImageIngestion = true`.
+-   **Telemetry Only:** Cloud prompts strictly receive `ColorTelemetry` / `AppearanceProfile` vectors and compact text manifests.
 
 ### Deterministic Multi-Tier Caching
 Results are cached using a SHA-256 fingerprint that includes the `executionTier`. This ensures that a local NPU result is never reused as a cloud result, maintaining execution integrity across tiers.
