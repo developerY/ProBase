@@ -22,7 +22,9 @@ data class VisualBlueprintData(
     val topItem: BlueprintItem? = null,
     val bottomItem: BlueprintItem? = null,
     val shoeItem: BlueprintItem? = null,
-    val recommendedPalette: List<String> = emptyList()
+    val outerwearItem: BlueprintItem? = null,
+    val recommendedPalette: List<String> = emptyList(),
+    val isComplete: Boolean = false
 )
 
 data class BlueprintItem(
@@ -44,10 +46,12 @@ fun FashionAdvice.toVisualBlueprintData(): VisualBlueprintData {
         cheeksItem = cosmetics.find { it.category.equals("Color & Dimension", ignoreCase = true) || it.category.equals("DIMENSION", ignoreCase = true) }?.toBlueprintItem(),
         lipsItem = cosmetics.find { it.category.equals("Lips", ignoreCase = true) || it.category.equals("LIPS", ignoreCase = true) }?.toBlueprintItem(),
         nailsItem = cosmetics.find { it.category.equals("Nails", ignoreCase = true) || it.category.equals("NAILS", ignoreCase = true) }?.toBlueprintItem(),
-        topItem = clothes.find { it.category.equals("TOPS", ignoreCase = true) || it.category.equals("OUTERWEAR", ignoreCase = true) }?.toBlueprintItem(),
-        bottomItem = clothes.find { it.category.equals("BOTTOMS", ignoreCase = true) }?.toBlueprintItem(),
+        topItem = clothes.find { it.category.equals("TOPS", ignoreCase = true) || it.category.equals("DRESSES", ignoreCase = true) }?.toBlueprintItem(),
+        bottomItem = clothes.find { it.category.equals("BOTTOMS", ignoreCase = true) || it.category.equals("DRESSES", ignoreCase = true) }?.toBlueprintItem(),
         shoeItem = clothes.find { it.category.equals("SHOES", ignoreCase = true) }?.toBlueprintItem(),
-        recommendedPalette = recommendedPalette
+        outerwearItem = clothes.find { it.category.equals("OUTERWEAR", ignoreCase = true) }?.toBlueprintItem(),
+        recommendedPalette = recommendedPalette,
+        isComplete = true // FashionAdvice is always a result
     )
 }
 
@@ -71,17 +75,44 @@ private fun SuggestedPiece.toBlueprintItem() = BlueprintItem(
 fun mapToVisualBlueprintData(
     cosmetics: List<CosmeticItem>,
     clothing: List<ClothingItem>,
-    palette: List<String>
+    palette: List<String>,
+    isComplete: Boolean = false
 ): VisualBlueprintData {
+    // 🛠️ Highly Adaptive Rehydration: Preserve distinct items across available slots
+    // 1. Identify primary pieces with greedy category matching
+    val top = clothing.find { it.category == ClothingCategory.TOPS }
+        ?: clothing.find { it.category == ClothingCategory.ACTIVEWEAR && it.name.contains("tank", true) }
+        ?: clothing.find { it.category == ClothingCategory.DRESSES }
+        
+    val bottom = clothing.find { it.category == ClothingCategory.BOTTOMS }
+        ?: clothing.find { it.category == ClothingCategory.ACTIVEWEAR && it.name.contains("pants", true) }
+        ?: if (top?.category == ClothingCategory.DRESSES) top else null
+        
+    val shoes = clothing.find { it.category == ClothingCategory.SHOES }
+    
+    val outerwear = clothing.find { it.category == ClothingCategory.OUTERWEAR }
+        ?: clothing.find { it.category == ClothingCategory.ACTIVEWEAR && it.name.contains("shirt", true) }
+        ?: clothing.find { it.category == ClothingCategory.ACTIVEWEAR && it.name.contains("jacket", true) }
+        ?: clothing.find { it.category == ClothingCategory.ACTIVEWEAR && it.name.contains("coat", true) }
+
+    // 🛠️ Fallback rehydration: ensure all returned clothing items are visible somewhere
+    val usedIds = listOfNotNull(top?.internalId, bottom?.internalId, shoes?.internalId, outerwear?.internalId)
+    val remainingClothing = clothing.filter { it.internalId !in usedIds }
+    
+    val finalTop = top ?: remainingClothing.firstOrNull()?.also { /* greedy assignment */ }
+    val finalBottom = bottom ?: remainingClothing.drop(1).firstOrNull()
+    
     return VisualBlueprintData(
         eyesItem = cosmetics.find { it.macroCategory == MacroCategory.EYES }?.toBlueprintItem(),
         cheeksItem = cosmetics.find { it.macroCategory == MacroCategory.DIMENSION }?.toBlueprintItem(),
         lipsItem = cosmetics.find { it.macroCategory == MacroCategory.LIPS }?.toBlueprintItem(),
         nailsItem = cosmetics.find { it.macroCategory == MacroCategory.NAILS }?.toBlueprintItem(),
-        topItem = clothing.find { it.category == ClothingCategory.TOPS }?.toBlueprintItem(),
-        bottomItem = clothing.find { it.category == ClothingCategory.BOTTOMS }?.toBlueprintItem(),
-        shoeItem = clothing.find { it.category == ClothingCategory.SHOES }?.toBlueprintItem(),
-        recommendedPalette = palette
+        topItem = finalTop?.toBlueprintItem(),
+        bottomItem = finalBottom?.toBlueprintItem(),
+        shoeItem = shoes?.toBlueprintItem(),
+        outerwearItem = outerwear?.toBlueprintItem(),
+        recommendedPalette = palette,
+        isComplete = isComplete
     )
 }
 

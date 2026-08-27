@@ -19,7 +19,8 @@ We enforce a strict separation between **Deterministic Retrieval** and **Generat
 
 ### A. Wardrobe Candidate Filter (Local RAG)
 The [`WardrobeCandidateFilter`](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/usecase/WardrobeCandidateFilter.kt) is the workhorse of the retrieval phase. It prunes the inventory ($N=300+$ items) into a "Reasoning Set" ($K=8\text{--}16$ items).
--   **Hard Pruning:** Immediately drops items failing availability, temperature, or rotation constraints.
+-   **Hard Pruning:** Immediately drops items failing availability (including `isHidden`), temperature heuristics (e.g., no `OUTERWEAR` in heat), or rotation constraints.
+-   **Rotation Fallback:** Automatically excludes items worn in the last 3 days if projected rotation scores are unavailable.
 -   **Soft Scoring:** Ranks items based on matching user `AppearanceTelemetry` and intent.
 
 ### B. Compact Manifest Serializer
@@ -30,8 +31,8 @@ The [`CompactManifestSerializer`](file:///Users/developer/AndroidStudioProjects/
 ### C. Capability Router
 The [`CapabilityRouter`](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/usecase/AiRoutingImpl.kt) dynamically detects and ranks available AI backends on the device.
 1.  **Tier 1.5 (Local Nano):** Highest priority. Runs on-device NPU. Private and free.
-2.  **Tier 0 (Firebase AI):** Secondary priority. High-intelligence managed cloud.
-3.  **Tier 1 (BYOK):** Fallback cloud tier.
+2.  **Tier 0 (Firebase AI):** Secondary priority. High-intelligence managed cloud. Encapsulates anonymous authentication.
+3.  **Tier 1 (BYOK):** Fallback cloud tier for user-provided keys.
 
 ---
 

@@ -72,7 +72,7 @@ class GeneratePlaylistUseCase @Inject constructor(
                 anchoredCosmeticIds = currentCosmeticAnchors.map { "c_${it.internalId}" }
             )
 
-            val dailyBlueprint = simulatorEngine.generateBlueprint(wardrobe, context)
+            val dailyBlueprint = simulatorEngine.generateBlueprint(wardrobe, cosmetics, context)
 
             // COMPLETE State Forwarding: Simulate EVERY item picked into the projected state
             dailyBlueprint.selectedClothingIds.forEach { id ->

@@ -8,8 +8,8 @@ This document details the architectural evolution of the KoColor styling pipelin
 
 We have decoupled the styling process into two distinct cognitive phases:
 
-1.  **Deterministic Reasoning (85% of load):** Handled locally by `WardrobeCandidateFilter`. It performs database-driven tasks like weather gating, availability checks, and rotation penalties.
-2.  **Generative Reasoning (15% of load):** Handled by an `AiProvider`. It solves the "aesthetic coordination problem" using only the pre-qualified candidates.
+1.  **Deterministic Reasoning (85% of load):** Handled locally by `WardrobeCandidateFilter`. It performs database-driven tasks like weather gating, availability checks (including hidden status), and rotation penalties (with a 3-day hardware-clock fallback).
+2.  **Generative Reasoning (15% of load):** Handled by an `AiProvider`. It solves the "aesthetic coordination problem" using only the pre-qualified candidates. Providers encapsulate their own session management, such as anonymous authentication for cloud tiers.
 
 This ensures we never waste expensive LLM tokens on simple database queries (e.g., "Is this shirt in the laundry?").
 
@@ -26,9 +26,10 @@ The new core module defines the unified contract for all AI backends.
 
 ### B. Local Candidate RAG (`WardrobeCandidateFilter`)
 A multi-stage pipeline that prunes $N=300+$ items down to a manageable Top-$K$ set:
-1.  **Hard Pruning**: Drops items that are unavailable, weather-incompatible, or violated by rotation rules.
+1.  **Hard Pruning**: Drops items that are marked as `isHidden`, weather-incompatible (e.g., no heavy coats in 25°C+), or violated by rotation rules.
 2.  **Soft Scoring**: Ranks remaining items against the user's `AppearanceTelemetry` and `userIntent` keywords.
-3.  **Truncation**: Returns exactly the number of items allowed by the current execution tier.
+3.  **Rotation Fallback**: If specific rotation scores are missing, the filter uses physical `lastUsedTimestamp` metadata to exclude items worn within the last 3 days.
+4.  **Truncation**: Returns exactly the number of items allowed by the current execution tier.
 
 ### C. Semantic Minification (`CompactManifestSerializer`)
 To slash token costs by **~80%**, we replaced verbose JSON with dense tuples:
@@ -55,6 +56,8 @@ The `StyleSimulatorEngine` no longer just "sends a request." It adaptively fits 
 ## 4. Resilience & Fallback
 
 *   **`HeuristicStyleEngine`**: An indestructible baseline that uses smart-randomization and basic color matching to provide a "styling blueprint" even when completely offline or without AI capacity.
+*   **`ByokAiProvider`**: A "Bring Your Own Key" provider that acts as a deep fallback (Priority 3) when neither local nor managed cloud tiers are available.
+*   **Encapsulated Auth**: Cloud providers like `FirebaseAiProvider` manage their own session state (e.g., `authManager.signInAnonymously()`) internally during execution, keeping the ViewModel layer clean.
 *   **Unified Exceptions**: Because every provider maps its errors to `AiExecutionFailure`, the simulator engine can handle a network drop or a Nano context-limit error using the exact same logic.
 
 ---

@@ -61,12 +61,13 @@ class StyleSimulatorIntegrationTest {
 
         every { provider.capability } returns capability
         coEvery { provider.countTokens(any()) } returns 200
-        coEvery { provider.execute(any()) } returns Result.success("{\"rationale\": \"Harmonic look\", \"selectedClothingIds\": [\"w_1\"], \"selectedCosmeticIds\": [], \"recommendedPalette\": [\"#FF0000\"]}")
+        coEvery { provider.execute(any()) } returns Result.success("{\"rationale\": \"Harmonic look\", \"selectedClothingIds\": [\"w_1\"], \"selectedCosmeticIds\": [\"c_1\", \"c_2\", \"c_3\", \"c_4\"], \"recommendedPalette\": [\"#FF0000\"]}")
         
         coEvery { capabilityRouter.getRankedAvailableProviders() } returns listOf(provider)
         coEvery { candidateFilter.getCandidates(any(), any(), any()) } returns items
+        coEvery { candidateFilter.getCosmeticCandidates(any(), any(), any()) } returns emptyList()
 
-        val result = engine.generateBlueprint(items, context)
+        val result = engine.generateBlueprint(items, emptyList(), context)
 
         assertThat(result.rationale).isEqualTo("Harmonic look")
         assertThat(result.selectedClothingIds).contains("w_1")
@@ -79,7 +80,7 @@ class StyleSimulatorIntegrationTest {
         coEvery { capabilityRouter.getRankedAvailableProviders() } returns emptyList()
         every { fallbackEngine.generate(context) } returns StyleBlueprint("Fallback Rationale", emptyList(), emptyList(), emptyList())
 
-        val result = engine.generateBlueprint(emptyList(), context)
+        val result = engine.generateBlueprint(emptyList(), emptyList(), context)
 
         assertThat(result.rationale).isEqualTo("Fallback Rationale")
     }

@@ -245,7 +245,8 @@ class StyleSimulatorViewModel @Inject constructor(
             visualBlueprintData = mapToVisualBlueprintData(
                 cosmetics = recommendedCosmetics,
                 clothing = recommendedClothing,
-                palette = result?.recommendedPalette ?: emptyList()
+                palette = result?.recommendedPalette ?: emptyList(),
+                isComplete = step == SimulationStep.RESULT
             )
         )
     }.stateIn(
@@ -415,18 +416,25 @@ class StyleSimulatorViewModel @Inject constructor(
                 localImageBitmap = state.userPortraitUri?.let { loadBitmapFromUri(Uri.parse(it)) }
             )
 
-            val blueprint = simulatorEngine.generateBlueprint(filteredWardrobe, requestContext)
-            
-            // Translate Rationale: Swap <ITEM:id> tags for rich names
-            val translatedRationale = translateRationale(
-                blueprint.rationale,
-                state.fullClothingInventory,
-                state.fullCosmeticInventory
-            )
+            try {
+                val blueprint = simulatorEngine.generateBlueprint(filteredWardrobe, state.fullCosmeticInventory, requestContext)
+                
+                // Translate Rationale: Swap <ITEM:id> tags for rich names
+                val translatedRationale = translateRationale(
+                    blueprint.rationale,
+                    state.fullClothingInventory,
+                    state.fullCosmeticInventory
+                )
 
-            _simulationResult.value = blueprint.copy(rationale = translatedRationale)
-            _simulationStep.value = SimulationStep.RESULT
-            _isAnalyzing.value = false
+                _simulationResult.value = blueprint.copy(rationale = translatedRationale)
+                _simulationStep.value = SimulationStep.RESULT
+                Log.d("StyleSimulatorVM", "Simulation successful, step set to RESULT")
+            } catch (e: Exception) {
+                Log.e("StyleSimulatorVM", "Simulation failed or result processing error", e)
+                _simulationStep.value = SimulationStep.RESULT // Transition to result anyway to stop loading
+            } finally {
+                _isAnalyzing.value = false
+            }
         }
     }
 

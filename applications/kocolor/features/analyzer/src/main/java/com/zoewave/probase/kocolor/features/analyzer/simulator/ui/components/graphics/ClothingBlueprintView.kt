@@ -51,6 +51,7 @@ fun ClothingBlueprintView(
     val topAnchor = Offset(0.dp.value, -60.dp.value)
     val bottomAnchor = Offset(0.dp.value, 30.dp.value)
     val shoesAnchor = Offset(0.dp.value, 145.dp.value)
+    val outerwearAnchor = Offset(20.dp.value, -50.dp.value) // Right shoulder
 
     // 3. Define Dynamic Callout Targets (End of the lines)
     val topTarget by animateOffsetAsState(
@@ -68,11 +69,16 @@ fun ClothingBlueprintView(
         if (expandedCategory == "SHOES") Offset(15f, 170f) else Offset(60f, 180f),
         label = "shoesTarget"
     )
+    val outerwearTarget by animateOffsetAsState(
+        if (expandedCategory == "OUTER") Offset(-15f, -80f) else Offset(-70f, -95f),
+        label = "outerwearTarget"
+    )
 
     // 4. Animate Width
     val topWidth by animateDpAsState(if (expandedCategory == "TOP") 160.dp else 120.dp, label = "topWidth")
     val bottomWidth by animateDpAsState(if (expandedCategory == "BOTTOM") 160.dp else 120.dp, label = "bottomWidth")
     val shoesWidth by animateDpAsState(if (expandedCategory == "SHOES") 160.dp else 120.dp, label = "shoesWidth")
+    val outerWidth by animateDpAsState(if (expandedCategory == "OUTER") 160.dp else 120.dp, label = "outerWidth")
 
     Box(
         modifier = modifier
@@ -159,6 +165,12 @@ fun ClothingBlueprintView(
             // SHOES Line
             drawLine(lineColor, Offset(center.x + shoesAnchor.x.dp.toPx(), center.y + shoesAnchor.y.dp.toPx()), Offset(center.x + shoesTarget.x.dp.toPx(), center.y + shoesTarget.y.dp.toPx()), lineStroke)
             drawCircle(lineColor, anchorRadius, Offset(center.x + shoesAnchor.x.dp.toPx(), center.y + shoesAnchor.y.dp.toPx()))
+
+            // OUTERWEAR Line (Conditional)
+            if (data.outerwearItem != null || !data.isComplete) {
+                drawLine(lineColor, Offset(center.x + outerwearAnchor.x.dp.toPx(), center.y + outerwearAnchor.y.dp.toPx()), Offset(center.x + outerwearTarget.x.dp.toPx(), center.y + outerwearTarget.y.dp.toPx()), lineStroke)
+                drawCircle(lineColor, anchorRadius, Offset(center.x + outerwearAnchor.x.dp.toPx(), center.y + outerwearAnchor.y.dp.toPx()))
+            }
         }
 
         // 🛠️ The established standard half-height from the Face Blueprint
@@ -167,7 +179,7 @@ fun ClothingBlueprintView(
         // --- TOP CALLOUT (Pinned at BottomStart) ---
         BlueprintCallout(
             label = "TOP",
-            productName = data.topItem?.name ?: "Pending...",
+            productName = data.topItem?.name ?: if (data.isComplete) "None" else "Pending...",
             colorHex = data.topItem?.colorHex,
             isExpanded = expandedCategory == "TOP",
             onExpandToggle = { expandedCategory = if (expandedCategory == "TOP") null else "TOP" },
@@ -185,7 +197,7 @@ fun ClothingBlueprintView(
         // --- BOTTOM CALLOUT (Pinned at TopEnd) ---
         BlueprintCallout(
             label = "BOTTOM",
-            productName = data.bottomItem?.name ?: "Pending...",
+            productName = data.bottomItem?.name ?: if (data.isComplete) "None" else "Pending...",
             colorHex = data.bottomItem?.colorHex,
             isExpanded = expandedCategory == "BOTTOM",
             onExpandToggle = { expandedCategory = if (expandedCategory == "BOTTOM") null else "BOTTOM" },
@@ -203,7 +215,7 @@ fun ClothingBlueprintView(
         // --- SHOES CALLOUT (Pinned at TopStart) ---
         BlueprintCallout(
             label = "SHOES",
-            productName = data.shoeItem?.name ?: "Pending...",
+            productName = data.shoeItem?.name ?: if (data.isComplete) "None" else "Pending...",
             colorHex = data.shoeItem?.colorHex,
             isExpanded = expandedCategory == "SHOES",
             onExpandToggle = { expandedCategory = if (expandedCategory == "SHOES") null else "SHOES" },
@@ -217,6 +229,25 @@ fun ClothingBlueprintView(
                 ),
             anchorAlignment = Alignment.TopStart
         )
+
+        // --- OUTER CALLOUT (Optional) ---
+        if (data.outerwearItem != null || !data.isComplete) {
+            BlueprintCallout(
+                label = "OUTER",
+                productName = data.outerwearItem?.name ?: if (data.isComplete) "None" else "Pending...",
+                colorHex = data.outerwearItem?.colorHex,
+                isExpanded = expandedCategory == "OUTER",
+                onExpandToggle = { expandedCategory = if (expandedCategory == "OUTER") null else "OUTER" },
+                modifier = Modifier
+                    .zIndex(if (expandedCategory == "OUTER") 10f else 1f)
+                    .width(outerWidth)
+                    .offset(
+                        x = horizontalShift + outerwearTarget.x.dp - (outerWidth / 2),
+                        y = blueprintOffset + outerwearTarget.y.dp + calloutHalfHeight
+                    ),
+                anchorAlignment = Alignment.TopEnd
+            )
+        }
     }
 }
 

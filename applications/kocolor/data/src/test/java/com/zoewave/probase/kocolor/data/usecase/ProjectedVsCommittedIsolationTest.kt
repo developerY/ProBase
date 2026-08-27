@@ -70,8 +70,8 @@ class ProjectedVsCommittedIsolationTest {
         ))
         coEvery { cosmeticRepository.getAllCosmetics() } returns flowOf(emptyList())
         coEvery { 
-            simulatorEngine.generateBlueprint(any(), any()) 
-        } returns StyleBlueprint("Rationale", listOf("w_1"), emptyList(), emptyList())
+            simulatorEngine.generateBlueprint(any(), any(), any()) 
+        } returns StyleBlueprint("Rationale", listOf("w_1"), listOf("c_1", "c_2", "c_3", "c_4"), emptyList())
 
         // 2. Generate Playlist
         val playlistId = useCase.generateWeeklyPlaylist(LocalDate.now()).getOrThrow()

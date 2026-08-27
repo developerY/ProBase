@@ -2,6 +2,7 @@ package com.zoewave.probase.kocolor.data.usecase
 
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
+import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
@@ -82,6 +83,45 @@ class WardrobeCandidateFilter @Inject constructor() {
             score += 20.0
         }
         
+        return score
+    }
+
+    suspend fun getCosmeticCandidates(
+        inventory: List<CosmeticItem>,
+        context: StyleRequestContext,
+        limit: Int
+    ): List<CosmeticItem> {
+        val noiseCategories = setOf("oral", "tools", "fragrance", "grooming", "organizers")
+        
+        val eligibleItems = inventory.filter { item ->
+            !item.isHidden && 
+            !noiseCategories.contains(item.macroCategory.name.lowercase())
+        }
+
+        // Priority for anchored items
+        val anchoredItems = eligibleItems.filter { "c_${it.internalId}" in context.anchoredCosmeticIds }
+        val remainingItems = eligibleItems.filter { "c_${it.internalId}" !in context.anchoredCosmeticIds }
+
+        // Stage 2: Soft Scoring & Ranking
+        val rankedRemaining = remainingItems.map { item ->
+            item to calculateCosmeticScore(item, context)
+        }.sortedByDescending { it.second }
+         .map { it.first }
+
+        // Stage 3: Pool Truncation
+        val combined = (anchoredItems + rankedRemaining).distinctBy { it.internalId }
+        return combined.take(limit)
+    }
+
+    private fun calculateCosmeticScore(item: CosmeticItem, context: StyleRequestContext): Double {
+        var score = 0.0
+        if (context.appearanceTelemetry.contains(item.temperature.name, ignoreCase = true)) {
+            score += 10.0
+        }
+        val keywords = context.intent.lowercase().split(" ", ",", ".")
+        if (keywords.any { item.name.contains(it, ignoreCase = true) || (item.notes?.contains(it, ignoreCase = true) ?: false) }) {
+            score += 20.0
+        }
         return score
     }
 }

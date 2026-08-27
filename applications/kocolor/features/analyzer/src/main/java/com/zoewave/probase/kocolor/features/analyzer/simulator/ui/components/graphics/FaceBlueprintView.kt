@@ -230,7 +230,7 @@ fun FaceBlueprintView(
         // --- EYES CALLOUT (Center/Top) ---
         BlueprintCallout(
             label = "EYES",
-            productName = data.eyesItem?.name ?: "Pending...",
+            productName = data.eyesItem?.name ?: if (data.isComplete) "Not required" else "Pending...",
             colorHex = data.eyesItem?.colorHex,
             isExpanded = expandedCategory == "EYES",
             onExpandToggle = { expandedCategory = if (expandedCategory == "EYES") null else "EYES" },
@@ -249,7 +249,7 @@ fun FaceBlueprintView(
         // --- CHEEKS CALLOUT (Right Side) ---
         BlueprintCallout(
             label = "CHEEKS",
-            productName = data.cheeksItem?.name ?: "Pending...",
+            productName = data.cheeksItem?.name ?: if (data.isComplete) "Not required" else "Pending...",
             colorHex = data.cheeksItem?.colorHex,
             isExpanded = expandedCategory == "CHEEKS",
             onExpandToggle = { expandedCategory = if (expandedCategory == "CHEEKS") null else "CHEEKS" },
@@ -266,7 +266,7 @@ fun FaceBlueprintView(
         // --- LIPS CALLOUT (Left Side) ---
         BlueprintCallout(
             label = "LIPS",
-            productName = data.lipsItem?.name ?: "Pending...",
+            productName = data.lipsItem?.name ?: if (data.isComplete) "Not required" else "Pending...",
             colorHex = data.lipsItem?.colorHex,
             isExpanded = expandedCategory == "LIPS",
             onExpandToggle = { expandedCategory = if (expandedCategory == "LIPS") null else "LIPS" },

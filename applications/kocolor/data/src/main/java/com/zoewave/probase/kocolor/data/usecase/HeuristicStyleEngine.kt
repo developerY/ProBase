@@ -47,12 +47,16 @@ class HeuristicStyleEngine @Inject constructor(
         bottoms.smartPick({it.name}, {it.notes})?.let { selectedItems.add(it) }
         shoes.smartPick({it.name}, {it.notes})?.let { selectedItems.add(it) }
 
-        // 2. Pick Cosmetics
+        // 2. Pick Cosmetics (Full pigment set: Eyes, Cheeks, Lips, Nails)
         val eyes = availableCosmetics.filter { it.macroCategory == MacroCategory.EYES }
+        val cheeks = availableCosmetics.filter { it.macroCategory == MacroCategory.DIMENSION }
         val lips = availableCosmetics.filter { it.macroCategory == MacroCategory.LIPS }
+        val nails = availableCosmetics.filter { it.macroCategory == MacroCategory.NAILS }
 
         eyes.smartPick({it.name}, {it.notes})?.let { selectedCosmetics.add(it) }
+        cheeks.smartPick({it.name}, {it.notes})?.let { selectedCosmetics.add(it) }
         lips.smartPick({it.name}, {it.notes})?.let { selectedCosmetics.add(it) }
+        nails.smartPick({it.name}, {it.notes})?.let { selectedCosmetics.add(it) }
 
         val palette = selectedItems.mapNotNull { it.dominantHex }.distinct().toMutableList()
         if (palette.isEmpty()) palette.add("#FFFFFF")
