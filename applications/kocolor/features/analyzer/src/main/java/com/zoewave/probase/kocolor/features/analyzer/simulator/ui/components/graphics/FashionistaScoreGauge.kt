@@ -59,6 +59,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlin.math.cos
+import kotlin.math.sin
 
 @Composable
 fun CollapsibleFashionistaScoreCard(
@@ -146,22 +148,43 @@ fun FashionistaScoreGauge(
     score: Int,
     modifier: Modifier = Modifier
 ) {
-    // Smooth entrance animation for progress and score integer
+    // Entrance animation for progress and score integer
     var animationTriggered by remember { mutableStateOf(false) }
     LaunchedEffect(score) {
         animationTriggered = true
     }
 
-    // Continuous shimmer sweep transition
+    // Organic Asynchronous Shimmer & Twinkle Transitions (Coprime periods for natural non-repeating feel)
     val infiniteTransition = rememberInfiniteTransition(label = "shimmerTransition")
+    
     val shimmerShift by infiniteTransition.animateFloat(
         initialValue = 0f,
-        targetValue = 800f,
+        targetValue = 1000f,
         animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 3000, easing = LinearEasing),
+            animation = tween(durationMillis = 2800, easing = LinearEasing),
             repeatMode = RepeatMode.Restart
         ),
         label = "shimmerShift"
+    )
+
+    val organicPulse by infiniteTransition.animateFloat(
+        initialValue = 0.6f,
+        targetValue = 1.0f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 4100, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "organicPulse"
+    )
+
+    val slowDiskRotation by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 7300, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "slowDiskRotation"
     )
 
     val targetProgress = (score.coerceIn(0, 100) / 100f)
@@ -193,7 +216,11 @@ fun FashionistaScoreGauge(
                 val center = Offset(size.width / 2, size.height / 2)
                 val outerRadius = size.minDimension / 2
 
-                // 1. Iridescent Pearl / Metallic Outer Background Disk with dynamic shimmer translation
+                // 1. Iridescent Pearl / Metallic Outer Background Disk with slow organic rotation
+                val rotRad = Math.toRadians(slowDiskRotation.toDouble())
+                val rotX = (cos(rotRad) * 15f).toFloat()
+                val rotY = (sin(rotRad) * 15f).toFloat()
+
                 val iridescentBrush = Brush.sweepGradient(
                     colors = listOf(
                         Color(0xFFF3E7D3), // Champagne
@@ -203,7 +230,7 @@ fun FashionistaScoreGauge(
                         Color(0xFFE2CBB7), // Warm Taupe
                         Color(0xFFF3E7D3)  // Loop
                     ),
-                    center = Offset(center.x + (shimmerShift % 20f - 10f), center.y + (shimmerShift % 20f - 10f))
+                    center = Offset(center.x + rotX, center.y + rotY)
                 )
 
                 // Outer Iridescent Disk Base
@@ -216,7 +243,7 @@ fun FashionistaScoreGauge(
                 // 2. Beveled Metallic Border Ring
                 val borderStrokeWidth = 4.dp.toPx()
                 drawCircle(
-                    color = Color.White.copy(alpha = 0.8f),
+                    color = Color.White.copy(alpha = 0.8f * organicPulse),
                     radius = outerRadius - borderStrokeWidth / 2,
                     center = center,
                     style = Stroke(width = borderStrokeWidth)
@@ -234,25 +261,25 @@ fun FashionistaScoreGauge(
                     style = Stroke(width = trackStrokeWidth)
                 )
 
-                // Dominant Sterling Silver Brush with a moving specular shimmer highlight and Ice Blue touch
+                // Dominant Sterling Silver Brush with moving specular shimmer & organic pulse
                 val silverBrush = Brush.linearGradient(
                     colors = listOf(
                         Color(0xFFE2E8F0), // Platinum White
                         Color(0xFFCBD5E1), // Sterling Silver
-                        Color(0xFFFFFFFF), // Specular Pure White Shimmer Highlight
+                        Color.White.copy(alpha = (0.7f + 0.3f * organicPulse).coerceIn(0f, 1f)), // Specular Shimmer Highlight
                         Color(0xFF94A3B8), // Brushed Steel
                         Color(0xFF7DD3FC), // Touch of Ice Blue
                         Color(0xFFE2E8F0)  // Platinum loop
                     ),
-                    start = Offset(center.x - trackRadius + (shimmerShift % 400f), center.y - trackRadius + (shimmerShift % 400f)),
-                    end = Offset(center.x + trackRadius + (shimmerShift % 400f), center.y + trackRadius + (shimmerShift % 400f))
+                    start = Offset(center.x - trackRadius + (shimmerShift % 500f), center.y - trackRadius + (shimmerShift % 500f)),
+                    end = Offset(center.x + trackRadius + (shimmerShift % 500f), center.y + trackRadius + (shimmerShift % 500f))
                 )
 
                 val sweepAngle = animatedProgress * 360f
 
-                // Subtle Ice-Blue Glow Aura
+                // Subtle Pulsing Ice-Blue Glow Aura
                 drawArc(
-                    color = Color(0xFF38BDF8).copy(alpha = 0.25f),
+                    color = Color(0xFF38BDF8).copy(alpha = 0.22f * organicPulse),
                     startAngle = -90f,
                     sweepAngle = sweepAngle,
                     useCenter = false,
@@ -272,7 +299,41 @@ fun FashionistaScoreGauge(
                     size = Size(trackRadius * 2, trackRadius * 2)
                 )
 
-                // 4. Inner White Core Disc
+                // 4. Organic Twinkling Specular Glints along the active progress arc
+                if (animatedProgress > 0.15f) {
+                    val angles = listOf(
+                        -90f + sweepAngle * 0.25f,
+                        -90f + sweepAngle * 0.65f,
+                        -90f + sweepAngle * 0.90f
+                    )
+
+                    angles.forEachIndexed { index, angleDeg ->
+                        val rad = Math.toRadians(angleDeg.toDouble())
+                        val glintX = center.x + (trackRadius * cos(rad)).toFloat()
+                        val glintY = center.y + (trackRadius * sin(rad)).toFloat()
+                        
+                        // Phase-shifted sine pulse for organic non-uniform twinkling
+                        val phase = index * 1.8f
+                        val glintAlpha = ((sin((shimmerShift * 0.02f + phase).toDouble()) + 1) / 2).toFloat() * 0.85f
+
+                        if (glintAlpha > 0.15f) {
+                            // Soft Outer Glow Dot
+                            drawCircle(
+                                color = Color(0xFFE0F2FE).copy(alpha = glintAlpha * 0.6f),
+                                radius = 4.5.dp.toPx(),
+                                center = Offset(glintX, glintY)
+                            )
+                            // Bright Pure White Specular Core
+                            drawCircle(
+                                color = Color.White.copy(alpha = glintAlpha),
+                                radius = 2.dp.toPx(),
+                                center = Offset(glintX, glintY)
+                            )
+                        }
+                    }
+                }
+
+                // 5. Inner White Core Disc
                 val innerCoreRadius = trackRadius - 12.dp.toPx()
                 drawCircle(
                     color = Color.White.copy(alpha = 0.95f),
