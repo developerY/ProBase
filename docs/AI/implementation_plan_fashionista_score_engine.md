@@ -299,12 +299,3 @@ FASHIONISTA is a standalone, purely deterministic measurement instrument. It tra
 6. **Intentional Asymmetry Test**: Verify an avant-garde asymmetric silhouette with high focal hierarchy receives a strong `silhouette` score ($> 0.80$) without penalty.
 7. **On-Device Downsampling Performance Test**: Verify `VisualMassEngine` completes $64 \times 128$ pixel buffer downsampling and Center of Gravity calculations in $< 5\text{ ms}$.
 8. **Deterministic Replicability Test**: Assert that identical `FashionistaObservation` inputs always produce byte-for-byte identical `FashionistaScore` outputs across thread invocations.
-
-1. **Mathematical Invariant Test**: Assert that for any input `FashionistaObservation`, output `score` $\in [0.0, 100.0]$ and `coverage` $\in [0.0, 1.0]$.
-2. **Weighted Evidence Completeness Test**: Verify that when facial biometrics are missing (`availability = 0.0`), `presentationIntegration` does not contribute to $Q_{base}$ or $Q_{interaction}$ numerators or denominators, and `coverage` = $\frac{\sum w_i a_i}{\sum w_i}$ decreases accordingly without penalizing `score`.
-3. **Single-Feature Interaction Denominator Test**: Verify that when only 1 feature is available ($Q_{int\_den} = 0.0$), `effectiveLambda` falls back to `0.0`, avoiding division-by-zero errors without reducing the base score.
-4. **Zero-Availability Fail-Safe Test**: Verify that an empty `FashionistaObservation` with zero availability across all 6 features returns `FashionistaScore(score = 0.0, coverage = 0.0)` without producing `NaN` or throwing `ArithmeticException`.
-5. **Lambda Blending Invariant Test**: Assert that $Q_{base}$ and $Q_{interaction}$ are blended via $(1 - \lambda)Q_{base} + \lambda Q_{interaction}$, keeping $Q$ bounded before penalties.
-6. **Intentional Asymmetry Test**: Verify an avant-garde asymmetric silhouette with high focal hierarchy receives a strong `silhouette` score ($> 0.80$) without penalty.
-7. **On-Device Downsampling Performance Test**: Verify `VisualMassEngine` completes $64 \times 128$ pixel buffer downsampling and Center of Gravity calculations in $< 5\text{ ms}$.
-8. **Deterministic Replicability Test**: Assert that identical `FashionistaObservation` inputs always produce byte-for-byte identical `FashionistaScore` outputs across thread invocations.
