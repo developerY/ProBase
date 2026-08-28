@@ -2,8 +2,13 @@ package com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.gr
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.animateIntAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -147,6 +152,18 @@ fun FashionistaScoreGauge(
         animationTriggered = true
     }
 
+    // Continuous shimmer sweep transition
+    val infiniteTransition = rememberInfiniteTransition(label = "shimmerTransition")
+    val shimmerShift by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 800f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 3000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "shimmerShift"
+    )
+
     val targetProgress = (score.coerceIn(0, 100) / 100f)
     val animatedProgress by animateFloatAsState(
         targetValue = if (animationTriggered) targetProgress else 0f,
@@ -176,7 +193,7 @@ fun FashionistaScoreGauge(
                 val center = Offset(size.width / 2, size.height / 2)
                 val outerRadius = size.minDimension / 2
 
-                // 1. Iridescent Pearl / Metallic Outer Background Disk
+                // 1. Iridescent Pearl / Metallic Outer Background Disk with dynamic shimmer translation
                 val iridescentBrush = Brush.sweepGradient(
                     colors = listOf(
                         Color(0xFFF3E7D3), // Champagne
@@ -186,7 +203,7 @@ fun FashionistaScoreGauge(
                         Color(0xFFE2CBB7), // Warm Taupe
                         Color(0xFFF3E7D3)  // Loop
                     ),
-                    center = center
+                    center = Offset(center.x + (shimmerShift % 20f - 10f), center.y + (shimmerShift % 20f - 10f))
                 )
 
                 // Outer Iridescent Disk Base
@@ -217,17 +234,18 @@ fun FashionistaScoreGauge(
                     style = Stroke(width = trackStrokeWidth)
                 )
 
-                // Dominant Sterling Silver Brush with a subtle touch of Ice Blue
+                // Dominant Sterling Silver Brush with a moving specular shimmer highlight and Ice Blue touch
                 val silverBrush = Brush.linearGradient(
                     colors = listOf(
                         Color(0xFFE2E8F0), // Platinum White
                         Color(0xFFCBD5E1), // Sterling Silver
+                        Color(0xFFFFFFFF), // Specular Pure White Shimmer Highlight
                         Color(0xFF94A3B8), // Brushed Steel
                         Color(0xFF7DD3FC), // Touch of Ice Blue
                         Color(0xFFE2E8F0)  // Platinum loop
                     ),
-                    start = Offset(center.x - trackRadius, center.y - trackRadius),
-                    end = Offset(center.x + trackRadius, center.y + trackRadius)
+                    start = Offset(center.x - trackRadius + (shimmerShift % 400f), center.y - trackRadius + (shimmerShift % 400f)),
+                    end = Offset(center.x + trackRadius + (shimmerShift % 400f), center.y + trackRadius + (shimmerShift % 400f))
                 )
 
                 val sweepAngle = animatedProgress * 360f
@@ -243,7 +261,7 @@ fun FashionistaScoreGauge(
                     size = Size(trackRadius * 2, trackRadius * 2)
                 )
 
-                // Core Platinum Silver Arc
+                // Core Platinum Silver Arc with Shimmer
                 drawArc(
                     brush = silverBrush,
                     startAngle = -90f,
