@@ -25,7 +25,8 @@ data class VisualBlueprintData(
     val shoeItem: BlueprintItem? = null,
     val outerwearItem: BlueprintItem? = null,
     val recommendedPalette: List<String> = emptyList(),
-    val isComplete: Boolean = false
+    val isComplete: Boolean = false,
+    val koColorScore: Int = 88
 )
 
 data class BlueprintItem(

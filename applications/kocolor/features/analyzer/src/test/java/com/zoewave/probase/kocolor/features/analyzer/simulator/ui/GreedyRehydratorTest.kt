@@ -6,16 +6,18 @@ import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.core.model.ritual.MicroCategory
+import com.zoewave.probase.kocolor.data.color.ColorHarmonyEngine
 import org.junit.Before
 import org.junit.Test
 
 class GreedyRehydratorTest {
 
+    private val colorHarmonyEngine = ColorHarmonyEngine()
     private lateinit var rehydrator: GreedyRehydrator
 
     @Before
     fun setup() {
-        rehydrator = GreedyRehydrator()
+        rehydrator = GreedyRehydrator(colorHarmonyEngine)
     }
 
     @Test

@@ -120,4 +120,31 @@ class StyleSimulatorEngineTest {
 
         assertThat(result.rationale).isEqualTo("Success")
     }
+
+    @Test
+    fun `generateBlueprint should log non-empty reasoning set to audit logger`() = runTest {
+        val context = StyleRequestContext(intent = "party", weather = "warm", appearanceTelemetry = ColorTelemetry())
+        val provider = mockk<AiProvider>()
+        val capability = AiProviderCapability(
+            id = "p1", displayName = "P1", maxInputTokens = 1000, maxOutputTokens = 10, timeoutMillis = 1000,
+            isLocal = true
+        )
+        
+        val items = List(5) { 
+            ClothingItem(internalId = it.toLong(), name = "Item $it", category = ClothingCategory.TOPS, colorHex = "#000000")
+        }
+        val provList = items.map { CandidateProvenance(clothingItem = it) }
+
+        every { provider.capability } returns capability
+        coEvery { provider.countTokens(any()) } returns 100
+        coEvery { provider.execute(any()) } returns Result.success("{\"rationale\": \"Success\", \"selectedClothingIds\": [], \"selectedCosmeticIds\": [], \"recommendedPalette\": []}")
+        
+        coEvery { capabilityRouter.getRankedAvailableProviders() } returns listOf(provider)
+        coEvery { contextEngine.generateSelectionState(any(), any(), any()) } returns StyleSelectionState(fullRankedCandidatePool = provList)
+        coEvery { candidateFilter.getCosmeticCandidates(any(), any(), any()) } returns emptyList()
+
+        engine.generateBlueprint(items, emptyList(), context)
+
+        verify { auditLogger.logReasoningSet(context.requestId, match { it.isNotEmpty() }) }
+    }
 }

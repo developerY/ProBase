@@ -38,9 +38,11 @@ import com.zoewave.probase.kocolor.data.usecase.AppearanceProfile
 import com.zoewave.probase.kocolor.data.usecase.ColorTelemetry
 import com.zoewave.probase.kocolor.data.usecase.GeneratePlaylistUseCase
 import com.zoewave.probase.kocolor.data.usecase.RotationScoringUseCase
+import com.zoewave.probase.kocolor.data.usecase.SelectionTier
 import com.zoewave.probase.kocolor.data.usecase.StyleBlueprint
 import com.zoewave.probase.kocolor.data.usecase.StyleRequestContext
 import com.zoewave.probase.kocolor.data.usecase.StyleSimulatorEngine
+import com.zoewave.probase.kocolor.data.usecase.UserConstraint
 import com.zoewave.probase.kocolor.db.dao.RoutineDao
 import com.zoewave.probase.kocolor.features.analyzer.calibration.ColorSeasonClassifier
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.ResultTab
@@ -49,6 +51,7 @@ import com.zoewave.probase.kocolor.model.calibration.ColorProfile
 import com.zoewave.probase.kocolor.model.calibration.FacialContrastVector
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -108,6 +111,8 @@ data class StyleSimulatorUiState(
     val anchoredClothingFamilies: Map<ClothingCategory, ColorFamily> = emptyMap(),
     val anchoredCosmeticFamilies: Map<MacroCategory, ColorFamily> = emptyMap(),
     
+    val userConstraints: Map<String, UserConstraint> = emptyMap(),
+    
     val selectedResultTab: ResultTab = ResultTab.CLOTHES,
     val visualBlueprintData: VisualBlueprintData = VisualBlueprintData()
 )
@@ -130,6 +135,8 @@ sealed class SimulatorEvent {
     data class SelectClothingCategory(val category: ClothingCategory) : SimulatorEvent()
     data class SelectCosmeticCategory(val category: MacroCategory) : SimulatorEvent()
     data class SelectResultTab(val tab: ResultTab) : SimulatorEvent()
+    data class ToggleItemLock(val itemId: String, val category: String) : SimulatorEvent()
+    data class ToggleItemForce(val itemId: String, val category: String) : SimulatorEvent()
 }
 
 sealed class SimulatorEffect {
@@ -166,6 +173,9 @@ class StyleSimulatorViewModel @Inject constructor(
     private val _isAnalyzing = MutableStateFlow(false)
     private val _faceAnalysisError = MutableStateFlow<String?>(null)
     private val _faceTelemetry = MutableStateFlow<FaceTelemetryData?>(null)
+    private val _explicitItemConstraints = MutableStateFlow<Map<String, UserConstraint>>(emptyMap())
+
+    private var simulationJob: Job? = null
 
     private val detector = FaceDetection.getClient(
         FaceDetectorOptions.Builder()
@@ -191,7 +201,8 @@ class StyleSimulatorViewModel @Inject constructor(
         _selectedResultTab,
         _isAnalyzing,
         _faceAnalysisError,
-        _faceTelemetry
+        _faceTelemetry,
+        _explicitItemConstraints
     ) { array ->
         val faceUri = array[0] as String?
         val profile = array[1] as FashionProfile?
@@ -208,6 +219,8 @@ class StyleSimulatorViewModel @Inject constructor(
         val analyzing = array[12] as Boolean
         val analysisError = array[13] as String?
         val telemetry = array[14] as FaceTelemetryData?
+        @Suppress("UNCHECKED_CAST")
+        val explicitConstraints = array[15] as Map<String, UserConstraint>
 
         val clothingFamilies = allClothing.filter { it.category == selectedClothingCat }
             .groupBy { it.colorFamily }
@@ -231,6 +244,7 @@ class StyleSimulatorViewModel @Inject constructor(
             userMessage = userMsg,
             anchoredClothingFamilies = anchoredClothing,
             anchoredCosmeticFamilies = anchoredCosmetics,
+            userConstraints = explicitConstraints,
             clothingFamilies = clothingFamilies,
             cosmeticFamilies = cosmeticFamilies,
             simulationStep = step,
@@ -256,7 +270,7 @@ class StyleSimulatorViewModel @Inject constructor(
                     anchoredCosmetics[item.macroCategory] == item.colorFamily
                 },
                 palette = result?.recommendedPalette ?: emptyList(),
-                isComplete = step == SimulationStep.RESULT
+                isComplete = (step == SimulationStep.RESULT || result != null)
             )
         )
     }.stateIn(
@@ -293,10 +307,18 @@ class StyleSimulatorViewModel @Inject constructor(
         return cal.timeInMillis
     }
 
+    private fun debouncedRunSimulation() {
+        simulationJob?.cancel()
+        simulationJob = viewModelScope.launch {
+            delay(300) // 300ms state debouncing
+            runSimulationInternal()
+        }
+    }
+
     fun onEvent(event: SimulatorEvent) {
         when (event) {
             is SimulatorEvent.UpdateMessage -> _userMessage.value = event.message
-            SimulatorEvent.StartSimulation -> runSimulation()
+            SimulatorEvent.StartSimulation -> debouncedRunSimulation()
             SimulatorEvent.GeneratePlaylist -> {
                 if (_isAnalyzing.value) return
                 viewModelScope.launch {
@@ -326,6 +348,7 @@ class StyleSimulatorViewModel @Inject constructor(
                 _userMessage.value = ""
                 _anchoredClothingFamilies.value = emptyMap()
                 _anchoredCosmeticFamilies.value = emptyMap()
+                _explicitItemConstraints.value = emptyMap()
                 _simulationStep.value = SimulationStep.MESSAGING
                 _simulationResult.value = null
                 _selectedResultTab.value = ResultTab.CLOTHES
@@ -364,6 +387,26 @@ class StyleSimulatorViewModel @Inject constructor(
                 }
                 _anchoredCosmeticFamilies.value = nextMap
             }
+            is SimulatorEvent.ToggleItemLock -> {
+                val nextMap = _explicitItemConstraints.value.toMutableMap()
+                val current = nextMap[event.itemId]
+                if (current?.tier == SelectionTier.LOCKED) {
+                    nextMap.remove(event.itemId)
+                } else {
+                    nextMap[event.itemId] = UserConstraint(event.itemId, event.category, SelectionTier.LOCKED)
+                }
+                _explicitItemConstraints.value = nextMap
+            }
+            is SimulatorEvent.ToggleItemForce -> {
+                val nextMap = _explicitItemConstraints.value.toMutableMap()
+                val current = nextMap[event.itemId]
+                if (current?.tier == SelectionTier.FORCED) {
+                    nextMap.remove(event.itemId)
+                } else {
+                    nextMap[event.itemId] = UserConstraint(event.itemId, event.category, SelectionTier.FORCED)
+                }
+                _explicitItemConstraints.value = nextMap
+            }
             is SimulatorEvent.SelectClothingCategory -> {
                 _selectedClothingCategory.value = event.category
             }
@@ -376,7 +419,7 @@ class StyleSimulatorViewModel @Inject constructor(
         }
     }
 
-    private fun runSimulation() {
+    private fun runSimulationInternal() {
         if (_isAnalyzing.value) return
         
         viewModelScope.launch {
@@ -419,15 +462,40 @@ class StyleSimulatorViewModel @Inject constructor(
             delay(1000)
             _simulationStep.value = SimulationStep.GENERATING
             
+            val familyClothingConstraints = anchoredClothing.map { item ->
+                UserConstraint(
+                    itemId = "w_${item.internalId}",
+                    category = item.category.name,
+                    tier = SelectionTier.LOCKED
+                )
+            }
+            val familyCosmeticConstraints = anchoredCosmetics.map { item ->
+                UserConstraint(
+                    itemId = "c_${item.internalId}",
+                    category = item.macroCategory.name,
+                    tier = SelectionTier.LOCKED
+                )
+            }
+            val allConstraints = (familyClothingConstraints + familyCosmeticConstraints + _explicitItemConstraints.value.values).distinctBy { it.itemId }
+
             val requestContext = StyleRequestContext(
                 intent = userIntent,
+                occasion = when {
+                    userIntent.contains("formal", true) || userIntent.contains("gala", true) -> "Formal"
+                    userIntent.contains("beach", true) || userIntent.contains("vacation", true) -> "Beach"
+                    userIntent.contains("work", true) || userIntent.contains("office", true) -> "Business Casual"
+                    else -> "Daily"
+                },
                 weather = weatherContext,
+                weatherTempC = weather.weather?.main?.temp?.toFloat() ?: 22f,
+                uvIndex = weather.environmentalContext?.uvIndex?.toFloat() ?: 3f,
                 appearanceProfile = appearance?.let { AppearanceProfile(it.temperature, it.depth, it.contrast) } ?: AppearanceProfile(),
                 appearanceTelemetry = ColorTelemetry(),
                 fashionProfile = skinContext,
                 rotationScores = rotationScores,
                 anchoredClothingIds = anchoredClothing.map { "w_${it.internalId}" },
                 anchoredCosmeticIds = anchoredCosmetics.map { "c_${it.internalId}" },
+                lockedConstraints = allConstraints,
                 localImageBitmap = state.userPortraitUri?.let { loadBitmapFromUri(Uri.parse(it)) }
             )
 
