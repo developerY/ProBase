@@ -10,6 +10,8 @@ import com.zoewave.probase.kocolor.fashionista.extraction.HierarchyFeatureExtrac
 import com.zoewave.probase.kocolor.fashionista.extraction.SilhouetteFeatureExtractor
 import com.zoewave.probase.kocolor.fashionista.extraction.TextureFeatureExtractor
 import com.zoewave.probase.kocolor.fashionista.integration.OutfitIntegrationEngine
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -26,7 +28,7 @@ class FashionistaScorerImpl @Inject constructor(
     private val calibration: FashionistaCalibration = FashionistaCalibration()
 ) : FashionistaScorer {
 
-    override fun score(outfit: FashionistaObservation): FashionistaScore {
+    override suspend fun score(outfit: FashionistaObservation): FashionistaScore = withContext(Dispatchers.Default) {
         // 1. Extract 6 Perceptual System FeatureValues
         val featureVector = FashionistaFeatureVector(
             composition = compositionExtractor.extract(outfit),
@@ -42,7 +44,7 @@ class FashionistaScorerImpl @Inject constructor(
 
         // Zero-Availability Fail-Safe Short-Circuit
         if (result.coverage == 0.0) {
-            return FashionistaScore(
+            return@withContext FashionistaScore(
                 score = 0.0,
                 coverage = 0.0,
                 standardId = calibration.standardId,
@@ -54,7 +56,7 @@ class FashionistaScorerImpl @Inject constructor(
         // 3. Calibration Curve Logistic Scaling
         val finalScore = calibrationCurve.mapToScore(result.q, calibration)
 
-        return FashionistaScore(
+        FashionistaScore(
             score = finalScore,
             coverage = result.coverage,
             standardId = calibration.standardId,
