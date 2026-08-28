@@ -217,14 +217,14 @@ fun FashionistaScoreGauge(
                     style = Stroke(width = trackStrokeWidth)
                 )
 
-                // Silver-Blue Metallic Brush
-                val silverBlueBrush = Brush.linearGradient(
+                // Dominant Sterling Silver Brush with a subtle touch of Ice Blue
+                val silverBrush = Brush.linearGradient(
                     colors = listOf(
-                        Color(0xFF8E9AAF), // Metallic Silver
-                        Color(0xFFA2D2FF), // Ice Blue
-                        Color(0xFF48CAE4), // Sapphire Cyan
-                        Color(0xFFBDE0FE), // Platinum Light Blue
-                        Color(0xFF6C5CE7)  // Deep Ice Iris
+                        Color(0xFFE2E8F0), // Platinum White
+                        Color(0xFFCBD5E1), // Sterling Silver
+                        Color(0xFF94A3B8), // Brushed Steel
+                        Color(0xFF7DD3FC), // Touch of Ice Blue
+                        Color(0xFFE2E8F0)  // Platinum loop
                     ),
                     start = Offset(center.x - trackRadius, center.y - trackRadius),
                     end = Offset(center.x + trackRadius, center.y + trackRadius)
@@ -232,20 +232,20 @@ fun FashionistaScoreGauge(
 
                 val sweepAngle = animatedProgress * 360f
 
-                // Outer Glowing Blue Aura (Wide stroke with soft alpha)
+                // Subtle Ice-Blue Glow Aura
                 drawArc(
-                    color = Color(0xFF48CAE4).copy(alpha = 0.45f),
+                    color = Color(0xFF38BDF8).copy(alpha = 0.25f),
                     startAngle = -90f,
                     sweepAngle = sweepAngle,
                     useCenter = false,
-                    style = Stroke(width = trackStrokeWidth + 6.dp.toPx(), cap = StrokeCap.Round),
+                    style = Stroke(width = trackStrokeWidth + 4.dp.toPx(), cap = StrokeCap.Round),
                     topLeft = Offset(center.x - trackRadius, center.y - trackRadius),
                     size = Size(trackRadius * 2, trackRadius * 2)
                 )
 
-                // Core Silver-Blue Progress Arc
+                // Core Platinum Silver Arc
                 drawArc(
-                    brush = silverBlueBrush,
+                    brush = silverBrush,
                     startAngle = -90f,
                     sweepAngle = sweepAngle,
                     useCenter = false,
