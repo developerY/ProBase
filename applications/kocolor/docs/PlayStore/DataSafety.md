@@ -99,8 +99,29 @@ This document provides the exact responses and field mappings required for compl
 
 ---
 
-## 5. Summary of Developer Commitments
+## 5. Google Play Console Health Feature Declarations
 
-1. **No Data Sold:** KoColor does not sell user data to data brokers or third parties.
+KoColor integrates with **Google Health Connect** to synchronize local bio-markers for skin defense and wellness correlation. In Google Play Console, declare the following under **Tell us about the health features in your app**:
+
+| Play Console Health Feature Category | Selection Status | Data Types Read via Health Connect API | Reason / Justification |
+| :--- | :--- | :--- | :--- |
+| **Activity and fitness** | **CHECK THIS BOX** | Steps, distance, active calories, exercise sessions, heart rate | Calculates physical activity and vital bio-marker correlations for skin/style insights. |
+| **Nutrition and weight management** | **CHECK THIS BOX** | Hydration records, weight metrics, daily fluid intake goals | Calibrates daily hydration targets and skin moisture defense. |
+| **Period tracking** | **UNCHECK** | N/A | Not applicable to KoColor. |
+| **Sleep management** | **UNCHECK** | N/A | **Not used / Not managed by KoColor.** |
+| **Stress management, relaxation, mental acuity** | **UNCHECK** | N/A | Not applicable to KoColor. |
+
+> [!IMPORTANT]
+> **Data Safety Questionnaire Rule for Health Connect**: All Health Connect bio-data (vitals, heart rate, steps, calories, hydration, weight) is read and processed **100% locally on-device** via the Health Connect API. It is never transmitted to external cloud servers or stored off-device.
+> 
+> Therefore, in the Data Safety Questionnaire:
+> 1. Select **"No"** for off-device collection/sharing of Health and Fitness data.
+> 2. Complete the **Health Feature Declarations** checkboxes exactly as listed above.
+
+---
+
+## 6. Summary of Developer Commitments
+
+1. **No Data Sold:** KoColor does not sell user data or Health Connect bio-markers to data brokers or third parties.
 2. **No Advertising Tracking:** KoColor does not use third-party advertising SDKs or cross-app tracking identifiers (like GAID) for targeted advertising.
-3. **Local-First Privacy Guarantee:** Raw pixel images and biometric features never leave the user's Android hardware.
+3. **Local-First Privacy Guarantee:** Raw pixel images, Health Connect bio-markers (sleep, vitals, steps, hydration), and facial features never leave the user's Android hardware.
