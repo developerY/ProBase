@@ -1,21 +1,14 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# FASHIONISTA Core Domain, Scoring, & Presentation Data Models
+-keep class com.zoewave.probase.kocolor.fashionista.domain.** { *; }
+-keep class com.zoewave.probase.kocolor.fashionista.scoring.** { *; }
+-keep class com.zoewave.probase.kocolor.fashionista.presentation.** { *; }
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# Jetpack Compose Custom Canvas Graphics & Visual Blueprint Components
+-keep class com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.** { *; }
+-keep class com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.FashionistaMathBreakdown { *; }
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
-
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# KoColor Style & Color Models
+-keep class com.zoewave.probase.kocolor.data.usecase.StyleBlueprint { *; }
+-keep class com.zoewave.probase.kocolor.data.usecase.StyleRequestContext { *; }
+-keep class com.zoewave.probase.kocolor.data.color.CandidateProvenance { *; }
+-keep class com.zoewave.probase.kocolor.data.color.CompositeColorProfile { *; }
