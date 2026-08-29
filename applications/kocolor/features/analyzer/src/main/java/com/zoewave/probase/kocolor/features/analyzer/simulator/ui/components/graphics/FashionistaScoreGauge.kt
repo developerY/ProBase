@@ -66,7 +66,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import com.zoewave.probase.kocolor.fashionista.domain.FashionistaFeatureVector
 import com.zoewave.probase.kocolor.fashionista.domain.FeatureValue
 
-enum class ScoreViewTab { GAUGE, RADAR, MATH }
+enum class ScoreViewTab { GAUGE, RADAR, MATH, DECOMP }
 
 @Composable
 fun CollapsibleFashionistaScoreCard(
@@ -181,8 +181,9 @@ fun CollapsibleFashionistaScoreCard(
                                         ScoreViewTab.GAUGE -> "GAUGE"
                                         ScoreViewTab.RADAR -> "RADAR"
                                         ScoreViewTab.MATH -> "MATH"
+                                        ScoreViewTab.DECOMP -> "DECOMP"
                                     },
-                                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
+                                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
                                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                                     color = if (isSelected) Color.White else Color.Black.copy(alpha = 0.7f)
                                 )
@@ -195,7 +196,17 @@ fun CollapsibleFashionistaScoreCard(
                     when (selectedTab) {
                         ScoreViewTab.GAUGE -> FashionistaHeroDial(score = score.toDouble(), coverage = coverage, breakdown = defaultBreakdown)
                         ScoreViewTab.RADAR -> FashionistaRadarChart(breakdown = defaultBreakdown)
-                        ScoreViewTab.MATH -> FashionistaDecompositionBar(score = score.toDouble(), breakdown = defaultBreakdown)
+                        ScoreViewTab.MATH -> FashionistaMathDecomposition(
+                            breakdown = FashionistaMathBreakdown(
+                                qBase = (score * 0.82 / 100.0).coerceIn(0.1, 1.0),
+                                qInteraction = (score * 0.88 / 100.0).coerceIn(0.1, 1.0),
+                                effectiveLambda = 0.20,
+                                unresolvedPenalty = if (score < 60) 0.12 else 0.0,
+                                qFinal = (score / 100.0).coerceIn(0.1, 1.0),
+                                finalScore = score
+                            )
+                        )
+                        ScoreViewTab.DECOMP -> FashionistaDecompositionBar(score = score.toDouble(), breakdown = defaultBreakdown)
                     }
                 }
             }

@@ -46,7 +46,6 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -54,6 +53,18 @@ import com.zoewave.probase.kocolor.fashionista.domain.FashionistaFeatureVector
 import com.zoewave.probase.kocolor.fashionista.domain.FeatureValue
 import kotlin.math.cos
 import kotlin.math.sin
+
+/**
+ * Data class representing the raw mathematical output of the deterministic scorer.
+ */
+data class FashionistaMathBreakdown(
+    val qBase: Double = 0.82,             // Range: 0.0 - 1.0
+    val qInteraction: Double = 0.88,      // Range: 0.0 - 1.0
+    val effectiveLambda: Double = 0.20,   // e.g., 0.20
+    val unresolvedPenalty: Double = 0.0, // Range: 0.0 - 0.5
+    val qFinal: Double = 0.832,            // Bounded: 0.0 - 1.0
+    val finalScore: Int = 87            // Calibrated: 0 - 100
+)
 
 /**
  * Component 1: Pearlescent Hero Dial (Based on design reference image_c2a0ca.png)
@@ -211,7 +222,6 @@ fun FashionistaHeroDial(
                     )
 
                     // Glowing Node Caps at start and end of coverage arc
-                    val startAngleRad = Math.toRadians(-90.0)
                     val endAngleRad = Math.toRadians((-90f + coverageSweepAngle).toDouble())
 
                     val endCapX = center.x + (innerTrackRadius * cos(endAngleRad)).toFloat()
@@ -432,7 +442,144 @@ fun FashionistaRadarChart(
 }
 
 /**
- * Component 3: Decomposition Bar (Waterfall / Math Breakdown)
+ * Component 3: MATH Tab - Detailed Waterfall Math Decomposition
+ * Visually audits the deterministic scoring equation:
+ * Q = (1 - λ)Q_base + λ Q_interaction - P_unresolved
+ */
+@Composable
+fun FashionistaMathDecomposition(
+    breakdown: FashionistaMathBreakdown,
+    modifier: Modifier = Modifier
+) {
+    var animTriggered by remember { mutableStateOf(false) }
+    LaunchedEffect(breakdown) {
+        animTriggered = true
+    }
+
+    val animatedAnimProgress by animateFloatAsState(
+        targetValue = if (animTriggered) 1f else 0f,
+        animationSpec = tween(durationMillis = 1200, easing = FastOutSlowInEasing),
+        label = "waterfallAnim"
+    )
+
+    val baseWidthRatio = ((1.0 - breakdown.effectiveLambda) * breakdown.qBase).coerceIn(0.0, 1.0).toFloat()
+    val interWidthRatio = (breakdown.effectiveLambda * breakdown.qInteraction).coerceIn(0.0, 1.0).toFloat()
+    val penaltyRatio = breakdown.unresolvedPenalty.coerceIn(0.0, 0.5).toFloat()
+    val netWidthRatio = (baseWidthRatio + interWidthRatio - penaltyRatio).coerceIn(0.0f, 1.0f)
+
+    Column(
+        modifier = modifier.fillMaxWidth().padding(horizontal = 8.dp),
+        horizontalAlignment = Alignment.Start
+    ) {
+        Text(
+            text = "DETERMINISTIC SCORING EQUATION",
+            style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.5.sp),
+            fontWeight = FontWeight.Bold,
+            color = Color.Black.copy(alpha = 0.8f)
+        )
+
+        Spacer(Modifier.height(4.dp))
+
+        Text(
+            text = "Q = (1 - λ)Q_base + λ Q_interaction - P_unresolved",
+            style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
+            color = Color.Gray
+        )
+
+        Spacer(Modifier.height(16.dp))
+
+        // Canvas Waterfall Chart
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(32.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .background(Color.Black.copy(alpha = 0.05f))
+        ) {
+            Canvas(modifier = Modifier.fillMaxSize().padding(horizontal = 4.dp, vertical = 6.dp)) {
+                val barWidth = size.width * animatedAnimProgress
+                val h = size.height
+
+                val basePixelWidth = (barWidth * baseWidthRatio).coerceAtMost(barWidth)
+                val interPixelWidth = (barWidth * interWidthRatio).coerceAtMost(barWidth - basePixelWidth)
+
+                // 1. Solid Base Score Bar (Dark Slate)
+                if (basePixelWidth > 0f) {
+                    drawRect(
+                        color = Color(0xFF1E293B),
+                        topLeft = Offset(0f, 0f),
+                        size = Size(basePixelWidth, h)
+                    )
+                }
+
+                // 2. Synergy Addition Bar (Premium Muted Green)
+                if (interPixelWidth > 0f) {
+                    drawRect(
+                        color = Color(0xFF10B981),
+                        topLeft = Offset(basePixelWidth, 0f),
+                        size = Size(interPixelWidth, h)
+                    )
+                }
+
+                // 3. Conflict Penalty (Red Subtraction Bar)
+                if (penaltyRatio > 0f) {
+                    val penaltyPixelWidth = (barWidth * penaltyRatio).coerceAtMost(basePixelWidth + interPixelWidth)
+                    val penaltyStartX = (basePixelWidth + interPixelWidth - penaltyPixelWidth).coerceAtLeast(0f)
+
+                    drawRect(
+                        color = Color(0xFFEF4444).copy(alpha = 0.85f),
+                        topLeft = Offset(penaltyStartX, 0f),
+                        size = Size(penaltyPixelWidth, h)
+                    )
+                }
+
+                // 4. Sharp Q-Marker Tick at Net qFinal Position
+                val qMarkerX = (barWidth * netWidthRatio).toFloat()
+                drawLine(
+                    color = Color.Black,
+                    start = Offset(qMarkerX, -2.dp.toPx()),
+                    end = Offset(qMarkerX, h + 2.dp.toPx()),
+                    strokeWidth = 3.dp.toPx()
+                )
+            }
+        }
+
+        Spacer(Modifier.height(12.dp))
+
+        // Explanatory Labels
+        val formattedBlended = "%.2f".format((1.0 - breakdown.effectiveLambda) * breakdown.qBase + breakdown.effectiveLambda * breakdown.qInteraction)
+        val formattedPenalty = "%.2f".format(breakdown.unresolvedPenalty)
+
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Blended Q: $formattedBlended",
+                    style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
+                    color = Color.Black
+                )
+                Text(
+                    text = "Penalty: -$formattedPenalty",
+                    style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
+                    color = if (breakdown.unresolvedPenalty > 0.0) Color(0xFFEF4444) else Color.Gray
+                )
+            }
+
+            Spacer(Modifier.height(6.dp))
+
+            Text(
+                text = "Q maps to FASHIONISTA Score: ${breakdown.finalScore}/100",
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                color = Color(0xFF2F6364)
+            )
+        }
+    }
+}
+
+/**
+ * Component 4: Decomposition Bar (Waterfall / Math Breakdown)
  * Explains Q_base evidence, Q_interaction synergy, and P_unresolved chaos penalties.
  */
 @Composable
@@ -537,6 +684,8 @@ private fun FashionistaHeroDialPreview() {
         FashionistaHeroDial(score = 87.0, coverage = 0.92, breakdown = sampleVector)
         Spacer(Modifier.height(24.dp))
         FashionistaRadarChart(breakdown = sampleVector)
+        Spacer(Modifier.height(24.dp))
+        FashionistaMathDecomposition(breakdown = FashionistaMathBreakdown())
         Spacer(Modifier.height(24.dp))
         FashionistaDecompositionBar(score = 87.0, breakdown = sampleVector)
     }
