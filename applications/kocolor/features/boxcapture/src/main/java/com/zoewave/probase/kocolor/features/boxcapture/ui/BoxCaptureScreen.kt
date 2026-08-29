@@ -46,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -69,6 +70,7 @@ import com.zoewave.probase.features.camera.productcapture.ui.ProductCaptureUiEve
 import com.zoewave.probase.features.graphics.colorpicker.ui.ColorPickerDialog
 import com.zoewave.probase.core.ui.util.parseColor
 import com.zoewave.probase.core.ui.util.toHex
+import com.zoewave.probase.kocolor.features.boxcapture.R
 import com.zoewave.probase.kocolor.features.boxcapture.ui.state.BoxCaptureUiState
 import com.zoewave.probase.kocolor.features.boxcapture.ui.state.CaptureMode
 import com.zoewave.probase.kocolor.features.boxcapture.ui.state.CaptureStep
@@ -329,11 +331,11 @@ private fun FinalValidationView(
             shape = RoundedCornerShape(32.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF34d399))
         ) {
-            Text("ADD TO COLLECTION", color = Color.Black, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.applications_kocolor_features_boxcapture_add_to_collection), color = Color.Black, fontWeight = FontWeight.Bold)
         }
         
         TextButton(onClick = onCancel, modifier = Modifier.padding(top = 16.dp)) {
-            Text("DISCARD", color = Color.Red.copy(alpha = 0.7f))
+            Text(stringResource(R.string.applications_kocolor_features_boxcapture_discard), color = Color.Red.copy(alpha = 0.7f))
         }
     }
 }
@@ -544,7 +546,7 @@ private fun ReviewView(
         ) {
             Icon(Icons.Default.AutoAwesome, null, tint = Color.Black)
             Spacer(Modifier.width(12.dp))
-            Text("FINALIZE WITH GEMINI AI", color = Color.Black, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.applications_kocolor_features_boxcapture_finalize_gemini), color = Color.Black, fontWeight = FontWeight.Bold)
         }
     }
 }

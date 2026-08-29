@@ -36,12 +36,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorUiState
 import androidx.compose.ui.tooling.preview.Preview
+import com.zoewave.probase.kocolor.features.analyzer.R
 
 @Composable
 fun FindingsDialog(
@@ -55,7 +57,7 @@ fun FindingsDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("ML Face Detection Findings", style = MaterialTheme.typography.titleLarge, fontFamily = FontFamily.Serif) },
+        title = { Text(stringResource(R.string.applications_kocolor_features_analyzer_findings_title), style = MaterialTheme.typography.titleLarge, fontFamily = FontFamily.Serif) },
         text = {
             Column(
                 modifier = Modifier
@@ -85,8 +87,8 @@ fun FindingsDialog(
                         Spacer(Modifier.height(8.dp))
                     }
 
-                    Text("Established Season: ${uiState.fashionProfileLabel}", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
-                    Text("Your aesthetic identity is being used to ground the AI's stylistic decisions and palette generation.", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
+                    Text(stringResource(R.string.applications_kocolor_features_analyzer_established_season_format, uiState.fashionProfileLabel ?: ""), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.applications_kocolor_features_analyzer_findings_desc), style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
                     
                     HorizontalDivider(
                         modifier = Modifier.padding(vertical = 4.dp), 
@@ -169,13 +171,13 @@ fun FindingsDialog(
                     }
                 } else {
                     CircularProgressIndicator(modifier = Modifier.size(24.dp).align(Alignment.CenterHorizontally))
-                    Text("Analyzing aesthetic DNA...", modifier = Modifier.align(Alignment.CenterHorizontally), style = MaterialTheme.typography.bodyMedium)
+                    Text(stringResource(R.string.applications_kocolor_features_analyzer_analyzing_dna), modifier = Modifier.align(Alignment.CenterHorizontally), style = MaterialTheme.typography.bodyMedium)
                 }
             }
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("CLOSE", fontWeight = FontWeight.Bold)
+                Text(androidx.compose.ui.res.stringResource(R.string.applications_kocolor_features_analyzer_close), fontWeight = FontWeight.Bold)
             }
         },
         shape = RoundedCornerShape(28.dp),

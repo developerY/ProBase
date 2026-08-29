@@ -13,4 +13,7 @@
     <string name="applications_kocolor_features_boxcapture_offline_mode_desc">OFFLINE MODE: Accuracy may be lower. You can refine details after extraction.</string>
     <string name="applications_kocolor_features_boxcapture_analysis_failed">ANALYSIS FAILED</string>
     <string name="applications_kocolor_features_boxcapture_try_again">TRY AGAIN</string>
+    <string name="applications_kocolor_features_boxcapture_add_to_collection">ADD TO COLLECTION</string>
+    <string name="applications_kocolor_features_boxcapture_discard">DISCARD</string>
+    <string name="applications_kocolor_features_boxcapture_finalize_gemini">FINALIZE WITH GEMINI AI</string>
 </resources>

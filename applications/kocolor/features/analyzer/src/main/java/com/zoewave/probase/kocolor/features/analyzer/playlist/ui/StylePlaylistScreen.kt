@@ -46,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -53,6 +54,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.zoewave.probase.core.model.ritual.ClothingItem
+import com.zoewave.probase.kocolor.features.analyzer.R
 import com.zoewave.probase.kocolor.model.playlist.DailyPlanStatus
 import com.zoewave.probase.kocolor.model.playlist.PlaylistStatus
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.shared.BlueprintDetailContent
@@ -184,7 +186,7 @@ private fun EmptyPlaylistState(onGenerate: () -> Unit) {
             shape = RoundedCornerShape(24.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
         ) {
-            Text("GENERATE WEEKLY PLAN", modifier = Modifier.padding(horizontal = 16.dp))
+            Text(stringResource(R.string.applications_kocolor_features_analyzer_generate_weekly_plan), modifier = Modifier.padding(horizontal = 16.dp))
         }
     }
 }
@@ -313,7 +315,7 @@ private fun DailyPlanCard(
                     shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF5F5F5), contentColor = Color.Black)
                 ) {
-                    Text("I'M WEARING THIS", fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.applications_kocolor_features_analyzer_wearing_this), fontWeight = FontWeight.Bold)
                 }
             }
         }

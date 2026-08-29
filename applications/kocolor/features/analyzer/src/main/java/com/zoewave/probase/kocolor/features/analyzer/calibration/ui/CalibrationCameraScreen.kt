@@ -61,6 +61,7 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -69,6 +70,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.zoewave.probase.kocolor.features.analyzer.R
 import com.zoewave.probase.kocolor.features.analyzer.calibration.ColorExtractionAnalyzer
 import com.zoewave.probase.kocolor.model.calibration.ColorProfile
 import com.zoewave.probase.kocolor.model.calibration.FacialContrastVector
@@ -269,7 +271,7 @@ private fun CalibrationResultContent(
             shape = RoundedCornerShape(24.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
         ) {
-            Text("FINALIZE PROFILE", fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.applications_kocolor_features_analyzer_finalize_profile), fontWeight = FontWeight.Bold)
         }
     }
 }

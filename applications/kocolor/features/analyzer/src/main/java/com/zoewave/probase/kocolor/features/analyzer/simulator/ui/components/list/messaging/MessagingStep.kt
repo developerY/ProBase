@@ -267,7 +267,7 @@ fun MessagingStep(
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Black),
                     elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
                 ) {
-                    Text("Get Fashion Advice", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Color.White)
+                    Text(stringResource(R.string.applications_kocolor_features_analyzer_simulator_begin_action), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Color.White)
                 }
 
                 OutlinedButton(
@@ -279,7 +279,7 @@ fun MessagingStep(
                 ) {
                     Icon(Icons.Default.AutoAwesome, null, modifier = Modifier.size(20.dp))
                     Spacer(Modifier.width(12.dp))
-                    Text("Generate 7-Day Playlist", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                    Text(androidx.compose.ui.res.stringResource(R.string.applications_kocolor_features_analyzer_generate_7day_playlist), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                 }
             }
         }
