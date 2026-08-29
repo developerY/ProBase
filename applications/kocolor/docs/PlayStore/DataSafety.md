@@ -1,0 +1,102 @@
+# Google Play Console Data Safety Form Guide for KoColor
+
+This document provides the exact responses and field mappings required for completing the **Data Safety** section in Google Play Console for **KoColor**.
+
+---
+
+## 1. Executive Summary & Core Declarations
+
+* **Does your app collect or share any of the required user data types?**  
+  👉 **Yes** (App Activity, App Info and Performance, Device Identifiers, and Environmental Weather Parameters for atmospheric color gating).
+* **Is all of the user data collected by your app encrypted in transit?**  
+  👉 **Yes** (All network traffic uses HTTPS/TLS 1.3).
+* **Do you provide a way for users to request that their data be deleted?**  
+  👉 **Yes** (Local data is deleted in-app or upon uninstallation; anonymized Firebase Analytics records are deleted upon request via App Instance ID in **Settings > About**).
+
+---
+
+## 2. On-Device Local Processing Exceptions (Google Play Guidelines)
+
+> [!NOTE]
+> Under Google Play Data Safety policy, data processed **strictly locally on-device** without leaving the user's hardware does **NOT** count as "Collection" for Play Console forms.
+
+1. **Photos & Facial Portraits (Skin & Color Calibration)**:
+   * **Handling:** Processed **100% locally on-device** via ML Kit Face Detection and local NPU color science algorithms.
+   * **Play Console Declaration:** Mark as **Not Collected** (or "Processed locally on-device") because raw pixels are never transmitted off the device.
+2. **Google Health Connect (Sleep & Circadian Wellness Data)**:
+   * **Handling:** Read **100% locally on-device** via Google Health Connect API to calibrate circadian skin defense context.
+   * **Play Console Declaration:** Mark as **Not Collected** off-device.
+
+---
+
+## 3. Detailed Data Type Declarations (Field-by-Field Mappings)
+
+### A. Location & Environmental Weather Data
+* **Data Type:** Coarse Location / Environmental Parameters (Postal Code / Weather query).
+* **Collected?** Yes.
+* **Shared?** No.
+* **Purpose:** **App Functionality** (Provides ambient temperature and UV index for hard-gating heavy outerwear/cosmetic recommendations).
+* **Ephemerally Processed?** Yes (Transmitted over HTTPS to retrieve atmospheric state, then discarded without persistent cloud storage).
+
+---
+
+### B. App Activity
+* **Data Type:** App interactions (e.g., screen views, simulator runs, palette locks).
+* **Collected?** Yes (via Firebase Analytics).
+* **Shared?** No.
+* **Purpose:** **Analytics** & **App Functionality**.
+* **Optional or Required?** Optional (User can opt out or request deletion via App Instance ID).
+
+---
+
+### C. App Info and Performance
+* **Data Type 1: Crash Logs**
+  * **Collected?** Yes (via Firebase Crashlytics).
+  * **Shared?** No.
+  * **Purpose:** **App Functionality** & **Analytics** (Identifying ANRs, NPU execution crashes, and stack traces).
+  * **Linked to User?** No (Anonymous).
+* **Data Type 2: Diagnostics & Performance Data**
+  * **Collected?** Yes (App load times, memory consumption).
+  * **Shared?** No.
+  * **Purpose:** **Analytics**.
+
+---
+
+### D. Device or Other Identifiers
+* **Data Type:** Device or other IDs (Firebase App Instance ID, Installation ID).
+* **Collected?** Yes (via Firebase SDKs).
+* **Shared?** No.
+* **Purpose:** **Analytics** & **App Functionality** (Enables manual analytics deletion routing upon user request).
+* **Linked to User?** No.
+
+---
+
+## 4. Play Console Form Section Answers
+
+### Section: Data Collection and Security
+| Question | Selection |
+| :--- | :--- |
+| **Does your app collect or share any user data?** | **Yes** |
+| **Is all data collected by your app encrypted in transit?** | **Yes** |
+| **Do you provide a way for users to request data deletion?** | **Yes** |
+| **Is data processing required for app functionality?** | **Yes** |
+
+### Section: Data Types Table Mappings
+
+| Data Category | Specific Data Type | Collected | Shared | Ephemeral | Purpose | Linked to User |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **Location** | Coarse Location / Weather Query | Yes | No | Yes | App Functionality | No |
+| **Photos & Videos** | Personal Photos (Portraits) | **No** (Local Only) | No | N/A | Local NPU Analysis | No |
+| **Health & Fitness** | Sleep / Wellness Metrics | **No** (Local Only) | No | N/A | Local Skin Calibration | No |
+| **App Activity** | App Interactions | Yes | No | No | Analytics | No |
+| **App Info & Performance** | Crash Logs | Yes | No | No | Analytics & Functionality | No |
+| **App Info & Performance** | Performance Diagnostics | Yes | No | No | Analytics | No |
+| **Device Identifiers** | App Instance ID | Yes | No | No | Analytics & Functionality | No |
+
+---
+
+## 5. Summary of Developer Commitments
+
+1. **No Data Sold:** KoColor does not sell user data to data brokers or third parties.
+2. **No Advertising Tracking:** KoColor does not use third-party advertising SDKs or cross-app tracking identifiers (like GAID) for targeted advertising.
+3. **Local-First Privacy Guarantee:** Raw pixel images and biometric features never leave the user's Android hardware.
