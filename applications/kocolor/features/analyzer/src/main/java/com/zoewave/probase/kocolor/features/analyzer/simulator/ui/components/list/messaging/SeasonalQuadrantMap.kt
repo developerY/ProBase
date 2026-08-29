@@ -18,11 +18,13 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zoewave.probase.kocolor.features.analyzer.R
 
 @Composable
 fun SeasonalQuadrantMap(
@@ -156,10 +158,10 @@ fun SeasonalQuadrantMap(
             fontSize = 12.sp
         )
 
-        Text("Light", style = axisLabelStyle, modifier = Modifier.align(Alignment.TopCenter).padding(top = 4.dp))
-        Text("Deep", style = axisLabelDarkStyle, modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 4.dp))
-        Text("Cool", style = axisLabelStyle, modifier = Modifier.align(Alignment.CenterStart).padding(start = 6.dp))
-        Text("Warm", style = axisLabelStyle, modifier = Modifier.align(Alignment.CenterEnd).padding(end = 6.dp))
+        Text(stringResource(R.string.applications_kocolor_features_analyzer_light), style = axisLabelStyle, modifier = Modifier.align(Alignment.TopCenter).padding(top = 4.dp))
+        Text(stringResource(R.string.applications_kocolor_features_analyzer_deep), style = axisLabelDarkStyle, modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 4.dp))
+        Text(stringResource(R.string.applications_kocolor_features_analyzer_cool), style = axisLabelStyle, modifier = Modifier.align(Alignment.CenterStart).padding(start = 6.dp))
+        Text(stringResource(R.string.applications_kocolor_features_analyzer_warm), style = axisLabelStyle, modifier = Modifier.align(Alignment.CenterEnd).padding(end = 6.dp))
 
         // --- OVERLAY QUADRANT LABELS (HIGH VISIBILITY) ---
         QuadrantLabelBox(

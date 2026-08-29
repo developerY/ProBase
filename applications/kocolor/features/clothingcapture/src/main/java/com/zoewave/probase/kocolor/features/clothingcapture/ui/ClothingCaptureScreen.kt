@@ -33,6 +33,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -44,6 +45,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -64,6 +66,7 @@ import com.zoewave.probase.features.camera.productcapture.ui.ProductCaptureUiEve
 import com.zoewave.probase.features.graphics.colorpicker.ui.ColorPickerDialog
 import com.zoewave.probase.core.ui.util.parseColor
 import com.zoewave.probase.core.ui.util.toHex
+import com.zoewave.probase.kocolor.features.clothingcapture.R
 import com.zoewave.probase.kocolor.features.clothingcapture.ui.state.ClothingCaptureStep
 import com.zoewave.probase.kocolor.features.clothingcapture.ui.state.ClothingCaptureUiState
 import com.zoewave.probase.kocolor.model.KoColorRoute
@@ -292,7 +295,7 @@ private fun FinalClothingValidationView(
                             .border(1.dp, Color.White.copy(alpha = 0.2f), CircleShape)
                     )
                     Spacer(Modifier.width(12.dp))
-                    Text("Verified Color", color = Color.White, style = MaterialTheme.typography.bodyLarge)
+                    Text(stringResource(R.string.applications_kocolor_features_clothingcapture_verified_color), color = Color.White, style = MaterialTheme.typography.bodyLarge)
                 }
             }
         }
@@ -313,11 +316,11 @@ private fun FinalClothingValidationView(
             shape = RoundedCornerShape(32.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFf472b6))
         ) {
-            Text("ADD TO WARDROBE", color = Color.Black, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.applications_kocolor_features_clothingcapture_add_to_wardrobe), color = Color.Black, fontWeight = FontWeight.Bold)
         }
-        
-        androidx.compose.material3.TextButton(onClick = onCancel, modifier = Modifier.padding(top = 16.dp)) {
-            Text("DISCARD", color = Color.Red.copy(alpha = 0.7f))
+
+        TextButton(onClick = onCancel, modifier = Modifier.padding(top = 16.dp)) {
+            Text(stringResource(R.string.applications_kocolor_features_clothingcapture_discard), color = Color.Red.copy(alpha = 0.7f))
         }
     }
 }
@@ -487,7 +490,7 @@ private fun ReviewView(
         ) {
             Icon(Icons.Default.AutoAwesome, null, tint = Color.Black)
             Spacer(Modifier.width(12.dp))
-            Text("FINALIZE WITH GEMINI AI", color = Color.Black, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.applications_kocolor_features_clothingcapture_finalize_gemini), color = Color.Black, fontWeight = FontWeight.Bold)
         }
     }
 }

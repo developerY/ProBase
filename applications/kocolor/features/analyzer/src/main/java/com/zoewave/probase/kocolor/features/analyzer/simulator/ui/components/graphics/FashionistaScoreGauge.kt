@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -62,7 +63,8 @@ import androidx.compose.ui.unit.sp
 import kotlin.math.cos
 import kotlin.math.sin
 
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.ui.res.stringResource
+import com.zoewave.probase.kocolor.features.analyzer.R
 import com.zoewave.probase.kocolor.fashionista.domain.FashionistaFeatureVector
 import com.zoewave.probase.kocolor.fashionista.domain.FeatureValue
 
@@ -125,7 +127,7 @@ fun CollapsibleFashionistaScoreCard(
                     Spacer(Modifier.width(12.dp))
                     Column {
                         Text(
-                            text = "KOCOLOR FASHIONISTA SCORE",
+                            text = stringResource(R.string.applications_kocolor_features_analyzer_fashionista_title),
                             style = MaterialTheme.typography.labelSmall.copy(
                                 letterSpacing = 1.5.sp,
                                 fontWeight = FontWeight.Bold
@@ -133,7 +135,7 @@ fun CollapsibleFashionistaScoreCard(
                             color = Color.Black
                         )
                         Text(
-                            text = if (isExpanded) "Tap to collapse" else "Tap for detailed score diagnostic",
+                            text = if (isExpanded) stringResource(R.string.applications_kocolor_features_analyzer_fashionista_tap_collapse) else stringResource(R.string.applications_kocolor_features_analyzer_fashionista_tap_expand),
                             style = MaterialTheme.typography.bodySmall,
                             color = Color.Gray
                         )
@@ -178,10 +180,10 @@ fun CollapsibleFashionistaScoreCard(
                             ) {
                                 Text(
                                     text = when (tab) {
-                                        ScoreViewTab.GAUGE -> "GAUGE"
-                                        ScoreViewTab.RADAR -> "RADAR"
-                                        ScoreViewTab.MATH -> "MATH"
-                                        ScoreViewTab.DECOMP -> "DECOMP"
+                                        ScoreViewTab.GAUGE -> stringResource(R.string.applications_kocolor_features_analyzer_fashionista_tab_gauge)
+                                        ScoreViewTab.RADAR -> stringResource(R.string.applications_kocolor_features_analyzer_fashionista_tab_radar)
+                                        ScoreViewTab.MATH -> stringResource(R.string.applications_kocolor_features_analyzer_fashionista_tab_math)
+                                        ScoreViewTab.DECOMP -> stringResource(R.string.applications_kocolor_features_analyzer_fashionista_tab_decomp)
                                     },
                                     style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
                                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
@@ -443,7 +445,7 @@ fun FashionistaScoreGauge(
         Spacer(Modifier.height(16.dp))
 
         Text(
-            text = "KOCOLOR FASHIONISTA SCORE",
+            text = stringResource(R.string.applications_kocolor_features_analyzer_fashionista_title),
             style = MaterialTheme.typography.labelSmall.copy(
                 letterSpacing = 2.5.sp,
                 fontWeight = FontWeight.Bold

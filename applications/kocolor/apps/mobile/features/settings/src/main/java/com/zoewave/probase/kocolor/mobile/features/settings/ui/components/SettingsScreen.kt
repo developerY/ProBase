@@ -100,7 +100,7 @@ fun SettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Settings") },
+                title = { Text(stringResource(R.string.applications_kocolor_apps_mobile_core_settings_title)) },
                 navigationIcon = {
                     IconButton(onClick = { navTo(KoColorRoute.Back) }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -132,8 +132,8 @@ fun SettingsScreen(
             AiConfigurationCard(
                 expanded = uiState.isAiExpanded,
                 onExpandToggle = { onEvent(SettingsEvent.OnAiExpandedToggled(!uiState.isAiExpanded)) },
-                title = "AI Configuration",
-                description = "Configure your Gemini API Key for style analysis and personal suggestions."
+                title = stringResource(R.string.applications_kocolor_apps_mobile_core_settings_ai_config_title),
+                description = stringResource(R.string.applications_kocolor_apps_mobile_core_settings_ai_config_desc)
             )
 
             AppSettingsCard(
@@ -149,10 +149,10 @@ fun SettingsScreen(
 
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("About", style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.applications_kocolor_apps_mobile_core_settings_about), style = MaterialTheme.typography.titleMedium)
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("KoColor Fashion App v0.1.0")
-                    Text("Powered by Gemini AI")
+                    Text(stringResource(R.string.applications_kocolor_apps_mobile_core_settings_app_version))
+                    Text(stringResource(R.string.applications_kocolor_apps_mobile_core_settings_powered_by))
                     
                     Spacer(modifier = Modifier.height(16.dp))
                     
@@ -209,9 +209,9 @@ fun AppSettingsCard(
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Column(modifier = Modifier.weight(1f)) {
-                    Text("App Settings", style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.applications_kocolor_apps_mobile_core_settings_app_settings_title), style = MaterialTheme.typography.titleMedium)
                     Text(
-                        "Configure hydration goals and experience",
+                        stringResource(R.string.applications_kocolor_apps_mobile_core_settings_app_settings_desc),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -249,7 +249,7 @@ fun TemperatureUnitSetting(
     onUnitChanged: (String) -> Unit
 ) {
     Column {
-        Text("Temperature Unit", style = MaterialTheme.typography.bodyLarge)
+        Text(stringResource(R.string.applications_kocolor_apps_mobile_core_settings_temp_unit), style = MaterialTheme.typography.bodyLarge)
         Spacer(modifier = Modifier.height(12.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -302,7 +302,7 @@ fun HydrationSetting(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text("Daily Hydration Goal", style = MaterialTheme.typography.bodyLarge)
+            Text(stringResource(R.string.applications_kocolor_apps_mobile_core_settings_hydration_goal), style = MaterialTheme.typography.bodyLarge)
             Text(
                 text = "%.1fL".format(goal),
                 style = MaterialTheme.typography.bodyLarge,
@@ -324,21 +324,10 @@ fun HydrationSetting(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        "Set your daily water intake target.",
+                        stringResource(R.string.applications_kocolor_apps_mobile_core_settings_hydration_desc),
                         style = MaterialTheme.typography.labelSmall,
                         color = Color.Gray
                     )
-                    
-                    /*TextButton(
-                        onClick = {},//onResetProgress,
-                        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
-                            Spacer(Modifier.width(4.dp))
-                            Text("Reset Today's Progress", style = MaterialTheme.typography.labelSmall)
-                        }
-                    }*/
                 }
             }
         }
@@ -378,9 +367,9 @@ fun HealthConnectCard(
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Column(modifier = Modifier.weight(1f)) {
-                    Text("Google Health Connect", style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.applications_kocolor_apps_mobile_core_settings_google_health), style = MaterialTheme.typography.titleMedium)
                     Text(
-                        "Sync sleep and wellness data for skin analysis",
+                        stringResource(R.string.applications_kocolor_apps_mobile_core_settings_google_health_desc),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

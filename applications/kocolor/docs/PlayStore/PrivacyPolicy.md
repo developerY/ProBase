@@ -24,11 +24,15 @@ KoColor utilizes a dual-tier AI architecture designed to enforce strict privacy 
 ---
 
 ### 3. Device Permissions & Optional Data Integrations
-To provide core fashion and skin-defense features, KoColor requests the following permissions, all handled with explicit user choice:
+To provide core fashion, skin-defense, and wellness correlation features, KoColor requests the following permissions, all handled with explicit user consent and choice:
 
 * **Camera & Storage:** Used solely to capture or select portrait photos for facial color calibration and wardrobe item photography locally on your device.
 * **Location & Weather Parameters (Optional):** Used to retrieve ambient temperature (°C) and UV Index from weather services to calibrate environmental garment and sunscreen recommendations. Location query is optional; users can deny permission, opt out in app settings, or rely on ambient defaults.
-* **Google Health Connect (Optional):** Users may optionally grant permission to read sleep and wellness metrics to calibrate skin defense recommendations. Health data is read **strictly on-device** and is never stored, logged, or transmitted externally by ZoeWave LLC.
+* **Google Health Connect (Bio-Data Integration):** Users may optionally grant permission to synchronize local Health Connect bio-markers:
+  * **Activity & Fitness:** Steps, distance, total calories burned, exercise sessions, and heart rate records.
+  * **Sleep Metrics:** Sleep duration sessions (`SleepSessionRecord`) read locally to calibrate circadian skin recovery and morning defense context.
+  * **Nutrition & Hydration:** Hydration logs, daily volume targets, and weight metrics.
+  * **Strict On-Device Processing:** All Health Connect bio-data is processed **100% locally on-device** (in-memory & local DB) to generate personal skin and style insights. ZoeWave LLC **never stores, transmits, or shares** Health Connect bio-data on external cloud servers or with third parties.
 
 ---
 

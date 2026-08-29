@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="applications_kocolor_features_clothingcapture_step_format">STEP %1$d OF %2$d</string>
+    <string name="applications_kocolor_features_clothingcapture_verified_color">Verified Color</string>
+    <string name="applications_kocolor_features_clothingcapture_add_to_wardrobe">ADD TO WARDROBE</string>
+    <string name="applications_kocolor_features_clothingcapture_discard">DISCARD</string>
+    <string name="applications_kocolor_features_clothingcapture_finalize_gemini">FINALIZE WITH GEMINI AI</string>
 </resources>
