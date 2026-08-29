@@ -22,8 +22,12 @@ This document provides the exact responses and field mappings required for compl
 
 1. **Photos & Facial Portraits (Skin & Color Calibration)**:
    * **Handling:** Processed **100% locally on-device** via ML Kit Face Detection and local NPU color science algorithms.
-   * **Play Console Declaration:** Mark as **Not Collected** (or "Processed locally on-device") because raw pixels are never transmitted off the device.
-2. **Google Health Connect (Sleep & Circadian Wellness Data)**:
+   * **Cloud Bifurcation Invariant:** Raw pixel images, bitmaps, and facial landmark coordinates are **compile-time blocked** from leaving your device. Cloud AI requests accept strictly `TextOnly` manifests.
+   * **Play Console Declaration:** Mark as **Not Collected** (or "Processed locally on-device") because raw biometric pixels and photos are never transmitted off the device.
+2. **Categorical Feature Descriptors vs. Raw Biometrics**:
+   * **What IS sent to Cloud LLM:** Only non-identifiable, categorical text labels (e.g., `Temperature: Cool`, `Depth: Medium`, `Contrast: High`) and wardrobe text IDs (`w_101`).
+   * **What IS NOT sent to Cloud LLM:** No facial images, no biometric face-mesh vectors, no skin patches, and no personal identifiers.
+3. **Google Health Connect (Sleep & Circadian Wellness Data)**:
    * **Handling:** Read **100% locally on-device** via Google Health Connect API to calibrate circadian skin defense context.
    * **Play Console Declaration:** Mark as **Not Collected** off-device.
 
