@@ -108,7 +108,7 @@ KoColor integrates with **Google Health Connect** to synchronize local bio-marke
 | **Activity and fitness** | **CHECK THIS BOX** | Steps, distance, active calories, exercise sessions, heart rate | Calculates physical activity and vital bio-marker correlations for skin/style insights. |
 | **Nutrition and weight management** | **CHECK THIS BOX** | Hydration records, weight metrics, daily fluid intake goals | Calibrates daily hydration targets and skin moisture defense. |
 | **Period tracking** | **UNCHECK** | N/A | Not applicable to KoColor. |
-| **Sleep management** | **UNCHECK** | N/A | **Not used / Not managed by KoColor.** |
+| **Sleep management** | **UNCHECK** | `SleepSessionRecord` (Read 100% locally on-device) | **Note:** Sleep duration is read locally via Health Connect to calibrate circadian skin defense, but "Sleep management" remains unchecked in Play Console category selection as KoColor does not provide sleep coaching/management services. |
 | **Stress management, relaxation, mental acuity** | **UNCHECK** | N/A | Not applicable to KoColor. |
 
 > [!IMPORTANT]

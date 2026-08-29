@@ -30,6 +30,7 @@ To provide core fashion, skin-defense, and wellness correlation features, KoColo
 * **Location & Weather Parameters (Optional):** Used to retrieve ambient temperature (°C) and UV Index from weather services to calibrate environmental garment and sunscreen recommendations. Location query is optional; users can deny permission, opt out in app settings, or rely on ambient defaults.
 * **Google Health Connect (Bio-Data Integration):** Users may optionally grant permission to synchronize local Health Connect bio-markers:
   * **Activity & Fitness:** Steps, distance, total calories burned, exercise sessions, and heart rate records.
+  * **Sleep Metrics:** Sleep duration sessions (`SleepSessionRecord`) read locally to calibrate circadian skin recovery and morning defense context.
   * **Nutrition & Hydration:** Hydration logs, daily volume targets, and weight metrics.
   * **Strict On-Device Processing:** All Health Connect bio-data is processed **100% locally on-device** (in-memory & local DB) to generate personal skin and style insights. ZoeWave LLC **never stores, transmits, or shares** Health Connect bio-data on external cloud servers or with third parties.
 
