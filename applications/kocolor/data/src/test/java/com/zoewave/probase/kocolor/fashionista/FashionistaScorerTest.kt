@@ -1,6 +1,5 @@
 package com.zoewave.probase.kocolor.fashionista
 
-import com.google.common.truth.DoubleSubject
 import com.google.common.truth.Truth.assertThat
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
@@ -15,6 +14,8 @@ import com.zoewave.probase.kocolor.fashionista.extraction.TextureFeatureExtracto
 import com.zoewave.probase.kocolor.fashionista.hierarchy.VisualHierarchyEngine
 import com.zoewave.probase.kocolor.fashionista.integration.CosmeticIntegrationEngine
 import com.zoewave.probase.kocolor.fashionista.integration.OutfitIntegrationEngine
+import com.zoewave.probase.kocolor.fashionista.presentation.AvailabilityStatus
+import com.zoewave.probase.kocolor.fashionista.presentation.FashionistaScoreMapper
 import com.zoewave.probase.kocolor.fashionista.scoring.CalibrationCurve
 import com.zoewave.probase.kocolor.fashionista.scoring.DeterministicScorer
 import com.zoewave.probase.kocolor.fashionista.scoring.FashionistaCalibration
@@ -24,12 +25,14 @@ import com.zoewave.probase.kocolor.fashionista.silhouette.SilhouetteEngine
 import com.zoewave.probase.kocolor.fashionista.silhouette.VisualMassEngine
 import com.zoewave.probase.kocolor.fashionista.texture.GlcmTextureEngine
 import com.zoewave.probase.kocolor.fashionista.texture.TextureHarmonyEngine
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 
 class FashionistaScorerTest {
 
     private lateinit var scorer: FashionistaScorerImpl
+    private val mapper = FashionistaScoreMapper()
 
     @Before
     fun setup() {
@@ -68,7 +71,7 @@ class FashionistaScorerTest {
     }
 
     @Test
-    fun `mathematical invariant test - score in 0-100 range and coverage in 0-1 range`() {
+    fun `mathematical invariant test - score in 0-100 range and coverage in 0-1 range`() = runTest {
         val observation = FashionistaObservation(
             clothingItems = listOf(
                 ClothingItem(internalId = 1, name = "Silk Blouse", category = ClothingCategory.TOPS, colorHex = "#1F2937"),
@@ -85,20 +88,29 @@ class FashionistaScorerTest {
         assertThat(result.coverage).isAtMost(1.0)
         assertThat(result.standardId).isEqualTo("FASHIONISTA")
         assertThat(result.standardVersion).isEqualTo(1)
+
+        val explanation = mapper.mapToExplanation(result)
+        assertThat(explanation.score).isIn(0..100)
+        assertThat(explanation.coveragePercentage).isIn(0..100)
     }
 
     @Test
-    fun `zero-availability fail-safe test - empty observation returns zero score and coverage without exception`() {
+    fun `zero-availability fail-safe test - empty observation returns zero score and coverage without exception`() = runTest {
         val emptyObservation = FashionistaObservation()
 
         val result = scorer.score(emptyObservation)
 
         assertThat(result.score).isEqualTo(0.0)
         assertThat(result.coverage).isEqualTo(0.0)
+
+        val explanation = mapper.mapToExplanation(result)
+        assertThat(explanation.score).isEqualTo(0)
+        assertThat(explanation.coveragePercentage).isEqualTo(0)
+        assertThat(explanation.interpretation).isEqualTo("Visually Unsuccessful")
     }
 
     @Test
-    fun `weighted evidence completeness test - flat-lay observation without face biometrics has lower coverage but valid score`() {
+    fun `weighted evidence completeness test - flat-lay observation without face biometrics has lower coverage but valid score`() = runTest {
         val observationNoFace = FashionistaObservation(
             clothingItems = listOf(
                 ClothingItem(internalId = 1, name = "Navy Blazer", category = ClothingCategory.OUTERWEAR, colorHex = "#1F2937"),
@@ -112,10 +124,17 @@ class FashionistaScorerTest {
         assertThat(result.breakdown.presentationIntegration.availability).isEqualTo(0.0)
         assertThat(result.score).isGreaterThan(0.0)
         assertThat(result.coverage).isLessThan(1.0)
+
+        val explanation = mapper.mapToExplanation(result)
+        val integrationFeature = explanation.features.find { it.name == "Presentation Integration" }
+        assertThat(integrationFeature).isNotNull()
+        assertThat(integrationFeature?.value).isNull()
+        assertThat(integrationFeature?.availabilityStatus).isEqualTo(AvailabilityStatus.NOT_MEASURABLE)
+        assertThat(integrationFeature?.explanation).contains("Not measurable from this image.")
     }
 
     @Test
-    fun `deterministic replicability test - identical observation produces byte-for-byte identical score`() {
+    fun `deterministic replicability test - identical observation produces byte-for-byte identical score`() = runTest {
         val observation = FashionistaObservation(
             clothingItems = listOf(
                 ClothingItem(internalId = 10, name = "Teal Dress", category = ClothingCategory.DRESSES, colorHex = "#2F6364"),

@@ -51,7 +51,7 @@ FASHIONISTA is a standalone, purely deterministic computational evaluator. It tr
 ### Critical Architectural Invariants
 
 1. **Zero AI/LLM/Network Dependency**:
-   - Executes 100% locally, on-device, and synchronously.
+   - 100% on-device, local, deterministic evaluation (thread-safe for background worker execution).
    - Zero network calls, zero LLMs, zero prompt assembly, zero cloud dependencies, and zero GenAI SDKs.
 2. **Context-Free & Reference-Free Evaluation**:
    - Evaluates the outfit strictly as observed.
@@ -69,7 +69,7 @@ FASHIONISTA is a standalone, purely deterministic computational evaluator. It tr
    - Measurements like vertical symmetry, Matsuda color templates, or GLCM complexity are treated as *evidence/features*, not definitions of good fashion.
    - Asymmetry, high contrast, and unusual proportions are valid stylistic choices. Penalties are strictly reserved for *unresolved perceptual conflicts* ($P_{unresolved}$).
 7. **Thread Safety**:
-   - The engine provides a synchronous, thread-safe Kotlin contract suited for execution on background coroutine workers (off the main UI thread).
+   - The engine provides a suspending, thread-safe Kotlin contract (`suspend fun score(outfit: FashionistaObservation): FashionistaScore`) executing on `Dispatchers.Default` off the main UI thread.
 
 ---
 
@@ -116,13 +116,19 @@ FASHIONISTA is a standalone, purely deterministic computational evaluator. It tr
 │   ├── ItaCalculator.kt
 │   ├── CosmeticIntegrationEngine.kt
 │   └── OutfitIntegrationEngine.kt
-└── scoring
-    ├── FashionistaCalibration.kt
-    ├── InteractionModel.kt
-    ├── DeterministicScorer.kt
-    ├── CalibrationCurve.kt
-    └── FashionistaScorerImpl.kt
+├── scoring
+│   ├── FashionistaCalibration.kt
+│   ├── InteractionModel.kt
+│   ├── DeterministicScorer.kt
+│   ├── CalibrationCurve.kt
+│   └── FashionistaScorerImpl.kt
+└── presentation
+    ├── FashionistaExplanation.kt
+    ├── FashionistaScoreMapper.kt
+    └── FashionistaVisualizations.kt
 ```
+
+- **Presentation Layer (Explainability)**: Dedicated translation mappers (`FashionistaScoreMapper`) that convert the frozen `FashionistaScore` into a human-readable `FashionistaExplanation`. Enforces progressive disclosure and null-safe UI states ("Not Measurable") without ever altering the deterministic math. Includes Jetpack Compose components (`FashionistaHeroDial`, `FashionistaRadarChart`, `FashionistaDecompositionBar`) for visual diagnostics.
 
 ---
 
@@ -139,7 +145,7 @@ FASHIONISTA is a standalone, purely deterministic computational evaluator. It tr
   - `visualHierarchy: FeatureValue`
   - `presentationIntegration: FeatureValue`
 - **`FashionistaScore`**: `data class FashionistaScore(val score: Double, val coverage: Double, val standardId: String, val standardVersion: Int, val breakdown: FashionistaFeatureVector)`.
-- **`FashionistaScorer`**: Synchronous interface contract (`fun score(outfit: FashionistaObservation): FashionistaScore`).
+- **`FashionistaScorer`**: Suspending, thread-safe interface contract (`suspend fun score(outfit: FashionistaObservation): FashionistaScore`).
 
 ### B. Pure Mathematics Primitives (`math` package)
 - **`Statistics.kt`**: Mean, weighted mean, variance, and standard deviation.
@@ -186,7 +192,15 @@ FASHIONISTA is a standalone, purely deterministic computational evaluator. It tr
   - `55–69`: Competent
   - `40–54`: Weak
   - `0–39`: Visually Unsuccessful
-- **`FashionistaScorerImpl`**: Master orchestrator implementing `FashionistaScorer`.
+- **`FashionistaScorerImpl`**: Master orchestrator implementing `FashionistaScorer` on `Dispatchers.Default`.
+
+### E. Presentation & Explainability Layer (`presentation` package)
+- **`FashionistaExplanation`**: UI model holding `score` (rounded Int), `coveragePercentage`, `interpretation`, and `features: List<FeatureExplanation>`.
+- **`FashionistaScoreMapper`**: Maps domain `FashionistaScore` to UI `FashionistaExplanation`. If a feature's `availability == 0.0`, maps to `AvailabilityStatus.NOT_MEASURABLE` with `value = null` and explanation *"Not measurable from this image."*.
+- **`FashionistaDecompositionBar`**: Horizontal stacked waterfall bar chart component ([`FashionistaVisualizations.kt`](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/features/analyzer/src/main/java/com/zoewave/probase/kocolor/features/analyzer/simulator/ui/components/graphics/FashionistaVisualizations.kt#L430-L510)) that visually breaks down the deterministic math for the user:
+  - **$Q_{base}$ Foundational Evidence**: Solid dark bar representing base feature weights.
+  - **$Q_{interaction}$ Synergy (+)**: Green appended block representing positive cross-feature interactions.
+  - **$P_{unresolved}$ Chaos Penalty (-)**: Red subtracted block representing unresolved perceptual complexity penalties.
 
 ---
 
@@ -198,4 +212,5 @@ The subsystem is thoroughly tested in [`FashionistaScorerTest.kt`](file:///Users
 2. **Dynamic Evidence Normalization**: Asserts that flat-lay observations without face biometrics set `presentationIntegration.availability = 0.0`, lowering `coverage` without corrupting the raw aesthetic `score`.
 3. **Single-Feature Interaction Denominator Test**: Asserts that single-feature inputs ($Q_{int\_den} == 0.0$) fall back to `effectiveLambda = 0.0` without division-by-zero errors.
 4. **Zero-Availability Fail-Safe Test**: Asserts that empty `FashionistaObservation` inputs return `score = 0.0` and `coverage = 0.0` without throwing exceptions or returning `NaN`.
-5. **Deterministic Replicability**: Asserts that identical `FashionistaObservation` inputs produce byte-for-byte identical `FashionistaScore` outputs across thread invocations.
+5. **Deterministic Replicability**: Asserts that identical `FashionistaObservation` inputs always produce byte-for-byte identical `FashionistaScore` outputs across thread invocations.
+6. **Presentation Mapping Test**: Asserts that `FashionistaScoreMapper` correctly maps unmeasurable features (`availability = 0.0`) to `value = null` and `AvailabilityStatus.NOT_MEASURABLE`.

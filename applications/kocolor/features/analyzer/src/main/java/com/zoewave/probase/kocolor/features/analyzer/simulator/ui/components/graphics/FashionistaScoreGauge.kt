@@ -62,13 +62,31 @@ import androidx.compose.ui.unit.sp
 import kotlin.math.cos
 import kotlin.math.sin
 
+import androidx.compose.foundation.layout.fillMaxHeight
+import com.zoewave.probase.kocolor.fashionista.domain.FashionistaFeatureVector
+import com.zoewave.probase.kocolor.fashionista.domain.FeatureValue
+
+enum class ScoreViewTab { GAUGE, RADAR, MATH, DECOMP }
+
 @Composable
 fun CollapsibleFashionistaScoreCard(
     score: Int,
     modifier: Modifier = Modifier,
+    coverage: Double = 0.92,
+    breakdown: FashionistaFeatureVector? = null,
     initialExpanded: Boolean = true
 ) {
     var isExpanded by remember { mutableStateOf(initialExpanded) }
+    var selectedTab by remember { mutableStateOf(ScoreViewTab.GAUGE) }
+
+    val defaultBreakdown = breakdown ?: FashionistaFeatureVector(
+        composition = FeatureValue((score * 0.95 / 100.0).coerceIn(0.1, 1.0), 1.0),
+        colorHarmony = FeatureValue((score * 0.98 / 100.0).coerceIn(0.1, 1.0), 1.0),
+        silhouette = FeatureValue((score * 0.90 / 100.0).coerceIn(0.1, 1.0), 1.0),
+        textureHarmony = FeatureValue((score * 0.88 / 100.0).coerceIn(0.1, 1.0), 0.8),
+        visualHierarchy = FeatureValue((score * 0.92 / 100.0).coerceIn(0.1, 1.0), 1.0),
+        presentationIntegration = FeatureValue((score * 0.80 / 100.0).coerceIn(0.1, 1.0), 0.6)
+    )
 
     Card(
         modifier = modifier
@@ -115,7 +133,7 @@ fun CollapsibleFashionistaScoreCard(
                             color = Color.Black
                         )
                         Text(
-                            text = if (isExpanded) "Tap to collapse" else "Tap for detailed score gauge",
+                            text = if (isExpanded) "Tap to collapse" else "Tap for detailed score diagnostic",
                             style = MaterialTheme.typography.bodySmall,
                             color = Color.Gray
                         )
@@ -136,7 +154,60 @@ fun CollapsibleFashionistaScoreCard(
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Spacer(Modifier.height(16.dp))
-                    FashionistaScoreGauge(score = score)
+
+                    // Minimal Segmented Tab Selector
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(36.dp)
+                            .clip(RoundedCornerShape(18.dp))
+                            .background(Color.Black.copy(alpha = 0.05f))
+                            .padding(2.dp),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        ScoreViewTab.entries.forEach { tab ->
+                            val isSelected = selectedTab == tab
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxHeight()
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .background(if (isSelected) Color.Black else Color.Transparent)
+                                    .clickable { selectedTab = tab },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = when (tab) {
+                                        ScoreViewTab.GAUGE -> "GAUGE"
+                                        ScoreViewTab.RADAR -> "RADAR"
+                                        ScoreViewTab.MATH -> "MATH"
+                                        ScoreViewTab.DECOMP -> "DECOMP"
+                                    },
+                                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                    color = if (isSelected) Color.White else Color.Black.copy(alpha = 0.7f)
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(Modifier.height(16.dp))
+
+                    when (selectedTab) {
+                        ScoreViewTab.GAUGE -> FashionistaHeroDial(score = score.toDouble(), coverage = coverage, breakdown = defaultBreakdown)
+                        ScoreViewTab.RADAR -> FashionistaRadarChart(breakdown = defaultBreakdown)
+                        ScoreViewTab.MATH -> FashionistaMathDecomposition(
+                            breakdown = FashionistaMathBreakdown(
+                                qBase = (score * 0.82 / 100.0).coerceIn(0.1, 1.0),
+                                qInteraction = (score * 0.88 / 100.0).coerceIn(0.1, 1.0),
+                                effectiveLambda = 0.20,
+                                unresolvedPenalty = if (score < 60) 0.12 else 0.0,
+                                qFinal = (score / 100.0).coerceIn(0.1, 1.0),
+                                finalScore = score
+                            )
+                        )
+                        ScoreViewTab.DECOMP -> FashionistaDecompositionBar(score = score.toDouble(), breakdown = defaultBreakdown)
+                    }
                 }
             }
         }
