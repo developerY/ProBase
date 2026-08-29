@@ -32,9 +32,10 @@ To provide core fashion and skin-defense features, KoColor requests the followin
 
 ---
 
-### 4. Advertising and Tracking
-* **No Advertising ID:** KoColor does not use the Google Advertising ID (`AD_ID`) for user profiling or cross-app tracking.
-* **No Third-Party Ads:** We do not display advertisements within the application.
+### 4. Analytics, Performance & Tracking
+* **No Advertising ID (`AD_ID`):** KoColor explicitly removes the Google Advertising ID (`AD_ID`) permission (`tools:node="remove"`) from the application manifest to prevent cross-app advertising profiling or tracking.
+* **App Instance Analytics:** We use **Google Analytics for Firebase** and **Firebase Crashlytics** solely for anonymized app performance, crash reporting, and feature usage trends analysis. These analytics rely on an anonymous, non-personalized **App Instance ID** generated locally by Firebase.
+* **No Third-Party Ads:** We do not display advertisements or share data with third-party ad networks.
 
 ---
 
