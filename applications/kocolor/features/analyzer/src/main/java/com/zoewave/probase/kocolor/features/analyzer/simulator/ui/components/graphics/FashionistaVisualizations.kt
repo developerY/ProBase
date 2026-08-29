@@ -44,11 +44,14 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zoewave.probase.kocolor.features.analyzer.R
 import com.zoewave.probase.kocolor.fashionista.domain.FashionistaFeatureVector
 import com.zoewave.probase.kocolor.fashionista.domain.FeatureValue
 import kotlin.math.cos
@@ -273,7 +276,7 @@ fun FashionistaHeroDial(
         Spacer(Modifier.height(8.dp))
 
         Text(
-            text = "KOCOLOR FASHIONISTA SCORE",
+            text = stringResource(R.string.applications_kocolor_features_analyzer_fashionista_title),
             style = MaterialTheme.typography.labelSmall.copy(
                 letterSpacing = 2.sp,
                 fontWeight = FontWeight.Bold
@@ -472,7 +475,7 @@ fun FashionistaMathDecomposition(
         horizontalAlignment = Alignment.Start
     ) {
         Text(
-            text = "DETERMINISTIC SCORING EQUATION",
+            text = stringResource(R.string.applications_kocolor_features_analyzer_fashionista_equation_title),
             style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.5.sp),
             fontWeight = FontWeight.Bold,
             color = Color.Black.copy(alpha = 0.8f)
@@ -547,8 +550,7 @@ fun FashionistaMathDecomposition(
         Spacer(Modifier.height(12.dp))
 
         // Explanatory Labels
-        val formattedBlended = "%.2f".format((1.0 - breakdown.effectiveLambda) * breakdown.qBase + breakdown.effectiveLambda * breakdown.qInteraction)
-        val formattedPenalty = "%.2f".format(breakdown.unresolvedPenalty)
+        val blendedVal = (1.0 - breakdown.effectiveLambda) * breakdown.qBase + breakdown.effectiveLambda * breakdown.qInteraction
 
         Column(modifier = Modifier.fillMaxWidth()) {
             Row(
@@ -556,12 +558,12 @@ fun FashionistaMathDecomposition(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Blended Q: $formattedBlended",
+                    text = stringResource(R.string.applications_kocolor_features_analyzer_fashionista_blended_format, blendedVal),
                     style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
                     color = Color.Black
                 )
                 Text(
-                    text = "Penalty: -$formattedPenalty",
+                    text = stringResource(R.string.applications_kocolor_features_analyzer_fashionista_penalty_format, breakdown.unresolvedPenalty),
                     style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
                     color = if (breakdown.unresolvedPenalty > 0.0) Color(0xFFEF4444) else Color.Gray
                 )
@@ -570,7 +572,7 @@ fun FashionistaMathDecomposition(
             Spacer(Modifier.height(6.dp))
 
             Text(
-                text = "Q maps to FASHIONISTA Score: ${breakdown.finalScore}/100",
+                text = stringResource(R.string.applications_kocolor_features_analyzer_fashionista_mapping_format, breakdown.finalScore),
                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                 color = Color(0xFF2F6364)
             )
@@ -597,7 +599,7 @@ fun FashionistaDecompositionBar(
         horizontalAlignment = Alignment.Start
     ) {
         Text(
-            text = "DETERMINISTIC MATH DECOMPOSITION",
+            text = stringResource(R.string.applications_kocolor_features_analyzer_fashionista_decomp_title),
             style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.5.sp),
             fontWeight = FontWeight.Bold,
             color = Color.Black.copy(alpha = 0.8f)
@@ -650,18 +652,18 @@ fun FashionistaDecompositionBar(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(Modifier.size(8.dp).clip(CircleShape).background(Color(0xFF1E293B)))
                 Spacer(Modifier.width(4.dp))
-                Text("Q_Base Evidence", style = MaterialTheme.typography.labelSmall, fontSize = 10.sp)
+                Text(stringResource(R.string.applications_kocolor_features_analyzer_fashionista_q_base), style = MaterialTheme.typography.labelSmall, fontSize = 10.sp)
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(Modifier.size(8.dp).clip(CircleShape).background(Color(0xFF10B981)))
                 Spacer(Modifier.width(4.dp))
-                Text("Q_Synergy (+)", style = MaterialTheme.typography.labelSmall, fontSize = 10.sp)
+                Text(stringResource(R.string.applications_kocolor_features_analyzer_fashionista_q_synergy), style = MaterialTheme.typography.labelSmall, fontSize = 10.sp)
             }
             if (pChaosPct > 0f) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(Modifier.size(8.dp).clip(CircleShape).background(Color(0xFFEF4444)))
                     Spacer(Modifier.width(4.dp))
-                    Text("P_Chaos (-)", style = MaterialTheme.typography.labelSmall, fontSize = 10.sp)
+                    Text(stringResource(R.string.applications_kocolor_features_analyzer_fashionista_p_chaos), style = MaterialTheme.typography.labelSmall, fontSize = 10.sp)
                 }
             }
         }

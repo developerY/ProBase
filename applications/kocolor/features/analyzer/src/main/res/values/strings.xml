@@ -52,4 +52,33 @@
     <string name="applications_kocolor_features_analyzer_simulator_clothing_anchors">CLOTHING ANCHORS</string>
     <string name="applications_kocolor_features_analyzer_simulator_makeup_anchors">MAKEUP ANCHORS</string>
     <string name="applications_kocolor_features_analyzer_simulator_tap_to_anchor">Select color families to anchor your look</string>
+
+    <string name="applications_kocolor_features_analyzer_fashionista_title">KOCOLOR FASHIONISTA SCORE</string>
+    <string name="applications_kocolor_features_analyzer_fashionista_tap_collapse">Tap to collapse</string>
+    <string name="applications_kocolor_features_analyzer_fashionista_tap_expand">Tap for detailed score diagnostic</string>
+    <string name="applications_kocolor_features_analyzer_fashionista_tab_gauge">GAUGE</string>
+    <string name="applications_kocolor_features_analyzer_fashionista_tab_radar">RADAR</string>
+    <string name="applications_kocolor_features_analyzer_fashionista_tab_math">MATH</string>
+    <string name="applications_kocolor_features_analyzer_fashionista_tab_decomp">DECOMP</string>
+    <string name="applications_kocolor_features_analyzer_fashionista_equation_title">DETERMINISTIC SCORING EQUATION</string>
+    <string name="applications_kocolor_features_analyzer_fashionista_decomp_title">DETERMINISTIC MATH DECOMPOSITION</string>
+    <string name="applications_kocolor_features_analyzer_fashionista_q_base">Q_Base Evidence</string>
+    <string name="applications_kocolor_features_analyzer_fashionista_q_synergy">Q_Synergy (+)</string>
+    <string name="applications_kocolor_features_analyzer_fashionista_p_chaos">P_Chaos (-)</string>
+    <string name="applications_kocolor_features_analyzer_fashionista_blended_format">Blended Q: %1$.2f</string>
+    <string name="applications_kocolor_features_analyzer_fashionista_penalty_format">Penalty: -%1$.2f</string>
+    <string name="applications_kocolor_features_analyzer_fashionista_mapping_format">Q maps to FASHIONISTA Score: %1$d/100</string>
+    <string name="applications_kocolor_features_analyzer_findings_title">ML Face Detection Findings</string>
+    <string name="applications_kocolor_features_analyzer_established_season_format">Established Season: %1$s</string>
+    <string name="applications_kocolor_features_analyzer_findings_desc">Your aesthetic identity is being used to ground the AI\'s stylistic decisions and palette generation.</string>
+    <string name="applications_kocolor_features_analyzer_analyzing_dna">Analyzing aesthetic DNA...</string>
+    <string name="applications_kocolor_features_analyzer_close">CLOSE</string>
+    <string name="applications_kocolor_features_analyzer_generate_7day_playlist">Generate 7-Day Playlist</string>
+    <string name="applications_kocolor_features_analyzer_generate_weekly_plan">GENERATE WEEKLY PLAN</string>
+    <string name="applications_kocolor_features_analyzer_wearing_this">I\'M WEARING THIS</string>
+    <string name="applications_kocolor_features_analyzer_finalize_profile">FINALIZE PROFILE</string>
+    <string name="applications_kocolor_features_analyzer_light">Light</string>
+    <string name="applications_kocolor_features_analyzer_deep">Deep</string>
+    <string name="applications_kocolor_features_analyzer_cool">Cool</string>
+    <string name="applications_kocolor_features_analyzer_warm">Warm</string>
 </resources>
