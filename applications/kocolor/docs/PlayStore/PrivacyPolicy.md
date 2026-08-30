@@ -30,16 +30,14 @@ To provide core fashion, skin-defense, and wellness correlation features, KoColo
 * **Location & Weather Parameters (Optional):** Used to retrieve ambient temperature (°C) and UV Index from weather services to calibrate environmental garment and sunscreen recommendations. Location query is optional; users can deny permission, opt out in app settings, or rely on ambient defaults.
 * **Google Health Connect (Bio-Data Integration):** Users may optionally grant permission to synchronize local Health Connect bio-markers:
   * **Activity & Fitness:** Steps, distance, total calories burned, exercise sessions, and heart rate records.
-  * **Sleep Metrics:** Sleep duration sessions (`SleepSessionRecord`) read locally to calibrate circadian skin recovery and morning defense context.
   * **Nutrition & Hydration:** Hydration logs, daily volume targets, and weight metrics.
   * **Strict On-Device Processing:** All Health Connect bio-data is processed **100% locally on-device** (in-memory & local DB) to generate personal skin and style insights. ZoeWave LLC **never stores, transmits, or shares** Health Connect bio-data on external cloud servers or with third parties.
 
 ---
 
 ### 4. Analytics, Performance & Tracking
-* **No Advertising ID (`AD_ID`):** KoColor explicitly removes the Google Advertising ID (`AD_ID`) permission (`tools:node="remove"`) from the application manifest to prevent cross-app advertising profiling or tracking.
-* **App Instance Analytics:** We use **Google Analytics for Firebase** and **Firebase Crashlytics** solely for anonymized app performance, crash reporting, and feature usage trends analysis. These analytics rely on an anonymous, non-personalized **App Instance ID** generated locally by Firebase.
-* **No Third-Party Ads:** We do not display advertisements or share data with third-party ad networks.
+* **Google Analytics & Advertising ID (`AD_ID`):** KoColor uses **Google Analytics for Firebase** and **Firebase Crashlytics** for anonymized usage metrics, performance monitoring, and app stability. Google Analytics utilizes the Advertising ID (`AD_ID`) and anonymous App Instance ID to measure install attribution, app usage trends, and crash diagnostics.
+* **No Third-Party Ads:** We do not display third-party advertisements or sell user data to data brokers.
 
 ---
 
