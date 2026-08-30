@@ -37,9 +37,9 @@ fun KoColorMainScreen(
     navTo: (KoColorRoute) -> Unit
 ) {
     val darkTheme = when (uiState.mainState.theme) {
-        "LIGHT" -> false
         "DARK" -> true
-        else -> isSystemInDarkTheme()
+        "SYSTEM" -> isSystemInDarkTheme()
+        else -> false // Default to Light theme
     }
 
     KoColorTheme(

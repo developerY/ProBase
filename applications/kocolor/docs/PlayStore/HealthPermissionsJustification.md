@@ -31,7 +31,7 @@ Copy and paste the exact text blocks below into the corresponding fields in Goog
 
 ---
 
-### Heart rate (`android.permission.health.READ_HEART_RATE` & `android.permission.health.WRITE_HEART_RATE`)
+### Heart rate (`android.permission.health.READ_HEART_RATE`)
 > KoColor reads heart rate bio-markers to correlate physical exertion and vital states with skin defense telemetry. This data is processed 100% locally on-device to provide personalized skin wellness insights and adjust activewear recommendations. Heart rate data remains on the user's device and is never uploaded externally.
 
 ---
@@ -43,12 +43,12 @@ Copy and paste the exact text blocks below into the corresponding fields in Goog
 
 ---
 
-### Nutrition (`android.permission.health.READ_NUTRITION` & `android.permission.health.WRITE_NUTRITION`)
-> KoColor accesses nutrition records locally to allow users to log and correlate dietary wellness factors (such as dietary antioxidant or fluid intake) with personal skin health and color clarity. All nutritional data is processed strictly on-device for personal wellness insights and is never transmitted off-device or shared with third parties.
+### Nutrition (`android.permission.health.READ_NUTRITION`)
+> KoColor accesses local nutrition records to allow users to log and correlate dietary wellness factors (such as dietary fluid intake and nutritional wellness) with personal skin health and color clarity. All nutritional data is processed strictly on-device for personal wellness insights and is never transmitted off-device or shared with third parties.
 
 ---
 
-### Weight (`android.permission.health.READ_WEIGHT` & `android.permission.health.WRITE_WEIGHT`)
+### Weight (`android.permission.health.READ_WEIGHT`)
 > KoColor reads weight records locally to calculate accurate personal hydration volume targets and body water proportion goals. This data is processed strictly on-device to support the app's local wellness and hydration tracking features.
 
 ---

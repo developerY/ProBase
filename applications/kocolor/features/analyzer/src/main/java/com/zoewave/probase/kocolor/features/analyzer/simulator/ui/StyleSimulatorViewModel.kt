@@ -632,7 +632,14 @@ class StyleSimulatorViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val parsedUri = Uri.parse(uri)
-                val image = InputImage.fromFilePath(context, parsedUri)
+                val bitmap = loadBitmapFromUri(parsedUri)
+                if (bitmap == null) {
+                    Log.e("StyleSimulatorVM", "Failed to load bitmap for sampling")
+                    _faceAnalysisError.value = "Internal error: Failed to process appearance source."
+                    return@launch
+                }
+
+                val image = InputImage.fromBitmap(bitmap, 0)
 
                 detector.process(image)
                     .addOnSuccessListener { faces ->
@@ -649,26 +656,15 @@ class StyleSimulatorViewModel @Inject constructor(
                                 face.boundingBox.top
                             )
 
-                            // We still need the bitmap for luminance sampling
-                            // But we use the ML Kit image resolution as the source of truth for telemetry
-                            val bitmap = loadBitmapFromUri(parsedUri) 
-                            if (bitmap == null) {
-                                Log.e("StyleSimulatorVM", "Failed to load bitmap for sampling")
-                                _faceAnalysisError.value = "Internal error: Failed to process appearance source."
-                                return@addOnSuccessListener
-                            }
-
                             val skinLuminance = cheekLandmark?.let { sampleLuminance(bitmap, it.position.x.toInt(), it.position.y.toInt()) } ?: 0.5f
-
                             val eyeLuminance = eyeLandmark?.let { sampleLuminance(bitmap, it.position.x.toInt(), it.position.y.toInt()) } ?: 0.2f
-
                             val hairLuminance = sampleLuminance(bitmap, face.boundingBox.centerX(), (face.boundingBox.top - 20).coerceAtLeast(0))
                             val contrastDelta = abs(skinLuminance - hairLuminance)
                             val undertone = estimateUndertone(bitmap, cheekLandmark?.position?.x?.toInt() ?: face.boundingBox.centerX(), cheekLandmark?.position?.y?.toInt() ?: face.boundingBox.centerY())
 
                             _faceTelemetry.value = FaceTelemetryData(
-                                imageWidth = image.width,
-                                imageHeight = image.height,
+                                imageWidth = bitmap.width,
+                                imageHeight = bitmap.height,
                                 cheekPoint = cheekLandmark?.position,
                                 eyePoint = eyeLandmark?.position,
                                 hairBoundingBox = hairBox,

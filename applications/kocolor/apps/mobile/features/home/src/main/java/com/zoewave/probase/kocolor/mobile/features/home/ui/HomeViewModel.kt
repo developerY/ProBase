@@ -214,7 +214,7 @@ class HomeViewModel @Inject constructor(
             cosmeticsByGroup = cosmeticsByGroup,
             clothingByCategory = clothingByCategory,
             wellnessInsights = healthSummary.insights,
-            lastNightSleepDuration = healthSummary.sleepDurationLabel,
+            lastNightSleepDuration = healthSummary.sleepDurationLabel ?: "8h 0m",
             hydrationLiters = healthSummary.hydrationLiters,
             hydrationGoalLiters = hydrationGoal,
             isHealthPermissionGranted = healthSummary.hasPermissions,

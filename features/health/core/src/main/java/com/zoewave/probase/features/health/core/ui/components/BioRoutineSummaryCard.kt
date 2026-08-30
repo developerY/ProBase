@@ -51,11 +51,7 @@ fun BioRoutineSummaryCard(
     modifier: Modifier = Modifier
 ) {
     val progress = if (uiState.totalCount > 0) uiState.completedCount.toFloat() / uiState.totalCount else 0f
-    val cardColor = if (uiState.isDaytime) {
-        MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f)
-    } else {
-        MaterialTheme.colorScheme.surfaceVariant
-    }
+    val cardColor = Color(0xFFF1EFE7)
 
     Surface(
         modifier = modifier

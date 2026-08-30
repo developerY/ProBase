@@ -166,11 +166,24 @@ class HealthSessionManager(private val context: Context) {
      * Aggregates total hydration for a specific time range.
      */
     suspend fun readTotalHydration(start: Instant, end: Instant): Volume? {
-        val request = AggregateRequest(
-            metrics = setOf(HydrationRecord.VOLUME_TOTAL),
-            timeRangeFilter = TimeRangeFilter.between(start, end)
-        )
-        return healthConnectClient.aggregate(request)[HydrationRecord.VOLUME_TOTAL]
+        return try {
+            val request = AggregateRequest(
+                metrics = setOf(HydrationRecord.VOLUME_TOTAL),
+                timeRangeFilter = TimeRangeFilter.between(start, end)
+            )
+            val agg = healthConnectClient.aggregate(request)[HydrationRecord.VOLUME_TOTAL]
+            if (agg != null) {
+                agg
+            } else {
+                val records = readHydration(start, end)
+                val totalLiters = records.sumOf { it.volume.inLiters }
+                if (totalLiters > 0.0) Volume.liters(totalLiters) else null
+            }
+        } catch (e: Exception) {
+            val records = try { readHydration(start, end) } catch (ignore: Exception) { emptyList() }
+            val totalLiters = records.sumOf { it.volume.inLiters }
+            if (totalLiters > 0.0) Volume.liters(totalLiters) else null
+        }
     }
 
     /**
@@ -647,6 +660,7 @@ class HealthSessionManager(private val context: Context) {
             ascendingOrder = false
         )
         val sleepSessions = healthConnectClient.readRecords(sleepSessionRequest)
+        Log.d(TAG, "readSleepSessions: Found ${sleepSessions.records.size} raw sleep records in Health Connect")
         sleepSessions.records.forEach { session ->
             val sessionTimeFilter = TimeRangeFilter.between(session.startTime, session.endTime)
             val durationAggregateRequest = AggregateRequest(
