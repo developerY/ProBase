@@ -67,11 +67,11 @@ This document provides the exact responses and field mappings required for compl
 ---
 
 ### D. Device or Other Identifiers
-* **Data Type:** Device or other IDs (Firebase App Instance ID, Installation ID).
-* **Collected?** Yes (via Firebase SDKs).
+* **Data Type:** Device or other IDs (Firebase App Instance ID, Advertising ID `AD_ID`).
+* **Collected?** Yes (via Firebase Analytics).
 * **Shared?** No.
-* **Purpose:** **Analytics** & **App Functionality** (Enables manual analytics deletion routing upon user request).
-* **Linked to User?** No.
+* **Purpose:** **Analytics** & **App Functionality** (Provides install attribution, app usage metrics, and enables manual analytics deletion routing upon user request).
+* **Linked to User?** No (Anonymized).
 
 ---
 
@@ -107,16 +107,12 @@ KoColor integrates with **Google Health Connect** to synchronize local bio-marke
 | :--- | :--- | :--- | :--- |
 | **Activity and fitness** | **CHECK THIS BOX** | Steps, distance, active calories, exercise sessions, heart rate | Calculates physical activity and vital bio-marker correlations for skin/style insights. |
 | **Nutrition and weight management** | **CHECK THIS BOX** | Hydration records, weight metrics, daily fluid intake goals | Calibrates daily hydration targets and skin moisture defense. |
-| **Period tracking** | **UNCHECK** | N/A | Not applicable to KoColor. |
-| **Sleep management** | **UNCHECK** | `SleepSessionRecord` (Read 100% locally on-device) | **Note:** Sleep duration is read locally via Health Connect to calibrate circadian skin defense, but "Sleep management" remains unchecked in Play Console category selection as KoColor does not provide sleep coaching/management services. |
-| **Stress management, relaxation, mental acuity** | **UNCHECK** | N/A | Not applicable to KoColor. |
+| **Period tracking** | **UNCHECK** | N/A | Not used / Stripped from manifest. |
+| **Sleep management** | **UNCHECK** | N/A | **Not used / Stripped from manifest.** |
+| **Stress management, relaxation, mental acuity** | **UNCHECK** | N/A | Not used / Stripped from manifest. |
 
 > [!IMPORTANT]
-> **Data Safety Questionnaire Rule for Health Connect**: All Health Connect bio-data (vitals, heart rate, steps, calories, hydration, weight) is read and processed **100% locally on-device** via the Health Connect API. It is never transmitted to external cloud servers or stored off-device.
-> 
-> Therefore, in the Data Safety Questionnaire:
-> 1. Select **"No"** for off-device collection/sharing of Health and Fitness data.
-> 2. Complete the **Health Feature Declarations** checkboxes exactly as listed above.
+> **Manifest Stripping Policy**: KoColor's `AndroidManifest.xml` explicitly strips all unneeded Health Connect permission declarations (such as `READ_SLEEP`, `READ_SEXUAL_ACTIVITY`, `READ_BLOOD_GLUCOSE`, `READ_CERVICAL_MUCUS`, etc.) using `tools:node="remove"`. KoColor strictly requests permissions only for **Activity & Fitness** and **Nutrition & Weight Management**.
 
 ---
 
@@ -124,4 +120,4 @@ KoColor integrates with **Google Health Connect** to synchronize local bio-marke
 
 1. **No Data Sold:** KoColor does not sell user data or Health Connect bio-markers to data brokers or third parties.
 2. **No Advertising Tracking:** KoColor does not use third-party advertising SDKs or cross-app tracking identifiers (like GAID) for targeted advertising.
-3. **Local-First Privacy Guarantee:** Raw pixel images, Health Connect bio-markers (sleep, vitals, steps, hydration), and facial features never leave the user's Android hardware.
+3. **Local-First Privacy Guarantee:** Raw pixel images, Health Connect bio-markers (vitals, steps, hydration), and facial features never leave the user's Android hardware.
