@@ -24,3 +24,12 @@
 -dontwarn com.google.ai.client.generativeai.**
 -keep class io.ktor.** { *; }
 -keep class com.google.ai.client.generativeai.** { *; }
+
+# R8 Automatic Log Stripping for Release Builds
+# Strips all Log.v(), Log.d(), and Log.isLoggable(..., DEBUG) calls in production
+-maximumremovedandroidloglevel 3
+
+-assumenosideeffects class android.util.Log {
+    public static *** v(...);
+    public static *** d(...);
+}

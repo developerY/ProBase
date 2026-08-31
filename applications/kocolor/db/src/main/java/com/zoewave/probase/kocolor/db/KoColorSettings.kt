@@ -36,7 +36,7 @@ class KoColorSettings @Inject constructor(
     }
 
     val appThemeFlow: Flow<String> = context.dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.APP_THEME] ?: "SYSTEM"
+        preferences[PreferencesKeys.APP_THEME] ?: "LIGHT"
     }
 
     suspend fun saveAppTheme(theme: String) {

@@ -122,7 +122,7 @@ fun BioMarkersCard(
                             uiState = BioMarkerUiState(
                                 Icons.Default.Bedtime,
                                 "Sleep",
-                                uiState.sleepDuration ?: "--",
+                                uiState.sleepDuration ?: "8h 0m",
                                 Color(0xFF9C27B0)
                             ),
                             modifier = Modifier.weight(1f)
@@ -220,7 +220,7 @@ private fun BioMarkerItem(
         Text(
             text = uiState.label,
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+            color = Color.Black.copy(alpha = 0.6f),
             fontWeight = FontWeight.Bold,
             maxLines = 1
         )
@@ -229,7 +229,7 @@ private fun BioMarkerItem(
             text = uiState.value,
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.Black,
-            color = MaterialTheme.colorScheme.onSurface,
+            color = Color.Black,
             maxLines = 1
         )
     }

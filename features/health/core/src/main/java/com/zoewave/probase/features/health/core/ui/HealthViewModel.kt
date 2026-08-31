@@ -81,26 +81,18 @@ class HealthViewModel @Inject constructor(
         }
     }
 
-    // 3. Define Permissions
+    // 3. Define Permissions (Read permissions for wellness sync + Write permission for Hydration ONLY)
     val permissions = setOf(
-        HealthPermission.getWritePermission(ExerciseSessionRecord::class),
         HealthPermission.getReadPermission(ExerciseSessionRecord::class),
-        HealthPermission.getWritePermission(StepsRecord::class),
         HealthPermission.getReadPermission(StepsRecord::class),
-        HealthPermission.getWritePermission(DistanceRecord::class),
         HealthPermission.getReadPermission(DistanceRecord::class),
-        HealthPermission.getWritePermission(TotalCaloriesBurnedRecord::class),
         HealthPermission.getReadPermission(TotalCaloriesBurnedRecord::class),
-        HealthPermission.getWritePermission(HeartRateRecord::class),
         HealthPermission.getReadPermission(HeartRateRecord::class),
-        HealthPermission.getWritePermission(WeightRecord::class),
         HealthPermission.getReadPermission(WeightRecord::class),
         HealthPermission.getReadPermission(SleepSessionRecord::class),
-        HealthPermission.getWritePermission(SleepSessionRecord::class),
         HealthPermission.getReadPermission(HydrationRecord::class),
         HealthPermission.getWritePermission(HydrationRecord::class),
-        HealthPermission.getReadPermission(NutritionRecord::class),
-        HealthPermission.getWritePermission(NutritionRecord::class)
+        HealthPermission.getReadPermission(NutritionRecord::class)
     )
 
     // Note: Acceptable for specific UI toggles, though Flow is preferred for data
@@ -231,32 +223,40 @@ class HealthViewModel @Inject constructor(
             }
             try {
                 if (healthSessionManager.hasAllPermissions(permissions)) {
-                    val sessions = readSessionInputs()
-                    val sleepSessions = healthSessionManager.readSleepSessions()
+                    val sessions = try { readSessionInputs() } catch (e: Exception) { emptyList() }
+                    val sleepSessions = try { healthSessionManager.readSleepSessions() } catch (e: Exception) { emptyList() }
 
                     // Define the range
                     val end = Instant.now()
                     val start = ZonedDateTime.now().minusDays(7).truncatedTo(ChronoUnit.DAYS).toInstant()
 
                     // 1. Fetch Steps
-                    val stepsMap = healthSessionManager.readSteps(start, end)
-                        .groupBy { it.startTime.atZone(ZoneId.systemDefault()).toLocalDate().toString() }
-                        .mapValues { entry -> entry.value.sumOf { it.count } }
+                    val stepsMap = try {
+                        healthSessionManager.readSteps(start, end)
+                            .groupBy { it.startTime.atZone(ZoneId.systemDefault()).toLocalDate().toString() }
+                            .mapValues { entry -> entry.value.sumOf { it.count } }
+                    } catch (e: Exception) { emptyMap() }
 
                     // 2. Fetch Distance (Meters)
-                    val distMap = healthSessionManager.readDistance(start, end)
-                        .groupBy { it.startTime.atZone(ZoneId.systemDefault()).toLocalDate().toString() }
-                        .mapValues { entry -> entry.value.sumOf { it.distance.inMeters } }
+                    val distMap = try {
+                        healthSessionManager.readDistance(start, end)
+                            .groupBy { it.startTime.atZone(ZoneId.systemDefault()).toLocalDate().toString() }
+                            .mapValues { entry -> entry.value.sumOf { it.distance.inMeters } }
+                    } catch (e: Exception) { emptyMap() }
 
                     // 3. Fetch Calories (Kcal)
-                    val calMap = healthSessionManager.readTotalCalories(start, end)
-                        .groupBy { it.startTime.atZone(ZoneId.systemDefault()).toLocalDate().toString() }
-                        .mapValues { entry -> entry.value.sumOf { it.energy.inKilocalories } }
+                    val calMap = try {
+                        healthSessionManager.readTotalCalories(start, end)
+                            .groupBy { it.startTime.atZone(ZoneId.systemDefault()).toLocalDate().toString() }
+                            .mapValues { entry -> entry.value.sumOf { it.energy.inKilocalories } }
+                    } catch (e: Exception) { emptyMap() }
 
                     // 4. Fetch Hydration (Liters)
-                    val hydrationMap = healthSessionManager.readHydration(start, end)
-                        .groupBy { it.startTime.atZone(ZoneId.systemDefault()).toLocalDate().toString() }
-                        .mapValues { entry -> entry.value.sumOf { it.volume.inLiters } }
+                    val hydrationMap = try {
+                        healthSessionManager.readHydration(start, end)
+                            .groupBy { it.startTime.atZone(ZoneId.systemDefault()).toLocalDate().toString() }
+                            .mapValues { entry -> entry.value.sumOf { it.volume.inLiters } }
+                    } catch (e: Exception) { emptyMap() }
 
                     val bleState = bleRepository.gattConnectionState.value
                     val bleChars = bleRepository.gattCharacteristicList.value
@@ -272,7 +272,7 @@ class HealthViewModel @Inject constructor(
                         stressLevel = 5 // Placeholder
                     )
                     
-                    val latestHR = healthSessionManager.readLatestHeartRateSample()?.beatsPerMinute
+                    val latestHR = try { healthSessionManager.readLatestHeartRateSample()?.beatsPerMinute } catch (e: Exception) { null }
 
                     _uiState.value = HealthUiState.Success(
                         sessions = sessions,

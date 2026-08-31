@@ -2,13 +2,17 @@ package com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.li
 
 import android.graphics.PointF
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -37,26 +41,33 @@ fun FaceTelemetryVisualizer(
             .build()
     }
 
-    Box(modifier = modifier.fillMaxWidth().aspectRatio(4f/3f)) { 
+    val imageW = telemetry.imageWidth.toFloat()
+    val imageH = telemetry.imageHeight.toFloat()
+    val imageAspectRatio = if (imageW > 0f && imageH > 0f) imageW / imageH else 3f / 4f
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .aspectRatio(imageAspectRatio)
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color.Black),
+        contentAlignment = Alignment.Center
+    ) { 
         AsyncImage(
             model = imageRequest,
             contentDescription = "Analyzed Portrait",
             modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
+            contentScale = ContentScale.Fit
         )
         
-        Canvas(modifier = Modifier.matchParentSize()) {
-            val imageW = telemetry.imageWidth.toFloat()
-            val imageH = telemetry.imageHeight.toFloat()
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            if (imageW <= 0f || imageH <= 0f) return@Canvas
 
-            // 1. Calculate the exact scale factor used by ContentScale.Crop
-            val scale = maxOf(size.width / imageW, size.height / imageH)
-
-            // 2. Calculate the offset to center the cropped image
+            // Uniform scale factor ensuring X and Y scale identically
+            val scale = minOf(size.width / imageW, size.height / imageH)
             val offsetX = (size.width - (imageW * scale)) / 2f
             val offsetY = (size.height - (imageH * scale)) / 2f
 
-            // 3. Apply both scale and translation to the ML Kit coordinates
             fun scalePoint(p: PointF): Offset {
                 return Offset(
                     x = (p.x * scale) + offsetX,

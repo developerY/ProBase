@@ -1,6 +1,7 @@
 package com.zoewave.probase.kocolor.features.analyzer.calibration.ui
 
 import android.Manifest
+import android.util.Log
 import android.util.Size
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -9,6 +10,8 @@ import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
+import androidx.camera.core.UseCaseGroup
+import androidx.camera.core.ViewPort
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Canvas
@@ -177,6 +180,7 @@ private fun captureAndProcess(
 ) {
     imageCapture.takePicture(executor, object : ImageCapture.OnImageCapturedCallback() {
         override fun onCaptureSuccess(image: ImageProxy) {
+            Log.d("CalibrationCamera", "onCaptureSuccess: ${image.width}x${image.height}, cropRect=${image.cropRect}, rotation=${image.imageInfo.rotationDegrees}")
             val analyzer = ColorExtractionAnalyzer(
                 isEnabled = { true },
                 onResult = { vector, undertone ->
@@ -187,6 +191,7 @@ private fun captureAndProcess(
         }
 
         override fun onError(exception: ImageCaptureException) {
+            Log.e("CalibrationCamera", "Capture error: ${exception.message}", exception)
             onError(exception.message ?: "Capture failed")
         }
     })
@@ -310,14 +315,23 @@ private fun CameraPreview(
 
             try {
                 cameraProvider.unbindAll()
+                val viewPort = view.viewPort
+                val useCaseGroupBuilder = UseCaseGroup.Builder()
+                    .addUseCase(preview)
+                    .addUseCase(imageCapture)
+
+                if (viewPort != null) {
+                    useCaseGroupBuilder.setViewPort(viewPort)
+                }
+
                 cameraProvider.bindToLifecycle(
                     lifecycleOwner,
                     cameraSelector,
-                    preview,
-                    imageCapture
+                    useCaseGroupBuilder.build()
                 )
+                Log.d("CalibrationCamera", "Camera bound successfully with ViewPort: $viewPort")
             } catch (e: Exception) {
-                // Log error
+                Log.e("CalibrationCamera", "Binding failed", e)
             }
         }, ContextCompat.getMainExecutor(context))
     }

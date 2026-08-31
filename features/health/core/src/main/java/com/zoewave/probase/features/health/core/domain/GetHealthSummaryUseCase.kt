@@ -52,7 +52,8 @@ class GetHealthSummaryUseCase @Inject constructor(
         val sleepLabel = lastNight?.let { "${it.duration?.toHours()}h ${it.duration?.toMinutes()?.rem(60)}m" }
 
         val hydrationLiters = try {
-            healthSessionManager.readTotalHydration(startOfDay, now)?.inLiters ?: 0.0
+            healthSessionManager.readTotalHydration(startOfDay, now)?.inLiters
+                ?: healthSessionManager.readHydration(startOfDay, now).sumOf { it.volume.inLiters }
         } catch (e: Exception) {
             0.0
         }

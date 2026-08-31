@@ -41,67 +41,13 @@ fun LuxuryBrandLogo(
     onEvent: (Unit) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    val infiniteTransition = rememberInfiniteTransition(label = "LuxuryEffects")
-    
-    val lightX by infiniteTransition.animateFloat(
-        initialValue = -150f,
-        targetValue = 150f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 6000, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "lightX"
-    )
-
-    val shimmerTranslate by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1000f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 3000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "shimmerTranslate"
-    )
-
-    val shadowOffsetX = -(lightX / 10).dp
-    val shadowAlpha = (0.3f - (kotlin.math.abs(lightX) / 1000f)).coerceAtLeast(0.1f)
-
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
-        Box(
-            modifier = Modifier
-                .offset { IntOffset(lightX.toInt(), -20) }
-                .size(40.dp)
-                .blur(20.dp)
-                .background(Color(0xFFFFF9C4).copy(alpha = 0.4f), CircleShape)
-        )
-
         Text(
             text = "KoColor",
-            style = MaterialTheme.typography.headlineMedium.copy(
-                shadow = Shadow(
-                    color = Color.Black.copy(alpha = shadowAlpha),
-                    offset = Offset(shadowOffsetX.value, 4f),
-                    blurRadius = 8f
-                )
-            ),
+            style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Black,
             letterSpacing = (-1).sp,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.drawWithContent {
-                drawContent()
-                drawRect(
-                    brush = Brush.linearGradient(
-                        colors = listOf(
-                            Color.Transparent,
-                            Color.White.copy(alpha = 0.4f),
-                            Color.Transparent,
-                        ),
-                        start = Offset(shimmerTranslate - 200f, 0f),
-                        end = Offset(shimmerTranslate, 0f)
-                    ),
-                    blendMode = BlendMode.SrcAtop
-                )
-            }
+            color = MaterialTheme.colorScheme.onSurface
         )
     }
 }

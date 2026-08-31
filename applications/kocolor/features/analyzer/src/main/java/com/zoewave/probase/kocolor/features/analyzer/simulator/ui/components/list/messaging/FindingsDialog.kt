@@ -78,11 +78,7 @@ fun FindingsDialog(
                         FaceTelemetryVisualizer(
                             imageUri = uiState.userPortraitUri,
                             telemetry = telemetry,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(200.dp)
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(Color.Black)
+                            modifier = Modifier.fillMaxWidth()
                         )
                         Spacer(Modifier.height(8.dp))
                     }
