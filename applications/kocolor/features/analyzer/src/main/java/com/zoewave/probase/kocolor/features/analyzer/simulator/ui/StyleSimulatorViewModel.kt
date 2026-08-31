@@ -4,8 +4,10 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.graphics.Matrix
 import android.graphics.PointF
 import android.graphics.Rect
+import android.media.ExifInterface
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -79,7 +81,8 @@ data class FaceTelemetryData(
     val eyeLuminance: Float = 0f,
     val hairLuminance: Float = 0f,
     val contrastDelta: Float = 0f,
-    val undertoneScore: Float = 0f
+    val undertoneScore: Float = 0f,
+    val isFrontCamera: Boolean = false
 )
 
 data class StyleSimulatorUiState(
@@ -552,10 +555,39 @@ class StyleSimulatorViewModel @Inject constructor(
 
     private fun loadBitmapFromUri(uri: Uri): Bitmap? {
         return try {
-            context.contentResolver.openInputStream(uri)?.use { inputStream ->
-                BitmapFactory.decodeStream(inputStream)
+            var rotationDegrees = 0
+            try {
+                context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                    val exifInterface = ExifInterface(inputStream)
+                    val orientation = exifInterface.getAttributeInt(
+                        ExifInterface.TAG_ORIENTATION,
+                        ExifInterface.ORIENTATION_NORMAL
+                    )
+                    rotationDegrees = when (orientation) {
+                        ExifInterface.ORIENTATION_ROTATE_90 -> 90
+                        ExifInterface.ORIENTATION_ROTATE_180 -> 180
+                        ExifInterface.ORIENTATION_ROTATE_270 -> 270
+                        else -> 0
+                    }
+                }
+            } catch (e: Exception) {
+                Log.w("StyleSimulatorVM", "Could not read EXIF orientation: ${e.message}")
             }
-        } catch (e: Exception) { null }
+
+            val rawBitmap = context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                BitmapFactory.decodeStream(inputStream)
+            } ?: return null
+
+            if (rotationDegrees != 0) {
+                val matrix = Matrix().apply { postRotate(rotationDegrees.toFloat()) }
+                Bitmap.createBitmap(rawBitmap, 0, 0, rawBitmap.width, rawBitmap.height, matrix, true)
+            } else {
+                rawBitmap
+            }
+        } catch (e: Exception) {
+            Log.e("StyleSimulatorVM", "Error loading bitmap from $uri", e)
+            null
+        }
     }
 
     private fun saveSelectionToColorTab() {
@@ -662,6 +694,9 @@ class StyleSimulatorViewModel @Inject constructor(
                             val contrastDelta = abs(skinLuminance - hairLuminance)
                             val undertone = estimateUndertone(bitmap, cheekLandmark?.position?.x?.toInt() ?: face.boundingBox.centerX(), cheekLandmark?.position?.y?.toInt() ?: face.boundingBox.centerY())
 
+                            val isCameraCapture = uri.contains("CapturedImages") || uri.contains("camera")
+                            Log.d("StyleSimulatorVM", "Telemetry Image: ${bitmap.width}x${bitmap.height}, isCamera: $isCameraCapture, FaceBox: ${face.boundingBox}, CheekPoint: ${cheekLandmark?.position}, EyePoint: ${eyeLandmark?.position}")
+
                             _faceTelemetry.value = FaceTelemetryData(
                                 imageWidth = bitmap.width,
                                 imageHeight = bitmap.height,
@@ -673,7 +708,8 @@ class StyleSimulatorViewModel @Inject constructor(
                                 eyeLuminance = eyeLuminance,
                                 hairLuminance = hairLuminance,
                                 contrastDelta = contrastDelta,
-                                undertoneScore = undertone
+                                undertoneScore = undertone,
+                                isFrontCamera = isCameraCapture
                             )
 
                             val vector = FacialContrastVector(skinLuminance, hairLuminance, eyeLuminance, contrastDelta)
@@ -692,7 +728,6 @@ class StyleSimulatorViewModel @Inject constructor(
                                 fashionRepository.saveProfile(profile.toFashionProfile())
                                 Log.d("StyleSimulatorVM", "Profile saved to repository")
                             }
-                            bitmap.recycle()
                         } else {
                             Log.w("StyleSimulatorVM", "No faces detected in the provided image")
                             _faceAnalysisError.value = "No face detected. Please try a clearer photo."

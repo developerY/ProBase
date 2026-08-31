@@ -3,7 +3,10 @@ package com.zoewave.probase.kocolor.features.analyzer.ui
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
+import android.media.ExifInterface
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.core.data.repository.AiConfigurationSettings
@@ -223,9 +226,37 @@ class AnalyzerViewModel @Inject constructor(
 
     private fun loadBitmapFromUri(uri: Uri): Bitmap? {
         return try {
-            val inputStream = context.contentResolver.openInputStream(uri)
-            BitmapFactory.decodeStream(inputStream)
+            var rotationDegrees = 0
+            try {
+                context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                    val exifInterface = ExifInterface(inputStream)
+                    val orientation = exifInterface.getAttributeInt(
+                        ExifInterface.TAG_ORIENTATION,
+                        ExifInterface.ORIENTATION_NORMAL
+                    )
+                    rotationDegrees = when (orientation) {
+                        ExifInterface.ORIENTATION_ROTATE_90 -> 90
+                        ExifInterface.ORIENTATION_ROTATE_180 -> 180
+                        ExifInterface.ORIENTATION_ROTATE_270 -> 270
+                        else -> 0
+                    }
+                }
+            } catch (e: Exception) {
+                Log.w("AnalyzerViewModel", "Could not read EXIF orientation: ${e.message}")
+            }
+
+            val rawBitmap = context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                BitmapFactory.decodeStream(inputStream)
+            } ?: return null
+
+            if (rotationDegrees != 0) {
+                val matrix = Matrix().apply { postRotate(rotationDegrees.toFloat()) }
+                Bitmap.createBitmap(rawBitmap, 0, 0, rawBitmap.width, rawBitmap.height, matrix, true)
+            } else {
+                rawBitmap
+            }
         } catch (e: Exception) {
+            Log.e("AnalyzerViewModel", "Error loading bitmap from $uri", e)
             null
         }
     }

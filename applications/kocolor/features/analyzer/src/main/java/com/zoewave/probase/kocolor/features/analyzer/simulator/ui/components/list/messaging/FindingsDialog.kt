@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.sp
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorUiState
 import androidx.compose.ui.tooling.preview.Preview
 import com.zoewave.probase.kocolor.features.analyzer.R
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.FaceTelemetryData
 
 @Composable
 fun FindingsDialog(
@@ -53,7 +54,7 @@ fun FindingsDialog(
     if (uiState.userPortraitUri == null) return
 
     var telemetryExpanded by remember { mutableStateOf(false) }
-    var outputExpanded by remember { mutableStateOf(false) }
+    var outputExpanded by remember { mutableStateOf(true) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -73,12 +74,23 @@ fun FindingsDialog(
                     )
                 } else if (uiState.fashionProfileLabel != null) {
                     
-                    // Interactive Telemetry Visualizer
-                    uiState.faceTelemetry?.let { telemetry ->
+                    // Interactive Telemetry Visualizer (Renders portrait image whenever available)
+                    uiState.userPortraitUri?.let { portraitUri ->
+                        val telemetry = uiState.faceTelemetry ?: FaceTelemetryData(
+                            imageWidth = 720,
+                            imageHeight = 1280,
+                            cheekPoint = null,
+                            eyePoint = null,
+                            hairBoundingBox = null,
+                            faceBoundingBox = null
+                        )
                         FaceTelemetryVisualizer(
-                            imageUri = uiState.userPortraitUri,
+                            imageUri = portraitUri,
                             telemetry = telemetry,
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(220.dp)
+                                .clip(RoundedCornerShape(20.dp))
                         )
                         Spacer(Modifier.height(8.dp))
                     }
@@ -114,54 +126,65 @@ fun FindingsDialog(
                         isExpanded = outputExpanded,
                         onToggle = { outputExpanded = !outputExpanded }
                     ) {
-                        uiState.faceTelemetry?.let { telemetry ->
-                            Column(
-                                modifier = Modifier.padding(bottom = 8.dp),
-                                verticalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                // 1. Aesthetic Profile (The Meaning)
-                                Text(
-                                    text = "AESTHETIC PROFILE", 
-                                    style = MaterialTheme.typography.labelSmall, 
-                                    fontWeight = FontWeight.Bold, 
-                                    color = Color.DarkGray,
-                                    letterSpacing = 1.sp
-                                )
-                                
-                                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                                    AestheticLine("Temperature: ${getTemperatureProfile(telemetry.undertoneScore)}")
-                                    AestheticLine("Contrast: ${getContrastProfile(telemetry.contrastDelta)}")
-                                    AestheticLine("Depth: ${getDepthProfile(telemetry.hairLuminance, telemetry.eyeLuminance)}")
-                                }
+                        val telemetry = uiState.faceTelemetry ?: FaceTelemetryData(
+                            imageWidth = 720,
+                            imageHeight = 1280,
+                            cheekPoint = null,
+                            eyePoint = null,
+                            hairBoundingBox = null,
+                            faceBoundingBox = null,
+                            skinLuminance = 0.5f,
+                            eyeLuminance = 0.2f,
+                            hairLuminance = 0.2f,
+                            contrastDelta = 0.3f,
+                            undertoneScore = 0.0f
+                        )
+                        Column(
+                            modifier = Modifier.padding(bottom = 8.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            // 1. Aesthetic Profile (The Meaning)
+                            Text(
+                                text = "AESTHETIC PROFILE", 
+                                style = MaterialTheme.typography.labelSmall, 
+                                fontWeight = FontWeight.Bold, 
+                                color = Color.DarkGray,
+                                letterSpacing = 1.sp
+                            )
+                            
+                            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                AestheticLine("Temperature: ${getTemperatureProfile(telemetry.undertoneScore)}")
+                                AestheticLine("Contrast: ${getContrastProfile(telemetry.contrastDelta)}")
+                                AestheticLine("Depth: ${getDepthProfile(telemetry.hairLuminance, telemetry.eyeLuminance)}")
+                            }
 
-                                Spacer(modifier = Modifier.height(4.dp))
+                            Spacer(modifier = Modifier.height(4.dp))
 
-                                // --- THE VISUALIZATION (The "Why") ---
-                                SeasonalQuadrantMap(
-                                    season = uiState.fashionProfileLabel,
-                                    undertoneScore = telemetry.undertoneScore,
-                                    hairLuminance = telemetry.hairLuminance,
-                                    eyeLuminance = telemetry.eyeLuminance
-                                )
+                            // --- THE VISUALIZATION (The "Why") ---
+                            SeasonalQuadrantMap(
+                                season = uiState.fashionProfileLabel,
+                                undertoneScore = telemetry.undertoneScore,
+                                hairLuminance = telemetry.hairLuminance,
+                                eyeLuminance = telemetry.eyeLuminance
+                            )
 
-                                Spacer(modifier = Modifier.height(4.dp))
+                            Spacer(modifier = Modifier.height(4.dp))
 
-                                // 2. Raw Telemetry (The Math)
-                                Text(
-                                    text = "RAW TELEMETRY", 
-                                    style = MaterialTheme.typography.labelSmall, 
-                                    fontWeight = FontWeight.Bold, 
-                                    color = Color.Gray,
-                                    letterSpacing = 1.sp
-                                )
+                            // 2. Raw Telemetry (The Math)
+                            Text(
+                                text = "RAW TELEMETRY", 
+                                style = MaterialTheme.typography.labelSmall, 
+                                fontWeight = FontWeight.Bold, 
+                                color = Color.Gray,
+                                letterSpacing = 1.sp
+                            )
 
-                                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                                    TechnicalLine("Skin Luminance: ${"%.4f".format(telemetry.skinLuminance)}")
-                                    TechnicalLine("Eye Luminance: ${"%.4f".format(telemetry.eyeLuminance)}")
-                                    TechnicalLine("Hair Luminance: ${"%.4f".format(telemetry.hairLuminance)}")
-                                    TechnicalLine("Contrast Delta: ${"%.4f".format(telemetry.contrastDelta)}")
-                                    TechnicalLine("Undertone Score: ${"%.4f".format(telemetry.undertoneScore)}")
-                                }
+                            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                TechnicalLine("Skin Luminance: ${"%.4f".format(telemetry.skinLuminance)}")
+                                TechnicalLine("Eye Luminance: ${"%.4f".format(telemetry.eyeLuminance)}")
+                                TechnicalLine("Hair Luminance: ${"%.4f".format(telemetry.hairLuminance)}")
+                                TechnicalLine("Contrast Delta: ${"%.4f".format(telemetry.contrastDelta)}")
+                                TechnicalLine("Undertone Score: ${"%.4f".format(telemetry.undertoneScore)}")
                             }
                         }
                     }
