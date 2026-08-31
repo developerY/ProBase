@@ -54,7 +54,7 @@ fun FindingsDialog(
     if (uiState.userPortraitUri == null) return
 
     var telemetryExpanded by remember { mutableStateOf(false) }
-    var outputExpanded by remember { mutableStateOf(true) }
+    var outputExpanded by remember { mutableStateOf(false) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
