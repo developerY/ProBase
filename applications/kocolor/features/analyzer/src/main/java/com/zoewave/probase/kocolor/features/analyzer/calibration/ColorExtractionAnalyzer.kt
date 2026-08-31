@@ -49,23 +49,23 @@ class ColorExtractionAnalyzer(
                     Log.d("ColorExtractionAnalyzer", "Face detected: ${faces.size} faces")
                     val face = faces[0]
                     
-                    // 1. Skin (Cheek)
+                    // 1. Skin (Cheek Patch)
                     val cheekLandmark = face.getLandmark(FaceLandmark.LEFT_CHEEK) ?: face.getLandmark(FaceLandmark.RIGHT_CHEEK)
-                    val skinLuminance = cheekLandmark?.let { sampleLuminance(bitmap, it.position.x.toInt(), it.position.y.toInt()) } ?: 0.5f
+                    val skinLuminance = cheekLandmark?.let { samplePatchLuminance(bitmap, it.position.x.toInt(), it.position.y.toInt()) } ?: 0.5f
 
-                    // 2. Iris (Eye)
+                    // 2. Iris (Eye Circle)
                     val eyeLandmark = face.getLandmark(FaceLandmark.LEFT_EYE) ?: face.getLandmark(FaceLandmark.RIGHT_EYE)
-                    val eyeLuminance = eyeLandmark?.let { sampleLuminance(bitmap, it.position.x.toInt(), it.position.y.toInt()) } ?: 0.2f
+                    val eyeLuminance = eyeLandmark?.let { sampleIrisLuminance(bitmap, it.position.x.toInt(), it.position.y.toInt(), face.boundingBox.width()) } ?: 0.35f
 
                     // 3. Hair Root (Above forehead)
-                    val hairLuminance = sampleLuminance(bitmap, face.boundingBox.centerX(), (face.boundingBox.top - 20).coerceAtLeast(0))
+                    val hairLuminance = samplePatchLuminance(bitmap, face.boundingBox.centerX(), (face.boundingBox.top - 20).coerceAtLeast(0))
 
                     val contrastDelta = abs(skinLuminance - hairLuminance)
                     
                     // 4. Undertone Estimation
                     val undertone = estimateUndertone(bitmap, cheekLandmark?.position?.x?.toInt() ?: face.boundingBox.centerX(), cheekLandmark?.position?.y?.toInt() ?: face.boundingBox.centerY())
 
-                    Log.d("ColorExtractionAnalyzer", "Established -> Skin: $skinLuminance, Hair: $hairLuminance, Delta: $contrastDelta, Undertone: $undertone")
+                    Log.d("ColorExtractionAnalyzer", "Established -> Skin: $skinLuminance, Eye: $eyeLuminance, Hair: $hairLuminance, Delta: $contrastDelta, Undertone: $undertone")
 
                     onResult(
                         FacialContrastVector(
@@ -85,18 +85,81 @@ class ColorExtractionAnalyzer(
             }
     }
 
-    private fun sampleLuminance(bitmap: Bitmap, x: Int, y: Int): Float {
-        if (x < 0 || x >= bitmap.width || y < 0 || y >= bitmap.height) return 0.5f
-        val pixel = bitmap.getPixel(x, y)
-        return (0.2126f * Color.red(pixel) + 0.7152f * Color.green(pixel) + 0.0722f * Color.blue(pixel)) / 255f
+    private fun samplePatchLuminance(bitmap: Bitmap, cx: Int, cy: Int, radius: Int = 3): Float {
+        var totalLuminance = 0f
+        var count = 0
+
+        for (dx in -radius..radius) {
+            for (dy in -radius..radius) {
+                val px = cx + dx
+                val py = cy + dy
+                if (px in 0 until bitmap.width && py in 0 until bitmap.height) {
+                    val pixel = bitmap.getPixel(px, py)
+                    val lum = (0.2126f * Color.red(pixel) + 0.7152f * Color.green(pixel) + 0.0722f * Color.blue(pixel)) / 255f
+                    totalLuminance += lum
+                    count++
+                }
+            }
+        }
+        return if (count > 0) (totalLuminance / count).coerceIn(0.0f, 1.0f) else 0.5f
     }
 
-    private fun estimateUndertone(bitmap: Bitmap, x: Int, y: Int): Float {
-        if (x < 0 || x >= bitmap.width || y < 0 || y >= bitmap.height) return 0f
-        val pixel = bitmap.getPixel(x, y)
-        val r = Color.red(pixel)
-        val b = Color.blue(pixel)
-        // Warm tones have more red relative to blue
-        return ((r - b).toFloat() / 255f).coerceIn(-1.0f, 1.0f)
+    private fun sampleIrisLuminance(bitmap: Bitmap, cx: Int, cy: Int, faceWidth: Int): Float {
+        val irisOffset = (faceWidth * 0.035f).toInt().coerceAtLeast(3)
+        var totalLuminance = 0f
+        var count = 0
+
+        val offsets = listOf(
+            Pair(irisOffset, 0),
+            Pair(-irisOffset, 0),
+            Pair(0, irisOffset),
+            Pair(0, -irisOffset),
+            Pair(irisOffset, irisOffset),
+            Pair(-irisOffset, -irisOffset),
+            Pair(irisOffset, -irisOffset),
+            Pair(-irisOffset, irisOffset)
+        )
+
+        for ((dx, dy) in offsets) {
+            val px = cx + dx
+            val py = cy + dy
+            if (px in 0 until bitmap.width && py in 0 until bitmap.height) {
+                val pixel = bitmap.getPixel(px, py)
+                val lum = (0.2126f * Color.red(pixel) + 0.7152f * Color.green(pixel) + 0.0722f * Color.blue(pixel)) / 255f
+                totalLuminance += lum
+                count++
+            }
+        }
+        return if (count > 0) (totalLuminance / count).coerceIn(0.0f, 1.0f) else 0.35f
+    }
+
+    private fun estimateUndertone(bitmap: Bitmap, cx: Int, cy: Int, radius: Int = 4): Float {
+        var totalR = 0f
+        var totalG = 0f
+        var totalB = 0f
+        var count = 0
+
+        for (dx in -radius..radius) {
+            for (dy in -radius..radius) {
+                val px = cx + dx
+                val py = cy + dy
+                if (px in 0 until bitmap.width && py in 0 until bitmap.height) {
+                    val pixel = bitmap.getPixel(px, py)
+                    totalR += Color.red(pixel)
+                    totalG += Color.green(pixel)
+                    totalB += Color.blue(pixel)
+                    count++
+                }
+            }
+        }
+        if (count == 0) return 0f
+        val avgR = totalR / count
+        val avgG = totalG / count
+        val avgB = totalB / count
+
+        val rbDiff = (avgR - avgB) / 255f
+        val gbDiff = (avgG - avgB) / 255f
+        val warmMetric = (rbDiff * 0.6f + gbDiff * 0.4f) - 0.28f
+        return warmMetric.coerceIn(-1.0f, 1.0f)
     }
 }

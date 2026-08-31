@@ -77,6 +77,7 @@ fun MessagingStep(
     if (showFindings) {
         FindingsDialog(
             uiState = uiState,
+            onEvent = onEvent,
             onDismiss = { showFindings = false }
         )
     }

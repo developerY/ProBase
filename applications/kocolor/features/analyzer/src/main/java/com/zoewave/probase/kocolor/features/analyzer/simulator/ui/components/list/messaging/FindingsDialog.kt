@@ -5,8 +5,10 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -41,20 +44,49 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zoewave.probase.core.ui.util.toHex
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.SimulatorEvent
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorUiState
 import androidx.compose.ui.tooling.preview.Preview
+import com.zoewave.probase.features.graphics.colorpicker.ui.ColorPickerDialog
 import com.zoewave.probase.kocolor.features.analyzer.R
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.FaceTelemetryData
 
 @Composable
 fun FindingsDialog(
     uiState: StyleSimulatorUiState,
+    onEvent: (SimulatorEvent) -> Unit = {},
     onDismiss: () -> Unit
 ) {
     if (uiState.userPortraitUri == null) return
 
     var telemetryExpanded by remember { mutableStateOf(false) }
     var outputExpanded by remember { mutableStateOf(false) }
+    var activePickerTarget by remember { mutableStateOf<String?>(null) } // "skin", "eye", "hair"
+
+    activePickerTarget?.let { target ->
+        val telemetry = uiState.faceTelemetry
+        val currentHex = when (target) {
+            "skin" -> telemetry?.skinColorHex ?: "#E8C8B8"
+            "eye" -> telemetry?.eyeColorHex ?: "#7A8F9E"
+            else -> telemetry?.hairColorHex ?: "#D8D2C5"
+        }
+        val initialColor = try { Color(android.graphics.Color.parseColor(currentHex)) } catch (e: Exception) { Color.Gray }
+
+        ColorPickerDialog(
+            initialColor = initialColor,
+            onColorSelected = { selectedColor ->
+                val hex = selectedColor.toHex()
+                when (target) {
+                    "skin" -> onEvent(SimulatorEvent.OnManualSkinColorSelected(hex))
+                    "eye" -> onEvent(SimulatorEvent.OnManualEyeColorSelected(hex))
+                    "hair" -> onEvent(SimulatorEvent.OnManualHairColorSelected(hex))
+                }
+                activePickerTarget = null
+            },
+            onDismissRequest = { activePickerTarget = null }
+        )
+    }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -170,6 +202,26 @@ fun FindingsDialog(
 
                             Spacer(modifier = Modifier.height(4.dp))
 
+                            // ML Sampled Color Swatches
+                            Text(
+                                text = "ML SAMPLED COLORS", 
+                                style = MaterialTheme.typography.labelSmall, 
+                                fontWeight = FontWeight.Bold, 
+                                color = Color.DarkGray,
+                                letterSpacing = 1.sp
+                            )
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                ColorSwatchItem(label = "Skin / Cheek", hex = telemetry.skinColorHex)
+                                ColorSwatchItem(label = "Eye / Iris", hex = telemetry.eyeColorHex)
+                                ColorSwatchItem(label = "Hair / Root", hex = telemetry.hairColorHex)
+                            }
+
+                            Spacer(modifier = Modifier.height(4.dp))
+
                             // 2. Raw Telemetry (The Math)
                             Text(
                                 text = "RAW TELEMETRY", 
@@ -271,4 +323,21 @@ private fun AestheticLine(text: String) {
         style = MaterialTheme.typography.bodySmall, 
         color = Color.DarkGray
     )
+}
+
+@Composable
+private fun ColorSwatchItem(label: String, hex: String) {
+    val color = try { Color(android.graphics.Color.parseColor(hex)) } catch (e: Exception) { Color.Gray }
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .clip(CircleShape)
+                .background(color)
+                .border(1.dp, Color.Black.copy(alpha = 0.15f), CircleShape)
+        )
+        Spacer(Modifier.height(4.dp))
+        Text(text = label, style = MaterialTheme.typography.labelSmall, fontSize = 9.sp, color = Color.Gray)
+        Text(text = hex.uppercase(), style = MaterialTheme.typography.labelSmall, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+    }
 }
