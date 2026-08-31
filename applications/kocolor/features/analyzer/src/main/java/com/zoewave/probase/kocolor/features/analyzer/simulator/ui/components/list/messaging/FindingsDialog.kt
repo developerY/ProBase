@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.AlertDialog
@@ -39,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -202,22 +204,35 @@ fun FindingsDialog(
 
                             Spacer(modifier = Modifier.height(4.dp))
 
-                            // ML Sampled Color Swatches
-                            Text(
-                                text = "ML SAMPLED COLORS", 
-                                style = MaterialTheme.typography.labelSmall, 
-                                fontWeight = FontWeight.Bold, 
-                                color = Color.DarkGray,
-                                letterSpacing = 1.sp
-                            )
+                            // ML Sampled Color Swatches (Tap Swatch to Calibrate & Re-analyze Category)
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "SAMPLED FEATURE COLORS", 
+                                    style = MaterialTheme.typography.labelSmall, 
+                                    fontWeight = FontWeight.Bold, 
+                                    color = Color.DarkGray,
+                                    letterSpacing = 1.sp
+                                )
+                                Text(
+                                    text = "TAP TO CALIBRATE", 
+                                    style = MaterialTheme.typography.labelSmall, 
+                                    fontWeight = FontWeight.Bold, 
+                                    fontSize = 9.sp,
+                                    color = Color(0xFF7C3AED)
+                                )
+                            }
 
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                ColorSwatchItem(label = "Skin / Cheek", hex = telemetry.skinColorHex)
-                                ColorSwatchItem(label = "Eye / Iris", hex = telemetry.eyeColorHex)
-                                ColorSwatchItem(label = "Hair / Root", hex = telemetry.hairColorHex)
+                                ColorSwatchItem(label = "Skin / Cheek", hex = telemetry.skinColorHex, onClick = { activePickerTarget = "skin" })
+                                ColorSwatchItem(label = "Eye / Iris", hex = telemetry.eyeColorHex, onClick = { activePickerTarget = "eye" })
+                                ColorSwatchItem(label = "Hair / Root", hex = telemetry.hairColorHex, onClick = { activePickerTarget = "hair" })
                             }
 
                             Spacer(modifier = Modifier.height(4.dp))
@@ -326,16 +341,27 @@ private fun AestheticLine(text: String) {
 }
 
 @Composable
-private fun ColorSwatchItem(label: String, hex: String) {
+private fun ColorSwatchItem(label: String, hex: String, onClick: () -> Unit = {}) {
     val color = try { Color(android.graphics.Color.parseColor(hex)) } catch (e: Exception) { Color.Gray }
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.clickable { onClick() }
+    ) {
         Box(
             modifier = Modifier
-                .size(36.dp)
+                .size(38.dp)
                 .clip(CircleShape)
                 .background(color)
-                .border(1.dp, Color.Black.copy(alpha = 0.15f), CircleShape)
-        )
+                .border(1.5.dp, Color.Black.copy(alpha = 0.2f), CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.Edit,
+                contentDescription = null,
+                modifier = Modifier.size(16.dp),
+                tint = if (color.luminance() > 0.5f) Color.Black.copy(alpha = 0.6f) else Color.White.copy(alpha = 0.8f)
+            )
+        }
         Spacer(Modifier.height(4.dp))
         Text(text = label, style = MaterialTheme.typography.labelSmall, fontSize = 9.sp, color = Color.Gray)
         Text(text = hex.uppercase(), style = MaterialTheme.typography.labelSmall, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color.Black)
