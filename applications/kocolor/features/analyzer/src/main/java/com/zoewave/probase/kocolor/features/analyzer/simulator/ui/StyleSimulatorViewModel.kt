@@ -4,8 +4,10 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.graphics.Matrix
 import android.graphics.PointF
 import android.graphics.Rect
+import android.media.ExifInterface
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -79,7 +81,11 @@ data class FaceTelemetryData(
     val eyeLuminance: Float = 0f,
     val hairLuminance: Float = 0f,
     val contrastDelta: Float = 0f,
-    val undertoneScore: Float = 0f
+    val undertoneScore: Float = 0f,
+    val isFrontCamera: Boolean = false,
+    val skinColorHex: String = "#E8C8B8",
+    val eyeColorHex: String = "#7A8F9E",
+    val hairColorHex: String = "#D8D2C5"
 )
 
 data class StyleSimulatorUiState(
@@ -137,6 +143,9 @@ sealed class SimulatorEvent {
     data class SelectResultTab(val tab: ResultTab) : SimulatorEvent()
     data class ToggleItemLock(val itemId: String, val category: String) : SimulatorEvent()
     data class ToggleItemForce(val itemId: String, val category: String) : SimulatorEvent()
+    data class OnManualSkinColorSelected(val hex: String) : SimulatorEvent()
+    data class OnManualEyeColorSelected(val hex: String) : SimulatorEvent()
+    data class OnManualHairColorSelected(val hex: String) : SimulatorEvent()
 }
 
 sealed class SimulatorEffect {
@@ -230,7 +239,7 @@ class StyleSimulatorViewModel @Inject constructor(
 
         val recommendedClothing = allClothing.filter { item ->
             "w_${item.internalId}" in (result?.selectedClothingIds ?: emptyList())
-        }
+        }.distinctBy { it.category }
         val recommendedCosmetics = allCosmetics.filter { item ->
             "c_${item.internalId}" in (result?.selectedCosmeticIds ?: emptyList())
         }
@@ -416,7 +425,94 @@ class StyleSimulatorViewModel @Inject constructor(
             is SimulatorEvent.SelectResultTab -> {
                 _selectedResultTab.value = event.tab
             }
+            is SimulatorEvent.OnManualSkinColorSelected -> updateManualTelemetry(skinHex = event.hex)
+            is SimulatorEvent.OnManualEyeColorSelected -> updateManualTelemetry(eyeHex = event.hex)
+            is SimulatorEvent.OnManualHairColorSelected -> updateManualTelemetry(hairHex = event.hex)
         }
+    }
+
+    private fun updateManualTelemetry(
+        skinHex: String? = null,
+        eyeHex: String? = null,
+        hairHex: String? = null
+    ) {
+        val current = _faceTelemetry.value ?: FaceTelemetryData(
+            imageWidth = 720,
+            imageHeight = 1280,
+            cheekPoint = null,
+            eyePoint = null,
+            hairBoundingBox = null,
+            faceBoundingBox = null
+        )
+
+        val newSkinHex = skinHex ?: current.skinColorHex
+        val newEyeHex = eyeHex ?: current.eyeColorHex
+        val newHairHex = hairHex ?: current.hairColorHex
+
+        val skinColor = parseColorSafely(newSkinHex)
+        val eyeColor = parseColorSafely(newEyeHex)
+        val hairColor = parseColorSafely(newHairHex)
+
+        val skinLuminance = calculateLuminance(skinColor)
+        val eyeLuminance = calculateLuminance(eyeColor)
+        val hairLuminance = calculateLuminance(hairColor)
+        val contrastDelta = abs(skinLuminance - hairLuminance)
+
+        val undertone = estimateUndertoneFromColor(skinColor)
+
+        val updatedTelemetry = current.copy(
+            skinLuminance = skinLuminance,
+            eyeLuminance = eyeLuminance,
+            hairLuminance = hairLuminance,
+            contrastDelta = contrastDelta,
+            undertoneScore = undertone,
+            skinColorHex = newSkinHex,
+            eyeColorHex = newEyeHex,
+            hairColorHex = newHairHex
+        )
+
+        _faceTelemetry.value = updatedTelemetry
+
+        val vector = FacialContrastVector(skinLuminance, hairLuminance, eyeLuminance, contrastDelta)
+        val season = seasonClassifier.classify(vector, undertone)
+
+        val profile = ColorProfile(
+            season = season,
+            undertone = undertone,
+            contrastVector = vector,
+            optimalPaletteHexCodes = seasonClassifier.getOptimalPalette(season)
+        )
+
+        viewModelScope.launch {
+            fashionRepository.saveProfile(profile.toFashionProfile())
+            Log.d("StyleSimulatorVM", "Manual Override Season: $season, Undertone: $undertone")
+        }
+    }
+
+    private fun parseColorSafely(hex: String): Int {
+        return try {
+            Color.parseColor(hex)
+        } catch (e: Exception) {
+            Color.GRAY
+        }
+    }
+
+    private fun calculateLuminance(colorInt: Int): Float {
+        val r = Color.red(colorInt) / 255f
+        val g = Color.green(colorInt) / 255f
+        val b = Color.blue(colorInt) / 255f
+        return (0.2126f * r + 0.7152f * g + 0.0722f * b).coerceIn(0f, 1f)
+    }
+
+    private fun estimateUndertoneFromColor(colorInt: Int): Float {
+        val r = Color.red(colorInt) / 255f
+        val g = Color.green(colorInt) / 255f
+        val b = Color.blue(colorInt) / 255f
+
+        val rbDiff = r - b
+        val gbDiff = g - b
+        val warmMetric = (rbDiff * 0.7f + gbDiff * 0.3f) - 0.12f
+        return (warmMetric * 2.2f).coerceIn(-1.0f, 1.0f)
     }
 
     private fun runSimulationInternal() {
@@ -552,10 +648,39 @@ class StyleSimulatorViewModel @Inject constructor(
 
     private fun loadBitmapFromUri(uri: Uri): Bitmap? {
         return try {
-            context.contentResolver.openInputStream(uri)?.use { inputStream ->
-                BitmapFactory.decodeStream(inputStream)
+            var rotationDegrees = 0
+            try {
+                context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                    val exifInterface = ExifInterface(inputStream)
+                    val orientation = exifInterface.getAttributeInt(
+                        ExifInterface.TAG_ORIENTATION,
+                        ExifInterface.ORIENTATION_NORMAL
+                    )
+                    rotationDegrees = when (orientation) {
+                        ExifInterface.ORIENTATION_ROTATE_90 -> 90
+                        ExifInterface.ORIENTATION_ROTATE_180 -> 180
+                        ExifInterface.ORIENTATION_ROTATE_270 -> 270
+                        else -> 0
+                    }
+                }
+            } catch (e: Exception) {
+                Log.w("StyleSimulatorVM", "Could not read EXIF orientation: ${e.message}")
             }
-        } catch (e: Exception) { null }
+
+            val rawBitmap = context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                BitmapFactory.decodeStream(inputStream)
+            } ?: return null
+
+            if (rotationDegrees != 0) {
+                val matrix = Matrix().apply { postRotate(rotationDegrees.toFloat()) }
+                Bitmap.createBitmap(rawBitmap, 0, 0, rawBitmap.width, rawBitmap.height, matrix, true)
+            } else {
+                rawBitmap
+            }
+        } catch (e: Exception) {
+            Log.e("StyleSimulatorVM", "Error loading bitmap from $uri", e)
+            null
+        }
     }
 
     private fun saveSelectionToColorTab() {
@@ -656,11 +781,18 @@ class StyleSimulatorViewModel @Inject constructor(
                                 face.boundingBox.top
                             )
 
-                            val skinLuminance = cheekLandmark?.let { sampleLuminance(bitmap, it.position.x.toInt(), it.position.y.toInt()) } ?: 0.5f
-                            val eyeLuminance = eyeLandmark?.let { sampleLuminance(bitmap, it.position.x.toInt(), it.position.y.toInt()) } ?: 0.2f
-                            val hairLuminance = sampleLuminance(bitmap, face.boundingBox.centerX(), (face.boundingBox.top - 20).coerceAtLeast(0))
+                            val skinLuminance = cheekLandmark?.let { samplePatchLuminance(bitmap, it.position.x.toInt(), it.position.y.toInt()) } ?: 0.5f
+                            val eyeLuminance = eyeLandmark?.let { sampleIrisLuminance(bitmap, it.position.x.toInt(), it.position.y.toInt(), face.boundingBox.width()) } ?: 0.35f
+                            val hairLuminance = samplePatchLuminance(bitmap, face.boundingBox.centerX(), (face.boundingBox.top - 20).coerceAtLeast(0))
                             val contrastDelta = abs(skinLuminance - hairLuminance)
                             val undertone = estimateUndertone(bitmap, cheekLandmark?.position?.x?.toInt() ?: face.boundingBox.centerX(), cheekLandmark?.position?.y?.toInt() ?: face.boundingBox.centerY())
+
+                            val skinColorHex = cheekLandmark?.let { samplePatchColorHex(bitmap, it.position.x.toInt(), it.position.y.toInt()) } ?: "#E8C8B8"
+                            val eyeColorHex = eyeLandmark?.let { sampleIrisColorHex(bitmap, it.position.x.toInt(), it.position.y.toInt(), face.boundingBox.width()) } ?: "#7A8F9E"
+                            val hairColorHex = samplePatchColorHex(bitmap, face.boundingBox.centerX(), (face.boundingBox.top - 20).coerceAtLeast(0))
+
+                            val isCameraCapture = uri.contains("CapturedImages") || uri.contains("camera")
+                            Log.d("StyleSimulatorVM", "Telemetry Image: ${bitmap.width}x${bitmap.height}, isCamera: $isCameraCapture, FaceBox: ${face.boundingBox}, CheekPoint: ${cheekLandmark?.position}, EyePoint: ${eyeLandmark?.position}")
 
                             _faceTelemetry.value = FaceTelemetryData(
                                 imageWidth = bitmap.width,
@@ -673,7 +805,11 @@ class StyleSimulatorViewModel @Inject constructor(
                                 eyeLuminance = eyeLuminance,
                                 hairLuminance = hairLuminance,
                                 contrastDelta = contrastDelta,
-                                undertoneScore = undertone
+                                undertoneScore = undertone,
+                                isFrontCamera = isCameraCapture,
+                                skinColorHex = skinColorHex,
+                                eyeColorHex = eyeColorHex,
+                                hairColorHex = hairColorHex
                             )
 
                             val vector = FacialContrastVector(skinLuminance, hairLuminance, eyeLuminance, contrastDelta)
@@ -692,7 +828,6 @@ class StyleSimulatorViewModel @Inject constructor(
                                 fashionRepository.saveProfile(profile.toFashionProfile())
                                 Log.d("StyleSimulatorVM", "Profile saved to repository")
                             }
-                            bitmap.recycle()
                         } else {
                             Log.w("StyleSimulatorVM", "No faces detected in the provided image")
                             _faceAnalysisError.value = "No face detected. Please try a clearer photo."
@@ -712,18 +847,144 @@ class StyleSimulatorViewModel @Inject constructor(
         }
     }
 
-    private fun sampleLuminance(bitmap: Bitmap, x: Int, y: Int): Float {
-        if (x < 0 || x >= bitmap.width || y < 0 || y >= bitmap.height) return 0.5f
-        val pixel = bitmap.getPixel(x, y)
-        return (0.2126f * Color.red(pixel) + 0.7152f * Color.green(pixel) + 0.0722f * Color.blue(pixel)) / 255f
+    private fun samplePatchLuminance(bitmap: Bitmap, cx: Int, cy: Int, radius: Int = 3): Float {
+        var totalLuminance = 0f
+        var count = 0
+
+        for (dx in -radius..radius) {
+            for (dy in -radius..radius) {
+                val px = cx + dx
+                val py = cy + dy
+                if (px in 0 until bitmap.width && py in 0 until bitmap.height) {
+                    val pixel = bitmap.getPixel(px, py)
+                    val lum = (0.2126f * Color.red(pixel) + 0.7152f * Color.green(pixel) + 0.0722f * Color.blue(pixel)) / 255f
+                    totalLuminance += lum
+                    count++
+                }
+            }
+        }
+        return if (count > 0) (totalLuminance / count).coerceIn(0.0f, 1.0f) else 0.5f
     }
 
-    private fun estimateUndertone(bitmap: Bitmap, x: Int, y: Int): Float {
-        if (x < 0 || x >= bitmap.width || y < 0 || y >= bitmap.height) return 0f
-        val pixel = bitmap.getPixel(x, y)
-        val r = Color.red(pixel)
-        val b = Color.blue(pixel)
-        return ((r - b).toFloat() / 255f).coerceIn(-1.0f, 1.0f)
+    private fun sampleIrisLuminance(bitmap: Bitmap, cx: Int, cy: Int, faceWidth: Int): Float {
+        val irisOffset = (faceWidth * 0.035f).toInt().coerceAtLeast(3)
+        var totalLuminance = 0f
+        var count = 0
+
+        val offsets = listOf(
+            Pair(irisOffset, 0),
+            Pair(-irisOffset, 0),
+            Pair(0, irisOffset),
+            Pair(0, -irisOffset),
+            Pair(irisOffset, irisOffset),
+            Pair(-irisOffset, -irisOffset),
+            Pair(irisOffset, -irisOffset),
+            Pair(-irisOffset, irisOffset)
+        )
+
+        for ((dx, dy) in offsets) {
+            val px = cx + dx
+            val py = cy + dy
+            if (px in 0 until bitmap.width && py in 0 until bitmap.height) {
+                val pixel = bitmap.getPixel(px, py)
+                val lum = (0.2126f * Color.red(pixel) + 0.7152f * Color.green(pixel) + 0.0722f * Color.blue(pixel)) / 255f
+                totalLuminance += lum
+                count++
+            }
+        }
+        return if (count > 0) (totalLuminance / count).coerceIn(0.0f, 1.0f) else 0.35f
+    }
+
+    private fun estimateUndertone(bitmap: Bitmap, cx: Int, cy: Int, radius: Int = 4): Float {
+        var totalR = 0f
+        var totalG = 0f
+        var totalB = 0f
+        var count = 0
+
+        for (dx in -radius..radius) {
+            for (dy in -radius..radius) {
+                val px = cx + dx
+                val py = cy + dy
+                if (px in 0 until bitmap.width && py in 0 until bitmap.height) {
+                    val pixel = bitmap.getPixel(px, py)
+                    totalR += Color.red(pixel)
+                    totalG += Color.green(pixel)
+                    totalB += Color.blue(pixel)
+                    count++
+                }
+            }
+        }
+        if (count == 0) return 0f
+        val avgR = totalR / count
+        val avgG = totalG / count
+        val avgB = totalB / count
+
+        val rbDiff = (avgR - avgB) / 255f
+        val gbDiff = (avgG - avgB) / 255f
+        val warmMetric = (rbDiff * 0.7f + gbDiff * 0.3f) - 0.12f
+        return (warmMetric * 2.2f).coerceIn(-1.0f, 1.0f)
+    }
+
+    private fun samplePatchColorHex(bitmap: Bitmap, cx: Int, cy: Int, radius: Int = 3): String {
+        var totalR = 0
+        var totalG = 0
+        var totalB = 0
+        var count = 0
+
+        for (dx in -radius..radius) {
+            for (dy in -radius..radius) {
+                val px = cx + dx
+                val py = cy + dy
+                if (px in 0 until bitmap.width && py in 0 until bitmap.height) {
+                    val pixel = bitmap.getPixel(px, py)
+                    totalR += Color.red(pixel)
+                    totalG += Color.green(pixel)
+                    totalB += Color.blue(pixel)
+                    count++
+                }
+            }
+        }
+        if (count == 0) return "#E8C8B8"
+        val avgR = (totalR / count).coerceIn(0, 255)
+        val avgG = (totalG / count).coerceIn(0, 255)
+        val avgB = (totalB / count).coerceIn(0, 255)
+        return String.format("#%02X%02X%02X", avgR, avgG, avgB)
+    }
+
+    private fun sampleIrisColorHex(bitmap: Bitmap, cx: Int, cy: Int, faceWidth: Int): String {
+        val irisOffset = (faceWidth * 0.035f).toInt().coerceAtLeast(3)
+        var totalR = 0
+        var totalG = 0
+        var totalB = 0
+        var count = 0
+
+        val offsets = listOf(
+            Pair(irisOffset, 0),
+            Pair(-irisOffset, 0),
+            Pair(0, irisOffset),
+            Pair(0, -irisOffset),
+            Pair(irisOffset, irisOffset),
+            Pair(-irisOffset, -irisOffset),
+            Pair(irisOffset, -irisOffset),
+            Pair(-irisOffset, irisOffset)
+        )
+
+        for ((dx, dy) in offsets) {
+            val px = cx + dx
+            val py = cy + dy
+            if (px in 0 until bitmap.width && py in 0 until bitmap.height) {
+                val pixel = bitmap.getPixel(px, py)
+                totalR += Color.red(pixel)
+                totalG += Color.green(pixel)
+                totalB += Color.blue(pixel)
+                count++
+            }
+        }
+        if (count == 0) return "#7A8F9E"
+        val avgR = (totalR / count).coerceIn(0, 255)
+        val avgG = (totalG / count).coerceIn(0, 255)
+        val avgB = (totalB / count).coerceIn(0, 255)
+        return String.format("#%02X%02X%02X", avgR, avgG, avgB)
     }
 
     private fun getDimensionalExplanation(telemetry: FaceTelemetryData): String {

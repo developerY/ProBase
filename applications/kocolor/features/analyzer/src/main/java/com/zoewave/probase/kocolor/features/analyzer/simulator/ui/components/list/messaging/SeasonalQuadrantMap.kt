@@ -28,16 +28,12 @@ import com.zoewave.probase.kocolor.features.analyzer.R
 
 @Composable
 fun SeasonalQuadrantMap(
-    season: String, // Source of truth for clamping
+    season: String, // Source of truth for season label
     undertoneScore: Float, // X-Axis: Cool (-1.0) to Warm (1.0)
     hairLuminance: Float, 
     eyeLuminance: Float,   
     modifier: Modifier = Modifier
 ) {
-    // 1. Determine the target quadrant based on the source of truth (the Classifier)
-    val isWarm = season.contains("SPRING", ignoreCase = true) || season.contains("AUTUMN", ignoreCase = true)
-    val isLight = season.contains("SPRING", ignoreCase = true) || season.contains("SUMMER", ignoreCase = true)
-
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -114,16 +110,12 @@ fun SeasonalQuadrantMap(
                 strokeWidth = 2.dp.toPx()
             )
 
-            // --- PLOT INDICATOR ---
-            val rawX = ((undertoneScore + 1f) / 2f).coerceIn(0f, 1f)
-            val rawY = ((hairLuminance + eyeLuminance) / 2f).coerceIn(0f, 1f)
+            // --- PLOT INDICATOR (Continuous Real-Time Coordinate Mapping) ---
+            val normX = ((undertoneScore + 1f) / 2f).coerceIn(0.05f, 0.95f)
+            val normY = ((hairLuminance * 0.5f + eyeLuminance * 0.5f)).coerceIn(0.05f, 0.95f)
 
-            // Clamp coordinates to correct quadrant
-            val clampedX = if (isWarm) rawX.coerceIn(0.55f, 0.95f) else rawX.coerceIn(0.05f, 0.45f)
-            val clampedY = if (isLight) rawY.coerceIn(0.55f, 0.95f) else rawY.coerceIn(0.05f, 0.45f)
-
-            val plotX = clampedX * canvasW
-            val plotY = (1f - clampedY) * canvasH 
+            val plotX = normX * canvasW
+            val plotY = (1f - normY) * canvasH 
             val userPoint = Offset(plotX, plotY)
 
             // High Contrast Indicator

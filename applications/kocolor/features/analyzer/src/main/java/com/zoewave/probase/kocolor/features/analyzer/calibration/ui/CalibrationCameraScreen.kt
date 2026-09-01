@@ -2,7 +2,9 @@ package com.zoewave.probase.kocolor.features.analyzer.calibration.ui
 
 import android.Manifest
 import android.util.Log
+import android.util.Rational
 import android.util.Size
+import android.view.Surface
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
@@ -304,36 +306,44 @@ private fun CameraPreview(
         factory = { previewView },
         modifier = Modifier.fillMaxSize()
     ) { view ->
-        val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
-        cameraProviderFuture.addListener({
-            val cameraProvider = cameraProviderFuture.get()
-            val preview = Preview.Builder().build().also {
-                it.setSurfaceProvider(view.surfaceProvider)
-            }
+        view.post {
+            if (view.width <= 0 || view.height <= 0) return@post
 
-            val cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
-
-            try {
-                cameraProvider.unbindAll()
-                val viewPort = view.viewPort
-                val useCaseGroupBuilder = UseCaseGroup.Builder()
-                    .addUseCase(preview)
-                    .addUseCase(imageCapture)
-
-                if (viewPort != null) {
-                    useCaseGroupBuilder.setViewPort(viewPort)
+            val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
+            cameraProviderFuture.addListener({
+                val cameraProvider = cameraProviderFuture.get()
+                val preview = Preview.Builder().build().also {
+                    it.setSurfaceProvider(view.surfaceProvider)
                 }
 
-                cameraProvider.bindToLifecycle(
-                    lifecycleOwner,
-                    cameraSelector,
-                    useCaseGroupBuilder.build()
-                )
-                Log.d("CalibrationCamera", "Camera bound successfully with ViewPort: $viewPort")
-            } catch (e: Exception) {
-                Log.e("CalibrationCamera", "Binding failed", e)
-            }
-        }, ContextCompat.getMainExecutor(context))
+                val cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
+
+                val display = view.display
+                val rotation = display?.rotation ?: Surface.ROTATION_0
+                val viewPort = ViewPort.Builder(
+                    Rational(view.width, view.height),
+                    rotation
+                ).setScaleType(ViewPort.FILL_CENTER).build()
+
+                val useCaseGroup = UseCaseGroup.Builder()
+                    .addUseCase(preview)
+                    .addUseCase(imageCapture)
+                    .setViewPort(viewPort)
+                    .build()
+
+                try {
+                    cameraProvider.unbindAll()
+                    cameraProvider.bindToLifecycle(
+                        lifecycleOwner,
+                        cameraSelector,
+                        useCaseGroup
+                    )
+                    Log.d("CalibrationCamera", "Camera bound with ViewPort: ${view.width}x${view.height}, rotation=$rotation")
+                } catch (e: Exception) {
+                    Log.e("CalibrationCamera", "Binding failed", e)
+                }
+            }, ContextCompat.getMainExecutor(context))
+        }
     }
 }
 

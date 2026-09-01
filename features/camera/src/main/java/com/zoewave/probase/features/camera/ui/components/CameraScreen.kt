@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Environment
 import android.provider.Settings
 import android.util.Log
+import android.util.Rational
 import android.view.OrientationEventListener
 import android.view.Surface
 import androidx.camera.compose.CameraXViewfinder
@@ -13,6 +14,8 @@ import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
 import androidx.camera.core.SurfaceRequest
+import androidx.camera.core.UseCaseGroup
+import androidx.camera.core.ViewPort
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.lifecycle.awaitInstance
 import androidx.compose.foundation.Canvas
@@ -134,11 +137,22 @@ fun CameraScreen(
 
             try {
                 cameraProvider.unbindAll()
+
+                val viewPort = ViewPort.Builder(
+                    Rational(9, 16),
+                    Surface.ROTATION_0
+                ).setScaleType(ViewPort.FILL_CENTER).build()
+
+                val useCaseGroup = UseCaseGroup.Builder()
+                    .addUseCase(previewUseCase)
+                    .addUseCase(imageCaptureUseCase)
+                    .setViewPort(viewPort)
+                    .build()
+
                 cameraProvider.bindToLifecycle(
                     lifecycleOwner,
                     uiState.cameraSelector,
-                    previewUseCase,
-                    imageCaptureUseCase
+                    useCaseGroup
                 )
             } catch (e: Exception) {
                 Log.e("CameraScreen", "Binding failed", e)

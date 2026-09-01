@@ -1,6 +1,9 @@
 package com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.list.messaging
 
 import android.graphics.PointF
+import android.graphics.Rect
+import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -35,8 +38,13 @@ fun FaceTelemetryVisualizer(
 ) {
     val context = LocalContext.current
     val imageRequest = remember(imageUri) {
+        val model = if (!imageUri.isNullOrEmpty() && imageUri.startsWith("file://")) {
+            Uri.parse(imageUri)
+        } else {
+            imageUri
+        }
         ImageRequest.Builder(context)
-            .data(imageUri)
+            .data(model)
             .crossfade(true)
             .build()
     }
@@ -61,65 +69,103 @@ fun FaceTelemetryVisualizer(
         )
         
         Canvas(modifier = Modifier.fillMaxSize()) {
-            if (imageW <= 0f || imageH <= 0f) return@Canvas
+            val imgW = if (imageW > 0f) imageW else size.width
+            val imgH = if (imageH > 0f) imageH else size.height
 
-            // Uniform scale factor ensuring X and Y scale identically
-            val scale = minOf(size.width / imageW, size.height / imageH)
-            val offsetX = (size.width - (imageW * scale)) / 2f
-            val offsetY = (size.height - (imageH * scale)) / 2f
+            val scale = minOf(size.width / imgW, size.height / imgH)
+            val offsetX = (size.width - (imgW * scale)) / 2f
+            val offsetY = (size.height - (imgH * scale)) / 2f
 
-            fun scalePoint(p: PointF): Offset {
-                return Offset(
-                    x = (p.x * scale) + offsetX,
-                    y = (p.y * scale) + offsetY
-                )
-            }
+            fun mapX(x: Float): Float = (x * scale) + offsetX
+            fun mapY(y: Float): Float = (y * scale) + offsetY
+            fun scalePoint(p: PointF): Offset = Offset(mapX(p.x), mapY(p.y))
 
-            // Hair Bounding Box
-            telemetry.hairBoundingBox?.let { rect ->
-                drawRect(
-                    color = Color.Yellow.copy(alpha = 0.6f),
-                    topLeft = Offset((rect.left * scale) + offsetX, (rect.top * scale) + offsetY),
-                    size = Size(rect.width() * scale, rect.height() * scale),
-                    style = Stroke(width = 4f, pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f))
-                )
-            }
+            val faceBox = telemetry.faceBoundingBox ?: Rect(
+                (imgW * 0.20f).toInt(),
+                (imgH * 0.22f).toInt(),
+                (imgW * 0.80f).toInt(),
+                (imgH * 0.72f).toInt()
+            )
 
-            // Face Bounding Box
-            telemetry.faceBoundingBox?.let { rect ->
-                drawRoundRect(
-                    color = Color.Cyan.copy(alpha = 0.4f),
-                    topLeft = Offset((rect.left * scale) + offsetX, (rect.top * scale) + offsetY),
-                    size = Size(rect.width() * scale, rect.height() * scale),
-                    cornerRadius = CornerRadius(12.dp.toPx()),
-                    style = Stroke(width = 2f, pathEffect = PathEffect.dashPathEffect(floatArrayOf(5f, 5f), 0f))
-                )
-            }
+            val hairBox = telemetry.hairBoundingBox ?: Rect(
+                (imgW * 0.20f).toInt(),
+                (imgH * 0.12f).toInt(),
+                (imgW * 0.80f).toInt(),
+                (imgH * 0.22f).toInt()
+            )
 
-            // Cheek Node
-            telemetry.cheekPoint?.let { point ->
-                drawCircle(
-                    color = Color.Cyan,
-                    radius = 12f,
-                    center = scalePoint(point),
-                    style = Stroke(width = 6f)
-                )
-                drawCircle(
-                    color = Color.Cyan.copy(alpha = 0.3f),
-                    radius = 24f,
-                    center = scalePoint(point)
-                )
-            }
+            val cheekPoint = telemetry.cheekPoint ?: PointF(
+                faceBox.centerX() - faceBox.width() * 0.18f,
+                faceBox.centerY() + faceBox.height() * 0.08f
+            )
 
-            // Eye Node
-            telemetry.eyePoint?.let { point ->
-                drawCircle(
-                    color = Color.Magenta,
-                    radius = 12f,
-                    center = scalePoint(point),
-                    style = Stroke(width = 6f)
-                )
-            }
+            val eyePoint = telemetry.eyePoint ?: PointF(
+                faceBox.centerX() - faceBox.width() * 0.18f,
+                faceBox.centerY() - faceBox.height() * 0.12f
+            )
+
+            val rightCheekPoint = PointF(
+                faceBox.centerX() + faceBox.width() * 0.18f,
+                faceBox.centerY() + faceBox.height() * 0.08f
+            )
+
+            Log.d("FaceTelemetryVisualizer", "Drawing Visualizer: imgW=$imgW, imgH=$imgH, canvasSize=${size.width}x${size.height}, faceBox=$faceBox, cheek=$cheekPoint, eye=$eyePoint")
+
+            // 1. Hair Bounding Box (Yellow Dashed)
+            drawRect(
+                color = Color.Yellow.copy(alpha = 0.85f),
+                topLeft = Offset(mapX(hairBox.left.toFloat()), mapY(hairBox.top.toFloat())),
+                size = Size(hairBox.width() * scale, hairBox.height() * scale),
+                style = Stroke(width = 4f, pathEffect = PathEffect.dashPathEffect(floatArrayOf(12f, 8f), 0f))
+            )
+
+            // 2. Face Bounding Box (Cyan Dashed)
+            drawRoundRect(
+                color = Color.Cyan.copy(alpha = 0.75f),
+                topLeft = Offset(mapX(faceBox.left.toFloat()), mapY(faceBox.top.toFloat())),
+                size = Size(faceBox.width() * scale, faceBox.height() * scale),
+                cornerRadius = CornerRadius(16.dp.toPx()),
+                style = Stroke(width = 3f, pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 6f), 0f))
+            )
+
+            // 3. Left Cheek Node (Cyan Target Circle)
+            drawCircle(
+                color = Color.Cyan,
+                radius = 14f,
+                center = scalePoint(cheekPoint),
+                style = Stroke(width = 6f)
+            )
+            drawCircle(
+                color = Color.Cyan.copy(alpha = 0.35f),
+                radius = 28f,
+                center = scalePoint(cheekPoint)
+            )
+
+            // 4. Right Cheek Node (Dodger Blue Target Circle)
+            drawCircle(
+                color = Color(0xFF1E88E5),
+                radius = 14f,
+                center = scalePoint(rightCheekPoint),
+                style = Stroke(width = 6f)
+            )
+            drawCircle(
+                color = Color(0xFF1E88E5).copy(alpha = 0.35f),
+                radius = 28f,
+                center = scalePoint(rightCheekPoint)
+            )
+
+            // 5. Eye Node (Magenta Target Circle)
+            drawCircle(
+                color = Color.Magenta,
+                radius = 14f,
+                center = scalePoint(eyePoint),
+                style = Stroke(width = 6f)
+            )
+            drawCircle(
+                color = Color.Magenta.copy(alpha = 0.35f),
+                radius = 28f,
+                center = scalePoint(eyePoint)
+            )
         }
     }
 }

@@ -48,11 +48,13 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.FaceTelemetryData
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.SimulatorEvent
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorUiState
 
@@ -97,9 +99,9 @@ fun UserPortraitSlot(
                         color = Color.Gray
                     )
                     Text(
-                        text = uiState.fashionProfileLabel?.uppercase() ?: "ANALYZING",
+                        text = if (uiState.userPortraitUri != null) (uiState.fashionProfileLabel?.uppercase() ?: "ANALYZING") else "NOT ESTABLISHED",
                         style = MaterialTheme.typography.bodyLarge.copy(fontSize = 12.sp, fontWeight = FontWeight.ExtraBold),
-                        color = Color.Black
+                        color = if (uiState.userPortraitUri != null) Color.Black else Color.Gray
                     )
                 }
                 
@@ -173,7 +175,7 @@ fun UserPortraitSlot(
             )
 
             Card(
-                onClick = { if (uiState.faceTelemetry != null) plotExpanded = !plotExpanded },
+                onClick = { plotExpanded = !plotExpanded },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp)
@@ -212,11 +214,24 @@ fun UserPortraitSlot(
             }
 
             AnimatedVisibility(
-                visible = plotExpanded && uiState.faceTelemetry != null,
+                visible = plotExpanded,
                 enter = expandVertically(),
                 exit = shrinkVertically()
             ) {
-                uiState.faceTelemetry?.let { telemetry ->
+                if (uiState.userPortraitUri != null) {
+                    val telemetry = uiState.faceTelemetry ?: FaceTelemetryData(
+                        imageWidth = 720,
+                        imageHeight = 1280,
+                        cheekPoint = null,
+                        eyePoint = null,
+                        hairBoundingBox = null,
+                        faceBoundingBox = null,
+                        skinLuminance = 0.5f,
+                        eyeLuminance = 0.2f,
+                        hairLuminance = 0.2f,
+                        contrastDelta = 0.3f,
+                        undertoneScore = 0.0f
+                    )
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -231,6 +246,23 @@ fun UserPortraitSlot(
                             hairLuminance = telemetry.hairLuminance,
                             eyeLuminance = telemetry.eyeLuminance,
                             modifier = Modifier.height(240.dp)
+                        )
+                    }
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 16.dp, start = 24.dp, end = 24.dp)
+                            .background(Color(0xFFF9F9F9), RoundedCornerShape(12.dp))
+                            .border(1.dp, Color.Black.copy(alpha = 0.05f), RoundedCornerShape(12.dp))
+                            .padding(20.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Capture or select a portrait photo above to scan your facial color DNA and establish your seasonal quadrant mapping.",
+                            style = MaterialTheme.typography.bodySmall,
+                            textAlign = TextAlign.Center,
+                            color = Color.Gray
                         )
                     }
                 }
