@@ -60,6 +60,7 @@ To ensure total isolation and ease of code review, the boundaries of the FASHION
 * Repository or Database layers
 * `WardrobeItem` or application-specific product entities
 * User profiles or seasonal identity state
+* Wearer data (FASHIONISTA MUST NOT require wearer data to produce an ensemble score)
 * Weather or atmospheric conditions
 * Occasion or calendar context
 * User intent or preference history
@@ -96,6 +97,19 @@ data class FashionistaObservation(
 )
 
 /**
+ * Defines the parameters and mathematical weights used for scoring.
+ */
+data class FashionistaCalibration(
+    val standardId: String,
+    val version: String,
+    val featureWeights: Map<String, Float>,
+    val interactionWeights: Map<String, Float>,
+    val penalties: Map<String, Float>,
+    val normalizationParameters: Map<String, Float>,
+    val calibrationParameters: Map<String, Float>
+)
+
+/**
  * Immutable evaluation snapshot emitted by the offline engine.
  * 
  * Invariants:
@@ -129,7 +143,7 @@ FASHIONISTA operates under strict mathematical predictability:
 
 $$\text{FashionistaObservation} + \text{FashionistaCalibration} \longrightarrow \text{FashionistaResult}$$
 
-Given an identical `FashionistaObservation` and identical `FashionistaCalibration`, FASHIONISTA produces the exact same deterministic result across all platforms. The engine enforces:
+Given an identical `FashionistaObservation` and identical `FashionistaCalibration`, FASHIONISTA produces a deterministic result independent of network availability, application state, or observation provenance. Cross-platform implementations must use the same defined numerical algorithms and tolerances, adhering to **Logical Determinism** (same observation + calibration $\rightarrow$ same score within defined tolerance). The engine enforces:
 
 * Fixed iteration order for all collection processing.
 * No unordered parallel reductions.
@@ -190,9 +204,9 @@ private fun updateManualTelemetry(newTelemetry: FaceTelemetryData) {
 
 ## 8. Verification Checklist
 
-* [x] **Dependency Firewall Enforced**: FASHIONISTA has zero dependencies on `fashionRepository`, `WardrobeItem`, UI state, or database models.
+* [x] **Dependency Firewall Enforced**: FASHIONISTA has zero dependencies on `fashionRepository`, `WardrobeItem`, UI state, or database models, and never mandates wearer data.
 * [x] **Zero Network Requests on Telemetry Edits**: Tapping skin/eye/hair swatches does not trigger Firebase/Gemini API calls.
 * [x] **Immutable Observation Contracts**: `FashionistaObservation` uses `ImmutableList` with zero entity/database ID dependencies.
-* [x] **Strict Determinism Invariant**: $\text{Observation} + \text{Calibration} \rightarrow \text{Result}$ with zero random seeds, timestamps, or unordered reductions.
+* [x] **Strict Determinism Invariant**: $\text{Observation} + \text{Calibration} \rightarrow \text{Result}$ enforcing logical determinism with zero random seeds, timestamps, or unordered reductions.
 * [x] **Score vs. Coverage Disambiguation**: Missing wearer telemetry reduces `coverage`, not the intrinsic `aestheticScore`.
 * [x] **Arbitrary Ensemble Support**: FASHIONISTA evaluates any observed ensemble (flat-lay, 2-piece, 3-piece, or full-body worn photo) regardless of provenance.
