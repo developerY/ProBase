@@ -1,13 +1,13 @@
-# FASHIONISTA Engine vs. KoColor Recommendation Pipeline Architecture
+These final refinements lock the FASHIONISTA architecture into a mathematically rigorous, side-effect-free standard. The canonical specification below is ready for immediate implementation.
+
+## FASHIONISTA Engine vs. KoColor Recommendation Pipeline Architecture
 
 This document defines the strict architectural boundary between **FASHIONISTA** (the standalone, 100% offline, zero-network deterministic aesthetic evaluation engine) and the **KoColor Recommendation Engine** (the AI-assisted style architect for daily outfit synthesis).
 
----
-
-## 1. Architectural Separation
+### 1. Architectural Separation
 
 | Dimension | KoColor Recommendation Engine | FASHIONISTA Scoring Engine |
-| :--- | :--- | :--- |
+| --- | --- | --- |
 | **Primary Question** | *"What should I wear?"* | *"How good is this?"* |
 | **Input** | Context Stream (Weather, Occasion, Wardrobe, User Intent) | `FashionistaObservation` (Pure visual properties) |
 | **Network & AI** | Optional LLM (Firebase Vertex AI / Gemini / Local AI) | **ZERO Network, ZERO LLM, 100% Offline Deterministic Computation** |
@@ -15,9 +15,7 @@ This document defines the strict architectural boundary between **FASHIONISTA** 
 | **Output** | Selected Outfit + Editorial AI Rationale | `FashionistaResult` (`aestheticScore`, `coverage`, 6-Axis Radar) |
 | **Provenance** | Internal Wardrobe Inventory Only | **Provenance Agnostic** (Accepts arbitrary observed ensembles) |
 
----
-
-## 2. Hard Boundary Flow
+### 2. Hard Boundary Flow
 
 ```text
                          KoColor
@@ -43,6 +41,7 @@ This document defines the strict architectural boundary between **FASHIONISTA** 
                                      ├─ Coverage
                                      ├─ 6-Axis Radar
                                      └─ Calibration Version
+
 ```
 
 **Critical Dependency Rule:**
@@ -52,9 +51,7 @@ This document defines the strict architectural boundary between **FASHIONISTA** 
 
 *(Both engines may consume shared deterministic extraction libraries, but neither engine depends on the other).*
 
----
-
-## 3. Engine Return Contract & Data Types
+### 3. Engine Return Contract & Data Types
 
 FASHIONISTA requires no knowledge of the application's underlying repository. It strictly forbids database IDs, `WardrobeItem` entity references, or application state within its input. It receives a pure visual observation and must **never mutate** the observation it receives.
 
@@ -97,15 +94,14 @@ data class RadarMetrics(
     val visualHierarchy: Float,
     val wearerIntegration: Float
 )
+
 ```
 
----
-
-## 4. The Determinism Contract
+### 4. The Determinism Contract
 
 FASHIONISTA operates under strict mathematical predictability.
 
-$$\text{FashionistaObservation} + \text{FashionistaCalibration} = \text{FashionistaResult}$$
+`FashionistaObservation` + `FashionistaCalibration` = **`FashionistaResult`**
 
 Given an identical observation and identical calibration version, FASHIONISTA produces the exact same deterministic result. To guarantee this across device architectures, the implementation strictly enforces:
 
@@ -116,9 +112,7 @@ Given an identical observation and identical calibration version, FASHIONISTA pr
 * Deterministic tie handling.
 * Zero random seeds, random sampling, timestamps, or device-specific environmental inputs.
 
----
-
-## 5. Score vs. Coverage Semantics
+### 5. Score vs. Coverage Semantics
 
 Missing physical data does not artificially degrade an outfit's aesthetic score.
 
@@ -130,9 +124,7 @@ If a flat-lay photograph is evaluated (no face detected), the wearer evidence is
 * **High Score + Low Coverage:** *"Looks excellent based on limited evidence."*
 * **High Score + High Coverage:** *"Looks excellent based on comprehensive evidence."*
 
----
-
-## 6. UI & State Flow Decoupling
+### 6. UI & State Flow Decoupling
 
 FASHIONISTA does not own or modify user personal color profiles, seasonal palettes, or profile persistence. When the user manually edits telemetry (Skin/Eye/Hair) in the Jetpack Compose UI, the ViewModel routes state to the respective systems completely independently:
 
@@ -159,18 +151,8 @@ private fun updateManualTelemetry(newTelemetry: FaceTelemetryData) {
     
     _fashionistaMetrics.value = fashionistaEngine.evaluate(
         observation = currentObservation,
-        calibration = activeCalibrationStandard // e.g., "FASHIONISTA Standard v1.1"
+        calibration = activeCalibrationStandard // e.g., v1.1
     )
 }
+
 ```
-
----
-
-## 7. Verification Checklist
-
-- [x] **Zero Network Requests on Telemetry Edits**: Tapping skin/eye/hair swatches does not trigger Firebase/Gemini API calls.
-- [x] **Immutable Observation Contracts**: `FashionistaObservation` uses `ImmutableList` with zero entity/database ID dependencies.
-- [x] **The Determinism Invariant**: Fixed iteration order, zero random seeds or timestamps, producing identical output for identical observation + calibration.
-- [x] **Personal Color Engine Decoupled**: FASHIONISTA does not depend on `fashionRepository`, `seasonClassifier`, or seasonal profile persistence.
-- [x] **Score vs. Coverage Disambiguation**: Flat-lay or missing face data reduces `coverage`, not the intrinsic `aestheticScore`.
-- [x] **Arbitrary Ensemble Support**: FASHIONISTA evaluates any observed ensemble (flat-lay, 2-piece, 3-piece, or full-body worn photo) from any provenance.
