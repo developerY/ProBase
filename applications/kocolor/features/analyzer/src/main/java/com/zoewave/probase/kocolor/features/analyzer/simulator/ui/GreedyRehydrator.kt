@@ -33,16 +33,16 @@ class GreedyRehydrator @Inject constructor(
         telemetry: ColorTelemetry = ColorTelemetry(),
         isComplete: Boolean = false
     ): VisualBlueprintData {
-        // 1. Initial Resolution
-        var resolvedClothing = resolveClothing(aiSelectedClothingIds, inventory)
-        var resolvedCosmetics = resolveCosmetics(aiSelectedCosmeticIds, cosmetics)
+        // 1. Initial Resolution & Deduplication by Category (Never allow 2 Bottoms or 2 Tops)
+        var resolvedClothing = resolveClothing(aiSelectedClothingIds, inventory).distinctBy { it.category }
+        var resolvedCosmetics = resolveCosmetics(aiSelectedCosmeticIds, cosmetics).distinctBy { it.macroCategory }
 
         // 2. Keyword Fallback (Resolving ambiguous/generic categories)
         resolvedClothing = applyClothingKeywordFallbacks(resolvedClothing)
 
         // 3. Anchor Fail-Safe (Re-injecting any omitted LOCKED/FORCED anchors)
-        resolvedClothing = enforceClothingFailSafe(resolvedClothing, activeClothingAnchors)
-        resolvedCosmetics = enforceCosmeticFailSafe(resolvedCosmetics, activeCosmeticAnchors)
+        resolvedClothing = enforceClothingFailSafe(resolvedClothing, activeClothingAnchors).distinctBy { it.category }
+        resolvedCosmetics = enforceCosmeticFailSafe(resolvedCosmetics, activeCosmeticAnchors).distinctBy { it.macroCategory }
 
         // 4. Calculate Post-Synthesis Fashionista Score (0-100)
         val fashionistaScore = colorHarmonyEngine.calculateFashionistaScore(
@@ -51,8 +51,8 @@ class GreedyRehydrator @Inject constructor(
             telemetry = telemetry
         )
 
-        // 5. Slot Assignment & Greedy Rehydration
-        val blueprint = assignToSlots(resolvedClothing, resolvedCosmetics, palette, isComplete)
+        // 5. Slot Assignment & Inventory Fallback for Shoes
+        val blueprint = assignToSlots(resolvedClothing, resolvedCosmetics, inventory, palette, isComplete)
         return blueprint.copy(koColorScore = fashionistaScore)
     }
 
@@ -105,23 +105,24 @@ class GreedyRehydrator @Inject constructor(
     private fun assignToSlots(
         clothing: List<ClothingItem>,
         cosmetics: List<CosmeticItem>,
+        inventory: List<ClothingItem>,
         palette: List<String>,
         isComplete: Boolean
     ): VisualBlueprintData {
-        // Clothing slots
-        val top = clothing.find { it.category == ClothingCategory.TOPS }
-            ?: clothing.find { it.category == ClothingCategory.DRESSES }
-        val bottom = clothing.find { it.category == ClothingCategory.BOTTOMS }
-            ?: if (top?.category == ClothingCategory.DRESSES) top else null
-        val shoes = clothing.find { it.category == ClothingCategory.SHOES }
-        val outerwear = clothing.find { it.category == ClothingCategory.OUTERWEAR }
+        // Clothing slots (strictly 1 item per category)
+        val deduplicatedClothing = clothing.distinctBy { it.category }
 
-        // No item left behind for clothing
-        val usedClothingIds = listOfNotNull(top?.internalId, bottom?.internalId, shoes?.internalId, outerwear?.internalId)
-        val remainingClothing = clothing.filter { it.internalId !in usedClothingIds }
+        val top = deduplicatedClothing.find { it.category == ClothingCategory.TOPS }
+            ?: deduplicatedClothing.find { it.category == ClothingCategory.DRESSES }
+            ?: inventory.find { it.category == ClothingCategory.TOPS }
 
-        val finalTop = top ?: remainingClothing.firstOrNull()
-        val finalBottom = bottom ?: remainingClothing.drop(1).firstOrNull()
+        val bottom = deduplicatedClothing.find { it.category == ClothingCategory.BOTTOMS }
+            ?: if (top?.category == ClothingCategory.DRESSES) top else inventory.find { it.category == ClothingCategory.BOTTOMS }
+
+        val shoes = deduplicatedClothing.find { it.category == ClothingCategory.SHOES }
+            ?: inventory.find { it.category == ClothingCategory.SHOES }
+
+        val outerwear = deduplicatedClothing.find { it.category == ClothingCategory.OUTERWEAR }
 
         // Cosmetic slots
         val eyes = cosmetics.find { it.macroCategory == MacroCategory.EYES }
@@ -134,20 +135,13 @@ class GreedyRehydrator @Inject constructor(
         val nails = cosmetics.find { it.macroCategory == MacroCategory.NAILS }
             ?: cosmetics.find { it.name.contains("nail", true) || it.name.contains("lacquer", true) }
 
-        // No item left behind for cosmetics
-        val usedCosmeticIds = listOfNotNull(eyes?.internalId, cheeks?.internalId, lips?.internalId, nails?.internalId)
-        val remainingCosmetics = cosmetics.filter { it.internalId !in usedCosmeticIds }
-
-        val finalEyes = eyes ?: remainingCosmetics.find { it.macroCategory == MacroCategory.PREP }
-        val finalLips = lips ?: remainingCosmetics.find { it.microCategory == MicroCategory.LIP_CARE }
-
         return VisualBlueprintData(
-            eyesItem = (finalEyes ?: eyes)?.toBlueprintItem(),
+            eyesItem = eyes?.toBlueprintItem(),
             cheeksItem = cheeks?.toBlueprintItem(),
-            lipsItem = (finalLips ?: lips)?.toBlueprintItem(),
+            lipsItem = lips?.toBlueprintItem(),
             nailsItem = nails?.toBlueprintItem(),
-            topItem = finalTop?.toBlueprintItem(),
-            bottomItem = finalBottom?.toBlueprintItem(),
+            topItem = top?.toBlueprintItem(),
+            bottomItem = bottom?.toBlueprintItem(),
             shoeItem = shoes?.toBlueprintItem(),
             outerwearItem = outerwear?.toBlueprintItem(),
             recommendedPalette = palette,

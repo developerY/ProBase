@@ -239,7 +239,7 @@ class StyleSimulatorViewModel @Inject constructor(
 
         val recommendedClothing = allClothing.filter { item ->
             "w_${item.internalId}" in (result?.selectedClothingIds ?: emptyList())
-        }
+        }.distinctBy { it.category }
         val recommendedCosmetics = allCosmetics.filter { item ->
             "c_${item.internalId}" in (result?.selectedCosmeticIds ?: emptyList())
         }
