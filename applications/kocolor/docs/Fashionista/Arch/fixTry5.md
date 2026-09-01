@@ -7,7 +7,7 @@ This document defines the strict architectural boundary between **FASHIONISTA** 
 ## 1. Architectural Separation
 
 | Dimension | KoColor Recommendation Engine | FASHIONISTA Evaluation Engine |
-| :--- | :--- | :--- |
+| --- | --- | --- |
 | **Primary Question** | *"What should I wear?"* | *"How good is this?"* |
 | **Input** | Context Stream (Weather, Occasion, Wardrobe, User Intent) | `FashionistaObservation` + `FashionistaCalibration` |
 | **Network & AI** | Optional LLM (Firebase Vertex AI / Gemini / Local AI) | **ZERO Network, ZERO LLM, 100% Offline Deterministic Computation** |
@@ -41,6 +41,7 @@ This document defines the strict architectural boundary between **FASHIONISTA** 
        + Rationale                   ├─ Coverage 0–1
                                      ├─ 6-Axis Radar
                                      └─ Calibration Version
+
 ```
 
 **Critical Dependency Rule:**
@@ -57,6 +58,7 @@ This document defines the strict architectural boundary between **FASHIONISTA** 
 To ensure total isolation and ease of code review, the boundaries of the FASHIONISTA module are strictly defined:
 
 **FASHIONISTA MUST NOT depend on:**
+
 * Repository or Database layers
 * `WardrobeItem` or application-specific product entities
 * User profiles or seasonal identity state
@@ -70,6 +72,7 @@ To ensure total isolation and ease of code review, the boundaries of the FASHION
 * Application UI state
 
 **FASHIONISTA MAY depend on:**
+
 * `FashionistaObservation`
 * `FashionistaCalibration`
 * Deterministic mathematical, color-space, and computer vision primitives
@@ -133,6 +136,7 @@ data class RadarMetrics(
     val visualHierarchy: Float,
     val wearerIntegration: Float
 )
+
 ```
 
 ---
@@ -143,7 +147,7 @@ FASHIONISTA operates under strict mathematical predictability:
 
 $$\text{FashionistaObservation} + \text{FashionistaCalibration} \longrightarrow \text{FashionistaResult}$$
 
-Given an identical `FashionistaObservation` and identical `FashionistaCalibration`, FASHIONISTA produces a deterministic result independent of network availability, application state, or observation provenance. Cross-platform implementations must use the same defined numerical algorithms and tolerances, adhering to **Logical Determinism** (same observation + calibration $\rightarrow$ same score within defined tolerance). The engine enforces:
+Given an identical `FashionistaObservation` and identical `FashionistaCalibration`, FASHIONISTA produces a deterministic result independent of network availability, application state, or observation provenance. Cross-platform implementations must use the same defined numerical algorithms and tolerances, adhering to **Logical Determinism** (same observation + calibration → same score within defined tolerance). The engine enforces:
 
 * Fixed iteration order for all collection processing.
 * No unordered parallel reductions.
@@ -198,6 +202,7 @@ private fun updateManualTelemetry(newTelemetry: FaceTelemetryData) {
         calibration = activeCalibrationStandard
     )
 }
+
 ```
 
 ---
