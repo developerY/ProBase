@@ -511,8 +511,8 @@ class StyleSimulatorViewModel @Inject constructor(
 
         val rbDiff = r - b
         val gbDiff = g - b
-        val warmMetric = (rbDiff * 0.6f + gbDiff * 0.4f) - 0.28f
-        return warmMetric.coerceIn(-1.0f, 1.0f)
+        val warmMetric = (rbDiff * 0.7f + gbDiff * 0.3f) - 0.12f
+        return (warmMetric * 2.2f).coerceIn(-1.0f, 1.0f)
     }
 
     private fun runSimulationInternal() {
@@ -921,8 +921,8 @@ class StyleSimulatorViewModel @Inject constructor(
 
         val rbDiff = (avgR - avgB) / 255f
         val gbDiff = (avgG - avgB) / 255f
-        val warmMetric = (rbDiff * 0.6f + gbDiff * 0.4f) - 0.28f
-        return warmMetric.coerceIn(-1.0f, 1.0f)
+        val warmMetric = (rbDiff * 0.7f + gbDiff * 0.3f) - 0.12f
+        return (warmMetric * 2.2f).coerceIn(-1.0f, 1.0f)
     }
 
     private fun samplePatchColorHex(bitmap: Bitmap, cx: Int, cy: Int, radius: Int = 3): String {

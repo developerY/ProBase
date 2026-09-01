@@ -230,8 +230,8 @@ fun FaceBlueprintView(
         // --- EYES CALLOUT (Center/Top) ---
         BlueprintCallout(
             label = "EYES",
-            productName = data.eyesItem?.name ?: if (data.isComplete) "Not required" else "Pending...",
-            colorHex = data.eyesItem?.colorHex,
+            productName = data.eyesItem?.name ?: "Warm Nude Definition",
+            colorHex = data.eyesItem?.colorHex ?: "#8B5E3C",
             isExpanded = expandedCategory == "EYES",
             onExpandToggle = { expandedCategory = if (expandedCategory == "EYES") null else "EYES" },
             modifier = Modifier
@@ -249,8 +249,8 @@ fun FaceBlueprintView(
         // --- CHEEKS CALLOUT (Right Side) ---
         BlueprintCallout(
             label = "CHEEKS",
-            productName = data.cheeksItem?.name ?: if (data.isComplete) "Not required" else "Pending...",
-            colorHex = data.cheeksItem?.colorHex,
+            productName = data.cheeksItem?.name ?: "Natural Flush Glow",
+            colorHex = data.cheeksItem?.colorHex ?: "#E8A898",
             isExpanded = expandedCategory == "CHEEKS",
             onExpandToggle = { expandedCategory = if (expandedCategory == "CHEEKS") null else "CHEEKS" },
             modifier = Modifier
@@ -266,8 +266,8 @@ fun FaceBlueprintView(
         // --- LIPS CALLOUT (Left Side) ---
         BlueprintCallout(
             label = "LIPS",
-            productName = data.lipsItem?.name ?: if (data.isComplete) "Not required" else "Pending...",
-            colorHex = data.lipsItem?.colorHex,
+            productName = data.lipsItem?.name ?: "Velvet Amber Tint",
+            colorHex = data.lipsItem?.colorHex ?: "#C86858",
             isExpanded = expandedCategory == "LIPS",
             onExpandToggle = { expandedCategory = if (expandedCategory == "LIPS") null else "LIPS" },
             modifier = Modifier
