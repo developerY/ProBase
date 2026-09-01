@@ -33,3 +33,7 @@
     public static *** v(...);
     public static *** d(...);
 }
+
+# Preserve line numbers and source files for decipherable production crash stack traces
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile

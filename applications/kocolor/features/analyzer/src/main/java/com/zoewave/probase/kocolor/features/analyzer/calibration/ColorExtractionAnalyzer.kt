@@ -91,14 +91,12 @@ class ColorExtractionAnalyzer(
 
         for (dx in -radius..radius) {
             for (dy in -radius..radius) {
-                val px = cx + dx
-                val py = cy + dy
-                if (px in 0 until bitmap.width && py in 0 until bitmap.height) {
-                    val pixel = bitmap.getPixel(px, py)
-                    val lum = (0.2126f * Color.red(pixel) + 0.7152f * Color.green(pixel) + 0.0722f * Color.blue(pixel)) / 255f
-                    totalLuminance += lum
-                    count++
-                }
+                val px = (cx + dx).coerceIn(0, bitmap.width - 1)
+                val py = (cy + dy).coerceIn(0, bitmap.height - 1)
+                val pixel = bitmap.getPixel(px, py)
+                val lum = (0.2126f * Color.red(pixel) + 0.7152f * Color.green(pixel) + 0.0722f * Color.blue(pixel)) / 255f
+                totalLuminance += lum
+                count++
             }
         }
         return if (count > 0) (totalLuminance / count).coerceIn(0.0f, 1.0f) else 0.5f
@@ -121,14 +119,12 @@ class ColorExtractionAnalyzer(
         )
 
         for ((dx, dy) in offsets) {
-            val px = cx + dx
-            val py = cy + dy
-            if (px in 0 until bitmap.width && py in 0 until bitmap.height) {
-                val pixel = bitmap.getPixel(px, py)
-                val lum = (0.2126f * Color.red(pixel) + 0.7152f * Color.green(pixel) + 0.0722f * Color.blue(pixel)) / 255f
-                totalLuminance += lum
-                count++
-            }
+            val px = (cx + dx).coerceIn(0, bitmap.width - 1)
+            val py = (cy + dy).coerceIn(0, bitmap.height - 1)
+            val pixel = bitmap.getPixel(px, py)
+            val lum = (0.2126f * Color.red(pixel) + 0.7152f * Color.green(pixel) + 0.0722f * Color.blue(pixel)) / 255f
+            totalLuminance += lum
+            count++
         }
         return if (count > 0) (totalLuminance / count).coerceIn(0.0f, 1.0f) else 0.35f
     }
@@ -141,15 +137,13 @@ class ColorExtractionAnalyzer(
 
         for (dx in -radius..radius) {
             for (dy in -radius..radius) {
-                val px = cx + dx
-                val py = cy + dy
-                if (px in 0 until bitmap.width && py in 0 until bitmap.height) {
-                    val pixel = bitmap.getPixel(px, py)
-                    totalR += Color.red(pixel)
-                    totalG += Color.green(pixel)
-                    totalB += Color.blue(pixel)
-                    count++
-                }
+                val px = (cx + dx).coerceIn(0, bitmap.width - 1)
+                val py = (cy + dy).coerceIn(0, bitmap.height - 1)
+                val pixel = bitmap.getPixel(px, py)
+                totalR += Color.red(pixel)
+                totalG += Color.green(pixel)
+                totalB += Color.blue(pixel)
+                count++
             }
         }
         if (count == 0) return 0f
@@ -159,7 +153,7 @@ class ColorExtractionAnalyzer(
 
         val rbDiff = (avgR - avgB) / 255f
         val gbDiff = (avgG - avgB) / 255f
-        val warmMetric = (rbDiff * 0.6f + gbDiff * 0.4f) - 0.28f
-        return warmMetric.coerceIn(-1.0f, 1.0f)
+        val warmMetric = (rbDiff * 0.7f + gbDiff * 0.3f) - 0.12f
+        return (warmMetric * 2.2f).coerceIn(-1.0f, 1.0f)
     }
 }

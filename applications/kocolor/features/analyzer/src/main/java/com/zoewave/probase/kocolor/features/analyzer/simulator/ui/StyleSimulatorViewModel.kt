@@ -53,6 +53,7 @@ import com.zoewave.probase.kocolor.model.calibration.ColorProfile
 import com.zoewave.probase.kocolor.model.calibration.FacialContrastVector
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -65,6 +66,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import java.util.Calendar
 import javax.inject.Inject
@@ -646,8 +648,8 @@ class StyleSimulatorViewModel @Inject constructor(
         return translated
     }
 
-    private fun loadBitmapFromUri(uri: Uri): Bitmap? {
-        return try {
+    private suspend fun loadBitmapFromUri(uri: Uri): Bitmap? = withContext(Dispatchers.IO) {
+        try {
             var rotationDegrees = 0
             try {
                 context.contentResolver.openInputStream(uri)?.use { inputStream ->
@@ -669,7 +671,7 @@ class StyleSimulatorViewModel @Inject constructor(
 
             val rawBitmap = context.contentResolver.openInputStream(uri)?.use { inputStream ->
                 BitmapFactory.decodeStream(inputStream)
-            } ?: return null
+            } ?: return@withContext null
 
             if (rotationDegrees != 0) {
                 val matrix = Matrix().apply { postRotate(rotationDegrees.toFloat()) }
@@ -853,14 +855,12 @@ class StyleSimulatorViewModel @Inject constructor(
 
         for (dx in -radius..radius) {
             for (dy in -radius..radius) {
-                val px = cx + dx
-                val py = cy + dy
-                if (px in 0 until bitmap.width && py in 0 until bitmap.height) {
-                    val pixel = bitmap.getPixel(px, py)
-                    val lum = (0.2126f * Color.red(pixel) + 0.7152f * Color.green(pixel) + 0.0722f * Color.blue(pixel)) / 255f
-                    totalLuminance += lum
-                    count++
-                }
+                val px = (cx + dx).coerceIn(0, bitmap.width - 1)
+                val py = (cy + dy).coerceIn(0, bitmap.height - 1)
+                val pixel = bitmap.getPixel(px, py)
+                val lum = (0.2126f * Color.red(pixel) + 0.7152f * Color.green(pixel) + 0.0722f * Color.blue(pixel)) / 255f
+                totalLuminance += lum
+                count++
             }
         }
         return if (count > 0) (totalLuminance / count).coerceIn(0.0f, 1.0f) else 0.5f
@@ -883,14 +883,12 @@ class StyleSimulatorViewModel @Inject constructor(
         )
 
         for ((dx, dy) in offsets) {
-            val px = cx + dx
-            val py = cy + dy
-            if (px in 0 until bitmap.width && py in 0 until bitmap.height) {
-                val pixel = bitmap.getPixel(px, py)
-                val lum = (0.2126f * Color.red(pixel) + 0.7152f * Color.green(pixel) + 0.0722f * Color.blue(pixel)) / 255f
-                totalLuminance += lum
-                count++
-            }
+            val px = (cx + dx).coerceIn(0, bitmap.width - 1)
+            val py = (cy + dy).coerceIn(0, bitmap.height - 1)
+            val pixel = bitmap.getPixel(px, py)
+            val lum = (0.2126f * Color.red(pixel) + 0.7152f * Color.green(pixel) + 0.0722f * Color.blue(pixel)) / 255f
+            totalLuminance += lum
+            count++
         }
         return if (count > 0) (totalLuminance / count).coerceIn(0.0f, 1.0f) else 0.35f
     }
@@ -903,15 +901,13 @@ class StyleSimulatorViewModel @Inject constructor(
 
         for (dx in -radius..radius) {
             for (dy in -radius..radius) {
-                val px = cx + dx
-                val py = cy + dy
-                if (px in 0 until bitmap.width && py in 0 until bitmap.height) {
-                    val pixel = bitmap.getPixel(px, py)
-                    totalR += Color.red(pixel)
-                    totalG += Color.green(pixel)
-                    totalB += Color.blue(pixel)
-                    count++
-                }
+                val px = (cx + dx).coerceIn(0, bitmap.width - 1)
+                val py = (cy + dy).coerceIn(0, bitmap.height - 1)
+                val pixel = bitmap.getPixel(px, py)
+                totalR += Color.red(pixel)
+                totalG += Color.green(pixel)
+                totalB += Color.blue(pixel)
+                count++
             }
         }
         if (count == 0) return 0f
@@ -933,15 +929,13 @@ class StyleSimulatorViewModel @Inject constructor(
 
         for (dx in -radius..radius) {
             for (dy in -radius..radius) {
-                val px = cx + dx
-                val py = cy + dy
-                if (px in 0 until bitmap.width && py in 0 until bitmap.height) {
-                    val pixel = bitmap.getPixel(px, py)
-                    totalR += Color.red(pixel)
-                    totalG += Color.green(pixel)
-                    totalB += Color.blue(pixel)
-                    count++
-                }
+                val px = (cx + dx).coerceIn(0, bitmap.width - 1)
+                val py = (cy + dy).coerceIn(0, bitmap.height - 1)
+                val pixel = bitmap.getPixel(px, py)
+                totalR += Color.red(pixel)
+                totalG += Color.green(pixel)
+                totalB += Color.blue(pixel)
+                count++
             }
         }
         if (count == 0) return "#E8C8B8"
@@ -970,15 +964,13 @@ class StyleSimulatorViewModel @Inject constructor(
         )
 
         for ((dx, dy) in offsets) {
-            val px = cx + dx
-            val py = cy + dy
-            if (px in 0 until bitmap.width && py in 0 until bitmap.height) {
-                val pixel = bitmap.getPixel(px, py)
-                totalR += Color.red(pixel)
-                totalG += Color.green(pixel)
-                totalB += Color.blue(pixel)
-                count++
-            }
+            val px = (cx + dx).coerceIn(0, bitmap.width - 1)
+            val py = (cy + dy).coerceIn(0, bitmap.height - 1)
+            val pixel = bitmap.getPixel(px, py)
+            totalR += Color.red(pixel)
+            totalG += Color.green(pixel)
+            totalB += Color.blue(pixel)
+            count++
         }
         if (count == 0) return "#7A8F9E"
         val avgR = (totalR / count).coerceIn(0, 255)
