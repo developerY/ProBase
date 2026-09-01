@@ -1,6 +1,7 @@
 package com.zoewave.probase.kocolor.data.usecase
 
 import android.util.Log
+import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.features.ai.core.AiInput
@@ -233,7 +234,59 @@ class StyleSimulatorEngine @Inject constructor(
                     retrievalReason = if (item.isSignature) "[Signature Item] Rotation bypassed." else "Role diversity match"
                 )
             }
-            val topWardrobeProv = selectionState.fullRankedCandidatePool.take(currentK)
+
+            // 1. Convert locked active anchors to candidate provenance (resolves ghost anchor bug)
+            val anchorProv = selectionState.activeAnchors.map { anchor ->
+                CandidateProvenance(
+                    clothingItem = anchor,
+                    contextScore = 1.0f,
+                    colorScore = 1.0f,
+                    appearanceScore = 1.0f,
+                    freshnessScore = 1.0f,
+                    retrievalReason = "[LOCKED ANCHOR] Required outfit anchor"
+                )
+            }
+
+            // 2. Combine locked anchors with ranked pool
+            val anchorIds = anchorProv.mapNotNull { it.clothingItem?.internalId }.toSet()
+            val poolWithoutAnchors = selectionState.fullRankedCandidatePool.filter { (it.clothingItem?.internalId ?: -1) !in anchorIds }
+            var topWardrobeProv = (anchorProv + poolWithoutAnchors).take(currentK.coerceAtLeast(anchorProv.size))
+
+            // 3. Category diversity guarantee (ensure TOPS, BOTTOMS, SHOES are all present)
+            val presentCategories = topWardrobeProv.mapNotNull { it.clothingItem?.category }.toSet()
+            val missingCategories = mutableListOf<ClothingCategory>()
+            if (!presentCategories.contains(ClothingCategory.TOPS) && !presentCategories.contains(ClothingCategory.DRESSES)) {
+                missingCategories.add(ClothingCategory.TOPS)
+            }
+            if (!presentCategories.contains(ClothingCategory.BOTTOMS) && !presentCategories.contains(ClothingCategory.DRESSES)) {
+                missingCategories.add(ClothingCategory.BOTTOMS)
+            }
+            if (!presentCategories.contains(ClothingCategory.SHOES)) {
+                missingCategories.add(ClothingCategory.SHOES)
+            }
+
+            if (missingCategories.isNotEmpty()) {
+                val currentIds = topWardrobeProv.mapNotNull { it.clothingItem?.internalId }.toSet()
+                val supplementaryCandidates = mutableListOf<CandidateProvenance>()
+                for (cat in missingCategories) {
+                    val suppItem = poolWithoutAnchors.find { it.clothingItem?.category == cat && (it.clothingItem?.internalId ?: -1) !in currentIds }
+                        ?: wardrobe.find { it.category == cat && it.internalId !in currentIds }?.let { item ->
+                            CandidateProvenance(
+                                clothingItem = item,
+                                contextScore = 0.8f,
+                                colorScore = 0.8f,
+                                appearanceScore = 0.8f,
+                                freshnessScore = 1.0f,
+                                retrievalReason = "Category balance guarantee (${cat.name})"
+                            )
+                        }
+                    if (suppItem != null) {
+                        supplementaryCandidates.add(suppItem)
+                    }
+                }
+                topWardrobeProv = topWardrobeProv + supplementaryCandidates
+            }
+
             auditLogger.logReasoningSet(context.requestId, topWardrobeProv + cCandidatesProv)
 
             val manifest = serializer.serialize(topWardrobeProv, cCandidates, detailLevel)
