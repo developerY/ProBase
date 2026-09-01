@@ -7,7 +7,7 @@ This document defines the strict architectural boundary between **FASHIONISTA** 
 ## 1. Architectural Separation
 
 | Dimension | KoColor Recommendation Engine | FASHIONISTA Evaluation Engine |
-| :--- | :--- | :--- |
+| --- | --- | --- |
 | **Primary Question** | *"What should I wear?"* | *"How good is this?"* |
 | **Input** | Context Stream (Weather, Occasion, Wardrobe, User Intent) | `FashionistaObservation` + `FashionistaCalibration` |
 | **Network & AI** | Optional LLM (Firebase Vertex AI / Gemini / Local AI) | **ZERO Network, ZERO LLM, 100% Offline Deterministic Computation** |
@@ -41,6 +41,7 @@ This document defines the strict architectural boundary between **FASHIONISTA** 
        + Rationale                   ├─ Coverage 0–1
                                      ├─ 6-Axis Radar
                                      └─ Calibration Version
+
 ```
 
 **Critical Dependency Rule:**
@@ -57,6 +58,7 @@ This document defines the strict architectural boundary between **FASHIONISTA** 
 To ensure total isolation and ease of code review, the boundaries of the FASHIONISTA module are strictly defined:
 
 **FASHIONISTA MUST NOT depend on:**
+
 * Repository or Database layers
 * `WardrobeItem` or application-specific product entities
 * User profiles or seasonal identity state
@@ -69,6 +71,7 @@ To ensure total isolation and ease of code review, the boundaries of the FASHION
 * Application UI state
 
 **FASHIONISTA MAY depend on:**
+
 * `FashionistaObservation`
 * `FashionistaCalibration`
 * Deterministic mathematical, color-space, and computer vision primitives
@@ -119,6 +122,7 @@ data class RadarMetrics(
     val visualHierarchy: Float,
     val wearerIntegration: Float
 )
+
 ```
 
 ---
@@ -127,7 +131,7 @@ data class RadarMetrics(
 
 FASHIONISTA operates under strict mathematical predictability:
 
-$$\text{FashionistaObservation} + \text{FashionistaCalibration} \longrightarrow \text{FashionistaResult}$$
+$$\text{FashionistaObservation} + \text{FashionistaCalibration} = \text{FashionistaResult}$$
 
 Given an identical `FashionistaObservation` and identical `FashionistaCalibration`, FASHIONISTA produces the exact same deterministic result across all platforms. The engine enforces:
 
@@ -184,6 +188,7 @@ private fun updateManualTelemetry(newTelemetry: FaceTelemetryData) {
         calibration = activeCalibrationStandard
     )
 }
+
 ```
 
 ---
