@@ -14,8 +14,29 @@ class PromptAssembler @Inject constructor() {
         providerCapability: AiProviderCapability
     ): AiInput {
         val profile = context.appearanceProfile
+        val clothingGoal = if (compactManifest.contains("SHOES", ignoreCase = true)) {
+            "1. Select BEST 3 clothing items (1 Top, 1 Bottom, 1 Shoes) from the WARDROBE section."
+        } else {
+            "1. Select BEST 2 clothing items (1 Top, 1 Bottom) from the WARDROBE section."
+        }
+
+        val cosmeticCategories = mutableListOf<String>()
+        if (compactManifest.contains("EYES", ignoreCase = true)) cosmeticCategories.add("Eye")
+        if (compactManifest.contains("DIMENSION", ignoreCase = true) || compactManifest.contains("CHEEK", ignoreCase = true)) cosmeticCategories.add("Cheek")
+        if (compactManifest.contains("LIPS", ignoreCase = true)) cosmeticCategories.add("Lip")
+        if (compactManifest.contains("NAILS", ignoreCase = true)) cosmeticCategories.add("Nail")
+
+        val cosmeticGoal = if (cosmeticCategories.isNotEmpty()) {
+            "2. Select 1 item from each available cosmetic category (${cosmeticCategories.joinToString(", ")}) from the COSMETICS section."
+        } else {
+            "2. Select available cosmetic items from the COSMETICS section."
+        }
+
         val prompt = """
             You are the KoColor Style Architect AI. Generate a "Style Blueprint" that is both stylistically harmonic and protective.
+            
+            STRICT GROUNDING RULE:
+            Do not invent stylistic adjectives (e.g., do not call nylon 'structural'). Describe items strictly using the physical materials and attributes listed in the manifest.
             
             APPEARANCE TELEMETRY:
             - Temperature: ${profile.undertone}
@@ -31,9 +52,9 @@ class PromptAssembler @Inject constructor() {
             $compactManifest
             
             GOAL:
-            1. Select BEST 3 clothing items (Top, Bottom, Shoes) from the WARDROBE section.
-            2. Select exactly 4 COSMETIC items (1 Eye, 1 Cheek, 1 Lip, 1 Nail) from the COSMETICS section. 
-            3. Construct a harmonic style where all colors work together, including a rationale.
+            $clothingGoal
+            $cosmeticGoal
+            3. Construct a harmonic style where all colors work together, including a rationale referencing ONLY selected item IDs.
             
             Respond ONLY with a valid JSON object matching this schema:
             {

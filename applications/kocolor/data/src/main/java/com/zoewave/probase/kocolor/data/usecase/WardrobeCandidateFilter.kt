@@ -142,15 +142,40 @@ class WardrobeCandidateFilter @Inject constructor(
     }
 
     private fun calculateCosmeticScore(item: CosmeticItem, context: StyleRequestContext): Double {
-        var score = 0.0
-        val appearanceString = "${context.appearanceProfile.undertone} • ${context.appearanceProfile.depth} • ${context.appearanceProfile.contrast}"
-        if (appearanceString.contains(item.temperature.name, ignoreCase = true)) {
-            score += 10.0
+        var score = 1.0 // Base score
+        val appearance = context.appearanceProfile
+        val telemetry = context.appearanceTelemetry
+
+        // 1. Relational Temperature Boost (evaluates raw float threshold + string label)
+        val isWarmContext = telemetry.undertoneScore > 0.02f ||
+                appearance.undertone.contains("Warm", ignoreCase = true) ||
+                appearance.undertone.contains("Golden", ignoreCase = true) ||
+                appearance.undertone.contains("Peach", ignoreCase = true)
+
+        val isCoolContext = telemetry.undertoneScore < -0.02f ||
+                appearance.undertone.contains("Cool", ignoreCase = true) ||
+                appearance.undertone.contains("Pink", ignoreCase = true) ||
+                appearance.undertone.contains("Blue", ignoreCase = true)
+
+        val cosmeticTemp = item.temperature.name.uppercase()
+        when {
+            isWarmContext && (cosmeticTemp.contains("WARM") || cosmeticTemp.contains("GOLDEN")) -> score += 1.85
+            isCoolContext && (cosmeticTemp.contains("COOL") || cosmeticTemp.contains("ROSY")) -> score += 1.85
+            cosmeticTemp.contains("NEUTRAL") -> score += 1.25
+            else -> score += 0.60
         }
+
+        // 2. Keyword & Intent Relevance
         val keywords = context.intent.lowercase().split(" ", ",", ".")
         if (keywords.any { item.name.contains(it, ignoreCase = true) || (item.notes?.contains(it, ignoreCase = true) ?: false) }) {
-            score += 20.0
+            score += 0.75
         }
+
+        // 3. Signature Item Boost
+        if (item.isSignature) {
+            score += 0.25
+        }
+
         return score
     }
 
