@@ -53,7 +53,8 @@ fun FashionAdvice.toVisualBlueprintData(): VisualBlueprintData {
         shoeItem = clothes.find { it.category.equals("SHOES", ignoreCase = true) }?.toBlueprintItem(),
         outerwearItem = clothes.find { it.category.equals("OUTERWEAR", ignoreCase = true) }?.toBlueprintItem(),
         recommendedPalette = recommendedPalette,
-        isComplete = true // FashionAdvice is always a result
+        isComplete = true, // FashionAdvice is always a result
+        koColorScore = fashionistaScore
     )
 }
 
