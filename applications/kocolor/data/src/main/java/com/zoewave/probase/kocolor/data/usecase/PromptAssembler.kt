@@ -1,7 +1,10 @@
 package com.zoewave.probase.kocolor.data.usecase
 
+import com.zoewave.probase.core.model.ritual.ClothingCategory
+import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.features.ai.core.AiInput
 import com.zoewave.probase.features.ai.core.AiProviderCapability
+import com.zoewave.probase.kocolor.data.color.CandidateProvenance
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -11,23 +14,31 @@ class PromptAssembler @Inject constructor() {
     fun buildExactRequest(
         context: StyleRequestContext,
         compactManifest: String,
+        clothingCandidates: List<CandidateProvenance> = emptyList(),
+        cosmeticCandidates: List<CandidateProvenance> = emptyList(),
         providerCapability: AiProviderCapability
     ): AiInput {
         val profile = context.appearanceProfile
-        val clothingGoal = if (compactManifest.contains("SHOES", ignoreCase = true)) {
+
+        val availableClothingCategories = clothingCandidates.mapNotNull { it.clothingItem?.category }.toSet()
+        val hasShoes = clothingCandidates.isEmpty() || availableClothingCategories.contains(
+            ClothingCategory.SHOES) || compactManifest.contains("SHOES", ignoreCase = true)
+
+        val clothingGoal = if (hasShoes) {
             "1. Select BEST 3 clothing items (1 Top, 1 Bottom, 1 Shoes) from the WARDROBE section."
         } else {
             "1. Select BEST 2 clothing items (1 Top, 1 Bottom) from the WARDROBE section."
         }
 
+        val availableCosmeticCategories = cosmeticCandidates.mapNotNull { it.cosmeticItem?.macroCategory }.toSet()
         val cosmeticCategories = mutableListOf<String>()
-        if (compactManifest.contains("EYES", ignoreCase = true)) cosmeticCategories.add("Eye")
-        if (compactManifest.contains("DIMENSION", ignoreCase = true) || compactManifest.contains("CHEEK", ignoreCase = true)) cosmeticCategories.add("Cheek")
-        if (compactManifest.contains("LIPS", ignoreCase = true)) cosmeticCategories.add("Lip")
-        if (compactManifest.contains("NAILS", ignoreCase = true)) cosmeticCategories.add("Nail")
+        if (cosmeticCandidates.isEmpty() || availableCosmeticCategories.contains(MacroCategory.EYES) || compactManifest.contains("EYES", ignoreCase = true)) cosmeticCategories.add("Eye")
+        if (cosmeticCandidates.isEmpty() || availableCosmeticCategories.contains(MacroCategory.DIMENSION) || compactManifest.contains("CHEEK", ignoreCase = true) || compactManifest.contains("DIMENSION", ignoreCase = true)) cosmeticCategories.add("Cheek")
+        if (cosmeticCandidates.isEmpty() || availableCosmeticCategories.contains(MacroCategory.LIPS) || compactManifest.contains("LIPS", ignoreCase = true)) cosmeticCategories.add("Lip")
+        if (cosmeticCandidates.isEmpty() || availableCosmeticCategories.contains(MacroCategory.NAILS) || compactManifest.contains("NAILS", ignoreCase = true)) cosmeticCategories.add("Nail")
 
         val cosmeticGoal = if (cosmeticCategories.isNotEmpty()) {
-            "2. Select 1 item from each available cosmetic category (${cosmeticCategories.joinToString(", ")}) from the COSMETICS section."
+            "2. Select 1 item from each available cosmetic role (${cosmeticCategories.joinToString(", ")}) from the COSMETICS section."
         } else {
             "2. Select available cosmetic items from the COSMETICS section."
         }
