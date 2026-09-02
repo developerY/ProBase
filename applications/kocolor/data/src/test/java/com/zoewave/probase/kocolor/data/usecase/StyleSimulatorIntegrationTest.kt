@@ -48,7 +48,8 @@ class StyleSimulatorIntegrationTest {
             capabilityRouter,
             cache,
             auditLogger,
-            fallbackEngine
+            fallbackEngine,
+            RecommendationValidator()
         )
     }
 
