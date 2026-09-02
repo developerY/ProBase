@@ -77,7 +77,8 @@ data class FashionAdvice(
     val faceUri: String? = null,
     val hairUri: String? = null,
     val shoesUri: String? = null,
-    val clothesUri: String? = null
+    val clothesUri: String? = null,
+    val fashionistaScore: Int = 88
 )
 
 @Serializable

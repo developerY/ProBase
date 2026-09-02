@@ -737,7 +737,8 @@ class StyleSimulatorViewModel @Inject constructor(
                 outfitSuggestions = listOf(outfitSuggestion),
                 recommendedPalette = state.recommendedPalette,
                 clothesUri = state.recommendedClothing.firstOrNull()?.imageUrl 
-                    ?: state.recommendedCosmetics.firstOrNull()?.imageUrl
+                    ?: state.recommendedCosmetics.firstOrNull()?.imageUrl,
+                fashionistaScore = state.visualBlueprintData.koColorScore
             )
             fashionRepository.saveSuggestion(advice)
             
