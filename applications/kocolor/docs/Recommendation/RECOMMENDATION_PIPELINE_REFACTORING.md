@@ -19,12 +19,15 @@ While the **FASHIONISTA Evaluation Engine** handles pure offline aesthetic scori
 
 ## 2. Refactoring Tasks & Code Changes
 
-### Task 1: Dynamic Pre-Flight Prompt Construction & Grounding
+### Task 1: Typed Dynamic Pre-Flight Prompt Construction & Grounding
 **File**: [`PromptAssembler.kt`](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/usecase/PromptAssembler.kt)
 
-* **Dynamic Category Goals**: Inspects `compactManifest` to dynamically construct prompt instructions:
+* **Typed Candidate Evaluation**: Inspects `clothingCandidates` and `cosmeticCandidates` domain objects (avoiding string parsing on serialized manifests) to construct exact category goals:
   ```kotlin
-  val clothingGoal = if (compactManifest.contains("SHOES", ignoreCase = true)) {
+  val availableClothingCategories = clothingCandidates.mapNotNull { it.clothingItem?.category }.toSet()
+  val hasShoes = clothingCandidates.isEmpty() || availableClothingCategories.contains(ClothingCategory.SHOES)
+
+  val clothingGoal = if (hasShoes) {
       "1. Select BEST 3 clothing items (1 Top, 1 Bottom, 1 Shoes) from the WARDROBE section."
   } else {
       "1. Select BEST 2 clothing items (1 Top, 1 Bottom) from the WARDROBE section."
@@ -65,12 +68,20 @@ Replaced flat `3.10` cosmetic scores with a relational temperature delta matchin
 
 ```kotlin
 private fun calculateCosmeticScore(item: CosmeticItem, context: StyleRequestContext): Double {
-    var score = 1.0
+    var score = 1.0 // Base score
     val appearance = context.appearanceProfile
+    val telemetry = context.appearanceTelemetry
 
-    val undertone = appearance.undertone
-    val isWarmContext = undertone.contains("Warm", ignoreCase = true) || undertone.contains("Golden", ignoreCase = true)
-    val isCoolContext = undertone.contains("Cool", ignoreCase = true) || undertone.contains("Pink", ignoreCase = true)
+    // Dual evaluation: raw float threshold + string descriptor
+    val isWarmContext = telemetry.undertoneScore > 0.02f ||
+            appearance.undertone.contains("Warm", ignoreCase = true) ||
+            appearance.undertone.contains("Golden", ignoreCase = true) ||
+            appearance.undertone.contains("Peach", ignoreCase = true)
+
+    val isCoolContext = telemetry.undertoneScore < -0.02f ||
+            appearance.undertone.contains("Cool", ignoreCase = true) ||
+            appearance.undertone.contains("Pink", ignoreCase = true) ||
+            appearance.undertone.contains("Blue", ignoreCase = true)
 
     val cosmeticTemp = item.temperature.name.uppercase()
     when {
