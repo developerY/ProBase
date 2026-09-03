@@ -78,7 +78,7 @@ class StyleSimulatorEngineTest {
         
         coEvery { capabilityRouter.getRankedAvailableProviders() } returns listOf(provider1, provider2)
         coEvery { contextEngine.generateSelectionState(any(), any(), any()) } returns StyleSelectionState()
-        coEvery { candidateFilter.getCosmeticCandidates(any(), any(), any()) } returns emptyList()
+        coEvery { candidateFilter.getCosmeticCandidateProvenance(any(), any(), any()) } returns emptyList()
 
         val result = engine.generateBlueprint(emptyList(), emptyList(), context)
 
@@ -120,7 +120,7 @@ class StyleSimulatorEngineTest {
         
         coEvery { capabilityRouter.getRankedAvailableProviders() } returns listOf(provider)
         coEvery { contextEngine.generateSelectionState(any(), any(), any()) } returns StyleSelectionState(fullRankedCandidatePool = provList)
-        coEvery { candidateFilter.getCosmeticCandidates(any(), any(), any()) } returns emptyList()
+        coEvery { candidateFilter.getCosmeticCandidateProvenance(any(), any(), any()) } returns emptyList()
         every { fallbackEngine.generate(any()) } returns StyleBlueprint("Fallback", emptyList(), emptyList(), emptyList())
 
         val result = engine.generateBlueprint(items, emptyList(), context)
@@ -148,7 +148,7 @@ class StyleSimulatorEngineTest {
         
         coEvery { capabilityRouter.getRankedAvailableProviders() } returns listOf(provider)
         coEvery { contextEngine.generateSelectionState(any(), any(), any()) } returns StyleSelectionState(fullRankedCandidatePool = provList)
-        coEvery { candidateFilter.getCosmeticCandidates(any(), any(), any()) } returns emptyList()
+        coEvery { candidateFilter.getCosmeticCandidateProvenance(any(), any(), any()) } returns emptyList()
 
         engine.generateBlueprint(items, emptyList(), context)
 
