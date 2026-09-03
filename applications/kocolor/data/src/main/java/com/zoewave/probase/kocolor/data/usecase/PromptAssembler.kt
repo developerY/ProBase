@@ -42,6 +42,19 @@ class PromptAssembler @Inject constructor() {
             "2. Select available cosmetic items from the COSMETICS section."
         }
 
+        val lockedAnchors = clothingCandidates.filter {
+            it.retrievalReason.contains("LOCKED ANCHOR", ignoreCase = true)
+        }
+        val anchorInstruction = if (lockedAnchors.isNotEmpty()) {
+            val anchorListText = lockedAnchors.joinToString(", ") { prov ->
+                val item = prov.clothingItem
+                "item w_${item?.internalId} (\"${item?.name}\")"
+            }
+            "0. MANDATORY OUTFIT ANCHOR: You MUST include $anchorListText in your selectedClothingIds array."
+        } else {
+            ""
+        }
+
         val prompt = """
             You are the KoColor Style Architect AI. Generate a "Style Blueprint" that is both stylistically harmonic and protective.
             
@@ -62,6 +75,7 @@ class PromptAssembler @Inject constructor() {
             $compactManifest
             
             GOAL:
+            $anchorInstruction
             $clothingGoal
             $cosmeticGoal
             3. Construct a harmonic style where all colors work together, including a rationale referencing ONLY selected item IDs.
