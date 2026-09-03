@@ -56,19 +56,17 @@ class PromptAssembler @Inject constructor() {
         }
 
         val weatherDetails = buildList {
-            add("Temp: ${context.weatherTempC}°C")
-            add("UV: ${context.uvIndex}")
+            context.weatherTempC.takeIf { it != 0f }?.let { add("Temp: ${it}°C") }
+            context.uvIndex.takeIf { it != 0f }?.let { add("UV: $it") }
         }.joinToString(", ")
 
         val weatherContextStr = buildString {
-            if (context.weather.isNotBlank() && !context.weather.contains("Temp:", ignoreCase = true)) {
-                append(context.weather)
+            if (context.weather.isNotBlank()) {
+                append(context.weather.trim())
             }
-            if (weatherDetails.isNotEmpty() && !context.weather.contains("Temp:", ignoreCase = true)) {
+            if (weatherDetails.isNotBlank()) {
                 if (isNotEmpty()) append(" ")
                 append("($weatherDetails)")
-            } else if (context.weather.contains("Temp:", ignoreCase = true)) {
-                append(context.weather)
             }
         }.ifBlank { "Clear" }
 
