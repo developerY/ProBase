@@ -1,53 +1,74 @@
 # KoColor Recommendation Pipeline Refactoring & Validation Specification
 
-This document details the refactoring of the **KoColor Recommendation Pipeline** (`StyleSimulatorEngine`, `PromptAssembler`, `RecommendationValidator`, `WardrobeCandidateFilter`) to eliminate LLM hallucinations, enforce dynamic prompt construction, implement post-LLM validation, and apply relational cosmetic scoring.
+This document details the refactoring of the **KoColor Recommendation Pipeline** (`StyleSimulatorEngine`, `PromptAssembler`, `RecommendationValidator`, `WardrobeCandidateFilter`, `GreedyRehydrator`). It establishes a deterministic-first recommendation architecture where Gemini acts purely as a synthesis layer, while strictly typed deterministic code controls evidence, constraints, validation, and persistence.
 
 ---
 
-## 1. Executive Summary
+## 1. System Intent & Architecture
 
-While the **FASHIONISTA Evaluation Engine** handles pure offline aesthetic scoring, the **KoColor Recommendation Pipeline** is responsible for generating personalized daily style recommendations ("What should I wear?").
+While **FASHIONISTA** operates as an independent, offline measurement tool ("How good is this outfit?"), the **KoColor Recommendation Engine** serves as the AI style architect ("What should I wear today?").
 
-### Key Objectives Achieved:
-1. **Dynamic Pre-Flight Prompt Construction**: Automatically adapts prompt requests (`Select BEST 3 clothing items`, `Select BEST 2 clothing items`) based strictly on available categories in the candidate manifest.
-2. **Strict Grounding Rule**: Enforces an explicit system instruction preventing LLMs from inventing ungrounded stylistic adjectives (e.g. calling seamless nylon "structural").
-3. **Deterministic Post-LLM Validator (`RecommendationValidator.kt`)**: Intercepts, validates, and sanitizes raw JSON from Gemini before it reaches UI state flows.
-4. **Relational Cosmetic Scoring**: Replaces flat `3.10` scores with a dynamic mathematical temperature delta (`3.85`, `3.60`, `3.10`) matching candidate cosmetics against locked outfit anchors.
-5. **Missing Category & Slot Fallback**: Dynamically adapts prompt constraints and post-validation assertions when wardrobe categories (e.g., shoes) are sparse.
+This refactoring hardens the recommendation engine to contain LLM hallucinations and prevent ungrounded output from entering trusted application state by enforcing typed domain boundaries before and after the generative step.
 
 ---
 
-## 2. Refactoring Tasks & Code Changes
+## 2. Task 1: Typed Dynamic Prompt Construction & Grounding
 
-### Task 1: Typed Dynamic Pre-Flight Prompt Construction & Grounding
-**File**: [`PromptAssembler.kt`](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/usecase/PromptAssembler.kt)
+### File Modified:
+* [`PromptAssembler.kt`](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/usecase/PromptAssembler.kt)
 
-* **Typed Candidate Evaluation**: Inspects `clothingCandidates` and `cosmeticCandidates` domain objects (avoiding string parsing on serialized manifests) to construct exact category goals:
-  ```kotlin
-  val availableClothingCategories = clothingCandidates.mapNotNull { it.clothingItem?.category }.toSet()
-  val hasShoes = clothingCandidates.isEmpty() || availableClothingCategories.contains(ClothingCategory.SHOES)
+### Implementation:
+Prompt instructions are built deterministically from typed candidate structures, ensuring prompt requirements and validator assertions derive from a common source of truth:
 
-  val clothingGoal = if (hasShoes) {
-      "1. Select BEST 3 clothing items (1 Top, 1 Bottom, 1 Shoes) from the WARDROBE section."
-  } else {
-      "1. Select BEST 2 clothing items (1 Top, 1 Bottom) from the WARDROBE section."
-  }
-  ```
-* **Strict Grounding Instruction Added**:
-  ```text
-  STRICT GROUNDING RULE:
-  Do not invent stylistic adjectives (e.g., do not call nylon 'structural'). Describe items strictly using the physical materials and attributes listed in the manifest.
-  ```
+```kotlin
+// 1. Typed evaluation of clothing candidate availability
+val availableClothingCategories = clothingCandidates.mapNotNull { it.clothingItem?.category }.toSet()
+val hasShoes = if (clothingCandidates.isNotEmpty()) {
+    availableClothingCategories.contains(ClothingCategory.SHOES)
+} else {
+    compactManifest.contains("SHOES", ignoreCase = true)
+}
+
+val clothingGoal = if (hasShoes) {
+    "1. Select BEST 3 clothing items (1 Top, 1 Bottom, 1 Shoes) from the WARDROBE section."
+} else {
+    "1. Select BEST 2 clothing items (1 Top, 1 Bottom) from the WARDROBE section."
+}
+
+// 2. Typed evaluation of cosmetic candidate availability
+val availableCosmeticCategories = cosmeticCandidates.mapNotNull { it.cosmeticItem?.macroCategory }.toSet()
+val cosmeticCategories = mutableListOf<String>()
+if (availableCosmeticCategories.contains(MacroCategory.EYES)) cosmeticCategories.add("Eye")
+if (availableCosmeticCategories.contains(MacroCategory.DIMENSION)) cosmeticCategories.add("Cheek")
+if (availableCosmeticCategories.contains(MacroCategory.LIPS)) cosmeticCategories.add("Lip")
+if (availableCosmeticCategories.contains(MacroCategory.NAILS)) cosmeticCategories.add("Nail")
+
+val cosmeticGoal = if (cosmeticCategories.isNotEmpty()) {
+    "2. Select 1 item from each available cosmetic role (${cosmeticCategories.joinToString(", ")}) from the COSMETICS section."
+} else {
+    "2. Select available cosmetic items from the COSMETICS section."
+}
+```
+
+### Strict Grounding Rule:
+```text
+STRICT GROUNDING RULE:
+Do not invent stylistic adjectives (e.g., do not call nylon 'structural'). Describe items strictly using the physical materials and attributes listed in the manifest.
+```
 
 ---
 
-### Task 2: Deterministic Post-LLM Validator
-**File**: [`RecommendationValidator.kt`](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/usecase/RecommendationValidator.kt)
+## 3. Task 2: Deterministic Post-LLM Validator
 
-Interceptors raw Gemini JSON and performs three verification passes:
+### File Created:
+* [`RecommendationValidator.kt`](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/usecase/RecommendationValidator.kt)
 
-1. **ID Existence Check**: Asserts every ID in `selectedClothingIds` and `selectedCosmeticIds` actually exists in the candidate manifest. Removes invalid or hallucinated IDs.
-2. **Rationale Cross-Check & Sanitization**: Scans `rationale` for product names. If a product name is referenced in `rationale` but its ID is missing from `selectedClothingIds` or `selectedCosmeticIds`, strips that sentence from the rationale:
+### Implementation:
+The validator enforces deterministic compositional invariants:
+
+1. **ID Existence Check**: Asserts every parsed ID matches the candidate manifest. Removes invalid or hallucinated IDs.
+2. **Duplicate-ID Rejection**: Filters out duplicate ID references.
+3. **Rationale Sanitization (Regex Sentence-Boundary Surgery)**: Scans `rationale` for product names. If a product is mentioned in `rationale` but its ID is unselected, strips that sentence from `rationale`:
    ```kotlin
    clothingMap.forEach { (name, item) ->
        val id = "w_${item.internalId}"
@@ -57,14 +78,19 @@ Interceptors raw Gemini JSON and performs three verification passes:
        }
    }
    ```
-3. **Integration**: Integrated into [`StyleSimulatorEngine.kt`](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/usecase/StyleSimulatorEngine.kt#L150) prior to caching or UI emission.
+4. **Pipeline Integration**: Integrated directly into [`StyleSimulatorEngine.kt`](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/usecase/StyleSimulatorEngine.kt#L150) prior to caching or UI emission.
 
 ---
 
-### Task 3: Relational Cosmetic Scoring
-**File**: [`WardrobeCandidateFilter.kt`](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/usecase/WardrobeCandidateFilter.kt#L145)
+## 4. Task 3: Relational Cosmetic Temperature Scoring
 
-Replaced flat `3.10` cosmetic scores with a relational temperature delta matching candidate cosmetics against the locked outfit anchor and user appearance profile:
+### File Modified:
+* [`WardrobeCandidateFilter.kt`](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/usecase/WardrobeCandidateFilter.kt#L145)
+
+### Implementation:
+Cosmetics are ranked dynamically by color temperature compatibility against the user's appearance profile and telemetry.
+
+> **Note**: The constants (`1.85`, `1.25`, `0.60`) are deterministic recommendation heuristics designed to create ranking deltas prior to LLM synthesis. They are separate from FASHIONISTA calibration parameters.
 
 ```kotlin
 private fun calculateCosmeticScore(item: CosmeticItem, context: StyleRequestContext): Double {
@@ -102,20 +128,51 @@ private fun calculateCosmeticScore(item: CosmeticItem, context: StyleRequestCont
 }
 ```
 
-* **Result**: Produces a mathematical ranking delta (`3.85`, `3.60`, `3.10`) that orders cosmetics by temperature harmony.
+---
+
+## 5. Task 4: Ghost Anchor Resolution & Slot Policy Enforcement
+
+### File Modified:
+* [`GreedyRehydrator.kt`](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/features/analyzer/src/main/java/com/zoewave/probase/kocolor/features/analyzer/simulator/ui/GreedyRehydrator.kt)
+* [`StyleSimulatorEngine.kt`](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/usecase/StyleSimulatorEngine.kt#L250)
+
+### Implementation:
+1. **Ghost Anchors**: `selectionState.activeAnchors` are prepended into `topWardrobeProv`, guaranteeing locked anchors are serialized into the manifest.
+2. **Candidate Diversity**: Pre-audits candidates to ensure `TOPS`/`DRESSES`, `BOTTOMS`, and `SHOES` are represented before constructing the prompt.
+3. **If No `SHOES` Candidate Exists in Wardrobe Inventory**: The prompt adapts dynamically to request 2 items (`Top, Bottom`), and `RecommendationValidator` adjusts assertions accordingly.
 
 ---
 
-### Task 4: Slot Deduplication & Missing Category Fallback
-**File**: [`StyleSimulatorEngine.kt`](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/usecase/StyleSimulatorEngine.kt#L250)
+## 6. Task 5: FASHIONISTA Score Persistence
 
-* **Pre-Flight Category Diversity Check**: Audits `topWardrobeProv` to verify `TOPS`/`DRESSES`, `BOTTOMS`, and `SHOES` are present in candidates.
-* If a category is missing (e.g. 0 shoes in top $K$), automatically injects top supplementary candidates for that missing category before constructing the prompt.
-* If 0 shoes exist in the user's entire closet, prompt adapts dynamically to request 2 items (`Top, Bottom`), and `RecommendationValidator` adjusts assertions accordingly.
+### Files Modified:
+* [`FashionModels.kt`](file:///Users/developer/AndroidStudioProjects/ProBase/core/model/src/main/java/com/zoewave/probase/core/model/ritual/FashionModels.kt)
+* [`StyleSimulatorViewModel.kt`](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/features/analyzer/src/main/java/com/zoewave/probase/kocolor/features/analyzer/simulator/ui/StyleSimulatorViewModel.kt)
+* [`VisualBlueprintModels.kt`](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/features/analyzer/src/main/java/com/zoewave/probase/kocolor/features/analyzer/simulator/ui/components/graphics/VisualBlueprintModels.kt)
+
+### Implementation:
+The persisted score in history is strictly defined as the calculated FASHIONISTA score (`fashionistaScore`), resolving the issue where historical items displayed a default `88`.
+
+```text
+Recommendation Engine
+        │ (generates outfit)
+        ▼
+Selected Ensemble
+        │ (observed as FashionistaObservation)
+        ▼
+FASHIONISTA Evaluation Engine
+        │
+        ▼
+aestheticScore + coverage + radar
+        │
+        ▼
+History Persistence
+```
 
 ---
 
-## 3. Verification & Test Results
+## 7. Build & Verification Results
 
 * **Unit Tests**: Executed `:applications:kocolor:data:testDebugUnitTest` and `:applications:kocolor:features:analyzer:testDebugUnitTest`. **35 out of 35 unit tests passed 100% green**.
-* **Debug Build**: `:applications:kocolor:apps:mobile:assembleDebug` compiled and assembled successfully with 0 errors.
+* **Debug Build**: `:applications:kocolor:apps:mobile:assembleDebug` assembled successfully with 0 errors.
+* **Release Build**: `:applications:kocolor:apps:mobile:assembleRelease` assembled with R8 log stripping enabled and 0 errors.
