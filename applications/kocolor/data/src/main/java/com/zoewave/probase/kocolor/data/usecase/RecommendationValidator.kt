@@ -57,6 +57,27 @@ class RecommendationValidator @Inject constructor() {
             }
         }
 
+        // 1b. Mandatory Locked Anchor Enforcement (Enforces locked anchors like w_50)
+        val lockedAnchorIds = clothingCandidates.filter {
+            it.retrievalReason.contains("LOCKED ANCHOR", ignoreCase = true)
+        }.mapNotNull { prov -> prov.clothingItem?.let { "w_${it.internalId}" } }
+
+        val finalClothingIds = filteredClothingIds.toMutableList()
+        lockedAnchorIds.forEach { anchorId ->
+            if (anchorId !in finalClothingIds) {
+                Log.w("RecommendationValidator", "Re-injecting omitted locked anchor $anchorId into selection")
+                val anchorItem = clothingCandidates.find { it.clothingItem?.let { item -> "w_${item.internalId}" } == anchorId }?.clothingItem
+                if (anchorItem != null) {
+                    // Remove any item sharing the same category (e.g. remove w_51 if w_50 is locked shoes)
+                    finalClothingIds.removeAll { id ->
+                        val item = clothingCandidates.find { it.clothingItem?.let { c -> "w_${c.internalId}" } == id }?.clothingItem
+                        item != null && item.category == anchorItem.category && id != anchorId
+                    }
+                    finalClothingIds.add(anchorId)
+                }
+            }
+        }
+
         // 2. Rationale Cross-Check & Sanitization (Strips references to unselected products)
         val clothingMap = clothingCandidates.mapNotNull { it.clothingItem }.associateBy { it.name }
         val cosmeticMap = cosmeticCandidates.mapNotNull { it.cosmeticItem }.associateBy { it.name }
@@ -64,7 +85,7 @@ class RecommendationValidator @Inject constructor() {
         var sanitizedRationale = rawBlueprint.rationale
         clothingMap.forEach { (name, item) ->
             val id = "w_${item.internalId}"
-            if (id !in filteredClothingIds && sanitizedRationale.contains(name, ignoreCase = true)) {
+            if (id !in finalClothingIds && sanitizedRationale.contains(name, ignoreCase = true)) {
                 Log.w("RecommendationValidator", "Sanitizing rationale: stripping reference to unselected clothing '$name'")
                 sanitizedRationale = sanitizedRationale.replace(Regex("(?i)[^.]*\\b${Regex.escape(name)}\\b[^.]*\\."), "")
             }
@@ -80,7 +101,7 @@ class RecommendationValidator @Inject constructor() {
 
         val sanitizedBlueprint = rawBlueprint.copy(
             rationale = sanitizedRationale.trim(),
-            selectedClothingIds = filteredClothingIds,
+            selectedClothingIds = finalClothingIds,
             selectedCosmeticIds = filteredCosmeticIds
         )
 
