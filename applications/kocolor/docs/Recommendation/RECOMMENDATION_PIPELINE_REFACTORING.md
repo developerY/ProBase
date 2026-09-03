@@ -1,6 +1,6 @@
 # KoColor Recommendation Pipeline Refactoring & Validation Specification
 
-This document details the refactoring of the **KoColor Recommendation Pipeline** (`StyleSimulatorEngine`, `PromptAssembler`, `RecommendationValidator`, `WardrobeCandidateFilter`, `GreedyRehydrator`). It establishes a deterministic-first recommendation architecture where Gemini acts purely as a synthesis layer, while strictly typed deterministic code controls evidence, constraints, validation, and persistence.
+This document details the refactoring of the **KoColor Recommendation Pipeline** (`StyleSimulatorEngine`, `PromptAssembler`, `RecommendationValidator`, `WardrobeCandidateFilter`, `GreedyRehydrator`). It establishes a deterministic-first recommendation architecture where Gemini acts as a constrained synthesis and selection layer, while strictly typed deterministic code controls evidence, constraints, validation, and persistence.
 
 ---
 
@@ -23,11 +23,8 @@ Prompt instructions are built deterministically from typed candidate structures,
 ```kotlin
 // 1. Typed evaluation of clothing candidate availability
 val availableClothingCategories = clothingCandidates.mapNotNull { it.clothingItem?.category }.toSet()
-val hasShoes = if (clothingCandidates.isNotEmpty()) {
-    availableClothingCategories.contains(ClothingCategory.SHOES)
-} else {
-    compactManifest.contains("SHOES", ignoreCase = true)
-}
+val hasShoes = availableClothingCategories.contains(ClothingCategory.SHOES) ||
+        (clothingCandidates.isEmpty() && compactManifest.contains("SHOES", ignoreCase = true))
 
 val clothingGoal = if (hasShoes) {
     "1. Select BEST 3 clothing items (1 Top, 1 Bottom, 1 Shoes) from the WARDROBE section."
@@ -66,9 +63,12 @@ Do not invent stylistic adjectives (e.g., do not call nylon 'structural'). Descr
 ### Implementation:
 The validator enforces deterministic compositional invariants:
 
-1. **ID Existence Check**: Asserts every parsed ID matches the candidate manifest. Removes invalid or hallucinated IDs.
-2. **Duplicate-ID Rejection**: Filters out duplicate ID references.
-3. **Rationale Sanitization (Regex Sentence-Boundary Surgery)**: Scans `rationale` for product names. If a product is mentioned in `rationale` but its ID is unselected, strips that sentence from `rationale`:
+1. **Grounded ID Check**: Rejects or removes IDs that are not present in the grounded candidate manifest.
+2. **Duplicate-ID Rejection**: Rejects or removes duplicate ID references.
+3. **Category & Role Validity**: Maps IDs back to domain entities to verify category classification.
+4. **Required Role Coverage**: Verifies selected items satisfy requested TOP/BOTTOM/SHOES composition goals.
+5. **Cardinality Constraints**: Asserts exactly 3 (or 2) clothing items and requested cosmetic roles.
+6. **Rationale Sentence Sanitization**: Scans `rationale` for product names. If a product is mentioned in `rationale` but its ID is unselected, strips that sentence from `rationale`:
    ```kotlin
    clothingMap.forEach { (name, item) ->
        val id = "w_${item.internalId}"
@@ -78,7 +78,7 @@ The validator enforces deterministic compositional invariants:
        }
    }
    ```
-4. **Pipeline Integration**: Integrated directly into [`StyleSimulatorEngine.kt`](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/usecase/StyleSimulatorEngine.kt#L150) prior to caching or UI emission.
+7. **Pipeline Integration**: Integrated directly into [`StyleSimulatorEngine.kt`](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/usecase/StyleSimulatorEngine.kt#L150) prior to caching or UI emission.
 
 ---
 
@@ -148,7 +148,7 @@ private fun calculateCosmeticScore(item: CosmeticItem, context: StyleRequestCont
 ### Files Modified:
 * [`FashionModels.kt`](file:///Users/developer/AndroidStudioProjects/ProBase/core/model/src/main/java/com/zoewave/probase/core/model/ritual/FashionModels.kt)
 * [`StyleSimulatorViewModel.kt`](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/features/analyzer/src/main/java/com/zoewave/probase/kocolor/features/analyzer/simulator/ui/StyleSimulatorViewModel.kt)
-* [`VisualBlueprintModels.kt`](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/features/analyzer/src/main/java/com/zoewave/probase/kocolor/features/analyzer/simulator/ui/components/graphics/VisualBlueprintModels.kt)
+* [`VisualBlueprintModels.kt`](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/features/analyzer/simulator/ui/components/graphics/VisualBlueprintModels.kt)
 
 ### Implementation:
 The persisted score in history is strictly defined as the calculated FASHIONISTA score (`fashionistaScore`), resolving the issue where historical items displayed a default `88`.

@@ -21,11 +21,7 @@ class PromptAssembler @Inject constructor() {
         val profile = context.appearanceProfile
 
         val availableClothingCategories = clothingCandidates.mapNotNull { it.clothingItem?.category }.toSet()
-        val hasShoes = if (clothingCandidates.isNotEmpty()) {
-            availableClothingCategories.contains(ClothingCategory.SHOES)
-        } else {
-            compactManifest.contains("SHOES", ignoreCase = true)
-        }
+        val hasShoes = availableClothingCategories.contains(ClothingCategory.SHOES) || (clothingCandidates.isEmpty() && compactManifest.contains("SHOES", ignoreCase = true))
 
         val clothingGoal = if (hasShoes) {
             "1. Select BEST 3 clothing items (1 Top, 1 Bottom, 1 Shoes) from the WARDROBE section."
