@@ -234,19 +234,8 @@ class StyleSimulatorEngine @Inject constructor(
 
         while (currentK >= cap.minCandidateAdditions) {
             val selectionState = contextEngine.generateSelectionState(wardrobe, context.lockedConstraints, context)
-            val cCandidates = candidateFilter.getCosmeticCandidates(cosmetics, context, limit = currentK)
-            
-            // Map cosmetics to provenance for audit logging
-            val cCandidatesProv = cCandidates.map { item ->
-                CandidateProvenance(
-                    cosmeticItem = item,
-                    contextScore = 0.5f,
-                    colorScore = 0.8f,
-                    appearanceScore = 0.8f,
-                    freshnessScore = 1.0f,
-                    retrievalReason = if (item.isSignature) "[Signature Item] Rotation bypassed." else "Role diversity match"
-                )
-            }
+            val cCandidatesProv = candidateFilter.getCosmeticCandidateProvenance(cosmetics, context, limit = currentK)
+            val cCandidates = cCandidatesProv.mapNotNull { it.cosmeticItem }
 
             // 1. Convert locked active anchors to candidate provenance (resolves ghost anchor bug)
             val anchorProv = selectionState.activeAnchors.map { anchor ->

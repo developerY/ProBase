@@ -4,6 +4,7 @@ import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.core.model.ritual.MacroCategory
+import com.zoewave.probase.kocolor.data.color.CandidateProvenance
 import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
@@ -90,11 +91,11 @@ class WardrobeCandidateFilter @Inject constructor(
         return score
     }
 
-    suspend fun getCosmeticCandidates(
+    suspend fun getCosmeticCandidateProvenance(
         inventory: List<CosmeticItem>,
         context: StyleRequestContext,
         limit: Int
-    ): List<CosmeticItem> {
+    ): List<CandidateProvenance> {
         val noiseCategories = setOf("oral", "tools", "fragrance", "grooming", "organizers")
         
         val eligibleItems = inventory.filter { item ->
@@ -107,13 +108,30 @@ class WardrobeCandidateFilter @Inject constructor(
         val anchoredItems = eligibleItems.filter { "c_${it.internalId}" in context.anchoredCosmeticIds }
         val remainingItems = eligibleItems.filter { "c_${it.internalId}" !in context.anchoredCosmeticIds }
 
-        // Stage 2: Soft Scoring & Ranking
-        val rankedRemaining = remainingItems.map { item ->
-            item to calculateCosmeticScore(item, context)
-        }.sortedByDescending { it.second }
-         .map { it.first }
+        // Stage 2: Soft Scoring & Ranking with CandidateProvenance
+        val rankedRemainingProv = remainingItems.map { item ->
+            val score = calculateCosmeticScore(item, context)
+            CandidateProvenance(
+                cosmeticItem = item,
+                contextScore = score.toFloat(),
+                colorScore = 0.8f,
+                appearanceScore = 0.8f,
+                freshnessScore = 1.0f,
+                retrievalReason = "Relational temperature match (${item.temperature.name})"
+            )
+        }.sortedByDescending { it.totalScore }
 
-        // Stage 3: Category-Diverse Candidate Allocation (Ensuring EYES, DIMENSION, LIPS, NAILS are represented)
+        val anchoredProv = anchoredItems.map { item ->
+            CandidateProvenance(
+                cosmeticItem = item,
+                contextScore = 2.0f,
+                colorScore = 1.0f,
+                appearanceScore = 1.0f,
+                freshnessScore = 1.0f,
+                retrievalReason = if (item.isSignature) "[Signature Item] Rotation bypassed." else "[LOCKED ANCHOR] Required cosmetic anchor"
+            )
+        }
+
         val targetCategories = setOf(
             MacroCategory.EYES,
             MacroCategory.DIMENSION,
@@ -121,24 +139,30 @@ class WardrobeCandidateFilter @Inject constructor(
             MacroCategory.NAILS
         )
 
-        val diverseSet = mutableListOf<CosmeticItem>()
-        diverseSet.addAll(anchoredItems)
+        val diverseSet = mutableListOf<CandidateProvenance>()
+        diverseSet.addAll(anchoredProv)
 
-        // Ensure at least 2 candidates for each target category if available
         for (category in targetCategories) {
-            val categoryMatches = rankedRemaining.filter { it.macroCategory == category }
+            val categoryMatches = rankedRemainingProv.filter { it.cosmeticItem?.macroCategory == category }
             diverseSet.addAll(categoryMatches.take(2))
         }
 
-        // Fill remaining limit with highest-scored items
-        for (item in rankedRemaining) {
+        for (prov in rankedRemainingProv) {
             if (diverseSet.size >= limit) break
-            if (item !in diverseSet) {
-                diverseSet.add(item)
+            if (prov !in diverseSet) {
+                diverseSet.add(prov)
             }
         }
 
         return diverseSet.take(limit)
+    }
+
+    suspend fun getCosmeticCandidates(
+        inventory: List<CosmeticItem>,
+        context: StyleRequestContext,
+        limit: Int
+    ): List<CosmeticItem> {
+        return getCosmeticCandidateProvenance(inventory, context, limit).mapNotNull { it.cosmeticItem }
     }
 
     private fun calculateCosmeticScore(item: CosmeticItem, context: StyleRequestContext): Double {

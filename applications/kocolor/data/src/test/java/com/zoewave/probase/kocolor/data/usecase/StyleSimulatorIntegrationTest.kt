@@ -71,7 +71,7 @@ class StyleSimulatorIntegrationTest {
         
         coEvery { capabilityRouter.getRankedAvailableProviders() } returns listOf(provider)
         coEvery { contextEngine.generateSelectionState(any(), any(), any()) } returns StyleSelectionState()
-        coEvery { candidateFilter.getCosmeticCandidates(any(), any(), any()) } returns emptyList()
+        coEvery { candidateFilter.getCosmeticCandidateProvenance(any(), any(), any()) } returns emptyList()
 
         val result = engine.generateBlueprint(items, emptyList(), context)
 
