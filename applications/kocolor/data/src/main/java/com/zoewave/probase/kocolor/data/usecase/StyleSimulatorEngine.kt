@@ -307,6 +307,8 @@ class StyleSimulatorEngine @Inject constructor(
             val candidateInput = promptAssembler.buildExactRequest(
                 context = context,
                 compactManifest = manifest,
+                clothingCandidates = topWardrobeProv,
+                cosmeticCandidates = cCandidatesProv,
                 providerCapability = cap
             )
             
