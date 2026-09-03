@@ -55,6 +55,23 @@ class PromptAssembler @Inject constructor() {
             ""
         }
 
+        val weatherDetails = buildList {
+            add("Temp: ${context.weatherTempC}°C")
+            add("UV: ${context.uvIndex}")
+        }.joinToString(", ")
+
+        val weatherContextStr = buildString {
+            if (context.weather.isNotBlank() && !context.weather.contains("Temp:", ignoreCase = true)) {
+                append(context.weather)
+            }
+            if (weatherDetails.isNotEmpty() && !context.weather.contains("Temp:", ignoreCase = true)) {
+                if (isNotEmpty()) append(" ")
+                append("($weatherDetails)")
+            } else if (context.weather.contains("Temp:", ignoreCase = true)) {
+                append(context.weather)
+            }
+        }.ifBlank { "Clear" }
+
         val prompt = """
             You are the KoColor Style Architect AI. Generate a "Style Blueprint" that is both stylistically harmonic and protective.
             
@@ -66,7 +83,7 @@ class PromptAssembler @Inject constructor() {
             - Depth: ${profile.depth}
             - Contrast: ${profile.contrast}
             
-            WEATHER/ATMOSPHERIC: ${context.weather} (Temp: ${context.weatherTempC}°C, UV: ${context.uvIndex})
+            WEATHER/ATMOSPHERIC: $weatherContextStr
             CIRCADIAN CONTEXT: ${context.circadianContext} (Wellness Score: ${context.wellnessScore})
             USER INTENT: ${context.intent}
             OCCASION: ${context.occasion}

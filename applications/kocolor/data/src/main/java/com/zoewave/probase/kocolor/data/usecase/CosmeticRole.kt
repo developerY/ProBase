@@ -10,13 +10,14 @@ enum class CosmeticRole(val displayName: String) {
     PREP("Prep");
 
     companion object {
-        fun fromMacroCategory(macroCategory: MacroCategory): CosmeticRole {
+        fun fromMacroCategory(macroCategory: MacroCategory): CosmeticRole? {
             return when (macroCategory) {
                 MacroCategory.EYES -> EYE
                 MacroCategory.DIMENSION -> CHEEK
                 MacroCategory.LIPS -> LIP
                 MacroCategory.NAILS -> NAIL
-                else -> PREP
+                MacroCategory.PREP -> PREP
+                else -> null
             }
         }
     }
