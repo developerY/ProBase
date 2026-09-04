@@ -7,6 +7,7 @@ import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.core.model.ritual.Temperature
 import com.zoewave.probase.core.util.color.ColorQuantizer
 import com.zoewave.probase.kocolor.data.color.CandidateProvenance
+import com.zoewave.probase.kocolor.data.color.FashionistaWeights
 import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -78,20 +79,40 @@ class WardrobeCandidateFilter @Inject constructor(
     }
 
     private fun calculateScore(item: ClothingItem, context: StyleRequestContext): Double {
-        var score = 0.0
-        
-        // 1. Match against AppearanceProfile (undertone match, contrast delta)
+        var score = 1.0
+        val tempC = context.weatherTempC ?: 22f
+
+        // 1. Seasonal / Appearance Harmony Bonus
         val appearanceString = "${context.appearanceProfile.undertone} • ${context.appearanceProfile.depth} • ${context.appearanceProfile.contrast}"
-        if (appearanceString.contains(item.colorTemperature ?: "", ignoreCase = true)) {
-            score += 10.0
+        val itemTemp = item.colorTemperature ?: "Neutral"
+        if (appearanceString.contains(itemTemp, ignoreCase = true)) {
+            score += FashionistaWeights.SEASONAL_HARMONY_BONUS
+        } else if (itemTemp.equals("Neutral", ignoreCase = true)) {
+            score += FashionistaWeights.NEUTRAL_ANCHOR_BONUS
         }
-        
-        // 2. Score contextual relevance against userIntent keywords and occasion tags
+
+        // 2. Weather & Thermal Mismatch Penalty (> 20°C vs Heavy Materials)
+        val nameLower = item.name.lowercase()
+        val materialLower = (item.material ?: "").lowercase()
+        val isHeavyMaterial = nameLower.contains("velvet") || nameLower.contains("shearling") ||
+                nameLower.contains("wool") || nameLower.contains("fleece") || nameLower.contains("down") ||
+                materialLower.contains("velvet") || materialLower.contains("shearling") || materialLower.contains("wool")
+
+        val isBreathableMaterial = nameLower.contains("linen") || nameLower.contains("cotton") ||
+                nameLower.contains("silk") || materialLower.contains("linen") || materialLower.contains("silk")
+
+        if (tempC > 20.0f && isHeavyMaterial) {
+            score += FashionistaWeights.THERMAL_MISMATCH_PENALTY // -3.0
+        } else if (tempC > 20.0f && isBreathableMaterial) {
+            score += FashionistaWeights.WEATHER_ALIGNMENT_BONUS // +1.5
+        }
+
+        // 3. Score contextual relevance against user intent keywords and occasion
         val keywords = context.intent.lowercase().split(" ", ",", ".")
         if (keywords.any { item.name.contains(it, ignoreCase = true) || (item.notes?.contains(it, ignoreCase = true) ?: false) }) {
-            score += 20.0
+            score += 2.0
         }
-        
+
         return score
     }
 
@@ -193,10 +214,21 @@ class WardrobeCandidateFilter @Inject constructor(
 
         val cosmeticTemp = effectiveTemp.name.uppercase()
         when {
-            isWarmContext && (cosmeticTemp.contains("WARM") || cosmeticTemp.contains("GOLDEN")) -> score += 1.85
-            isCoolContext && (cosmeticTemp.contains("COOL") || cosmeticTemp.contains("ROSY")) -> score += 1.85
-            cosmeticTemp.contains("NEUTRAL") -> score += 1.25
-            else -> score += 0.60
+            // Relational Harmony: Warm cosmetic in Warm context OR Cool in Cool context
+            (isWarmContext && cosmeticTemp.contains("WARM")) ||
+            (isCoolContext && cosmeticTemp.contains("COOL")) -> {
+                score += FashionistaWeights.SEASONAL_HARMONY_BONUS // +2.0
+            }
+            // Color Clash Penalty: Cool cosmetic in Warm context OR Warm in Cool context
+            (isWarmContext && cosmeticTemp.contains("COOL")) ||
+            (isCoolContext && cosmeticTemp.contains("WARM")) -> {
+                score += FashionistaWeights.COLOR_CLASH_PENALTY // -2.5
+            }
+            // Neutral Anchor Bonus
+            cosmeticTemp.contains("NEUTRAL") -> {
+                score += FashionistaWeights.NEUTRAL_ANCHOR_BONUS // +1.25
+            }
+            else -> score += 0.50
         }
 
         // 2. Keyword & Intent Relevance
