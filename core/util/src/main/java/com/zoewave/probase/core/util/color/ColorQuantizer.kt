@@ -3,6 +3,7 @@ package com.zoewave.probase.core.util.color
 import android.graphics.Color
 import androidx.core.graphics.ColorUtils
 import com.zoewave.probase.core.model.ritual.ColorFamily
+import com.zoewave.probase.core.model.ritual.Temperature
 
 object ColorQuantizer {
 
@@ -40,6 +41,30 @@ object ColorQuantizer {
             closestFamily
         } catch (e: Exception) {
             ColorFamily.UNKNOWN
+        }
+    }
+
+    /**
+     * Determines temperature (WARM, COOL, NEUTRAL) from hex color.
+     */
+    fun determineTemperature(hexColor: String?): Temperature {
+        if (hexColor.isNullOrBlank()) return Temperature.NEUTRAL
+        return try {
+            val colorInt = Color.parseColor(hexColor)
+            val r = Color.red(colorInt) / 255f
+            val g = Color.green(colorInt) / 255f
+            val b = Color.blue(colorInt) / 255f
+
+            val rbDiff = r - b
+            val gbDiff = g - b
+            val warmMetric = (rbDiff * 0.7f + gbDiff * 0.3f) - 0.12f
+            when {
+                warmMetric > 0.05f -> Temperature.WARM
+                warmMetric < -0.05f -> Temperature.COOL
+                else -> Temperature.NEUTRAL
+            }
+        } catch (e: Exception) {
+            Temperature.NEUTRAL
         }
     }
 }
