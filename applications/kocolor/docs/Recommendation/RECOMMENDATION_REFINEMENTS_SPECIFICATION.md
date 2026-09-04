@@ -9,7 +9,7 @@ This document details the technical fixes implemented for the **3.10 Cosmetic Fl
 | Module / Component | Issue Description | Engineering Fix |
 | :--- | :--- | :--- |
 | **Cosmetic Scoring Engine** | Audit logs showed flat `3.10` score for all cosmetics (`Score: 3.10 -> Reason: Role diversity match`). | `StyleSimulatorEngine` was overriding/discarding the relational candidate scores produced by `WardrobeCandidateFilter`. Updated `WardrobeCandidateFilter.getCosmeticCandidateProvenance()` to pass calculated scores directly. |
-| **Weather Telemetry Prompt** | Prompt received colliding strings (`UV: Unknown, Temp: UnknownC (Temp: 22.0°C, UV: 3.0)`). | Transitioned weather telemetry from pre-formatted string parsing to a typed data model, allowing `PromptAssembler` to construct a single canonical string. |
+| **Weather Telemetry Prompt** | Prompt received colliding strings (`UV: Unknown, Temp: UnknownC (Temp: 22.0°C, UV: 3.0)`). | Transitioned weather telemetry fields to typed nullable float values while retaining the weather description as a non-authoritative display string. |
 | **Cosmetic Domain Role Alignment** | `DIMENSION` was mapped to `Cheek` ad-hoc via string interpolation. | Centralized mapping with `CosmeticRole` enum. Replaced the permissive fallback (`else -> PREP`) with a strict nullable return (`else -> null`) to prevent unmapped categories from silently becoming prep items. |
 
 ---
@@ -48,12 +48,12 @@ val rankedRemainingProv = remainingItems.mapNotNull { item ->
 ### 2. Weather Telemetry Single Source of Truth
 **File**: [`PromptAssembler.kt`](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/usecase/PromptAssembler.kt)
 
-Replaced collision-prone string checking with clean, typed string construction:
+Transitioned weather telemetry fields to typed nullable float values to safely handle real `0.0` measurements. Replaced collision-prone string checking with clean string construction:
 
 ```kotlin
 val weatherDetails = buildList {
-    context.weatherTempC.takeIf { it != 0f }?.let { add("Temp: ${it}°C") }
-    context.uvIndex.takeIf { it != 0f }?.let { add("UV: $it") }
+    context.weatherTempC?.let { add("Temp: ${it}°C") }
+    context.uvIndex?.let { add("UV: $it") }
 }.joinToString(", ")
 
 val weatherContextStr = buildString {
