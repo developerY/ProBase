@@ -4,6 +4,7 @@ import android.util.Log
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.kocolor.data.color.CandidateProvenance
 import com.zoewave.probase.kocolor.data.usecase.StyleBlueprint
+import com.zoewave.probase.kocolor.fashionista.domain.FashionistaScore
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -40,6 +41,10 @@ class StyleAuditLogger @Inject constructor() {
             tokensUsed = tokens
             finalBlueprint = blueprint
         }
+    }
+
+    fun logFashionistaEvaluation(requestId: String, score: FashionistaScore) {
+        trails[requestId]?.fashionistaScore = score
     }
 
     fun printAuditTrail(requestId: String) {
@@ -79,6 +84,17 @@ class StyleAuditLogger @Inject constructor() {
             appendLine("    Selected Clothing: ${trail.finalBlueprint?.selectedClothingIds}")
             appendLine("    Selected Cosmetics: ${trail.finalBlueprint?.selectedCosmeticIds}")
             appendLine("    AI Rationale: \"${trail.finalBlueprint?.rationale ?: "N/A"}\"")
+            appendLine()
+
+            appendLine("[5] AESTHETIC CALIBRATION (FASHIONISTA)")
+            trail.fashionistaScore?.let { score ->
+                val statusText = if (score.isApproved) "APPROVED" else "REJECTED"
+                appendLine("    Color Harmony Score: ${"%.1f".format(score.colorHarmonyScore)} / 100")
+                appendLine("    Silhouette Proportion Score: ${"%.1f".format(score.silhouetteScore)} / 100")
+                appendLine("    Contrast & Depth Score: ${"%.1f".format(score.contrastScore)} / 100")
+                appendLine("    Final FASHIONISTA Score: ${"%.1f".format(score.totalScore)} / 100")
+                appendLine("    Status: $statusText")
+            } ?: appendLine("    NO CALIBRATION RECORDED")
             appendLine("==================================================")
         }.toString()
 

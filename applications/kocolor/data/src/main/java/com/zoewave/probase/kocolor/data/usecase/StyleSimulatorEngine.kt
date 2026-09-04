@@ -9,6 +9,7 @@ import com.zoewave.probase.features.ai.core.AiProvider
 import com.zoewave.probase.features.ai.local.data.PromptCacheRepository
 import com.zoewave.probase.kocolor.data.color.CandidateProvenance
 import com.zoewave.probase.kocolor.data.telemetry.StyleAuditLogger
+import com.zoewave.probase.kocolor.fashionista.domain.FashionistaEvaluator
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -23,7 +24,8 @@ class StyleSimulatorEngine @Inject constructor(
     private val cache: PromptCacheRepository,
     private val auditLogger: StyleAuditLogger,
     private val fallbackEngine: DeterministicStyleEngine,
-    private val validator: RecommendationValidator
+    private val validator: RecommendationValidator,
+    private val fashionistaEvaluator: FashionistaEvaluator
 ) {
 
     companion object {
@@ -89,11 +91,11 @@ class StyleSimulatorEngine @Inject constructor(
                     } catch (e: Exception) {
                         Log.e("StyleSimulatorEngine", "Failed to decode cached result", e)
                         // Continue to execute if cache is corrupt
-                        executeAndCache(provider, fitResult, fingerprint, providerStartTime, requestContext.requestId) ?: continue
+                        executeAndCache(provider, fitResult, fingerprint, providerStartTime, requestContext) ?: continue
                     }
                 }
 
-                val blueprint = executeAndCache(provider, fitResult, fingerprint, providerStartTime, requestContext.requestId)
+                val blueprint = executeAndCache(provider, fitResult, fingerprint, providerStartTime, requestContext)
                 if (blueprint != null) {
                     auditLogger.printAuditTrail(requestContext.requestId)
                     return blueprint
@@ -117,6 +119,9 @@ class StyleSimulatorEngine @Inject constructor(
         Log.i("StyleSimulatorEngine", "All providers failed. Falling back to deterministic engine.")
         val blueprint = fallbackEngine.generate(requestContext)
         
+        val fashionistaScore = fashionistaEvaluator.evaluate(blueprint, requestContext)
+        auditLogger.logFashionistaEvaluation(requestContext.requestId, fashionistaScore)
+
         auditLogger.logAiExecution(
             requestId = requestContext.requestId,
             providerId = "DETERMINISTIC_FALLBACK",
@@ -142,7 +147,7 @@ class StyleSimulatorEngine @Inject constructor(
         fitResult: AdaptiveFitResult,
         fingerprint: String,
         startTime: Long,
-        requestId: String
+        requestContext: StyleRequestContext
     ): StyleBlueprint? {
         val input = fitResult.request
         val executionResult = provider.execute(input)
@@ -163,9 +168,12 @@ class StyleSimulatorEngine @Inject constructor(
                     Log.w("StyleSimulatorEngine", "Sanitized blueprint errors: ${validation.validationErrors.joinToString("; ")}")
                 }
 
+                val fashionistaScore = fashionistaEvaluator.evaluate(blueprint, requestContext)
+                auditLogger.logFashionistaEvaluation(requestContext.requestId, fashionistaScore)
+
                 cache.put(fingerprint, rawResult)
                 auditLogger.logAiExecution(
-                    requestId = requestId,
+                    requestId = requestContext.requestId,
                     providerId = provider.capability.id,
                     tokens = fitResult.tokenCount,
                     blueprint = blueprint
