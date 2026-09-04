@@ -15,34 +15,77 @@ class ColorHarmonicsEvaluator @Inject constructor() {
         if (palette.isEmpty()) return 75.0f
 
         val hslList = palette.mapNotNull { parseToHsl(it) }
-        if (hslList.size < 2) return 80.0f
+        if (hslList.isEmpty()) return 75.0f
+        if (hslList.size == 1) return 85.0f
 
-        var totalDeltaAngle = 0f
-        var pairs = 0
+        var pairHarmonyScore = 0f
+        var pairCount = 0
 
         for (i in hslList.indices) {
             for (j in i + 1 until hslList.size) {
-                val h1 = hslList[i][0]
-                val h2 = hslList[j][0]
-                var diff = abs(h1 - h2)
-                if (diff > 180f) diff = 360f - diff
-                totalDeltaAngle += diff
-                pairs++
+                val hsl1 = hslList[i]
+                val hsl2 = hslList[j]
+
+                val hue1 = hsl1[0]
+                val hue2 = hsl2[0]
+                val distance = calculateHueDistance(hue1, hue2)
+
+                val isNeutral1 = isNeutralColor(hsl1)
+                val isNeutral2 = isNeutralColor(hsl2)
+
+                var deltaScore = 0f
+
+                when {
+                    // Monochromatic / Analogous: 0° - 30°
+                    distance in 0f..30f -> {
+                        deltaScore += 2.0f
+                    }
+                    // Complementary: 150° - 210°
+                    distance in 150f..210f -> {
+                        deltaScore += 1.5f
+                    }
+                    // Clash Penalty: 70° - 110°
+                    distance in 70f..110f -> {
+                        // Neutral Exception: If either color is black, white, pale, or muted, neutrals do not clash
+                        if (isNeutral1 || isNeutral2) {
+                            deltaScore += 0.5f // Neutral pairing credit
+                        } else {
+                            deltaScore -= 2.0f // Unmitigated clash penalty
+                        }
+                    }
+                    else -> {
+                        // Triadic or soft transition
+                        deltaScore += 0.5f
+                    }
+                }
+
+                pairHarmonyScore += deltaScore
+                pairCount++
             }
         }
 
-        val avgAngle = if (pairs > 0) totalDeltaAngle / pairs else 0f
+        val avgPairHarmony = if (pairCount > 0) pairHarmonyScore / pairCount else 0f
 
-        return when {
-            // Analogous harmony (0° - 45° delta)
-            avgAngle in 0f..45f -> 95.0f
-            // Complementary harmony (135° - 180° delta)
-            avgAngle in 135f..180f -> 92.0f
-            // Triadic harmony (90° - 135° delta)
-            avgAngle in 90f..135f -> 88.0f
-            // Color Clash (45° - 90° uncalibrated delta)
-            else -> 72.0f
-        }
+        // Map baseline score (78.0) + weighted pair harmony to 0 - 100 scale
+        return (78.0f + avgPairHarmony * 10.0f).coerceIn(0.0f, 100.0f)
+    }
+
+    /**
+     * Shortest angular distance between two hues on 360-degree color wheel.
+     */
+    private fun calculateHueDistance(hue1: Float, hue2: Float): Float {
+        val diff = abs(hue1 - hue2)
+        return minOf(diff, 360f - diff)
+    }
+
+    /**
+     * Neutral Exception Check:
+     * Lightness < 0.2 (black/dark), Lightness > 0.8 (white/pale), or Saturation < 0.2 (gray/muted).
+     */
+    private fun isNeutralColor(hsl: FloatArray): Boolean {
+        val saturation = hsl[1]
+        val lightness = hsl[2]
+        return lightness < 0.2f || lightness > 0.8f || saturation < 0.2f
     }
 
     private fun parseToHsl(hex: String): FloatArray? {
