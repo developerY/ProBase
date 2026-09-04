@@ -2,6 +2,7 @@ package com.zoewave.probase.kocolor.features.settings.domain.seeder.model
 
 import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.core.model.ritual.MicroCategory
+import com.zoewave.probase.core.model.ritual.Temperature
 import com.zoewave.probase.core.util.color.ColorQuantizer
 import com.zoewave.probase.kocolor.db.entity.CosmeticItemEntity
 import kotlinx.serialization.Serializable
@@ -14,7 +15,8 @@ data class CosmeticSeedDto(
     val microCategory: String,
     val colorHex: String,
     val imageUrl: String? = null,
-    val price: Double? = null
+    val price: Double? = null,
+    val temperature: String? = null
 ) {
     fun toEntity(): CosmeticItemEntity {
         val macro = try {
@@ -29,11 +31,20 @@ data class CosmeticSeedDto(
             it.name.equals(microCategory.replace(" ", "_"), ignoreCase = true)
         } ?: MicroCategory.OTHER
 
+        val tempEnum = temperature?.let {
+            try {
+                Temperature.valueOf(it.uppercase())
+            } catch (e: Exception) {
+                null
+            }
+        } ?: ColorQuantizer.determineTemperature(colorHex)
+
         return CosmeticItemEntity(
             name = name,
             brand = brand,
             macroCategory = macro,
             microCategory = micro,
+            temperature = tempEnum,
             colorHex = colorHex,
             colorFamily = ColorQuantizer.snapToFamily(colorHex),
             imageUrl = imageUrl?.let { 
