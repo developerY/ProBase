@@ -1,18 +1,24 @@
 package com.zoewave.probase.kocolor.fashionista.domain
 
 /**
- * The final reference-calibrated aesthetic evaluation.
- * 
- * @param score The deterministic aesthetic score (0.000 - 100.000).
- * @param coverage The weighted evidence completeness (0.0 - 1.0).
- * @param standardId The identifier for the calibration baseline used.
- * @param standardVersion The version of the calibration standard.
- * @param breakdown The granular feature evidence used to compute the score.
+ * Immutable evaluation snapshot emitted by the FASHIONISTA Engine.
  */
 data class FashionistaScore(
-    val score: Double,
-    val coverage: Double,
-    val standardId: String,
-    val standardVersion: Int,
-    val breakdown: FashionistaFeatureVector
+    val colorHarmonyScore: Float = 0f,
+    val silhouetteScore: Float = 0f,
+    val contrastScore: Float = 0f,
+    val totalScore: Float = 0f,
+    val isApproved: Boolean = totalScore >= 80.0f,
+    val score: Double = totalScore.toDouble(),
+    val coverage: Double = 1.0,
+    val standardId: String = "FASHIONISTA_STD",
+    val standardVersion: String = "v1.1",
+    val breakdown: FashionistaFeatureVector = FashionistaFeatureVector(
+        composition = FeatureValue(0.85, 1.0),
+        colorHarmony = FeatureValue(0.85, 1.0),
+        silhouette = FeatureValue(0.85, 1.0),
+        textureHarmony = FeatureValue(0.85, 1.0),
+        visualHierarchy = FeatureValue(0.85, 1.0),
+        presentationIntegration = FeatureValue(0.85, 1.0)
+    )
 )
