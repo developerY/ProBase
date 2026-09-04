@@ -7,7 +7,7 @@ import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.core.model.ritual.Temperature
 import com.zoewave.probase.core.util.color.ColorQuantizer
 import com.zoewave.probase.kocolor.data.color.CandidateProvenance
-import com.zoewave.probase.kocolor.data.color.FashionistaWeights
+import com.zoewave.probase.kocolor.data.color.RecommendationWeights
 import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -82,29 +82,33 @@ class WardrobeCandidateFilter @Inject constructor(
         var score = 1.0
         val tempC = context.weatherTempC ?: 22f
 
-        // 1. Seasonal / Appearance Harmony Bonus
+        // 1. Appearance Temperature Harmony Bonus
         val appearanceString = "${context.appearanceProfile.undertone} • ${context.appearanceProfile.depth} • ${context.appearanceProfile.contrast}"
         val itemTemp = item.colorTemperature ?: "Neutral"
         if (appearanceString.contains(itemTemp, ignoreCase = true)) {
-            score += FashionistaWeights.SEASONAL_HARMONY_BONUS
+            score += RecommendationWeights.APPEARANCE_TEMPERATURE_HARMONY_BONUS
         } else if (itemTemp.equals("Neutral", ignoreCase = true)) {
-            score += FashionistaWeights.NEUTRAL_ANCHOR_BONUS
+            score += RecommendationWeights.NEUTRAL_ANCHOR_BONUS
         }
 
-        // 2. Weather & Thermal Mismatch Penalty (> 20°C vs Heavy Materials)
+        // 2. Weather & Thermal Mismatch Penalty (> 20.0°C vs Heavy/Insulating Constructions)
         val nameLower = item.name.lowercase()
         val materialLower = (item.material ?: "").lowercase()
-        val isHeavyMaterial = nameLower.contains("velvet") || nameLower.contains("shearling") ||
+
+        // Cold-weather & insulating constructions (fleece, shearling, down, velvet, heavy wool)
+        val isInsulatingConstruction = nameLower.contains("velvet") || nameLower.contains("shearling") ||
                 nameLower.contains("wool") || nameLower.contains("fleece") || nameLower.contains("down") ||
-                materialLower.contains("velvet") || materialLower.contains("shearling") || materialLower.contains("wool")
+                materialLower.contains("velvet") || materialLower.contains("shearling") || materialLower.contains("wool") || materialLower.contains("fleece")
 
-        val isBreathableMaterial = nameLower.contains("linen") || nameLower.contains("cotton") ||
-                nameLower.contains("silk") || materialLower.contains("linen") || materialLower.contains("silk")
+        // Warm-weather-compatible materials (linen, lightweight cotton, silk, seersucker)
+        val isWarmWeatherMaterial = nameLower.contains("linen") || nameLower.contains("cotton") ||
+                nameLower.contains("silk") || nameLower.contains("seersucker") ||
+                materialLower.contains("linen") || materialLower.contains("silk") || materialLower.contains("seersucker")
 
-        if (tempC > 20.0f && isHeavyMaterial) {
-            score += FashionistaWeights.THERMAL_MISMATCH_PENALTY // -3.0
-        } else if (tempC > 20.0f && isBreathableMaterial) {
-            score += FashionistaWeights.WEATHER_ALIGNMENT_BONUS // +1.5
+        if (tempC > 20.0f && isInsulatingConstruction) {
+            score += RecommendationWeights.THERMAL_MISMATCH_PENALTY // -3.0
+        } else if (tempC > 20.0f && isWarmWeatherMaterial) {
+            score += RecommendationWeights.WEATHER_ALIGNMENT_BONUS // +1.5
         }
 
         // 3. Score contextual relevance against user intent keywords and occasion
@@ -214,19 +218,19 @@ class WardrobeCandidateFilter @Inject constructor(
 
         val cosmeticTemp = effectiveTemp.name.uppercase()
         when {
-            // Relational Harmony: Warm cosmetic in Warm context OR Cool in Cool context
+            // Appearance Temperature Harmony: Warm cosmetic in Warm context OR Cool in Cool context
             (isWarmContext && cosmeticTemp.contains("WARM")) ||
             (isCoolContext && cosmeticTemp.contains("COOL")) -> {
-                score += FashionistaWeights.SEASONAL_HARMONY_BONUS // +2.0
+                score += RecommendationWeights.APPEARANCE_TEMPERATURE_HARMONY_BONUS // +2.0
             }
-            // Color Clash Penalty: Cool cosmetic in Warm context OR Warm in Cool context
+            // Appearance Temperature Clash Penalty: Cool cosmetic in Warm context OR Warm in Cool context
             (isWarmContext && cosmeticTemp.contains("COOL")) ||
             (isCoolContext && cosmeticTemp.contains("WARM")) -> {
-                score += FashionistaWeights.COLOR_CLASH_PENALTY // -2.5
+                score += RecommendationWeights.APPEARANCE_TEMPERATURE_CLASH_PENALTY // -2.5
             }
             // Neutral Anchor Bonus
             cosmeticTemp.contains("NEUTRAL") -> {
-                score += FashionistaWeights.NEUTRAL_ANCHOR_BONUS // +1.25
+                score += RecommendationWeights.NEUTRAL_ANCHOR_BONUS // +1.25
             }
             else -> score += 0.50
         }
