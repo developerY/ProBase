@@ -10,7 +10,13 @@ import com.zoewave.probase.features.ai.core.AiProviderCapability
 import com.zoewave.probase.features.ai.local.data.PromptCacheRepository
 import com.zoewave.probase.kocolor.data.color.CandidateProvenance
 import com.zoewave.probase.kocolor.data.telemetry.StyleAuditLogger
-import io.mockk.*
+import io.mockk.Runs
+import io.mockk.coEvery
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.verify
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -50,7 +56,8 @@ class StyleSimulatorEngineTest {
             capabilityRouter,
             cache,
             auditLogger,
-            fallbackEngine
+            fallbackEngine,
+            RecommendationValidator()
         )
     }
 
@@ -71,7 +78,7 @@ class StyleSimulatorEngineTest {
         
         coEvery { capabilityRouter.getRankedAvailableProviders() } returns listOf(provider1, provider2)
         coEvery { contextEngine.generateSelectionState(any(), any(), any()) } returns StyleSelectionState()
-        coEvery { candidateFilter.getCosmeticCandidates(any(), any(), any()) } returns emptyList()
+        coEvery { candidateFilter.getCosmeticCandidateProvenance(any(), any(), any()) } returns emptyList()
 
         val result = engine.generateBlueprint(emptyList(), emptyList(), context)
 
@@ -113,7 +120,7 @@ class StyleSimulatorEngineTest {
         
         coEvery { capabilityRouter.getRankedAvailableProviders() } returns listOf(provider)
         coEvery { contextEngine.generateSelectionState(any(), any(), any()) } returns StyleSelectionState(fullRankedCandidatePool = provList)
-        coEvery { candidateFilter.getCosmeticCandidates(any(), any(), any()) } returns emptyList()
+        coEvery { candidateFilter.getCosmeticCandidateProvenance(any(), any(), any()) } returns emptyList()
         every { fallbackEngine.generate(any()) } returns StyleBlueprint("Fallback", emptyList(), emptyList(), emptyList())
 
         val result = engine.generateBlueprint(items, emptyList(), context)
@@ -141,7 +148,7 @@ class StyleSimulatorEngineTest {
         
         coEvery { capabilityRouter.getRankedAvailableProviders() } returns listOf(provider)
         coEvery { contextEngine.generateSelectionState(any(), any(), any()) } returns StyleSelectionState(fullRankedCandidatePool = provList)
-        coEvery { candidateFilter.getCosmeticCandidates(any(), any(), any()) } returns emptyList()
+        coEvery { candidateFilter.getCosmeticCandidateProvenance(any(), any(), any()) } returns emptyList()
 
         engine.generateBlueprint(items, emptyList(), context)
 

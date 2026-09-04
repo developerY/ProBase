@@ -22,7 +22,8 @@ class StyleSimulatorEngine @Inject constructor(
     private val capabilityRouter: CapabilityRouter,
     private val cache: PromptCacheRepository,
     private val auditLogger: StyleAuditLogger,
-    private val fallbackEngine: DeterministicStyleEngine
+    private val fallbackEngine: DeterministicStyleEngine,
+    private val validator: RecommendationValidator
 ) {
 
     companion object {
@@ -150,7 +151,18 @@ class StyleSimulatorEngine @Inject constructor(
         return if (executionResult.isSuccess) {
             val rawResult = executionResult.getOrThrow()
             try {
-                val blueprint = decodeBlueprint(rawResult)
+                val rawBlueprint = decodeBlueprint(rawResult)
+                val validation = validator.validateAndSanitize(
+                    rawBlueprint = rawBlueprint,
+                    clothingCandidates = fitResult.clothingCandidates,
+                    cosmeticCandidates = fitResult.cosmeticCandidates
+                )
+                val blueprint = validation.sanitizedBlueprint
+
+                if (validation.validationErrors.isNotEmpty()) {
+                    Log.w("StyleSimulatorEngine", "Sanitized blueprint errors: ${validation.validationErrors.joinToString("; ")}")
+                }
+
                 cache.put(fingerprint, rawResult)
                 auditLogger.logAiExecution(
                     requestId = requestId,
@@ -158,7 +170,6 @@ class StyleSimulatorEngine @Inject constructor(
                     tokens = fitResult.tokenCount,
                     blueprint = blueprint
                 )
-                // auditLogger.printAuditTrail(...)
                 logTelemetry(
                     tier = provider.capability.id,
                     kLimit = fitResult.kLimit,
@@ -203,7 +214,9 @@ class StyleSimulatorEngine @Inject constructor(
         val request: AiInput,
         val kLimit: Int,
         val detailLevel: SerializationDetailLevel,
-        val tokenCount: Int
+        val tokenCount: Int,
+        val clothingCandidates: List<CandidateProvenance>,
+        val cosmeticCandidates: List<CandidateProvenance>
     )
 
     /**
@@ -221,19 +234,8 @@ class StyleSimulatorEngine @Inject constructor(
 
         while (currentK >= cap.minCandidateAdditions) {
             val selectionState = contextEngine.generateSelectionState(wardrobe, context.lockedConstraints, context)
-            val cCandidates = candidateFilter.getCosmeticCandidates(cosmetics, context, limit = currentK)
-            
-            // Map cosmetics to provenance for audit logging
-            val cCandidatesProv = cCandidates.map { item ->
-                CandidateProvenance(
-                    cosmeticItem = item,
-                    contextScore = 0.5f,
-                    colorScore = 0.8f,
-                    appearanceScore = 0.8f,
-                    freshnessScore = 1.0f,
-                    retrievalReason = if (item.isSignature) "[Signature Item] Rotation bypassed." else "Role diversity match"
-                )
-            }
+            val cCandidatesProv = candidateFilter.getCosmeticCandidateProvenance(cosmetics, context, limit = currentK)
+            val cCandidates = cCandidatesProv.mapNotNull { it.cosmeticItem }
 
             // 1. Convert locked active anchors to candidate provenance (resolves ghost anchor bug)
             val anchorProv = selectionState.activeAnchors.map { anchor ->
@@ -294,13 +296,15 @@ class StyleSimulatorEngine @Inject constructor(
             val candidateInput = promptAssembler.buildExactRequest(
                 context = context,
                 compactManifest = manifest,
+                clothingCandidates = topWardrobeProv,
+                cosmeticCandidates = cCandidatesProv,
                 providerCapability = cap
             )
             
             val tokenCount = provider.countTokens(candidateInput)
             if (tokenCount <= cap.maxInputTokens) {
                 Log.d("StyleSimulatorEngine", "Adapted context: K=$currentK, Detail=$detailLevel, Tokens=$tokenCount")
-                return AdaptiveFitResult(candidateInput, currentK, detailLevel, tokenCount)
+                return AdaptiveFitResult(candidateInput, currentK, detailLevel, tokenCount, topWardrobeProv, cCandidatesProv)
             }
 
             when (detailLevel) {
