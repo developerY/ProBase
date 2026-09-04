@@ -6,7 +6,9 @@ import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.kocolor.data.color.CandidateProvenance
 import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -95,7 +97,7 @@ class WardrobeCandidateFilter @Inject constructor(
         inventory: List<CosmeticItem>,
         context: StyleRequestContext,
         limit: Int
-    ): List<CandidateProvenance> {
+    ): List<CandidateProvenance> = withContext(Dispatchers.Default) {
         val noiseCategories = setOf("oral", "tools", "fragrance", "grooming", "organizers")
         
         val eligibleItems = inventory.filter { item ->
@@ -154,7 +156,7 @@ class WardrobeCandidateFilter @Inject constructor(
             }
         }
 
-        return diverseSet.take(limit)
+        diverseSet.take(limit)
     }
 
     suspend fun getCosmeticCandidates(

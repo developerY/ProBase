@@ -87,7 +87,7 @@ class RecommendationValidator @Inject constructor() {
             val id = "w_${item.internalId}"
             if (id !in finalClothingIds && sanitizedRationale.contains(name, ignoreCase = true)) {
                 Log.w("RecommendationValidator", "Sanitizing rationale: stripping reference to unselected clothing '$name'")
-                sanitizedRationale = sanitizedRationale.replace(Regex("(?i)[^.]*\\b${Regex.escape(name)}\\b[^.]*\\."), "")
+                sanitizedRationale = sanitizedRationale.replace(Regex("(?i)(?<!\\d)[^.]*\\b${Regex.escape(name)}\\b[^.]*\\.(?!\\d)"), "")
             }
         }
 
@@ -95,7 +95,7 @@ class RecommendationValidator @Inject constructor() {
             val id = "c_${item.internalId}"
             if (id !in filteredCosmeticIds && sanitizedRationale.contains(name, ignoreCase = true)) {
                 Log.w("RecommendationValidator", "Sanitizing rationale: stripping reference to unselected cosmetic '$name'")
-                sanitizedRationale = sanitizedRationale.replace(Regex("(?i)[^.]*\\b${Regex.escape(name)}\\b[^.]*\\."), "")
+                sanitizedRationale = sanitizedRationale.replace(Regex("(?i)(?<!\\d)[^.]*\\b${Regex.escape(name)}\\b[^.]*\\.(?!\\d)"), "")
             }
         }
 

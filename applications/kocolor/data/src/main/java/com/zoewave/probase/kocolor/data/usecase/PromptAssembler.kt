@@ -73,8 +73,10 @@ class PromptAssembler @Inject constructor() {
         val prompt = """
             You are the KoColor Style Architect AI. Generate a "Style Blueprint" that is both stylistically harmonic and protective.
             
-            STRICT GROUNDING RULE:
-            Do not invent stylistic adjectives (e.g., do not call nylon 'structural'). Describe items strictly using the physical materials and attributes listed in the manifest.
+            STRICT GROUNDING RULES & CONSTRAINTS:
+            1. DESCRIPTIVE ACCURACY: Do not invent stylistic adjectives (e.g., do not call nylon 'structural'). Describe items strictly using the physical materials and attributes listed in the manifest.
+            2. CATEGORY ISOLATION: You may ONLY select cosmetics from the requested roles (Eye, Cheek, Lip, Nail). You are STRICTLY FORBIDDEN from selecting or referencing items categorized as PREP, HAIR, or COMPLEXION, regardless of the environmental context.
+            3. RATIONALE FORMATTING: Write the rationale as fluid prose. Do not use decimals or decimal numbers (e.g., write "high UV" instead of "6.9 UV") to ensure clean downstream text processing.
             
             APPEARANCE TELEMETRY:
             - Temperature: ${profile.undertone}
