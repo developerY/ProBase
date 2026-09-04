@@ -2,6 +2,9 @@ package com.zoewave.probase.kocolor.data.usecase
 
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.core.model.ritual.CosmeticItem
+import com.zoewave.probase.core.model.ritual.Finish
+import com.zoewave.probase.core.model.ritual.Temperature
+import com.zoewave.probase.core.util.color.ColorQuantizer
 import com.zoewave.probase.kocolor.data.color.CandidateProvenance
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -26,8 +29,8 @@ class CompactManifestSerializer @Inject constructor() {
             val category = item.category.name
             val name = item.name
             val hex = item.colorHex
-            val temperature = item.colorTemperature ?: "Neutral"
-            val depth = item.seasonalPalette ?: "Mod"
+            val temperature = item.colorTemperature?.takeIf { it != "UNKNOWN" } ?: ColorQuantizer.determineTemperature(item.colorHex).name
+            val depth = item.seasonalPalette?.takeIf { it != "UNKNOWN" } ?: "Balanced"
             val material = item.material ?: "Cotton"
 
             when (detailLevel) {
@@ -42,9 +45,9 @@ class CompactManifestSerializer @Inject constructor() {
             val category = item.macroCategory.name
             val name = item.name
             val hex = item.colorHex
-            val temperature = item.temperature.name
-            val finish = item.finish.name
-            val brand = item.brand
+            val temperature = if (item.temperature != Temperature.UNKNOWN) item.temperature.name else ColorQuantizer.determineTemperature(item.colorHex).name
+            val finish = if (item.finish != Finish.UNKNOWN) item.finish.name else "SATIN"
+            val brand = item.brand.ifBlank { "KoColor" }
 
             when (detailLevel) {
                 SerializationDetailLevel.MINIMAL -> "[$id|$category|$name|$hex]"
