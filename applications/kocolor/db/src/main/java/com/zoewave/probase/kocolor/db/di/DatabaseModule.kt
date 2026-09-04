@@ -54,6 +54,7 @@ abstract class DatabaseModule {
                 KoColorDatabase::class.java,
                 "kocolor_database"
             )
+            .fallbackToDestructiveMigration()
             .build()
         }
 
