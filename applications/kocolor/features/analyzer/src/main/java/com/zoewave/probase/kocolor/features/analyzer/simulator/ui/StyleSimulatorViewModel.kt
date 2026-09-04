@@ -536,7 +536,8 @@ class StyleSimulatorViewModel @Inject constructor(
             val appearance = state.faceTelemetry?.let { getAppearanceTelemetry(it) }
 
             val weather = atmosphericRepository.atmosphericState.value
-            val weatherContext = "UV: ${weather.environmentalContext?.uvIndex ?: "Unknown"}, Temp: ${weather.weather?.main?.temp ?: "Unknown"}C"
+            val tempVal = weather.weather?.main?.temp?.toFloat() ?: 22.0f
+            val uvVal = weather.environmentalContext?.uvIndex?.toFloat() ?: 3.0f
 
             val anchoredClothing = state.anchoredClothingFamilies.flatMap { (cat, family) ->
                 state.fullClothingInventory.filter { it.category == cat && it.colorFamily == family }
@@ -584,9 +585,9 @@ class StyleSimulatorViewModel @Inject constructor(
                     userIntent.contains("work", true) || userIntent.contains("office", true) -> "Business Casual"
                     else -> "Daily"
                 },
-                weather = weatherContext,
-                weatherTempC = weather.weather?.main?.temp?.toFloat() ?: 22f,
-                uvIndex = weather.environmentalContext?.uvIndex?.toFloat() ?: 3f,
+                weather = "Clear",
+                weatherTempC = tempVal,
+                uvIndex = uvVal,
                 appearanceProfile = appearance?.let { AppearanceProfile(it.temperature, it.depth, it.contrast) } ?: AppearanceProfile(),
                 appearanceTelemetry = ColorTelemetry(),
                 fashionProfile = skinContext,
