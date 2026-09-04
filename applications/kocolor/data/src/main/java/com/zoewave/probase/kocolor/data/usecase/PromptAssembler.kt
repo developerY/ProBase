@@ -56,8 +56,8 @@ class PromptAssembler @Inject constructor() {
         }
 
         val weatherDetails = buildList {
-            context.weatherTempC.takeIf { it != 0f }?.let { add("Temp: ${it}°C") }
-            context.uvIndex.takeIf { it != 0f }?.let { add("UV: $it") }
+            context.weatherTempC?.let { add("Temp: ${it}°C") }
+            context.uvIndex?.let { add("UV: $it") }
         }.joinToString(", ")
 
         val weatherContextStr = buildString {

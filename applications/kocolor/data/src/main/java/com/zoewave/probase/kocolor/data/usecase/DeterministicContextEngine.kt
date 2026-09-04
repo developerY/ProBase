@@ -41,7 +41,7 @@ class DeterministicContextEngine @Inject constructor(
         val missingRoles = roleGapAnalyzer.determineRoleRequirements(
             anchors = lockedAnchors,
             occasion = context.occasion,
-            weatherTempC = context.weatherTempC
+            weatherTempC = context.weatherTempC ?: 22f // Fallback for legacy role logic
         )
 
         // 4. Hard Constraints (Eliminate impossible items)
