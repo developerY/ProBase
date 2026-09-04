@@ -4,6 +4,8 @@ import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.core.model.ritual.MacroCategory
+import com.zoewave.probase.core.model.ritual.Temperature
+import com.zoewave.probase.core.util.color.ColorQuantizer
 import com.zoewave.probase.kocolor.data.color.CandidateProvenance
 import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
 import kotlinx.coroutines.Dispatchers
@@ -183,7 +185,13 @@ class WardrobeCandidateFilter @Inject constructor(
                 appearance.undertone.contains("Pink", ignoreCase = true) ||
                 appearance.undertone.contains("Blue", ignoreCase = true)
 
-        val cosmeticTemp = item.temperature.name.uppercase()
+        val effectiveTemp = if (item.temperature != Temperature.UNKNOWN) {
+            item.temperature
+        } else {
+            ColorQuantizer.determineTemperature(item.colorHex)
+        }
+
+        val cosmeticTemp = effectiveTemp.name.uppercase()
         when {
             isWarmContext && (cosmeticTemp.contains("WARM") || cosmeticTemp.contains("GOLDEN")) -> score += 1.85
             isCoolContext && (cosmeticTemp.contains("COOL") || cosmeticTemp.contains("ROSY")) -> score += 1.85
