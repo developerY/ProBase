@@ -138,7 +138,13 @@ class WardrobeCandidateFilter @Inject constructor(
         val remainingItems = eligibleItems.filter { "c_${it.internalId}" !in context.anchoredCosmeticIds }
 
         // Stage 2: Soft Scoring & Ranking with CandidateProvenance
-        val rankedRemainingProv = remainingItems.map { item ->
+        val rankedRemainingProv = remainingItems.map { rawItem ->
+            val effectiveTemp = if (rawItem.temperature != Temperature.UNKNOWN) {
+                rawItem.temperature
+            } else {
+                ColorQuantizer.determineTemperature(rawItem.colorHex)
+            }
+            val item = if (rawItem.temperature != Temperature.UNKNOWN) rawItem else rawItem.copy(temperature = effectiveTemp)
             val score = calculateCosmeticScore(item, context)
             CandidateProvenance(
                 cosmeticItem = item,
@@ -150,7 +156,13 @@ class WardrobeCandidateFilter @Inject constructor(
             )
         }.sortedByDescending { it.totalScore }
 
-        val anchoredProv = anchoredItems.map { item ->
+        val anchoredProv = anchoredItems.map { rawItem ->
+            val effectiveTemp = if (rawItem.temperature != Temperature.UNKNOWN) {
+                rawItem.temperature
+            } else {
+                ColorQuantizer.determineTemperature(rawItem.colorHex)
+            }
+            val item = if (rawItem.temperature != Temperature.UNKNOWN) rawItem else rawItem.copy(temperature = effectiveTemp)
             CandidateProvenance(
                 cosmeticItem = item,
                 contextScore = 2.0f,
