@@ -8,6 +8,8 @@ import com.zoewave.probase.kocolor.fashionista.domain.FashionistaScore
 data class StyleResultUiState(
     val blueprint: StyleBlueprint? = null,
     val fashionistaScore: FashionistaScore? = null,
+    val fashionistaCoverage: Float? = null,
+    val calibrationVersion: String? = null,
     val selectedClothing: List<ClothingItem> = emptyList(),
     val selectedCosmetics: List<CosmeticItem> = emptyList(),
     val isLoading: Boolean = false,

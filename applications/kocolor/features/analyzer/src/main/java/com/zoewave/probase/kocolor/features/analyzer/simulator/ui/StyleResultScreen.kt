@@ -197,7 +197,7 @@ private fun FashionistaScoreBadge(score: FashionistaScore) {
         ) {
             Column {
                 Text(
-                    text = "FASHIONISTA SCORE",
+                    text = "FASHIONISTA SCORE (${score.standardId} ${score.standardVersion})",
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Bold,
                     color = Color.Gray,
@@ -208,6 +208,11 @@ private fun FashionistaScoreBadge(score: FashionistaScore) {
                     style = MaterialTheme.typography.headlineLarge,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = "Coverage: ${(score.coverage * 100).roundToInt()}%",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.Gray
                 )
             }
 
