@@ -10,6 +10,7 @@ import com.zoewave.probase.features.ai.core.AiProviderCapability
 import com.zoewave.probase.features.ai.local.data.PromptCacheRepository
 import com.zoewave.probase.kocolor.data.color.CandidateProvenance
 import com.zoewave.probase.kocolor.data.telemetry.StyleAuditLogger
+import com.zoewave.probase.kocolor.fashionista.domain.FashionistaEvaluator
 import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.every
@@ -31,6 +32,7 @@ class StyleSimulatorEngineTest {
     private val cache = mockk<PromptCacheRepository>()
     private val auditLogger = mockk<StyleAuditLogger>(relaxed = true)
     private val fallbackEngine = mockk<DeterministicStyleEngine>()
+    private val fashionistaEvaluator = mockk<FashionistaEvaluator>(relaxed = true)
     
     private lateinit var engine: StyleSimulatorEngine
 
@@ -57,7 +59,8 @@ class StyleSimulatorEngineTest {
             cache,
             auditLogger,
             fallbackEngine,
-            RecommendationValidator()
+            RecommendationValidator(),
+            fashionistaEvaluator
         )
     }
 

@@ -78,7 +78,41 @@ class RecommendationValidator @Inject constructor() {
             }
         }
 
-        // 2. Rationale Cross-Check & Sanitization (Strips references to unselected products)
+        // 2. Cosmetic Role Category Firewall Enforcement
+        val finalCosmeticIds = filteredCosmeticIds.filter { id ->
+            val item = cosmeticCandidates.find { it.cosmeticItem?.let { c -> "c_${c.internalId}" } == id || it.cosmeticItem?.remoteId == id }?.cosmeticItem
+            if (item != null) {
+                val role = CosmeticRole.fromMacroCategory(item.macroCategory)
+                if (role == null || role == CosmeticRole.PREP) {
+                    errors.add("Invalid cosmetic role '${item.macroCategory}' removed for item: $id")
+                    Log.w("RecommendationValidator", "Sanitizing blueprint: removed unmapped/PREP cosmetic role for '$id'")
+                    false
+                } else {
+                    true
+                }
+            } else {
+                false
+            }
+        }
+
+        // 2b. Role Coverage & Cardinality Assertion (Asserts all requested cosmetic roles are present)
+        val requestedCosmeticRoles = cosmeticCandidates.mapNotNull {
+            it.cosmeticItem?.let { c -> CosmeticRole.fromMacroCategory(c.macroCategory) }
+        }.filter { it != CosmeticRole.PREP }.toSet()
+
+        val selectedCosmeticRoles = finalCosmeticIds.mapNotNull { id ->
+            val item = cosmeticCandidates.find { it.cosmeticItem?.let { c -> "c_${c.internalId}" } == id || it.cosmeticItem?.remoteId == id }?.cosmeticItem
+            item?.let { CosmeticRole.fromMacroCategory(it.macroCategory) }
+        }.toSet()
+
+        if (requestedCosmeticRoles.isNotEmpty() && selectedCosmeticRoles.size < requestedCosmeticRoles.size) {
+            val missingRoles = requestedCosmeticRoles - selectedCosmeticRoles
+            val errorMsg = "Validation failed: Missing required cosmetic roles [${missingRoles.joinToString { it.displayName }}]"
+            Log.e("RecommendationValidator", errorMsg)
+            errors.add(errorMsg)
+        }
+
+        // 3. Rationale Cross-Check & Sanitization (Strips references to unselected products)
         val clothingMap = clothingCandidates.mapNotNull { it.clothingItem }.associateBy { it.name }
         val cosmeticMap = cosmeticCandidates.mapNotNull { it.cosmeticItem }.associateBy { it.name }
 
@@ -93,7 +127,7 @@ class RecommendationValidator @Inject constructor() {
 
         cosmeticMap.forEach { (name, item) ->
             val id = "c_${item.internalId}"
-            if (id !in filteredCosmeticIds && sanitizedRationale.contains(name, ignoreCase = true)) {
+            if (id !in finalCosmeticIds && sanitizedRationale.contains(name, ignoreCase = true)) {
                 Log.w("RecommendationValidator", "Sanitizing rationale: stripping reference to unselected cosmetic '$name'")
                 sanitizedRationale = sanitizedRationale.replace(Regex("(?i)(?<!\\d)[^.]*\\b${Regex.escape(name)}\\b[^.]*\\.(?!\\d)"), "")
             }
@@ -102,7 +136,7 @@ class RecommendationValidator @Inject constructor() {
         val sanitizedBlueprint = rawBlueprint.copy(
             rationale = sanitizedRationale.trim(),
             selectedClothingIds = finalClothingIds,
-            selectedCosmeticIds = filteredCosmeticIds
+            selectedCosmeticIds = finalCosmeticIds
         )
 
         return ValidationResult(

@@ -48,7 +48,7 @@ class FashionistaScorerImpl @Inject constructor(
                 score = 0.0,
                 coverage = 0.0,
                 standardId = calibration.standardId,
-                standardVersion = calibration.version,
+                standardVersion = calibration.version.toString(),
                 breakdown = featureVector
             )
         }
@@ -60,7 +60,7 @@ class FashionistaScorerImpl @Inject constructor(
             score = finalScore,
             coverage = result.coverage,
             standardId = calibration.standardId,
-            standardVersion = calibration.version,
+            standardVersion = calibration.version.toString(),
             breakdown = featureVector
         )
     }

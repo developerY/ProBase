@@ -49,7 +49,7 @@ import com.zoewave.probase.kocolor.model.playlist.PlaylistStatus
         StylePlaylistEntity::class,
         DailyStylePlanEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 @ColumnTypeConverters(FashionConverters::class, KoColorTypeConverters::class)

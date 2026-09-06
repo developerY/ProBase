@@ -2,6 +2,7 @@ package com.zoewave.probase.kocolor.data.telemetry
 
 import com.zoewave.probase.kocolor.data.color.CandidateProvenance
 import com.zoewave.probase.kocolor.data.usecase.StyleBlueprint
+import com.zoewave.probase.kocolor.fashionista.domain.FashionistaScore
 
 enum class AnchorSource { 
     USER_LOCKED, 
@@ -30,5 +31,6 @@ data class StyleAuditTrail(
     var reasoningSet: List<CandidateProvenance>? = null,
     var aiProviderUsed: String? = null,
     var tokensUsed: Int? = null,
-    var finalBlueprint: StyleBlueprint? = null
+    var finalBlueprint: StyleBlueprint? = null,
+    var fashionistaScore: FashionistaScore? = null
 )

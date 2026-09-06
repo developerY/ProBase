@@ -48,25 +48,10 @@ val rankedRemainingProv = remainingItems.mapNotNull { item ->
 ### 2. Weather Telemetry Single Source of Truth
 **File**: [`PromptAssembler.kt`](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/usecase/PromptAssembler.kt)
 
-Transitioned weather telemetry fields to typed nullable float values to safely handle real `0.0` measurements. Replaced collision-prone string checking with clean string construction:
+Stripped pre-formatted string parsing and redundant prefix variables. The weather telemetry line strictly interpolates populated numerical fields:
 
 ```kotlin
-val weatherDetails = buildList {
-    context.weatherTempC?.let { add("Temp: ${it}°C") }
-    context.uvIndex?.let { add("UV: $it") }
-}.joinToString(", ")
-
-val weatherContextStr = buildString {
-    if (context.weather.isNotBlank()) {
-        append(context.weather.trim())
-    }
-    if (weatherDetails.isNotBlank()) {
-        if (isNotEmpty()) append(" ")
-        append("($weatherDetails)")
-    }
-}.ifBlank { "Clear" }
-
-val weatherContext = "WEATHER/ATMOSPHERIC: $weatherContextStr"
+val weatherContext = "WEATHER/ATMOSPHERIC: Temp: ${context.weatherTempC ?: 22.0f}°C, UV: ${context.uvIndex ?: 3.0f}"
 ```
 
 ---

@@ -87,7 +87,7 @@ class FashionistaScorerTest {
         assertThat(result.coverage).isAtLeast(0.0)
         assertThat(result.coverage).isAtMost(1.0)
         assertThat(result.standardId).isEqualTo("FASHIONISTA")
-        assertThat(result.standardVersion).isEqualTo(1)
+        assertThat(result.standardVersion).isEqualTo("1")
 
         val explanation = mapper.mapToExplanation(result)
         assertThat(explanation.score).isIn(0..100)
