@@ -1,6 +1,7 @@
 package com.zoewave.probase.kocolor.data.usecase
 
 import android.graphics.Color
+import android.util.Log
 import androidx.core.graphics.ColorUtils
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
@@ -147,6 +148,8 @@ class DeterministicContextEngine @Inject constructor(
         
         // 3. Automatic Anchor (pass hard constraints with high-chroma intent override)
         val viableItems = inventory.filter { isContextuallyViable(it, context) }
+
+        Log.d("KoColor", "Parsed Intent Colorfulness: ${context.intentProfile.colorfulness} for intent '${context.intent}'")
 
         if (context.intentProfile.colorfulness > 0.7f) {
             val chromaticAnchor = viableItems

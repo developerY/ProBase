@@ -14,13 +14,19 @@ class IntentAnalyzer @Inject constructor() {
         var formality = 0.5f
         var colorContrast = 0.5f
 
+        // Explicit High-Chroma Keyword Matching
+        if (keywords.any { it == "colorful" || it == "vibrant" || it == "bright" || it == "neon" }) {
+            colorfulness = 1.0f
+            colorContrast += 0.4f
+        }
+
         for (word in keywords) {
             when (word) {
-                "colorful" -> colorfulness += 0.8f
-                "vibrant" -> colorfulness += 0.9f
-                "bright" -> colorfulness += 0.7f
-                "neon" -> { colorfulness += 0.9f; novelty += 0.4f }
-                "fun" -> { colorfulness += 0.4f; novelty += 0.5f }
+                "colorful" -> colorfulness = 1.0f
+                "vibrant" -> colorfulness = 1.0f
+                "bright" -> colorfulness = 1.0f
+                "neon" -> { colorfulness = 1.0f; novelty += 0.4f }
+                "fun" -> { colorfulness = maxOf(colorfulness, 0.8f); novelty += 0.5f }
                 "minimalist", "minimal" -> { colorfulness -= 0.7f; novelty -= 0.6f; colorContrast -= 0.4f }
                 "muted", "subtle" -> { colorfulness -= 0.6f; colorContrast -= 0.5f }
                 "professional", "work", "office" -> { formality += 0.8f; novelty -= 0.3f; colorfulness -= 0.3f }
