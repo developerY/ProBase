@@ -1,6 +1,6 @@
 # Implementation Plan: User Intent Fulfillment & Validator Hardening
 
-Based on the architectural review in `ArchRev54.md`, `ArchRev55.md`, and `ArchRev57.md`, this document outlines the step-by-step implementation plan to resolve critical validator failures and bridge the gap between user intent and deterministic candidate scoring without conflating recommendation intent with FASHIONISTA aesthetics.
+Based on the architectural review in `ArchRev54.md`, `ArchRev55.md`, `ArchRev57.md`, and `ArchRev58.md`, this document outlines the step-by-step implementation plan to resolve critical validator failures and bridge the gap between user intent and deterministic candidate scoring without conflating recommendation intent with FASHIONISTA aesthetics.
 
 ---
 
@@ -9,18 +9,23 @@ Based on the architectural review in `ArchRev54.md`, `ArchRev55.md`, and `ArchRe
 **The Problem**: The `RecommendationValidator` allowed Gemini to return 3 cosmetics (dropping the CHEEK role) instead of the required 4, erroneously passing the state to `RESULT`.
 **The Goal**: Enforce strict cardinality and role coverage, triggering a rejection/retry if the LLM drops a requested category.
 
-### 1. Enforce Cosmetic Role Coverage
-* **File**: `RecommendationValidator.kt`
+### 1. Create a Shared `RecommendationComposition` Object
+* **File**: `StyleModels.kt`
 * **Implementation**:
-  * Track the explicitly requested cosmetic roles (based on the candidate manifest).
-  * After mapping `finalCosmeticIds` to their `CosmeticRole` via `CosmeticRole.fromMacroCategory`, assert that **all requested roles are present**.
-  * If a role is missing (e.g., `CHEEK`), append an error to `validationErrors`.
+  ```kotlin
+  data class RecommendationComposition(
+      val clothingSlots: Set<OutfitSlot>,
+      val cosmeticRoles: Set<CosmeticRole>,
+      val mandatoryAnchors: Set<String>
+  )
+  ```
+  **Invariant**: `RecommendationComposition` is derived *once* before the first LLM call and is reused unchanged by `PromptAssembler`, every retry loop, and `RecommendationValidator`. The prompt and validator cannot disagree about what constitutes a valid response.
 
-### 2. Enforce Strict Cardinality
+### 2. Enforce Composition Invariants in Validation
 * **File**: `RecommendationValidator.kt`
 * **Implementation**:
-  * Assert that exactly 3 clothing items (or 2 if shoes are unavailable) are selected.
-  * Assert that the number of cosmetic items matches the number of requested roles.
+  * Assert that all `clothingSlots` and `cosmeticRoles` specified in the `RecommendationComposition` are present in the final selected IDs.
+  * Assert that the strict cardinality matches exactly.
   * If `errors.isNotEmpty()`, `isValid` must evaluate to `false`.
 
 ### 3. Implement Bounded Automatic Retry
@@ -29,7 +34,6 @@ Based on the architectural review in `ArchRev54.md`, `ArchRev55.md`, and `ArchRe
   * In `executeAndCache`, check `validation.isValid`.
   * If `!validation.isValid`, treat it as an execution failure (`reason = "VALIDATION_FAILED"`) and trigger a retry.
   * **Constraint**: Limit retries to a bounded count (e.g., `maxRetries = 2`). Changing provider or detail level must **not** silently weaken the structural composition requirements.
-  * **Invariant**: Every retry must validate against the same `RecommendationComposition` derived before the first LLM call.
 
 ---
 
@@ -53,7 +57,7 @@ Based on the architectural review in `ArchRev54.md`, `ArchRev55.md`, and `ArchRe
 ### 2. Implement Deterministic Intent Analyzer
 * **File**: `IntentAnalyzer.kt` (New)
 * **Implementation**:
-  * Parse `context.intent` string for expressive keywords using weighted lexical evidence to map to the multi-dimensional profile.
+  * Parse `context.intent` string using weighted lexical evidence to map to the multi-dimensional profile.
   * `colorful` $\rightarrow$ `+0.8 colorfulness`
   * `vibrant` $\rightarrow$ `+0.9 colorfulness`
   * `bright` $\rightarrow$ `+0.7 colorfulness`
@@ -61,7 +65,7 @@ Based on the architectural review in `ArchRev54.md`, `ArchRev55.md`, and `ArchRe
   * `minimalist` $\rightarrow$ `-0.7 colorfulness, -0.6 novelty`
   * `professional` $\rightarrow$ `+0.8 formality`
   * `casual` $\rightarrow$ `-0.4 formality`
-  * Clamp each dimension to `[0,1]`.
+  * **Invariant**: The analyzer must apply positive and negative evidence cumulatively, then clamp the final dimensions to `[0,1]`.
 
 ### 3. Perceptual Chroma Candidate Scoring
 * **File**: `WardrobeCandidateFilter.kt`
@@ -72,8 +76,10 @@ Based on the architectural review in `ArchRev54.md`, `ArchRev55.md`, and `ArchRe
     * High colorfulness intent + medium chroma $\rightarrow$ mild bonus
     * High colorfulness intent + neutral $\rightarrow$ neutral / slight penalty (allows neutrals as supporting bases)
   * Evaluate the ensemble distribution (maximum chroma, mean chroma, percentage of chromatic items, hue diversity) rather than a simple average.
-  * **Invariant 1**: Intent-derived scores must influence candidate retrieval/ranking **before** Top-K candidate selection and before Gemini sees the candidate set.
-  * **Invariant 2**: Intent scoring may influence candidate ranking, but it must **never override** hard constraints (mandatory anchors, required clothing slots, required cosmetic roles, wardrobe availability, or validator requirements). Soft intent preferences are optimized only after satisfying hard constraints.
+  * **Invariant 1**: The intent scorer must distinguish chromatic accents from uniformly high-chroma ensembles so that "colorful" rewards intentional color presence rather than indiscriminate saturation.
+  * **Invariant 2**: Intent-derived scores must influence candidate retrieval/ranking **before** Top-K candidate selection and before Gemini sees the candidate set.
+  * **Invariant 3 (Hard vs. Soft)**: Intent scoring may influence candidate ranking, but it must **never override** hard constraints (mandatory anchors, required clothing slots, required cosmetic roles, wardrobe availability, or validator requirements). Soft intent preferences are optimized only after satisfying hard constraints.
+  * **Fallback Invariant**: Intent scoring may identify unmet preferences, but it must never cause unavailable garments, colors, or categories to be invented.
 
 ---
 
@@ -81,6 +87,8 @@ Based on the architectural review in `ArchRev54.md`, `ArchRev55.md`, and `ArchRe
 
 **The Problem**: An 88.2 FASHIONISTA score on a neutral outfit masks the fact that the recommendation completely failed the "colorful" user request.
 **The Goal**: Expose a multidimensional "Intent Fulfillment" metric explicitly defining how well the recommendation answered the user's prompt based on structured evidence.
+
+*Explicit Distinction*: `StyleIntentProfile` = what the user asked for. `IntentFulfillment` = how well the final ensemble satisfied it.
 
 ### 1. Define Intent Fulfillment Result
 * **File**: `StyleModels.kt` or `GenerateStyleResultUseCase.kt`
@@ -94,6 +102,7 @@ Based on the architectural review in `ArchRev54.md`, `ArchRev55.md`, and `ArchRe
 
   data class IntentFulfillmentDimensions(
       val colorfulness: Float,
+      val colorContrast: Float,
       val novelty: Float,
       val formality: Float
   )
@@ -104,12 +113,13 @@ Based on the architectural review in `ArchRev54.md`, `ArchRev55.md`, and `ArchRe
 * **File**: `IntentFulfillmentEvaluator.kt` (New)
 * **Implementation**:
   * Evaluates structured properties of the validated selected ensemble (e.g., CIELAB chroma, categories, materials).
-  * **Invariant**: `IntentFulfillmentEvaluator` is 100% deterministic and does **not** inspect LLM rationale text.
-  * Evaluates independently from FASHIONISTA. (Aesthetic quality $\neq$ Request satisfaction).
+  * **Invariant 1**: `IntentFulfillmentEvaluator` is 100% deterministic and does **not** inspect LLM rationale text.
+  * **Invariant 2 (Independence)**: Evaluates independently from FASHIONISTA. (Aesthetic quality $\neq$ Request satisfaction).
+  * **Invariant 3 (Acceptance Criteria)**: A recommendation cannot be marked fully successful solely because FASHIONISTA approves it. (`FASHIONISTA APPROVED` $\neq$ `RECOMMENDATION SUCCESS`).
 
 ### 3. Update the UI State
 * **File**: `StyleResultUiState.kt` & `StyleResultScreen.kt`
 * **Implementation**:
   * Expose `intentFulfillment`.
-  * Display a dedicated UI component: `"Intent Fulfillment: 35/100"` with breakdown dimensions and `unmetIntent` tags.
+  * Display a dedicated UI component displaying `intentFulfillment.score` with its dimensional breakdown and `unmetIntent` tags.
   * Clearly separates *what was asked for* (Recommendation Fulfillment) from *how good it looks* (FASHIONISTA).
