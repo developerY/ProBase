@@ -27,11 +27,13 @@ class HeuristicStyleEngine @Inject constructor(
         val selectedItems = mutableListOf<ClothingItem>()
         val selectedCosmetics = mutableListOf<CosmeticItem>()
         
-        // 1. Pick Clothes
-        val tops = availableWardrobe.filter { it.category == ClothingCategory.TOPS }
-        val bottoms = availableWardrobe.filter { it.category == ClothingCategory.BOTTOMS }
-        val shoes = availableWardrobe.filter { it.category == ClothingCategory.SHOES }
-        
+        // 1. Respect Active Anchors (USER_LOCKED, USER_SELECTED, or INTENT ANCHOR)
+        val anchoredIds = context.anchoredClothingIds.toSet()
+        val activeAnchors = availableWardrobe.filter { "w_${it.internalId}" in anchoredIds || it.remoteId in anchoredIds }
+        selectedItems.addAll(activeAnchors)
+
+        val anchorSlots = activeAnchors.mapNotNull { OutfitSlot.fromCategory(it.category) }.toSet()
+
         fun <T> List<T>.smartPick(nameSelector: (T) -> String, notesSelector: (T) -> String?): T? {
             if (this.isEmpty()) return null
             val matches = this.filter { item ->
@@ -43,9 +45,18 @@ class HeuristicStyleEngine @Inject constructor(
             return matches.randomOrNull() ?: this.random()
         }
 
-        tops.smartPick({it.name}, {it.notes})?.let { selectedItems.add(it) }
-        bottoms.smartPick({it.name}, {it.notes})?.let { selectedItems.add(it) }
-        shoes.smartPick({it.name}, {it.notes})?.let { selectedItems.add(it) }
+        if (OutfitSlot.TOP !in anchorSlots) {
+            val tops = availableWardrobe.filter { it.category == ClothingCategory.TOPS || it.category == ClothingCategory.ACTIVEWEAR }
+            tops.smartPick({it.name}, {it.notes})?.let { selectedItems.add(it) }
+        }
+        if (OutfitSlot.BOTTOM !in anchorSlots) {
+            val bottoms = availableWardrobe.filter { it.category == ClothingCategory.BOTTOMS }
+            bottoms.smartPick({it.name}, {it.notes})?.let { selectedItems.add(it) }
+        }
+        if (OutfitSlot.SHOES !in anchorSlots) {
+            val shoes = availableWardrobe.filter { it.category == ClothingCategory.SHOES }
+            shoes.smartPick({it.name}, {it.notes})?.let { selectedItems.add(it) }
+        }
 
         // 2. Pick Cosmetics (Full pigment set: Eyes, Cheeks, Lips, Nails)
         val eyes = availableCosmetics.filter { it.macroCategory == MacroCategory.EYES }
