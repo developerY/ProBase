@@ -39,6 +39,7 @@ import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
 import com.zoewave.probase.kocolor.data.usecase.AppearanceProfile
 import com.zoewave.probase.kocolor.data.usecase.ColorTelemetry
 import com.zoewave.probase.kocolor.data.usecase.GeneratePlaylistUseCase
+import com.zoewave.probase.kocolor.data.usecase.IntentAnalyzer
 import com.zoewave.probase.kocolor.data.usecase.RotationScoringUseCase
 import com.zoewave.probase.kocolor.data.usecase.SelectionTier
 import com.zoewave.probase.kocolor.data.usecase.StyleBlueprint
@@ -170,7 +171,8 @@ class StyleSimulatorViewModel @Inject constructor(
     private val atmosphericRepository: AtmosphericRepository,
     private val rotationRepository: RotationRepository,
     private val rotationScoringUseCase: RotationScoringUseCase,
-    private val greedyRehydrator: GreedyRehydrator
+    private val greedyRehydrator: GreedyRehydrator,
+    private val intentAnalyzer: IntentAnalyzer
 ) : ViewModel() {
 
     private val _selectedClothingCategory = MutableStateFlow(ClothingCategory.TOPS)
@@ -579,6 +581,7 @@ class StyleSimulatorViewModel @Inject constructor(
 
             val requestContext = StyleRequestContext(
                 intent = userIntent,
+                intentProfile = intentAnalyzer.analyze(userIntent),
                 occasion = when {
                     userIntent.contains("formal", true) || userIntent.contains("gala", true) -> "Formal"
                     userIntent.contains("beach", true) || userIntent.contains("vacation", true) -> "Beach"
