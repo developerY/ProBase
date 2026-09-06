@@ -43,7 +43,9 @@ class PromptAssembler @Inject constructor() {
         }
 
         val lockedAnchors = clothingCandidates.filter {
-            it.retrievalReason.contains("LOCKED ANCHOR", ignoreCase = true)
+            it.retrievalReason.contains("LOCKED ANCHOR", ignoreCase = true) ||
+            it.retrievalReason.contains("INTENT ANCHOR", ignoreCase = true) ||
+            it.contextScore >= 1.0f
         }
         val anchorInstruction = if (lockedAnchors.isNotEmpty()) {
             val anchorListText = lockedAnchors.joinToString(", ") { prov ->

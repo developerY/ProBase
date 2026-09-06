@@ -7,6 +7,7 @@ import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.kocolor.data.color.CandidateProvenance
 import com.zoewave.probase.kocolor.data.color.ColorHarmonyEngine
+import com.zoewave.probase.kocolor.data.color.RecommendationWeights
 import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
 import com.zoewave.probase.kocolor.data.telemetry.AnchorSource
 import com.zoewave.probase.kocolor.data.telemetry.PruningRecord
@@ -212,7 +213,19 @@ class DeterministicContextEngine @Inject constructor(
     private fun calculateContextScore(item: ClothingItem, context: StyleRequestContext): Float {
         var score = 0.5f
         if (context.intent.contains(item.category.name, ignoreCase = true)) score += 0.3f
-        return score.coerceIn(0f, 1f)
+
+        // Apply dynamic CIELAB chroma intent scaling curve to un-flatten candidate ranks
+        if (context.intentProfile.colorfulness > 0.7f) {
+            val chroma = calculateChroma(item.colorHex)
+            val chromaScaledBonus = (chroma / 50.0f) * RecommendationWeights.HIGH_CHROMA_INTENT_BONUS
+            if (chroma > 20.0f) {
+                score += chromaScaledBonus
+            } else {
+                score += RecommendationWeights.MONOCHROME_NEUTRAL_PENALTY
+            }
+        }
+
+        return score.coerceIn(0f, 5.0f)
     }
 
     private fun calculateFreshnessScore(item: ClothingItem, context: StyleRequestContext): Float {
