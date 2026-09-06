@@ -160,11 +160,16 @@ class WardrobeCandidateFilter @Inject constructor(
         context: StyleRequestContext,
         limit: Int
     ): List<CandidateProvenance> = withContext(Dispatchers.Default) {
-        val noiseCategories = setOf("oral", "tools", "fragrance", "grooming", "organizers")
-        
+        val allowedMacroCategories = setOf(
+            MacroCategory.EYES,
+            MacroCategory.DIMENSION,
+            MacroCategory.LIPS,
+            MacroCategory.NAILS
+        )
+
         val eligibleItems = inventory.filter { item ->
             !item.isHidden && 
-            !noiseCategories.contains(item.macroCategory.name.lowercase()) &&
+            item.macroCategory in allowedMacroCategories &&
             !isCosmeticRotationViolated(item)
         }
 

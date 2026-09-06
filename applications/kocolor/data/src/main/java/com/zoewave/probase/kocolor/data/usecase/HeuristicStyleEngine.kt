@@ -14,22 +14,24 @@ import javax.inject.Singleton
 @Singleton
 class HeuristicStyleEngine @Inject constructor(
     private val wardrobeRepository: WardrobeRepository,
-    private val cosmeticRepository: CosmeticInventoryRepository
+    private val cosmeticRepository: CosmeticInventoryRepository,
+    private val contextEngine: DeterministicContextEngine
 ) : DeterministicStyleEngine {
 
     override fun generate(context: StyleRequestContext): StyleBlueprint {
         // Use runBlocking for the deterministic fallback as it's usually called as a last resort
-        // and needs to return a non-suspend result based on the interface.
-        // In a real app, this should ideally be async or pre-fetched.
         val availableWardrobe = runBlocking { wardrobeRepository.getAllClothing().first() }
         val availableCosmetics = runBlocking { cosmeticRepository.getAllCosmetics().first() }
 
         val selectedItems = mutableListOf<ClothingItem>()
         val selectedCosmetics = mutableListOf<CosmeticItem>()
         
-        // 1. Respect Active Anchors (USER_LOCKED, USER_SELECTED, or INTENT ANCHOR)
-        val anchoredIds = context.anchoredClothingIds.toSet()
-        val activeAnchors = availableWardrobe.filter { "w_${it.internalId}" in anchoredIds || it.remoteId in anchoredIds }
+        // 1. Resolve Active Anchors via ContextEngine (USER_LOCKED, USER_SELECTED, or INTENT ANCHOR)
+        val selectionState = runBlocking { contextEngine.generateSelectionState(availableWardrobe, context.lockedConstraints, context) }
+        val activeAnchors = selectionState.activeAnchors.ifEmpty {
+            val anchoredIds = context.anchoredClothingIds.toSet()
+            availableWardrobe.filter { "w_${it.internalId}" in anchoredIds || it.remoteId in anchoredIds }
+        }
         selectedItems.addAll(activeAnchors)
 
         val anchorSlots = activeAnchors.mapNotNull { OutfitSlot.fromCategory(it.category) }.toSet()
