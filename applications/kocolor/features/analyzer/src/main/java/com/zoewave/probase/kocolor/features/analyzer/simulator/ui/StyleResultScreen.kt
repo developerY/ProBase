@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.core.model.ritual.CosmeticItem
+import com.zoewave.probase.kocolor.data.usecase.IntentFulfillment
 import com.zoewave.probase.kocolor.fashionista.domain.FashionistaScore
 import kotlin.math.roundToInt
 
@@ -81,7 +82,12 @@ fun StyleResultScreen(
                     FashionistaScoreBadge(score = score)
                 }
 
-                // 2. AI Rationale Container
+                // 2. Intent Fulfillment Component
+                uiState.intentFulfillment?.let { intentFulfillment ->
+                    IntentFulfillmentCard(fulfillment = intentFulfillment)
+                }
+
+                // 3. AI Rationale Container
                 uiState.blueprint?.rationale?.let { rationale ->
                     Card(
                         modifier = Modifier.fillMaxWidth(),
@@ -226,6 +232,65 @@ private fun FashionistaScoreBadge(score: FashionistaScore) {
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.labelMedium,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun IntentFulfillmentCard(fulfillment: IntentFulfillment) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = "INTENT FULFILLMENT",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Gray,
+                        letterSpacing = 1.sp
+                    )
+                    Text(
+                        text = "${fulfillment.score.roundToInt()}/100",
+                        style = MaterialTheme.typography.headlineLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+
+                Surface(
+                    shape = RoundedCornerShape(20.dp),
+                    color = if (fulfillment.score >= 70f) Color(0xFF3B82F6) else Color(0xFFF59E0B)
+                ) {
+                    Text(
+                        text = if (fulfillment.score >= 70f) "MATCHED" else "PARTIAL",
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.labelMedium,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
+                }
+            }
+
+            if (fulfillment.unmetIntent.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Unmet Intent: ${fulfillment.unmetIntent.joinToString(", ")}",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.error
                 )
             }
         }

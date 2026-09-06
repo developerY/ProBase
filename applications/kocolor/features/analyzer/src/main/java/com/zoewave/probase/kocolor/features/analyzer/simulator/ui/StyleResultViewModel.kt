@@ -26,6 +26,7 @@ class StyleResultViewModel @Inject constructor(
                 _uiState.value = StyleResultUiState(
                     blueprint = result.blueprint,
                     fashionistaScore = result.fashionistaScore,
+                    intentFulfillment = result.intentFulfillment,
                     fashionistaCoverage = result.fashionistaScore.coverage.toFloat(),
                     calibrationVersion = result.fashionistaScore.standardVersion,
                     selectedClothing = result.selectedClothing,

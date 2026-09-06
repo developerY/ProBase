@@ -44,6 +44,14 @@ data class RoleRequirement(
 )
 
 @Serializable
+data class StyleIntentProfile(
+    val colorfulness: Float = 0.5f, 
+    val colorContrast: Float = 0.5f,
+    val novelty: Float = 0.5f,
+    val formality: Float = 0.5f
+)
+
+@Serializable
 data class StyleRequestContext(
     val requestId: String = UUID.randomUUID().toString(),
     val intent: String,
@@ -53,6 +61,7 @@ data class StyleRequestContext(
     val uvIndex: Float? = null,
     val appearanceTelemetry: ColorTelemetry = ColorTelemetry(),
     val appearanceProfile: AppearanceProfile = AppearanceProfile(),
+    val intentProfile: StyleIntentProfile = StyleIntentProfile(),
     val circadianContext: String = "Defense & Protection",
     val wellnessScore: Double = 0.85,
     val anchoredClothingIds: List<String> = emptyList(),
@@ -76,4 +85,23 @@ data class StyleBlueprint(
     val selectedClothingIds: List<String>,
     val selectedCosmeticIds: List<String>,
     val recommendedPalette: List<String>
+)
+
+data class RecommendationComposition(
+    val clothingSlots: Set<OutfitSlot>,
+    val cosmeticRoles: Set<CosmeticRole>,
+    val mandatoryAnchors: Set<String>
+)
+
+data class IntentFulfillmentDimensions(
+    val colorfulness: Float,
+    val colorContrast: Float,
+    val novelty: Float,
+    val formality: Float
+)
+
+data class IntentFulfillment(
+    val score: Float,
+    val dimensions: IntentFulfillmentDimensions,
+    val unmetIntent: List<String>
 )
