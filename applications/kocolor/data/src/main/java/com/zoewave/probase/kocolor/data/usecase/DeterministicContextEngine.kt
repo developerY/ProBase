@@ -1,5 +1,7 @@
 package com.zoewave.probase.kocolor.data.usecase
 
+import android.graphics.Color
+import androidx.core.graphics.ColorUtils
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.kocolor.data.color.CandidateProvenance
@@ -10,6 +12,7 @@ import com.zoewave.probase.kocolor.data.telemetry.PruningRecord
 import com.zoewave.probase.kocolor.data.telemetry.StyleAuditLogger
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.math.sqrt
 
 @Singleton
 class DeterministicContextEngine @Inject constructor(
@@ -142,8 +145,26 @@ class DeterministicContextEngine @Inject constructor(
             }
         }
         
-        // 3. Automatic Anchor (pass hard constraints)
-        val anchor = inventory.filter { isContextuallyViable(it, context) }
+        // 3. Automatic Anchor (pass hard constraints with high-chroma intent override)
+        val viableItems = inventory.filter { isContextuallyViable(it, context) }
+
+        if (context.intentProfile.colorfulness > 0.7f) {
+            val chromaticAnchor = viableItems
+                .filter { calculateChroma(it.colorHex) > 30f }
+                .maxByOrNull { calculateChroma(it.colorHex) + calculateContextScore(it, context).toFloat() }
+
+            if (chromaticAnchor != null) {
+                auditLogger.logAnchorResolution(
+                    context.requestId,
+                    chromaticAnchor,
+                    AnchorSource.AUTOMATIC_CONTEXT,
+                    "High-chroma intent override for '${context.intent}'"
+                )
+                return chromaticAnchor
+            }
+        }
+
+        val anchor = viableItems
             .sortedByDescending { calculateContextScore(it, context) + calculateFreshnessScore(it, context) }
             .firstOrNull()
             
@@ -152,6 +173,20 @@ class DeterministicContextEngine @Inject constructor(
         }
         
         return anchor
+    }
+
+    private fun calculateChroma(hex: String?): Float {
+        if (hex.isNullOrBlank()) return 0f
+        return try {
+            val colorInt = Color.parseColor(hex)
+            val lab = DoubleArray(3)
+            ColorUtils.colorToLAB(colorInt, lab)
+            val a = lab[1]
+            val b = lab[2]
+            sqrt(a * a + b * b).toFloat()
+        } catch (e: Exception) {
+            0f
+        }
     }
 
     private fun isContextuallyViable(item: ClothingItem, context: StyleRequestContext): Boolean {

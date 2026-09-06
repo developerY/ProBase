@@ -1,5 +1,7 @@
 package com.zoewave.probase.kocolor.data.usecase
 
+import android.graphics.Color
+import androidx.core.graphics.ColorUtils
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.core.model.ritual.CosmeticItem
@@ -14,6 +16,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.math.sqrt
 
 @Singleton
 class WardrobeCandidateFilter @Inject constructor(
@@ -111,13 +114,37 @@ class WardrobeCandidateFilter @Inject constructor(
             score += RecommendationWeights.WEATHER_ALIGNMENT_BONUS // +1.5
         }
 
-        // 3. Score contextual relevance against user intent keywords and occasion
+        // 3. Pre-Gemini High-Chroma Intent Boost & Neutral Demotion
+        val chroma = calculateChroma(item.colorHex)
+        if (context.intentProfile.colorfulness > 0.7f) {
+            if (chroma > 30.0f) {
+                score += RecommendationWeights.HIGH_CHROMA_INTENT_BONUS // +2.5f
+            } else if (chroma < 15.0f) {
+                score += RecommendationWeights.MONOCHROME_NEUTRAL_PENALTY // -1.5f
+            }
+        }
+
+        // 4. Score contextual relevance against user intent keywords and occasion
         val keywords = context.intent.lowercase().split(" ", ",", ".")
         if (keywords.any { item.name.contains(it, ignoreCase = true) || (item.notes?.contains(it, ignoreCase = true) ?: false) }) {
             score += 2.0
         }
 
         return score
+    }
+
+    private fun calculateChroma(hex: String?): Float {
+        if (hex.isNullOrBlank()) return 0f
+        return try {
+            val colorInt = Color.parseColor(hex)
+            val lab = DoubleArray(3)
+            ColorUtils.colorToLAB(colorInt, lab)
+            val a = lab[1]
+            val b = lab[2]
+            sqrt(a * a + b * b).toFloat()
+        } catch (e: Exception) {
+            0f
+        }
     }
 
     suspend fun getCosmeticCandidateProvenance(
