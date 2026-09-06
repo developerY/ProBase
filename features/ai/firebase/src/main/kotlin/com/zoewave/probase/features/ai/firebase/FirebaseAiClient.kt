@@ -54,6 +54,7 @@ class FirebaseAiClientImpl @Inject constructor() : FirebaseAiClient {
         modelName = MODEL_NAME,
         generationConfig = generationConfig {
             responseMimeType = "application/json"
+            temperature = 0.75f
         }
     )
 

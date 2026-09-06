@@ -130,6 +130,14 @@ class WardrobeCandidateFilter @Inject constructor(
             score += 2.0
         }
 
+        // 5. Recently-Worn Novelty Penalty (-2.5f)
+        val lastUsed = item.lastUsedTimestamp ?: 0L
+        val sevenDaysAgo = System.currentTimeMillis() - (7 * 24 * 60 * 60 * 1000L)
+        val rotationPenalty = context.rotationScores[item.remoteId] ?: 0.0
+        if (lastUsed > sevenDaysAgo || rotationPenalty >= 0.50) {
+            score += RecommendationWeights.RECENTLY_WORN_PENALTY // -2.5f
+        }
+
         return score
     }
 
@@ -152,11 +160,16 @@ class WardrobeCandidateFilter @Inject constructor(
         context: StyleRequestContext,
         limit: Int
     ): List<CandidateProvenance> = withContext(Dispatchers.Default) {
-        val noiseCategories = setOf("oral", "tools", "fragrance", "grooming", "organizers")
-        
+        val allowedMacroCategories = setOf(
+            MacroCategory.EYES,
+            MacroCategory.DIMENSION,
+            MacroCategory.LIPS,
+            MacroCategory.NAILS
+        )
+
         val eligibleItems = inventory.filter { item ->
             !item.isHidden && 
-            !noiseCategories.contains(item.macroCategory.name.lowercase()) &&
+            item.macroCategory in allowedMacroCategories &&
             !isCosmeticRotationViolated(item)
         }
 

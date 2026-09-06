@@ -12,4 +12,5 @@ object RecommendationWeights {
     const val APPEARANCE_TEMPERATURE_CLASH_PENALTY = -2.5f
     const val THERMAL_MISMATCH_PENALTY = -3.0f
     const val MONOCHROME_NEUTRAL_PENALTY = -1.5f
+    const val RECENTLY_WORN_PENALTY = -2.5f
 }
