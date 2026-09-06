@@ -1,6 +1,7 @@
 package com.zoewave.probase.kocolor.data.telemetry
 
 import com.zoewave.probase.kocolor.data.color.CandidateProvenance
+import com.zoewave.probase.kocolor.data.usecase.IntentFulfillment
 import com.zoewave.probase.kocolor.data.usecase.StyleBlueprint
 import com.zoewave.probase.kocolor.fashionista.domain.FashionistaScore
 
@@ -32,5 +33,6 @@ data class StyleAuditTrail(
     var aiProviderUsed: String? = null,
     var tokensUsed: Int? = null,
     var finalBlueprint: StyleBlueprint? = null,
-    var fashionistaScore: FashionistaScore? = null
+    var fashionistaScore: FashionistaScore? = null,
+    var intentFulfillment: IntentFulfillment? = null
 )

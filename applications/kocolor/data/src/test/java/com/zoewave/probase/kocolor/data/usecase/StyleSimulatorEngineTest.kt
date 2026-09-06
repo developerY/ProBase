@@ -60,7 +60,8 @@ class StyleSimulatorEngineTest {
             auditLogger,
             fallbackEngine,
             RecommendationValidator(),
-            fashionistaEvaluator
+            fashionistaEvaluator,
+            IntentFulfillmentEvaluator()
         )
     }
 

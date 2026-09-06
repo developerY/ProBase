@@ -3,6 +3,7 @@ package com.zoewave.probase.kocolor.data.telemetry
 import android.util.Log
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.kocolor.data.color.CandidateProvenance
+import com.zoewave.probase.kocolor.data.usecase.IntentFulfillment
 import com.zoewave.probase.kocolor.data.usecase.StyleBlueprint
 import com.zoewave.probase.kocolor.fashionista.domain.FashionistaScore
 import java.util.concurrent.ConcurrentHashMap
@@ -45,6 +46,10 @@ class StyleAuditLogger @Inject constructor() {
 
     fun logFashionistaEvaluation(requestId: String, score: FashionistaScore) {
         trails[requestId]?.fashionistaScore = score
+    }
+
+    fun logIntentFulfillment(requestId: String, fulfillment: IntentFulfillment) {
+        trails[requestId]?.intentFulfillment = fulfillment
     }
 
     fun printAuditTrail(requestId: String) {
@@ -95,12 +100,20 @@ class StyleAuditLogger @Inject constructor() {
                 appendLine("    Final FASHIONISTA Score: ${"%.1f".format(score.totalScore)} / 100")
                 appendLine("    Status: $statusText")
             } ?: appendLine("    NO CALIBRATION RECORDED")
+            appendLine()
+
+            appendLine("[6] INTENT FULFILLMENT")
+            trail.intentFulfillment?.let { fulfillment ->
+                appendLine("    Overall Intent Match: ${"%.1f".format(fulfillment.score)} / 100")
+                appendLine("    Colorfulness Score: ${"%.2f".format(fulfillment.dimensions.colorfulness)}")
+                appendLine("    Color Contrast Score: ${"%.2f".format(fulfillment.dimensions.colorContrast)}")
+                appendLine("    Unmet Intent Parameters: ${fulfillment.unmetIntent.ifEmpty { listOf("None") }}")
+            } ?: appendLine("    NO INTENT FULFILLMENT RECORDED")
             appendLine("==================================================")
         }.toString()
 
         Log.d("KoColor_Audit", output)
         
-        // Optional: remove after printing to keep memory clean
         trails.remove(requestId)
     }
 }

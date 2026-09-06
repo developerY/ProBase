@@ -25,7 +25,8 @@ class StyleSimulatorEngine @Inject constructor(
     private val auditLogger: StyleAuditLogger,
     private val fallbackEngine: DeterministicStyleEngine,
     private val validator: RecommendationValidator,
-    private val fashionistaEvaluator: FashionistaEvaluator
+    private val fashionistaEvaluator: FashionistaEvaluator,
+    private val intentFulfillmentEvaluator: IntentFulfillmentEvaluator
 ) {
 
     companion object {
@@ -171,6 +172,16 @@ class StyleSimulatorEngine @Inject constructor(
                 val fashionistaScore = fashionistaEvaluator.evaluate(blueprint, requestContext)
                 auditLogger.logFashionistaEvaluation(requestContext.requestId, fashionistaScore)
 
+                val selectedClothingItems = fitResult.clothingCandidates.mapNotNull { it.clothingItem }.filter { "w_${it.internalId}" in blueprint.selectedClothingIds || it.remoteId in blueprint.selectedClothingIds }
+                val selectedCosmeticItems = fitResult.cosmeticCandidates.mapNotNull { it.cosmeticItem }.filter { "c_${it.internalId}" in blueprint.selectedCosmeticIds || it.remoteId in blueprint.selectedCosmeticIds }
+
+                val intentFulfillment = intentFulfillmentEvaluator.evaluate(
+                    intentProfile = requestContext.intentProfile,
+                    selectedClothing = selectedClothingItems,
+                    selectedCosmetics = selectedCosmeticItems
+                )
+                auditLogger.logIntentFulfillment(requestContext.requestId, intentFulfillment)
+
                 cache.put(fingerprint, rawResult)
                 auditLogger.logAiExecution(
                     requestId = requestContext.requestId,
@@ -245,15 +256,24 @@ class StyleSimulatorEngine @Inject constructor(
             val cCandidatesProv = candidateFilter.getCosmeticCandidateProvenance(cosmetics, context, limit = currentK)
             val cCandidates = cCandidatesProv.mapNotNull { it.cosmeticItem }
 
-            // 1. Convert locked active anchors to candidate provenance (resolves ghost anchor bug)
+            // 1. Convert active anchors to candidate provenance with accurate rationale
             val anchorProv = selectionState.activeAnchors.map { anchor ->
+                val isUserLock = context.lockedConstraints.any {
+                    (it.itemId == "w_${anchor.internalId}" || it.itemId == anchor.remoteId) &&
+                    (it.tier == SelectionTier.LOCKED || it.tier == SelectionTier.FORCED || it.tier == SelectionTier.SELECTED)
+                }
+                val rationaleText = if (isUserLock) {
+                    "[LOCKED ANCHOR] Required outfit anchor"
+                } else {
+                    "[INTENT ANCHOR] High-chroma intent override"
+                }
                 CandidateProvenance(
                     clothingItem = anchor,
                     contextScore = 1.0f,
                     colorScore = 1.0f,
                     appearanceScore = 1.0f,
                     freshnessScore = 1.0f,
-                    retrievalReason = "[LOCKED ANCHOR] Required outfit anchor"
+                    retrievalReason = rationaleText
                 )
             }
 
