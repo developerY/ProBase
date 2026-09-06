@@ -9,7 +9,7 @@ data class AiProviderCapability(
     val maxInputTokens: Int,
     val maxOutputTokens: Int,
     val timeoutMillis: Long,
-    val maxCandidateAdditions: Int = 12,
+    val maxCandidateAdditions: Int = 25,
     val minCandidateAdditions: Int = 4,
     val isLocal: Boolean,
     val supportsLocalImageIngestion: Boolean = false

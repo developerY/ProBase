@@ -19,7 +19,7 @@ class FirebaseAiProvider @Inject constructor(
         maxInputTokens = 1536,
         maxOutputTokens = 512,
         timeoutMillis = 3000L,
-        maxCandidateAdditions = 12,
+        maxCandidateAdditions = 25,
         minCandidateAdditions = 6,
         isLocal = false
     )
