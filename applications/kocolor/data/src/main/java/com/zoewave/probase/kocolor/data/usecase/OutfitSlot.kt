@@ -11,7 +11,7 @@ enum class OutfitSlot {
     companion object {
         fun fromCategory(category: ClothingCategory): OutfitSlot? {
             return when (category) {
-                ClothingCategory.TOPS, ClothingCategory.DRESSES -> TOP
+                ClothingCategory.TOPS, ClothingCategory.DRESSES, ClothingCategory.ACTIVEWEAR -> TOP
                 ClothingCategory.BOTTOMS -> BOTTOM
                 ClothingCategory.SHOES -> SHOES
                 ClothingCategory.OUTERWEAR -> OUTERWEAR

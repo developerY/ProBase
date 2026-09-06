@@ -95,6 +95,23 @@ class RecommendationValidator @Inject constructor() {
             }
         }
 
+        // 2b. Role Coverage & Cardinality Assertion (Asserts all requested cosmetic roles are present)
+        val requestedCosmeticRoles = cosmeticCandidates.mapNotNull {
+            it.cosmeticItem?.let { c -> CosmeticRole.fromMacroCategory(c.macroCategory) }
+        }.filter { it != CosmeticRole.PREP }.toSet()
+
+        val selectedCosmeticRoles = finalCosmeticIds.mapNotNull { id ->
+            val item = cosmeticCandidates.find { it.cosmeticItem?.let { c -> "c_${c.internalId}" } == id || it.cosmeticItem?.remoteId == id }?.cosmeticItem
+            item?.let { CosmeticRole.fromMacroCategory(it.macroCategory) }
+        }.toSet()
+
+        if (requestedCosmeticRoles.isNotEmpty() && selectedCosmeticRoles.size < requestedCosmeticRoles.size) {
+            val missingRoles = requestedCosmeticRoles - selectedCosmeticRoles
+            val errorMsg = "Validation failed: Missing required cosmetic roles [${missingRoles.joinToString { it.displayName }}]"
+            Log.e("RecommendationValidator", errorMsg)
+            errors.add(errorMsg)
+        }
+
         // 3. Rationale Cross-Check & Sanitization (Strips references to unselected products)
         val clothingMap = clothingCandidates.mapNotNull { it.clothingItem }.associateBy { it.name }
         val cosmeticMap = cosmeticCandidates.mapNotNull { it.cosmeticItem }.associateBy { it.name }
