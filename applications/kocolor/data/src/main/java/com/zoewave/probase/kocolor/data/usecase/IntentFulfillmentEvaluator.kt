@@ -41,17 +41,26 @@ class IntentFulfillmentEvaluator @Inject constructor() {
         // Just use colorfulness as the main score for now
         val score = (colorfulnessDelta * 100.0f).coerceIn(0.0f, 100.0f)
 
-        val unmet = mutableListOf<String>()
-        if (intentProfile.colorfulness > 0.7f && normalizedEvaluatedColorfulness < 0.4f) {
-            unmet.add("Colorfulness")
-        }
-
         val dimensions = IntentFulfillmentDimensions(
             colorfulness = normalizedEvaluatedColorfulness,
             colorContrast = 0.5f,
             novelty = 0.5f,
             formality = 0.5f
         )
+
+        val unmet = mutableListOf<String>()
+        if (intentProfile.colorfulness > 0.6f && dimensions.colorfulness < 0.6f) {
+            unmet.add("Colorfulness")
+        }
+        if (intentProfile.colorContrast > 0.6f && dimensions.colorContrast < 0.6f) {
+            unmet.add("Color Contrast")
+        }
+        if (intentProfile.novelty > 0.6f && dimensions.novelty < 0.6f) {
+            unmet.add("Novelty")
+        }
+        if (score < 70.0f && unmet.isEmpty()) {
+            unmet.add("Colorfulness & Vibrancy")
+        }
 
         return IntentFulfillment(
             score = score,

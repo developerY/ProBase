@@ -4,7 +4,11 @@ import android.util.Log
 import com.google.common.truth.Truth.assertThat
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
+import com.zoewave.probase.core.model.ritual.CosmeticItem
+import com.zoewave.probase.core.model.ritual.MacroCategory
+import com.zoewave.probase.core.model.ritual.MicroCategory
 import com.zoewave.probase.features.ai.core.AiProvider
+import com.zoewave.probase.kocolor.data.color.CandidateProvenance
 import com.zoewave.probase.features.ai.core.AiProviderCapability
 import com.zoewave.probase.features.ai.local.data.PromptCacheRepository
 import com.zoewave.probase.kocolor.data.telemetry.StyleAuditLogger
@@ -41,6 +45,7 @@ class StyleSimulatorIntegrationTest {
         every { cache.generateFingerprint(any(), any(), any(), any(), any(), any(), any(), any()) } returns "test_hash"
         every { cache.get(any()) } returns null
         every { cache.put(any(), any()) } just Runs
+        every { fallbackEngine.generate(any()) } returns StyleBlueprint("Fallback", emptyList(), emptyList(), emptyList())
 
         engine = StyleSimulatorEngine(
             contextEngine,
@@ -73,9 +78,16 @@ class StyleSimulatorIntegrationTest {
         coEvery { provider.countTokens(any()) } returns 200
         coEvery { provider.execute(any()) } returns Result.success("{\"rationale\": \"Harmonic look\", \"selectedClothingIds\": [\"w_1\"], \"selectedCosmeticIds\": [\"c_1\", \"c_2\", \"c_3\", \"c_4\"], \"recommendedPalette\": [\"#FF0000\"]}")
         
+        val mockCosmetics = listOf(
+            CandidateProvenance(cosmeticItem = CosmeticItem(internalId = 1, name = "Eye Shadow", brand = "KoColor", macroCategory = MacroCategory.EYES, microCategory = MicroCategory.EYESHADOW, colorHex = "#000000")),
+            CandidateProvenance(cosmeticItem = CosmeticItem(internalId = 2, name = "Blush", brand = "KoColor", macroCategory = MacroCategory.DIMENSION, microCategory = MicroCategory.BLUSH, colorHex = "#000000")),
+            CandidateProvenance(cosmeticItem = CosmeticItem(internalId = 3, name = "Lipstick", brand = "KoColor", macroCategory = MacroCategory.LIPS, microCategory = MicroCategory.LIPSTICK, colorHex = "#000000")),
+            CandidateProvenance(cosmeticItem = CosmeticItem(internalId = 4, name = "Nail Polish", brand = "KoColor", macroCategory = MacroCategory.NAILS, microCategory = MicroCategory.NAIL_POLISH, colorHex = "#000000"))
+        )
+
         coEvery { capabilityRouter.getRankedAvailableProviders() } returns listOf(provider)
         coEvery { contextEngine.generateSelectionState(any(), any(), any()) } returns StyleSelectionState()
-        coEvery { candidateFilter.getCosmeticCandidateProvenance(any(), any(), any()) } returns emptyList()
+        coEvery { candidateFilter.getCosmeticCandidateProvenance(any(), any(), any()) } returns mockCosmetics
 
         val result = engine.generateBlueprint(items, emptyList(), context)
 

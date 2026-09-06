@@ -163,11 +163,22 @@ class StyleSimulatorEngine @Inject constructor(
                     clothingCandidates = fitResult.clothingCandidates,
                     cosmeticCandidates = fitResult.cosmeticCandidates
                 )
-                val blueprint = validation.sanitizedBlueprint
 
-                if (validation.validationErrors.isNotEmpty()) {
-                    Log.w("StyleSimulatorEngine", "Sanitized blueprint errors: ${validation.validationErrors.joinToString("; ")}")
+                if (!validation.isValid) {
+                    Log.e("StyleSimulatorEngine", "Validation failed: ${validation.validationErrors.joinToString("; ")}. Halting execution for retry.")
+                    logTelemetry(
+                        tier = provider.capability.id,
+                        kLimit = fitResult.kLimit,
+                        detail = fitResult.detailLevel,
+                        tokens = fitResult.tokenCount,
+                        latency = latency,
+                        success = false,
+                        reason = "VALIDATION_FAILED"
+                    )
+                    return null
                 }
+
+                val blueprint = validation.sanitizedBlueprint
 
                 val fashionistaScore = fashionistaEvaluator.evaluate(blueprint, requestContext)
                 auditLogger.logFashionistaEvaluation(requestContext.requestId, fashionistaScore)
