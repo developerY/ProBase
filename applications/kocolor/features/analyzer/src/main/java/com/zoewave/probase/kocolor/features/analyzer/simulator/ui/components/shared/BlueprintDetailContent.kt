@@ -53,8 +53,11 @@ import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.gra
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.VisualBlueprintData
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.VisualBlueprintSection
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.mapToVisualBlueprintData
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.phase
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.toStyleCreationUiModel
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.list.PlaceholderResultCard
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.list.ResultCard
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.result.StyleCreationStoryScreen
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
 @Composable
@@ -247,6 +250,13 @@ fun BlueprintDetailContent(
                     isLoading = false
                 ),
                 isScrollable = false
+            )
+        }
+
+        item {
+            StyleCreationStoryScreen(
+                model = data.toStyleCreationUiModel(),
+                phase = data.phase
             )
         }
 

@@ -8,6 +8,9 @@ import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.core.model.ritual.MicroCategory
 import com.zoewave.probase.core.model.ritual.MakeupSuggestion
 import com.zoewave.probase.core.model.ritual.SuggestedPiece
+import com.zoewave.probase.kocolor.data.usecase.CreationPhase
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.result.StyleCreationUiModel
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.result.StyleItemUiModel
 
 enum class ResultTab { FACE, CLOTHES, NAILS }
 
@@ -152,3 +155,33 @@ private fun ClothingItem.toBlueprintItem() = BlueprintItem(
     colorHex = colorHex,
     imageUrl = imageUrl
 )
+
+val VisualBlueprintData.phase: CreationPhase
+    get() = if (isComplete) CreationPhase.COMPLETE else CreationPhase.AI_GENERATING
+
+fun VisualBlueprintData.toStyleCreationUiModel(): StyleCreationUiModel {
+    val clothingModels = listOfNotNull(topItem, bottomItem, shoeItem, outerwearItem).map { item ->
+        StyleItemUiModel(
+            id = "w_${item.id ?: 0}",
+            name = item.name,
+            role = "GARMENT",
+            colorHex = item.colorHex
+        )
+    }
+
+    val cosmeticModels = listOfNotNull(eyesItem, cheeksItem, lipsItem, nailsItem).map { item ->
+        StyleItemUiModel(
+            id = "c_${item.id ?: 0}",
+            name = item.name,
+            role = "COSMETIC",
+            colorHex = item.colorHex
+        )
+    }
+
+    return StyleCreationUiModel(
+        clothing = clothingModels,
+        cosmetics = cosmeticModels,
+        paletteHex = recommendedPalette,
+        fashionistaScore = koColorScore.toFloat()
+    )
+}
