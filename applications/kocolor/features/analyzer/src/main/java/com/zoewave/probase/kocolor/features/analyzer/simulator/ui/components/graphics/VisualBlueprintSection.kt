@@ -83,9 +83,7 @@ fun VisualBlueprintSection(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .verticalScroll(rememberScrollState()),
+                modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(14.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {

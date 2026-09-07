@@ -219,6 +219,7 @@ fun BlueprintDetailContent(
             )
         }
 
+      
         item {
             StyleResultContent(
                 uiState = StyleResultUiState(
@@ -238,27 +239,6 @@ fun BlueprintDetailContent(
                     isLoading = false
                 ),
                 isScrollable = false
-            )
-        }
-
-        item {
-            StyleResultContent(
-                uiState = StyleResultUiState(
-                    blueprint = StyleBlueprint(
-                        rationale = rationale ?: "",
-                        selectedClothingIds = recommendedClothing.map { "w_${it.internalId}" },
-                        selectedCosmeticIds = recommendedCosmetics.map { "c_${it.internalId}" },
-                        recommendedPalette = recommendedPalette
-                    ),
-                    fashionistaScore = fashionistaScore ?: FashionistaScore(
-                        totalScore = data.koColorScore.toFloat(),
-                        isApproved = data.koColorScore >= 80
-                    ),
-                    intentFulfillment = intentFulfillment,
-                    selectedClothing = recommendedClothing,
-                    selectedCosmetics = recommendedCosmetics,
-                    isLoading = false
-                )
             )
         }
 
