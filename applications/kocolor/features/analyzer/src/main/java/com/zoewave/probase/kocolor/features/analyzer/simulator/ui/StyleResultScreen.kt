@@ -79,15 +79,18 @@ fun StyleResultScreen(
 @Composable
 fun StyleResultContent(
     uiState: StyleResultUiState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isScrollable: Boolean = true
 ) {
     Surface(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.background
     ) {
         if (uiState.isLoading) {
             Box(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -101,11 +104,19 @@ fun StyleResultContent(
                 }
             }
         } else {
-            Column(
-                modifier = Modifier
+            val columnModifier = if (isScrollable) {
+                Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
-                    .padding(16.dp),
+                    .padding(16.dp)
+            } else {
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            }
+
+            Column(
+                modifier = columnModifier,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 // 1. FASHIONISTA Badge Component
