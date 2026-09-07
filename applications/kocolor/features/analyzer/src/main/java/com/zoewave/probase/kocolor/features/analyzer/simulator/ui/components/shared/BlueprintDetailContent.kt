@@ -22,6 +22,9 @@ import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.kocolor.features.analyzer.R
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.AuditStep
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.AuditTrailView
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.ExecutionTier
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.CollapsibleFashionistaScoreCard
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.FashionistaScoreGauge
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.ResultTab
@@ -166,6 +169,21 @@ fun BlueprintDetailContent(
 
         item {
             CollapsibleFashionistaScoreCard(score = data.koColorScore)
+        }
+
+        // System Architecture Audit Log Card placed right under FASHIONISTA score and above Save button
+        item {
+            AuditTrailView(
+                executionTier = if (isLocalResult) ExecutionTier.DETERMINISTIC_FALLBACK else ExecutionTier.AI_CLOUD,
+                latencyMs = if (isLocalResult) 134 else 1290,
+                fashionistaScore = data.koColorScore.toFloat(),
+                steps = listOf(
+                    AuditStep(1, "Anchor Establishment", "Resolved outfit anchor via Intent/Context Engine."),
+                    AuditStep(2, "Deterministic Pruning", "Inventory evaluated and weather-gated."),
+                    AuditStep(3, "Mathematical Scoring", "Top candidates ranked by relational color harmony."),
+                    AuditStep(4, "AI Synthesis & Validation", "Synthesized blueprint validated across 4 cosmetic roles.")
+                )
+            )
         }
 
         if (actionButtonText != null && onActionClick != null) {

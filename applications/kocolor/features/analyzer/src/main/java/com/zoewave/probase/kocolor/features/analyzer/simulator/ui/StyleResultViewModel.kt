@@ -19,6 +19,8 @@ class StyleResultViewModel @Inject constructor(
     val uiState: StateFlow<StyleResultUiState> = _uiState.asStateFlow()
 
     fun generateStyleRecommendation(intent: String = "Daily Outfit") {
+        if (_uiState.value.isLoading) return
+        
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
             try {

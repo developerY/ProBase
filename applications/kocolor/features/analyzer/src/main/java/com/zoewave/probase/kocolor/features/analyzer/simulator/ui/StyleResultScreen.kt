@@ -1,8 +1,11 @@
 package com.zoewave.probase.kocolor.features.analyzer.simulator.ui
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,36 +23,64 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.core.model.ritual.CosmeticItem
+import com.zoewave.probase.core.model.ritual.MacroCategory
+import com.zoewave.probase.core.model.ritual.MicroCategory
+import com.zoewave.probase.core.model.ritual.Temperature
 import com.zoewave.probase.kocolor.data.usecase.IntentFulfillment
+import com.zoewave.probase.kocolor.data.usecase.IntentFulfillmentDimensions
+import com.zoewave.probase.kocolor.data.usecase.StyleBlueprint
 import com.zoewave.probase.kocolor.fashionista.domain.FashionistaScore
 import kotlin.math.roundToInt
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun StyleResultScreen(
+    intent: String = "Daily Outfit",
     viewModel: StyleResultViewModel,
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
+    LaunchedEffect(intent) {
+        viewModel.generateStyleRecommendation(intent)
+    }
+
+    StyleResultContent(uiState = uiState, modifier = modifier)
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun StyleResultContent(
+    uiState: StyleResultUiState,
+    modifier: Modifier = Modifier
+) {
     Surface(
         modifier = modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
@@ -189,52 +220,109 @@ fun StyleResultScreen(
 
 @Composable
 private fun FashionistaScoreBadge(score: FashionistaScore) {
+    var isExpanded by remember { mutableStateOf(false) }
+    val rotationState by animateFloatAsState(targetValue = if (isExpanded) 180f else 0f, label = "ScoreChevronRotation")
+
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { isExpanded = !isExpanded },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column {
-                Text(
-                    text = "FASHIONISTA SCORE (${score.standardId} ${score.standardVersion})",
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Gray,
-                    letterSpacing = 1.sp
-                )
-                Text(
-                    text = "${score.totalScore.roundToInt()}/100",
-                    style = MaterialTheme.typography.headlineLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                    text = "Coverage: ${(score.coverage * 100).roundToInt()}%",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = Color.Gray
-                )
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = "FASHIONISTA SCORE (${score.standardId} ${score.standardVersion})",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Gray,
+                        letterSpacing = 1.sp
+                    )
+                    Text(
+                        text = "${score.totalScore.roundToInt()}/100",
+                        style = MaterialTheme.typography.headlineLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = "Coverage: ${(score.coverage * 100).roundToInt()}%",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.Gray
+                    )
+                }
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Surface(
+                        shape = RoundedCornerShape(20.dp),
+                        color = if (score.isApproved) Color(0xFF10B981) else Color(0xFFEF4444)
+                    ) {
+                        Text(
+                            text = if (score.isApproved) "APPROVED" else "REJECTED",
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.labelMedium,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Icon(
+                        imageVector = Icons.Default.ArrowDropDown,
+                        contentDescription = if (isExpanded) "Collapse Score Breakdown" else "Expand Score Breakdown",
+                        modifier = Modifier.rotate(rotationState)
+                    )
+                }
             }
 
-            Surface(
-                shape = RoundedCornerShape(20.dp),
-                color = if (score.isApproved) Color(0xFF10B981) else Color(0xFFEF4444)
-            ) {
-                Text(
-                    text = if (score.isApproved) "APPROVED" else "REJECTED",
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.labelMedium,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                )
+            // Expandable Sub-Score Breakdown Card under FASHIONISTA Score
+            AnimatedVisibility(visible = isExpanded) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp)
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f), RoundedCornerShape(12.dp))
+                        .padding(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "AESTHETIC CALIBRATION BREAKDOWN",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                        letterSpacing = 1.sp
+                    )
+                    ScoreMetricRow(label = "Color Harmony", score = score.colorHarmonyScore)
+                    ScoreMetricRow(label = "Silhouette Proportion", score = score.silhouetteScore)
+                    ScoreMetricRow(label = "Contrast & Depth", score = score.contrastScore)
+                }
             }
         }
+    }
+}
+
+@Composable
+private fun ScoreMetricRow(label: String, score: Float) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Text(
+            text = "${score.roundToInt()}/100",
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary
+        )
     }
 }
 
@@ -390,5 +478,54 @@ private fun CosmeticRoleCard(item: CosmeticItem) {
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true, name = "Style Result Preview")
+@Composable
+private fun StyleResultScreenPreview() {
+    MaterialTheme {
+        StyleResultContent(
+            uiState = StyleResultUiState(
+                blueprint = StyleBlueprint(
+                    rationale = "Harmonic vibrant look designed for a warm daily occasion.",
+                    selectedClothingIds = listOf("w_3", "w_35", "w_48"),
+                    selectedCosmeticIds = listOf("c_123", "c_78", "c_114", "c_133"),
+                    recommendedPalette = listOf("#FF5F1F", "#EDD5B1", "#BDA06A", "#0047AB")
+                ),
+                fashionistaScore = FashionistaScore(
+                    colorHarmonyScore = 95.5f,
+                    silhouetteScore = 85.0f,
+                    contrastScore = 95.0f,
+                    totalScore = 92.7f,
+                    isApproved = true,
+                    coverage = 1.0,
+                    standardId = "FASHIONISTA_STD",
+                    standardVersion = "v1.1"
+                ),
+                intentFulfillment = IntentFulfillment(
+                    score = 91.2f,
+                    dimensions = IntentFulfillmentDimensions(
+                        colorfulness = 0.88f,
+                        colorContrast = 0.82f,
+                        novelty = 0.75f,
+                        formality = 0.50f
+                    ),
+                    unmetIntent = emptyList()
+                ),
+                selectedClothing = listOf(
+                    ClothingItem(internalId = 3, name = "Electric Coral Cropped Hoodie", category = ClothingCategory.ACTIVEWEAR, material = "100% Organic Cotton", colorHex = "#FF5F1F"),
+                    ClothingItem(internalId = 35, name = "Warm Ivory Pleated Trousers", category = ClothingCategory.BOTTOMS, material = "Cotton Blend", colorHex = "#EDD5B1"),
+                    ClothingItem(internalId = 48, name = "Camel Leather Boots", category = ClothingCategory.SHOES, material = "Full Grain Leather", colorHex = "#BDA06A")
+                ),
+                selectedCosmetics = listOf(
+                    CosmeticItem(internalId = 123, name = "Golden Hour Shimmer", brand = "KoColor", macroCategory = MacroCategory.EYES, microCategory = MicroCategory.EYESHADOW, temperature = Temperature.NEUTRAL, colorHex = "#FFD700"),
+                    CosmeticItem(internalId = 78, name = "Natural Peach Blush", brand = "KoColor", macroCategory = MacroCategory.DIMENSION, microCategory = MicroCategory.BLUSH, temperature = Temperature.WARM, colorHex = "#FFA07A"),
+                    CosmeticItem(internalId = 114, name = "Warm Terracotta Lipstick", brand = "KoColor", macroCategory = MacroCategory.LIPS, microCategory = MicroCategory.LIPSTICK, temperature = Temperature.WARM, colorHex = "#C75B39"),
+                    CosmeticItem(internalId = 133, name = "Cobalt Core Polish", brand = "KoColor", macroCategory = MacroCategory.NAILS, microCategory = MicroCategory.NAIL_POLISH, temperature = Temperature.COOL, colorHex = "#0047AB")
+                ),
+                isLoading = false
+            )
+        )
     }
 }

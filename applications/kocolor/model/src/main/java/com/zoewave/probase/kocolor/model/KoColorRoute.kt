@@ -34,6 +34,9 @@ sealed class KoColorRoute {
     data object StyleSimulator : KoColorRoute()
 
     @Serializable
+    data class StyleResult(val intent: String = "Daily Outfit") : KoColorRoute()
+
+    @Serializable
     data object ColorSearch : KoColorRoute()
 
     @Serializable
