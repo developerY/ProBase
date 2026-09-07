@@ -49,6 +49,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoewave.probase.kocolor.data.usecase.CreationPhase
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.AuditStep
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.AuditTrailView
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.ExecutionTier
 
 data class StyleCreationUiModel(
     val occasion: String = "Daily Outfit",
@@ -74,7 +77,15 @@ data class StyleCreationUiModel(
     val contrastDepth: Float = 80.0f,
     val intentStatus: IntentUiStatus = IntentUiStatus.NOT_SPECIFIED,
     val observedColorfulness: Float? = 0.53f,
-    val observedColorContrast: Float? = 0.50f
+    val observedColorContrast: Float? = 0.50f,
+    val executionTier: ExecutionTier = ExecutionTier.AI_CLOUD,
+    val latencyMs: Long = 1290L,
+    val auditSteps: List<AuditStep> = listOf(
+        AuditStep(1, "Anchor Establishment", "Resolved outfit anchor via Intent/Context Engine."),
+        AuditStep(2, "Deterministic Pruning", "Inventory evaluated and weather-gated."),
+        AuditStep(3, "Mathematical Scoring", "Top candidates ranked by relational color harmony."),
+        AuditStep(4, "AI Synthesis & Validation", "Synthesized blueprint validated across 4 cosmetic roles.")
+    )
 )
 
 data class StyleItemUiModel(
@@ -238,6 +249,15 @@ fun StyleCreationStoryScreen(
 
                 item {
                     StyleCharacterCard(model)
+                }
+
+                item {
+                    AuditTrailView(
+                        executionTier = model.executionTier,
+                        latencyMs = model.latencyMs,
+                        fashionistaScore = model.fashionistaScore,
+                        steps = model.auditSteps
+                    )
                 }
             }
 

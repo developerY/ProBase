@@ -168,5 +168,7 @@ data class StyleCreationResult(
     val fashionista: FashionistaScore,
     val intent: IntentFulfillment,
     val selectedClothing: List<ClothingItem>,
-    val selectedCosmetics: List<CosmeticItem>
+    val selectedCosmetics: List<CosmeticItem>,
+    val executionTier: String = "AI_CLOUD",
+    val latencyMs: Long = 1290L
 )
