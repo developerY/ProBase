@@ -46,15 +46,12 @@ import com.zoewave.probase.core.model.ritual.MicroCategory
 import com.zoewave.probase.core.model.ritual.Temperature
 import com.zoewave.probase.kocolor.data.usecase.IntentFulfillment
 import com.zoewave.probase.kocolor.data.usecase.ObservedEnsembleMetrics
-import com.zoewave.probase.kocolor.data.usecase.StyleBlueprint
 import com.zoewave.probase.kocolor.data.usecase.StyleIntentProfile
 import com.zoewave.probase.kocolor.data.usecase.StyleIntentState
 import com.zoewave.probase.kocolor.fashionista.domain.FashionistaScore
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.AuditStep
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.AuditTrailView
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.ExecutionTier
-import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleResultContent
-import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleResultUiState
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.CollapsibleFashionistaScoreCard
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.ResultTab
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.VisualBlueprintData
@@ -239,62 +236,50 @@ fun BlueprintDetailContent(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                onClick = { navTo(KoColorRoute.StyleResult(intent = rationale ?: "Daily Outfit")) }
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.weight(1f)
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.AutoAwesome,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(24.dp)
-                            )
-                            Spacer(modifier = Modifier.width(12.dp))
+                        Icon(
+                            imageVector = Icons.Default.AutoAwesome,
+                            contentDescription = "Style Result Analysis",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(28.dp)
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column {
                             Text(
-                                text = "STYLE RESULT ANALYSIS",
+                                text = "View Style Result Analysis",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
-                        }
-
-                        IconButton(
-                            onClick = { navTo(KoColorRoute.StyleResult(intent = rationale ?: "Daily Outfit")) }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.ChevronRight,
-                                contentDescription = "Open Full Screen Analysis",
-                                tint = MaterialTheme.colorScheme.primary
+                            Text(
+                                text = "Inspect complete score breakdown, intent fulfillment & audit logs",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.Gray
                             )
                         }
                     }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    StyleResultContent(
-                        uiState = StyleResultUiState(
-                            blueprint = StyleBlueprint(
-                                rationale = rationale ?: "",
-                                selectedClothingIds = recommendedClothing.map { "w_${it.internalId}" },
-                                selectedCosmeticIds = recommendedCosmetics.map { "c_${it.internalId}" },
-                                recommendedPalette = recommendedPalette
-                            ),
-                            fashionistaScore = fashionistaScore ?: FashionistaScore(
-                                totalScore = data.koColorScore.toFloat(),
-                                isApproved = data.koColorScore >= 80
-                            ),
-                            intentFulfillment = intentFulfillment,
-                            selectedClothing = recommendedClothing,
-                            selectedCosmetics = recommendedCosmetics,
-                            isLoading = false
-                        ),
-                        isScrollable = false
-                    )
+                    IconButton(
+                        onClick = { navTo(KoColorRoute.StyleResult(intent = rationale ?: "Daily Outfit")) }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ChevronRight,
+                            contentDescription = "Open Analysis",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 }
             }
         }
