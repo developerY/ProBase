@@ -3,7 +3,6 @@ package com.zoewave.probase.kocolor.mobile.ui
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -19,10 +18,12 @@ import com.zoewave.probase.features.health.nutrition.ui.shared.MealsViewModel
 import com.zoewave.probase.features.readers.barcode.ui.BarcodeScannerScreen
 import com.zoewave.probase.features.readers.qrscanner.ui.QRCodeScannerScreen
 import com.zoewave.probase.features.weather.ui.WeatherUiRoute
+import com.zoewave.probase.kocolor.data.usecase.StyleBlueprint
+import com.zoewave.probase.kocolor.fashionista.domain.FashionistaScore
 import com.zoewave.probase.kocolor.features.analyzer.calibration.ui.CalibrationCameraScreen
 import com.zoewave.probase.kocolor.features.analyzer.playlist.ui.StylePlaylistScreen
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleResultScreen
-import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleResultViewModel
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleResultUiState
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorScreen
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorViewModel
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.toStyleCreationUiModel
@@ -322,11 +323,28 @@ fun koColorNavEntryProvider(
             )
         }
         is KoColorRoute.StyleResult -> NavEntry(route) {
-            val viewModel: StyleResultViewModel = hiltViewModel()
+            val viewModel: StyleSimulatorViewModel = hiltViewModel()
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+            val resultUiState = StyleResultUiState(
+                blueprint = state.creationResult?.blueprint ?: StyleBlueprint(
+                    rationale = state.rationale ?: "",
+                    selectedClothingIds = state.recommendedClothing.map { "w_${it.internalId}" },
+                    selectedCosmeticIds = state.recommendedCosmetics.map { "c_${it.internalId}" },
+                    recommendedPalette = state.recommendedPalette
+                ),
+                fashionistaScore = state.creationResult?.fashionista ?: state.fashionistaScore ?: FashionistaScore(
+                    totalScore = 88f,
+                    isApproved = true
+                ),
+                intentFulfillment = state.creationResult?.intent ?: state.intentFulfillment,
+                selectedClothing = state.recommendedClothing,
+                selectedCosmetics = state.recommendedCosmetics,
+                isLoading = false
+            )
             StyleResultScreen(
-                intent = route.intent,
-                viewModel = viewModel,
-                modifier = Modifier
+                uiState = resultUiState,
+                onEvent = viewModel::onEvent,
+                navTo = onNavigateTo
             )
         }
         is KoColorRoute.WardrobeLanding -> NavEntry(route) {
