@@ -10,14 +10,21 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,11 +34,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.core.model.ritual.MacroCategory
+import com.zoewave.probase.core.model.ritual.MicroCategory
+import com.zoewave.probase.core.model.ritual.Temperature
 import com.zoewave.probase.kocolor.data.usecase.IntentFulfillment
 import com.zoewave.probase.kocolor.data.usecase.ObservedEnsembleMetrics
 import com.zoewave.probase.kocolor.data.usecase.StyleBlueprint
@@ -245,6 +256,54 @@ fun BlueprintDetailContent(
             )
         }
 
+        item {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                onClick = { navTo(KoColorRoute.StyleCreationStory(intent = rationale ?: "Daily Outfit")) }
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.AutoAwesome,
+                            contentDescription = "Style Creation Story",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(28.dp)
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column {
+                            Text(
+                                text = "View Style Creation Story",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = "Inspect step-by-step decision timeline & architecture logs",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.Gray
+                            )
+                        }
+                    }
+                    Icon(
+                        imageVector = Icons.Default.ChevronRight,
+                        contentDescription = "Open Story",
+                        tint = Color.Gray
+                    )
+                }
+            }
+        }
+
         if (actionButtonText != null && onActionClick != null) {
             item {
                 Button(
@@ -263,6 +322,58 @@ fun BlueprintDetailContent(
                     )
                 }
             }
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Blueprint Detail Content Preview")
+@Composable
+private fun BlueprintDetailContentPreview() {
+    MaterialTheme {
+        Box(modifier = Modifier.padding(16.dp)) {
+            BlueprintDetailContent(
+                title = "STYLE BLUEPRINT",
+                rationale = "Selected an energetic Electric Coral Cropped Hoodie anchored with warm neutral pleated trousers and camel boots for an elevated, vibrant daily look.",
+                isLocalResult = false,
+                recommendedClothing = listOf(
+                    ClothingItem(internalId = 3, name = "Electric Coral Cropped Hoodie", category = ClothingCategory.ACTIVEWEAR, material = "100% Organic Cotton", colorHex = "#FF5F1F"),
+                    ClothingItem(internalId = 35, name = "Warm Ivory Pleated Trousers", category = ClothingCategory.BOTTOMS, material = "Cotton Blend", colorHex = "#EDD5B1"),
+                    ClothingItem(internalId = 48, name = "Camel Leather Boots", category = ClothingCategory.SHOES, material = "Full Grain Leather", colorHex = "#BDA06A")
+                ),
+                recommendedCosmetics = listOf(
+                    CosmeticItem(internalId = 123, name = "Golden Hour Shimmer", brand = "KoColor", macroCategory = MacroCategory.EYES, microCategory = MicroCategory.EYESHADOW, temperature = Temperature.NEUTRAL, colorHex = "#FFD700"),
+                    CosmeticItem(internalId = 78, name = "Natural Peach Blush", brand = "KoColor", macroCategory = MacroCategory.DIMENSION, microCategory = MicroCategory.BLUSH, temperature = Temperature.WARM, colorHex = "#FFA07A"),
+                    CosmeticItem(internalId = 114, name = "Warm Terracotta Lipstick", brand = "KoColor", macroCategory = MacroCategory.LIPS, microCategory = MicroCategory.LIPSTICK, temperature = Temperature.WARM, colorHex = "#C75B39"),
+                    CosmeticItem(internalId = 133, name = "Cobalt Core Polish", brand = "KoColor", macroCategory = MacroCategory.NAILS, microCategory = MicroCategory.NAIL_POLISH, temperature = Temperature.COOL, colorHex = "#0047AB")
+                ),
+                recommendedPalette = listOf("#FF5F1F", "#EDD5B1", "#BDA06A", "#0047AB"),
+                selectedResultTab = ResultTab.CLOTHES,
+                onTabSelected = {},
+                intentFulfillment = IntentFulfillment(
+                    state = StyleIntentState.Specified(StyleIntentProfile()),
+                    score = 91.2f,
+                    observedMetrics = ObservedEnsembleMetrics(
+                        colorfulness = 0.88f,
+                        colorContrast = 0.82f,
+                        novelty = 0.75f,
+                        formality = 0.50f
+                    ),
+                    unmetIntent = emptyList()
+                ),
+                fashionistaScore = FashionistaScore(
+                    colorHarmonyScore = 95.5f,
+                    silhouetteScore = 85.0f,
+                    contrastScore = 95.0f,
+                    totalScore = 92.7f,
+                    isApproved = true,
+                    coverage = 1.0,
+                    standardId = "FASHIONISTA_STD",
+                    standardVersion = "v1.1"
+                ),
+                actionButtonText = "Save Advice to Collection",
+                onActionClick = {},
+                navTo = {}
+            )
         }
     }
 }

@@ -2,8 +2,10 @@ package com.zoewave.probase.kocolor.data.usecase
 
 import android.graphics.Bitmap
 import com.zoewave.probase.core.model.ritual.ClothingItem
+import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.kocolor.data.color.CandidateProvenance
 import com.zoewave.probase.kocolor.data.color.CompositeColorProfile
+import com.zoewave.probase.kocolor.fashionista.domain.FashionistaScore
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import java.util.UUID
@@ -116,3 +118,57 @@ data class IntentFulfillment(
 ) {
     val isSpecified: Boolean get() = state is StyleIntentState.Specified
 }
+
+enum class CreationPhase {
+    IDLE,
+    CONTEXT_PARSED,
+    ANCHOR_ESTABLISHED,
+    AI_GENERATING,
+    COMPLETE,
+    ERROR
+}
+
+data class StyleContextSummary(
+    val occasion: String = "Daily Outfit",
+    val appearanceTemperature: String = "Neutral",
+    val appearanceDepth: String = "Medium",
+    val appearanceContrast: String = "Balanced",
+    val temperatureC: Float? = 22.0f,
+    val uvIndex: Float? = 3.0f,
+    val circadianContext: String = "Defense & Protection"
+)
+
+data class AnchorDecision(
+    val anchorName: String = "Universal Khaki Button-Down",
+    val anchorId: String = "w_41",
+    val anchorReason: String = "Automatic context anchor"
+)
+
+data class CandidateSummary(
+    val eligibleWardrobeCount: Int = 53,
+    val eligibleCosmeticsCount: Int = 25
+)
+
+data class ValidationItemModel(
+    val label: String,
+    val passed: Boolean
+)
+
+data class RecommendationValidationResult(
+    val isValid: Boolean = true,
+    val validationItems: List<ValidationItemModel> = emptyList()
+)
+
+data class StyleCreationResult(
+    val context: StyleContextSummary,
+    val anchor: AnchorDecision,
+    val candidateSummary: CandidateSummary,
+    val blueprint: StyleBlueprint,
+    val validation: RecommendationValidationResult,
+    val fashionista: FashionistaScore,
+    val intent: IntentFulfillment,
+    val selectedClothing: List<ClothingItem>,
+    val selectedCosmetics: List<CosmeticItem>,
+    val executionTier: String = "AI_CLOUD",
+    val latencyMs: Long = 1290L
+)

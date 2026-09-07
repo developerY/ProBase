@@ -31,6 +31,7 @@ import androidx.compose.material.icons.outlined.Style
 import androidx.compose.material.icons.outlined.Verified
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -45,8 +46,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zoewave.probase.kocolor.data.usecase.CreationPhase
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.AuditStep
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.AuditTrailView
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.ExecutionTier
 
 data class StyleCreationUiModel(
     val occasion: String = "Daily Outfit",
@@ -72,7 +78,15 @@ data class StyleCreationUiModel(
     val contrastDepth: Float = 80.0f,
     val intentStatus: IntentUiStatus = IntentUiStatus.NOT_SPECIFIED,
     val observedColorfulness: Float? = 0.53f,
-    val observedColorContrast: Float? = 0.50f
+    val observedColorContrast: Float? = 0.50f,
+    val executionTier: ExecutionTier = ExecutionTier.AI_CLOUD,
+    val latencyMs: Long = 1290L,
+    val auditSteps: List<AuditStep> = listOf(
+        AuditStep(1, "Anchor Establishment", "Resolved outfit anchor via Intent/Context Engine."),
+        AuditStep(2, "Deterministic Pruning", "Inventory evaluated and weather-gated."),
+        AuditStep(3, "Mathematical Scoring", "Top candidates ranked by relational color harmony."),
+        AuditStep(4, "AI Synthesis & Validation", "Synthesized blueprint validated across 4 cosmetic roles.")
+    )
 )
 
 data class StyleItemUiModel(
@@ -98,7 +112,8 @@ enum class IntentUiStatus {
 @Composable
 fun StyleCreationStoryScreen(
     model: StyleCreationUiModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    phase: CreationPhase = CreationPhase.COMPLETE
 ) {
     Scaffold(
         modifier = modifier,
@@ -161,59 +176,90 @@ fun StyleCreationStoryScreen(
                 )
             }
 
-            if (model.clothing.isNotEmpty()) {
+            if (phase == CreationPhase.AI_GENERATING) {
                 item {
-                    OutfitAssemblyCard(
-                        clothing = model.clothing
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(24.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(20.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                            Spacer(Modifier.height(12.dp))
+                            Text(
+                                text = "AI Style Synthesis in Progress...",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.Gray
+                            )
+                        }
+                    }
+                }
+            } else {
+                if (model.clothing.isNotEmpty()) {
+                    item {
+                        OutfitAssemblyCard(
+                            clothing = model.clothing
+                        )
+                    }
+                }
+
+                if (model.cosmetics.isNotEmpty()) {
+                    item {
+                        CosmeticSelectionCard(
+                            cosmetics = model.cosmetics
+                        )
+                    }
+                }
+
+                item {
+                    TimelineStep(
+                        number = "04",
+                        icon = Icons.Outlined.AutoAwesome,
+                        title = "AI style synthesis",
+                        subtitle = "Cloud AI used for synthesis with grounded candidate set.",
+                        body = model.aiRationale.replace(Regex("(?i)feature\\s+\\d+\\s+is\\s+not\\s+available.*"), "").trim()
                     )
                 }
-            }
 
-            if (model.cosmetics.isNotEmpty()) {
+                if (model.validationItems.isNotEmpty()) {
+                    item {
+                        ValidationCard(
+                            validations = model.validationItems
+                        )
+                    }
+                }
+
+                if (model.paletteHex.isNotEmpty()) {
+                    item {
+                        PaletteCard(
+                            palette = model.paletteHex
+                        )
+                    }
+                }
+
                 item {
-                    CosmeticSelectionCard(
-                        cosmetics = model.cosmetics
+                    FashionistaCard(
+                        score = model.fashionistaScore,
+                        colorHarmony = model.colorHarmony,
+                        silhouette = model.silhouette,
+                        contrastDepth = model.contrastDepth
                     )
                 }
-            }
 
-            item {
-                TimelineStep(
-                    number = "04",
-                    icon = Icons.Outlined.AutoAwesome,
-                    title = "AI style synthesis",
-                    subtitle = "Gemini assembled the final recommendation from the grounded candidate set.",
-                    body = model.aiRationale
-                )
-            }
-
-            if (model.validationItems.isNotEmpty()) {
                 item {
-                    ValidationCard(
-                        validations = model.validationItems
+                    StyleCharacterCard(model)
+                }
+
+                item {
+                    AuditTrailView(
+                        executionTier = model.executionTier,
+                        latencyMs = model.latencyMs,
+                        fashionistaScore = model.fashionistaScore,
+                        steps = model.auditSteps
                     )
                 }
-            }
-
-            if (model.paletteHex.isNotEmpty()) {
-                item {
-                    PaletteCard(
-                        palette = model.paletteHex
-                    )
-                }
-            }
-
-            item {
-                FashionistaCard(
-                    score = model.fashionistaScore,
-                    colorHarmony = model.colorHarmony,
-                    silhouette = model.silhouette,
-                    contrastDepth = model.contrastDepth
-                )
-            }
-
-            item {
-                StyleCharacterCard(model)
             }
 
             item {
@@ -826,4 +872,56 @@ private fun parseHex(hex: String): Color {
     return runCatching {
         Color(android.graphics.Color.parseColor(hex))
     }.getOrDefault(Color.Gray)
+}
+
+@Preview(showBackground = true, name = "Style Creation Story Preview")
+@Composable
+private fun StyleCreationStoryScreenPreview() {
+    MaterialTheme {
+        StyleCreationStoryScreen(
+            model = StyleCreationUiModel(
+                occasion = "Daily Outfit",
+                userIntent = "fun colorful outfit",
+                appearanceTemperature = "Neutral",
+                appearanceDepth = "Light",
+                appearanceContrast = "Balanced",
+                temperatureC = 23.4f,
+                uvIndex = 5.75f,
+                circadianContext = "Defense & Protection",
+                eligibleWardrobeCount = 53,
+                anchorName = "Electric Coral Cropped Hoodie",
+                anchorId = "w_3",
+                anchorReason = "[INTENT ANCHOR] High-chroma intent override",
+                clothing = listOf(
+                    StyleItemUiModel(id = "w_3", name = "Electric Coral Cropped Hoodie", role = "TOP", colorHex = "#FF5F1F", temperature = "WARM", material = "100% Organic Cotton"),
+                    StyleItemUiModel(id = "w_35", name = "Warm Ivory Pleated Trousers", role = "BOTTOM", colorHex = "#EDD5B1", temperature = "NEUTRAL", material = "Cotton Blend"),
+                    StyleItemUiModel(id = "w_48", name = "Camel Leather Boots", role = "SHOES", colorHex = "#BDA06A", temperature = "WARM", material = "Full Grain Leather")
+                ),
+                cosmetics = listOf(
+                    StyleItemUiModel(id = "c_123", name = "Golden Hour Shimmer", role = "EYE", colorHex = "#FFD700", temperature = "NEUTRAL"),
+                    StyleItemUiModel(id = "c_78", name = "Natural Peach Blush", role = "CHEEK", colorHex = "#FFA07A", temperature = "WARM"),
+                    StyleItemUiModel(id = "c_114", name = "Warm Terracotta Lipstick", role = "LIP", colorHex = "#C75B39", temperature = "WARM"),
+                    StyleItemUiModel(id = "c_133", name = "Cobalt Core Polish", role = "NAIL", colorHex = "#0047AB", temperature = "COOL")
+                ),
+                aiRationale = "Selected an energetic Electric Coral Cropped Hoodie anchored with warm neutral pleated trousers and camel boots for an elevated, vibrant daily look.",
+                validationItems = listOf(
+                    ValidationUiModel("Mandatory anchor included", true),
+                    ValidationUiModel("Top / Bottom / Shoes composition", true),
+                    ValidationUiModel("Eye / Cheek / Lip / Nail roles", true),
+                    ValidationUiModel("All selected IDs grounded", true),
+                    ValidationUiModel("Forbidden PREP items excluded", true)
+                ),
+                paletteHex = listOf("#FF5F1F", "#EDD5B1", "#BDA06A", "#0047AB"),
+                fashionistaScore = 92.7f,
+                colorHarmony = 98.0f,
+                silhouette = 85.0f,
+                contrastDepth = 95.0f,
+                intentStatus = IntentUiStatus.SPECIFIED,
+                observedColorfulness = 0.88f,
+                observedColorContrast = 0.82f,
+                executionTier = ExecutionTier.AI_CLOUD,
+                latencyMs = 1290L
+            )
+        )
+    }
 }
