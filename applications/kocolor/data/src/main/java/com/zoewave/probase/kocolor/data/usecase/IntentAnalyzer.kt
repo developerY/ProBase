@@ -12,18 +12,18 @@ class IntentAnalyzer @Inject constructor() {
             return StyleIntentState.NotSpecified
         }
         val profile = analyze(intentString)
-        return if (profile.isSpecified) StyleIntentState.Specified(profile) else StyleIntentState.NotSpecified
+        return StyleIntentState.Specified(profile)
     }
 
     fun analyze(intentString: String): StyleIntentProfile {
         val trimmed = intentString.trim()
         if (trimmed.isBlank() || trimmed.equals("Daily Outfit", ignoreCase = true) || trimmed.equals("Daily", ignoreCase = true)) {
-            return StyleIntentProfile(isSpecified = false)
+            return StyleIntentProfile()
         }
 
         val keywords = trimmed.lowercase().split(Regex("[\\s,.]+")).filter { it.isNotBlank() }
         if (keywords.isEmpty()) {
-            return StyleIntentProfile(isSpecified = false)
+            return StyleIntentProfile()
         }
 
         var colorfulness = 0.5f
@@ -56,7 +56,6 @@ class IntentAnalyzer @Inject constructor() {
         }
 
         return StyleIntentProfile(
-            isSpecified = true,
             colorfulness = colorfulness.coerceIn(0.0f, 1.0f),
             colorContrast = colorContrast.coerceIn(0.0f, 1.0f),
             novelty = novelty.coerceIn(0.0f, 1.0f),

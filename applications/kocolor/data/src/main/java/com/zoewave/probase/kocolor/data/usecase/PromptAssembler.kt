@@ -29,18 +29,17 @@ class PromptAssembler @Inject constructor() {
             "1. Select BEST 2 clothing items (1 Top, 1 Bottom) from the WARDROBE section."
         }
 
-        val availableCosmeticCategories = cosmeticCandidates.mapNotNull { it.cosmeticItem?.macroCategory }.toSet()
-        val cosmeticCategories = mutableListOf<String>()
-        if (cosmeticCandidates.isEmpty() || availableCosmeticCategories.contains(MacroCategory.EYES) || compactManifest.contains("EYES", ignoreCase = true)) cosmeticCategories.add("Eye")
-        if (cosmeticCandidates.isEmpty() || availableCosmeticCategories.contains(MacroCategory.DIMENSION) || compactManifest.contains("CHEEK", ignoreCase = true) || compactManifest.contains("DIMENSION", ignoreCase = true)) cosmeticCategories.add("Cheek")
-        if (cosmeticCandidates.isEmpty() || availableCosmeticCategories.contains(MacroCategory.LIPS) || compactManifest.contains("LIPS", ignoreCase = true)) cosmeticCategories.add("Lip")
-        if (cosmeticCandidates.isEmpty() || availableCosmeticCategories.contains(MacroCategory.NAILS) || compactManifest.contains("NAILS", ignoreCase = true)) cosmeticCategories.add("Nail")
+        val cosmeticCategories = cosmeticCandidates.mapNotNull { prov ->
+            prov.cosmeticItem?.let { CosmeticRole.fromMacroCategory(it.macroCategory)?.displayName }
+        }.filter { it != "Prep" }.distinct()
 
-        val cosmeticGoal = if (cosmeticCategories.isNotEmpty()) {
-            "2. Select 1 item from each available cosmetic role (${cosmeticCategories.joinToString(", ")}) from the COSMETICS section."
+        val activeCategories = if (cosmeticCategories.isNotEmpty()) {
+            cosmeticCategories
         } else {
-            "2. Select available cosmetic items from the COSMETICS section."
+            listOf("Eye", "Cheek", "Lip", "Nail")
         }
+
+        val cosmeticGoal = "2. Select 1 item from each available cosmetic role (${activeCategories.joinToString(", ")}) from the COSMETICS section."
 
         val lockedAnchors = clothingCandidates.filter {
             it.retrievalReason.contains("LOCKED ANCHOR", ignoreCase = true) ||
@@ -92,11 +91,17 @@ class PromptAssembler @Inject constructor() {
             }
         """.trimIndent()
 
+        val tempOverride = if (context.intent.equals("Surprise Me", ignoreCase = true) || context.intentProfile.colorfulness >= 0.85f) {
+            0.85f
+        } else {
+            null
+        }
+
         val bitmap = context.localImageBitmap
         return if (providerCapability.supportsLocalImageIngestion && bitmap != null) {
-            AiInput.Multimodal(promptString = prompt, localImage = bitmap)
+            AiInput.Multimodal(promptString = prompt, localImage = bitmap, temperatureOverride = tempOverride)
         } else {
-            AiInput.TextOnly(promptString = prompt)
+            AiInput.TextOnly(promptString = prompt, temperatureOverride = tempOverride)
         }
     }
 }

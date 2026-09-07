@@ -45,7 +45,6 @@ data class RoleRequirement(
 
 @Serializable
 data class StyleIntentProfile(
-    val isSpecified: Boolean = false,
     val colorfulness: Float = 0.5f, 
     val colorContrast: Float = 0.5f,
     val novelty: Float = 0.5f,
@@ -110,8 +109,10 @@ data class ObservedEnsembleMetrics(
 )
 
 data class IntentFulfillment(
-    val isSpecified: Boolean = true,
+    val state: StyleIntentState = StyleIntentState.NotSpecified,
     val score: Float? = null,
     val observedMetrics: ObservedEnsembleMetrics = ObservedEnsembleMetrics(0.5f, 0.5f, 0.5f, 0.5f),
     val unmetIntent: List<String> = emptyList()
-)
+) {
+    val isSpecified: Boolean get() = state is StyleIntentState.Specified
+}

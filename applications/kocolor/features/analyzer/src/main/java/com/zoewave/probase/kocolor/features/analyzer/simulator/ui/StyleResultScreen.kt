@@ -57,6 +57,8 @@ import com.zoewave.probase.core.model.ritual.Temperature
 import com.zoewave.probase.kocolor.data.usecase.IntentFulfillment
 import com.zoewave.probase.kocolor.data.usecase.ObservedEnsembleMetrics
 import com.zoewave.probase.kocolor.data.usecase.StyleBlueprint
+import com.zoewave.probase.kocolor.data.usecase.StyleIntentProfile
+import com.zoewave.probase.kocolor.data.usecase.StyleIntentState
 import com.zoewave.probase.kocolor.fashionista.domain.FashionistaScore
 import kotlin.math.roundToInt
 
@@ -545,7 +547,7 @@ private fun StyleResultScreenPreview() {
                     standardVersion = "v1.1"
                 ),
                 intentFulfillment = IntentFulfillment(
-                    isSpecified = true,
+                    state = StyleIntentState.Specified(StyleIntentProfile()),
                     score = 91.2f,
                     observedMetrics = ObservedEnsembleMetrics(
                         colorfulness = 0.88f,

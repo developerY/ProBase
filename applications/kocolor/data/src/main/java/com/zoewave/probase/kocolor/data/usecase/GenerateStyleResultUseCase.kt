@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.random.Random
 
 data class StyleResult(
     val blueprint: StyleBlueprint,
@@ -38,6 +39,25 @@ class GenerateStyleResultUseCase @Inject constructor(
         val context = StyleRequestContext(
             intent = intent,
             intentProfile = intentProfile
+        )
+
+        execute(wardrobe, cosmetics, context)
+    }
+
+    suspend fun executeSurpriseStyle(): StyleResult = withContext(Dispatchers.Default) {
+        val wardrobe = wardrobeRepository.getAllClothing().first()
+        val cosmetics = cosmeticRepository.getAllCosmetics().first()
+
+        val surpriseProfile = StyleIntentProfile(
+            colorfulness = Random.nextFloat() * 0.15f + 0.85f,
+            colorContrast = 0.85f,
+            novelty = 0.90f,
+            formality = 0.40f
+        )
+
+        val context = StyleRequestContext(
+            intent = "Surprise Me",
+            intentProfile = surpriseProfile
         )
 
         execute(wardrobe, cosmetics, context)

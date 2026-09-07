@@ -45,7 +45,7 @@ class FirebaseAiProvider @Inject constructor(
 
         return try {
             authManager.signInAnonymously()
-            val response = client.generateContent(input.promptString)
+            val response = client.generateContent(input.promptString, input.temperatureOverride)
             Result.success(response.text)
         } catch (e: Exception) {
             Result.failure(e)

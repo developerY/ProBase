@@ -38,10 +38,16 @@ class IntentFulfillmentEvaluator @Inject constructor() {
             formality = 0.50f
         )
 
+        val intentState = if (intentProfile.colorfulness != 0.5f || intentProfile.colorContrast != 0.5f || intentProfile.novelty != 0.5f || intentProfile.formality != 0.5f) {
+            StyleIntentState.Specified(intentProfile)
+        } else {
+            StyleIntentState.NotSpecified
+        }
+
         // If intent was NOT explicitly specified, return observed metrics without false positive 0-100 match score!
-        if (!intentProfile.isSpecified) {
+        if (intentState is StyleIntentState.NotSpecified) {
             return IntentFulfillment(
-                isSpecified = false,
+                state = StyleIntentState.NotSpecified,
                 score = null,
                 observedMetrics = observedMetrics,
                 unmetIntent = emptyList()
@@ -72,7 +78,7 @@ class IntentFulfillmentEvaluator @Inject constructor() {
         }
 
         return IntentFulfillment(
-            isSpecified = true,
+            state = StyleIntentState.Specified(intentProfile),
             score = score,
             observedMetrics = observedMetrics,
             unmetIntent = unmet

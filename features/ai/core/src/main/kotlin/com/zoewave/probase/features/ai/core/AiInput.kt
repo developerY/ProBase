@@ -9,13 +9,16 @@ import android.graphics.Bitmap
  */
 sealed interface AiInput {
     val promptString: String
+    val temperatureOverride: Float?
 
     data class TextOnly(
-        override val promptString: String
+        override val promptString: String,
+        override val temperatureOverride: Float? = null
     ) : AiInput
 
     data class Multimodal(
         override val promptString: String,
-        val localImage: Bitmap
+        val localImage: Bitmap,
+        override val temperatureOverride: Float? = null
     ) : AiInput
 }

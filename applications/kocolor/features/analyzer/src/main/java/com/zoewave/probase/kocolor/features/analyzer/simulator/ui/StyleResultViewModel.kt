@@ -43,4 +43,30 @@ class StyleResultViewModel @Inject constructor(
             }
         }
     }
+
+    fun generateSurpriseStyle() {
+        if (_uiState.value.isLoading) return
+
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
+            try {
+                val result = generateStyleResultUseCase.executeSurpriseStyle()
+                _uiState.value = StyleResultUiState(
+                    blueprint = result.blueprint,
+                    fashionistaScore = result.fashionistaScore,
+                    intentFulfillment = result.intentFulfillment,
+                    fashionistaCoverage = result.fashionistaScore.coverage.toFloat(),
+                    calibrationVersion = result.fashionistaScore.standardVersion,
+                    selectedClothing = result.selectedClothing,
+                    selectedCosmetics = result.selectedCosmetics,
+                    isLoading = false
+                )
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    errorMessage = e.message ?: "Failed to generate surprise style."
+                )
+            }
+        }
+    }
 }
