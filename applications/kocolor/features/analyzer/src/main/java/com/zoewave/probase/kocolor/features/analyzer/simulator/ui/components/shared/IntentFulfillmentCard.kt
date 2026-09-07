@@ -23,6 +23,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoewave.probase.kocolor.data.usecase.IntentFulfillment
 import com.zoewave.probase.kocolor.data.usecase.ObservedEnsembleMetrics
+import com.zoewave.probase.kocolor.data.usecase.StyleIntentProfile
+import com.zoewave.probase.kocolor.data.usecase.StyleIntentState
 import kotlin.math.roundToInt
 
 @Composable
@@ -140,7 +142,7 @@ private fun IntentFulfillmentCardPreview() {
     MaterialTheme {
         IntentFulfillmentCard(
             fulfillment = IntentFulfillment(
-                isSpecified = true,
+                state = StyleIntentState.Specified(StyleIntentProfile()),
                 score = 85f,
                 observedMetrics = ObservedEnsembleMetrics(
                     colorfulness = 0.8f,
