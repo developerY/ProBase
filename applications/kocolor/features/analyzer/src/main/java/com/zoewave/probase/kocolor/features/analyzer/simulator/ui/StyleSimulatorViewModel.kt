@@ -39,6 +39,7 @@ import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
 import com.zoewave.probase.kocolor.data.telemetry.StyleAuditTrail
 import com.zoewave.probase.kocolor.data.usecase.AppearanceProfile
 import com.zoewave.probase.kocolor.data.usecase.ColorTelemetry
+import com.zoewave.probase.kocolor.data.usecase.CreationPhase
 import com.zoewave.probase.kocolor.data.usecase.GeneratePlaylistUseCase
 import com.zoewave.probase.kocolor.data.usecase.GenerateStyleResultUseCase
 import com.zoewave.probase.kocolor.data.usecase.IntentAnalyzer
@@ -46,6 +47,7 @@ import com.zoewave.probase.kocolor.data.usecase.IntentFulfillment
 import com.zoewave.probase.kocolor.data.usecase.RotationScoringUseCase
 import com.zoewave.probase.kocolor.data.usecase.SelectionTier
 import com.zoewave.probase.kocolor.data.usecase.StyleBlueprint
+import com.zoewave.probase.kocolor.data.usecase.StyleCreationResult
 import com.zoewave.probase.kocolor.data.usecase.StyleRequestContext
 import com.zoewave.probase.kocolor.data.usecase.StyleSimulatorEngine
 import com.zoewave.probase.kocolor.data.usecase.UserConstraint
@@ -96,6 +98,8 @@ data class FaceTelemetryData(
 )
 
 data class StyleSimulatorUiState(
+    val creationPhase: CreationPhase = CreationPhase.IDLE,
+    val creationResult: StyleCreationResult? = null,
     val morningRoutineCompleted: Boolean = false,
     val circadianContext: String = "Defense & Protection",
     val wellnessScore: Double = 0.85,
@@ -126,9 +130,9 @@ data class StyleSimulatorUiState(
     // Family-based anchors (Constraint set by user)
     val anchoredClothingFamilies: Map<ClothingCategory, ColorFamily> = emptyMap(),
     val anchoredCosmeticFamilies: Map<MacroCategory, ColorFamily> = emptyMap(),
-    
+
     val userConstraints: Map<String, UserConstraint> = emptyMap(),
-    
+
     val selectedResultTab: ResultTab = ResultTab.CLOTHES,
     val visualBlueprintData: VisualBlueprintData = VisualBlueprintData()
 )
@@ -195,6 +199,8 @@ class StyleSimulatorViewModel @Inject constructor(
     private val _faceAnalysisError = MutableStateFlow<String?>(null)
     private val _faceTelemetry = MutableStateFlow<FaceTelemetryData?>(null)
     private val _explicitItemConstraints = MutableStateFlow<Map<String, UserConstraint>>(emptyMap())
+    private val _creationPhase = MutableStateFlow(CreationPhase.IDLE)
+    private val _creationResult = MutableStateFlow<StyleCreationResult?>(null)
 
     private var simulationJob: Job? = null
 
@@ -223,7 +229,9 @@ class StyleSimulatorViewModel @Inject constructor(
         _isAnalyzing,
         _faceAnalysisError,
         _faceTelemetry,
-        _explicitItemConstraints
+        _explicitItemConstraints,
+        _creationPhase,
+        _creationResult
     ) { array ->
         val faceUri = array[0] as String?
         val profile = array[1] as FashionProfile?
@@ -242,6 +250,8 @@ class StyleSimulatorViewModel @Inject constructor(
         val telemetry = array[14] as FaceTelemetryData?
         @Suppress("UNCHECKED_CAST")
         val explicitConstraints = array[15] as Map<String, UserConstraint>
+        val phase = array[16] as CreationPhase
+        val creationResult = array[17] as StyleCreationResult?
 
         val clothingFamilies = allClothing.filter { it.category == selectedClothingCat }
             .groupBy { it.colorFamily }
@@ -257,6 +267,8 @@ class StyleSimulatorViewModel @Inject constructor(
         }
 
         StyleSimulatorUiState(
+            creationPhase = phase,
+            creationResult = creationResult,
             userPortraitUri = faceUri,
             fullClothingInventory = allClothing,
             fullCosmeticInventory = allCosmetics,

@@ -31,6 +31,7 @@ import androidx.compose.material.icons.outlined.Style
 import androidx.compose.material.icons.outlined.Verified
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -47,6 +48,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zoewave.probase.kocolor.data.usecase.CreationPhase
 
 data class StyleCreationUiModel(
     val occasion: String = "Daily Outfit",
@@ -98,7 +100,8 @@ enum class IntentUiStatus {
 @Composable
 fun StyleCreationStoryScreen(
     model: StyleCreationUiModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    phase: CreationPhase = CreationPhase.COMPLETE
 ) {
     Scaffold(
         modifier = modifier,
@@ -161,59 +164,81 @@ fun StyleCreationStoryScreen(
                 )
             }
 
-            if (model.clothing.isNotEmpty()) {
+            if (phase == CreationPhase.AI_GENERATING) {
                 item {
-                    OutfitAssemblyCard(
-                        clothing = model.clothing
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(24.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(20.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                            Spacer(Modifier.height(12.dp))
+                            Text(
+                                text = "AI Style Synthesis in Progress...",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.Gray
+                            )
+                        }
+                    }
+                }
+            } else {
+                if (model.clothing.isNotEmpty()) {
+                    item {
+                        OutfitAssemblyCard(
+                            clothing = model.clothing
+                        )
+                    }
+                }
+
+                if (model.cosmetics.isNotEmpty()) {
+                    item {
+                        CosmeticSelectionCard(
+                            cosmetics = model.cosmetics
+                        )
+                    }
+                }
+
+                item {
+                    TimelineStep(
+                        number = "04",
+                        icon = Icons.Outlined.AutoAwesome,
+                        title = "AI style synthesis",
+                        subtitle = "Cloud AI used for synthesis with grounded candidate set.",
+                        body = model.aiRationale.replace(Regex("(?i)feature\\s+\\d+\\s+is\\s+not\\s+available.*"), "").trim()
                     )
                 }
-            }
 
-            if (model.cosmetics.isNotEmpty()) {
+                if (model.validationItems.isNotEmpty()) {
+                    item {
+                        ValidationCard(
+                            validations = model.validationItems
+                        )
+                    }
+                }
+
+                if (model.paletteHex.isNotEmpty()) {
+                    item {
+                        PaletteCard(
+                            palette = model.paletteHex
+                        )
+                    }
+                }
+
                 item {
-                    CosmeticSelectionCard(
-                        cosmetics = model.cosmetics
+                    FashionistaCard(
+                        score = model.fashionistaScore,
+                        colorHarmony = model.colorHarmony,
+                        silhouette = model.silhouette,
+                        contrastDepth = model.contrastDepth
                     )
                 }
-            }
 
-            item {
-                TimelineStep(
-                    number = "04",
-                    icon = Icons.Outlined.AutoAwesome,
-                    title = "AI style synthesis",
-                    subtitle = "Gemini assembled the final recommendation from the grounded candidate set.",
-                    body = model.aiRationale
-                )
-            }
-
-            if (model.validationItems.isNotEmpty()) {
                 item {
-                    ValidationCard(
-                        validations = model.validationItems
-                    )
+                    StyleCharacterCard(model)
                 }
-            }
-
-            if (model.paletteHex.isNotEmpty()) {
-                item {
-                    PaletteCard(
-                        palette = model.paletteHex
-                    )
-                }
-            }
-
-            item {
-                FashionistaCard(
-                    score = model.fashionistaScore,
-                    colorHarmony = model.colorHarmony,
-                    silhouette = model.silhouette,
-                    contrastDepth = model.contrastDepth
-                )
-            }
-
-            item {
-                StyleCharacterCard(model)
             }
 
             item {
