@@ -1,50 +1,34 @@
-Scaffold the Jetpack Compose presentation layer to render the KoColor `StyleBlueprint` and our dual-axis evaluation metrics on device.
+package com.zoewave.probase.kocolor.features.analyzer.simulator.ui
 
-1. Create UI State Holder: Create a `StyleResultUiState` data class containing:
-    - `blueprint` (StyleBlueprint?)
-    - `fashionistaScore` (FashionistaScore?)
-    - `intentMatch` (IntentFulfillmentScore?)
-    - `isLoading` (Boolean)
-    - `errorMessage` (String?)
-
-2. Create the ViewModel: Create `StyleResultViewModel` which consumes the orchestration engine, exposes a `StateFlow<StyleResultUiState>`, and triggers the generation request.
-
-3. Build Compose Screen (`StyleResultScreen.kt`): Implement a clean, modern Jetpack Compose layout with:
-    - A loading state showing simulation progress.
-    - An Outfit Card displaying the selected wardrobe items, their materials, and color swatches derived from `recommendedPalette`.
-    - A FASHIONISTA Badge component rendering the aesthetic score (0-100) and APPROVED/REJECTED status.
-    - An Intent Match Badge displaying the fulfillment percentage.
-    - The AI rationale text rendered in a clean typography container.
-
-~~~
-
-This component is exceptionally close to production-grade because it correctly isolates the technical telemetry behind an animated disclosure toggle without cluttering the primary user journey. The use of `MaterialTheme` colors ensures seamless dark/light mode scaling, and mapping the terminal logs to `FontFamily.Monospace` perfectly preserves the engineering aesthetic of the KoColor pipeline.
-
-**Production Strengths**
-
-* **State-Driven Animation:** Utilizing `AnimatedVisibility` and `animateFloatAsState` for the chevron rotation provides fluid, professional micro-interactions.
-* **Semantic Layering:** Wrapping the execution metadata (latency, provider) in `SuggestionChip` components cleanly separates the high-level status from the raw log output.
-* **Theme Compliance:** Relying on `surfaceVariant` and `colorScheme.error` guarantees this card will render correctly regardless of system theme settings.
-
-**Architectural Refinements for Strict Production**
-
-* **Enum Over String Matching:** Checking `executionTier.contains("FALLBACK")` is fragile. Transition `executionTier` to a strongly typed enum to prevent silent UI failures if the backend string changes.
-* **Recomposition Safety:** Passing `dummySteps()` as a default parameter instantiates a new list on every single recomposition. Default to `emptyList()` and rely on the `ViewModel` state.
-* **Accessibility Boundaries:** The `clickable` modifier on the header row needs a `semantics { role = Role.Button }` tag so screen readers announce it correctly.
-
-```kotlin
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -56,24 +40,28 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlin.math.roundToInt
 
 enum class ExecutionTier { AI_CLOUD, DETERMINISTIC_FALLBACK }
+
+data class AuditStep(val index: Int, val title: String, val details: String)
 
 @Composable
 fun AuditTrailView(
     executionTier: ExecutionTier = ExecutionTier.DETERMINISTIC_FALLBACK,
     latencyMs: Long = 129,
     fashionistaScore: Float = 85.4f,
-    steps: List<AuditStep> = emptyList()
+    steps: List<AuditStep> = emptyList(),
+    modifier: Modifier = Modifier
 ) {
     var isExpanded by remember { mutableStateOf(false) }
     val rotationState by animateFloatAsState(targetValue = if (isExpanded) 180f else 0f, label = "ChevronRotation")
     val isFallback = executionTier == ExecutionTier.DETERMINISTIC_FALLBACK
 
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .padding(16.dp),
+            .padding(vertical = 8.dp),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
     ) {
@@ -81,7 +69,8 @@ fun AuditTrailView(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable(role = Role.Button) { isExpanded = !isExpanded },
+                    .semantics { role = Role.Button }
+                    .clickable { isExpanded = !isExpanded },
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -117,18 +106,56 @@ fun AuditTrailView(
                 modifier = Modifier.padding(top = 12.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                SuggestionChip(
-                    onClick = {},
-                    label = { Text("Match: $fashionistaScore/100") },
-                    icon = { Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(16.dp)) }
-                )
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f))
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Default.CheckCircle, 
+                            contentDescription = null, 
+                            modifier = Modifier.size(14.dp), 
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "Match: ${fashionistaScore.roundToInt()}/100",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+                
                 if (isFallback) {
-                    SuggestionChip(
-                        onClick = {},
-                        label = { Text("AI Validation Failed") },
-                        colors = SuggestionChipDefaults.suggestionChipColors(labelColor = MaterialTheme.colorScheme.error),
-                        icon = { Icon(Icons.Default.Warning, contentDescription = null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.error) }
-                    )
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = MaterialTheme.colorScheme.errorContainer,
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.5f))
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                Icons.Default.Warning, 
+                                contentDescription = null, 
+                                modifier = Modifier.size(14.dp), 
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "AI Validation Failed",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onErrorContainer
+                            )
+                        }
+                    }
                 }
             }
 
@@ -172,9 +199,3 @@ fun AuditTrailView(
         }
     }
 }
-
-data class AuditStep(val index: Int, val title: String, val details: String)
-
-```
-
-The final missing piece for this specific view is the `IntentFulfillment` metric you just perfected in the backend. How do you want to visualize the `Unmet Intent Parameters: [Color Contrast, Novelty]` array inside this component when the fulfillment score drops below your threshold?

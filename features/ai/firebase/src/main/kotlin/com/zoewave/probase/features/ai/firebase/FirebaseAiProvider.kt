@@ -16,9 +16,9 @@ class FirebaseAiProvider @Inject constructor(
     override val capability = AiProviderCapability(
         id = "firebase_ai_logic",
         displayName = "Firebase AI Logic (Cloud)",
-        maxInputTokens = 1536,
-        maxOutputTokens = 512,
-        timeoutMillis = 3000L,
+        maxInputTokens = 8192,
+        maxOutputTokens = 1024,
+        timeoutMillis = 15000L,
         maxCandidateAdditions = 25,
         minCandidateAdditions = 6,
         isLocal = false

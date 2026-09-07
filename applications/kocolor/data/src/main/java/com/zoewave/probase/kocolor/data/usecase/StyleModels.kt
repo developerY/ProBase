@@ -45,11 +45,20 @@ data class RoleRequirement(
 
 @Serializable
 data class StyleIntentProfile(
+    val isSpecified: Boolean = false,
     val colorfulness: Float = 0.5f, 
     val colorContrast: Float = 0.5f,
     val novelty: Float = 0.5f,
     val formality: Float = 0.5f
 )
+
+sealed interface StyleIntentState {
+    @Serializable
+    data object NotSpecified : StyleIntentState
+
+    @Serializable
+    data class Specified(val profile: StyleIntentProfile) : StyleIntentState
+}
 
 @Serializable
 data class StyleRequestContext(
@@ -93,7 +102,7 @@ data class RecommendationComposition(
     val mandatoryAnchors: Set<String>
 )
 
-data class IntentFulfillmentDimensions(
+data class ObservedEnsembleMetrics(
     val colorfulness: Float,
     val colorContrast: Float,
     val novelty: Float,
@@ -101,7 +110,8 @@ data class IntentFulfillmentDimensions(
 )
 
 data class IntentFulfillment(
-    val score: Float,
-    val dimensions: IntentFulfillmentDimensions,
-    val unmetIntent: List<String>
+    val isSpecified: Boolean = true,
+    val score: Float? = null,
+    val observedMetrics: ObservedEnsembleMetrics = ObservedEnsembleMetrics(0.5f, 0.5f, 0.5f, 0.5f),
+    val unmetIntent: List<String> = emptyList()
 )

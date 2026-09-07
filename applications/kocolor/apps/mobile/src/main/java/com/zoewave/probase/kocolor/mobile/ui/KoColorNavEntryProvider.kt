@@ -20,7 +20,6 @@ import com.zoewave.probase.features.readers.qrscanner.ui.QRCodeScannerScreen
 import com.zoewave.probase.features.weather.ui.WeatherUiRoute
 import com.zoewave.probase.kocolor.features.analyzer.calibration.ui.CalibrationCameraScreen
 import com.zoewave.probase.kocolor.features.analyzer.playlist.ui.StylePlaylistScreen
-import com.zoewave.probase.kocolor.features.analyzer.playlist.ui.StylePlaylistScreen
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorScreen
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorViewModel
 import com.zoewave.probase.kocolor.features.analyzer.ui.AnalyzerUiRoute

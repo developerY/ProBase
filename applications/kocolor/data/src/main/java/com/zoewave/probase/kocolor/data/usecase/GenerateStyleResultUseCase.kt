@@ -40,6 +40,14 @@ class GenerateStyleResultUseCase @Inject constructor(
             intentProfile = intentProfile
         )
 
+        execute(wardrobe, cosmetics, context)
+    }
+
+    suspend fun execute(
+        wardrobe: List<ClothingItem>,
+        cosmetics: List<CosmeticItem>,
+        context: StyleRequestContext
+    ): StyleResult = withContext(Dispatchers.Default) {
         val blueprint = simulatorEngine.generateBlueprint(wardrobe, cosmetics, context)
         val fashionistaScore = fashionistaEvaluator.evaluate(blueprint, context)
 
@@ -51,7 +59,7 @@ class GenerateStyleResultUseCase @Inject constructor(
         }
 
         val intentFulfillment = intentFulfillmentEvaluator.evaluate(
-            intentProfile = intentProfile,
+            intentProfile = context.intentProfile,
             selectedClothing = selectedClothing,
             selectedCosmetics = selectedCosmetics
         )

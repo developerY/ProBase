@@ -36,10 +36,13 @@ import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
 import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
 import com.zoewave.probase.kocolor.data.repository.RotationRepository
 import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
+import com.zoewave.probase.kocolor.data.telemetry.StyleAuditTrail
 import com.zoewave.probase.kocolor.data.usecase.AppearanceProfile
 import com.zoewave.probase.kocolor.data.usecase.ColorTelemetry
 import com.zoewave.probase.kocolor.data.usecase.GeneratePlaylistUseCase
+import com.zoewave.probase.kocolor.data.usecase.GenerateStyleResultUseCase
 import com.zoewave.probase.kocolor.data.usecase.IntentAnalyzer
+import com.zoewave.probase.kocolor.data.usecase.IntentFulfillment
 import com.zoewave.probase.kocolor.data.usecase.RotationScoringUseCase
 import com.zoewave.probase.kocolor.data.usecase.SelectionTier
 import com.zoewave.probase.kocolor.data.usecase.StyleBlueprint
@@ -47,6 +50,7 @@ import com.zoewave.probase.kocolor.data.usecase.StyleRequestContext
 import com.zoewave.probase.kocolor.data.usecase.StyleSimulatorEngine
 import com.zoewave.probase.kocolor.data.usecase.UserConstraint
 import com.zoewave.probase.kocolor.db.dao.RoutineDao
+import com.zoewave.probase.kocolor.fashionista.domain.FashionistaScore
 import com.zoewave.probase.kocolor.features.analyzer.calibration.ColorSeasonClassifier
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.ResultTab
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.VisualBlueprintData
@@ -98,6 +102,9 @@ data class StyleSimulatorUiState(
     val recommendedPalette: List<String> = emptyList(),
     val recommendedClothing: List<ClothingItem> = emptyList(),
     val recommendedCosmetics: List<CosmeticItem> = emptyList(),
+    val fashionistaScore: FashionistaScore? = null,
+    val intentFulfillment: IntentFulfillment? = null,
+    val auditTrail: StyleAuditTrail? = null,
     val isAnalyzing: Boolean = false,
     val simulationStep: SimulationStep = SimulationStep.MESSAGING,
     val userMessage: String = "",
@@ -172,7 +179,8 @@ class StyleSimulatorViewModel @Inject constructor(
     private val rotationRepository: RotationRepository,
     private val rotationScoringUseCase: RotationScoringUseCase,
     private val greedyRehydrator: GreedyRehydrator,
-    private val intentAnalyzer: IntentAnalyzer
+    private val intentAnalyzer: IntentAnalyzer,
+    private val generateStyleResultUseCase: GenerateStyleResultUseCase
 ) : ViewModel() {
 
     private val _selectedClothingCategory = MutableStateFlow(ClothingCategory.TOPS)
@@ -602,7 +610,8 @@ class StyleSimulatorViewModel @Inject constructor(
             )
 
             try {
-                val blueprint = simulatorEngine.generateBlueprint(filteredWardrobe, state.fullCosmeticInventory, requestContext)
+                val styleResult = generateStyleResultUseCase.execute(filteredWardrobe, state.fullCosmeticInventory, requestContext)
+                val blueprint = styleResult.blueprint
                 
                 // Translate Rationale: Swap <ITEM:id> tags for rich names
                 val translatedRationale = translateRationale(
