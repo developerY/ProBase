@@ -34,7 +34,7 @@ interface FirebaseAiClient {
     /**
      * Executes a raw prompt.
      */
-    suspend fun generateContent(prompt: String): AiResponse
+    suspend fun generateContent(prompt: String, temperatureOverride: Float? = null): AiResponse
 
     /**
      * Estimates tokens for a raw prompt.
@@ -47,14 +47,14 @@ class FirebaseAiClientImpl @Inject constructor() : FirebaseAiClient {
 
     private val MODEL_NAME = "gemini-3.5-flash-lite"
     
-    private fun getModel() = Firebase.ai(
+    private fun getModel(temperatureOverride: Float? = null) = Firebase.ai(
         backend = GenerativeBackend.googleAI(),
         useLimitedUseAppCheckTokens = true
     ).generativeModel(
         modelName = MODEL_NAME,
         generationConfig = generationConfig {
             responseMimeType = "application/json"
-            temperature = 0.75f
+            temperature = temperatureOverride ?: 0.75f
         }
     )
 
@@ -109,11 +109,11 @@ class FirebaseAiClientImpl @Inject constructor() : FirebaseAiClient {
         return getModel().countTokens(prompt).totalTokens
     }
 
-    override suspend fun generateContent(prompt: String): AiResponse {
+    override suspend fun generateContent(prompt: String, temperatureOverride: Float?): AiResponse {
         // 4. Execute Cloud Request with Logging
         Log.d("KoColorAI_IO", ">>> REQUEST TO GEMINI (RAW):\n$prompt")
         
-        val response = getModel().generateContent(prompt)
+        val response = getModel(temperatureOverride).generateContent(prompt)
         
         Log.d("KoColorAI_IO", "^^^ RESPONSE FROM GEMINI (RAW):\n${response.text ?: "EMPTY_RESPONSE"}")
         

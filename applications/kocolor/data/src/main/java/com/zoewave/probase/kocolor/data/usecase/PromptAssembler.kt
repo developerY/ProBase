@@ -92,11 +92,17 @@ class PromptAssembler @Inject constructor() {
             }
         """.trimIndent()
 
+        val tempOverride = if (context.intent.equals("Surprise Me", ignoreCase = true) || context.intentProfile.colorfulness >= 0.85f) {
+            0.85f
+        } else {
+            null
+        }
+
         val bitmap = context.localImageBitmap
         return if (providerCapability.supportsLocalImageIngestion && bitmap != null) {
-            AiInput.Multimodal(promptString = prompt, localImage = bitmap)
+            AiInput.Multimodal(promptString = prompt, localImage = bitmap, temperatureOverride = tempOverride)
         } else {
-            AiInput.TextOnly(promptString = prompt)
+            AiInput.TextOnly(promptString = prompt, temperatureOverride = tempOverride)
         }
     }
 }
