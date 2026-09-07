@@ -25,6 +25,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -235,25 +236,67 @@ fun BlueprintDetailContent(
 
       
         item {
-            StyleResultContent(
-                uiState = StyleResultUiState(
-                    blueprint = StyleBlueprint(
-                        rationale = rationale ?: "",
-                        selectedClothingIds = recommendedClothing.map { "w_${it.internalId}" },
-                        selectedCosmeticIds = recommendedCosmetics.map { "c_${it.internalId}" },
-                        recommendedPalette = recommendedPalette
-                    ),
-                    fashionistaScore = fashionistaScore ?: FashionistaScore(
-                        totalScore = data.koColorScore.toFloat(),
-                        isApproved = data.koColorScore >= 80
-                    ),
-                    intentFulfillment = intentFulfillment,
-                    selectedClothing = recommendedClothing,
-                    selectedCosmetics = recommendedCosmetics,
-                    isLoading = false
-                ),
-                isScrollable = false
-            )
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.AutoAwesome,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(
+                                text = "STYLE RESULT ANALYSIS",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+
+                        IconButton(
+                            onClick = { navTo(KoColorRoute.StyleResult(intent = rationale ?: "Daily Outfit")) }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ChevronRight,
+                                contentDescription = "Open Full Screen Analysis",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    StyleResultContent(
+                        uiState = StyleResultUiState(
+                            blueprint = StyleBlueprint(
+                                rationale = rationale ?: "",
+                                selectedClothingIds = recommendedClothing.map { "w_${it.internalId}" },
+                                selectedCosmeticIds = recommendedCosmetics.map { "c_${it.internalId}" },
+                                recommendedPalette = recommendedPalette
+                            ),
+                            fashionistaScore = fashionistaScore ?: FashionistaScore(
+                                totalScore = data.koColorScore.toFloat(),
+                                isApproved = data.koColorScore >= 80
+                            ),
+                            intentFulfillment = intentFulfillment,
+                            selectedClothing = recommendedClothing,
+                            selectedCosmetics = recommendedCosmetics,
+                            isLoading = false
+                        ),
+                        isScrollable = false
+                    )
+                }
+            }
         }
 
         item {
