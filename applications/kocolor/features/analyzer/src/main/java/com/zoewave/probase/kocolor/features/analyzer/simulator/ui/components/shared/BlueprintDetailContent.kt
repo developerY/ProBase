@@ -17,8 +17,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -53,11 +59,8 @@ import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.gra
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.VisualBlueprintData
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.VisualBlueprintSection
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.mapToVisualBlueprintData
-import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.phase
-import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.toStyleCreationUiModel
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.list.PlaceholderResultCard
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.list.ResultCard
-import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.result.StyleCreationStoryScreen
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
 @Composable
@@ -254,10 +257,51 @@ fun BlueprintDetailContent(
         }
 
         item {
-            StyleCreationStoryScreen(
-                model = data.toStyleCreationUiModel(),
-                phase = data.phase
-            )
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                onClick = { navTo(KoColorRoute.StyleCreationStory(intent = rationale ?: "Daily Outfit")) }
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.AutoAwesome,
+                            contentDescription = "Style Creation Story",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(28.dp)
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column {
+                            Text(
+                                text = "View Style Creation Story",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = "Inspect step-by-step decision timeline & architecture logs",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.Gray
+                            )
+                        }
+                    }
+                    Icon(
+                        imageVector = Icons.Default.ChevronRight,
+                        contentDescription = "Open Story",
+                        tint = Color.Gray
+                    )
+                }
+            }
         }
 
         if (actionButtonText != null && onActionClick != null) {
