@@ -42,7 +42,8 @@ class CompactManifestSerializer @Inject constructor() {
 
         val cManifest = cosmetics.joinToString(separator = "\n") { item ->
             val id = "c_${item.internalId}"
-            val category = item.macroCategory.name
+            val role = CosmeticRole.fromMacroCategory(item.macroCategory)
+            val category = role?.name ?: item.macroCategory.name
             val name = item.name
             val hex = item.colorHex
             val temperature = if (item.temperature != Temperature.UNKNOWN) item.temperature.name else ColorQuantizer.determineTemperature(item.colorHex).name
