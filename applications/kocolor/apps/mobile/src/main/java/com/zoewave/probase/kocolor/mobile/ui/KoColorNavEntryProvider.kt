@@ -3,7 +3,6 @@ package com.zoewave.probase.kocolor.mobile.ui
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -21,8 +20,6 @@ import com.zoewave.probase.features.readers.qrscanner.ui.QRCodeScannerScreen
 import com.zoewave.probase.features.weather.ui.WeatherUiRoute
 import com.zoewave.probase.kocolor.features.analyzer.calibration.ui.CalibrationCameraScreen
 import com.zoewave.probase.kocolor.features.analyzer.playlist.ui.StylePlaylistScreen
-import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleResultScreen
-import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleResultViewModel
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorScreen
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorViewModel
 import com.zoewave.probase.kocolor.features.analyzer.ui.AnalyzerUiRoute
@@ -309,14 +306,6 @@ fun koColorNavEntryProvider(
                 effect = viewModel.effect,
                 onEvent = viewModel::onEvent,
                 navTo = onNavigateTo
-            )
-        }
-        is KoColorRoute.StyleResult -> NavEntry(route) {
-            val viewModel: StyleResultViewModel = hiltViewModel()
-            StyleResultScreen(
-                intent = route.intent,
-                viewModel = viewModel,
-                modifier = Modifier
             )
         }
         is KoColorRoute.WardrobeLanding -> NavEntry(route) {

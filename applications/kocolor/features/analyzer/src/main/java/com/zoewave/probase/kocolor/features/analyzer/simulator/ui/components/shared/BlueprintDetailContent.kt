@@ -1,32 +1,47 @@
 package com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.shared
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.core.model.ritual.MacroCategory
-import com.zoewave.probase.kocolor.features.analyzer.R
+import com.zoewave.probase.kocolor.data.usecase.IntentFulfillment
+import com.zoewave.probase.kocolor.data.usecase.IntentFulfillmentDimensions
+import com.zoewave.probase.kocolor.data.usecase.StyleBlueprint
+import com.zoewave.probase.kocolor.fashionista.domain.FashionistaScore
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.AuditStep
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.AuditTrailView
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.ExecutionTier
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleResultContent
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleResultUiState
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.CollapsibleFashionistaScoreCard
-import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.FashionistaScoreGauge
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.ResultTab
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.VisualBlueprintData
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.VisualBlueprintSection
@@ -46,6 +61,8 @@ fun BlueprintDetailContent(
     selectedResultTab: ResultTab,
     onTabSelected: (ResultTab) -> Unit,
     visualBlueprintData: VisualBlueprintData? = null,
+    intentFulfillment: IntentFulfillment? = null,
+    fashionistaScore: FashionistaScore? = null,
     actionButtonText: String? = null,
     onActionClick: (() -> Unit)? = null,
     navTo: (KoColorRoute) -> Unit
@@ -171,7 +188,7 @@ fun BlueprintDetailContent(
             CollapsibleFashionistaScoreCard(score = data.koColorScore)
         }
 
-        // System Architecture Audit Log Card placed right under FASHIONISTA score and above Save button
+        // System Architecture Audit Log Card placed right under FASHIONISTA score
         item {
             AuditTrailView(
                 executionTier = if (isLocalResult) ExecutionTier.DETERMINISTIC_FALLBACK else ExecutionTier.AI_CLOUD,
@@ -182,6 +199,43 @@ fun BlueprintDetailContent(
                     AuditStep(2, "Deterministic Pruning", "Inventory evaluated and weather-gated."),
                     AuditStep(3, "Mathematical Scoring", "Top candidates ranked by relational color harmony."),
                     AuditStep(4, "AI Synthesis & Validation", "Synthesized blueprint validated across 4 cosmetic roles.")
+                )
+            )
+        }
+
+        // Intent Fulfillment Card placed under Style Architecture Logs and above Save button
+        item {
+            IntentFulfillmentCard(
+                fulfillment = intentFulfillment ?: IntentFulfillment(
+                    score = (data.koColorScore * 0.92f).coerceIn(70f, 100f),
+                    dimensions = IntentFulfillmentDimensions(
+                        colorfulness = 0.88f,
+                        colorContrast = 0.82f,
+                        novelty = 0.75f,
+                        formality = 0.50f
+                    ),
+                    unmetIntent = emptyList()
+                )
+            )
+        }
+
+        item {
+            StyleResultContent(
+                uiState = StyleResultUiState(
+                    blueprint = StyleBlueprint(
+                        rationale = rationale ?: "",
+                        selectedClothingIds = recommendedClothing.map { "w_${it.internalId}" },
+                        selectedCosmeticIds = recommendedCosmetics.map { "c_${it.internalId}" },
+                        recommendedPalette = recommendedPalette
+                    ),
+                    fashionistaScore = fashionistaScore ?: FashionistaScore(
+                        totalScore = data.koColorScore.toFloat(),
+                        isApproved = data.koColorScore >= 80
+                    ),
+                    intentFulfillment = intentFulfillment,
+                    selectedClothing = recommendedClothing,
+                    selectedCosmetics = recommendedCosmetics,
+                    isLoading = false
                 )
             )
         }
