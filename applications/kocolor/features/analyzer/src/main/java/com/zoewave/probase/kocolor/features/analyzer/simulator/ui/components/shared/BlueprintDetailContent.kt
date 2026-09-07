@@ -33,7 +33,7 @@ import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.kocolor.data.usecase.IntentFulfillment
-import com.zoewave.probase.kocolor.data.usecase.IntentFulfillmentDimensions
+import com.zoewave.probase.kocolor.data.usecase.ObservedEnsembleMetrics
 import com.zoewave.probase.kocolor.data.usecase.StyleBlueprint
 import com.zoewave.probase.kocolor.fashionista.domain.FashionistaScore
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.AuditStep
@@ -207,8 +207,9 @@ fun BlueprintDetailContent(
         item {
             IntentFulfillmentCard(
                 fulfillment = intentFulfillment ?: IntentFulfillment(
+                    isSpecified = true,
                     score = (data.koColorScore * 0.92f).coerceIn(70f, 100f),
-                    dimensions = IntentFulfillmentDimensions(
+                    observedMetrics = ObservedEnsembleMetrics(
                         colorfulness = 0.88f,
                         colorContrast = 0.82f,
                         novelty = 0.75f,

@@ -104,10 +104,17 @@ class StyleAuditLogger @Inject constructor() {
 
             appendLine("[6] INTENT FULFILLMENT")
             trail.intentFulfillment?.let { fulfillment ->
-                appendLine("    Overall Intent Match: ${"%.1f".format(fulfillment.score)} / 100")
-                appendLine("    Colorfulness Score: ${"%.2f".format(fulfillment.dimensions.colorfulness)}")
-                appendLine("    Color Contrast Score: ${"%.2f".format(fulfillment.dimensions.colorContrast)}")
-                appendLine("    Unmet Intent Parameters: ${fulfillment.unmetIntent.ifEmpty { listOf("None") }}")
+                if (fulfillment.isSpecified && fulfillment.score != null) {
+                    appendLine("    Status: SPECIFIED")
+                    appendLine("    Overall Intent Match: ${"%.1f".format(fulfillment.score)} / 100")
+                    appendLine("    Observed Colorfulness: ${"%.2f".format(fulfillment.observedMetrics.colorfulness)}")
+                    appendLine("    Observed Color Contrast: ${"%.2f".format(fulfillment.observedMetrics.colorContrast)}")
+                    appendLine("    Unmet Intent Parameters: ${fulfillment.unmetIntent.ifEmpty { listOf("None") }}")
+                } else {
+                    appendLine("    Status: NOT_SPECIFIED")
+                    appendLine("    Observed Style Character Colorfulness: ${"%.2f".format(fulfillment.observedMetrics.colorfulness)}")
+                    appendLine("    Observed Style Character Contrast: ${"%.2f".format(fulfillment.observedMetrics.colorContrast)}")
+                }
             } ?: appendLine("    NO INTENT FULFILLMENT RECORDED")
             appendLine("==================================================")
         }.toString()

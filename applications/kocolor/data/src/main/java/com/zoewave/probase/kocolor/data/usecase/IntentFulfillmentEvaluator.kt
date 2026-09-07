@@ -31,6 +31,23 @@ class IntentFulfillmentEvaluator @Inject constructor() {
         val evaluatedColorfulness = ((maxChroma / 120.0f) * 0.4f) + (meanChroma / 100.0f * 0.4f) + (chromaticRatio * 0.2f)
         val normalizedEvaluatedColorfulness = evaluatedColorfulness.coerceIn(0.0f, 1.0f)
 
+        val observedMetrics = ObservedEnsembleMetrics(
+            colorfulness = normalizedEvaluatedColorfulness,
+            colorContrast = 0.50f,
+            novelty = 0.50f,
+            formality = 0.50f
+        )
+
+        // If intent was NOT explicitly specified, return observed metrics without false positive 0-100 match score!
+        if (!intentProfile.isSpecified) {
+            return IntentFulfillment(
+                isSpecified = false,
+                score = null,
+                observedMetrics = observedMetrics,
+                unmetIntent = emptyList()
+            )
+        }
+
         var colorfulnessDelta = 1.0f - abs(intentProfile.colorfulness - normalizedEvaluatedColorfulness)
         
         // Asymmetric penalty: If they want colorful and we gave them neutral, hit them hard.
@@ -38,24 +55,16 @@ class IntentFulfillmentEvaluator @Inject constructor() {
             colorfulnessDelta *= 0.5f 
         }
 
-        // Just use colorfulness as the main score for now
         val score = (colorfulnessDelta * 100.0f).coerceIn(0.0f, 100.0f)
 
-        val dimensions = IntentFulfillmentDimensions(
-            colorfulness = normalizedEvaluatedColorfulness,
-            colorContrast = 0.5f,
-            novelty = 0.5f,
-            formality = 0.5f
-        )
-
         val unmet = mutableListOf<String>()
-        if (intentProfile.colorfulness > 0.6f && dimensions.colorfulness < 0.6f) {
+        if (intentProfile.colorfulness > 0.6f && observedMetrics.colorfulness < 0.6f) {
             unmet.add("Colorfulness")
         }
-        if (intentProfile.colorContrast > 0.6f && dimensions.colorContrast < 0.6f) {
+        if (intentProfile.colorContrast > 0.6f && observedMetrics.colorContrast < 0.6f) {
             unmet.add("Color Contrast")
         }
-        if (intentProfile.novelty > 0.6f && dimensions.novelty < 0.6f) {
+        if (intentProfile.novelty > 0.6f && observedMetrics.novelty < 0.6f) {
             unmet.add("Novelty")
         }
         if (score < 70.0f && unmet.isEmpty()) {
@@ -63,8 +72,9 @@ class IntentFulfillmentEvaluator @Inject constructor() {
         }
 
         return IntentFulfillment(
+            isSpecified = true,
             score = score,
-            dimensions = dimensions,
+            observedMetrics = observedMetrics,
             unmetIntent = unmet
         )
     }

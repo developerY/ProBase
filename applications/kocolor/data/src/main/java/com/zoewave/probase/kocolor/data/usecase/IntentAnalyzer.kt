@@ -6,9 +6,26 @@ import javax.inject.Singleton
 @Singleton
 class IntentAnalyzer @Inject constructor() {
 
+    fun analyzeState(intentString: String): StyleIntentState {
+        val trimmed = intentString.trim()
+        if (trimmed.isBlank() || trimmed.equals("Daily Outfit", ignoreCase = true) || trimmed.equals("Daily", ignoreCase = true)) {
+            return StyleIntentState.NotSpecified
+        }
+        val profile = analyze(intentString)
+        return if (profile.isSpecified) StyleIntentState.Specified(profile) else StyleIntentState.NotSpecified
+    }
+
     fun analyze(intentString: String): StyleIntentProfile {
-        val keywords = intentString.lowercase().split(Regex("[\\s,.]+")).filter { it.isNotBlank() }
-        
+        val trimmed = intentString.trim()
+        if (trimmed.isBlank() || trimmed.equals("Daily Outfit", ignoreCase = true) || trimmed.equals("Daily", ignoreCase = true)) {
+            return StyleIntentProfile(isSpecified = false)
+        }
+
+        val keywords = trimmed.lowercase().split(Regex("[\\s,.]+")).filter { it.isNotBlank() }
+        if (keywords.isEmpty()) {
+            return StyleIntentProfile(isSpecified = false)
+        }
+
         var colorfulness = 0.5f
         var novelty = 0.5f
         var formality = 0.5f
@@ -39,6 +56,7 @@ class IntentAnalyzer @Inject constructor() {
         }
 
         return StyleIntentProfile(
+            isSpecified = true,
             colorfulness = colorfulness.coerceIn(0.0f, 1.0f),
             colorContrast = colorContrast.coerceIn(0.0f, 1.0f),
             novelty = novelty.coerceIn(0.0f, 1.0f),

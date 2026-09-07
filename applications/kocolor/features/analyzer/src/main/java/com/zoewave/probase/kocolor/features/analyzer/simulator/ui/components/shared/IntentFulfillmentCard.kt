@@ -22,7 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoewave.probase.kocolor.data.usecase.IntentFulfillment
-import com.zoewave.probase.kocolor.data.usecase.IntentFulfillmentDimensions
+import com.zoewave.probase.kocolor.data.usecase.ObservedEnsembleMetrics
 import kotlin.math.roundToInt
 
 @Composable
@@ -40,48 +40,95 @@ fun IntentFulfillmentCard(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            val scoreVal = fulfillment.score
+            if (fulfillment.isSpecified && scoreVal != null) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            text = "YOUR REQUEST FULFILLMENT",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Gray,
+                            letterSpacing = 1.sp
+                        )
+                        Text(
+                            text = "${scoreVal.roundToInt()}/100",
+                            style = MaterialTheme.typography.headlineLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+
+                    Surface(
+                        shape = RoundedCornerShape(20.dp),
+                        color = if (scoreVal >= 70f) Color(0xFF3B82F6) else Color(0xFFF59E0B)
+                    ) {
+                        Text(
+                            text = if (scoreVal >= 70f) "MATCHED" else "PARTIAL",
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.labelMedium,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                        )
+                    }
+                }
+
+                if (fulfillment.unmetIntent.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Unmet Intent: ${fulfillment.unmetIntent.joinToString(", ")}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            } else {
                 Column {
                     Text(
-                        text = "INTENT FULFILLMENT",
+                        text = "STYLE CHARACTER (NO INTENT SPECIFIED)",
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
                         color = Color.Gray,
                         letterSpacing = 1.sp
                     )
-                    Text(
-                        text = "${fulfillment.score.roundToInt()}/100",
-                        style = MaterialTheme.typography.headlineLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "Ensemble Colorfulness",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = "%.2f".format(fulfillment.observedMetrics.colorfulness),
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "Color Contrast",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = "%.2f".format(fulfillment.observedMetrics.colorContrast),
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 }
-
-                Surface(
-                    shape = RoundedCornerShape(20.dp),
-                    color = if (fulfillment.score >= 70f) Color(0xFF3B82F6) else Color(0xFFF59E0B)
-                ) {
-                    Text(
-                        text = if (fulfillment.score >= 70f) "MATCHED" else "PARTIAL",
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.labelMedium,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                    )
-                }
-            }
-
-            if (fulfillment.unmetIntent.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Unmet Intent: ${fulfillment.unmetIntent.joinToString(", ")}",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.error
-                )
             }
         }
     }
@@ -93,8 +140,9 @@ private fun IntentFulfillmentCardPreview() {
     MaterialTheme {
         IntentFulfillmentCard(
             fulfillment = IntentFulfillment(
+                isSpecified = true,
                 score = 85f,
-                dimensions = IntentFulfillmentDimensions(
+                observedMetrics = ObservedEnsembleMetrics(
                     colorfulness = 0.8f,
                     colorContrast = 0.7f,
                     novelty = 0.6f,
