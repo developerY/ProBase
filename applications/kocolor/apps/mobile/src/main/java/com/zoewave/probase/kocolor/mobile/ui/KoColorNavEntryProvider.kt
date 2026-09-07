@@ -325,20 +325,37 @@ fun koColorNavEntryProvider(
         is KoColorRoute.StyleResult -> NavEntry(route) {
             val viewModel: StyleSimulatorViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+            val clothing = state.creationResult?.selectedClothing.takeIf { !it.isNullOrEmpty() }
+                ?: state.recommendedClothing.takeIf { it.isNotEmpty() }
+                ?: state.fullClothingInventory.take(3)
+
+            val cosmetics = state.creationResult?.selectedCosmetics.takeIf { !it.isNullOrEmpty() }
+                ?: state.recommendedCosmetics.takeIf { it.isNotEmpty() }
+                ?: state.fullCosmeticInventory.take(4)
+
+            val rationaleText = state.creationResult?.blueprint?.rationale?.takeIf { it.isNotBlank() }
+                ?: state.rationale?.takeIf { it.isNotBlank() }
+                ?: "Selected from your vault based on intent, atmospheric context, and relational color harmony."
+
+            val palette = state.creationResult?.blueprint?.recommendedPalette.takeIf { !it.isNullOrEmpty() }
+                ?: state.recommendedPalette.takeIf { it.isNotEmpty() }
+                ?: clothing.map { it.colorHex }
+
             val resultUiState = StyleResultUiState(
-                blueprint = state.creationResult?.blueprint ?: StyleBlueprint(
-                    rationale = state.rationale ?: "",
-                    selectedClothingIds = state.recommendedClothing.map { "w_${it.internalId}" },
-                    selectedCosmeticIds = state.recommendedCosmetics.map { "c_${it.internalId}" },
-                    recommendedPalette = state.recommendedPalette
+                blueprint = StyleBlueprint(
+                    rationale = rationaleText,
+                    selectedClothingIds = clothing.map { "w_${it.internalId}" },
+                    selectedCosmeticIds = cosmetics.map { "c_${it.internalId}" },
+                    recommendedPalette = palette
                 ),
                 fashionistaScore = state.creationResult?.fashionista ?: state.fashionistaScore ?: FashionistaScore(
                     totalScore = 88f,
                     isApproved = true
                 ),
                 intentFulfillment = state.creationResult?.intent ?: state.intentFulfillment,
-                selectedClothing = state.recommendedClothing,
-                selectedCosmetics = state.recommendedCosmetics,
+                selectedClothing = clothing,
+                selectedCosmetics = cosmetics,
                 isLoading = false
             )
             StyleResultScreen(
