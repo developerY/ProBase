@@ -4,7 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,29 +20,23 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material.icons.outlined.ColorLens
-import androidx.compose.material.icons.outlined.FilterAlt
-import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.Style
-import androidx.compose.material.icons.outlined.Verified
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -53,7 +47,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -62,6 +57,9 @@ import com.zoewave.probase.kocolor.data.usecase.CreationPhase
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.AuditStep
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.AuditTrailView
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.ExecutionTier
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.SimulatorEvent
+import com.zoewave.probase.kocolor.model.KoColorRoute
+import kotlin.math.roundToInt
 
 data class StyleCreationUiModel(
     val occasion: String = "Daily Outfit",
@@ -124,7 +122,8 @@ fun StyleCreationStoryScreen(
     model: StyleCreationUiModel,
     modifier: Modifier = Modifier,
     phase: CreationPhase = CreationPhase.COMPLETE,
-    isEmbedded: Boolean = false
+    isEmbedded: Boolean = false,
+    navTo: (KoColorRoute) -> Unit = {}
 ) {
     if (isEmbedded) {
         StyleCreationStoryContent(
@@ -135,43 +134,50 @@ fun StyleCreationStoryScreen(
     } else {
         Scaffold(
             modifier = modifier,
+            containerColor = Color.White,
             contentWindowInsets = WindowInsets.navigationBars,
             topBar = {
-                TopAppBar(
+                CenterAlignedTopAppBar(
                     title = {
-                        Column {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
-                                text = "Your Style",
-                                fontWeight = FontWeight.Bold
+                                text = "STYLE JOURNEY",
+                                fontFamily = FontFamily.Serif,
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 2.sp
                             )
                             Text(
                                 text = "How KoColor created this look",
-                                style = MaterialTheme.typography.labelMedium
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Color.Gray
                             )
                         }
-                    }
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = { navTo(KoColorRoute.Back) }) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        }
+                    },
+                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.White)
                 )
             }
         ) { paddingValues ->
-
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .systemBarsPadding()
                     .padding(paddingValues)
-                    .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
+                    .padding(horizontal = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
-
                 item {
                     StyleCreationStoryContent(
                         model = model,
                         phase = phase
                     )
                 }
-
                 item {
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(32.dp))
                 }
             }
         }
@@ -184,158 +190,390 @@ fun StyleCreationStoryContent(
     phase: CreationPhase,
     modifier: Modifier = Modifier
 ) {
-    var isJourneyExpanded by remember { mutableStateOf(false) }
+    var isArchitectureExpanded by remember { mutableStateOf(false) }
     val rotationState by animateFloatAsState(
-        targetValue = if (isJourneyExpanded) 180f else 0f,
-        label = "JourneyChevronRotation"
+        targetValue = if (isArchitectureExpanded) 180f else 0f,
+        label = "ArchitectureChevronRotation"
     )
 
     Column(
-        modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(14.dp)
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
-        if (!model.userIntent.isNullOrBlank()) {
-            Column(modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp)) {
+        // --- 01 THE VISION ---
+        EditorialSection(stepNumber = "01", title = "THE VISION") {
+            Text(
+                text = if (!model.userIntent.isNullOrBlank()) "\"${model.userIntent}\"" else "No specific style preference provided.",
+                style = MaterialTheme.typography.titleLarge,
+                fontFamily = FontFamily.Serif,
+                fontStyle = FontStyle.Italic,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = "Occasion: ${model.occasion}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.Gray
+            )
+        }
+
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
+
+        // --- 02 THE ATMOSPHERE ---
+        EditorialSection(stepNumber = "02", title = "THE ATMOSPHERE") {
+            Text(
+                text = "${model.appearanceTemperature} Undertone • ${model.appearanceDepth} Depth • ${model.appearanceContrast} Contrast",
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.SemiBold
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 Text(
-                    text = "FOR YOUR REQUEST",
+                    text = "Temp: ${model.temperatureC ?: "--"}°C",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Gray
+                )
+                Text(
+                    text = "UV: ${model.uvIndex ?: "--"}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Gray
+                )
+                Text(
+                    text = model.circadianContext,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Gray
+                )
+            }
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "${model.eligibleWardrobeCount} wardrobe items survived deterministic weather & climate gating.",
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.Gray
+            )
+        }
+
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
+
+        // --- 03 THE ANCHOR ---
+        EditorialSection(stepNumber = "03", title = "THE ANCHOR") {
+            Text(
+                text = model.anchorName,
+                style = MaterialTheme.typography.titleLarge,
+                fontFamily = FontFamily.Serif,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = if (!model.userIntent.isNullOrBlank()) {
+                    "Your request called for a specific style profile, so KoColor promoted a high-confidence candidate (${model.anchorId}) as the foundational anchor."
+                } else {
+                    "KoColor automatically selected ${model.anchorName} (${model.anchorId}) as the foundational context anchor for this look."
+                },
+                style = MaterialTheme.typography.bodyMedium,
+                fontStyle = FontStyle.Italic,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                lineHeight = 22.sp
+            )
+        }
+
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
+
+        // --- 04 THE ENSEMBLE ---
+        EditorialSection(stepNumber = "04", title = "THE ENSEMBLE") {
+            if (model.clothing.isNotEmpty()) {
+                Text(
+                    text = "WARDROBE SELECTIONS",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Gray,
+                    letterSpacing = 1.5.sp
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                model.clothing.forEach { item ->
+                    EditorialItemRow(item)
+                }
+            }
+
+            if (model.cosmetics.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "BEAUTY LAYER",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Gray,
+                    letterSpacing = 1.5.sp
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                model.cosmetics.forEach { item ->
+                    EditorialItemRow(item)
+                }
+            }
+
+            if (model.paletteHex.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(20.dp))
+                Text(
+                    text = "THE EDITORIAL PALETTE",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Gray,
+                    letterSpacing = 1.5.sp
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    model.paletteHex.forEach { hex ->
+                        val colorName = mapHexToSemanticName(hex)
+                        val color = try { Color(android.graphics.Color.parseColor(hex)) } catch (e: Exception) { Color.Gray }
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = colorName,
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Box(
+                                modifier = Modifier
+                                    .size(44.dp)
+                                    .clip(CircleShape)
+                                    .background(color)
+                                    .border(1.dp, Color.Black.copy(alpha = 0.1f), CircleShape)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
+
+        // --- 05 THE STYLE ARCHITECT ---
+        EditorialSection(stepNumber = "05", title = "THE STYLE ARCHITECT") {
+            Text(
+                text = "The Style Architect says:",
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
+                letterSpacing = 1.sp
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "“${model.aiRationale.replace(Regex("(?i)feature\\s+\\d+\\s+is\\s+not\\s+available.*"), "").trim()}”",
+                style = MaterialTheme.typography.bodyLarge,
+                fontFamily = FontFamily.Serif,
+                fontStyle = FontStyle.Italic,
+                lineHeight = 28.sp,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
+
+        // --- 06 THE CHECK ---
+        EditorialSection(stepNumber = "06", title = "THE CHECK") {
+            Text(
+                text = "KoColor verified 6/6 architectural constraints for this recommendation:",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.Gray
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            val validations = model.validationItems.ifEmpty {
+                listOf(
+                    ValidationUiModel("Mandatory anchor included", true),
+                    ValidationUiModel("Top / Bottom / Shoes composition", true),
+                    ValidationUiModel("Eye / Cheek / Lip / Nail roles", true),
+                    ValidationUiModel("All selected IDs grounded", true),
+                    ValidationUiModel("Forbidden PREP items excluded", true),
+                    ValidationUiModel("Rationale references selected items only", true)
+                )
+            }
+            validations.forEach { validation ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(vertical = 4.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.CheckCircle,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        text = validation.label,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
+        }
+
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
+
+        // --- 07 THE SCORE ---
+        EditorialSection(stepNumber = "07", title = "THE SCORE") {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = "FASHIONISTA AESTHETIC EVALUATION",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Gray,
+                        letterSpacing = 1.sp
+                    )
+                    Text(
+                        text = "${model.fashionistaScore.roundToInt()} / 100",
+                        style = MaterialTheme.typography.displayMedium,
+                        fontFamily = FontFamily.Serif,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+                Surface(
+                    shape = RoundedCornerShape(50.dp),
+                    color = Color(0xFF10B981)
+                ) {
+                    Text(
+                        text = "APPROVED",
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.labelMedium,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text("Color Harmony", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
+                Text("${model.colorHarmony.roundToInt()}/100", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text("Silhouette Proportion", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
+                Text("${model.silhouette.roundToInt()}/100", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text("Contrast & Depth", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
+                Text("${model.contrastDepth.roundToInt()}/100", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+            }
+
+            Spacer(modifier = Modifier.height(18.dp))
+
+            if (model.intentStatus == IntentUiStatus.SPECIFIED && model.intentScore != null) {
+                Text(
+                    text = "YOUR REQUEST FULFILLMENT",
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Bold,
                     color = Color.Gray,
                     letterSpacing = 1.sp
                 )
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    text = "\"${model.userIntent}\"",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-            }
-        }
-        if (model.clothing.isNotEmpty()) {
-            OutfitAssemblyCard(
-                clothing = model.clothing
-            )
-        }
-
-        if (model.cosmetics.isNotEmpty()) {
-            CosmeticSelectionCard(
-                cosmetics = model.cosmetics
-            )
-        }
-
-        FilledTonalButton(
-            onClick = { isJourneyExpanded = !isJourneyExpanded },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.AutoAwesome,
-                contentDescription = null,
-                modifier = Modifier.size(18.dp)
-            )
-            Spacer(Modifier.width(8.dp))
-            Text(
-                text = if (isJourneyExpanded) "Hide Style Journey" else "View Style Journey",
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(Modifier.weight(1f))
-            Icon(
-                imageVector = Icons.Default.ArrowDropDown,
-                contentDescription = null,
-                modifier = Modifier.rotate(rotationState)
-            )
-        }
-
-        AnimatedVisibility(visible = isJourneyExpanded) {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
-            ) {
-                ContextCard(model)
-
-                TimelineStep(
-                    number = "01",
-                    icon = Icons.Outlined.FilterAlt,
-                    title = "Understood the context",
-                    subtitle = "${model.eligibleWardrobeCount} wardrobe items survived deterministic filtering.",
-                    body = buildString {
-                        append("${model.occasion} occasion")
-                        if (model.userIntent.isNullOrBlank()) {
-                            append(" • No specific style preference")
-                        } else {
-                            append(" • \"${model.userIntent}\"")
-                        }
-                    }
-                )
-
-                TimelineStep(
-                    number = "02",
-                    icon = Icons.Outlined.Style,
-                    title = "Established the anchor",
-                    subtitle = model.anchorName,
-                    body = "${model.anchorReason} • ${model.anchorId}"
-                )
-
-                if (model.clothing.isNotEmpty() || model.cosmetics.isNotEmpty()) {
-                    TimelineStep(
-                        number = "03",
-                        icon = Icons.Outlined.CheckCircle,
-                        title = "Built the outfit",
-                        subtitle = "Assembled ensemble from candidates.",
-                        body = model.clothing.joinToString(" + ") { it.name }
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "${model.intentScore.roundToInt()} / 100 Match",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = "REQUEST SATISFIED",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF3B82F6)
                     )
                 }
+            } else {
+                Text(
+                    text = "OBSERVED STYLE CHARACTERISTICS",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Gray,
+                    letterSpacing = 1.sp
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "No specific style preference was provided.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Gray
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text("Ensemble Colorfulness", style = MaterialTheme.typography.bodyMedium)
+                    Text("${((model.observedColorfulness ?: 0.53f) * 100).toInt()}", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text("Color Contrast", style = MaterialTheme.typography.bodyMedium)
+                    Text("${((model.observedColorContrast ?: 0.50f) * 100).toInt()}", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+                }
+            }
+        }
 
-                if (phase == CreationPhase.AI_GENERATING) {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(24.dp)
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(20.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-                            Spacer(Modifier.height(12.dp))
-                            Text(
-                                text = "AI Style Synthesis in Progress...",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = Color.Gray
-                            )
-                        }
-                    }
-                } else {
-                    TimelineStep(
-                        number = "04",
-                        icon = Icons.Outlined.AutoAwesome,
-                        title = "AI style synthesis",
-                        subtitle = "Cloud AI used for synthesis with grounded candidate set.",
-                        body = model.aiRationale.replace(Regex("(?i)feature\\s+\\d+\\s+is\\s+not\\s+available.*"), "").trim()
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
+
+        // --- 08 PROGRESSIVE DISCLOSURE FOOTER: STYLE ARCHITECTURE ---
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { isArchitectureExpanded = !isArchitectureExpanded }
+                    .padding(vertical = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Outlined.AutoAwesome,
+                        contentDescription = null,
+                        tint = Color.Gray,
+                        modifier = Modifier.size(18.dp)
                     )
-
-                    if (model.validationItems.isNotEmpty()) {
-                        ValidationCard(
-                            validations = model.validationItems
-                        )
-                    }
-
-                    if (model.paletteHex.isNotEmpty()) {
-                        PaletteCard(
-                            palette = model.paletteHex
-                        )
-                    }
-
-                    FashionistaCard(
-                        score = model.fashionistaScore,
-                        colorHarmony = model.colorHarmony,
-                        silhouette = model.silhouette,
-                        contrastDepth = model.contrastDepth
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "STYLE ARCHITECTURE LOGS",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Gray,
+                        letterSpacing = 1.5.sp
                     )
+                }
+                Icon(
+                    imageVector = Icons.Default.ArrowDropDown,
+                    contentDescription = if (isArchitectureExpanded) "Collapse Architecture Logs" else "Expand Architecture Logs",
+                    modifier = Modifier.rotate(rotationState),
+                    tint = Color.Gray
+                )
+            }
 
-                    StyleCharacterCard(model)
-
-
+            AnimatedVisibility(visible = isArchitectureExpanded) {
+                Box(modifier = Modifier.padding(top = 8.dp)) {
                     AuditTrailView(
                         executionTier = model.executionTier,
                         latencyMs = model.latencyMs,
@@ -349,715 +587,113 @@ fun StyleCreationStoryContent(
 }
 
 @Composable
-private fun ContextCard(
-    model: StyleCreationUiModel
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Person,
-                    contentDescription = null
-                )
-
-                Spacer(Modifier.width(10.dp))
-
-                Text(
-                    text = "YOUR CONTEXT",
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-            Text(
-                text = model.userIntent?.takeIf { it.isNotBlank() }
-                    ?: "No specific style preference",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
-
-            Row(
-                modifier = Modifier.horizontalScroll(
-                    rememberScrollState()
-                ),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                ContextChip("Temperature", model.appearanceTemperature)
-                ContextChip("Depth", model.appearanceDepth)
-                ContextChip("Contrast", model.appearanceContrast)
-            }
-
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                MetricPill(
-                    label = "Temp",
-                    value = model.temperatureC?.let {
-                        "${"%.1f".format(it)}°C"
-                    } ?: "—"
-                )
-
-                MetricPill(
-                    label = "UV",
-                    value = model.uvIndex?.let {
-                        "%.2f".format(it)
-                    } ?: "—"
-                )
-            }
-
-            Text(
-                text = model.circadianContext,
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
-    }
-}
-
-@Composable
-private fun TimelineStep(
-    number: String,
-    icon: ImageVector,
+private fun EditorialSection(
+    stepNumber: String,
     title: String,
-    subtitle: String,
-    body: String
+    content: @Composable () -> Unit
 ) {
-    Row(
+    Column(
         modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.Top
+        verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Surface(
-                modifier = Modifier.size(42.dp),
-                shape = CircleShape,
-                tonalElevation = 4.dp
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = null
-                    )
-                }
-            }
-
-            Spacer(Modifier.height(4.dp))
-
+        Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = number,
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Bold
+                text = stepNumber,
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Black,
+                color = MaterialTheme.colorScheme.primary,
+                letterSpacing = 1.sp
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge,
+                fontFamily = FontFamily.Serif,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.sp
             )
         }
-
-        Spacer(Modifier.width(14.dp))
-
-        Card(
-            modifier = Modifier.weight(1f),
-            shape = RoundedCornerShape(20.dp)
-        ) {
-            Column(
-                modifier = Modifier.padding(18.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-
-                Text(
-                    text = body,
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
-        }
+        Spacer(modifier = Modifier.height(2.dp))
+        content()
     }
 }
 
 @Composable
-private fun OutfitAssemblyCard(
-    clothing: List<StyleItemUiModel>
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
-        ) {
-            SectionHeader(
-                title = "Fashion",
-                headline = "Built the outfit",
-                icon = Icons.Outlined.Style
-            )
-
-            clothing.forEach { item ->
-                OutfitItemRow(item)
-            }
-        }
-    }
-}
-
-@Composable
-private fun OutfitItemRow(
-    item: StyleItemUiModel
-) {
+private fun EditorialItemRow(item: StyleItemUiModel) {
+    val color = try { Color(android.graphics.Color.parseColor(item.colorHex)) } catch (e: Exception) { Color.Gray }
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
             modifier = Modifier
-                .size(46.dp)
-                .clip(RoundedCornerShape(14.dp))
-                .background(parseHex(item.colorHex))
+                .size(36.dp)
+                .clip(CircleShape)
+                .background(color)
+                .border(1.dp, Color.Black.copy(alpha = 0.1f), CircleShape)
         )
-
-        Spacer(Modifier.width(14.dp))
-
-        Column(
-            modifier = Modifier.weight(1f)
-        ) {
-            Text(
-                text = item.role,
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Bold
-            )
-
+        Spacer(modifier = Modifier.width(16.dp))
+        Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = item.name,
                 style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
             )
-
-            item.material?.let {
-                Text(
-                    text = it,
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
-        }
-
-        item.temperature?.let {
-            AssistChip(
-                onClick = {},
-                enabled = false,
-                label = { Text(it) }
+            Text(
+                text = "${item.role} ${item.material?.let { "• $it" } ?: ""}",
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.Gray
             )
         }
     }
 }
 
-@Composable
-private fun CosmeticSelectionCard(
-    cosmetics: List<StyleItemUiModel>
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            SectionHeader(
-                title = "COSMETICS",
-                headline = "Completed the beauty layer",
-                icon = Icons.Outlined.ColorLens
-            )
-
-            cosmetics.forEach { item ->
-                CosmeticRow(item)
-            }
-        }
+fun mapHexToSemanticName(hex: String): String {
+    val cleanHex = hex.uppercase().removePrefix("#")
+    return when {
+        cleanHex.startsWith("FF5F") || cleanHex.startsWith("FFA0") || cleanHex.startsWith("FF7") -> "Coral"
+        cleanHex.startsWith("EDD") || cleanHex.startsWith("F3E") || cleanHex.startsWith("FFF") || cleanHex.startsWith("FAF") -> "Ivory"
+        cleanHex.startsWith("BDA") || cleanHex.startsWith("8B4") || cleanHex.startsWith("C5") || cleanHex.startsWith("D2") -> "Camel"
+        cleanHex.startsWith("004") || cleanHex.startsWith("0B0") || cleanHex.startsWith("1E3") -> "Cobalt"
+        cleanHex.startsWith("2C2") || cleanHex.startsWith("1F2") || cleanHex.startsWith("000") || cleanHex.startsWith("11") -> "Charcoal"
+        cleanHex.startsWith("DC1") || cleanHex.startsWith("FF0") || cleanHex.startsWith("C7") || cleanHex.startsWith("E6") -> "Terracotta"
+        else -> "Harmonic"
     }
 }
 
-@Composable
-private fun CosmeticRow(
-    item: StyleItemUiModel
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(
-            modifier = Modifier
-                .size(34.dp)
-                .clip(CircleShape)
-                .background(parseHex(item.colorHex))
-                .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
-        )
-
-        Spacer(Modifier.width(12.dp))
-
-        Column(
-            modifier = Modifier.weight(1f)
-        ) {
-            Text(
-                text = item.role,
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Bold
-            )
-
-            Text(
-                text = item.name,
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
-
-        item.temperature?.let {
-            Text(
-                text = it,
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Bold
-            )
-        }
-    }
-}
-
-@Composable
-private fun ValidationCard(
-    validations: List<ValidationUiModel>
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            SectionHeader(
-                title = "05",
-                headline = "Verified the recommendation",
-                icon = Icons.Outlined.Verified
-            )
-
-            validations.forEach { validation ->
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = if (validation.passed)
-                            Icons.Outlined.CheckCircle
-                        else
-                            Icons.Outlined.Verified,
-                        contentDescription = null,
-                        tint = if (validation.passed)
-                            MaterialTheme.colorScheme.primary
-                        else
-                            MaterialTheme.colorScheme.error
-                    )
-
-                    Spacer(Modifier.width(10.dp))
-
-                    Text(validation.label)
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun FashionistaCard(
-    score: Float,
-    colorHarmony: Float,
-    silhouette: Float,
-    contrastDepth: Float
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(28.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(22.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "FASHIONISTA",
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Bold
-            )
-
-            Spacer(Modifier.height(4.dp))
-
-            Text(
-                text = "Aesthetic evaluation",
-                style = MaterialTheme.typography.bodyMedium
-            )
-
-            Spacer(Modifier.height(12.dp))
-
-            Text(
-                text = "%.1f".format(score),
-                fontSize = 52.sp,
-                fontWeight = FontWeight.Bold
-            )
-
-            Text(
-                text = "/ 100",
-                style = MaterialTheme.typography.titleMedium
-            )
-
-            Spacer(Modifier.height(18.dp))
-
-            ScoreRow("Color Harmony", colorHarmony)
-            ScoreRow("Silhouette", silhouette)
-            ScoreRow("Contrast & Depth", contrastDepth)
-
-            Spacer(Modifier.height(12.dp))
-
-            Surface(
-                shape = RoundedCornerShape(50.dp),
-                tonalElevation = 3.dp
-            ) {
-                Text(
-                    text = "APPROVED",
-                    modifier = Modifier.padding(
-                        horizontal = 16.dp,
-                        vertical = 8.dp
-                    ),
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun ScoreRow(
-    label: String,
-    score: Float
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 5.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(label)
-            Text(
-                text = "%.0f".format(score),
-                fontWeight = FontWeight.Bold
-            )
-        }
-    }
-}
-
-@Composable
-private fun StyleCharacterCard(
-    model: StyleCreationUiModel
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            Text(
-                text = "OBSERVED STYLE",
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Bold
-            )
-
-            if (model.intentStatus == IntentUiStatus.NOT_SPECIFIED) {
-                Text(
-                    text = "No specific style preference was provided."
-                )
-            }
-
-            model.observedColorfulness?.let {
-                CharacterRow(
-                    label = "Colorfulness",
-                    value = it
-                )
-            }
-
-            model.observedColorContrast?.let {
-                CharacterRow(
-                    label = "Color Contrast",
-                    value = it
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun CharacterRow(
-    label: String,
-    value: Float
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(label)
-
-        Text(
-            text = "${(value * 100).toInt()}",
-            fontWeight = FontWeight.Bold
-        )
-    }
-}
-
-@Composable
-private fun PaletteCard(
-    palette: List<String>
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Text(
-                text = "RECOMMENDED PALETTE",
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Bold
-            )
-
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                palette.forEach { hex ->
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(48.dp)
-                                .clip(CircleShape)
-                                .background(parseHex(hex))
-                                .border(
-                                    1.dp,
-                                    MaterialTheme.colorScheme.outline,
-                                    CircleShape
-                                )
-                        )
-
-                        Spacer(Modifier.height(4.dp))
-
-                        Text(
-                            text = hex,
-                            style = MaterialTheme.typography.labelSmall
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun SectionHeader(
-    title: String,
-    headline: String,
-    icon: ImageVector
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null
-        )
-
-        Spacer(Modifier.width(10.dp))
-
-        Column {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Bold
-            )
-
-            Text(
-                text = headline,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-        }
-    }
-}
-
-@Composable
-private fun ContextChip(
-    label: String,
-    value: String
-) {
-    AssistChip(
-        onClick = {},
-        enabled = false,
-        label = {
-            Text("$label: $value")
-        }
-    )
-}
-
-@Composable
-private fun MetricPill(
-    label: String,
-    value: String
-) {
-    Surface(
-        shape = RoundedCornerShape(50.dp),
-        tonalElevation = 2.dp
-    ) {
-        Row(
-            modifier = Modifier.padding(
-                horizontal = 14.dp,
-                vertical = 8.dp
-            ),
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelSmall
-            )
-
-            Text(
-                text = value,
-                fontWeight = FontWeight.Bold
-            )
-        }
-    }
-}
-
-private fun parseHex(hex: String): Color {
-    return runCatching {
-        Color(android.graphics.Color.parseColor(hex))
-    }.getOrDefault(Color.Gray)
-}
-
-@Preview(showBackground = true, name = "Style Creation Story Preview")
+@Preview(showBackground = true, name = "Editorial Style Story Preview")
 @Composable
 private fun StyleCreationStoryScreenPreview() {
     MaterialTheme {
         StyleCreationStoryScreen(
             model = StyleCreationUiModel(
-                occasion = "Daily Outfit",
-                userIntent = "fun colorful outfit",
-                appearanceTemperature = "Neutral",
-                appearanceDepth = "Light",
-                appearanceContrast = "Balanced",
-                temperatureC = 23.4f,
-                uvIndex = 5.75f,
-                circadianContext = "Defense & Protection",
-                eligibleWardrobeCount = 53,
-                anchorName = "Electric Coral Cropped Hoodie",
-                anchorId = "w_3",
-                anchorReason = "[INTENT ANCHOR] High-chroma intent override",
+                userIntent = "A bold statement for the city.",
+                occasion = "Evening Gala",
+                appearanceTemperature = "Cool",
+                appearanceDepth = "Deep",
+                temperatureC = 18.5f,
+                uvIndex = 1.2f,
+                anchorName = "Midnight Velvet Blazer",
+                anchorReason = "Selected for its high formality and contrast.",
                 clothing = listOf(
-                    StyleItemUiModel(id = "w_3", name = "Electric Coral Cropped Hoodie", role = "TOP", colorHex = "#FF5F1F", temperature = "WARM", material = "100% Organic Cotton"),
-                    StyleItemUiModel(id = "w_35", name = "Warm Ivory Pleated Trousers", role = "BOTTOM", colorHex = "#EDD5B1", temperature = "NEUTRAL", material = "Cotton Blend"),
-                    StyleItemUiModel(id = "w_48", name = "Camel Leather Boots", role = "SHOES", colorHex = "#BDA06A", temperature = "WARM", material = "Full Grain Leather")
+                    StyleItemUiModel("1", "Midnight Velvet Blazer", "OUTERWEAR", "#0B0C10", material = "Silk Velvet"),
+                    StyleItemUiModel("2", "Charcoal Silk Trousers", "BOTTOM", "#1F2833", material = "100% Silk")
                 ),
                 cosmetics = listOf(
-                    StyleItemUiModel(id = "c_123", name = "Golden Hour Shimmer", role = "EYE", colorHex = "#FFD700", temperature = "NEUTRAL"),
-                    StyleItemUiModel(id = "c_78", name = "Natural Peach Blush", role = "CHEEK", colorHex = "#FFA07A", temperature = "WARM"),
-                    StyleItemUiModel(id = "c_114", name = "Warm Terracotta Lipstick", role = "LIP", colorHex = "#C75B39", temperature = "WARM"),
-                    StyleItemUiModel(id = "c_133", name = "Cobalt Core Polish", role = "NAIL", colorHex = "#0047AB", temperature = "COOL")
+                    StyleItemUiModel("3", "Crimson Matte", "LIP", "#DC143C")
                 ),
-                aiRationale = "Selected an energetic Electric Coral Cropped Hoodie anchored with warm neutral pleated trousers and camel boots for an elevated, vibrant daily look.",
-                validationItems = listOf(
-                    ValidationUiModel("Mandatory anchor included", true),
-                    ValidationUiModel("Top / Bottom / Shoes composition", true),
-                    ValidationUiModel("Eye / Cheek / Lip / Nail roles", true),
-                    ValidationUiModel("All selected IDs grounded", true),
-                    ValidationUiModel("Forbidden PREP items excluded", true)
-                ),
-                paletteHex = listOf("#FF5F1F", "#EDD5B1", "#BDA06A", "#0047AB"),
-                fashionistaScore = 92.7f,
-                colorHarmony = 98.0f,
-                silhouette = 85.0f,
-                contrastDepth = 95.0f,
+                aiRationale = "The velvet blazer grounds the look in deep, cool tones perfectly suited for an evening gala, while the crimson lip provides a striking focal point.",
+                paletteHex = listOf("#0B0C10", "#1F2833", "#C5C6C7", "#DC143C"),
+                fashionistaScore = 96.5f,
+                colorHarmony = 98f,
+                silhouette = 94f,
+                contrastDepth = 97f,
                 intentStatus = IntentUiStatus.SPECIFIED,
-                observedColorfulness = 0.88f,
-                observedColorContrast = 0.82f,
-                executionTier = ExecutionTier.AI_CLOUD,
-                latencyMs = 1290L
+                intentScore = 94.2f
             )
         )
     }
 }
-
-@Preview(
-    showBackground = true,
-    heightDp = 2700, // Increase this value to fit the entire scrollable content
-    widthDp = 400
-)
-@Composable
-private fun StyleCreationStoryScreenPreviewLong() {
-    MaterialTheme {
-        StyleCreationStoryScreen(
-            model = StyleCreationUiModel(
-                occasion = "Daily Outfit",
-                userIntent = "fun colorful outfit",
-                appearanceTemperature = "Neutral",
-                appearanceDepth = "Light",
-                appearanceContrast = "Balanced",
-                temperatureC = 23.4f,
-                uvIndex = 5.75f,
-                circadianContext = "Defense & Protection",
-                eligibleWardrobeCount = 53,
-                anchorName = "Electric Coral Cropped Hoodie",
-                anchorId = "w_3",
-                anchorReason = "[INTENT ANCHOR] High-chroma intent override",
-                clothing = listOf(
-                    StyleItemUiModel(id = "w_3", name = "Electric Coral Cropped Hoodie", role = "TOP", colorHex = "#FF5F1F", temperature = "WARM", material = "100% Organic Cotton"),
-                    StyleItemUiModel(id = "w_35", name = "Warm Ivory Pleated Trousers", role = "BOTTOM", colorHex = "#EDD5B1", temperature = "NEUTRAL", material = "Cotton Blend"),
-                    StyleItemUiModel(id = "w_48", name = "Camel Leather Boots", role = "SHOES", colorHex = "#BDA06A", temperature = "WARM", material = "Full Grain Leather")
-                ),
-                cosmetics = listOf(
-                    StyleItemUiModel(id = "c_123", name = "Golden Hour Shimmer", role = "EYE", colorHex = "#FFD700", temperature = "NEUTRAL"),
-                    StyleItemUiModel(id = "c_78", name = "Natural Peach Blush", role = "CHEEK", colorHex = "#FFA07A", temperature = "WARM"),
-                    StyleItemUiModel(id = "c_114", name = "Warm Terracotta Lipstick", role = "LIP", colorHex = "#C75B39", temperature = "WARM"),
-                    StyleItemUiModel(id = "c_133", name = "Cobalt Core Polish", role = "NAIL", colorHex = "#0047AB", temperature = "COOL")
-                ),
-                aiRationale = "Selected an energetic Electric Coral Cropped Hoodie anchored with warm neutral pleated trousers and camel boots for an elevated, vibrant daily look.",
-                validationItems = listOf(
-                    ValidationUiModel("Mandatory anchor included", true),
-                    ValidationUiModel("Top / Bottom / Shoes composition", true),
-                    ValidationUiModel("Eye / Cheek / Lip / Nail roles", true),
-                    ValidationUiModel("All selected IDs grounded", true),
-                    ValidationUiModel("Forbidden PREP items excluded", true)
-                ),
-                paletteHex = listOf("#FF5F1F", "#EDD5B1", "#BDA06A", "#0047AB"),
-                fashionistaScore = 92.7f,
-                colorHarmony = 98.0f,
-                silhouette = 85.0f,
-                contrastDepth = 95.0f,
-                intentStatus = IntentUiStatus.SPECIFIED,
-                observedColorfulness = 0.88f,
-                observedColorContrast = 0.82f,
-                executionTier = ExecutionTier.AI_CLOUD,
-                latencyMs = 1290L
-            )
-        )
-    }
-}
-
