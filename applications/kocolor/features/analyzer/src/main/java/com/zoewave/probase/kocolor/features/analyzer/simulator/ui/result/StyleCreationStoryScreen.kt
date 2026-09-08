@@ -1,5 +1,7 @@
 package com.zoewave.probase.kocolor.features.analyzer.simulator.ui.result
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
@@ -22,6 +24,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.ColorLens
@@ -33,6 +36,7 @@ import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -40,9 +44,14 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -113,43 +122,119 @@ enum class IntentUiStatus {
 fun StyleCreationStoryScreen(
     model: StyleCreationUiModel,
     modifier: Modifier = Modifier,
-    phase: CreationPhase = CreationPhase.COMPLETE
+    phase: CreationPhase = CreationPhase.COMPLETE,
+    isEmbedded: Boolean = false
 ) {
-    Scaffold(
-        modifier = modifier,
-        contentWindowInsets = WindowInsets.navigationBars,
-        topBar = {
-            TopAppBar(
-                title = {
-                    Column {
-                        Text(
-                            text = "Your Style",
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = "How KoColor created this look",
-                            style = MaterialTheme.typography.labelMedium
-                        )
+    if (isEmbedded) {
+        StyleCreationStoryContent(
+            model = model,
+            phase = phase,
+            modifier = modifier
+        )
+    } else {
+        Scaffold(
+            modifier = modifier,
+            contentWindowInsets = WindowInsets.navigationBars,
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Column {
+                            Text(
+                                text = "Your Style",
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = "How KoColor created this look",
+                                style = MaterialTheme.typography.labelMedium
+                            )
+                        }
                     }
+                )
+            }
+        ) { paddingValues ->
+
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .systemBarsPadding()
+                    .padding(paddingValues)
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+
+                item {
+                    StyleCreationStoryContent(
+                        model = model,
+                        phase = phase
+                    )
                 }
+
+                item {
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun StyleCreationStoryContent(
+    model: StyleCreationUiModel,
+    phase: CreationPhase,
+    modifier: Modifier = Modifier
+) {
+    var isJourneyExpanded by remember { mutableStateOf(false) }
+    val rotationState by animateFloatAsState(
+        targetValue = if (isJourneyExpanded) 180f else 0f,
+        label = "JourneyChevronRotation"
+    )
+
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
+        if (model.clothing.isNotEmpty()) {
+            OutfitAssemblyCard(
+                clothing = model.clothing
             )
         }
-    ) { paddingValues ->
 
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .systemBarsPadding()
-                .padding(paddingValues)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+        if (model.cosmetics.isNotEmpty()) {
+            CosmeticSelectionCard(
+                cosmetics = model.cosmetics
+            )
+        }
+
+        FilledTonalButton(
+            onClick = { isJourneyExpanded = !isJourneyExpanded },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp)
         ) {
+            Icon(
+                imageVector = Icons.Outlined.AutoAwesome,
+                contentDescription = null,
+                modifier = Modifier.size(18.dp)
+            )
+            Spacer(Modifier.width(8.dp))
+            Text(
+                text = if (isJourneyExpanded) "Hide Style Journey" else "View Style Journey",
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(Modifier.weight(1f))
+            Icon(
+                imageVector = Icons.Default.ArrowDropDown,
+                contentDescription = null,
+                modifier = Modifier.rotate(rotationState)
+            )
+        }
 
-            item {
+        AnimatedVisibility(visible = isJourneyExpanded) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
                 ContextCard(model)
-            }
 
-            item {
                 TimelineStep(
                     number = "01",
                     icon = Icons.Outlined.FilterAlt,
@@ -164,9 +249,7 @@ fun StyleCreationStoryScreen(
                         }
                     }
                 )
-            }
 
-            item {
                 TimelineStep(
                     number = "02",
                     icon = Icons.Outlined.Style,
@@ -174,10 +257,8 @@ fun StyleCreationStoryScreen(
                     subtitle = model.anchorName,
                     body = "${model.anchorReason} • ${model.anchorId}"
                 )
-            }
 
-            if (phase == CreationPhase.AI_GENERATING) {
-                item {
+                if (phase == CreationPhase.AI_GENERATING) {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(24.dp)
@@ -195,25 +276,7 @@ fun StyleCreationStoryScreen(
                             )
                         }
                     }
-                }
-            } else {
-                if (model.clothing.isNotEmpty()) {
-                    item {
-                        OutfitAssemblyCard(
-                            clothing = model.clothing
-                        )
-                    }
-                }
-
-                if (model.cosmetics.isNotEmpty()) {
-                    item {
-                        CosmeticSelectionCard(
-                            cosmetics = model.cosmetics
-                        )
-                    }
-                }
-
-                item {
+                } else {
                     TimelineStep(
                         number = "04",
                         icon = Icons.Outlined.AutoAwesome,
@@ -221,38 +284,28 @@ fun StyleCreationStoryScreen(
                         subtitle = "Cloud AI used for synthesis with grounded candidate set.",
                         body = model.aiRationale.replace(Regex("(?i)feature\\s+\\d+\\s+is\\s+not\\s+available.*"), "").trim()
                     )
-                }
 
-                if (model.validationItems.isNotEmpty()) {
-                    item {
+                    if (model.validationItems.isNotEmpty()) {
                         ValidationCard(
                             validations = model.validationItems
                         )
                     }
-                }
 
-                if (model.paletteHex.isNotEmpty()) {
-                    item {
+                    if (model.paletteHex.isNotEmpty()) {
                         PaletteCard(
                             palette = model.paletteHex
                         )
                     }
-                }
 
-                item {
                     FashionistaCard(
                         score = model.fashionistaScore,
                         colorHarmony = model.colorHarmony,
                         silhouette = model.silhouette,
                         contrastDepth = model.contrastDepth
                     )
-                }
 
-                item {
                     StyleCharacterCard(model)
-                }
 
-                item {
                     AuditTrailView(
                         executionTier = model.executionTier,
                         latencyMs = model.latencyMs,
@@ -260,10 +313,6 @@ fun StyleCreationStoryScreen(
                         steps = model.auditSteps
                     )
                 }
-            }
-
-            item {
-                Spacer(modifier = Modifier.height(24.dp))
             }
         }
     }
@@ -422,7 +471,7 @@ private fun OutfitAssemblyCard(
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             SectionHeader(
-                title = "03",
+                title = "Fashion",
                 headline = "Built the outfit",
                 icon = Icons.Outlined.Style
             )
