@@ -86,6 +86,7 @@ data class StyleCreationUiModel(
     val silhouette: Float = 75.0f,
     val contrastDepth: Float = 80.0f,
     val intentStatus: IntentUiStatus = IntentUiStatus.NOT_SPECIFIED,
+    val intentScore: Float? = null,
     val observedColorfulness: Float? = 0.53f,
     val observedColorContrast: Float? = 0.50f,
     val executionTier: ExecutionTier = ExecutionTier.AI_CLOUD,
@@ -233,69 +234,81 @@ fun StyleCreationStoryContent(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                ContextCard(model)
+        ContextCard(model)
 
-                TimelineStep(
-                    number = "01",
-                    icon = Icons.Outlined.FilterAlt,
-                    title = "Understood the context",
-                    subtitle = "${model.eligibleWardrobeCount} wardrobe items survived deterministic filtering.",
-                    body = buildString {
-                        append("${model.occasion} occasion")
-                        if (model.userIntent.isNullOrBlank()) {
-                            append(" • No specific style preference")
-                        } else {
-                            append(" • \"${model.userIntent}\"")
-                        }
-                    }
-                )
-
-                TimelineStep(
-                    number = "02",
-                    icon = Icons.Outlined.Style,
-                    title = "Established the anchor",
-                    subtitle = model.anchorName,
-                    body = "${model.anchorReason} • ${model.anchorId}"
-                )
-
-                if (phase == CreationPhase.AI_GENERATING) {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(24.dp)
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(20.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-                            Spacer(Modifier.height(12.dp))
-                            Text(
-                                text = "AI Style Synthesis in Progress...",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = Color.Gray
-                            )
-                        }
-                    }
+        TimelineStep(
+            number = "01",
+            icon = Icons.Outlined.FilterAlt,
+            title = "Understood the context",
+            subtitle = "${model.eligibleWardrobeCount} wardrobe items survived deterministic filtering.",
+            body = buildString {
+                append("${model.occasion} occasion")
+                if (model.userIntent.isNullOrBlank()) {
+                    append(" • No specific style preference")
                 } else {
-                    TimelineStep(
-                        number = "04",
-                        icon = Icons.Outlined.AutoAwesome,
-                        title = "AI style synthesis",
-                        subtitle = "Cloud AI used for synthesis with grounded candidate set.",
-                        body = model.aiRationale.replace(Regex("(?i)feature\\s+\\d+\\s+is\\s+not\\s+available.*"), "").trim()
+                    append(" • \"${model.userIntent}\"")
+                }
+            }
+        )
+
+        TimelineStep(
+            number = "02",
+            icon = Icons.Outlined.Style,
+            title = "Established the anchor",
+            subtitle = model.anchorName,
+            body = "${model.anchorReason} • ${model.anchorId}"
+        )
+
+        if (phase == CreationPhase.AI_GENERATING) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(24.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(20.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                    Spacer(Modifier.height(12.dp))
+                    Text(
+                        text = "AI Style Synthesis in Progress...",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.Gray
                     )
+                }
+            }
+        } else {
+            if (model.clothing.isNotEmpty()) {
+                OutfitAssemblyCard(
+                    clothing = model.clothing
+                )
+            }
 
-                    if (model.validationItems.isNotEmpty()) {
-                        ValidationCard(
-                            validations = model.validationItems
-                        )
-                    }
+            if (model.cosmetics.isNotEmpty()) {
+                CosmeticSelectionCard(
+                    cosmetics = model.cosmetics
+                )
+            }
 
-                    if (model.paletteHex.isNotEmpty()) {
-                        PaletteCard(
-                            palette = model.paletteHex
-                        )
-                    }
+            TimelineStep(
+                number = "04",
+                icon = Icons.Outlined.AutoAwesome,
+                title = "AI style synthesis",
+                subtitle = "Cloud AI used for synthesis with grounded candidate set.",
+                body = model.aiRationale.replace(Regex("(?i)feature\\s+\\d+\\s+is\\s+not\\s+available.*"), "").trim()
+            )
+
+            if (model.validationItems.isNotEmpty()) {
+                ValidationCard(
+                    validations = model.validationItems
+                )
+            }
+
+            if (model.paletteHex.isNotEmpty()) {
+                PaletteCard(
+                    palette = model.paletteHex
+                )
+            }
 
                     FashionistaCard(
                         score = model.fashionistaScore,
