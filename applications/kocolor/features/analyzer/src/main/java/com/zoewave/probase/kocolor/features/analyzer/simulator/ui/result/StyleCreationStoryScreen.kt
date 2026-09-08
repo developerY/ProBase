@@ -194,6 +194,24 @@ fun StyleCreationStoryContent(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
+        if (!model.userIntent.isNullOrBlank()) {
+            Column(modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp)) {
+                Text(
+                    text = "FOR YOUR REQUEST",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Gray,
+                    letterSpacing = 1.sp
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = "\"${model.userIntent}\"",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+            }
+        }
         if (model.clothing.isNotEmpty()) {
             OutfitAssemblyCard(
                 clothing = model.clothing
@@ -234,81 +252,81 @@ fun StyleCreationStoryContent(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-        ContextCard(model)
+                ContextCard(model)
 
-        TimelineStep(
-            number = "01",
-            icon = Icons.Outlined.FilterAlt,
-            title = "Understood the context",
-            subtitle = "${model.eligibleWardrobeCount} wardrobe items survived deterministic filtering.",
-            body = buildString {
-                append("${model.occasion} occasion")
-                if (model.userIntent.isNullOrBlank()) {
-                    append(" • No specific style preference")
+                TimelineStep(
+                    number = "01",
+                    icon = Icons.Outlined.FilterAlt,
+                    title = "Understood the context",
+                    subtitle = "${model.eligibleWardrobeCount} wardrobe items survived deterministic filtering.",
+                    body = buildString {
+                        append("${model.occasion} occasion")
+                        if (model.userIntent.isNullOrBlank()) {
+                            append(" • No specific style preference")
+                        } else {
+                            append(" • \"${model.userIntent}\"")
+                        }
+                    }
+                )
+
+                TimelineStep(
+                    number = "02",
+                    icon = Icons.Outlined.Style,
+                    title = "Established the anchor",
+                    subtitle = model.anchorName,
+                    body = "${model.anchorReason} • ${model.anchorId}"
+                )
+
+                TimelineStep(
+                    number = "03",
+                    icon = Icons.Outlined.CheckCircle,
+                    title = "Built the outfit",
+                    subtitle = "Assembled ensemble from candidates.",
+                    body = if (model.clothing.isNotEmpty()) {
+                        model.clothing.joinToString(" + ") { it.name }
+                    } else {
+                        "Analyzed context and generated recommendations."
+                    }
+                )
+
+                if (phase == CreationPhase.AI_GENERATING) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(24.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(20.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                            Spacer(Modifier.height(12.dp))
+                            Text(
+                                text = "AI Style Synthesis in Progress...",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.Gray
+                            )
+                        }
+                    }
                 } else {
-                    append(" • \"${model.userIntent}\"")
-                }
-            }
-        )
-
-        TimelineStep(
-            number = "02",
-            icon = Icons.Outlined.Style,
-            title = "Established the anchor",
-            subtitle = model.anchorName,
-            body = "${model.anchorReason} • ${model.anchorId}"
-        )
-
-        if (phase == CreationPhase.AI_GENERATING) {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(24.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(20.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-                    Spacer(Modifier.height(12.dp))
-                    Text(
-                        text = "AI Style Synthesis in Progress...",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Gray
+                    TimelineStep(
+                        number = "04",
+                        icon = Icons.Outlined.AutoAwesome,
+                        title = "AI style synthesis",
+                        subtitle = "Cloud AI used for synthesis with grounded candidate set.",
+                        body = model.aiRationale.replace(Regex("(?i)feature\\s+\\d+\\s+is\\s+not\\s+available.*"), "").trim()
                     )
-                }
-            }
-        } else {
-            if (model.clothing.isNotEmpty()) {
-                OutfitAssemblyCard(
-                    clothing = model.clothing
-                )
-            }
 
-            if (model.cosmetics.isNotEmpty()) {
-                CosmeticSelectionCard(
-                    cosmetics = model.cosmetics
-                )
-            }
+                    if (model.validationItems.isNotEmpty()) {
+                        ValidationCard(
+                            validations = model.validationItems
+                        )
+                    }
 
-            TimelineStep(
-                number = "04",
-                icon = Icons.Outlined.AutoAwesome,
-                title = "AI style synthesis",
-                subtitle = "Cloud AI used for synthesis with grounded candidate set.",
-                body = model.aiRationale.replace(Regex("(?i)feature\\s+\\d+\\s+is\\s+not\\s+available.*"), "").trim()
-            )
-
-            if (model.validationItems.isNotEmpty()) {
-                ValidationCard(
-                    validations = model.validationItems
-                )
-            }
-
-            if (model.paletteHex.isNotEmpty()) {
-                PaletteCard(
-                    palette = model.paletteHex
-                )
-            }
+                    if (model.paletteHex.isNotEmpty()) {
+                        PaletteCard(
+                            palette = model.paletteHex
+                        )
+                    }
 
                     FashionistaCard(
                         score = model.fashionistaScore,
@@ -318,6 +336,7 @@ fun StyleCreationStoryContent(
                     )
 
                     StyleCharacterCard(model)
+
 
                     AuditTrailView(
                         executionTier = model.executionTier,
@@ -759,7 +778,7 @@ private fun StyleCharacterCard(
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Text(
-                text = "STYLE CHARACTER",
+                text = "OBSERVED STYLE",
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.Bold
             )
