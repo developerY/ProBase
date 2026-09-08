@@ -277,17 +277,15 @@ fun StyleCreationStoryContent(
                     body = "${model.anchorReason} • ${model.anchorId}"
                 )
 
-                TimelineStep(
-                    number = "03",
-                    icon = Icons.Outlined.CheckCircle,
-                    title = "Built the outfit",
-                    subtitle = "Assembled ensemble from candidates.",
-                    body = if (model.clothing.isNotEmpty()) {
-                        model.clothing.joinToString(" + ") { it.name }
-                    } else {
-                        "Analyzed context and generated recommendations."
-                    }
-                )
+                if (model.clothing.isNotEmpty() || model.cosmetics.isNotEmpty()) {
+                    TimelineStep(
+                        number = "03",
+                        icon = Icons.Outlined.CheckCircle,
+                        title = "Built the outfit",
+                        subtitle = "Assembled ensemble from candidates.",
+                        body = model.clothing.joinToString(" + ") { it.name }
+                    )
+                }
 
                 if (phase == CreationPhase.AI_GENERATING) {
                     Card(

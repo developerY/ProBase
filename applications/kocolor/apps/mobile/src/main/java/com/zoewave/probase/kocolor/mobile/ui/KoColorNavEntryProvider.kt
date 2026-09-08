@@ -27,6 +27,7 @@ import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleResultUiS
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorScreen
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorViewModel
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.toStyleCreationUiModel
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.result.FashionJourneyScreen
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.result.StyleCreationStoryScreen
 import com.zoewave.probase.kocolor.features.analyzer.ui.AnalyzerUiRoute
 import com.zoewave.probase.kocolor.features.analyzer.ui.AnalyzerViewModel
@@ -320,6 +321,14 @@ fun koColorNavEntryProvider(
             StyleCreationStoryScreen(
                 model = state.toStyleCreationUiModel(),
                 phase = state.creationPhase
+            )
+        }
+        is KoColorRoute.FashionJourney -> NavEntry(route) {
+            val viewModel: StyleSimulatorViewModel = hiltViewModel()
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+            FashionJourneyScreen(
+                model = state.toStyleCreationUiModel(),
+                navTo = onNavigateTo
             )
         }
         is KoColorRoute.StyleResult -> NavEntry(route) {
