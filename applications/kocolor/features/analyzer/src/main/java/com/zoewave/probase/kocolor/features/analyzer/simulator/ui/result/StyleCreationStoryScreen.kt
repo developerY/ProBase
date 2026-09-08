@@ -57,7 +57,6 @@ import com.zoewave.probase.kocolor.data.usecase.CreationPhase
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.AuditStep
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.AuditTrailView
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.ExecutionTier
-import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.SimulatorEvent
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import kotlin.math.roundToInt
 
