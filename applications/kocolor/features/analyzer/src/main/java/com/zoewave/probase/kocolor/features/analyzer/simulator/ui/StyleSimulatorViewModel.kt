@@ -35,6 +35,7 @@ import com.zoewave.probase.kocolor.data.FashionRepository
 import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
 import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
 import com.zoewave.probase.kocolor.data.repository.RotationRepository
+import com.zoewave.probase.kocolor.data.repository.StyleResultRepository
 import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
 import com.zoewave.probase.kocolor.data.telemetry.StyleAuditTrail
 import com.zoewave.probase.kocolor.data.usecase.AppearanceProfile
@@ -49,6 +50,7 @@ import com.zoewave.probase.kocolor.data.usecase.SelectionTier
 import com.zoewave.probase.kocolor.data.usecase.StyleBlueprint
 import com.zoewave.probase.kocolor.data.usecase.StyleCreationResult
 import com.zoewave.probase.kocolor.data.usecase.StyleRequestContext
+import com.zoewave.probase.kocolor.data.usecase.StyleResult
 import com.zoewave.probase.kocolor.data.usecase.StyleSimulatorEngine
 import com.zoewave.probase.kocolor.data.usecase.UserConstraint
 import com.zoewave.probase.kocolor.db.dao.RoutineDao
@@ -184,7 +186,8 @@ class StyleSimulatorViewModel @Inject constructor(
     private val rotationScoringUseCase: RotationScoringUseCase,
     private val greedyRehydrator: GreedyRehydrator,
     private val intentAnalyzer: IntentAnalyzer,
-    private val generateStyleResultUseCase: GenerateStyleResultUseCase
+    private val generateStyleResultUseCase: GenerateStyleResultUseCase,
+    private val styleResultRepository: StyleResultRepository
 ) : ViewModel() {
 
     private val _selectedClothingCategory = MutableStateFlow(ClothingCategory.TOPS)
@@ -201,6 +204,8 @@ class StyleSimulatorViewModel @Inject constructor(
     private val _explicitItemConstraints = MutableStateFlow<Map<String, UserConstraint>>(emptyMap())
     private val _creationPhase = MutableStateFlow(CreationPhase.IDLE)
     private val _creationResult = MutableStateFlow<StyleCreationResult?>(null)
+    private val _fashionistaScore = MutableStateFlow<FashionistaScore?>(null)
+    private val _intentFulfillment = MutableStateFlow<IntentFulfillment?>(null)
 
     private var simulationJob: Job? = null
 
@@ -231,7 +236,9 @@ class StyleSimulatorViewModel @Inject constructor(
         _faceTelemetry,
         _explicitItemConstraints,
         _creationPhase,
-        _creationResult
+        _creationResult,
+        _fashionistaScore,
+        _intentFulfillment
     ) { array ->
         val faceUri = array[0] as String?
         val profile = array[1] as FashionProfile?
@@ -252,6 +259,8 @@ class StyleSimulatorViewModel @Inject constructor(
         val explicitConstraints = array[15] as Map<String, UserConstraint>
         val phase = array[16] as CreationPhase
         val creationResult = array[17] as StyleCreationResult?
+        val fashionScore = array[18] as FashionistaScore?
+        val fulfillment = array[19] as IntentFulfillment?
 
         val clothingFamilies = allClothing.filter { it.category == selectedClothingCat }
             .groupBy { it.colorFamily }
@@ -285,6 +294,8 @@ class StyleSimulatorViewModel @Inject constructor(
             recommendedPalette = result?.recommendedPalette ?: emptyList(),
             recommendedClothing = recommendedClothing,
             recommendedCosmetics = recommendedCosmetics,
+            fashionistaScore = fashionScore,
+            intentFulfillment = fulfillment,
             isLocalResult = result?.rationale?.startsWith("Local Architect") ?: false,
             fashionProfileLabel = profile?.let { "${it.undertone} ${it.seasonalType}" },
             selectedResultTab = resultTab,
@@ -622,20 +633,44 @@ class StyleSimulatorViewModel @Inject constructor(
             )
 
             try {
-                val styleResult = generateStyleResultUseCase.execute(filteredWardrobe, state.fullCosmeticInventory, requestContext)
-                val blueprint = styleResult.blueprint
+                val creationResult = generateStyleResultUseCase.executeCreationResult(
+                    wardrobe = filteredWardrobe,
+                    cosmetics = state.fullCosmeticInventory,
+                    context = requestContext,
+                    onPhaseChanged = { phase ->
+                        _creationPhase.value = phase
+                    }
+                )
                 
-                // Translate Rationale: Swap <ITEM:id> tags for rich names
+                val blueprint = creationResult.blueprint
                 val translatedRationale = translateRationale(
                     blueprint.rationale,
                     state.fullClothingInventory,
                     state.fullCosmeticInventory
                 )
 
-                _simulationResult.value = blueprint.copy(rationale = translatedRationale)
+                val updatedBlueprint = blueprint.copy(rationale = translatedRationale)
+
+                _simulationResult.value = updatedBlueprint
+                _fashionistaScore.value = creationResult.fashionista
+                _intentFulfillment.value = creationResult.intent
+                _creationResult.value = creationResult.copy(blueprint = updatedBlueprint)
+
+                styleResultRepository.setLatestResult(
+                    StyleResult(
+                        blueprint = updatedBlueprint,
+                        fashionistaScore = creationResult.fashionista,
+                        intentFulfillment = creationResult.intent,
+                        selectedClothing = creationResult.selectedClothing,
+                        selectedCosmetics = creationResult.selectedCosmetics
+                    ),
+                    creationResult = creationResult.copy(blueprint = updatedBlueprint)
+                )
+
                 _simulationStep.value = SimulationStep.RESULT
                 Log.d("StyleSimulatorVM", "Simulation successful, step set to RESULT")
             } catch (e: Exception) {
+                _creationPhase.value = CreationPhase.ERROR
                 Log.e("StyleSimulatorVM", "Simulation failed or result processing error", e)
                 _simulationStep.value = SimulationStep.RESULT // Transition to result anyway to stop loading
             } finally {

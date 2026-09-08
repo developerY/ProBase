@@ -18,11 +18,16 @@ import com.zoewave.probase.features.health.nutrition.ui.shared.MealsViewModel
 import com.zoewave.probase.features.readers.barcode.ui.BarcodeScannerScreen
 import com.zoewave.probase.features.readers.qrscanner.ui.QRCodeScannerScreen
 import com.zoewave.probase.features.weather.ui.WeatherUiRoute
+import com.zoewave.probase.kocolor.data.usecase.StyleBlueprint
+import com.zoewave.probase.kocolor.fashionista.domain.FashionistaScore
 import com.zoewave.probase.kocolor.features.analyzer.calibration.ui.CalibrationCameraScreen
 import com.zoewave.probase.kocolor.features.analyzer.playlist.ui.StylePlaylistScreen
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleResultScreen
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleResultUiState
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorScreen
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorViewModel
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.toStyleCreationUiModel
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.result.FashionJourneyScreen
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.result.StyleCreationStoryScreen
 import com.zoewave.probase.kocolor.features.analyzer.ui.AnalyzerUiRoute
 import com.zoewave.probase.kocolor.features.analyzer.ui.AnalyzerViewModel
@@ -316,6 +321,56 @@ fun koColorNavEntryProvider(
             StyleCreationStoryScreen(
                 model = state.toStyleCreationUiModel(),
                 phase = state.creationPhase
+            )
+        }
+        is KoColorRoute.FashionJourney -> NavEntry(route) {
+            val viewModel: StyleSimulatorViewModel = hiltViewModel()
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+            FashionJourneyScreen(
+                model = state.toStyleCreationUiModel(),
+                navTo = onNavigateTo
+            )
+        }
+        is KoColorRoute.StyleResult -> NavEntry(route) {
+            val viewModel: StyleSimulatorViewModel = hiltViewModel()
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+            val clothing = state.creationResult?.selectedClothing.takeIf { !it.isNullOrEmpty() }
+                ?: state.recommendedClothing.takeIf { it.isNotEmpty() }
+                ?: state.fullClothingInventory.take(3)
+
+            val cosmetics = state.creationResult?.selectedCosmetics.takeIf { !it.isNullOrEmpty() }
+                ?: state.recommendedCosmetics.takeIf { it.isNotEmpty() }
+                ?: state.fullCosmeticInventory.take(4)
+
+            val rationaleText = state.creationResult?.blueprint?.rationale?.takeIf { it.isNotBlank() }
+                ?: state.rationale?.takeIf { it.isNotBlank() }
+                ?: "Selected from your vault based on intent, atmospheric context, and relational color harmony."
+
+            val palette = state.creationResult?.blueprint?.recommendedPalette.takeIf { !it.isNullOrEmpty() }
+                ?: state.recommendedPalette.takeIf { it.isNotEmpty() }
+                ?: clothing.map { it.colorHex }
+
+            val resultUiState = StyleResultUiState(
+                blueprint = StyleBlueprint(
+                    rationale = rationaleText,
+                    selectedClothingIds = clothing.map { "w_${it.internalId}" },
+                    selectedCosmeticIds = cosmetics.map { "c_${it.internalId}" },
+                    recommendedPalette = palette
+                ),
+                fashionistaScore = state.creationResult?.fashionista ?: state.fashionistaScore ?: FashionistaScore(
+                    totalScore = 88f,
+                    isApproved = true
+                ),
+                intentFulfillment = state.creationResult?.intent ?: state.intentFulfillment,
+                selectedClothing = clothing,
+                selectedCosmetics = cosmetics,
+                isLoading = false
+            )
+            StyleResultScreen(
+                uiState = resultUiState,
+                onEvent = viewModel::onEvent,
+                navTo = onNavigateTo
             )
         }
         is KoColorRoute.WardrobeLanding -> NavEntry(route) {

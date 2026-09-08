@@ -27,11 +27,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoewave.probase.kocolor.data.usecase.IntentFulfillment
 import com.zoewave.probase.kocolor.data.usecase.ObservedEnsembleMetrics
 import com.zoewave.probase.kocolor.data.usecase.StyleIntentProfile
 import com.zoewave.probase.kocolor.data.usecase.StyleIntentState
+import com.zoewave.probase.kocolor.features.analyzer.R
 import kotlin.math.roundToInt
 
 @Composable
@@ -59,7 +62,7 @@ fun IntentFulfillmentCard(
                 ) {
                     Column {
                         Text(
-                            text = "YOUR REQUEST FULFILLMENT",
+                            text = stringResource(R.string.applications_kocolor_features_analyzer_story_intent_fulfillment),
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold,
                             color = Color.Gray,
@@ -98,7 +101,7 @@ fun IntentFulfillmentCard(
             } else {
                 Column {
                     Text(
-                        text = "STYLE CHARACTER (NO INTENT SPECIFIED)",
+                        text = stringResource(R.string.applications_kocolor_features_analyzer_story_observed_style_title) + " (NO INTENT SPECIFIED)",
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
                         color = Color.Gray,

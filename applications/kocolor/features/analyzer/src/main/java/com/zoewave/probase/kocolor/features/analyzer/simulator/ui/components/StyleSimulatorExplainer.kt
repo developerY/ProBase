@@ -90,6 +90,7 @@ fun StyleSimulatorUiState.toStyleCreationUiModel(): StyleCreationUiModel {
         silhouette = fashionista?.silhouetteScore ?: 80.0f,
         contrastDepth = fashionista?.contrastScore ?: 85.0f,
         intentStatus = if (intentFulfillment?.isSpecified == true) IntentUiStatus.SPECIFIED else IntentUiStatus.NOT_SPECIFIED,
+        intentScore = intentFulfillment?.score,
         observedColorfulness = intentFulfillment?.observedMetrics?.colorfulness ?: 0.53f,
         observedColorContrast = intentFulfillment?.observedMetrics?.colorContrast ?: 0.50f,
         executionTier = if (isLocalResult) ExecutionTier.DETERMINISTIC_FALLBACK else ExecutionTier.AI_CLOUD,

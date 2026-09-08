@@ -25,6 +25,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -43,17 +45,15 @@ import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.core.model.ritual.MicroCategory
 import com.zoewave.probase.core.model.ritual.Temperature
+import com.zoewave.probase.kocolor.features.analyzer.R
 import com.zoewave.probase.kocolor.data.usecase.IntentFulfillment
 import com.zoewave.probase.kocolor.data.usecase.ObservedEnsembleMetrics
-import com.zoewave.probase.kocolor.data.usecase.StyleBlueprint
 import com.zoewave.probase.kocolor.data.usecase.StyleIntentProfile
 import com.zoewave.probase.kocolor.data.usecase.StyleIntentState
 import com.zoewave.probase.kocolor.fashionista.domain.FashionistaScore
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.AuditStep
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.AuditTrailView
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.ExecutionTier
-import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleResultContent
-import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleResultUiState
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.CollapsibleFashionistaScoreCard
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.ResultTab
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.VisualBlueprintData
@@ -235,25 +235,107 @@ fun BlueprintDetailContent(
 
       
         item {
-            StyleResultContent(
-                uiState = StyleResultUiState(
-                    blueprint = StyleBlueprint(
-                        rationale = rationale ?: "",
-                        selectedClothingIds = recommendedClothing.map { "w_${it.internalId}" },
-                        selectedCosmeticIds = recommendedCosmetics.map { "c_${it.internalId}" },
-                        recommendedPalette = recommendedPalette
-                    ),
-                    fashionistaScore = fashionistaScore ?: FashionistaScore(
-                        totalScore = data.koColorScore.toFloat(),
-                        isApproved = data.koColorScore >= 80
-                    ),
-                    intentFulfillment = intentFulfillment,
-                    selectedClothing = recommendedClothing,
-                    selectedCosmetics = recommendedCosmetics,
-                    isLoading = false
-                ),
-                isScrollable = false
-            )
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                onClick = { navTo(KoColorRoute.StyleResult(intent = rationale ?: "Daily Outfit")) }
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.AutoAwesome,
+                            contentDescription = "Style Result Analysis",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(28.dp)
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column {
+                            Text(
+                                text = stringResource(R.string.applications_kocolor_features_analyzer_story_view_analysis),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = stringResource(R.string.applications_kocolor_features_analyzer_story_inspect_breakdown),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.Gray
+                            )
+                        }
+                    }
+                    IconButton(
+                        onClick = { navTo(KoColorRoute.StyleResult(intent = rationale ?: "Daily Outfit")) }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ChevronRight,
+                            contentDescription = "Open Analysis",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+            }
+        }
+
+        item {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                onClick = { navTo(KoColorRoute.FashionJourney(intent = rationale ?: "Daily Outfit")) }
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.AutoAwesome,
+                            contentDescription = "Explore Fashion Journey",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(28.dp)
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column {
+                            Text(
+                                text = stringResource(R.string.applications_kocolor_features_analyzer_story_explore_journey),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = stringResource(R.string.applications_kocolor_features_analyzer_story_inspect_timeline),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.Gray
+                            )
+                        }
+                    }
+                    IconButton(
+                        onClick = { navTo(KoColorRoute.FashionJourney(intent = rationale ?: "Daily Outfit")) }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ChevronRight,
+                            contentDescription = "Open Journey",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+            }
         }
 
         item {
