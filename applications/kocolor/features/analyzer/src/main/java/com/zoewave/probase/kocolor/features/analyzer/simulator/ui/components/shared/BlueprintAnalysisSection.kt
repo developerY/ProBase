@@ -22,17 +22,9 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.kocolor.data.usecase.IntentFulfillment
-import com.zoewave.probase.kocolor.data.usecase.ObservedEnsembleMetrics
-import com.zoewave.probase.kocolor.data.usecase.StyleIntentProfile
-import com.zoewave.probase.kocolor.data.usecase.StyleIntentState
-import com.zoewave.probase.kocolor.features.analyzer.R
-import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.AuditStep
-import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.AuditTrailView
-import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.ExecutionTier
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.VisualBlueprintData
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
@@ -43,6 +35,7 @@ fun LazyListScope.blueprintAnalysisSection(
     rationale: String?,
     navTo: (KoColorRoute) -> Unit
 ) {
+    /*
     // System Architecture Audit Log Card placed right under FASHIONISTA score
     item {
         AuditTrailView(
@@ -57,6 +50,7 @@ fun LazyListScope.blueprintAnalysisSection(
             )
         )
     }
+
 
     // Intent Fulfillment Card placed under Style Architecture Logs and above Save button
     item {
@@ -178,7 +172,7 @@ fun LazyListScope.blueprintAnalysisSection(
             }
         }
     }
-
+     */
     item {
         Card(
             modifier = Modifier.fillMaxWidth(),
