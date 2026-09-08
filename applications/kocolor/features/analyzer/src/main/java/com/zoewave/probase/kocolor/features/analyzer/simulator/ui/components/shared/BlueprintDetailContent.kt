@@ -33,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -44,6 +45,7 @@ import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.core.model.ritual.MicroCategory
 import com.zoewave.probase.core.model.ritual.Temperature
+import com.zoewave.probase.kocolor.features.analyzer.R
 import com.zoewave.probase.kocolor.data.usecase.IntentFulfillment
 import com.zoewave.probase.kocolor.data.usecase.ObservedEnsembleMetrics
 import com.zoewave.probase.kocolor.data.usecase.StyleIntentProfile
@@ -259,13 +261,13 @@ fun BlueprintDetailContent(
                         Spacer(modifier = Modifier.width(16.dp))
                         Column {
                             Text(
-                                text = "View Style Result Analysis",
+                                text = stringResource(R.string.applications_kocolor_features_analyzer_story_view_analysis),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
-                                text = "Inspect complete score breakdown, intent fulfillment & audit logs",
+                                text = stringResource(R.string.applications_kocolor_features_analyzer_story_inspect_breakdown),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = Color.Gray
                             )
@@ -311,13 +313,13 @@ fun BlueprintDetailContent(
                         Spacer(modifier = Modifier.width(16.dp))
                         Column {
                             Text(
-                                text = "Explore Fashion Journey",
+                                text = stringResource(R.string.applications_kocolor_features_analyzer_story_explore_journey),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
-                                text = "A curated editorial on the making of your look",
+                                text = stringResource(R.string.applications_kocolor_features_analyzer_story_inspect_timeline),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = Color.Gray
                             )

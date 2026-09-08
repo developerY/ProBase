@@ -81,4 +81,23 @@
     <string name="applications_kocolor_features_analyzer_deep">Deep</string>
     <string name="applications_kocolor_features_analyzer_cool">Cool</string>
     <string name="applications_kocolor_features_analyzer_warm">Warm</string>
+
+    <string name="applications_kocolor_features_analyzer_story_title">Your Style</string>
+    <string name="applications_kocolor_features_analyzer_story_subtitle">How KoColor created this look</string>
+    <string name="applications_kocolor_features_analyzer_story_view_journey">View Style Journey</string>
+    <string name="applications_kocolor_features_analyzer_story_hide_journey">Hide Style Journey</string>
+    <string name="applications_kocolor_features_analyzer_story_view_analysis">View Style Result Analysis</string>
+    <string name="applications_kocolor_features_analyzer_story_inspect_breakdown">Inspect complete score breakdown, intent fulfillment &amp; audit logs</string>
+    <string name="applications_kocolor_features_analyzer_story_explore_journey">Explore Fashion Journey</string>
+    <string name="applications_kocolor_features_analyzer_story_inspect_timeline">A curated editorial on the making of your look</string>
+    <string name="applications_kocolor_features_analyzer_story_for_request">FOR YOUR REQUEST</string>
+    <string name="applications_kocolor_features_analyzer_story_context_title">Understood the context</string>
+    <string name="applications_kocolor_features_analyzer_story_anchor_title">Established the anchor</string>
+    <string name="applications_kocolor_features_analyzer_story_outfit_title">Built the outfit</string>
+    <string name="applications_kocolor_features_analyzer_story_synthesis_title">AI style synthesis</string>
+    <string name="applications_kocolor_features_analyzer_story_verification_title">Verified the recommendation</string>
+    <string name="applications_kocolor_features_analyzer_story_fashionista_title">FASHIONISTA</string>
+    <string name="applications_kocolor_features_analyzer_story_observed_style_title">OBSERVED STYLE</string>
+    <string name="applications_kocolor_features_analyzer_story_surprise_me">Surprise Me!</string>
+    <string name="applications_kocolor_features_analyzer_story_intent_fulfillment">YOUR REQUEST FULFILLMENT</string>
 </resources>
