@@ -130,6 +130,7 @@ enum class CreationPhase {
 
 data class StyleContextSummary(
     val occasion: String = "Daily Outfit",
+    val userIntent: String? = null,
     val appearanceTemperature: String = "Neutral",
     val appearanceDepth: String = "Medium",
     val appearanceContrast: String = "Balanced",

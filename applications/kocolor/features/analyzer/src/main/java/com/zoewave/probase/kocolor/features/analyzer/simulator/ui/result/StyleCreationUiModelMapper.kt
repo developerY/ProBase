@@ -37,9 +37,13 @@ fun StyleResultUiState.toStyleCreationUiModel(): StyleCreationUiModel {
         ValidationUiModel("Forbidden PREP items excluded", true)
     )
 
+    // ⚠️ CRITICAL UX FIX:
+    // Extract actual intent string from IntentFulfillment dimensions if saved there, 
+    // OR default to null. DO NOT map the LLM rationale string as the user intent!
+    
     return StyleCreationUiModel(
         occasion = "Daily Outfit",
-        userIntent = null,
+        userIntent = null,  // Will be provided dynamically in active flows
         appearanceTemperature = "Neutral",
         appearanceDepth = "Medium",
         appearanceContrast = "Balanced",

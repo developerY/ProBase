@@ -654,7 +654,13 @@ class StyleSimulatorViewModel @Inject constructor(
                 _simulationResult.value = updatedBlueprint
                 _fashionistaScore.value = creationResult.fashionista
                 _intentFulfillment.value = creationResult.intent
-                _creationResult.value = creationResult.copy(blueprint = updatedBlueprint)
+                
+                val finalCreationResult = creationResult.copy(
+                    blueprint = updatedBlueprint,
+                    context = creationResult.context.copy(userIntent = requestContext.intent)
+                )
+                
+                _creationResult.value = finalCreationResult
 
                 styleResultRepository.setLatestResult(
                     StyleResult(
@@ -664,7 +670,7 @@ class StyleSimulatorViewModel @Inject constructor(
                         selectedClothing = creationResult.selectedClothing,
                         selectedCosmetics = creationResult.selectedCosmetics
                     ),
-                    creationResult = creationResult.copy(blueprint = updatedBlueprint)
+                    creationResult = finalCreationResult
                 )
 
                 _simulationStep.value = SimulationStep.RESULT

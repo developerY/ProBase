@@ -320,7 +320,9 @@ fun koColorNavEntryProvider(
         is KoColorRoute.StyleCreationStory -> NavEntry(route) {
             val viewModel: StyleResultViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()
-            val creationModel = state.toStyleCreationUiModel()
+            val creationModel = state.toStyleCreationUiModel().copy(
+                userIntent = route.intent.takeIf { it != "Daily Outfit" && it.isNotBlank() }
+            )
             StyleCreationStoryScreen(
                 model = creationModel,
                 phase = CreationPhase.COMPLETE,
@@ -330,7 +332,9 @@ fun koColorNavEntryProvider(
         is KoColorRoute.FashionJourney -> NavEntry(route) {
             val viewModel: StyleResultViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()
-            val creationModel = state.toStyleCreationUiModel()
+            val creationModel = state.toStyleCreationUiModel().copy(
+                userIntent = route.intent.takeIf { it != "Daily Outfit" && it.isNotBlank() }
+            )
             FashionJourneyScreen(
                 model = creationModel,
                 navTo = onNavigateTo
