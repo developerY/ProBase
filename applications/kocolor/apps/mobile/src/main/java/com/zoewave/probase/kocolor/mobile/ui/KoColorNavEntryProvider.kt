@@ -18,17 +18,19 @@ import com.zoewave.probase.features.health.nutrition.ui.shared.MealsViewModel
 import com.zoewave.probase.features.readers.barcode.ui.BarcodeScannerScreen
 import com.zoewave.probase.features.readers.qrscanner.ui.QRCodeScannerScreen
 import com.zoewave.probase.features.weather.ui.WeatherUiRoute
+import com.zoewave.probase.kocolor.data.usecase.CreationPhase
 import com.zoewave.probase.kocolor.data.usecase.StyleBlueprint
 import com.zoewave.probase.kocolor.fashionista.domain.FashionistaScore
 import com.zoewave.probase.kocolor.features.analyzer.calibration.ui.CalibrationCameraScreen
 import com.zoewave.probase.kocolor.features.analyzer.playlist.ui.StylePlaylistScreen
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleResultScreen
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleResultUiState
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleResultViewModel
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorScreen
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorViewModel
-import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.toStyleCreationUiModel
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.result.FashionJourneyScreen
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.result.StyleCreationStoryScreen
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.result.toStyleCreationUiModel
 import com.zoewave.probase.kocolor.features.analyzer.ui.AnalyzerUiRoute
 import com.zoewave.probase.kocolor.features.analyzer.ui.AnalyzerViewModel
 import com.zoewave.probase.kocolor.features.boxcapture.ui.BoxCaptureEvent
@@ -52,6 +54,7 @@ import com.zoewave.probase.kocolor.features.inventory.ui.ColorVerificationRoute
 import com.zoewave.probase.kocolor.features.inventory.ui.ColorVerificationUiState
 import com.zoewave.probase.kocolor.features.inventory.ui.StrategicDiversityScreen
 import com.zoewave.probase.kocolor.features.inventory.ui.StyleIntelligenceScreen
+import com.zoewave.probase.kocolor.features.inventory.ui.UsageDistributionScreen
 import com.zoewave.probase.kocolor.features.inventory.ui.UsageMetricsScreen
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeCategoryCoverScreen
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeCategoryCoverUiState
@@ -316,18 +319,25 @@ fun koColorNavEntryProvider(
             )
         }
         is KoColorRoute.StyleCreationStory -> NavEntry(route) {
-            val viewModel: StyleSimulatorViewModel = hiltViewModel()
+            val viewModel: StyleResultViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()
+            val creationModel = state.toStyleCreationUiModel().copy(
+                userIntent = route.intent.takeIf { it != "Daily Outfit" && it.isNotBlank() }
+            )
             StyleCreationStoryScreen(
-                model = state.toStyleCreationUiModel(),
-                phase = state.creationPhase
+                model = creationModel,
+                phase = CreationPhase.COMPLETE,
+                navTo = onNavigateTo
             )
         }
         is KoColorRoute.FashionJourney -> NavEntry(route) {
-            val viewModel: StyleSimulatorViewModel = hiltViewModel()
+            val viewModel: StyleResultViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()
+            val creationModel = state.toStyleCreationUiModel().copy(
+                userIntent = route.intent.takeIf { it != "Daily Outfit" && it.isNotBlank() }
+            )
             FashionJourneyScreen(
-                model = state.toStyleCreationUiModel(),
+                model = creationModel,
                 navTo = onNavigateTo
             )
         }
@@ -390,6 +400,14 @@ fun koColorNavEntryProvider(
                 navTo = onNavigateTo
             )
         }
+        is KoColorRoute.UsageDistribution -> NavEntry(route) {
+            val viewModel: WardrobeViewModel = hiltViewModel()
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+            UsageDistributionScreen(
+                uiState = state,
+                navTo = onNavigateTo
+            )
+        }
         is KoColorRoute.StrategicDiversity -> NavEntry(route) {
             val viewModel: WardrobeViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -398,7 +416,7 @@ fun koColorNavEntryProvider(
                 navTo = onNavigateTo
             )
         }
-        is KoColorRoute.UsageDistribution -> NavEntry(route) {
+        is KoColorRoute.UsageMetrics -> NavEntry(route) {
             val viewModel: WardrobeViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()
             UsageMetricsScreen(

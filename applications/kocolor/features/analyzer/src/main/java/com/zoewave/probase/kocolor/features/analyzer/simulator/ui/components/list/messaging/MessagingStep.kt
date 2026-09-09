@@ -276,7 +276,8 @@ fun MessagingStep(
                     modifier = Modifier.fillMaxWidth().height(64.dp),
                     shape = RoundedCornerShape(32.dp),
                     border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.1f)),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Black)
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Black),
+                    enabled = false
                 ) {
                     Icon(Icons.Default.AutoAwesome, null, modifier = Modifier.size(20.dp))
                     Spacer(Modifier.width(12.dp))
