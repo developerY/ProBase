@@ -144,7 +144,8 @@ fun WardrobeLandingScreen(
                     onViewIntelligenceClicked = { navTo(KoColorRoute.WardrobeAnalytics) },
                     onViewInventoryClicked = { navTo(KoColorRoute.Wardrobe) },
                     onViewFootprintClicked = { navTo(KoColorRoute.StrategicDiversity) },
-                    onViewBehaviorClicked = { navTo(KoColorRoute.UsageDistribution) }
+                    onViewBehaviorClicked = { navTo(KoColorRoute.UsageDistribution) },
+                    onViewAnalyticsClicked = { navTo(KoColorRoute.WardrobeAnalytics) }
                 )
             }
 

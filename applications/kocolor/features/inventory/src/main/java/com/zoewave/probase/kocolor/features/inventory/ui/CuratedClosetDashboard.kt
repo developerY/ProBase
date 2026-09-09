@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Checkroom
 import androidx.compose.material.icons.filled.Explore
@@ -42,6 +43,7 @@ fun CuratedClosetDashboard(
     onViewInventoryClicked: () -> Unit,
     onViewFootprintClicked: () -> Unit,
     onViewBehaviorClicked: () -> Unit,
+    onViewAnalyticsClicked: () -> Unit = onViewIntelligenceClicked,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -51,10 +53,10 @@ fun CuratedClosetDashboard(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Top Row: Glow Score (Behavior) and Diversity (Footprint)
+        // Top Row: Glow Score (Behavior), Diversity (Footprint), and Wardrobe Analytics
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             SmallStatCard(
                 icon = Icons.Default.AutoAwesome,
@@ -68,6 +70,13 @@ fun CuratedClosetDashboard(
                 value = diversityLabel.uppercase(),
                 label = "FOOTPRINT",
                 onClick = onViewFootprintClicked,
+                modifier = Modifier.weight(1f)
+            )
+            SmallStatCard(
+                icon = Icons.Default.Analytics,
+                value = "$totalPieces",
+                label = "ANALYTICS",
+                onClick = onViewAnalyticsClicked,
                 modifier = Modifier.weight(1f)
             )
         }
