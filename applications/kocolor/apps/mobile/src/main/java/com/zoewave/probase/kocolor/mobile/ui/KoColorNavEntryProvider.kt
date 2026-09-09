@@ -320,7 +320,8 @@ fun koColorNavEntryProvider(
             val state by viewModel.uiState.collectAsStateWithLifecycle()
             StyleCreationStoryScreen(
                 model = state.toStyleCreationUiModel(),
-                phase = state.creationPhase
+                phase = state.creationPhase,
+                navTo = onNavigateTo
             )
         }
         is KoColorRoute.FashionJourney -> NavEntry(route) {
