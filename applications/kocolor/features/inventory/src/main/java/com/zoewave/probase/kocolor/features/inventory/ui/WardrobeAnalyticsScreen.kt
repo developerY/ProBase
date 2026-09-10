@@ -110,6 +110,9 @@ fun WardrobeAnalyticsScreen(
             // 04 The Collection
             item { CollectionSection(analytics) }
 
+            // 05 Wear Distribution Chart
+            item { WearDistributionChartSection(uiState.items) }
+
             // 05 Color History
             item { ColorHistorySection(analytics.wearHistory) }
 
@@ -473,6 +476,98 @@ fun ColorHistorySection(wearEvents: List<WearEvent>) {
         ) {
             Text("Oldest", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
             Text("Today", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+        }
+    }
+}
+
+@Composable
+private fun WearDistributionChartSection(items: List<ClothingItem>) {
+    Column {
+        EditorialHeader("Wear Distribution")
+        Text(
+            text = "Each dot represents a single item in your wardrobe. The vertical axis indicates total times worn.",
+            color = Color.Gray,
+            style = MaterialTheme.typography.bodyMedium
+        )
+        Spacer(modifier = Modifier.height(24.dp))
+
+        val maxWears = items.maxOfOrNull { it.usageCount }?.coerceAtLeast(1) ?: 1
+        // Sort items by usage count ascending (least worn on the left, most worn on the right)
+        val sortedItems = items.sortedBy { it.usageCount }
+
+        if (sortedItems.isEmpty()) {
+            Text(
+                text = "No clothing items found.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.Gray
+            )
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(260.dp)
+                    .background(Color.White)
+            ) {
+                Canvas(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .padding(horizontal = 8.dp)
+                ) {
+                    val canvasWidth = size.width
+                    val canvasHeight = size.height
+
+                    // Draw X-axis
+                    drawLine(
+                        color = Color.LightGray,
+                        start = Offset(0f, canvasHeight),
+                        end = Offset(canvasWidth, canvasHeight),
+                        strokeWidth = 2.dp.toPx()
+                    )
+
+                    // Draw Y-axis
+                    drawLine(
+                        color = Color.LightGray,
+                        start = Offset(0f, 0f),
+                        end = Offset(0f, canvasHeight),
+                        strokeWidth = 2.dp.toPx()
+                    )
+
+                    val itemCount = sortedItems.size
+                    // We flip the mapping:
+                    // Y-axis represents total times worn (0 at bottom, maxWears at top)
+                    // X-axis represents the individual clothing items sequentially
+                    sortedItems.forEachIndexed { index, item ->
+                        val xPos = if (itemCount > 1) {
+                            (index.toFloat() / (itemCount - 1).toFloat()) * canvasWidth
+                        } else {
+                            canvasWidth / 2f
+                        }
+                        // Inverse mapping for Y so 0 is at the bottom (canvasHeight)
+                        val wearRatio = if (maxWears > 0) item.usageCount.toFloat() / maxWears.toFloat() else 0f
+                        val yPos = canvasHeight - (wearRatio * canvasHeight)
+
+                        val itemColor = try { Color(android.graphics.Color.parseColor(item.colorHex)) } catch (e: Exception) { Color(0xFF2C3241) }
+
+                        drawCircle(
+                            color = itemColor.copy(alpha = 0.7f),
+                            radius = 4.dp.toPx(),
+                            center = Offset(xPos, yPos)
+                        )
+                    }
+                }
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp)
+                        .padding(top = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(text = "Least worn", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+                    Text(text = "Most worn items", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+                }
+            }
         }
     }
 }
