@@ -266,6 +266,7 @@ fun ColorHubScreen(
                                             SourceType.VANITY -> "Vanity"
                                         },
                                         hex = sig.hex,
+                                        imageUrl = sig.imageUrl,
                                         onClick = {
                                             val route = when (sig.sourceType) {
                                                 SourceType.WARDROBE -> KoColorRoute.WardrobeDetail(sig.sourceId)
@@ -516,6 +517,7 @@ private fun InventoryProductCard(
     name: String,
     source: String,
     hex: String,
+    imageUrl: String?,
     onClick: () -> Unit
 ) {
     Card(
@@ -530,13 +532,27 @@ private fun InventoryProductCard(
             modifier = Modifier.padding(20.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                modifier = Modifier
-                    .size(56.dp)
-                    .clip(CircleShape)
-                    .background(parseColor(hex))
-                    .border(0.5.dp, Color.Black.copy(alpha = 0.1f), CircleShape)
-            )
+            Surface(
+                shape = CircleShape,
+                modifier = Modifier.size(56.dp),
+                color = Color.White
+            ) {
+                if (!imageUrl.isNullOrBlank()) {
+                    AsyncImage(
+                        model = imageUrl,
+                        contentDescription = name,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(parseColor(hex))
+                            .border(0.5.dp, Color.Black.copy(alpha = 0.1f), CircleShape)
+                    )
+                }
+            }
             Spacer(Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(

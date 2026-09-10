@@ -31,12 +31,12 @@ class ColorIntelligenceRepositoryImpl @Inject constructor(
             val wardrobeColors = wardrobe.mapNotNull { item ->
                 val hex = item.dominantHex ?: item.colorHex
                 if (hex != null) {
-                    ColorSignature(hex, item.internalId, SourceType.WARDROBE, item.name)
+                    ColorSignature(hex, item.internalId, SourceType.WARDROBE, item.name, item.imageUrl)
                 } else null
             }
             val cosmeticColors = cosmetics.mapNotNull { item ->
                 if (item.colorHex.isNotBlank()) {
-                    ColorSignature(item.colorHex, item.internalId, SourceType.VANITY, item.name)
+                    ColorSignature(item.colorHex, item.internalId, SourceType.VANITY, item.name, item.imageUrl)
                 } else null
             }
             wardrobeColors + cosmeticColors
