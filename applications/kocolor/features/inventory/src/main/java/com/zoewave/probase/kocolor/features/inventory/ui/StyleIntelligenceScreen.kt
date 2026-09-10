@@ -32,6 +32,8 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -70,6 +72,11 @@ fun StyleIntelligenceScreen(
     navTo: (KoColorRoute) -> Unit
 ) {
     val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale.US) }
+    var selectedCategoryFilter by remember { mutableStateOf<ClothingCategory?>(null) }
+    val filteredItems = remember(uiState.items, selectedCategoryFilter) {
+        if (selectedCategoryFilter == null) uiState.items
+        else uiState.items.filter { it.category == selectedCategoryFilter }
+    }
     
     Scaffold(
         topBar = {
@@ -129,6 +136,47 @@ fun StyleIntelligenceScreen(
                 }
             }
 
+            // 1.5 Category Filter Chips Row
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    FilterChip(
+                        selected = selectedCategoryFilter == null,
+                        onClick = { selectedCategoryFilter = null },
+                        label = { Text("All Items", fontWeight = FontWeight.Bold) },
+                        shape = RoundedCornerShape(50.dp),
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = Color.Black,
+                            selectedLabelColor = Color.White,
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                            labelColor = Color.DarkGray
+                        )
+                    )
+
+                    ClothingCategory.entries.forEach { category ->
+                        FilterChip(
+                            selected = selectedCategoryFilter == category,
+                            onClick = {
+                                selectedCategoryFilter = if (selectedCategoryFilter == category) null else category
+                            },
+                            label = { Text(category.name.lowercase().replaceFirstChar { it.uppercase() }, fontWeight = FontWeight.Bold) },
+                            shape = RoundedCornerShape(50.dp),
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = Color.Black,
+                                selectedLabelColor = Color.White,
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                labelColor = Color.DarkGray
+                            )
+                        )
+                    }
+                }
+            }
+
             // 2. Chromatic Core
             item {
                 var selectedGroup by remember { mutableStateOf<Pair<String, List<ClothingItem>>?>(null) }
@@ -141,8 +189,8 @@ fun StyleIntelligenceScreen(
                         letterSpacing = 1.sp
                     )
                     
-                    val colorGroups = remember(uiState.items) {
-                        uiState.items
+                    val colorGroups = remember(filteredItems) {
+                        filteredItems
                             .filter { it.colorHex.isNotBlank() }
                             .groupBy { it.colorHex }
                             .toList()
