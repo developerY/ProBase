@@ -409,7 +409,7 @@ private fun WearDistributionChartSection(items: List<ClothingItem>) {
     Column {
         EditorialHeader("Wear Distribution")
         Text(
-            text = "Each dot represents a single item in your wardrobe. The horizontal axis indicates total times worn.",
+            text = "Each dot represents a single item in your wardrobe. The vertical axis indicates total times worn.",
             color = Color.Gray,
             style = MaterialTheme.typography.bodyMedium
         )
@@ -457,13 +457,18 @@ private fun WearDistributionChartSection(items: List<ClothingItem>) {
                     )
 
                     val itemCount = sortedItems.size
+                    // We flip the mapping:
+                    // Y-axis represents total times worn (0 at bottom, maxWears at top)
+                    // X-axis represents the individual clothing items sequentially
                     sortedItems.forEachIndexed { index, item ->
-                        val xPos = (item.usageCount.toFloat() / maxWears.toFloat()) * canvasWidth
-                        val yPos = if (itemCount > 1) {
-                            (index.toFloat() / (itemCount - 1).toFloat()) * canvasHeight
+                        val xPos = if (itemCount > 1) {
+                            (index.toFloat() / (itemCount - 1).toFloat()) * canvasWidth
                         } else {
-                            canvasHeight / 2f
+                            canvasWidth / 2f
                         }
+                        // Inverse mapping for Y so 0 is at the bottom (canvasHeight)
+                        val wearRatio = if (maxWears > 0) item.usageCount.toFloat() / maxWears.toFloat() else 0f
+                        val yPos = canvasHeight - (wearRatio * canvasHeight)
                         
                         val itemColor = try { Color(android.graphics.Color.parseColor(item.colorHex)) } catch (e: Exception) { Color(0xFF2C3241) }
 
@@ -482,8 +487,8 @@ private fun WearDistributionChartSection(items: List<ClothingItem>) {
                         .padding(top = 8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(text = "0", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
-                    Text(text = "$maxWears wears", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+                    Text(text = "Most worn items", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+                    Text(text = "Least worn", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
                 }
             }
         }
