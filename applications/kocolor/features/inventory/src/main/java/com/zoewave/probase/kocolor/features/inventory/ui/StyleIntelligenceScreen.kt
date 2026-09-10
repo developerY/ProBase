@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -116,35 +115,7 @@ fun StyleIntelligenceScreen(
             contentPadding = PaddingValues(24.dp),
             verticalArrangement = Arrangement.spacedBy(32.dp)
         ) {
-            // 1. Performance Row
-            item {
-                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Text(
-                        text = "PORTFOLIO PERFORMANCE",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Color.Gray,
-                        letterSpacing = 1.sp
-                    )
-                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                        AnalysisSmallCard(
-                            label = "TOTAL VALUE",
-                            value = currencyFormatter.format(uiState.totalInvestment),
-                            modifier = Modifier.weight(1f)
-                        )
-                        val avgCpw = uiState.items.mapNotNull { 
-                            if (it.usageCount > 0 && it.price != null) it.price!! / it.usageCount else null 
-                        }.let { if (it.isEmpty()) null else it.average() }
-                        
-                        AnalysisSmallCard(
-                            label = "AVG CPW",
-                            value = avgCpw?.let { currencyFormatter.format(it) } ?: "N/A",
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                }
-            }
-
-            // 2. Chromatic Core & Spectrum System
+            // 1. Chromatic Core & Spectrum System (Placed on top!)
             item {
                 var selectedGroup by remember { mutableStateOf<Pair<String, List<ClothingItem>>?>(null) }
                 val lazyListState = rememberLazyListState()
@@ -377,35 +348,95 @@ fun StyleIntelligenceScreen(
                 }
             }
 
-            // 2.5 Portfolio Composition (Full Footprint Table)
+            // 2. Performance Row
             item {
-                Text(
-                    text = "PORTFOLIO COMPOSITION",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = Color.Gray,
-                    letterSpacing = 1.sp
-                )
-            }
-
-            val sortedCategories = uiState.categoriesMetadata.toList().sortedByDescending { it.second.itemCount }
-            items(sortedCategories) { (name, metadata) ->
-                PortfolioCategoryRow(
-                    name = name,
-                    metadata = metadata,
-                    totalItems = uiState.totalItems,
-                    totalInvestment = uiState.totalInvestment
-                )
-            }
-
-            item {
-                ProInsightCard(
-                    text = if (uiState.totalItems > 0) {
-                        "Your wardrobe shows ${uiState.diversityIndex} diversity. " +
-                                "Balanced distribution across ${uiState.itemsByCategory.size} verticals."
-                    } else {
-                        "Start adding items to analyze your strategic diversity."
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Text(
+                        text = "PORTFOLIO PERFORMANCE",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.Gray,
+                        letterSpacing = 1.sp
+                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                        AnalysisSmallCard(
+                            label = "TOTAL VALUE",
+                            value = currencyFormatter.format(uiState.totalInvestment),
+                            modifier = Modifier.weight(1f)
+                        )
+                        val avgCpw = uiState.items.mapNotNull { 
+                            if (it.usageCount > 0 && it.price != null) it.price!! / it.usageCount else null 
+                        }.let { if (it.isEmpty()) null else it.average() }
+                        
+                        AnalysisSmallCard(
+                            label = "AVG CPW",
+                            value = avgCpw?.let { currencyFormatter.format(it) } ?: "N/A",
+                            modifier = Modifier.weight(1f)
+                        )
                     }
+                }
+            }
+
+            // 2.5 Portfolio Composition (Collapsible)
+            item {
+                var isPortfolioExpanded by remember { mutableStateOf(false) }
+                val rotationState by animateFloatAsState(
+                    targetValue = if (isPortfolioExpanded) 180f else 0f,
+                    label = "PortfolioChevronRotation"
                 )
+
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { isPortfolioExpanded = !isPortfolioExpanded }
+                            .padding(vertical = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "PORTFOLIO COMPOSITION",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color.Gray,
+                            letterSpacing = 1.sp
+                        )
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowDown,
+                            contentDescription = if (isPortfolioExpanded) "Hide Portfolio Composition" else "Show Portfolio Composition",
+                            modifier = Modifier.rotate(rotationState),
+                            tint = Color.Gray
+                        )
+                    }
+
+                    AnimatedVisibility(visible = isPortfolioExpanded) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 12.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            val sortedCategories = uiState.categoriesMetadata.toList().sortedByDescending { it.second.itemCount }
+                            sortedCategories.forEach { (name, metadata) ->
+                                PortfolioCategoryRow(
+                                    name = name,
+                                    metadata = metadata,
+                                    totalItems = uiState.totalItems,
+                                    totalInvestment = uiState.totalInvestment
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(4.dp))
+
+                            ProInsightCard(
+                                text = if (uiState.totalItems > 0) {
+                                    "Your wardrobe shows ${uiState.diversityIndex} diversity. " +
+                                            "Balanced distribution across ${uiState.itemsByCategory.size} verticals."
+                                } else {
+                                    "Start adding items to analyze your strategic diversity."
+                                }
+                            )
+                        }
+                    }
+                }
             }
 
             // 3. Style Efficiency List (Collapsible)
