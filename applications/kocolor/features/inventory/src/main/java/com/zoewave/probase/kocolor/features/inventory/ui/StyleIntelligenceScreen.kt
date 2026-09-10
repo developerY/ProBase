@@ -1,19 +1,45 @@
 package com.zoewave.probase.kocolor.features.inventory.ui
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -23,9 +49,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
+import com.zoewave.probase.kocolor.features.inventory.ui.components.ProInsightCard
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import java.text.NumberFormat
-import java.util.*
+import java.util.Locale
 import android.graphics.Color as AndroidColor
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -146,22 +173,93 @@ fun StyleIntelligenceScreen(
                 }
             }
 
-            // 3. Style Efficiency List
+            // 2.5 Portfolio Composition (Full Footprint Table)
             item {
                 Text(
-                    text = "STYLE EFFICIENCY (CPW)",
+                    text = "PORTFOLIO COMPOSITION",
                     style = MaterialTheme.typography.labelSmall,
                     color = Color.Gray,
                     letterSpacing = 1.sp
                 )
             }
 
-            val efficiencySorted = uiState.items.sortedBy { 
-                it.price?.div(it.usageCount.takeIf { count -> count > 0 } ?: 1) ?: Double.MAX_VALUE 
+            val sortedCategories = uiState.categoriesMetadata.toList().sortedByDescending { it.second.itemCount }
+            items(sortedCategories) { (name, metadata) ->
+                PortfolioCategoryRow(
+                    name = name,
+                    metadata = metadata,
+                    totalItems = uiState.totalItems,
+                    totalInvestment = uiState.totalInvestment
+                )
             }
-            
-            items(efficiencySorted) { item ->
-                CPWItemCard(item = item)
+
+            item {
+                ProInsightCard(
+                    text = if (uiState.totalItems > 0) {
+                        "Your wardrobe shows ${uiState.diversityIndex} diversity. " +
+                                "Balanced distribution across ${uiState.itemsByCategory.size} verticals."
+                    } else {
+                        "Start adding items to analyze your strategic diversity."
+                    }
+                )
+            }
+
+            // 3. Style Efficiency List (Collapsible)
+            item {
+                var isCpwExpanded by remember { mutableStateOf(false) }
+                val rotationState by animateFloatAsState(
+                    targetValue = if (isCpwExpanded) 180f else 0f,
+                    label = "CpwChevronRotation"
+                )
+
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { isCpwExpanded = !isCpwExpanded }
+                            .padding(vertical = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "STYLE EFFICIENCY (CPW)",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color.Gray,
+                            letterSpacing = 1.sp
+                        )
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowDown,
+                            contentDescription = if (isCpwExpanded) "Collapse CPW" else "Expand CPW",
+                            modifier = Modifier.rotate(rotationState),
+                            tint = Color.Gray
+                        )
+                    }
+
+                    AnimatedVisibility(visible = isCpwExpanded) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 12.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            val efficiencySorted = uiState.items.sortedBy { 
+                                it.price?.div(it.usageCount.takeIf { count -> count > 0 } ?: 1) ?: Double.MAX_VALUE 
+                            }
+
+                            if (efficiencySorted.isEmpty()) {
+                                Text(
+                                    text = "No cost per wear data available.",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = Color.Gray
+                                )
+                            } else {
+                                efficiencySorted.forEach { item ->
+                                    CPWItemCard(item = item)
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }

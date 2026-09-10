@@ -110,7 +110,7 @@ fun StrategicDiversityScreen(
 }
 
 @Composable
-private fun PortfolioCategoryRow(
+fun PortfolioCategoryRow(
     name: String,
     metadata: CategoryMetadata,
     totalItems: Int,

@@ -53,23 +53,16 @@ fun CuratedClosetDashboard(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Top Row: Glow Score (Behavior), Diversity (Footprint), and Wardrobe Analytics
+        // Top Row: Glow Score (Behavior) and Wardrobe Analytics
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             SmallStatCard(
                 icon = Icons.Default.AutoAwesome,
                 value = glowScore?.let { "${(it * 100).toInt()}%" } ?: "—",
                 label = "BEHAVIOR",
                 onClick = onViewBehaviorClicked,
-                modifier = Modifier.weight(1f)
-            )
-            SmallStatCard(
-                icon = Icons.Default.Explore,
-                value = diversityLabel.uppercase(),
-                label = "FOOTPRINT",
-                onClick = onViewFootprintClicked,
                 modifier = Modifier.weight(1f)
             )
             SmallStatCard(
