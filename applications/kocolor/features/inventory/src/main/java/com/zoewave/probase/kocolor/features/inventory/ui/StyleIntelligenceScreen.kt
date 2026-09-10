@@ -1,10 +1,13 @@
 package com.zoewave.probase.kocolor.features.inventory.ui
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -160,23 +163,24 @@ fun StyleIntelligenceScreen(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(48.dp)
-                                .clip(RoundedCornerShape(12.dp))
+                                .height(52.dp)
+                                .clip(RoundedCornerShape(14.dp))
+                                .horizontalScroll(rememberScrollState())
                         ) {
                             colorGroups.forEach { group ->
                                 val (hex, items) = group
                                 val isSelected = selectedGroup?.first == hex
-                                val segmentWeight by animateFloatAsState(
-                                    targetValue = if (isSelected) (items.size.toFloat() * 3.5f).coerceAtLeast(8f) else items.size.toFloat(),
-                                    label = "SegmentWeightAnimation"
+                                val segmentWidth by animateDpAsState(
+                                    targetValue = if (isSelected) (items.size * 22 + 80).dp.coerceIn(100.dp, 200.dp) else (items.size * 14 + 18).dp.coerceIn(24.dp, 90.dp),
+                                    label = "SegmentWidthAnimation"
                                 )
                                 Box(
                                     modifier = Modifier
-                                        .weight(segmentWeight)
+                                        .width(segmentWidth)
                                         .fillMaxHeight()
                                         .background(Color(AndroidColor.parseColor(hex)))
                                         .border(
-                                            width = if (isSelected) 2.dp else 0.5.dp,
+                                            width = if (isSelected) 2.5.dp else 0.5.dp,
                                             color = if (isSelected) Color.White else Color.White.copy(alpha = 0.2f)
                                         )
                                         .clickable {
