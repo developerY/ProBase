@@ -144,48 +144,7 @@ fun StyleIntelligenceScreen(
                 }
             }
 
-            // 1.5 Category Filter Chips Row
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    FilterChip(
-                        selected = selectedCategoryFilter == null,
-                        onClick = { selectedCategoryFilter = null },
-                        label = { Text("All Items", fontWeight = FontWeight.Bold) },
-                        shape = RoundedCornerShape(50.dp),
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = Color.Black,
-                            selectedLabelColor = Color.White,
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                            labelColor = Color.DarkGray
-                        )
-                    )
-
-                    ClothingCategory.entries.forEach { category ->
-                        FilterChip(
-                            selected = selectedCategoryFilter == category,
-                            onClick = {
-                                selectedCategoryFilter = if (selectedCategoryFilter == category) null else category
-                            },
-                            label = { Text(category.name.lowercase().replaceFirstChar { it.uppercase() }, fontWeight = FontWeight.Bold) },
-                            shape = RoundedCornerShape(50.dp),
-                            colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = Color.Black,
-                                selectedLabelColor = Color.White,
-                                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                labelColor = Color.DarkGray
-                            )
-                        )
-                    }
-                }
-            }
-
-            // 2. Chromatic Core
+            // 2. Chromatic Core & Spectrum System
             item {
                 var selectedGroup by remember { mutableStateOf<Pair<String, List<ClothingItem>>?>(null) }
                 val lazyListState = rememberLazyListState()
@@ -225,6 +184,45 @@ fun StyleIntelligenceScreen(
                                     selectedGroup = null
                                     selectedCategoryFilter = null
                                 }
+                            )
+                        }
+                    }
+
+                    // Category Filter Chips Row placed directly under "Your Color Spectrum" title
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        FilterChip(
+                            selected = selectedCategoryFilter == null,
+                            onClick = { selectedCategoryFilter = null },
+                            label = { Text("All Items", fontWeight = FontWeight.Bold) },
+                            shape = RoundedCornerShape(50.dp),
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = Color.Black,
+                                selectedLabelColor = Color.White,
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                labelColor = Color.DarkGray
+                            )
+                        )
+
+                        ClothingCategory.entries.forEach { category ->
+                            FilterChip(
+                                selected = selectedCategoryFilter == category,
+                                onClick = {
+                                    selectedCategoryFilter = if (selectedCategoryFilter == category) null else category
+                                },
+                                label = { Text(category.name.lowercase().replaceFirstChar { it.uppercase() }, fontWeight = FontWeight.Bold) },
+                                shape = RoundedCornerShape(50.dp),
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = Color.Black,
+                                    selectedLabelColor = Color.White,
+                                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                    labelColor = Color.DarkGray
+                                )
                             )
                         }
                     }
