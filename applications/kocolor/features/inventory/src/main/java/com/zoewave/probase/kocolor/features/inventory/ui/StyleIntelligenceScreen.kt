@@ -166,13 +166,17 @@ fun StyleIntelligenceScreen(
                             colorGroups.forEach { group ->
                                 val (hex, items) = group
                                 val isSelected = selectedGroup?.first == hex
+                                val segmentWeight by animateFloatAsState(
+                                    targetValue = if (isSelected) (items.size.toFloat() * 3.5f).coerceAtLeast(8f) else items.size.toFloat(),
+                                    label = "SegmentWeightAnimation"
+                                )
                                 Box(
                                     modifier = Modifier
-                                        .weight(items.size.toFloat())
+                                        .weight(segmentWeight)
                                         .fillMaxHeight()
                                         .background(Color(AndroidColor.parseColor(hex)))
                                         .border(
-                                            width = if (isSelected) 3.dp else 0.5.dp,
+                                            width = if (isSelected) 2.dp else 0.5.dp,
                                             color = if (isSelected) Color.White else Color.White.copy(alpha = 0.2f)
                                         )
                                         .clickable {
