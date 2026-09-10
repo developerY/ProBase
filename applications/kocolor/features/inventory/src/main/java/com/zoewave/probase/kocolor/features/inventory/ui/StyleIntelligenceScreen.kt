@@ -31,6 +31,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Checkroom
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -42,8 +43,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.AsyncImage
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -313,10 +317,41 @@ fun StyleIntelligenceScreen(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .clickable { navTo(KoColorRoute.WardrobeDetail(item.internalId)) }
-                                            .padding(vertical = 4.dp),
+                                            .padding(vertical = 6.dp),
                                         horizontalArrangement = Arrangement.SpaceBetween,
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
+                                        Surface(
+                                            shape = RoundedCornerShape(12.dp),
+                                            modifier = Modifier.size(48.dp),
+                                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                                        ) {
+                                            if (!item.imageUrl.isNullOrBlank()) {
+                                                AsyncImage(
+                                                    model = item.imageUrl,
+                                                    contentDescription = item.name,
+                                                    modifier = Modifier.fillMaxSize(),
+                                                    contentScale = ContentScale.Crop
+                                                )
+                                            } else {
+                                                Box(
+                                                    modifier = Modifier
+                                                        .fillMaxSize()
+                                                        .background(Color(AndroidColor.parseColor(if (item.colorHex.startsWith("#")) item.colorHex else "#${item.colorHex}"))),
+                                                    contentAlignment = Alignment.Center
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.Checkroom,
+                                                        contentDescription = null,
+                                                        tint = Color.White.copy(alpha = 0.8f),
+                                                        modifier = Modifier.size(22.dp)
+                                                    )
+                                                }
+                                            }
+                                        }
+
+                                        Spacer(Modifier.width(16.dp))
+
                                         Column(modifier = Modifier.weight(1f)) {
                                             Text(
                                                 text = item.name,
