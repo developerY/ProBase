@@ -1,4 +1,4 @@
-package com.zoewave.probase.kocolor.features.inventory.ui
+package com.zoewave.probase.kocolor.features.inventory.ui.org
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -52,9 +52,10 @@ import com.zoewave.probase.kocolor.features.inventory.domain.RotationAnalytics
 import com.zoewave.probase.kocolor.features.inventory.domain.VersatilityAnalytics
 import com.zoewave.probase.kocolor.features.inventory.domain.WardrobeAnalytics
 import com.zoewave.probase.kocolor.features.inventory.domain.WardrobeAnalyticsEngine
+import com.zoewave.probase.kocolor.features.inventory.domain.WardrobeCoverage
 import com.zoewave.probase.kocolor.features.inventory.domain.WardrobeDna
 import com.zoewave.probase.kocolor.features.inventory.domain.WardrobeInsight
-import com.zoewave.probase.kocolor.features.inventory.domain.WearEvent
+import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeUiState
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -110,8 +111,8 @@ fun WardrobeAnalyticsScreen(
             // 04 The Collection
             item { CollectionSection(analytics) }
 
-            // 05 Color History
-            item { ColorHistorySection(analytics.wearHistory) }
+            // 05 Wear Distribution Chart
+            item { WearDistributionChartSection(uiState.items) }
 
             // 06 Rotation
             item { RotationSection(analytics.rotation) }
@@ -120,7 +121,7 @@ fun WardrobeAnalyticsScreen(
             item { VersatilitySection(analytics.versatility, navTo) }
 
             // 07 Wardrobe Gaps
-            item { CoverageSection(analytics.insights) }
+            item { CoverageSection(analytics.coverage, analytics.insights) }
 
             item { Spacer(modifier = Modifier.height(40.dp)) }
         }
@@ -187,19 +188,6 @@ private fun SnapshotSection(analytics: WardrobeAnalytics) {
                     color = Color.Gray
                 )
             }
-            Column {
-                Text(
-                    text = "${analytics.neverWornItems}",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 28.sp,
-                    fontFamily = FontFamily.Serif
-                )
-                Text(
-                    text = "never worn",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Gray
-                )
-            }
         }
     }
 }
@@ -208,12 +196,6 @@ private fun SnapshotSection(analytics: WardrobeAnalytics) {
 private fun DnaSection(dna: WardrobeDna) {
     Column {
         EditorialHeader("Your Wardrobe DNA")
-        Text(
-            text = "Based on your wardrobe, not your personal color profile.",
-            color = Color.Gray,
-            style = MaterialTheme.typography.bodySmall
-        )
-        Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = dna.primaryIdentity,
             fontFamily = FontFamily.Serif,
@@ -424,55 +406,93 @@ private fun ItemFrequencyBar(name: String, wearCount: Int, maxWears: Int) {
 }
 
 @Composable
-fun ColorHistorySection(wearEvents: List<WearEvent>) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        EditorialHeader("Your Color History")
+private fun WearDistributionChartSection(items: List<ClothingItem>) {
+    Column {
+        EditorialHeader("Wear Distribution")
+        Text(
+            text = "Each dot represents a single item in your wardrobe. The vertical axis indicates total times worn.",
+            color = Color.Gray,
+            style = MaterialTheme.typography.bodyMedium
+        )
+        Spacer(modifier = Modifier.height(24.dp))
         
-        if (wearEvents.isEmpty()) {
-            Text("No recent wear history.", color = Color.Gray)
-            return
-        }
+        val maxWears = items.maxOfOrNull { it.usageCount }?.coerceAtLeast(1) ?: 1
+        // Sort items by usage count ascending (least worn on the left, most worn on the right)
+        val sortedItems = items.sortedBy { it.usageCount }
+        
+        if (sortedItems.isEmpty()) {
+            Text(
+                text = "No clothing items found.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.Gray
+            )
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(260.dp)
+                    .background(Color.White)
+            ) {
+                Canvas(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .padding(horizontal = 8.dp)
+                ) {
+                    val canvasWidth = size.width
+                    val canvasHeight = size.height
 
-        // 1. Calculate Time Range (X-Axis)
-        val minTime = wearEvents.minOf { it.timestamp }
-        val maxTime = wearEvents.maxOf { it.timestamp }
-        val timeRange = (maxTime - minTime).coerceAtLeast(1L).toFloat()
+                    // Draw X-axis
+                    drawLine(
+                        color = Color.LightGray,
+                        start = Offset(0f, canvasHeight),
+                        end = Offset(canvasWidth, canvasHeight),
+                        strokeWidth = 2.dp.toPx()
+                    )
 
-        // 2. Draw the Canvas
-        Canvas(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(100.dp)
-                .padding(vertical = 16.dp)
-        ) {
-            val canvasWidth = size.width
-            val canvasHeight = size.height
+                    // Draw Y-axis
+                    drawLine(
+                        color = Color.LightGray,
+                        start = Offset(0f, 0f),
+                        end = Offset(0f, canvasHeight),
+                        strokeWidth = 2.dp.toPx()
+                    )
 
-            // Plot each wear event as a colored dot
-            wearEvents.forEach { event ->
-                // Normalize X based on time
-                val normalizedX = (event.timestamp - minTime).toFloat() / timeRange
-                val xPos = normalizedX * canvasWidth
+                    val itemCount = sortedItems.size
+                    // We flip the mapping:
+                    // Y-axis represents total times worn (0 at bottom, maxWears at top)
+                    // X-axis represents the individual clothing items sequentially
+                    sortedItems.forEachIndexed { index, item ->
+                        val xPos = if (itemCount > 1) {
+                            (index.toFloat() / (itemCount - 1).toFloat()) * canvasWidth
+                        } else {
+                            canvasWidth / 2f
+                        }
+                        // Inverse mapping for Y so 0 is at the bottom (canvasHeight)
+                        val wearRatio = if (maxWears > 0) item.usageCount.toFloat() / maxWears.toFloat() else 0f
+                        val yPos = canvasHeight - (wearRatio * canvasHeight)
+                        
+                        val itemColor = try { Color(android.graphics.Color.parseColor(item.colorHex)) } catch (e: Exception) { Color(0xFF2C3241) }
 
-                // Center Y vertically
-                val yPos = canvasHeight / 2f
-
-                drawCircle(
-                    color = try { Color(android.graphics.Color.parseColor(event.colorHex)) } catch (e: Exception) { Color(0xFF2C3241) },
-                    radius = 36f, // Size of the dot
-                    center = Offset(xPos, yPos),
-                    alpha = 0.7f
-                )
+                        drawCircle(
+                            color = itemColor.copy(alpha = 0.7f),
+                            radius = 4.dp.toPx(),
+                            center = Offset(xPos, yPos)
+                        )
+                    }
+                }
+                
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp)
+                        .padding(top = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(text = "Least worn", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+                    Text(text = "Most worn items", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+                }
             }
-        }
-        
-        // 3. Timeline Labels
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text("Oldest", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
-            Text("Today", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
         }
     }
 }
@@ -546,9 +566,9 @@ private fun VersatilitySection(
 }
 
 @Composable
-private fun CoverageSection(insights: List<WardrobeInsight>) {
+private fun CoverageSection(coverage: WardrobeCoverage, insights: List<WardrobeInsight>) {
     Column {
-        EditorialHeader("WARDROBE OPPORTUNITIES")
+        EditorialHeader("What Your Wardrobe Is Missing")
         insights.forEach { insight ->
             Row(
                 modifier = Modifier
@@ -583,8 +603,20 @@ private fun WardrobeAnalyticsScreenLongPreview() {
         WardrobeAnalyticsScreen(
             uiState = WardrobeUiState(
                 items = listOf(
-                    ClothingItem(internalId = 1, name = "Universal Khaki Button-Down", category = ClothingCategory.TOPS, usageCount = 18, colorHex = "#B8A992"),
-                    ClothingItem(internalId = 2, name = "Camel Leather Boots", category = ClothingCategory.SHOES, usageCount = 14, colorHex = "#BDA06A")
+                    ClothingItem(
+                        internalId = 1,
+                        name = "Universal Khaki Button-Down",
+                        category = ClothingCategory.TOPS,
+                        usageCount = 18,
+                        colorHex = "#B8A992"
+                    ),
+                    ClothingItem(
+                        internalId = 2,
+                        name = "Camel Leather Boots",
+                        category = ClothingCategory.SHOES,
+                        usageCount = 14,
+                        colorHex = "#BDA06A"
+                    )
                 )
             )
         )
@@ -598,8 +630,20 @@ private fun WardrobeAnalyticsScreenPreview() {
         WardrobeAnalyticsScreen(
             uiState = WardrobeUiState(
                 items = listOf(
-                    ClothingItem(internalId = 1, name = "Universal Khaki Button-Down", category = ClothingCategory.TOPS, usageCount = 18, colorHex = "#B8A992"),
-                    ClothingItem(internalId = 2, name = "Camel Leather Boots", category = ClothingCategory.SHOES, usageCount = 14, colorHex = "#BDA06A")
+                    ClothingItem(
+                        internalId = 1,
+                        name = "Universal Khaki Button-Down",
+                        category = ClothingCategory.TOPS,
+                        usageCount = 18,
+                        colorHex = "#B8A992"
+                    ),
+                    ClothingItem(
+                        internalId = 2,
+                        name = "Camel Leather Boots",
+                        category = ClothingCategory.SHOES,
+                        usageCount = 14,
+                        colorHex = "#BDA06A"
+                    )
                 )
             )
         )

@@ -2,15 +2,17 @@ package com.zoewave.probase.kocolor.features.inventory.domain
 
 data class WardrobeAnalytics(
     val totalItems: Int = 54,
-    val activeItems: Int = 47,
+    val activeItems: Int = 42,
     val rarelyWornItems: Int = 7,
+    val neverWornItems: Int = 5,
     val dna: WardrobeDna = WardrobeDna(),
     val colorDistribution: ColorDistribution = ColorDistribution(),
     val categoryDistribution: CategoryDistribution = CategoryDistribution(),
     val rotation: RotationAnalytics = RotationAnalytics(),
     val versatility: VersatilityAnalytics = VersatilityAnalytics(),
     val coverage: WardrobeCoverage = WardrobeCoverage(),
-    val insights: List<WardrobeInsight> = emptyList()
+    val insights: List<WardrobeInsight> = emptyList(),
+    val wearHistory: List<WearEvent> = emptyList()
 )
 
 data class WardrobeDna(
@@ -83,4 +85,10 @@ data class GarmentSummary(
     val id: String,
     val name: String,
     val wearCount: Int
+)
+
+data class WearEvent(
+    val timestamp: Long,
+    val colorHex: String,
+    val category: String
 )
