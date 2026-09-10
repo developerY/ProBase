@@ -10,13 +10,17 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -124,6 +128,8 @@ fun StyleIntelligenceScreen(
 
             // 2. Chromatic Core
             item {
+                var selectedGroup by remember { mutableStateOf<Pair<String, List<ClothingItem>>?>(null) }
+
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     Text(
                         text = "CHROMATIC CORE",
@@ -157,14 +163,82 @@ fun StyleIntelligenceScreen(
                                 .height(48.dp)
                                 .clip(RoundedCornerShape(12.dp))
                         ) {
-                            colorGroups.forEach { (hex, items) ->
+                            colorGroups.forEach { group ->
+                                val (hex, items) = group
+                                val isSelected = selectedGroup?.first == hex
                                 Box(
                                     modifier = Modifier
                                         .weight(items.size.toFloat())
                                         .fillMaxHeight()
                                         .background(Color(AndroidColor.parseColor(hex)))
-                                        .border(0.5.dp, Color.White.copy(alpha = 0.2f))
+                                        .border(
+                                            width = if (isSelected) 3.dp else 0.5.dp,
+                                            color = if (isSelected) Color.White else Color.White.copy(alpha = 0.2f)
+                                        )
+                                        .clickable {
+                                            selectedGroup = if (isSelected) null else group
+                                        }
                                 )
+                            }
+                        }
+
+                        // 🔍 Selection Details
+                        selectedGroup?.let { (hex, items) ->
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(Color.White, RoundedCornerShape(16.dp))
+                                    .padding(16.dp),
+                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Box(
+                                        Modifier
+                                            .size(20.dp)
+                                            .clip(CircleShape)
+                                            .background(Color(AndroidColor.parseColor(hex)))
+                                            .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
+                                    )
+                                    Spacer(Modifier.width(12.dp))
+                                    Text(
+                                        text = "${items.size} ${if (items.size == 1) "Garment" else "Garments"} in this shade",
+                                        style = MaterialTheme.typography.labelLarge,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                                
+                                items.forEach { item ->
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clickable { navTo(KoColorRoute.WardrobeDetail(item.internalId)) }
+                                            .padding(vertical = 4.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(
+                                                text = item.name,
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                fontWeight = FontWeight.SemiBold,
+                                                color = Color.Black
+                                            )
+                                            Text(
+                                                text = item.brand ?: item.category.name,
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = Color.Gray
+                                            )
+                                        }
+                                        Icon(
+                                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                            contentDescription = "View Details",
+                                            modifier = Modifier
+                                                .size(16.dp)
+                                                .rotate(180f),
+                                            tint = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
+                                }
                             }
                         }
                     } else {
