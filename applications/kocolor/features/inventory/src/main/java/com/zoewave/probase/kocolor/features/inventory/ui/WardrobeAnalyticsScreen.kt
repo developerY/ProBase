@@ -1,7 +1,7 @@
 package com.zoewave.probase.kocolor.features.inventory.ui
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,7 +19,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -38,6 +38,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -47,8 +48,6 @@ import androidx.compose.ui.unit.sp
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.kocolor.features.inventory.domain.ColorDistribution
-import com.zoewave.probase.kocolor.features.inventory.domain.ColorStat
-import com.zoewave.probase.kocolor.features.inventory.domain.GarmentSummary
 import com.zoewave.probase.kocolor.features.inventory.domain.RotationAnalytics
 import com.zoewave.probase.kocolor.features.inventory.domain.VersatilityAnalytics
 import com.zoewave.probase.kocolor.features.inventory.domain.WardrobeAnalytics
@@ -111,7 +110,10 @@ fun WardrobeAnalyticsScreen(
             // 04 The Collection
             item { CollectionSection(analytics) }
 
-            // 05 Rotation
+            // 05 Wear Distribution Chart
+            item { WearDistributionChartSection(uiState.items) }
+
+            // 06 Rotation
             item { RotationSection(analytics.rotation) }
 
             // 06 Versatility
@@ -323,37 +325,171 @@ private fun RotationSection(rotation: RotationAnalytics) {
             style = MaterialTheme.typography.bodyMedium
         )
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(24.dp))
+
+        val maxWears = rotation.mostWorn.maxOfOrNull { it.wearCount }?.coerceAtLeast(1) ?: 1
+
         Text(
-            text = "MOST WORN GARMENTS",
+            text = "MOST WORN",
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Bold,
             color = Color.Gray,
             letterSpacing = 1.5.sp
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(12.dp))
+        rotation.mostWorn.forEach { item ->
+            ItemFrequencyBar(name = item.name, wearCount = item.wearCount, maxWears = maxWears)
+        }
 
-        rotation.mostWorn.take(3).forEachIndexed { index, item ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "${index + 1}. ${item.name}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium
-                )
-                Text(
-                    text = "${item.wearCount} wears",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray
-                )
+        if (rotation.leastWorn.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(24.dp))
+            Text(
+                text = "LEAST WORN",
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Bold,
+                color = Color.Gray,
+                letterSpacing = 1.5.sp
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            rotation.leastWorn.forEach { item ->
+                ItemFrequencyBar(name = item.name, wearCount = item.wearCount, maxWears = maxWears)
             }
         }
     }
 }
+
+@Composable
+private fun ItemFrequencyBar(name: String, wearCount: Int, maxWears: Int) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Bottom
+        ) {
+            Text(
+                text = name,
+                fontSize = 14.sp,
+                color = Color.DarkGray,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 16.dp)
+            )
+            Text(
+                text = "$wearCount wears",
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily.Monospace
+            )
+        }
+
+        Spacer(modifier = Modifier.height(6.dp))
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(4.dp)
+                .background(Color.LightGray.copy(alpha = 0.4f))
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(fraction = (wearCount.toFloat() / maxWears.toFloat()).coerceIn(0f, 1f))
+                    .fillMaxHeight()
+                    .background(Color(0xFF2C3241))
+            )
+        }
+    }
+}
+
+@Composable
+private fun WearDistributionChartSection(items: List<ClothingItem>) {
+    Column {
+        EditorialHeader("Wear Distribution")
+        Text(
+            text = "Each dot represents a single item in your wardrobe. The horizontal axis indicates total times worn.",
+            color = Color.Gray,
+            style = MaterialTheme.typography.bodyMedium
+        )
+        Spacer(modifier = Modifier.height(24.dp))
+        
+        val maxWears = items.maxOfOrNull { it.usageCount }?.coerceAtLeast(1) ?: 1
+        val sortedItems = items.sortedByDescending { it.usageCount }
+        
+        if (sortedItems.isEmpty()) {
+            Text(
+                text = "No clothing items found.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.Gray
+            )
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(260.dp)
+                    .background(Color.White)
+            ) {
+                Canvas(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .padding(horizontal = 8.dp)
+                ) {
+                    val canvasWidth = size.width
+                    val canvasHeight = size.height
+
+                    // Draw X-axis
+                    drawLine(
+                        color = Color.LightGray,
+                        start = Offset(0f, canvasHeight),
+                        end = Offset(canvasWidth, canvasHeight),
+                        strokeWidth = 2.dp.toPx()
+                    )
+
+                    // Draw Y-axis
+                    drawLine(
+                        color = Color.LightGray,
+                        start = Offset(0f, 0f),
+                        end = Offset(0f, canvasHeight),
+                        strokeWidth = 2.dp.toPx()
+                    )
+
+                    val itemCount = sortedItems.size
+                    sortedItems.forEachIndexed { index, item ->
+                        val xPos = (item.usageCount.toFloat() / maxWears.toFloat()) * canvasWidth
+                        val yPos = if (itemCount > 1) {
+                            (index.toFloat() / (itemCount - 1).toFloat()) * canvasHeight
+                        } else {
+                            canvasHeight / 2f
+                        }
+                        
+                        val itemColor = try { Color(android.graphics.Color.parseColor(item.colorHex)) } catch (e: Exception) { Color(0xFF2C3241) }
+
+                        drawCircle(
+                            color = itemColor.copy(alpha = 0.7f),
+                            radius = 4.dp.toPx(),
+                            center = Offset(xPos, yPos)
+                        )
+                    }
+                }
+                
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp)
+                        .padding(top = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(text = "0", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+                    Text(text = "$maxWears wears", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+                }
+            }
+        }
+    }
+}
+
 
 @Composable
 private fun VersatilitySection(
