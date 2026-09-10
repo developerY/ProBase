@@ -1,15 +1,17 @@
 package com.zoewave.probase.kocolor.features.inventory.ui
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -22,7 +24,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -44,6 +49,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,6 +59,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -60,6 +67,7 @@ import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.kocolor.features.inventory.ui.components.ProInsightCard
 import com.zoewave.probase.kocolor.model.KoColorRoute
+import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.Locale
 import android.graphics.Color as AndroidColor
@@ -180,14 +188,46 @@ fun StyleIntelligenceScreen(
             // 2. Chromatic Core
             item {
                 var selectedGroup by remember { mutableStateOf<Pair<String, List<ClothingItem>>?>(null) }
+                val lazyListState = rememberLazyListState()
+                val scope = rememberCoroutineScope()
 
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Text(
-                        text = "CHROMATIC CORE",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Color.Gray,
-                        letterSpacing = 1.sp
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text(
+                                text = "PROFILE ANALYSIS",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Black,
+                                letterSpacing = 1.2.sp,
+                                color = Color.Gray
+                            )
+                            Text(
+                                text = "Your Color Spectrum",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontFamily = FontFamily.Serif,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF2C2420)
+                            )
+                        }
+
+                        if (selectedGroup != null || selectedCategoryFilter != null) {
+                            Text(
+                                text = "Reset",
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.Bold,
+                                textDecoration = TextDecoration.Underline,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.clickable {
+                                    selectedGroup = null
+                                    selectedCategoryFilter = null
+                                }
+                            )
+                        }
+                    }
                     
                     val colorGroups = remember(filteredItems) {
                         filteredItems
@@ -198,43 +238,79 @@ fun StyleIntelligenceScreen(
                                 { (hex, _) ->
                                     val hsv = FloatArray(3)
                                     try {
-                                        AndroidColor.colorToHSV(AndroidColor.parseColor(hex), hsv)
-                                        // Neutrals to the end (Saturation < 0.1)
+                                        AndroidColor.colorToHSV(AndroidColor.parseColor(if (hex.startsWith("#")) hex else "#$hex"), hsv)
                                         if (hsv[1] < 0.1f) 1 else 0 
                                     } catch (e: Exception) { 1 }
                                 },
-                                { it.second.size * -1 } // Then by count descending
+                                { (hex, _) ->
+                                    val hsv = FloatArray(3)
+                                    try {
+                                        AndroidColor.colorToHSV(AndroidColor.parseColor(if (hex.startsWith("#")) hex else "#$hex"), hsv)
+                                        val hue = hsv[0]
+                                        if (hue > 330) hue - 360 else hue
+                                    } catch (e: Exception) { 0f }
+                                },
+                                { (hex, _) ->
+                                    val hsv = FloatArray(3)
+                                    try {
+                                        AndroidColor.colorToHSV(AndroidColor.parseColor(if (hex.startsWith("#")) hex else "#$hex"), hsv)
+                                        hsv[2] 
+                                    } catch (e: Exception) { 0f }
+                                }
                             ))
                     }
 
                     if (colorGroups.isNotEmpty()) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(52.dp)
-                                .clip(RoundedCornerShape(14.dp))
-                                .horizontalScroll(rememberScrollState())
-                        ) {
-                            colorGroups.forEach { group ->
-                                val (hex, items) = group
-                                val isSelected = selectedGroup?.first == hex
-                                val segmentWidth by animateDpAsState(
-                                    targetValue = if (isSelected) (items.size * 22 + 80).dp.coerceIn(100.dp, 200.dp) else (items.size * 14 + 18).dp.coerceIn(24.dp, 90.dp),
-                                    label = "SegmentWidthAnimation"
-                                )
-                                Box(
-                                    modifier = Modifier
-                                        .width(segmentWidth)
-                                        .fillMaxHeight()
-                                        .background(Color(AndroidColor.parseColor(hex)))
-                                        .border(
-                                            width = if (isSelected) 2.5.dp else 0.5.dp,
-                                            color = if (isSelected) Color.White else Color.White.copy(alpha = 0.2f)
-                                        )
-                                        .clickable {
-                                            selectedGroup = if (isSelected) null else group
-                                        }
-                                )
+                        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                            val totalGroups = colorGroups.size
+                            val containerWidth = maxWidth
+                            val baseItemWidth = if (totalGroups > 0) (containerWidth / totalGroups).coerceAtLeast(4.dp) else 0.dp
+
+                            LazyRow(
+                                state = lazyListState,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(100.dp)
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp)),
+                                horizontalArrangement = Arrangement.Start
+                            ) {
+                                items(colorGroups.size) { index ->
+                                    val group = colorGroups[index]
+                                    val (hex, _) = group
+                                    val isSelected = selectedGroup?.first == hex
+
+                                    val animatedWidth by animateDpAsState(
+                                        targetValue = when {
+                                            selectedGroup == null -> baseItemWidth
+                                            isSelected -> 100.dp
+                                            else -> 12.dp
+                                        },
+                                        animationSpec = spring(stiffness = Spring.StiffnessLow),
+                                        label = "width"
+                                    )
+
+                                    Box(
+                                        modifier = Modifier
+                                            .width(animatedWidth)
+                                            .fillMaxHeight()
+                                            .background(Color(AndroidColor.parseColor(if (hex.startsWith("#")) hex else "#$hex")))
+                                            .border(
+                                                width = if (isSelected) 3.dp else 0.dp,
+                                                color = if (isSelected) Color.White else Color.Transparent
+                                            )
+                                            .clickable {
+                                                if (isSelected) {
+                                                    selectedGroup = null
+                                                } else {
+                                                    selectedGroup = group
+                                                    scope.launch {
+                                                        lazyListState.animateScrollToItem(index)
+                                                    }
+                                                }
+                                            }
+                                    )
+                                }
                             }
                         }
 
@@ -252,7 +328,7 @@ fun StyleIntelligenceScreen(
                                         Modifier
                                             .size(20.dp)
                                             .clip(CircleShape)
-                                            .background(Color(AndroidColor.parseColor(hex)))
+                                            .background(Color(AndroidColor.parseColor(if (hex.startsWith("#")) hex else "#$hex")))
                                             .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
                                     )
                                     Spacer(Modifier.width(12.dp))
