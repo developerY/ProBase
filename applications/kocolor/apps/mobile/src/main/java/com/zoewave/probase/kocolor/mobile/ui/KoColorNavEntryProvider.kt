@@ -401,6 +401,14 @@ fun koColorNavEntryProvider(
                 navTo = onNavigateTo
             )
         }
+        is KoColorRoute.StyleIntelligence -> NavEntry(route) {
+            val viewModel: WardrobeViewModel = hiltViewModel()
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+            StyleIntelligenceScreen(
+                uiState = state,
+                navTo = onNavigateTo
+            )
+        }
         is KoColorRoute.UsageDistribution -> NavEntry(route) {
             val viewModel: WardrobeViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()
