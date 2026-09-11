@@ -629,6 +629,9 @@ class StyleSimulatorViewModel @Inject constructor(
                 anchoredClothingIds = anchoredClothing.map { "w_${it.internalId}" },
                 anchoredCosmeticIds = anchoredCosmetics.map { "c_${it.internalId}" },
                 lockedConstraints = allConstraints,
+                wardrobeDna = "Neutral-led, Warm-biased",
+                rotationHealth = 61,
+                wardrobeVersatility = 18,
                 localImageBitmap = state.userPortraitUri?.let { loadBitmapFromUri(Uri.parse(it)) }
             )
 

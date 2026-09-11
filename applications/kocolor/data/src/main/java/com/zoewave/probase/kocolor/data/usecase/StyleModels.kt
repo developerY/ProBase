@@ -79,6 +79,10 @@ data class StyleRequestContext(
     val rotationScores: Map<String, Double> = emptyMap(),
     val fashionProfile: String? = null,
     val lockedConstraints: List<UserConstraint> = emptyList(),
+    // Wardrobe Intelligence Context
+    val wardrobeDna: String? = null,
+    val rotationHealth: Int? = null,
+    val wardrobeVersatility: Int? = null,
     @Transient val localImageBitmap: Bitmap? = null
 )
 
