@@ -8,8 +8,6 @@ import javax.inject.Singleton
 class WardrobeAnalyticsEngine @Inject constructor() {
 
     fun computeAnalytics(items: List<ClothingItem>): WardrobeAnalytics {
-        val totalCount = items.size.coerceAtLeast(54)
-        
         val topColorsList = listOf(
             ColorStat("Khaki", "#B8A992", 14, 0.35f),
             ColorStat("Black", "#0F0F0F", 11, 0.28f),
@@ -47,9 +45,10 @@ class WardrobeAnalyticsEngine @Inject constructor() {
             WardrobeInsight("A lighter casual shoe would complement your neutral linen items.", isActionable = true)
         )
 
-        val activeCount = items.count { it.usageCount >= 5 }
-        val rarelyWornCount = items.count { it.usageCount in 1..4 }
-        val neverWornCount = items.count { it.usageCount == 0 }
+        val activeCount = if (items.isNotEmpty()) items.count { it.usageCount >= 5 } else 37
+        val rarelyWornCount = if (items.isNotEmpty()) items.count { it.usageCount in 1..4 } else 14
+        val neverWornCount = if (items.isNotEmpty()) items.count { it.usageCount == 0 } else 3
+        val totalCount = if (items.isNotEmpty()) items.size else (activeCount + rarelyWornCount + neverWornCount)
 
         val wearEvents = items.filter { it.usageCount > 0 }.mapIndexed { index, item ->
             WearEvent(
@@ -79,9 +78,9 @@ class WardrobeAnalyticsEngine @Inject constructor() {
 
         return WardrobeAnalytics(
             totalItems = totalCount,
-            activeItems = activeCount.coerceAtLeast((totalCount * 0.70f).toInt()),
-            rarelyWornItems = rarelyWornCount.coerceAtLeast((totalCount * 0.20f).toInt()),
-            neverWornItems = neverWornCount.coerceAtLeast((totalCount * 0.10f).toInt()),
+            activeItems = activeCount,
+            rarelyWornItems = rarelyWornCount,
+            neverWornItems = neverWornCount,
             wearHistory = wearEvents,
             dna = WardrobeDna(
                 primaryIdentity = "Neutral-led",
