@@ -24,22 +24,19 @@ class ColorIntelligenceRepositoryImpl @Inject constructor(
 ) : ColorIntelligenceRepository {
 
     override fun getAllInventoryColors(): Flow<List<ColorSignature>> {
-        return combine(
-            wardrobeRepository.getAllClothing(),
-            cosmeticRepository.getAllCosmetics()
-        ) { wardrobe, cosmetics ->
-            val wardrobeColors = wardrobe.mapNotNull { item ->
-                val hex = item.dominantHex ?: item.colorHex
-                if (hex != null) {
-                    ColorSignature(hex, item.internalId, SourceType.WARDROBE, item.name, item.imageUrl)
-                } else null
-            }
-            val cosmeticColors = cosmetics.mapNotNull { item ->
+        return cosmeticRepository.getAllCosmetics().map { cosmetics ->
+            cosmetics.mapNotNull { item ->
                 if (item.colorHex.isNotBlank()) {
-                    ColorSignature(item.colorHex, item.internalId, SourceType.VANITY, item.name, item.imageUrl)
+                    ColorSignature(
+                        hex = item.colorHex,
+                        sourceId = item.internalId,
+                        sourceType = SourceType.VANITY,
+                        name = item.name,
+                        imageUrl = item.imageUrl,
+                        categoryName = item.macroCategory.displayName
+                    )
                 } else null
             }
-            wardrobeColors + cosmeticColors
         }
     }
 

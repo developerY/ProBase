@@ -14,6 +14,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -33,6 +34,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -48,6 +50,8 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -57,8 +61,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -67,7 +71,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.AnnotatedString
@@ -80,19 +83,17 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.zoewave.probase.kocolor.features.colors.domain.model.ColorSignature
 import com.zoewave.probase.kocolor.features.colors.domain.model.SourceType
 import com.zoewave.probase.kocolor.features.colors.util.ColorScienceUtils
-import com.zoewave.probase.kocolor.features.seasonal_trends.ui.SeasonalTrendsContainer
-import com.zoewave.probase.kocolor.features.seasonal_trends.ui.SeasonalTrendsViewModel
-import com.zoewave.probase.kocolor.mobile.features.color.R
-import com.zoewave.probase.kocolor.model.KoColorRoute
-import android.graphics.Color as AndroidColor
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zoewave.probase.kocolor.features.seasonal_trends.ui.SeasonalInspirationFullScreen
+import com.zoewave.probase.kocolor.features.seasonal_trends.ui.SeasonalTrendsViewModel
+import com.zoewave.probase.kocolor.model.KoColorRoute
 import kotlinx.coroutines.launch
+import android.graphics.Color as AndroidColor
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
@@ -102,9 +103,15 @@ fun ColorHubScreen(
     navTo: (KoColorRoute) -> Unit
 ) {
     var selectedGroup by remember { mutableStateOf<Pair<String, List<ColorSignature>>?>(null) }
+    var selectedCategoryFilter by remember { mutableStateOf<String?>(null) }
     var showShopWipDialog by remember { mutableStateOf(false) }
     var isTrendsExpanded by remember { mutableStateOf(false) }
     
+    val filteredColors = remember(uiState.inventoryColors, selectedCategoryFilter) {
+        if (selectedCategoryFilter == null) uiState.inventoryColors
+        else uiState.inventoryColors.filter { it.categoryName.equals(selectedCategoryFilter, ignoreCase = true) }
+    }
+
     val serifFont = FontFamily.Serif
     val trendsViewModel: SeasonalTrendsViewModel = hiltViewModel()
     val trendsState by trendsViewModel.uiState.collectAsStateWithLifecycle()
@@ -168,19 +175,67 @@ fun ColorHubScreen(
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFF2C2420)
                             )
-                            Text(
-                                "Reset",
-                                style = MaterialTheme.typography.labelLarge,
-                                fontWeight = FontWeight.Bold,
-                                textDecoration = TextDecoration.Underline,
-                                modifier = Modifier.clickable { selectedGroup = null }
-                            )
+                            if (selectedGroup != null || selectedCategoryFilter != null) {
+                                Text(
+                                    "Reset",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    textDecoration = TextDecoration.Underline,
+                                    modifier = Modifier.clickable {
+                                        selectedGroup = null
+                                        selectedCategoryFilter = null
+                                    }
+                                )
+                            }
                         }
-                        
+
+                        Spacer(Modifier.height(16.dp))
+
+                        // Cosmetic Category Filter Chips Row
+                        val categories = listOf("Eyes", "Cheeks", "Lips", "Nails")
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .horizontalScroll(rememberScrollState()),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            FilterChip(
+                                selected = selectedCategoryFilter == null,
+                                onClick = { selectedCategoryFilter = null },
+                                label = { Text("All Products", fontWeight = FontWeight.Bold) },
+                                shape = RoundedCornerShape(50.dp),
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = Color.Black,
+                                    selectedLabelColor = Color.White,
+                                    containerColor = Color.White.copy(alpha = 0.6f),
+                                    labelColor = Color.DarkGray
+                                )
+                            )
+
+                            categories.forEach { cat ->
+                                FilterChip(
+                                    selected = selectedCategoryFilter.equals(cat, ignoreCase = true),
+                                    onClick = {
+                                        selectedCategoryFilter = if (selectedCategoryFilter.equals(cat, ignoreCase = true)) null else cat
+                                    },
+                                    label = { Text(cat, fontWeight = FontWeight.Bold) },
+                                    shape = RoundedCornerShape(50.dp),
+                                    colors = FilterChipDefaults.filterChipColors(
+                                        selectedContainerColor = Color.Black,
+                                        selectedLabelColor = Color.White,
+                                        containerColor = Color.White.copy(alpha = 0.6f),
+                                        labelColor = Color.DarkGray
+                                    )
+                                )
+                            }
+                        }
+
                         Spacer(Modifier.height(20.dp))
-                        
+
                         ChromaticDnaBar(
-                            colors = uiState.inventoryColors,
+                            colors = filteredColors,
                             selectedGroup = selectedGroup,
                             onGroupSelected = { selectedGroup = it },
                             navTo = navTo
