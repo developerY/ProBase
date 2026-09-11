@@ -55,7 +55,10 @@ class WardrobeAnalyticsEngine @Inject constructor() {
             WearEvent(
                 timestamp = System.currentTimeMillis() - (index * 86400000L), // Stagger dates
                 colorHex = item.colorHex,
-                category = item.category.name
+                category = item.category.name,
+                itemId = item.internalId,
+                itemName = item.name,
+                imageUrl = item.imageUrl
             )
         }.sortedBy { it.timestamp }
 

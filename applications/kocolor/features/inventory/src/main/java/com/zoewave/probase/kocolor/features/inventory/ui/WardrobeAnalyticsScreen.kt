@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -437,55 +438,173 @@ private fun ItemFrequencyBar(name: String, wearCount: Int, maxWears: Int) {
 }
 
 @Composable
-fun ColorHistorySection(wearEvents: List<WearEvent>) {
+fun ColorHistorySection(
+    wearEvents: List<WearEvent>,
+    navTo: (KoColorRoute) -> Unit = {}
+) {
+    var selectedEvent by remember { mutableStateOf<WearEvent?>(null) }
+
     Column(modifier = Modifier.fillMaxWidth()) {
         EditorialHeader("Your Color History")
+        Text(
+            text = "Tap any color dot on the thread to inspect garment history.",
+            color = Color.Gray,
+            style = MaterialTheme.typography.bodyMedium
+        )
         
         if (wearEvents.isEmpty()) {
             Text("No recent wear history.", color = Color.Gray)
             return
         }
 
-        // 1. Calculate Time Range (X-Axis)
         val minTime = wearEvents.minOf { it.timestamp }
         val maxTime = wearEvents.maxOf { it.timestamp }
         val timeRange = (maxTime - minTime).coerceAtLeast(1L).toFloat()
 
-        // 2. Draw the Canvas
+        var dotPositions by remember { mutableStateOf<List<Pair<Offset, WearEvent>>>(emptyList()) }
+
         Canvas(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(100.dp)
+                .height(110.dp)
                 .padding(vertical = 16.dp)
+                .pointerInput(wearEvents) {
+                    detectTapGestures { tapOffset ->
+                        val maxDistPx = 36.dp.toPx()
+                        val closest = dotPositions.minByOrNull { (dotPos, _) ->
+                            val dx = dotPos.x - tapOffset.x
+                            val dy = dotPos.y - tapOffset.y
+                            kotlin.math.sqrt(dx * dx + dy * dy)
+                        }
+                        if (closest != null) {
+                            val (dotPos, event) = closest
+                            val dx = dotPos.x - tapOffset.x
+                            val dy = dotPos.y - tapOffset.y
+                            val dist = kotlin.math.sqrt(dx * dx + dy * dy)
+                            if (dist <= maxDistPx) {
+                                selectedEvent = if (selectedEvent == event) null else event
+                            }
+                        }
+                    }
+                }
         ) {
             val canvasWidth = size.width
             val canvasHeight = size.height
+            val newPositions = mutableListOf<Pair<Offset, WearEvent>>()
 
-            // Plot each wear event as a colored dot
             wearEvents.forEach { event ->
-                // Normalize X based on time
                 val normalizedX = (event.timestamp - minTime).toFloat() / timeRange
                 val xPos = normalizedX * canvasWidth
-
-                // Center Y vertically
                 val yPos = canvasHeight / 2f
+                val pos = Offset(xPos, yPos)
+                newPositions.add(pos to event)
+
+                val itemColor = try {
+                    val cleanHex = if (event.colorHex.startsWith("#")) event.colorHex else "#${event.colorHex}"
+                    Color(android.graphics.Color.parseColor(cleanHex))
+                } catch (e: Exception) {
+                    Color(0xFF2C3241)
+                }
+
+                val isSelected = selectedEvent == event
+
+                if (isSelected) {
+                    drawCircle(
+                        color = Color.Black,
+                        radius = 42f,
+                        center = pos,
+                        style = Stroke(width = 4f)
+                    )
+                }
 
                 drawCircle(
-                    color = try { Color(android.graphics.Color.parseColor(event.colorHex)) } catch (e: Exception) { Color(0xFF2C3241) },
-                    radius = 36f, // Size of the dot
-                    center = Offset(xPos, yPos),
-                    alpha = 0.7f
+                    color = itemColor,
+                    radius = if (isSelected) 38f else 36f,
+                    center = pos,
+                    alpha = if (isSelected) 1f else 0.7f
                 )
             }
+            dotPositions = newPositions
         }
         
-        // 3. Timeline Labels
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text("Oldest", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
             Text("Today", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+        }
+
+        // 🔍 Selected Event Details Card
+        AnimatedVisibility(visible = selectedEvent != null) {
+            selectedEvent?.let { event ->
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp)
+                        .clickable { navTo(KoColorRoute.WardrobeDetail(event.itemId)) },
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Surface(
+                            shape = CircleShape,
+                            modifier = Modifier.size(44.dp),
+                            color = Color.White
+                        ) {
+                            if (!event.imageUrl.isNullOrBlank()) {
+                                AsyncImage(
+                                    model = event.imageUrl,
+                                    contentDescription = event.itemName,
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Crop
+                                )
+                            } else {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(try { Color(android.graphics.Color.parseColor(if (event.colorHex.startsWith("#")) event.colorHex else "#${event.colorHex}")) } catch (e: Exception) { Color.Gray }),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Checkroom,
+                                        contentDescription = null,
+                                        tint = Color.White.copy(alpha = 0.8f),
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.width(16.dp))
+
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = event.itemName,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = "${event.category} • Worn in your rotation",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.Gray
+                            )
+                        }
+
+                        Text(
+                            text = "Details →",
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+            }
         }
     }
 }

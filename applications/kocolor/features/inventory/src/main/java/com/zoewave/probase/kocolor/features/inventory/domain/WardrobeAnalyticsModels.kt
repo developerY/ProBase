@@ -90,5 +90,8 @@ data class GarmentSummary(
 data class WearEvent(
     val timestamp: Long,
     val colorHex: String,
-    val category: String
+    val category: String,
+    val itemId: Long = 0,
+    val itemName: String = "Garment",
+    val imageUrl: String? = null
 )
