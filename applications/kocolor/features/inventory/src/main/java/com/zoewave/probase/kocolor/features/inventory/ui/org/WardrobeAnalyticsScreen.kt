@@ -1,10 +1,8 @@
-package com.zoewave.probase.kocolor.features.inventory.ui
+package com.zoewave.probase.kocolor.features.inventory.ui.org
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,11 +19,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Checkroom
 import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,22 +34,15 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import coil.compose.AsyncImage
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoewave.probase.core.model.ritual.ClothingCategory
@@ -63,9 +52,10 @@ import com.zoewave.probase.kocolor.features.inventory.domain.RotationAnalytics
 import com.zoewave.probase.kocolor.features.inventory.domain.VersatilityAnalytics
 import com.zoewave.probase.kocolor.features.inventory.domain.WardrobeAnalytics
 import com.zoewave.probase.kocolor.features.inventory.domain.WardrobeAnalyticsEngine
+import com.zoewave.probase.kocolor.features.inventory.domain.WardrobeCoverage
 import com.zoewave.probase.kocolor.features.inventory.domain.WardrobeDna
 import com.zoewave.probase.kocolor.features.inventory.domain.WardrobeInsight
-import com.zoewave.probase.kocolor.features.inventory.domain.WearEvent
+import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeUiState
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -122,10 +112,7 @@ fun WardrobeAnalyticsScreen(
             item { CollectionSection(analytics) }
 
             // 05 Wear Distribution Chart
-            item { WearDistributionChartSection(uiState.items, navTo) }
-
-            // 05 Color History
-            item { ColorHistorySection(analytics.wearHistory) }
+            item { WearDistributionChartSection(uiState.items) }
 
             // 06 Rotation
             item { RotationSection(analytics.rotation) }
@@ -134,7 +121,7 @@ fun WardrobeAnalyticsScreen(
             item { VersatilitySection(analytics.versatility, navTo) }
 
             // 07 Wardrobe Gaps
-            item { CoverageSection(analytics.insights) }
+            item { CoverageSection(analytics.coverage, analytics.insights) }
 
             item { Spacer(modifier = Modifier.height(40.dp)) }
         }
@@ -201,19 +188,6 @@ private fun SnapshotSection(analytics: WardrobeAnalytics) {
                     color = Color.Gray
                 )
             }
-            Column {
-                Text(
-                    text = "${analytics.neverWornItems}",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 28.sp,
-                    fontFamily = FontFamily.Serif
-                )
-                Text(
-                    text = "never worn",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Gray
-                )
-            }
         }
     }
 }
@@ -222,12 +196,6 @@ private fun SnapshotSection(analytics: WardrobeAnalytics) {
 private fun DnaSection(dna: WardrobeDna) {
     Column {
         EditorialHeader("Your Wardrobe DNA")
-        Text(
-            text = "Based on your wardrobe, not your personal color profile.",
-            color = Color.Gray,
-            style = MaterialTheme.typography.bodySmall
-        )
-        Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = dna.primaryIdentity,
             fontFamily = FontFamily.Serif,
@@ -438,196 +406,20 @@ private fun ItemFrequencyBar(name: String, wearCount: Int, maxWears: Int) {
 }
 
 @Composable
-fun ColorHistorySection(
-    wearEvents: List<WearEvent>,
-    navTo: (KoColorRoute) -> Unit = {}
-) {
-    var selectedEvent by remember { mutableStateOf<WearEvent?>(null) }
-
-    Column(modifier = Modifier.fillMaxWidth()) {
-        EditorialHeader("Your Color History")
-        Text(
-            text = "Tap any color dot on the thread to inspect garment history.",
-            color = Color.Gray,
-            style = MaterialTheme.typography.bodyMedium
-        )
-        
-        if (wearEvents.isEmpty()) {
-            Text("No recent wear history.", color = Color.Gray)
-            return
-        }
-
-        val minTime = wearEvents.minOf { it.timestamp }
-        val maxTime = wearEvents.maxOf { it.timestamp }
-        val timeRange = (maxTime - minTime).coerceAtLeast(1L).toFloat()
-
-        var dotPositions by remember { mutableStateOf<List<Pair<Offset, WearEvent>>>(emptyList()) }
-
-        Canvas(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(110.dp)
-                .padding(vertical = 16.dp)
-                .pointerInput(wearEvents) {
-                    detectTapGestures { tapOffset ->
-                        val maxDistPx = 36.dp.toPx()
-                        val closest = dotPositions.minByOrNull { (dotPos, _) ->
-                            val dx = dotPos.x - tapOffset.x
-                            val dy = dotPos.y - tapOffset.y
-                            kotlin.math.sqrt(dx * dx + dy * dy)
-                        }
-                        if (closest != null) {
-                            val (dotPos, event) = closest
-                            val dx = dotPos.x - tapOffset.x
-                            val dy = dotPos.y - tapOffset.y
-                            val dist = kotlin.math.sqrt(dx * dx + dy * dy)
-                            if (dist <= maxDistPx) {
-                                selectedEvent = if (selectedEvent == event) null else event
-                            }
-                        }
-                    }
-                }
-        ) {
-            val canvasWidth = size.width
-            val canvasHeight = size.height
-            val newPositions = mutableListOf<Pair<Offset, WearEvent>>()
-
-            wearEvents.forEach { event ->
-                val normalizedX = (event.timestamp - minTime).toFloat() / timeRange
-                val xPos = normalizedX * canvasWidth
-                val yPos = canvasHeight / 2f
-                val pos = Offset(xPos, yPos)
-                newPositions.add(pos to event)
-
-                val itemColor = try {
-                    val cleanHex = if (event.colorHex.startsWith("#")) event.colorHex else "#${event.colorHex}"
-                    Color(android.graphics.Color.parseColor(cleanHex))
-                } catch (e: Exception) {
-                    Color(0xFF2C3241)
-                }
-
-                val isSelected = selectedEvent == event
-
-                if (isSelected) {
-                    drawCircle(
-                        color = Color.Black,
-                        radius = 42f,
-                        center = pos,
-                        style = Stroke(width = 4f)
-                    )
-                }
-
-                drawCircle(
-                    color = itemColor,
-                    radius = if (isSelected) 38f else 36f,
-                    center = pos,
-                    alpha = if (isSelected) 1f else 0.7f
-                )
-            }
-            dotPositions = newPositions
-        }
-        
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text("Oldest", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
-            Text("Today", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
-        }
-
-        // 🔍 Selected Event Details Card
-        AnimatedVisibility(visible = selectedEvent != null) {
-            selectedEvent?.let { event ->
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 16.dp)
-                        .clickable { navTo(KoColorRoute.WardrobeDetail(event.itemId)) },
-                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Surface(
-                            shape = CircleShape,
-                            modifier = Modifier.size(44.dp),
-                            color = Color.White
-                        ) {
-                            if (!event.imageUrl.isNullOrBlank()) {
-                                AsyncImage(
-                                    model = event.imageUrl,
-                                    contentDescription = event.itemName,
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentScale = ContentScale.Crop
-                                )
-                            } else {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .background(try { Color(android.graphics.Color.parseColor(if (event.colorHex.startsWith("#")) event.colorHex else "#${event.colorHex}")) } catch (e: Exception) { Color.Gray }),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Checkroom,
-                                        contentDescription = null,
-                                        tint = Color.White.copy(alpha = 0.8f),
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                }
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.width(16.dp))
-
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = event.itemName,
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Text(
-                                text = "${event.category} • Worn in your rotation",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = Color.Gray
-                            )
-                        }
-
-                        Text(
-                            text = "Details →",
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun WearDistributionChartSection(
-    items: List<ClothingItem>,
-    navTo: (KoColorRoute) -> Unit = {}
-) {
-    var selectedItem by remember { mutableStateOf<ClothingItem?>(null) }
-
+private fun WearDistributionChartSection(items: List<ClothingItem>) {
     Column {
         EditorialHeader("Wear Distribution")
         Text(
-            text = "Each dot represents a single item in your wardrobe. Tap any dot to inspect item details.",
+            text = "Each dot represents a single item in your wardrobe. The vertical axis indicates total times worn.",
             color = Color.Gray,
             style = MaterialTheme.typography.bodyMedium
         )
         Spacer(modifier = Modifier.height(24.dp))
-
+        
         val maxWears = items.maxOfOrNull { it.usageCount }?.coerceAtLeast(1) ?: 1
-        val sortedItems = remember(items) { items.sortedBy { it.usageCount } }
-
+        // Sort items by usage count ascending (least worn on the left, most worn on the right)
+        val sortedItems = items.sortedBy { it.usageCount }
+        
         if (sortedItems.isEmpty()) {
             Text(
                 text = "No clothing items found.",
@@ -638,184 +430,67 @@ private fun WearDistributionChartSection(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .height(260.dp)
                     .background(Color.White)
             ) {
-                var dotPositions by remember { mutableStateOf<List<Pair<Offset, ClothingItem>>>(emptyList()) }
-
                 Canvas(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(220.dp)
-                        .padding(horizontal = 8.dp, vertical = 8.dp)
-                        .pointerInput(sortedItems) {
-                            detectTapGestures { tapOffset ->
-                                val maxDistPx = 32.dp.toPx()
-                                val closest = dotPositions.minByOrNull { (dotPos, _) ->
-                                    val dx = dotPos.x - tapOffset.x
-                                    val dy = dotPos.y - tapOffset.y
-                                    kotlin.math.sqrt(dx * dx + dy * dy)
-                                }
-                                if (closest != null) {
-                                    val (dotPos, item) = closest
-                                    val dx = dotPos.x - tapOffset.x
-                                    val dy = dotPos.y - tapOffset.y
-                                    val dist = kotlin.math.sqrt(dx * dx + dy * dy)
-                                    if (dist <= maxDistPx) {
-                                        selectedItem = if (selectedItem == item) null else item
-                                    }
-                                }
-                            }
-                        }
+                        .weight(1f)
+                        .padding(horizontal = 8.dp)
                 ) {
                     val canvasWidth = size.width
                     val canvasHeight = size.height
 
-                    // Draw X-axis (bottom)
+                    // Draw X-axis
                     drawLine(
                         color = Color.LightGray,
                         start = Offset(0f, canvasHeight),
                         end = Offset(canvasWidth, canvasHeight),
-                        strokeWidth = 1.dp.toPx()
+                        strokeWidth = 2.dp.toPx()
                     )
 
-                    // Draw Y-axis (left)
+                    // Draw Y-axis
                     drawLine(
                         color = Color.LightGray,
                         start = Offset(0f, 0f),
                         end = Offset(0f, canvasHeight),
-                        strokeWidth = 1.dp.toPx()
+                        strokeWidth = 2.dp.toPx()
                     )
 
                     val itemCount = sortedItems.size
-                    val newPositions = mutableListOf<Pair<Offset, ClothingItem>>()
-
+                    // We flip the mapping:
+                    // Y-axis represents total times worn (0 at bottom, maxWears at top)
+                    // X-axis represents the individual clothing items sequentially
                     sortedItems.forEachIndexed { index, item ->
                         val xPos = if (itemCount > 1) {
                             (index.toFloat() / (itemCount - 1).toFloat()) * canvasWidth
                         } else {
                             canvasWidth / 2f
                         }
-                        
+                        // Inverse mapping for Y so 0 is at the bottom (canvasHeight)
                         val wearRatio = if (maxWears > 0) item.usageCount.toFloat() / maxWears.toFloat() else 0f
                         val yPos = canvasHeight - (wearRatio * canvasHeight)
-                        val pos = Offset(xPos, yPos)
-                        newPositions.add(pos to item)
-
-                        val itemColor = try {
-                            val cleanHex = if (item.colorHex.startsWith("#")) item.colorHex else "#${item.colorHex}"
-                            Color(android.graphics.Color.parseColor(cleanHex))
-                        } catch (e: Exception) {
-                            Color(0xFF2C3241)
-                        }
-
-                        val isSelected = selectedItem == item
-
-                        if (isSelected) {
-                            drawCircle(
-                                color = Color.Black,
-                                radius = 14f,
-                                center = pos,
-                                style = Stroke(width = 3f)
-                            )
-                        }
+                        
+                        val itemColor = try { Color(android.graphics.Color.parseColor(item.colorHex)) } catch (e: Exception) { Color(0xFF2C3241) }
 
                         drawCircle(
-                            color = itemColor.copy(alpha = if (isSelected) 1f else 0.8f),
-                            radius = if (isSelected) 10f else 7f,
-                            center = pos
+                            color = itemColor.copy(alpha = 0.7f),
+                            radius = 4.dp.toPx(),
+                            center = Offset(xPos, yPos)
                         )
                     }
-                    dotPositions = newPositions
                 }
-
+                
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 8.dp, vertical = 8.dp),
+                        .padding(horizontal = 8.dp)
+                        .padding(top = 8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(
-                        text = "Least worn",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Color.Gray
-                    )
-                    Text(
-                        text = "Most worn items",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Color.Gray
-                    )
-                }
-
-                // 🔍 Selected Dot Tooltip Card
-                AnimatedVisibility(visible = selectedItem != null) {
-                    selectedItem?.let { item ->
-                        Surface(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 12.dp)
-                                .clickable { navTo(KoColorRoute.WardrobeDetail(item.internalId)) },
-                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
-                            shape = RoundedCornerShape(16.dp)
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Surface(
-                                    shape = RoundedCornerShape(12.dp),
-                                    modifier = Modifier.size(44.dp),
-                                    color = Color.White
-                                ) {
-                                    if (!item.imageUrl.isNullOrBlank()) {
-                                        AsyncImage(
-                                            model = item.imageUrl,
-                                            contentDescription = item.name,
-                                            modifier = Modifier.fillMaxSize(),
-                                            contentScale = ContentScale.Crop
-                                        )
-                                    } else {
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxSize()
-                                                .background(try { Color(android.graphics.Color.parseColor(if (item.colorHex.startsWith("#")) item.colorHex else "#${item.colorHex}")) } catch (e: Exception) { Color.Gray }),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Default.Checkroom,
-                                                contentDescription = null,
-                                                tint = Color.White.copy(alpha = 0.8f),
-                                                modifier = Modifier.size(20.dp)
-                                            )
-                                        }
-                                    }
-                                }
-
-                                Spacer(modifier = Modifier.width(16.dp))
-
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = item.name,
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                    Text(
-                                        text = "${item.category.name} • ${item.usageCount} wears",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = Color.Gray
-                                    )
-                                }
-
-                                Text(
-                                    text = "Details →",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                            }
-                        }
-                    }
+                    Text(text = "Least worn", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+                    Text(text = "Most worn items", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
                 }
             }
         }
@@ -891,9 +566,9 @@ private fun VersatilitySection(
 }
 
 @Composable
-private fun CoverageSection(insights: List<WardrobeInsight>) {
+private fun CoverageSection(coverage: WardrobeCoverage, insights: List<WardrobeInsight>) {
     Column {
-        EditorialHeader("WARDROBE OPPORTUNITIES")
+        EditorialHeader("What Your Wardrobe Is Missing")
         insights.forEach { insight ->
             Row(
                 modifier = Modifier
@@ -928,8 +603,20 @@ private fun WardrobeAnalyticsScreenLongPreview() {
         WardrobeAnalyticsScreen(
             uiState = WardrobeUiState(
                 items = listOf(
-                    ClothingItem(internalId = 1, name = "Universal Khaki Button-Down", category = ClothingCategory.TOPS, usageCount = 18, colorHex = "#B8A992"),
-                    ClothingItem(internalId = 2, name = "Camel Leather Boots", category = ClothingCategory.SHOES, usageCount = 14, colorHex = "#BDA06A")
+                    ClothingItem(
+                        internalId = 1,
+                        name = "Universal Khaki Button-Down",
+                        category = ClothingCategory.TOPS,
+                        usageCount = 18,
+                        colorHex = "#B8A992"
+                    ),
+                    ClothingItem(
+                        internalId = 2,
+                        name = "Camel Leather Boots",
+                        category = ClothingCategory.SHOES,
+                        usageCount = 14,
+                        colorHex = "#BDA06A"
+                    )
                 )
             )
         )
@@ -943,8 +630,20 @@ private fun WardrobeAnalyticsScreenPreview() {
         WardrobeAnalyticsScreen(
             uiState = WardrobeUiState(
                 items = listOf(
-                    ClothingItem(internalId = 1, name = "Universal Khaki Button-Down", category = ClothingCategory.TOPS, usageCount = 18, colorHex = "#B8A992"),
-                    ClothingItem(internalId = 2, name = "Camel Leather Boots", category = ClothingCategory.SHOES, usageCount = 14, colorHex = "#BDA06A")
+                    ClothingItem(
+                        internalId = 1,
+                        name = "Universal Khaki Button-Down",
+                        category = ClothingCategory.TOPS,
+                        usageCount = 18,
+                        colorHex = "#B8A992"
+                    ),
+                    ClothingItem(
+                        internalId = 2,
+                        name = "Camel Leather Boots",
+                        category = ClothingCategory.SHOES,
+                        usageCount = 14,
+                        colorHex = "#BDA06A"
+                    )
                 )
             )
         )

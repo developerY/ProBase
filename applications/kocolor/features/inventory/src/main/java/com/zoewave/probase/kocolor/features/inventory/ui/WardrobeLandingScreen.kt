@@ -141,10 +141,11 @@ fun WardrobeLandingScreen(
                     totalValue = uiState.totalInvestment,
                     glowScore = uiState.glowScore?.toFloat(),
                     diversityLabel = uiState.diversityIndex,
-                    onViewIntelligenceClicked = { navTo(KoColorRoute.WardrobeAnalytics) },
+                    onViewIntelligenceClicked = { navTo(KoColorRoute.StyleIntelligence) },
                     onViewInventoryClicked = { navTo(KoColorRoute.Wardrobe) },
                     onViewFootprintClicked = { navTo(KoColorRoute.StrategicDiversity) },
-                    onViewBehaviorClicked = { navTo(KoColorRoute.UsageDistribution) }
+                    onViewBehaviorClicked = { navTo(KoColorRoute.UsageDistribution) },
+                    onViewAnalyticsClicked = { navTo(KoColorRoute.WardrobeAnalytics) }
                 )
             }
 

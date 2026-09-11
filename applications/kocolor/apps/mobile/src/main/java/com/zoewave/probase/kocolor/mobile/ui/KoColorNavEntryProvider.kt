@@ -56,6 +56,7 @@ import com.zoewave.probase.kocolor.features.inventory.ui.StrategicDiversityScree
 import com.zoewave.probase.kocolor.features.inventory.ui.StyleIntelligenceScreen
 import com.zoewave.probase.kocolor.features.inventory.ui.UsageDistributionScreen
 import com.zoewave.probase.kocolor.features.inventory.ui.UsageMetricsScreen
+import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeAnalyticsScreen
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeCategoryCoverScreen
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeCategoryCoverUiState
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeDetailScreen
@@ -393,6 +394,14 @@ fun koColorNavEntryProvider(
             )
         }
         is KoColorRoute.WardrobeAnalytics -> NavEntry(route) {
+            val viewModel: WardrobeViewModel = hiltViewModel()
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+            WardrobeAnalyticsScreen(
+                uiState = state,
+                navTo = onNavigateTo
+            )
+        }
+        is KoColorRoute.StyleIntelligence -> NavEntry(route) {
             val viewModel: WardrobeViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()
             StyleIntelligenceScreen(

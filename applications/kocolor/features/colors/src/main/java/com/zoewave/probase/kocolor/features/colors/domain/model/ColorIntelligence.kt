@@ -14,7 +14,9 @@ data class ColorSignature(
     val hex: String,
     val sourceId: Long,
     val sourceType: SourceType,
-    val name: String? = null
+    val name: String? = null,
+    val imageUrl: String? = null,
+    val categoryName: String? = null
 )
 
 enum class SourceType {
