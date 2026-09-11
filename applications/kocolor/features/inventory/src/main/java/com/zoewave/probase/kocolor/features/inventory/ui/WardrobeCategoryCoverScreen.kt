@@ -108,7 +108,7 @@ fun WardrobeCategoryCoverScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { navTo(KoColorRoute.WardrobeAnalytics) }) { Icon(Icons.Default.Insights, null) }
+                    IconButton(onClick = { navTo(KoColorRoute.WardrobeFootprint) }) { Icon(Icons.Default.Insights, null) }
                 }
             )
         },

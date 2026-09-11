@@ -39,15 +39,15 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.ui.layout.ContentScale
-import coil.compose.AsyncImage
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -59,15 +59,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
+import com.zoewave.probase.kocolor.features.inventory.domain.WardrobeAnalyticsEngine
 import com.zoewave.probase.kocolor.features.inventory.ui.components.ProInsightCard
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import kotlinx.coroutines.launch
@@ -77,7 +79,7 @@ import android.graphics.Color as AndroidColor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StyleIntelligenceScreen(
+fun WardrobeFootprintScreen(
     uiState: WardrobeUiState,
     modifier: Modifier = Modifier,
     navTo: (KoColorRoute) -> Unit
@@ -89,7 +91,7 @@ fun StyleIntelligenceScreen(
         else uiState.items.filter { it.category == selectedCategoryFilter }
     }
     
-    val engine = remember { com.zoewave.probase.kocolor.features.inventory.domain.WardrobeAnalyticsEngine() }
+    val engine = remember { WardrobeAnalyticsEngine() }
     val analytics = remember(uiState.items) { engine.computeAnalytics(uiState.items) }
 
     Scaffold(
@@ -133,7 +135,7 @@ fun StyleIntelligenceScreen(
                         letterSpacing = 1.5.sp,
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
-                    androidx.compose.material3.HorizontalDivider(
+                    HorizontalDivider(
                         modifier = Modifier.padding(bottom = 16.dp),
                         color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
                     )
@@ -438,15 +440,6 @@ fun StyleIntelligenceScreen(
                             value = currencyFormatter.format(uiState.totalInvestment),
                             modifier = Modifier.weight(1f)
                         )
-                        val avgCpw = uiState.items.mapNotNull { 
-                            if (it.usageCount > 0 && it.price != null) it.price!! / it.usageCount else null 
-                        }.let { if (it.isEmpty()) null else it.average() }
-                        
-                        AnalysisSmallCard(
-                            label = "AVG CPW",
-                            value = avgCpw?.let { currencyFormatter.format(it) } ?: "N/A",
-                            modifier = Modifier.weight(1f)
-                        )
                     }
                 }
             }
@@ -514,116 +507,40 @@ fun StyleIntelligenceScreen(
                 }
             }
 
-            // 3. Style Efficiency List (Collapsible)
+            // 4. Wardrobe Opportunities
             item {
-                var isCpwExpanded by remember { mutableStateOf(false) }
-                val rotationState by animateFloatAsState(
-                    targetValue = if (isCpwExpanded) 180f else 0f,
-                    label = "CpwChevronRotation"
-                )
-
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { isCpwExpanded = !isCpwExpanded }
-                            .padding(vertical = 8.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "STYLE EFFICIENCY (CPW)",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = Color.Gray,
-                            letterSpacing = 1.sp
-                        )
-                        Icon(
-                            imageVector = Icons.Default.KeyboardArrowDown,
-                            contentDescription = if (isCpwExpanded) "Collapse CPW" else "Expand CPW",
-                            modifier = Modifier.rotate(rotationState),
-                            tint = Color.Gray
-                        )
-                    }
-
-                    AnimatedVisibility(visible = isCpwExpanded) {
-                        Column(
+                Column {
+                    Text(
+                        text = "WARDROBE OPPORTUNITIES",
+                        fontFamily = FontFamily.Serif,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.5.sp,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                    HorizontalDivider(modifier = Modifier.padding(bottom = 16.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                    
+                    analytics.insights.forEach { insight ->
+                        Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(top = 12.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                                .padding(vertical = 6.dp),
+                            verticalAlignment = Alignment.Top
                         ) {
-                            val efficiencySorted = uiState.items.sortedBy { 
-                                it.price?.div(it.usageCount.takeIf { count -> count > 0 } ?: 1) ?: Double.MAX_VALUE 
-                            }
-
-                            if (efficiencySorted.isEmpty()) {
-                                Text(
-                                    text = "No cost per wear data available.",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = Color.Gray
-                                )
-                            } else {
-                                efficiencySorted.forEach { item ->
-                                    CPWItemCard(item = item)
-                                }
-                            }
+                            Text(
+                                text = "+ ",
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary,
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                            Text(
+                                text = insight.message,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
                         }
                     }
                 }
-            }
-        }
-    }
-}
-
-@Composable
-private fun CPWItemCard(item: ClothingItem) {
-    val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale.US) }
-    val cpw = if (item.usageCount > 0 && item.price != null) {
-        item.price!! / item.usageCount
-    } else null
-
-    Card(
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .padding(20.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = item.name.uppercase(),
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black
-                )
-                Text(
-                    text = "INVESTMENT: ${currencyFormatter.format(item.price ?: 0.0)}",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = Color.Gray
-                )
-            }
-
-            Column(horizontalAlignment = Alignment.End) {
-                Text(
-                    text = cpw?.let { currencyFormatter.format(it) } ?: "NOT DEPLOYED",
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        fontFamily = FontFamily.Serif,
-                        fontWeight = FontWeight.Bold
-                    ),
-                    color = if (cpw != null) Color(0xFF1B5E20) else Color.Gray
-                )
-                Text(
-                    text = "CPW",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = Color.Gray,
-                    textAlign = TextAlign.End
-                )
             }
         }
     }
@@ -664,9 +581,9 @@ private fun AnalysisSmallCard(
 
 @Preview
 @Composable
-fun StyleIntelligenceScreenPreview() {
+fun WardrobeFootprintScreenPreview() {
     MaterialTheme {
-        StyleIntelligenceScreen(
+        WardrobeFootprintScreen(
             uiState = WardrobeUiState(
                 totalInvestment = 1200.0,
                 items = listOf(
