@@ -86,6 +86,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.kocolor.features.colors.domain.model.ColorSignature
 import com.zoewave.probase.kocolor.features.colors.domain.model.SourceType
 import com.zoewave.probase.kocolor.features.colors.util.ColorScienceUtils
@@ -191,9 +192,7 @@ fun ColorHubScreen(
 
                         Spacer(Modifier.height(16.dp))
 
-                        // Cosmetic Category Filter Chips Row
-                        val categories = listOf("Eyes", "Cheeks", "Lips", "Nails")
-
+                        // Cosmetic Category Filter Chips Row matching MacroCategory.entries
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -214,13 +213,13 @@ fun ColorHubScreen(
                                 )
                             )
 
-                            categories.forEach { cat ->
+                            MacroCategory.entries.forEach { macro ->
                                 FilterChip(
-                                    selected = selectedCategoryFilter.equals(cat, ignoreCase = true),
+                                    selected = selectedCategoryFilter.equals(macro.displayName, ignoreCase = true),
                                     onClick = {
-                                        selectedCategoryFilter = if (selectedCategoryFilter.equals(cat, ignoreCase = true)) null else cat
+                                        selectedCategoryFilter = if (selectedCategoryFilter.equals(macro.displayName, ignoreCase = true)) null else macro.displayName
                                     },
-                                    label = { Text(cat, fontWeight = FontWeight.Bold) },
+                                    label = { Text(macro.displayName, fontWeight = FontWeight.Bold) },
                                     shape = RoundedCornerShape(50.dp),
                                     colors = FilterChipDefaults.filterChipColors(
                                         selectedContainerColor = Color.Black,
