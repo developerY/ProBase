@@ -229,9 +229,12 @@ private fun EditorialHeader(title: String) {
 
 @Composable
 private fun SnapshotSection(analytics: WardrobeAnalytics) {
+    val dynamicTotal = analytics.activeItems + analytics.rarelyWornItems + analytics.neverWornItems
+    val displayTotal = if (analytics.totalItems == dynamicTotal) analytics.totalItems else dynamicTotal
+
     Column {
         Text(
-            text = "${analytics.totalItems} PIECES",
+            text = "$displayTotal PIECES",
             fontSize = 42.sp,
             fontWeight = FontWeight.Light,
             fontFamily = FontFamily.Serif
