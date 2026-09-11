@@ -12,7 +12,18 @@ data class WardrobeAnalytics(
     val versatility: VersatilityAnalytics = VersatilityAnalytics(),
     val coverage: WardrobeCoverage = WardrobeCoverage(),
     val insights: List<WardrobeInsight> = emptyList(),
-    val wearHistory: List<WearEvent> = emptyList()
+    val wearHistory: List<WearEvent> = emptyList(),
+    val analyticsCoverage: AnalyticsCoverage = AnalyticsCoverage()
+)
+
+data class AnalyticsCoverage(
+    val inventoryCoverage: Float = 1.0f,
+    val wearHistoryCoverage: Float = 0.85f,
+    val financialCoverage: Float = 0.65f,
+    val colorDataCoverage: Float = 0.95f,
+    val totalWearRecords: Int = 217,
+    val periodStart: Long = System.currentTimeMillis() - (86400000L * 90),
+    val periodEnd: Long = System.currentTimeMillis()
 )
 
 data class WardrobeDna(

@@ -62,6 +62,21 @@ class WardrobeAnalyticsEngine @Inject constructor() {
             )
         }.sortedBy { it.timestamp }
 
+        val totalWears = items.sumOf { it.usageCount }
+        val itemsWithPrice = items.count { it.price != null }
+        val itemsWithColor = items.count { it.colorHex.isNotBlank() }
+        val earliestWear = wearEvents.minOfOrNull { it.timestamp } ?: (System.currentTimeMillis() - 86400000L * 90)
+
+        val analyticsCoverage = AnalyticsCoverage(
+            inventoryCoverage = 1.0f,
+            wearHistoryCoverage = if (totalCount > 0) activeCount.toFloat() / totalCount else 0f,
+            financialCoverage = if (totalCount > 0) itemsWithPrice.toFloat() / totalCount else 0f,
+            colorDataCoverage = if (totalCount > 0) itemsWithColor.toFloat() / totalCount else 0f,
+            totalWearRecords = totalWears,
+            periodStart = earliestWear,
+            periodEnd = System.currentTimeMillis()
+        )
+
         return WardrobeAnalytics(
             totalItems = totalCount,
             activeItems = activeCount.coerceAtLeast((totalCount * 0.70f).toInt()),
@@ -114,7 +129,8 @@ class WardrobeAnalyticsEngine @Inject constructor() {
                 brightAccents = 0.30f,
                 deepColors = 0.65f
             ),
-            insights = insights
+            insights = insights,
+            analyticsCoverage = analyticsCoverage
         )
     }
 }
