@@ -1,8 +1,10 @@
 package com.zoewave.probase.kocolor.features.inventory.ui
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,6 +24,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Checkroom
 import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -34,15 +37,22 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import coil.compose.AsyncImage
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoewave.probase.core.model.ritual.ClothingCategory
@@ -111,7 +121,7 @@ fun WardrobeAnalyticsScreen(
             item { CollectionSection(analytics) }
 
             // 05 Wear Distribution Chart
-            item { WearDistributionChartSection(uiState.items) }
+            item { WearDistributionChartSection(uiState.items, navTo) }
 
             // 05 Color History
             item { ColorHistorySection(analytics.wearHistory) }
@@ -481,19 +491,23 @@ fun ColorHistorySection(wearEvents: List<WearEvent>) {
 }
 
 @Composable
-private fun WearDistributionChartSection(items: List<ClothingItem>) {
+private fun WearDistributionChartSection(
+    items: List<ClothingItem>,
+    navTo: (KoColorRoute) -> Unit = {}
+) {
+    var selectedItem by remember { mutableStateOf<ClothingItem?>(null) }
+
     Column {
         EditorialHeader("Wear Distribution")
         Text(
-            text = "Each dot represents a single item in your wardrobe. The vertical axis indicates total times worn.",
+            text = "Each dot represents a single item in your wardrobe. Tap any dot to inspect item details.",
             color = Color.Gray,
             style = MaterialTheme.typography.bodyMedium
         )
         Spacer(modifier = Modifier.height(24.dp))
 
         val maxWears = items.maxOfOrNull { it.usageCount }?.coerceAtLeast(1) ?: 1
-        // Sort items by usage count ascending (least worn on the left, most worn on the right)
-        val sortedItems = items.sortedBy { it.usageCount }
+        val sortedItems = remember(items) { items.sortedBy { it.usageCount } }
 
         if (sortedItems.isEmpty()) {
             Text(
@@ -505,67 +519,184 @@ private fun WearDistributionChartSection(items: List<ClothingItem>) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(260.dp)
                     .background(Color.White)
             ) {
+                var dotPositions by remember { mutableStateOf<List<Pair<Offset, ClothingItem>>>(emptyList()) }
+
                 Canvas(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f)
-                        .padding(horizontal = 8.dp)
+                        .height(220.dp)
+                        .padding(horizontal = 8.dp, vertical = 8.dp)
+                        .pointerInput(sortedItems) {
+                            detectTapGestures { tapOffset ->
+                                val maxDistPx = 32.dp.toPx()
+                                val closest = dotPositions.minByOrNull { (dotPos, _) ->
+                                    val dx = dotPos.x - tapOffset.x
+                                    val dy = dotPos.y - tapOffset.y
+                                    kotlin.math.sqrt(dx * dx + dy * dy)
+                                }
+                                if (closest != null) {
+                                    val (dotPos, item) = closest
+                                    val dx = dotPos.x - tapOffset.x
+                                    val dy = dotPos.y - tapOffset.y
+                                    val dist = kotlin.math.sqrt(dx * dx + dy * dy)
+                                    if (dist <= maxDistPx) {
+                                        selectedItem = if (selectedItem == item) null else item
+                                    }
+                                }
+                            }
+                        }
                 ) {
                     val canvasWidth = size.width
                     val canvasHeight = size.height
 
-                    // Draw X-axis
+                    // Draw X-axis (bottom)
                     drawLine(
                         color = Color.LightGray,
                         start = Offset(0f, canvasHeight),
                         end = Offset(canvasWidth, canvasHeight),
-                        strokeWidth = 2.dp.toPx()
+                        strokeWidth = 1.dp.toPx()
                     )
 
-                    // Draw Y-axis
+                    // Draw Y-axis (left)
                     drawLine(
                         color = Color.LightGray,
                         start = Offset(0f, 0f),
                         end = Offset(0f, canvasHeight),
-                        strokeWidth = 2.dp.toPx()
+                        strokeWidth = 1.dp.toPx()
                     )
 
                     val itemCount = sortedItems.size
-                    // We flip the mapping:
-                    // Y-axis represents total times worn (0 at bottom, maxWears at top)
-                    // X-axis represents the individual clothing items sequentially
+                    val newPositions = mutableListOf<Pair<Offset, ClothingItem>>()
+
                     sortedItems.forEachIndexed { index, item ->
                         val xPos = if (itemCount > 1) {
                             (index.toFloat() / (itemCount - 1).toFloat()) * canvasWidth
                         } else {
                             canvasWidth / 2f
                         }
-                        // Inverse mapping for Y so 0 is at the bottom (canvasHeight)
+                        
                         val wearRatio = if (maxWears > 0) item.usageCount.toFloat() / maxWears.toFloat() else 0f
                         val yPos = canvasHeight - (wearRatio * canvasHeight)
+                        val pos = Offset(xPos, yPos)
+                        newPositions.add(pos to item)
 
-                        val itemColor = try { Color(android.graphics.Color.parseColor(item.colorHex)) } catch (e: Exception) { Color(0xFF2C3241) }
+                        val itemColor = try {
+                            val cleanHex = if (item.colorHex.startsWith("#")) item.colorHex else "#${item.colorHex}"
+                            Color(android.graphics.Color.parseColor(cleanHex))
+                        } catch (e: Exception) {
+                            Color(0xFF2C3241)
+                        }
+
+                        val isSelected = selectedItem == item
+
+                        if (isSelected) {
+                            drawCircle(
+                                color = Color.Black,
+                                radius = 14f,
+                                center = pos,
+                                style = Stroke(width = 3f)
+                            )
+                        }
 
                         drawCircle(
-                            color = itemColor.copy(alpha = 0.7f),
-                            radius = 4.dp.toPx(),
-                            center = Offset(xPos, yPos)
+                            color = itemColor.copy(alpha = if (isSelected) 1f else 0.8f),
+                            radius = if (isSelected) 10f else 7f,
+                            center = pos
                         )
                     }
+                    dotPositions = newPositions
                 }
 
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 8.dp)
-                        .padding(top = 8.dp),
+                        .padding(horizontal = 8.dp, vertical = 8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(text = "Least worn", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
-                    Text(text = "Most worn items", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+                    Text(
+                        text = "Least worn",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.Gray
+                    )
+                    Text(
+                        text = "Most worn items",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.Gray
+                    )
+                }
+
+                // 🔍 Selected Dot Tooltip Card
+                AnimatedVisibility(visible = selectedItem != null) {
+                    selectedItem?.let { item ->
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 12.dp)
+                                .clickable { navTo(KoColorRoute.WardrobeDetail(item.internalId)) },
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                            shape = RoundedCornerShape(16.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Surface(
+                                    shape = RoundedCornerShape(12.dp),
+                                    modifier = Modifier.size(44.dp),
+                                    color = Color.White
+                                ) {
+                                    if (!item.imageUrl.isNullOrBlank()) {
+                                        AsyncImage(
+                                            model = item.imageUrl,
+                                            contentDescription = item.name,
+                                            modifier = Modifier.fillMaxSize(),
+                                            contentScale = ContentScale.Crop
+                                        )
+                                    } else {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                                .background(try { Color(android.graphics.Color.parseColor(if (item.colorHex.startsWith("#")) item.colorHex else "#${item.colorHex}")) } catch (e: Exception) { Color.Gray }),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Checkroom,
+                                                contentDescription = null,
+                                                tint = Color.White.copy(alpha = 0.8f),
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                        }
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.width(16.dp))
+
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = item.name,
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Text(
+                                        text = "${item.category.name} • ${item.usageCount} wears",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = Color.Gray
+                                    )
+                                }
+
+                                Text(
+                                    text = "Details →",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
