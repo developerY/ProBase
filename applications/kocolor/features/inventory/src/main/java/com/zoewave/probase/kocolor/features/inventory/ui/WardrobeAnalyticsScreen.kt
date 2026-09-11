@@ -109,6 +109,9 @@ fun WardrobeAnalyticsScreen(
                 .padding(horizontal = 24.dp),
             verticalArrangement = Arrangement.spacedBy(32.dp)
         ) {
+            // 00 Analytics Coverage & Observation Period
+            item { CoverageQualitySection(analytics.analyticsCoverage) }
+
             // 01 Snapshot
             item { SnapshotSection(analytics) }
 
@@ -138,6 +141,74 @@ fun WardrobeAnalyticsScreen(
 
             item { Spacer(modifier = Modifier.height(40.dp)) }
         }
+    }
+}
+
+@Composable
+private fun CoverageQualitySection(coverage: com.zoewave.probase.kocolor.features.inventory.domain.AnalyticsCoverage) {
+    val dateFormat = remember { java.text.SimpleDateFormat("MMM yyyy", java.util.Locale.getDefault()) }
+    val startStr = dateFormat.format(java.util.Date(coverage.periodStart))
+    val endStr = dateFormat.format(java.util.Date(coverage.periodEnd))
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f), RoundedCornerShape(16.dp))
+            .padding(16.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "DATA COVERAGE & QUALITY",
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Bold,
+                color = Color.Gray,
+                letterSpacing = 1.sp
+            )
+            Icon(Icons.Outlined.AutoAwesome, contentDescription = null, tint = Color(0xFF10B981), modifier = Modifier.size(16.dp))
+        }
+        
+        Spacer(modifier = Modifier.height(12.dp))
+        
+        Text(
+            text = "${coverage.totalWearRecords} wear records analyzed",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Text(
+            text = "Observation Period: $startStr – $endStr",
+            style = MaterialTheme.typography.bodySmall,
+            color = Color.Gray
+        )
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            CoverageMetric("Inventory", coverage.inventoryCoverage)
+            CoverageMetric("Color Data", coverage.colorDataCoverage)
+            CoverageMetric("Wear History", coverage.wearHistoryCoverage)
+        }
+    }
+}
+
+@Composable
+private fun CoverageMetric(label: String, percentage: Float) {
+    Column {
+        Text(
+            text = "${(percentage * 100).toInt()}%",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = Color.Gray
+        )
     }
 }
 

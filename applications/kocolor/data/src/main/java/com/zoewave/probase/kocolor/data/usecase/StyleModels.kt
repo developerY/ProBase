@@ -79,6 +79,10 @@ data class StyleRequestContext(
     val rotationScores: Map<String, Double> = emptyMap(),
     val fashionProfile: String? = null,
     val lockedConstraints: List<UserConstraint> = emptyList(),
+    // Wardrobe Intelligence Context
+    val wardrobeDna: String? = null,
+    val rotationHealth: Int? = null,
+    val wardrobeVersatility: Int? = null,
     @Transient val localImageBitmap: Bitmap? = null
 )
 
@@ -136,7 +140,12 @@ data class StyleContextSummary(
     val appearanceContrast: String = "Balanced",
     val temperatureC: Float? = 22.0f,
     val uvIndex: Float? = 3.0f,
-    val circadianContext: String = "Defense & Protection"
+    val circadianContext: String = "Defense & Protection",
+    
+    // Explicit Analytics -> Recommendation Engine Data Flow
+    val wardrobeDna: String? = null, 
+    val rotationHealth: Int? = null,
+    val wardrobeVersatility: Int? = null
 )
 
 data class AnchorDecision(

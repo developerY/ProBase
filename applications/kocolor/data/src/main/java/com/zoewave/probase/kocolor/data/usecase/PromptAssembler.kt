@@ -73,6 +73,11 @@ class PromptAssembler @Inject constructor() {
             USER INTENT: ${context.intent}
             OCCASION: ${context.occasion}
             
+            WARDROBE INTELLIGENCE:
+            - Wardrobe DNA: ${context.wardrobeDna ?: "Balanced"}
+            - Rotation Health Score: ${context.rotationHealth ?: 100}/100
+            - Anchor Versatility Target: ${context.wardrobeVersatility ?: 0} compatible looks
+            
             AVAILABLE CANDIDATES (COMPACT MANIFEST):
             $compactManifest
             
