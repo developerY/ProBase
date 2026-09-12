@@ -39,6 +39,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zoewave.probase.kocolor.features.inventory.domain.WardrobeAnalytics
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -49,7 +50,7 @@ import java.util.Locale
  */
 @Composable
 fun CuratedClosetDashboard(
-    totalPieces: Int,
+    analytics: WardrobeAnalytics,
     totalValue: Double,
     glowScore: Float?,
     diversityLabel: String,
@@ -60,6 +61,7 @@ fun CuratedClosetDashboard(
     onViewAnalyticsClicked: () -> Unit = onViewIntelligenceClicked,
     modifier: Modifier = Modifier
 ) {
+    val totalPieces = analytics.totalItems
     val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale.US) }
     
     Column(
@@ -404,8 +406,31 @@ fun ToneRow(color: Color, name: String, percent: String, items: String) {
 @Composable
 fun CuratedClosetDashboardPreview() {
     MaterialTheme {
+        val dummyAnalytics = WardrobeAnalytics(
+            totalItems = 54,
+            activeItems = 37,
+            rarelyWornItems = 14,
+            neverWornItems = 3,
+            wearHistory = emptyList(),
+            dna = com.zoewave.probase.kocolor.features.inventory.domain.WardrobeDna("Neutral-led", "Warm-biased", "Medium depth", "Balanced contrast", "Low-to-medium chroma"),
+            colorDistribution = com.zoewave.probase.kocolor.features.inventory.domain.ColorDistribution(
+                42, 31, 27, listOf(
+                    com.zoewave.probase.kocolor.features.inventory.domain.ColorStat("Sand Linen", "#D4C4B7", 19, 0.35f),
+                    com.zoewave.probase.kocolor.features.inventory.domain.ColorStat("Noir Espresso", "#2C2A29", 14, 0.25f),
+                    com.zoewave.probase.kocolor.features.inventory.domain.ColorStat("Olive Sage", "#7A8B76", 10, 0.18f),
+                    com.zoewave.probase.kocolor.features.inventory.domain.ColorStat("Warm Ochre", "#C18C5D", 6, 0.12f),
+                    com.zoewave.probase.kocolor.features.inventory.domain.ColorStat("Rose Accents", "#C28F90", 5, 0.10f)
+                )
+            ),
+            categoryDistribution = com.zoewave.probase.kocolor.features.inventory.domain.CategoryDistribution(16, 9, 8, 7, 6, 8),
+            rotation = com.zoewave.probase.kocolor.features.inventory.domain.RotationAnalytics(18, 29, 7, 61, emptyList(), emptyList()),
+            versatility = com.zoewave.probase.kocolor.features.inventory.domain.VersatilityAnalytics(312, com.zoewave.probase.kocolor.features.inventory.domain.VersatileGarment("w_41", "Universal Khaki Button-Down", 18, 8, 5, 3)),
+            coverage = com.zoewave.probase.kocolor.features.inventory.domain.WardrobeCoverage(0.85f, 0.50f, 0.30f, 0.65f),
+            insights = emptyList(),
+            analyticsCoverage = com.zoewave.probase.kocolor.features.inventory.domain.AnalyticsCoverage(1.0f, 0.85f, 0.65f, 0.95f, 217, System.currentTimeMillis() - (86400000L * 90), System.currentTimeMillis())
+        )
         CuratedClosetDashboard(
-            totalPieces = 54,
+            analytics = dummyAnalytics,
             totalValue = 6210.0,
             glowScore = 0.94f,
             diversityLabel = "Eclectic",
@@ -421,8 +446,25 @@ fun CuratedClosetDashboardPreview() {
 @Composable
 fun CuratedClosetDashboardColdStartPreview() {
     MaterialTheme {
+        val dummyAnalytics = WardrobeAnalytics(
+            totalItems = 3,
+            activeItems = 1,
+            rarelyWornItems = 2,
+            neverWornItems = 0,
+            wearHistory = emptyList(),
+            dna = com.zoewave.probase.kocolor.features.inventory.domain.WardrobeDna("Initializing", "-", "-", "-", "-"),
+            colorDistribution = com.zoewave.probase.kocolor.features.inventory.domain.ColorDistribution(
+                0, 0, 0, emptyList()
+            ),
+            categoryDistribution = com.zoewave.probase.kocolor.features.inventory.domain.CategoryDistribution(0, 0, 0, 0, 0, 0),
+            rotation = com.zoewave.probase.kocolor.features.inventory.domain.RotationAnalytics(0, 0, 0, 0, emptyList(), emptyList()),
+            versatility = com.zoewave.probase.kocolor.features.inventory.domain.VersatilityAnalytics(0, com.zoewave.probase.kocolor.features.inventory.domain.VersatileGarment("w_1", "Initial Item", 0, 0, 0, 0)),
+            coverage = com.zoewave.probase.kocolor.features.inventory.domain.WardrobeCoverage(0f, 0f, 0f, 0f),
+            insights = emptyList(),
+            analyticsCoverage = com.zoewave.probase.kocolor.features.inventory.domain.AnalyticsCoverage(1.0f, 0f, 0f, 0f, 0, System.currentTimeMillis(), System.currentTimeMillis())
+        )
         CuratedClosetDashboard(
-            totalPieces = 3,
+            analytics = dummyAnalytics,
             totalValue = 450.0,
             glowScore = null,
             diversityLabel = "Initializing",

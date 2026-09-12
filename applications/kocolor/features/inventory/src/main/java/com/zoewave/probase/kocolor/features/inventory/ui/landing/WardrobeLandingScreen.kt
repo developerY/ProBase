@@ -149,8 +149,11 @@ fun WardrobeLandingScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {
+                val engine = remember { com.zoewave.probase.kocolor.features.inventory.domain.WardrobeAnalyticsEngine() }
+                val analytics = remember(uiState.items) { engine.computeAnalytics(uiState.items) }
+
                 CuratedClosetDashboard(
-                    totalPieces = uiState.totalItems,
+                    analytics = analytics,
                     totalValue = uiState.totalInvestment,
                     glowScore = uiState.glowScore?.toFloat(),
                     diversityLabel = uiState.diversityIndex,
