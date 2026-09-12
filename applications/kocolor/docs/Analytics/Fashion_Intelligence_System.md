@@ -90,3 +90,35 @@ To avoid looking like a generic corporate spreadsheet, KoColor abandons standard
 ### The Dynamic Chromatic Core
 *   **What it is:** A horizontally scrolling, single-band spectrum of the user's entire inventory.
 *   **How it works:** Tapping a color segment smoothly expands it using a spring animation, immediately listing every garment or cosmetic product that matches that specific shade.
+
+
+Structure
+com/zoewave/probase/kocolor/features/inventory/ui/
+│
+├── landing/
+│   ├── WardrobeLandingScreen.kt
+│   └── CuratedClosetDashboard.kt
+│
+├── analytics/
+│   ├── WardrobeFootprintScreen.kt
+│   ├── WardrobeBehaviorScreen.kt
+│   ├── StyleIntelligenceScreen.kt
+│   ├── WardrobeAnalyticsScreen.kt
+│   ├── StrategicDiversityScreen.kt
+│   ├── UsageDistributionScreen.kt
+│   └── UsageMetricsScreen.kt
+│
+├── management/
+│   ├── WardrobeScreen.kt
+│   ├── WardrobeDetailScreen.kt
+│   ├── WardrobeEditScreen.kt
+│   ├── WardrobeCategoryCoverScreen.kt
+│   └── ColorVerificationScreen.kt
+│
+├── components/
+│   └── [UI Component files...]
+│
+├── util/
+│   └── [Utility files...]
+│
+└── WardrobeViewModel.kt
