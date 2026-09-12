@@ -1,4 +1,4 @@
-package com.zoewave.probase.kocolor.features.inventory.ui
+package com.zoewave.probase.kocolor.features.inventory.ui.analytics
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
@@ -68,6 +68,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
+import com.zoewave.probase.kocolor.features.inventory.ui.CategoryMetadata
+import com.zoewave.probase.kocolor.features.inventory.ui.PortfolioCategoryRow
+import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeUiState
 import com.zoewave.probase.kocolor.features.inventory.ui.components.ProInsightCard
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import kotlinx.coroutines.launch

@@ -1,4 +1,4 @@
-package com.zoewave.probase.kocolor.features.inventory.ui
+package com.zoewave.probase.kocolor.features.inventory.ui.archive
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Canvas
@@ -66,11 +66,12 @@ import com.zoewave.probase.kocolor.features.inventory.domain.WardrobeAnalyticsEn
 import com.zoewave.probase.kocolor.features.inventory.domain.WardrobeDna
 import com.zoewave.probase.kocolor.features.inventory.domain.WardrobeInsight
 import com.zoewave.probase.kocolor.features.inventory.domain.WearEvent
+import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeUiState
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun WardrobeAnalyticsScreen(
+fun LegacyWardrobeAnalyticsScreen(
     uiState: WardrobeUiState,
     modifier: Modifier = Modifier,
     navTo: (KoColorRoute) -> Unit = {}
@@ -512,7 +513,7 @@ private fun ItemFrequencyBar(name: String, wearCount: Int, maxWears: Int) {
 }
 
 @Composable
-fun ColorHistorySection(
+private fun ColorHistorySection(
     wearEvents: List<WearEvent>,
     navTo: (KoColorRoute) -> Unit = {}
 ) {
@@ -860,7 +861,7 @@ private fun WearDistributionChartSection(
                                                 imageVector = Icons.Default.Checkroom,
                                                 contentDescription = null,
                                                 tint = Color.White.copy(alpha = 0.8f),
-                                                modifier = Modifier.size(20.dp)
+                                                modifier = Modifier.size(22.dp)
                                             )
                                         }
                                     }
@@ -895,7 +896,6 @@ private fun WearDistributionChartSection(
         }
     }
 }
-
 
 @Composable
 private fun VersatilitySection(
@@ -997,9 +997,9 @@ private fun CoverageSection(insights: List<WardrobeInsight>) {
     heightDp = 2700    // Extend this to fit your entire scrollable list
 )
 @Composable
-private fun WardrobeAnalyticsScreenLongPreview() {
+private fun LegacyWardrobeAnalyticsScreenLongPreview() {
     MaterialTheme {
-        WardrobeAnalyticsScreen(
+        LegacyWardrobeAnalyticsScreen(
             uiState = WardrobeUiState(
                 items = listOf(
                     ClothingItem(internalId = 1, name = "Universal Khaki Button-Down", category = ClothingCategory.TOPS, usageCount = 18, colorHex = "#B8A992"),
@@ -1012,9 +1012,9 @@ private fun WardrobeAnalyticsScreenLongPreview() {
 
 @Preview(showBackground = true, name = "Wardrobe Analytics Editorial Preview")
 @Composable
-private fun WardrobeAnalyticsScreenPreview() {
+private fun LegacyWardrobeAnalyticsScreenPreview() {
     MaterialTheme {
-        WardrobeAnalyticsScreen(
+        LegacyWardrobeAnalyticsScreen(
             uiState = WardrobeUiState(
                 items = listOf(
                     ClothingItem(internalId = 1, name = "Universal Khaki Button-Down", category = ClothingCategory.TOPS, usageCount = 18, colorHex = "#B8A992"),

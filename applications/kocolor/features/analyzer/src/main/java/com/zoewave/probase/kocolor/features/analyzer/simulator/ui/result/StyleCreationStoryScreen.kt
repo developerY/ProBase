@@ -228,25 +228,16 @@ fun StyleCreationStoryContent(
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.SemiBold
             )
-            Spacer(modifier = Modifier.height(6.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                Text(
-                    text = "Temp: ${model.temperatureC ?: "--"}°C",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Gray
-                )
-                Text(
-                    text = "UV: ${model.uvIndex ?: "--"}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Gray
-                )
-                Text(
-                    text = model.circadianContext,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Gray
-                )
+            Spacer(modifier = Modifier.height(12.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                AtmospherePill("Temp", "${model.temperatureC ?: "--"}°C")
+                AtmospherePill("UV", "${model.uvIndex ?: "--"}")
+                AtmospherePill("Circadian", model.circadianContext.split(" ").firstOrNull() ?: "Defense")
             }
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = "${model.eligibleWardrobeCount} wardrobe items survived deterministic weather & climate gating.",
                 style = MaterialTheme.typography.bodySmall,
@@ -660,6 +651,15 @@ fun mapHexToSemanticName(hex: String): String {
         cleanHex.startsWith("2C2") || cleanHex.startsWith("1F2") || cleanHex.startsWith("000") || cleanHex.startsWith("11") -> "Charcoal"
         cleanHex.startsWith("DC1") || cleanHex.startsWith("FF0") || cleanHex.startsWith("C7") || cleanHex.startsWith("E6") -> "Terracotta"
         else -> "Harmonic"
+    }
+}
+
+@Composable
+private fun AtmospherePill(label: String, value: String) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(text = label, style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(text = value, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
     }
 }
 
