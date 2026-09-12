@@ -9,7 +9,19 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -23,7 +35,17 @@ import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -43,10 +65,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.zoewave.probase.kocolor.mobile.features.home.R
-import com.zoewave.probase.kocolor.mobile.features.home.ui.components.LuxuryBrandLogo
 import com.zoewave.probase.core.model.ritual.SavedAnalysis
 import com.zoewave.probase.core.ui.util.parseColor
+import com.zoewave.probase.kocolor.mobile.features.home.R
+import com.zoewave.probase.kocolor.mobile.features.home.ui.components.LuxuryBrandLogo
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import java.text.NumberFormat
 import java.util.Locale
@@ -132,18 +154,7 @@ fun CollectionHubScreen(
                 verticalArrangement = Arrangement.spacedBy(24.dp),
                 contentPadding = PaddingValues(top = 8.dp, bottom = 32.dp)
             ) {
-                // 1. DISCOVER COSMETICS
-                item {
-                    SyncHubButton(
-                        title = "Discover Cosmetics",
-                        subtitle = "Cosmetics & Beauty",
-                        backgroundColor = Color(0xFF2E1A2C), // Dark Plum
-                        shimmerProgress = shimmerProgress,
-                        onClick = { navTo(KoColorRoute.StarterPack(filter = "cosmetics")) }
-                    )
-                }
-
-                // 2. THE VANITY
+                // 1. THE VANITY (with incorporated Discover Cosmetics pill)
                 item {
                     ArchiveVerticalCard(
                         uiState = ArchiveVerticalUiState(
@@ -154,6 +165,10 @@ fun CollectionHubScreen(
                             value = uiState.totalVanityValue,
                             imageModel = R.drawable.vanity_white_background,
                             icon = Icons.Default.Face,
+                            discoverTitle = "DISCOVER",
+                            discoverSubtitle = "Cosmetics",
+                            discoverColor = Color(0xFF3D223B), // Dark Plum
+                            onDiscoverClick = { navTo(KoColorRoute.StarterPack(filter = "cosmetics")) },
                             breakdown = uiState.cosmeticsByGroup
                         ),
                         onEvent = { navTo(KoColorRoute.VanityLanding) },
@@ -161,18 +176,7 @@ fun CollectionHubScreen(
                     )
                 }
 
-                // 3. EXPLORE FASHION
-                item {
-                    SyncHubButton(
-                        title = "Explore Fashion",
-                        subtitle = "Apparel & Fashion",
-                        backgroundColor = Color(0xFF1A1C2E), // Deep Navy
-                        shimmerProgress = shimmerProgress,
-                        onClick = { navTo(KoColorRoute.StarterPack(filter = "clothing")) }
-                    )
-                }
-
-                // 4. THE WARDROBE
+                // 2. THE WARDROBE (with incorporated Explore Fashion pill)
                 item {
                     ArchiveVerticalCard(
                         uiState = ArchiveVerticalUiState(
@@ -183,6 +187,10 @@ fun CollectionHubScreen(
                             value = uiState.totalWardrobeValue,
                             imageModel = R.drawable.wardrobe_background,
                             icon = Icons.Default.Checkroom,
+                            discoverTitle = "EXPLORE",
+                            discoverSubtitle = "Fashion",
+                            discoverColor = Color(0xFF1B2238), // Deep Navy
+                            onDiscoverClick = { navTo(KoColorRoute.StarterPack(filter = "clothing")) },
                             breakdown = uiState.clothingByCategory
                         ),
                         onEvent = { navTo(KoColorRoute.WardrobeLanding) },
@@ -375,8 +383,71 @@ data class ArchiveVerticalUiState(
     val value: Double,
     val imageModel: Any,
     val icon: ImageVector,
+    val discoverTitle: String? = null,
+    val discoverSubtitle: String? = null,
+    val discoverColor: Color = Color(0xFF3D223B),
+    val onDiscoverClick: (() -> Unit)? = null,
     val breakdown: Map<String, Int> = emptyMap()
 )
+
+@Composable
+private fun DiscoverPillButton(
+    title: String,
+    subtitle: String,
+    backgroundColor: Color,
+    icon: ImageVector,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(24.dp),
+        color = backgroundColor,
+        shadowElevation = 2.dp
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Surface(
+                shape = CircleShape,
+                color = Color.White.copy(alpha = 0.2f),
+                modifier = Modifier.size(24.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(14.dp)
+                    )
+                }
+            }
+            Column {
+                Text(
+                    text = title.uppercase(),
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = Color.White,
+                    fontSize = 9.sp,
+                    letterSpacing = 0.8.sp
+                )
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.White.copy(alpha = 0.85f),
+                    fontSize = 9.sp
+                )
+            }
+            Icon(
+                imageVector = Icons.Default.AutoAwesome,
+                contentDescription = null,
+                tint = Color(0xFFFFD700),
+                modifier = Modifier.size(14.dp)
+            )
+        }
+    }
+}
 
 @Composable
 private fun ArchiveVerticalCard(
@@ -413,7 +484,7 @@ private fun ArchiveVerticalCard(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.Top
                 ) {
-                    Column {
+                    Column(modifier = Modifier.weight(1f, fill = false)) {
                         Text(
                             text = uiState.title,
                             style = MaterialTheme.typography.displaySmall.copy(fontSize = 32.sp),
@@ -427,13 +498,23 @@ private fun ArchiveVerticalCard(
                         )
                     }
 
-                    Surface(
-                        color = Color(0xFFF5F5F5),
-                        shape = CircleShape,
-                        modifier = Modifier.size(48.dp)
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(uiState.icon, null, modifier = Modifier.size(24.dp))
+                    if (uiState.discoverTitle != null && uiState.onDiscoverClick != null) {
+                        DiscoverPillButton(
+                            title = uiState.discoverTitle,
+                            subtitle = uiState.discoverSubtitle ?: "Cosmetics",
+                            backgroundColor = uiState.discoverColor,
+                            icon = uiState.icon,
+                            onClick = uiState.onDiscoverClick
+                        )
+                    } else {
+                        Surface(
+                            color = Color(0xFFF5F5F5),
+                            shape = CircleShape,
+                            modifier = Modifier.size(48.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(uiState.icon, null, modifier = Modifier.size(24.dp))
+                            }
                         }
                     }
                 }
@@ -477,6 +558,64 @@ private fun ArchiveVerticalCard(
                     )
                 }
             }
+        }
+    }
+}
+
+@androidx.compose.ui.tooling.preview.Preview(showBackground = true)
+@Composable
+private fun CollectionHubScreenPreview() {
+    MaterialTheme {
+        CollectionHubScreen(
+            uiState = HomeUiState(
+                totalCosmetics = 117,
+                totalClothing = 54,
+                totalVanityValue = 7577.00,
+                totalWardrobeValue = 6210.00,
+                cosmeticsByGroup = mapOf(
+                    "Complexion" to 58,
+                    "Eyes & Brows" to 20,
+                    "Nails" to 18
+                ),
+                clothingByCategory = mapOf(
+                    "Tops" to 16,
+                    "Bottoms" to 9,
+                    "Shoes" to 7
+                )
+            ),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
+@androidx.compose.ui.tooling.preview.Preview(showBackground = true, name = "Vanity Card with Discover Pill")
+@Composable
+private fun VanityCardPreview() {
+    MaterialTheme {
+        Box(modifier = Modifier.padding(16.dp)) {
+            ArchiveVerticalCard(
+                uiState = ArchiveVerticalUiState(
+                    title = "The Vanity",
+                    count = 117,
+                    countLabel = "items curated",
+                    valueLabel = "TOTAL VALUE",
+                    value = 7577.00,
+                    imageModel = R.drawable.vanity_white_background,
+                    icon = Icons.Default.Face,
+                    discoverTitle = "DISCOVER",
+                    discoverSubtitle = "Cosmetics",
+                    discoverColor = Color(0xFF3D223B),
+                    onDiscoverClick = {},
+                    breakdown = mapOf(
+                        "Complexion" to 58,
+                        "Eyes & Brows" to 20,
+                        "Nails" to 18
+                    )
+                ),
+                onEvent = {},
+                navTo = {}
+            )
         }
     }
 }
