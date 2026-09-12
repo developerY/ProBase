@@ -121,7 +121,7 @@ fun CuratedClosetDashboard(
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Text(
-                        text = "$diversityLabel Footprint · Neutral Spring",
+                        text = "$diversityLabel Footprint · ${analytics.dna.primaryIdentity}",
                         color = Color(0xFF6A1B9A),
                         style = MaterialTheme.typography.labelSmall,
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
