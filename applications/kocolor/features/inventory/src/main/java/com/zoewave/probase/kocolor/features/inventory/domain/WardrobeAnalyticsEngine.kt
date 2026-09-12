@@ -8,13 +8,54 @@ import javax.inject.Singleton
 class WardrobeAnalyticsEngine @Inject constructor() {
 
     fun computeAnalytics(items: List<ClothingItem>): WardrobeAnalytics {
-        val topColorsList = listOf(
-            ColorStat("Khaki", "#B8A992", 14, 0.35f),
-            ColorStat("Black", "#0F0F0F", 11, 0.28f),
-            ColorStat("Crimson", "#541624", 7, 0.18f),
-            ColorStat("Teal", "#0047AB", 5, 0.12f),
-            ColorStat("Ivory", "#EDD5B1", 4, 0.07f)
-        )
+        val totalCount = if (items.isNotEmpty()) items.size else 54
+
+
+        // 1. DYNAMIC COLOR CLUSTERING (Level 2: Dynamic Wardrobe Palette)
+        val validColors = items.filter { it.colorHex.isNotBlank() }
+        val topColorsList = if (validColors.isNotEmpty()) {
+            val colorGroups = validColors.groupBy {
+                val cleanHex = if (it.colorHex.startsWith("#")) it.colorHex else "#${it.colorHex}"
+                cleanHex.uppercase()
+            }.toList().sortedByDescending { it.second.size }
+            
+            val totalColors = validColors.size
+            val selectedClusters = if (totalColors < 10) colorGroups.take(3) else colorGroups.take(5)
+            
+            selectedClusters.map { (hex, group) ->
+                ColorStat(
+                    name = mapHexToSemanticName(hex), // Use controlled vocabulary
+                    hex = hex,
+                    count = group.size,
+                    percentage = group.size.toFloat() / totalColors.toFloat()
+                )
+            }
+        } else {
+            // Cold start mock (Level 1 Standard Coordinates fallback)
+            listOf(
+                ColorStat("Sand Linen", "#D4C4B7", 19, 0.35f),
+                ColorStat("Noir Espresso", "#2C2A29", 14, 0.25f),
+                ColorStat("Olive Sage", "#7A8B76", 10, 0.18f),
+                ColorStat("Warm Ochre", "#C18C5D", 6, 0.12f),
+                ColorStat("Rose Accents", "#C28F90", 5, 0.10f)
+            )
+        }
+
+        // 2. DYNAMIC NEUTRAL/WARM/COOL PERCENTAGES
+        val neutralsPct = if (validColors.isNotEmpty()) {
+            val neutralCount = validColors.count { isNeutral(it.colorHex) }
+            ((neutralCount.toFloat() / validColors.size) * 100).toInt()
+        } else 42
+        
+        val warmPct = if (validColors.isNotEmpty()) {
+            val warmCount = validColors.count { isWarm(it.colorHex) && !isNeutral(it.colorHex) }
+            ((warmCount.toFloat() / validColors.size) * 100).toInt()
+        } else 31
+        
+        val coolPct = if (validColors.isNotEmpty()) {
+            val coolCount = validColors.count { !isWarm(it.colorHex) && !isNeutral(it.colorHex) }
+            ((coolCount.toFloat() / validColors.size) * 100).toInt()
+        } else 27
 
         val mostWornGarments = if (items.isNotEmpty()) {
             items.sortedByDescending { it.usageCount }.take(3).map {
@@ -48,7 +89,6 @@ class WardrobeAnalyticsEngine @Inject constructor() {
         val activeCount = if (items.isNotEmpty()) items.count { it.usageCount >= 5 } else 37
         val rarelyWornCount = if (items.isNotEmpty()) items.count { it.usageCount in 1..4 } else 14
         val neverWornCount = if (items.isNotEmpty()) items.count { it.usageCount == 0 } else 3
-        val totalCount = if (items.isNotEmpty()) items.size else (activeCount + rarelyWornCount + neverWornCount)
 
         val wearEvents = items.filter { it.usageCount > 0 }.mapIndexed { index, item ->
             WearEvent(
@@ -90,9 +130,9 @@ class WardrobeAnalyticsEngine @Inject constructor() {
                 chroma = "Low-to-medium chroma"
             ),
             colorDistribution = ColorDistribution(
-                neutralsPct = 42,
-                warmPct = 31,
-                coolPct = 27,
+                neutralsPct = neutralsPct,
+                warmPct = warmPct,
+                coolPct = coolPct,
                 topColors = topColorsList
             ),
             categoryDistribution = CategoryDistribution(
@@ -131,5 +171,35 @@ class WardrobeAnalyticsEngine @Inject constructor() {
             insights = insights,
             analyticsCoverage = analyticsCoverage
         )
+    }
+
+    private fun mapHexToSemanticName(hex: String): String {
+        val cleanHex = hex.uppercase().removePrefix("#")
+        return when {
+            cleanHex.startsWith("FF5F") || cleanHex.startsWith("FFA0") || cleanHex.startsWith("FF7") -> "Coral"
+            cleanHex.startsWith("EDD") || cleanHex.startsWith("F3E") || cleanHex.startsWith("FFF") || cleanHex.startsWith("FAF") -> "Ivory"
+            cleanHex.startsWith("BDA") || cleanHex.startsWith("8B4") || cleanHex.startsWith("C5") || cleanHex.startsWith("D2") -> "Camel"
+            cleanHex.startsWith("004") || cleanHex.startsWith("0B0") || cleanHex.startsWith("1E3") -> "Cobalt"
+            cleanHex.startsWith("2C2") || cleanHex.startsWith("1F2") || cleanHex.startsWith("000") || cleanHex.startsWith("11") -> "Charcoal"
+            cleanHex.startsWith("DC1") || cleanHex.startsWith("FF0") || cleanHex.startsWith("C7") || cleanHex.startsWith("E6") -> "Terracotta"
+            else -> "Harmonic Accent"
+        }
+    }
+
+    private fun isNeutral(hex: String): Boolean {
+        return try {
+            val hsv = FloatArray(3)
+            android.graphics.Color.colorToHSV(android.graphics.Color.parseColor(if (hex.startsWith("#")) hex else "#$hex"), hsv)
+            hsv[1] < 0.15f || hsv[2] < 0.2f || hsv[2] > 0.9f
+        } catch (e: Exception) { true }
+    }
+
+    private fun isWarm(hex: String): Boolean {
+        return try {
+            val hsv = FloatArray(3)
+            android.graphics.Color.colorToHSV(android.graphics.Color.parseColor(if (hex.startsWith("#")) hex else "#$hex"), hsv)
+            val hue = hsv[0]
+            hue in 0f..90f || hue in 300f..360f
+        } catch (e: Exception) { true }
     }
 }

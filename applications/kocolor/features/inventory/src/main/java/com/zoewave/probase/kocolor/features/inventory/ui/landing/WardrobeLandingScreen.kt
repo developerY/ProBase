@@ -1,4 +1,4 @@
-package com.zoewave.probase.kocolor.features.inventory.ui
+package com.zoewave.probase.kocolor.features.inventory.ui.landing
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -21,7 +20,16 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.*
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -40,13 +48,13 @@ import androidx.compose.ui.unit.sp
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.kocolor.features.inventory.R
+import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeEvent
+import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeUiState
 import com.zoewave.probase.kocolor.features.inventory.ui.components.AtelierWardrobeCard
 import com.zoewave.probase.kocolor.features.inventory.ui.components.AtelierWardrobeUiState
 import com.zoewave.probase.kocolor.features.inventory.ui.components.RecentClothingCard
 import com.zoewave.probase.kocolor.features.inventory.ui.components.WardrobeTaxonomyDialog
 import com.zoewave.probase.kocolor.model.KoColorRoute
-import java.text.NumberFormat
-import java.util.Locale
 
 @Preview(showBackground = true)
 @Composable
@@ -57,7 +65,12 @@ private fun WardrobeLandingScreenPreview() {
                 totalItems = 9,
                 totalInvestment = 1615.0,
                 items = listOf(
-                    ClothingItem(internalId = 1, name = "Blouse", category = ClothingCategory.TOPS, colorHex = "#FFFFFF")
+                    ClothingItem(
+                        internalId = 1,
+                        name = "Blouse",
+                        category = ClothingCategory.TOPS,
+                        colorHex = "#FFFFFF"
+                    )
                 ),
                 glowScore = 0.84,
                 diversityIndex = "Eclectic"
@@ -136,8 +149,11 @@ fun WardrobeLandingScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {
+                val engine = remember { com.zoewave.probase.kocolor.features.inventory.domain.WardrobeAnalyticsEngine() }
+                val analytics = remember(uiState.items) { engine.computeAnalytics(uiState.items) }
+
                 CuratedClosetDashboard(
-                    totalPieces = uiState.totalItems,
+                    analytics = analytics,
                     totalValue = uiState.totalInvestment,
                     glowScore = uiState.glowScore?.toFloat(),
                     diversityLabel = uiState.diversityIndex,

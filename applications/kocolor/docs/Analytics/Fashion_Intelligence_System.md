@@ -17,16 +17,16 @@ The foundation of the analytics system is strict separation of concerns:
 
 The system is organized into a cohesive three-act story, presented across distinct editorial screens.
 
-### ACT I: THE FOOTPRINT (What You Own)
-*   **Screen:** `StyleIntelligenceScreen`
+### ACT I: THE FOOTPRINT (What You Own) [file](applications/kocolor/features/inventory/src/main/java/com/zoewave/probase/kocolor/features/inventory/ui/analytics/WardrobeFootprintScreen.kt)
+*   **Screen:** `WardrobeFootprintScreen` (formerly `StyleIntelligenceScreen`)
 *   **Purpose:** Evaluates the user's physical inventory as a luxury asset portfolio.
 *   **Key Metrics:**
     *   **Portfolio Performance:** Total financial investment and overall Average Cost Per Wear (CPW).
     *   **Chromatic Core:** A single-band, horizontally scrolling, interactive color spectrum of the user's inventory. Filterable by category (e.g., Wardrobe vs. Vanity) or specific item types (Tops, Bottoms).
     *   **Portfolio Composition:** A detailed, quantitative breakdown of strategic wardrobe diversity (e.g., "Eclectic: 27% Outerwear, 16% Activewear").
 
-### ACT II: THE BEHAVIOR (How You Wear It)
-*   **Screen:** `WardrobeAnalyticsScreen`
+### ACT II: THE BEHAVIOR (How You Wear It) [file](applications/kocolor/features/inventory/src/main/java/com/zoewave/probase/kocolor/features/inventory/ui/analytics/WardrobeBehaviorScreen.kt)
+*   **Screen:** `WardrobeBehaviorScreen` (formerly `WardrobeAnalyticsScreen`)
 *   **Purpose:** A behavioral psychology dashboard measuring actual utility, habits, and wardrobe ROI.
 *   **Key Metrics:**
     *   **Wardrobe DNA:** The aesthetic identity of the closet (e.g., *Neutral-led, Warm-biased*).
@@ -34,8 +34,9 @@ The system is organized into a cohesive three-act story, presented across distin
     *   **Versatility & Utility:** Deterministically calculates all compatible outfit combinations (e.g., *Universal Khaki Button-Down: 18 possible looks*).
     *   **Wardrobe Opportunities:** Actionable coverage gaps (e.g., *+ A saturated cool accent would expand your color coverage*).
 
-### ACT III: THE SYNTHESIS (The AI Output)
-*   **Screens:** `FashionJourneyScreen` & `StyleCreationStoryScreen`
+### ACT III: THE SYNTHESIS (The KoColor Recommendation Engine) 
+[file](applications/kocolor/features/analyzer/src/main/java/com/zoewave/probase/kocolor/features/analyzer/simulator/ui/result/StyleCreationStoryScreen.kt)
+*   **Screen:** `StyleCreationStoryScreen`
 *   **Purpose:** Explains *how* and *why* an outfit was created for a specific day or event.
 *   **Key Metrics:**
     *   **The Vision & Atmosphere:** Maps the user's requested intent to the current weather and UV conditions.
@@ -88,3 +89,127 @@ To avoid looking like a generic corporate spreadsheet, KoColor abandons standard
 ### The Dynamic Chromatic Core
 *   **What it is:** A horizontally scrolling, single-band spectrum of the user's entire inventory.
 *   **How it works:** Tapping a color segment smoothly expands it using a spring animation, immediately listing every garment or cosmetic product that matches that specific shade.
+
+---
+
+## Appendix Inventory UI File Catalog & Breakdown
+
+com/zoewave/probase/kocolor/features/inventory/ui/
+│
+├── landing/
+│   ├── WardrobeLandingScreen.kt
+│   └── CuratedClosetDashboard.kt
+│
+├── analytics/
+│   ├── WardrobeFootprintScreen.kt
+│   ├── WardrobeBehaviorScreen.kt
+│   ├── StyleIntelligenceScreen.kt
+│   ├── WardrobeAnalyticsScreen.kt
+│   ├── StrategicDiversityScreen.kt
+│   ├── UsageDistributionScreen.kt
+│   └── UsageMetricsScreen.kt
+│
+├── management/
+│   ├── WardrobeScreen.kt
+│   ├── WardrobeDetailScreen.kt
+│   ├── WardrobeEditScreen.kt
+│   ├── WardrobeCategoryCoverScreen.kt
+│   └── ColorVerificationScreen.kt
+│
+├── components/
+│   └── [UI Component files...]
+│
+├── util/
+│   └── [Utility files...]
+│
+└── WardrobeViewModel.kt
+
+The `com.zoewave.probase.kocolor.features.inventory.ui` package is structured into distinct, feature-driven directories. Below is the detailed breakdown of the contents and responsibilities of every file.
+
+### Root Package (`ui/`)
+*   **`WardrobeViewModel.kt`**: Central ViewModel driving the inventory feature. Observes Room database flows (`WardrobeRepository`), maintains `WardrobeUiState` (total items, total investment, category metadata, glow scores, diversity index), and handles user events (sorting, filtering, category selection).
+
+### Landing Directory (`ui/landing/`)
+*   **`WardrobeLandingScreen.kt`**: The primary entry container for the closet tab. Hosts category cover carousels, action bars, taxonomy dialogs, and embeds the `CuratedClosetDashboard`.
+*   **`CuratedClosetDashboard.kt`**: Executive dashboard UI component displaying top summary stat cards (`THE FOOTPRINT` and `THE BEHAVIOR`) and bottom action cards (`VIEW INTELLIGENCE` and `VIEW INVENTORY`).
+
+### Analytics Directory (`ui/analytics/`)
+*   **`WardrobeFootprintScreen.kt`**: Act I (The Footprint) master screen. Renders Wardrobe DNA, Profile Analysis / Chromatic Core single-band color spectrum (with category filters), Portfolio Performance ($ Value), Portfolio Composition progress bars, and Wardrobe Opportunities.
+*   **`WardrobeBehaviorScreen.kt`**: Act II (The Behavior) master screen. Renders Data Coverage & Quality metrics, Engagement Snapshot (Rotation / Rarely / Never Worn), Wear Distribution Canvas scatter plot, Color History Canvas timeline thread, Rotation Health scores, Style Efficiency (CPW) collapsible list, and Versatility & Utility metrics.
+*   **`StyleIntelligenceScreen.kt`**: Financial ROI and style intelligence screen rendering Total Investment Value, Average Cost Per Wear (CPW), and item-level CPW ranking cards with direct detail links.
+*   **`WardrobeAnalyticsScreen.kt`**: Core behavioral analytics screen container housing interactive Canvas plots and rotation health sections.
+*   **`StrategicDiversityScreen.kt`**: Standalone portfolio diversity screen showing portfolio composition progress bars per category and strategic diversity insights (`ProInsightCard`).
+*   **`UsageDistributionScreen.kt`**: Standalone wear distribution screen featuring `UsageDistributionChart` and ranked `WearRankingRow` items.
+*   **`UsageMetricsScreen.kt`**: Standalone rotation frequency screen showing wear distribution histograms and top-worn piece rankings.
+
+### Management Directory (`ui/management/`)
+*   **`WardrobeScreen.kt`**: Main digital closet item catalog list/grid view with category filtering, search bar, and item addition CTA.
+*   **`WardrobeDetailScreen.kt`**: Detailed view for a single garment displaying thumbnail image, brand, category, formality, price, CPW, wear count, and notes.
+*   **`WardrobeEditScreen.kt`**: Edit form for updating garment metadata (name, price, category, formality, color hex, image).
+*   **`WardrobeCategoryCoverScreen.kt`**: Focused category cover view showing category-specific stats (top worn, best value, premium piece) and filtered item grid.
+*   **`ColorVerificationScreen.kt`**: Interactive screen for verifying and adjusting detected color hex codes, undertone temperatures, and palettes for a garment.
+
+### Shared Components Directory (`ui/components/`)
+*   **`AnalyticsStatCard.kt`**: Reusable dashboard stat card rendering label, formatted value, and icon.
+*   **`CategoryStatCard.kt`**: Small card component displaying category name, item count, and icon.
+*   **`ClothingProductGridCard.kt`**: Grid card component for displaying clothing items with thumbnail images, names, and prices.
+*   **`ColorVerificationItem.kt`**: Interactive row component for color code editing and verification.
+*   **`DetailRow.kt`**: Key-value text row component for item detail views.
+*   **`MetricItem.kt`**: Compact metric row component for stats display.
+*   **`ProInsightCard.kt`**: Styled purple callout card displaying AI/analytics insights and diversity notes.
+*   **`RankingStatCard.kt`**: Numbered ranking row component for top/least worn garments.
+*   **`SectionHeader.kt`**: Standardized section header component with title and action button.
+*   **`UsageDistributionChart.kt`**: Vertical bar chart component categorizing items by wear count buckets (Never, 1-5, 6-10, 11-20, 20+).
+*   **`WardrobeCard.kt`**: Primary card component representing a garment in lists with image, name, brand, color badge, and CPW.
+*   **`WardrobeComponents.kt`**: Collection of shared UI components including taxonomy dialogs, category chips, and filter bars.
+*   **`WardrobeEfficiencyRow.kt`**: Row component displaying item name and calculated Cost-Per-Wear value.
+*   **`WearRankingRow.kt`**: Row component rendering rank number, item name, wear count, and color swatch circle.
+
+### Utilities Directory (`ui/util/`)
+*   **`FreshnessLogic.kt`**: Utility calculating item freshness, recency decay, and PAO/rotation indicators.
+
+#### Summary
+A complete file-by-file breakdown detailing the exact responsibilities of all 26 files inside `com.zoewave.probase.kocolor.features.inventory.ui`:
+
+- **Root Package (`ui/`):**
+    - `WardrobeViewModel.kt`: Central ViewModel observing database flows, maintaining `WardrobeUiState` (items, value, metadata, glow scores, diversity index), and handling user filtering/events.
+
+- **Landing (`ui/landing/`):**
+    - `WardrobeLandingScreen.kt`: Main closet tab container hosting category cover carousels and taxonomy dialogs.
+    - `CuratedClosetDashboard.kt`: Executive dashboard UI component rendering summary cards (`FOOTPRINT`, `BEHAVIOR`, `VIEW INTELLIGENCE`, `VIEW INVENTORY`).
+
+- **Analytics (`ui/analytics/`):**
+    - `WardrobeFootprintScreen.kt`: Master Act I screen (Wardrobe DNA, Chromatic Core spectrum, Portfolio Performance, Portfolio Composition, Opportunities).
+    - `WardrobeBehaviorScreen.kt`: Master Act II screen (Data Coverage & Quality, Engagement Snapshot, Wear Distribution Canvas plot, Color History Canvas thread, Rotation Health, CPW list, Versatility & Utility).
+    - `StyleIntelligenceScreen.kt`: Financial ROI & CPW efficiency ranking screen.
+    - `WardrobeAnalyticsScreen.kt`: Core analytics screen container.
+    - `StrategicDiversityScreen.kt`: Standalone portfolio category composition screen.
+    - `UsageDistributionScreen.kt`: Standalone wear distribution chart screen.
+    - `UsageMetricsScreen.kt`: Standalone rotation frequency histogram screen.
+
+- **Management (`ui/management/`):**
+    - `WardrobeScreen.kt`: Main digital closet catalog list/grid view with search and category filtering.
+    - `WardrobeDetailScreen.kt`: Garment detail view (thumbnail, brand, category, formality, price, CPW, wears, notes).
+    - `WardrobeEditScreen.kt`: Form for editing garment metadata.
+    - `WardrobeCategoryCoverScreen.kt`: Category cover view with top worn, best value, and premium piece highlights.
+    - `ColorVerificationScreen.kt`: Tool for inspecting and verifying garment hex codes, temperature undertones, and palettes.
+
+- **Shared Components (`ui/components/`):**
+    - Breakdown of all 14 reusable UI cards, charts, progress bars, and rows:
+        - `AnalyticsStatCard`
+        - `CategoryStatCard`
+        - `ClothingProductGridCard`
+        - `ColorVerificationItem`
+        - `DetailRow`
+        - `MetricItem`
+        - `ProInsightCard`
+        - `RankingStatCard`
+        - `SectionHeader`
+        - `UsageDistributionChart`
+        - `WardrobeCard`
+        - `WardrobeComponents`
+        - `WardrobeEfficiencyRow`
+        - `WearRankingRow`
+
+- **Utilities (`ui/util/`):**
+    - `FreshnessLogic.kt`: Garment freshness, recency decay, and rotation degradation calculator.

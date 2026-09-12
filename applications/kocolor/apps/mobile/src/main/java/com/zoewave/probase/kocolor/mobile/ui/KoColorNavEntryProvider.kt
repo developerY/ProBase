@@ -52,9 +52,9 @@ import com.zoewave.probase.kocolor.features.cosmetics.ui.StitchProductBuilder
 import com.zoewave.probase.kocolor.features.cosmetics.ui.VanityLandingScreen
 import com.zoewave.probase.kocolor.features.inventory.ui.ColorVerificationRoute
 import com.zoewave.probase.kocolor.features.inventory.ui.ColorVerificationUiState
-import com.zoewave.probase.kocolor.features.inventory.ui.StyleIntelligenceScreen
-import com.zoewave.probase.kocolor.features.inventory.ui.UsageMetricsScreen
-import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeAnalyticsScreen
+import com.zoewave.probase.kocolor.features.inventory.ui.analytics.StyleIntelligenceScreen
+import com.zoewave.probase.kocolor.features.inventory.ui.analytics.WardrobeBehaviorScreen
+import com.zoewave.probase.kocolor.features.inventory.ui.analytics.WardrobeFootprintScreen
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeCategoryCoverScreen
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeCategoryCoverUiState
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeDetailScreen
@@ -62,7 +62,7 @@ import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeDetailUiState
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeEditScreen
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeEditUiState
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeEvent
-import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeLandingScreen
+import com.zoewave.probase.kocolor.features.inventory.ui.landing.WardrobeLandingScreen
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeRoute
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeViewModel
 import com.zoewave.probase.kocolor.features.routines.ui.RoutineDetailUiRoute
@@ -394,7 +394,7 @@ fun koColorNavEntryProvider(
         is KoColorRoute.WardrobeFootprint -> NavEntry(route) {
             val viewModel: WardrobeViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()
-            StyleIntelligenceScreen(
+            WardrobeFootprintScreen(
                 uiState = state,
                 navTo = onNavigateTo
             )
@@ -402,7 +402,15 @@ fun koColorNavEntryProvider(
         is KoColorRoute.WardrobeBehavior -> NavEntry(route) {
             val viewModel: WardrobeViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()
-            WardrobeAnalyticsScreen(
+            WardrobeBehaviorScreen(
+                uiState = state,
+                navTo = onNavigateTo
+            )
+        }
+        is KoColorRoute.StyleIntelligence -> NavEntry(route) {
+            val viewModel: WardrobeViewModel = hiltViewModel()
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+            StyleIntelligenceScreen(
                 uiState = state,
                 navTo = onNavigateTo
             )
@@ -410,7 +418,7 @@ fun koColorNavEntryProvider(
         is KoColorRoute.UsageMetrics -> NavEntry(route) {
             val viewModel: WardrobeViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()
-            UsageMetricsScreen(
+            WardrobeBehaviorScreen(
                 uiState = state,
                 navTo = onNavigateTo
             )
