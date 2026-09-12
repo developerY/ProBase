@@ -17,7 +17,7 @@ The foundation of the analytics system is strict separation of concerns:
 
 The system is organized into a cohesive three-act story, presented across distinct editorial screens.
 
-### ACT I: THE FOOTPRINT (What You Own)
+### ACT I: THE FOOTPRINT (What You Own) [file](applications/kocolor/features/inventory/src/main/java/com/zoewave/probase/kocolor/features/inventory/ui/StyleIntelligenceScreen.kt)
 *   **Screen:** `StyleIntelligenceScreen`
 *   **Purpose:** Evaluates the user's physical inventory as a luxury asset portfolio.
 *   **Key Metrics:**
@@ -25,7 +25,7 @@ The system is organized into a cohesive three-act story, presented across distin
     *   **Chromatic Core:** A single-band, horizontally scrolling, interactive color spectrum of the user's inventory. Filterable by category (e.g., Wardrobe vs. Vanity) or specific item types (Tops, Bottoms).
     *   **Portfolio Composition:** A detailed, quantitative breakdown of strategic wardrobe diversity (e.g., "Eclectic: 27% Outerwear, 16% Activewear").
 
-### ACT II: THE BEHAVIOR (How You Wear It)
+### ACT II: THE BEHAVIOR (How You Wear It) [file](applications/kocolor/features/inventory/src/main/java/com/zoewave/probase/kocolor/features/inventory/ui/WardrobeAnalyticsScreen.kt)
 *   **Screen:** `WardrobeAnalyticsScreen`
 *   **Purpose:** A behavioral psychology dashboard measuring actual utility, habits, and wardrobe ROI.
 *   **Key Metrics:**
@@ -34,7 +34,9 @@ The system is organized into a cohesive three-act story, presented across distin
     *   **Versatility & Utility:** Deterministically calculates all compatible outfit combinations (e.g., *Universal Khaki Button-Down: 18 possible looks*).
     *   **Wardrobe Opportunities:** Actionable coverage gaps (e.g., *+ A saturated cool accent would expand your color coverage*).
 
-### ACT III: THE SYNTHESIS (The AI Output)
+### ACT III: THE SYNTHESIS (The KoColor Recommendation Engine) 
+[file](applications/kocolor/features/analyzer/src/main/java/com/zoewave/probase/kocolor/features/analyzer/simulator/ui/result/StyleCreationStoryScreen.kt)
+[file](applications/kocolor/features/analyzer/src/main/java/com/zoewave/probase/kocolor/features/analyzer/simulator/ui/result/FashionJourneyScreen.kt)
 *   **Screens:** `FashionJourneyScreen` & `StyleCreationStoryScreen`
 *   **Purpose:** Explains *how* and *why* an outfit was created for a specific day or event.
 *   **Key Metrics:**
