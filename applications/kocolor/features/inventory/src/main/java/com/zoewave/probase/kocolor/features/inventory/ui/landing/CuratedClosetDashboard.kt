@@ -82,7 +82,27 @@ fun CuratedClosetDashboard(
             LargeVerticalCard(
                 icon = Icons.Default.Checkroom,
                 value = totalPieces.toString(),
-                label = null,
+                label = "TOTAL PIECES",
+                subContent = {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.padding(top = 6.dp)
+                    ) {
+                        Surface(
+                            shape = RoundedCornerShape(50.dp),
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+                        ) {
+                            Text(
+                                text = "${diversityLabel.uppercase()} FOOTPRINT",
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary,
+                                fontSize = 9.sp
+                            )
+                        }
+                    }
+                },
                 actionText = "VIEW INTELLIGENCE",
                 actionBrush = Brush.linearGradient(
                     colors = listOf(
@@ -101,6 +121,15 @@ fun CuratedClosetDashboard(
                 value = currencyFormatter.format(totalValue),
                 label = "TOTAL VALUE",
                 valueColor = Color(0xFF1B5E20), // Dark Green
+                subContent = {
+                    Text(
+                        text = "Across $totalPieces items",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray,
+                        fontSize = 10.sp,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                },
                 actionText = "VIEW INVENTORY →",
                 actionBrush = Brush.linearGradient(
                     colors = listOf(
@@ -172,7 +201,8 @@ private fun LargeVerticalCard(
     actionBrush: Brush,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    valueColor: Color = Color.Black
+    valueColor: Color = Color.Black,
+    subContent: (@Composable () -> Unit)? = null
 ) {
     Card(
         modifier = modifier.height(260.dp),
@@ -200,15 +230,15 @@ private fun LargeVerticalCard(
                         .align(Alignment.Start)
                 )
                 
-                Spacer(Modifier.weight(1f))
+                Spacer(Modifier.weight(0.5f))
                 
                 Text(
                     text = value,
                     style = MaterialTheme.typography.displayMedium.copy(
                         fontSize = when {
-                            value.length > 9 -> 28.sp
-                            value.length > 6 -> 36.sp
-                            else -> 48.sp
+                            value.length > 9 -> 26.sp
+                            value.length > 6 -> 32.sp
+                            else -> 42.sp
                         },
                         fontFamily = FontFamily.Serif,
                         fontWeight = FontWeight.Bold
@@ -225,11 +255,13 @@ private fun LargeVerticalCard(
                         color = Color.Gray,
                         letterSpacing = 1.sp,
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(top = 4.dp)
+                        modifier = Modifier.padding(top = 2.dp)
                     )
                 }
+
+                subContent?.invoke()
                 
-                Spacer(Modifier.weight(1.2f))
+                Spacer(Modifier.weight(0.8f))
             }
 
             // Action Area
@@ -245,7 +277,7 @@ private fun LargeVerticalCard(
                     modifier = Modifier
                         .padding(horizontal = 16.dp, vertical = 12.dp)
                         .clip(RoundedCornerShape(50)),
-                    color = Color.Black.copy(alpha = 0.15f) // Darker translucent for better contrast on light gradients
+                    color = Color.Black.copy(alpha = 0.15f)
                 ) {
                     Text(
                         text = actionText,
