@@ -2,15 +2,27 @@ package com.zoewave.probase.kocolor.features.inventory.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Checkroom
-import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.MonetizationOn
-import androidx.compose.material3.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -26,7 +38,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.text.NumberFormat
-import java.util.*
+import java.util.Locale
 
 /**
  * CuratedClosetDashboard
@@ -53,26 +65,14 @@ fun CuratedClosetDashboard(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Top Row: Footprint and Behavior
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            SmallStatCard(
-                icon = Icons.Default.Explore,
-                value = diversityLabel.uppercase(),
-                label = "FOOTPRINT",
-                onClick = onViewFootprintClicked,
-                modifier = Modifier.weight(1f)
-            )
-            SmallStatCard(
-                icon = Icons.Default.AutoAwesome,
-                value = glowScore?.let { "${(it * 100).toInt()}%" } ?: "—",
-                label = "BEHAVIOR",
-                onClick = onViewBehaviorClicked,
-                modifier = Modifier.weight(1f)
-            )
-        }
+        // Top Row: Behavior Analysis
+        SmallStatCard(
+            icon = Icons.Default.AutoAwesome,
+            value = glowScore?.let { "${(it * 100).toInt()}%" } ?: "—",
+            label = "BEHAVIOR",
+            onClick = onViewBehaviorClicked,
+            modifier = Modifier.fillMaxWidth()
+        )
 
         // Bottom Row: Total Pieces and Total Value
         Row(
