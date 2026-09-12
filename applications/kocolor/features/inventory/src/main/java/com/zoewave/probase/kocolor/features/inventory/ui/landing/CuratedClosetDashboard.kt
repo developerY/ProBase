@@ -162,7 +162,8 @@ fun CuratedClosetDashboard(
                                 color = Color.Gray,
                                 fontWeight = FontWeight.Bold
                             )
-                            val displayScore = glowScore?.let { (it * 100).toInt().toString() + "%" } ?: "94%"
+                            val displayScore = analytics.harmonyScore?.let { "${(it * 100).toInt()}%" }
+                                ?: if (analytics.totalItems > 0) "94%" else "0%"
                             Text(
                                 text = "$displayScore HARMONY SCORE",
                                 style = MaterialTheme.typography.titleSmall,
@@ -194,7 +195,7 @@ fun CuratedClosetDashboard(
                         fontSize = 10.sp
                     )
                     Text(
-                        text = "5 TONES TRACKED",
+                        text = "${analytics.colorDistribution.topColors.size} TONES TRACKED",
                         style = MaterialTheme.typography.labelSmall,
                         color = Color.Gray,
                         fontSize = 10.sp
