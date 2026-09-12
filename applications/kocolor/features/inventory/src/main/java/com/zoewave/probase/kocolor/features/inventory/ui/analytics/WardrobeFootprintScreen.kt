@@ -72,6 +72,7 @@ import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.kocolor.features.inventory.domain.WardrobeAnalyticsEngine
 import com.zoewave.probase.kocolor.features.inventory.ui.CategoryMetadata
 import com.zoewave.probase.kocolor.features.inventory.ui.PortfolioCategoryRow
+import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeEvent
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeUiState
 import com.zoewave.probase.kocolor.features.inventory.ui.components.ProInsightCard
 import com.zoewave.probase.kocolor.model.KoColorRoute
@@ -84,8 +85,9 @@ import android.graphics.Color as AndroidColor
 @Composable
 fun WardrobeFootprintScreen(
     uiState: WardrobeUiState,
-    modifier: Modifier = Modifier,
-    navTo: (KoColorRoute) -> Unit
+    onEvent: (WardrobeEvent) -> Unit = {},
+    navTo: (KoColorRoute) -> Unit = {},
+    modifier: Modifier = Modifier
 ) {
     val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale.US) }
     var selectedCategoryFilter by remember { mutableStateOf<ClothingCategory?>(null) }

@@ -50,3 +50,18 @@ fun CategoryStatCard(
         }
     }
 }
+
+@androidx.compose.ui.tooling.preview.Preview(showBackground = true)
+@Composable
+private fun CategoryStatCardPreview() {
+    MaterialTheme {
+        CategoryStatCard(
+            uiState = CategoryStatUiState(
+                title = "BEST VALUE",
+                value = "Khaki Button-Down",
+                isAlert = false
+            ),
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}

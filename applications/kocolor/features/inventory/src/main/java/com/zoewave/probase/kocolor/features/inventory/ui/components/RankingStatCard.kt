@@ -5,6 +5,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -18,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.core.ui.util.parseColor
 import com.zoewave.probase.core.model.ritual.ClothingItem
@@ -73,5 +76,20 @@ fun RankingStatCard(
                 Text(text = "None yet", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f))
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun RankingStatCardPreview() {
+    MaterialTheme {
+        RankingStatCard(
+            uiState = RankingStatUiState(
+                title = "MOST WORN",
+                item = ClothingItem(name = "Silk Blazer", category = com.zoewave.probase.core.model.ritual.ClothingCategory.TOPS, colorHex = "#000000"),
+                icon = androidx.compose.material.icons.Icons.Default.Star
+            ),
+            modifier = Modifier.padding(16.dp)
+        )
     }
 }

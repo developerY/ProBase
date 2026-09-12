@@ -69,6 +69,7 @@ import com.zoewave.probase.kocolor.features.inventory.domain.VersatilityAnalytic
 import com.zoewave.probase.kocolor.features.inventory.domain.WardrobeAnalytics
 import com.zoewave.probase.kocolor.features.inventory.domain.WardrobeAnalyticsEngine
 import com.zoewave.probase.kocolor.features.inventory.domain.WearEvent
+import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeEvent
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeUiState
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import java.text.NumberFormat
@@ -79,8 +80,9 @@ import android.graphics.Color as AndroidColor
 @Composable
 fun WardrobeBehaviorScreen(
     uiState: WardrobeUiState,
-    modifier: Modifier = Modifier,
-    navTo: (KoColorRoute) -> Unit = {}
+    onEvent: (WardrobeEvent) -> Unit = {},
+    navTo: (KoColorRoute) -> Unit = {},
+    modifier: Modifier = Modifier
 ) {
     val engine = remember { WardrobeAnalyticsEngine() }
     val analytics = remember(uiState.items) { engine.computeAnalytics(uiState.items) }

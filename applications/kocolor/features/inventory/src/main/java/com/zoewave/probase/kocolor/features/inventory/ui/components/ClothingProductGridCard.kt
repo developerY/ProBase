@@ -67,3 +67,22 @@ fun ClothingProductGridCard(uiState: ClothingItem, navTo: (KoColorRoute) -> Unit
         }
     }
 }
+
+@androidx.compose.ui.tooling.preview.Preview(showBackground = true)
+@Composable
+private fun ClothingProductGridCardPreview() {
+    MaterialTheme {
+        Box(modifier = Modifier.width(180.dp)) {
+            ClothingProductGridCard(
+                uiState = ClothingItem(
+                    internalId = 1L,
+                    name = "Silk Blazer",
+                    brand = "Gucci",
+                    category = com.zoewave.probase.core.model.ritual.ClothingCategory.TOPS,
+                    colorHex = "#000000"
+                ),
+                navTo = {}
+            )
+        }
+    }
+}
