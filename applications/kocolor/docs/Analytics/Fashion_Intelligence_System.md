@@ -167,3 +167,49 @@ The `com.zoewave.probase.kocolor.features.inventory.ui` package is structured in
 
 ### Utilities Directory (`ui/util/`)
 *   **`FreshnessLogic.kt`**: Utility calculating item freshness, recency decay, and PAO/rotation indicators.
+
+#### Summary
+A complete file-by-file breakdown detailing the exact responsibilities of all 26 files inside `com.zoewave.probase.kocolor.features.inventory.ui`:
+
+- **Root Package (`ui/`):**
+    - `WardrobeViewModel.kt`: Central ViewModel observing database flows, maintaining `WardrobeUiState` (items, value, metadata, glow scores, diversity index), and handling user filtering/events.
+
+- **Landing (`ui/landing/`):**
+    - `WardrobeLandingScreen.kt`: Main closet tab container hosting category cover carousels and taxonomy dialogs.
+    - `CuratedClosetDashboard.kt`: Executive dashboard UI component rendering summary cards (`FOOTPRINT`, `BEHAVIOR`, `VIEW INTELLIGENCE`, `VIEW INVENTORY`).
+
+- **Analytics (`ui/analytics/`):**
+    - `WardrobeFootprintScreen.kt`: Master Act I screen (Wardrobe DNA, Chromatic Core spectrum, Portfolio Performance, Portfolio Composition, Opportunities).
+    - `WardrobeBehaviorScreen.kt`: Master Act II screen (Data Coverage & Quality, Engagement Snapshot, Wear Distribution Canvas plot, Color History Canvas thread, Rotation Health, CPW list, Versatility & Utility).
+    - `StyleIntelligenceScreen.kt`: Financial ROI & CPW efficiency ranking screen.
+    - `WardrobeAnalyticsScreen.kt`: Core analytics screen container.
+    - `StrategicDiversityScreen.kt`: Standalone portfolio category composition screen.
+    - `UsageDistributionScreen.kt`: Standalone wear distribution chart screen.
+    - `UsageMetricsScreen.kt`: Standalone rotation frequency histogram screen.
+
+- **Management (`ui/management/`):**
+    - `WardrobeScreen.kt`: Main digital closet catalog list/grid view with search and category filtering.
+    - `WardrobeDetailScreen.kt`: Garment detail view (thumbnail, brand, category, formality, price, CPW, wears, notes).
+    - `WardrobeEditScreen.kt`: Form for editing garment metadata.
+    - `WardrobeCategoryCoverScreen.kt`: Category cover view with top worn, best value, and premium piece highlights.
+    - `ColorVerificationScreen.kt`: Tool for inspecting and verifying garment hex codes, temperature undertones, and palettes.
+
+- **Shared Components (`ui/components/`):**
+    - Breakdown of all 14 reusable UI cards, charts, progress bars, and rows:
+        - `AnalyticsStatCard`
+        - `CategoryStatCard`
+        - `ClothingProductGridCard`
+        - `ColorVerificationItem`
+        - `DetailRow`
+        - `MetricItem`
+        - `ProInsightCard`
+        - `RankingStatCard`
+        - `SectionHeader`
+        - `UsageDistributionChart`
+        - `WardrobeCard`
+        - `WardrobeComponents`
+        - `WardrobeEfficiencyRow`
+        - `WearRankingRow`
+
+- **Utilities (`ui/util/`):**
+    - `FreshnessLogic.kt`: Garment freshness, recency decay, and rotation degradation calculator.
