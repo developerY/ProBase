@@ -9,6 +9,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,6 +25,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -53,6 +55,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -156,6 +159,15 @@ fun CollectionHubScreen(
             ) {
                 // 1. THE VANITY (with incorporated Discover Cosmetics pill)
                 item {
+                    val cosmeticsProgress = remember(uiState.cosmeticsByGroup) {
+                        listOf(
+                            CategoryProgressItem("COMP", uiState.cosmeticsByGroup["COMPLEXION"] ?: 58, 80, Color(0xFFD4AF37)),
+                            CategoryProgressItem("EYES", uiState.cosmeticsByGroup["EYES & BROWS"] ?: 20, 35, Color(0xFF4A2B4B)),
+                            CategoryProgressItem("NAILS", uiState.cosmeticsByGroup["NAILS"] ?: 18, 30, Color(0xFF8B263E)),
+                            CategoryProgressItem("LIPS", uiState.cosmeticsByGroup["LIPS"] ?: 21, 32, Color(0xFFC25975))
+                        )
+                    }
+
                     ArchiveVerticalCard(
                         uiState = ArchiveVerticalUiState(
                             title = stringResource(R.string.applications_kocolor_apps_mobile_features_home_hub_vanity_title),
@@ -169,6 +181,7 @@ fun CollectionHubScreen(
                             discoverSubtitle = "Cosmetics",
                             discoverColor = Color(0xFF3D223B), // Dark Plum
                             onDiscoverClick = { navTo(KoColorRoute.StarterPack(filter = "cosmetics")) },
+                            categoryProgress = cosmeticsProgress,
                             breakdown = uiState.cosmeticsByGroup
                         ),
                         onEvent = { navTo(KoColorRoute.VanityLanding) },
@@ -178,6 +191,15 @@ fun CollectionHubScreen(
 
                 // 2. THE WARDROBE (with incorporated Explore Fashion pill)
                 item {
+                    val wardrobeProgress = remember(uiState.clothingByCategory) {
+                        listOf(
+                            CategoryProgressItem("TOPS", uiState.clothingByCategory["TOPS"] ?: 16, 25, Color(0xFF3B5249)),
+                            CategoryProgressItem("BOTS", uiState.clothingByCategory["BOTTOMS"] ?: 9, 15, Color(0xFF415A77)),
+                            CategoryProgressItem("SHOES", uiState.clothingByCategory["SHOES"] ?: 7, 12, Color(0xFF774936)),
+                            CategoryProgressItem("OUTER", uiState.clothingByCategory["OUTERWEAR"] ?: 6, 10, Color(0xFF8D5B4C))
+                        )
+                    }
+
                     ArchiveVerticalCard(
                         uiState = ArchiveVerticalUiState(
                             title = stringResource(R.string.applications_kocolor_apps_mobile_features_home_hub_wardrobe_title),
@@ -191,6 +213,7 @@ fun CollectionHubScreen(
                             discoverSubtitle = "Fashion",
                             discoverColor = Color(0xFF1B2238), // Deep Navy
                             onDiscoverClick = { navTo(KoColorRoute.StarterPack(filter = "clothing")) },
+                            categoryProgress = wardrobeProgress,
                             breakdown = uiState.clothingByCategory
                         ),
                         onEvent = { navTo(KoColorRoute.WardrobeLanding) },
@@ -375,6 +398,13 @@ private fun CuratedCollectionCard(
     }
 }
 
+data class CategoryProgressItem(
+    val label: String,
+    val owned: Int,
+    val target: Int,
+    val color: Color
+)
+
 data class ArchiveVerticalUiState(
     val title: String,
     val count: Int,
@@ -387,64 +417,202 @@ data class ArchiveVerticalUiState(
     val discoverSubtitle: String? = null,
     val discoverColor: Color = Color(0xFF3D223B),
     val onDiscoverClick: (() -> Unit)? = null,
+    val categoryProgress: List<CategoryProgressItem> = emptyList(),
     val breakdown: Map<String, Int> = emptyMap()
 )
 
 @Composable
-private fun DiscoverPillButton(
-    title: String,
-    subtitle: String,
-    backgroundColor: Color,
-    icon: ImageVector,
-    onClick: () -> Unit
+private fun CategoryCompletionCapsuleBar(
+    items: List<CategoryProgressItem>,
+    modifier: Modifier = Modifier
 ) {
     Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(24.dp),
-        color = backgroundColor,
-        shadowElevation = 2.dp
+        modifier = modifier,
+        shape = RoundedCornerShape(50),
+        color = Color.White,
+        shadowElevation = 2.dp,
+        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFECECEC))
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+            modifier = Modifier
+                .horizontalScroll(rememberScrollState())
+                .padding(horizontal = 12.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            items.forEach { progress ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(5.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(7.dp)
+                            .clip(CircleShape)
+                            .background(progress.color)
+                    )
+                    Text(
+                        text = progress.label.uppercase(),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.DarkGray,
+                        fontSize = 9.sp,
+                        letterSpacing = 0.5.sp
+                    )
+                    Row(verticalAlignment = Alignment.Bottom) {
+                        Text(
+                            text = "${progress.owned}",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = Color(0xFF3D223B),
+                            fontSize = 10.sp
+                        )
+                        Text(
+                            text = "/${progress.target}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color.Gray,
+                            fontSize = 8.sp
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TopRightVanityActionCard(
+    discoverTitle: String,
+    discoverSubtitle: String,
+    backgroundColor: Color,
+    icon: ImageVector,
+    categoryProgress: List<CategoryProgressItem>,
+    onDiscoverClick: () -> Unit
+) {
+    Surface(
+        shape = RoundedCornerShape(20.dp),
+        color = Color.White,
+        shadowElevation = 3.dp,
+        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFF0F0F0))
+    ) {
+        Column(
+            modifier = Modifier.padding(6.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Top: Dark Pill Button
             Surface(
-                shape = CircleShape,
-                color = Color.White.copy(alpha = 0.2f),
-                modifier = Modifier.size(24.dp)
+                onClick = onDiscoverClick,
+                shape = RoundedCornerShape(16.dp),
+                color = backgroundColor
             ) {
-                Box(contentAlignment = Alignment.Center) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Surface(
+                        shape = CircleShape,
+                        color = Color.White.copy(alpha = 0.2f),
+                        modifier = Modifier.size(22.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(13.dp)
+                            )
+                        }
+                    }
+                    Column {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text(
+                                text = discoverTitle.uppercase(),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = Color.White,
+                                fontSize = 9.sp,
+                                letterSpacing = 0.8.sp
+                            )
+                            Icon(
+                                imageVector = Icons.Default.AutoAwesome,
+                                contentDescription = null,
+                                tint = Color(0xFFFFD700),
+                                modifier = Modifier.size(10.dp)
+                            )
+                        }
+                        Text(
+                            text = discoverSubtitle,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color.White.copy(alpha = 0.85f),
+                            fontSize = 8.sp
+                        )
+                    }
                     Icon(
-                        imageVector = icon,
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.size(14.dp)
+                        tint = Color.White.copy(alpha = 0.8f),
+                        modifier = Modifier
+                            .size(12.dp)
+                            .rotate(180f)
                     )
                 }
             }
-            Column {
-                Text(
-                    text = title.uppercase(),
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = Color.White,
-                    fontSize = 9.sp,
-                    letterSpacing = 0.8.sp
-                )
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = Color.White.copy(alpha = 0.85f),
-                    fontSize = 9.sp
-                )
+
+            // Bottom: Row of Category Progress Pills (COMP 58/80, EYES 20/35, NAILS 18/25)
+            if (categoryProgress.isNotEmpty()) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    categoryProgress.take(3).forEach { progress ->
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = Color(0xFFF7F7F7)
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(3.dp)
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(5.dp)
+                                            .clip(CircleShape)
+                                            .background(progress.color)
+                                    )
+                                    Text(
+                                        text = progress.label.uppercase(),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.DarkGray,
+                                        fontSize = 7.sp
+                                    )
+                                }
+                                Row(verticalAlignment = Alignment.Bottom) {
+                                    Text(
+                                        text = "${progress.owned}",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        color = Color(0xFF3D223B),
+                                        fontSize = 9.sp
+                                    )
+                                    Text(
+                                        text = "/${progress.target}",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = Color.Gray,
+                                        fontSize = 7.sp
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
             }
-            Icon(
-                imageVector = Icons.Default.AutoAwesome,
-                contentDescription = null,
-                tint = Color(0xFFFFD700),
-                modifier = Modifier.size(14.dp)
-            )
         }
     }
 }
@@ -499,12 +667,13 @@ private fun ArchiveVerticalCard(
                     }
 
                     if (uiState.discoverTitle != null && uiState.onDiscoverClick != null) {
-                        DiscoverPillButton(
-                            title = uiState.discoverTitle,
-                            subtitle = uiState.discoverSubtitle ?: "Cosmetics",
+                        TopRightVanityActionCard(
+                            discoverTitle = uiState.discoverTitle,
+                            discoverSubtitle = uiState.discoverSubtitle ?: "Cosmetics Catalog",
                             backgroundColor = uiState.discoverColor,
                             icon = uiState.icon,
-                            onClick = uiState.onDiscoverClick
+                            categoryProgress = uiState.categoryProgress,
+                            onDiscoverClick = uiState.onDiscoverClick
                         )
                     } else {
                         Surface(
@@ -519,7 +688,12 @@ private fun ArchiveVerticalCard(
                     }
                 }
 
-                if (uiState.breakdown.isNotEmpty()) {
+                if (uiState.categoryProgress.isNotEmpty()) {
+                    CategoryCompletionCapsuleBar(
+                        items = uiState.categoryProgress,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                } else if (uiState.breakdown.isNotEmpty()) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
