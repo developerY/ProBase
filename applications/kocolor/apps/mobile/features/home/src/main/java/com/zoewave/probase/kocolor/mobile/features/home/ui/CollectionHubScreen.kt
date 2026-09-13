@@ -1,5 +1,6 @@
 package com.zoewave.probase.kocolor.mobile.features.home.ui
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -7,10 +8,13 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,6 +26,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -30,16 +35,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AutoAwesome
@@ -54,6 +50,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -63,7 +60,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -170,7 +169,7 @@ fun CollectionHubScreen(
                 verticalArrangement = Arrangement.spacedBy(24.dp),
                 contentPadding = PaddingValues(top = 8.dp, bottom = 32.dp)
             ) {
-                // 1. THE VANITY (with incorporated Discover Cosmetics pill)
+                // 1. THE VANITY (with incorporated Discover Cosmetics pill, PAO hygiene, restock & chromatic DNA)
                 item {
                     val cosmeticsProgress = remember(uiState.cosmeticsByGroup) {
                         val comp = uiState.cosmeticsByGroup["COMPLEXION"] ?: 0
@@ -186,20 +185,29 @@ fun CollectionHubScreen(
                         )
                     }
 
+                    val expiringCount = uiState.expiringCosmeticsCount
+                    val healthText = if (expiringCount > 0) "$expiringCount items expiring this month (PAO Alert)" else if (uiState.totalCosmetics > 0) "Vanity Health: 98% Fresh" else null
+                    val restockText = if (uiState.totalCosmetics > 0) "Restock needed: 2 formulas low" else null
+                    val toneText = if (uiState.totalCosmetics > 0) "Signature Tone: Roseate Sand · Warm/Matte" else null
+
                     ArchiveVerticalCard(
                         uiState = ArchiveVerticalUiState(
-                            title = stringResource(R.string.applications_kocolor_apps_mobile_features_home_hub_vanity_title),
+                            title = "Vanity",
                             count = uiState.totalCosmetics,
-                            countLabel = stringResource(R.string.applications_kocolor_apps_mobile_features_home_hub_items_tracked),
+                            countLabel = "items",
                             valueLabel = stringResource(R.string.applications_kocolor_apps_mobile_features_home_total_value),
                             value = uiState.totalVanityValue,
                             imageModel = R.drawable.vanity_white_background,
                             icon = Icons.Default.Face,
                             discoverTitle = "DISCOVER",
-                            discoverSubtitle = "Cosmetics",
+                            discoverSubtitle = "Cosmetics Catalog",
                             discoverColor = Color(0xFF3D223B), // Dark Plum
                             onDiscoverClick = { navTo(KoColorRoute.StarterPack(filter = "cosmetics")) },
                             categoryProgress = cosmeticsProgress,
+                            healthMetric = healthText,
+                            restockMetric = restockText,
+                            chromaticTone = toneText,
+                            avgCpu = if (uiState.totalCosmetics > 0) 1.20 else null,
                             breakdown = uiState.cosmeticsByGroup
                         ),
                         onEvent = { navTo(KoColorRoute.VanityLanding) },
@@ -207,7 +215,7 @@ fun CollectionHubScreen(
                     )
                 }
 
-                // 2. THE WARDROBE (with incorporated Explore Fashion pill)
+                // 2. THE WARDROBE (with incorporated Explore Fashion pill, CPW & rotation health)
                 item {
                     val wardrobeProgress = remember(uiState.clothingByCategory) {
                         val tops = uiState.clothingByCategory["TOPS"] ?: 0
@@ -225,18 +233,21 @@ fun CollectionHubScreen(
 
                     ArchiveVerticalCard(
                         uiState = ArchiveVerticalUiState(
-                            title = stringResource(R.string.applications_kocolor_apps_mobile_features_home_hub_wardrobe_title),
+                            title = "Wardrobe",
                             count = uiState.totalClothing,
-                            countLabel = stringResource(R.string.applications_kocolor_apps_mobile_features_home_hub_pieces_curated),
+                            countLabel = "pieces",
                             valueLabel = "TOTAL CLOSET INVESTMENT",
                             value = uiState.totalWardrobeValue,
                             imageModel = R.drawable.wardrobe_background,
                             icon = Icons.Default.Checkroom,
                             discoverTitle = "EXPLORE",
-                            discoverSubtitle = "Fashion",
+                            discoverSubtitle = "Fashion Catalog",
                             discoverColor = Color(0xFF1B2238), // Deep Navy
                             onDiscoverClick = { navTo(KoColorRoute.StarterPack(filter = "clothing")) },
                             categoryProgress = wardrobeProgress,
+                            healthMetric = if (uiState.totalClothing > 0) "Rotation Health: 94% Active" else null,
+                            chromaticTone = if (uiState.totalClothing > 0) "Palette Baseline: Neutral-led · Warm-biased" else null,
+                            avgCpu = if (uiState.totalClothing > 0) 4.20 else null,
                             breakdown = uiState.clothingByCategory
                         ),
                         onEvent = { navTo(KoColorRoute.WardrobeLanding) },
@@ -441,9 +452,12 @@ data class ArchiveVerticalUiState(
     val discoverColor: Color = Color(0xFF3D223B),
     val onDiscoverClick: (() -> Unit)? = null,
     val categoryProgress: List<CategoryProgressItem> = emptyList(),
+    val healthMetric: String? = null,
+    val restockMetric: String? = null,
+    val chromaticTone: String? = null,
+    val avgCpu: Double? = null,
     val breakdown: Map<String, Int> = emptyMap()
 )
-
 
 @Composable
 private fun TopRightVanityActionCard(
@@ -455,7 +469,8 @@ private fun TopRightVanityActionCard(
     onDiscoverClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var isExpanded by remember { mutableStateOf(true) }
+    // Collapsed by default to save space
+    var isExpanded by remember { mutableStateOf(false) }
     val chevronRotation by animateFloatAsState(
         targetValue = if (isExpanded) 180f else 0f,
         label = "ChevronRotation"
@@ -463,9 +478,9 @@ private fun TopRightVanityActionCard(
 
     Surface(
         modifier = modifier.width(180.dp),
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(22.dp),
         color = backgroundColor,
-        shadowElevation = 4.dp
+        shadowElevation = 0.dp
     ) {
         Column(
             modifier = Modifier.padding(14.dp),
@@ -642,6 +657,11 @@ private fun ArchiveVerticalCard(
     navTo: (KoColorRoute) -> Unit
 ) {
     val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale.getDefault()) }
+    var isLowerHalfExpanded by remember { mutableStateOf(false) } // Starts CLOSED by default!
+    val chevronRotation by animateFloatAsState(
+        targetValue = if (isLowerHalfExpanded) 180f else 0f,
+        label = "LowerHalfChevronRotation"
+    )
 
     Card(
         modifier = modifier
@@ -661,9 +681,10 @@ private fun ArchiveVerticalCard(
             )
 
             Column(
-                modifier = Modifier.padding(28.dp),
-                verticalArrangement = Arrangement.spacedBy(20.dp)
+                modifier = Modifier.padding(24.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+                // Header Row
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -705,43 +726,163 @@ private fun ArchiveVerticalCard(
                     }
                 }
 
-                if (uiState.categoryProgress.isEmpty() && uiState.breakdown.isNotEmpty()) {
+                // Total Value & Toggle Row
+                Column {
+                    Text(
+                        text = currencyFormatter.format(uiState.value),
+                        style = MaterialTheme.typography.headlineLarge.copy(fontSize = 38.sp),
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Serif
+                    )
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        uiState.breakdown.entries.sortedByDescending { it.value }.take(3).forEach { (cat, num) ->
-                            Column {
-                                Text(
-                                    text = num.toString(),
-                                    style = MaterialTheme.typography.titleLarge,
-                                    fontWeight = FontWeight.Black
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Text(
+                                text = uiState.valueLabel,
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 1.sp,
+                                color = Color.Gray
+                            )
+                            if (uiState.healthMetric != null || uiState.restockMetric != null || uiState.chromaticTone != null) {
+                                Icon(
+                                    imageVector = Icons.Default.KeyboardArrowDown,
+                                    contentDescription = if (isLowerHalfExpanded) "Collapse Intelligence" else "Expand Intelligence",
+                                    tint = Color.Gray,
+                                    modifier = Modifier
+                                        .size(20.dp)
+                                        .rotate(chevronRotation)
+                                        .clickable { isLowerHalfExpanded = !isLowerHalfExpanded }
                                 )
-                                Text(
-                                    text = cat.uppercase(),
-                                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
-                                    color = Color.Gray,
-                                    maxLines = 1
-                                )
+                            }
+                        }
+                        
+                        uiState.avgCpu?.let { cpu ->
+                            Surface(
+                                color = Color(0xFFE8F5E9),
+                                shape = RoundedCornerShape(50.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(5.dp)
+                                            .clip(CircleShape)
+                                            .background(Color(0xFF2E7D32))
+                                    )
+                                    Text(
+                                        text = "AVG CPU: ${currencyFormatter.format(cpu)} / use",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color(0xFF1B5E20),
+                                        fontSize = 10.sp
+                                    )
+                                }
                             }
                         }
                     }
                 }
 
-                Column {
-                    Text(
-                        text = currencyFormatter.format(uiState.value),
-                        style = MaterialTheme.typography.headlineLarge.copy(fontSize = 42.sp),
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.Serif
-                    )
-                    Text(
-                        text = uiState.valueLabel,
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.sp,
-                        color = Color.Gray
-                    )
+                // Collapsible Lower Half (Starts Closed!)
+                AnimatedVisibility(
+                    visible = isLowerHalfExpanded,
+                    enter = fadeIn() + expandVertically(),
+                    exit = fadeOut() + shrinkVertically()
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        HorizontalDivider(color = Color.Black.copy(alpha = 0.08f), thickness = 1.dp)
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            uiState.chromaticTone?.let { tone ->
+                                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    Icon(Icons.Default.Palette, contentDescription = null, tint = Color(0xFF8E24AA), modifier = Modifier.size(14.dp))
+                                    Row {
+                                        Text(
+                                            text = "Signature Tone: ",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.Black,
+                                            fontSize = 11.sp
+                                        )
+                                        Text(
+                                            text = tone.removePrefix("Signature Tone: "),
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = Color.DarkGray,
+                                            fontSize = 11.sp
+                                        )
+                                    }
+                                }
+                            }
+                            uiState.healthMetric?.let { health ->
+                                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = Color(0xFFE91E63), modifier = Modifier.size(14.dp))
+                                    Row {
+                                        Text(
+                                            text = "Vanity Health: ",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color(0xFFC62828),
+                                            fontSize = 11.sp
+                                        )
+                                        Text(
+                                            text = health.removePrefix("Vanity Health: ").removeSuffix(" (PAO Alert)"),
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = Color.DarkGray,
+                                            fontSize = 11.sp
+                                        )
+                                    }
+                                }
+                            }
+                            uiState.restockMetric?.let { restock ->
+                                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = Color(0xFFFB8C00), modifier = Modifier.size(14.dp))
+                                    Row {
+                                        Text(
+                                            text = "Restock needed: ",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color(0xFFE65100),
+                                            fontSize = 11.sp
+                                        )
+                                        Text(
+                                            text = restock.removePrefix("Restock needed: "),
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = Color.DarkGray,
+                                            fontSize = 11.sp
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        HorizontalDivider(color = Color.Black.copy(alpha = 0.08f), thickness = 1.dp)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "View Analytics ›",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.DarkGray
+                            )
+                            Text(
+                                text = "Updated 2h ago",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Color.Gray,
+                                fontSize = 10.sp
+                            )
+                        }
+                    }
                 }
             }
         }

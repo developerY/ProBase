@@ -213,3 +213,6 @@ A complete file-by-file breakdown detailing the exact responsibilities of all 26
 
 - **Utilities (`ui/util/`):**
     - `FreshnessLogic.kt`: Garment freshness, recency decay, and rotation degradation calculator.
+
+- **App Icon Design:**
+    - [`Icon_Design.md`](file:///Users/developer/AndroidStudioProjects/ProBase/applications/kocolor/docs/Analytics/Icon_Design.md): Official 1024x1024 high-res luxury KoColor Atelier app icon design and spec.
