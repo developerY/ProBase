@@ -1,22 +1,22 @@
 package com.zoewave.probase.kocolor.features.starterpack.ui.synchub
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
@@ -63,14 +63,16 @@ fun SyncHubScreen(
         val baseFiltered = if (filter.isNullOrBlank()) {
             uiState.availablePacks
         } else {
-            val fashionKeywords = listOf("fashion", "outerwear", "active", "dresses")
+            val fashionKeywords = listOf("fashion", "top", "bottom", "skirt", "pants", "shoes", "sneakers", "boots", "outerwear", "active", "dress")
             if (filter.lowercase() == "clothing") {
                 uiState.availablePacks.filter { pack -> 
-                    fashionKeywords.any { pack.id.lowercase().contains(it) } 
+                    fashionKeywords.any { pack.id.lowercase().contains(it) || pack.name.lowercase().contains(it) } || pack.id == "com.kocolor.pack.fashion.complete"
                 }
             } else if (filter.lowercase() == "cosmetics") {
                 uiState.availablePacks.filter { pack -> 
-                    !fashionKeywords.any { pack.id.lowercase().contains(it) } 
+                    // Exclude fashion items AND exclude the complete fashion hero pack!
+                    pack.id != "com.kocolor.pack.fashion.complete" &&
+                    !fashionKeywords.any { pack.id.lowercase().contains(it) || pack.name.lowercase().contains(it) || pack.description.lowercase().contains(it) }
                 }
             } else {
                 uiState.availablePacks
@@ -105,8 +107,9 @@ fun SyncHubScreen(
             }
             
             baseFiltered.filter { pack ->
-                pack.id == "com.kocolor.pack.cosmetics.complete" || 
-                pack.id == "com.kocolor.pack.fashion.complete" || 
+                if (filter?.lowercase() == "clothing" && pack.id == "com.kocolor.pack.fashion.complete") return@filter true
+                if (filter?.lowercase() != "clothing" && pack.id == "com.kocolor.pack.cosmetics.complete") return@filter true
+                
                 keywords.any { kw -> 
                     pack.id.lowercase().contains(kw) || 
                     pack.name.lowercase().contains(kw) ||
@@ -176,10 +179,9 @@ fun SyncHubScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .horizontalScroll(rememberScrollState())
-                        .padding(vertical = 8.dp),
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Spacer(Modifier.width(16.dp))
                     categories.forEach { cat ->
                         FilterChip(
                             selected = uiState.selectedCategory == cat,
@@ -210,28 +212,30 @@ fun SyncHubScreen(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize(),
-            contentPadding = PaddingValues(16.dp),
+            contentPadding = PaddingValues(bottom = 120.dp, start = 16.dp, end = 16.dp, top = 16.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            // Hero Section: Complete Collection
             val heroPackId = if (filter?.lowercase() == "clothing") "com.kocolor.pack.fashion.complete" else "com.kocolor.pack.cosmetics.complete"
-            val heroPack = filteredAvailablePacks.find { it.id == heroPackId }
             
-            if (heroPack != null) {
-                item {
-                    HeroPackageCard(
-                        pack = heroPack,
-                        status = uiState.installedPacks.find { it.packId == heroPack.id }?.status ?: PackStatus.AVAILABLE,
-                        onImportClick = { 
-                            onNavigateTo(KoColorRoute.PackPreview(
-                                packId = heroPack.id, 
-                                sha256 = heroPack.sha256, 
-                                publisher = heroPack.publisher,
-                                categoryFilter = filter
-                            )) 
-                        },
-                        onInfoClick = { selectedInfoPack = heroPack }
-                    )
+            // Hero Section: Complete Collection (Always visible, scrolls with list)
+            if (filter?.lowercase() != "clothing") {
+                val heroPack = uiState.availablePacks.find { it.id == heroPackId }
+                if (heroPack != null) {
+                    item {
+                        HeroPackageCard(
+                            pack = heroPack,
+                            status = uiState.installedPacks.find { it.packId == heroPack.id }?.status ?: PackStatus.AVAILABLE,
+                            onImportClick = { 
+                                onNavigateTo(KoColorRoute.PackPreview(
+                                    packId = heroPack.id, 
+                                    sha256 = heroPack.sha256, 
+                                    publisher = heroPack.publisher,
+                                    categoryFilter = filter
+                                )) 
+                            },
+                            onInfoClick = { selectedInfoPack = heroPack }
+                        )
+                    }
                 }
             }
 
