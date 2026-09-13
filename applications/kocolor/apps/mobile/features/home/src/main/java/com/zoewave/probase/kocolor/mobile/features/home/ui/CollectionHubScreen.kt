@@ -3,6 +3,7 @@ package com.zoewave.probase.kocolor.mobile.features.home.ui
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -28,12 +30,23 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Checkroom
 import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Search
@@ -160,11 +173,16 @@ fun CollectionHubScreen(
                 // 1. THE VANITY (with incorporated Discover Cosmetics pill)
                 item {
                     val cosmeticsProgress = remember(uiState.cosmeticsByGroup) {
+                        val comp = uiState.cosmeticsByGroup["COMPLEXION"] ?: 0
+                        val eyes = uiState.cosmeticsByGroup["EYES & BROWS"] ?: 0
+                        val nails = uiState.cosmeticsByGroup["NAILS"] ?: 0
+                        val lips = uiState.cosmeticsByGroup["LIPS"] ?: 0
+
                         listOf(
-                            CategoryProgressItem("COMP", uiState.cosmeticsByGroup["COMPLEXION"] ?: 58, 80, Color(0xFFD4AF37)),
-                            CategoryProgressItem("EYES", uiState.cosmeticsByGroup["EYES & BROWS"] ?: 20, 35, Color(0xFF4A2B4B)),
-                            CategoryProgressItem("NAILS", uiState.cosmeticsByGroup["NAILS"] ?: 18, 30, Color(0xFF8B263E)),
-                            CategoryProgressItem("LIPS", uiState.cosmeticsByGroup["LIPS"] ?: 21, 32, Color(0xFFC25975))
+                            CategoryProgressItem("COMP", comp, if (comp > 0) (comp * 1.4f).toInt().coerceAtLeast(20) else 20, Color(0xFFD4AF37)),
+                            CategoryProgressItem("EYES", eyes, if (eyes > 0) (eyes * 1.5f).toInt().coerceAtLeast(15) else 15, Color(0xFF4A2B4B)),
+                            CategoryProgressItem("NAILS", nails, if (nails > 0) (nails * 1.5f).toInt().coerceAtLeast(10) else 10, Color(0xFF8B263E)),
+                            CategoryProgressItem("LIPS", lips, if (lips > 0) (lips * 1.5f).toInt().coerceAtLeast(15) else 15, Color(0xFFC25975))
                         )
                     }
 
@@ -192,11 +210,16 @@ fun CollectionHubScreen(
                 // 2. THE WARDROBE (with incorporated Explore Fashion pill)
                 item {
                     val wardrobeProgress = remember(uiState.clothingByCategory) {
+                        val tops = uiState.clothingByCategory["TOPS"] ?: 0
+                        val bots = uiState.clothingByCategory["BOTTOMS"] ?: 0
+                        val shoes = uiState.clothingByCategory["SHOES"] ?: 0
+                        val outer = uiState.clothingByCategory["OUTERWEAR"] ?: 0
+
                         listOf(
-                            CategoryProgressItem("TOPS", uiState.clothingByCategory["TOPS"] ?: 16, 25, Color(0xFF3B5249)),
-                            CategoryProgressItem("BOTS", uiState.clothingByCategory["BOTTOMS"] ?: 9, 15, Color(0xFF415A77)),
-                            CategoryProgressItem("SHOES", uiState.clothingByCategory["SHOES"] ?: 7, 12, Color(0xFF774936)),
-                            CategoryProgressItem("OUTER", uiState.clothingByCategory["OUTERWEAR"] ?: 6, 10, Color(0xFF8D5B4C))
+                            CategoryProgressItem("TOPS", tops, if (tops > 0) (tops * 1.5f).toInt().coerceAtLeast(15) else 15, Color(0xFF3B5249)),
+                            CategoryProgressItem("BOTS", bots, if (bots > 0) (bots * 1.5f).toInt().coerceAtLeast(10) else 10, Color(0xFF415A77)),
+                            CategoryProgressItem("SHOES", shoes, if (shoes > 0) (shoes * 1.5f).toInt().coerceAtLeast(8) else 8, Color(0xFF774936)),
+                            CategoryProgressItem("OUTER", outer, if (outer > 0) (outer * 1.5f).toInt().coerceAtLeast(6) else 6, Color(0xFF8D5B4C))
                         )
                     }
 
@@ -421,64 +444,6 @@ data class ArchiveVerticalUiState(
     val breakdown: Map<String, Int> = emptyMap()
 )
 
-@Composable
-private fun CategoryCompletionCapsuleBar(
-    items: List<CategoryProgressItem>,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        modifier = modifier,
-        shape = RoundedCornerShape(50),
-        color = Color.White,
-        shadowElevation = 2.dp,
-        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFECECEC))
-    ) {
-        Row(
-            modifier = Modifier
-                .horizontalScroll(rememberScrollState())
-                .padding(horizontal = 12.dp, vertical = 6.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items.forEach { progress ->
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(5.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(7.dp)
-                            .clip(CircleShape)
-                            .background(progress.color)
-                    )
-                    Text(
-                        text = progress.label.uppercase(),
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.DarkGray,
-                        fontSize = 9.sp,
-                        letterSpacing = 0.5.sp
-                    )
-                    Row(verticalAlignment = Alignment.Bottom) {
-                        Text(
-                            text = "${progress.owned}",
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = Color(0xFF3D223B),
-                            fontSize = 10.sp
-                        )
-                        Text(
-                            text = "/${progress.target}",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = Color.Gray,
-                            fontSize = 8.sp
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
 
 @Composable
 private fun TopRightVanityActionCard(
@@ -487,52 +452,63 @@ private fun TopRightVanityActionCard(
     backgroundColor: Color,
     icon: ImageVector,
     categoryProgress: List<CategoryProgressItem>,
-    onDiscoverClick: () -> Unit
+    onDiscoverClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
+    var isExpanded by remember { mutableStateOf(true) }
+    val chevronRotation by animateFloatAsState(
+        targetValue = if (isExpanded) 180f else 0f,
+        label = "ChevronRotation"
+    )
+
     Surface(
-        shape = RoundedCornerShape(20.dp),
-        color = Color.White,
-        shadowElevation = 3.dp,
-        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFF0F0F0))
+        modifier = modifier.width(180.dp),
+        shape = RoundedCornerShape(24.dp),
+        color = backgroundColor,
+        shadowElevation = 4.dp
     ) {
         Column(
-            modifier = Modifier.padding(6.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier.padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            // Top: Dark Pill Button
-            Surface(
-                onClick = onDiscoverClick,
-                shape = RoundedCornerShape(16.dp),
-                color = backgroundColor
+            // Top Header: Dark Pill Button + Expand Toggle
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onDiscoverClick() },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Row(
-                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.weight(1f)
                 ) {
                     Surface(
                         shape = CircleShape,
                         color = Color.White.copy(alpha = 0.2f),
-                        modifier = Modifier.size(22.dp)
+                        modifier = Modifier.size(28.dp)
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             Icon(
                                 imageVector = icon,
                                 contentDescription = null,
                                 tint = Color.White,
-                                modifier = Modifier.size(13.dp)
+                                modifier = Modifier.size(16.dp)
                             )
                         }
                     }
                     Column {
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(3.dp)
+                        ) {
                             Text(
                                 text = discoverTitle.uppercase(),
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.ExtraBold,
                                 color = Color.White,
-                                fontSize = 9.sp,
+                                fontSize = 10.sp,
                                 letterSpacing = 0.8.sp
                             )
                             Icon(
@@ -545,43 +521,63 @@ private fun TopRightVanityActionCard(
                         Text(
                             text = discoverSubtitle,
                             style = MaterialTheme.typography.labelSmall,
-                            color = Color.White.copy(alpha = 0.85f),
-                            fontSize = 8.sp
+                            color = Color.White.copy(alpha = 0.8f),
+                            fontSize = 8.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
+                }
+
+                IconButton(
+                    onClick = { isExpanded = !isExpanded },
+                    modifier = Modifier.size(20.dp)
+                ) {
                     Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = null,
+                        imageVector = Icons.Default.KeyboardArrowDown,
+                        contentDescription = if (isExpanded) "Collapse" else "Expand",
                         tint = Color.White.copy(alpha = 0.8f),
-                        modifier = Modifier
-                            .size(12.dp)
-                            .rotate(180f)
+                        modifier = Modifier.rotate(chevronRotation)
                     )
                 }
             }
 
-            // Bottom: Row of Category Progress Pills (COMP 58/80, EYES 20/35, NAILS 18/25)
-            if (categoryProgress.isNotEmpty()) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    verticalAlignment = Alignment.CenterVertically
+            // Divider Line
+            HorizontalDivider(
+                color = Color.White.copy(alpha = 0.15f),
+                thickness = 1.dp
+            )
+
+            // Collapsible / Vertically Scrollable Details Section
+            AnimatedVisibility(
+                visible = isExpanded,
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically()
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 160.dp)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    categoryProgress.take(3).forEach { progress ->
-                        Surface(
-                            shape = RoundedCornerShape(12.dp),
-                            color = Color(0xFFF7F7F7)
+                    categoryProgress.forEach { progress ->
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
-                            Column(
-                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(3.dp)
+                                    horizontalArrangement = Arrangement.spacedBy(5.dp),
+                                    modifier = Modifier.weight(1f)
                                 ) {
                                     Box(
                                         modifier = Modifier
-                                            .size(5.dp)
+                                            .size(6.dp)
                                             .clip(CircleShape)
                                             .background(progress.color)
                                     )
@@ -589,8 +585,11 @@ private fun TopRightVanityActionCard(
                                         text = progress.label.uppercase(),
                                         style = MaterialTheme.typography.labelSmall,
                                         fontWeight = FontWeight.Bold,
-                                        color = Color.DarkGray,
-                                        fontSize = 7.sp
+                                        color = Color.White.copy(alpha = 0.9f),
+                                        fontSize = 8.sp,
+                                        letterSpacing = 0.5.sp,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
                                     )
                                 }
                                 Row(verticalAlignment = Alignment.Bottom) {
@@ -598,16 +597,34 @@ private fun TopRightVanityActionCard(
                                         text = "${progress.owned}",
                                         style = MaterialTheme.typography.labelSmall,
                                         fontWeight = FontWeight.ExtraBold,
-                                        color = Color(0xFF3D223B),
-                                        fontSize = 9.sp
+                                        color = Color.White,
+                                        fontSize = 10.sp
                                     )
                                     Text(
                                         text = "/${progress.target}",
                                         style = MaterialTheme.typography.labelSmall,
-                                        color = Color.Gray,
-                                        fontSize = 7.sp
+                                        color = Color.White.copy(alpha = 0.6f),
+                                        fontSize = 8.sp
                                     )
                                 }
+                            }
+
+                            // Progress Bar
+                            val fillRatio = if (progress.target > 0) (progress.owned.toFloat() / progress.target.toFloat()).coerceIn(0f, 1f) else 0f
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(3.dp)
+                                    .clip(CircleShape)
+                                    .background(Color.White.copy(alpha = 0.15f))
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth(fraction = fillRatio)
+                                        .fillMaxHeight()
+                                        .clip(CircleShape)
+                                        .background(progress.color)
+                                )
                             }
                         }
                     }
@@ -688,21 +705,16 @@ private fun ArchiveVerticalCard(
                     }
                 }
 
-                if (uiState.categoryProgress.isNotEmpty()) {
-                    CategoryCompletionCapsuleBar(
-                        items = uiState.categoryProgress,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                } else if (uiState.breakdown.isNotEmpty()) {
+                if (uiState.categoryProgress.isEmpty() && uiState.breakdown.isNotEmpty()) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         uiState.breakdown.entries.sortedByDescending { it.value }.take(3).forEach { (cat, num) ->
                             Column {
                                 Text(
                                     text = num.toString(),
-                                    style = MaterialTheme.typography.titleMedium,
+                                    style = MaterialTheme.typography.titleLarge,
                                     fontWeight = FontWeight.Black
                                 )
                                 Text(
