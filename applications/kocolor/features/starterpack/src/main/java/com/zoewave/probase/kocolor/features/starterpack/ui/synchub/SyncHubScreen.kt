@@ -168,6 +168,29 @@ fun SyncHubScreen(
                     onBack = onBack
                 )
                 
+                // Top Hero Card
+                if (filter?.lowercase() != "clothing") {
+                    val heroPackId = "com.kocolor.pack.cosmetics.complete"
+                    val heroPack = uiState.availablePacks.find { it.id == heroPackId }
+                    if (heroPack != null) {
+                        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                            HeroPackageCard(
+                                pack = heroPack,
+                                status = uiState.installedPacks.find { it.packId == heroPack.id }?.status ?: PackStatus.AVAILABLE,
+                                onImportClick = { 
+                                    onNavigateTo(KoColorRoute.PackPreview(
+                                        packId = heroPack.id, 
+                                        sha256 = heroPack.sha256, 
+                                        publisher = heroPack.publisher,
+                                        categoryFilter = filter
+                                    )) 
+                                },
+                                onInfoClick = { selectedInfoPack = heroPack }
+                            )
+                        }
+                    }
+                }
+                
                 // Filter Chips
                 val categories = if (filter?.lowercase() == "clothing") {
                     listOf("ALL", "TOPS", "BOTTOMS", "DRESSES", "OUTERWEAR", "ACTIVEWEAR", "SHOES")
@@ -212,32 +235,10 @@ fun SyncHubScreen(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize(),
-            contentPadding = PaddingValues(bottom = 120.dp, start = 16.dp, end = 16.dp, top = 16.dp),
+            contentPadding = PaddingValues(bottom = 120.dp, start = 16.dp, end = 16.dp, top = 8.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             val heroPackId = if (filter?.lowercase() == "clothing") "com.kocolor.pack.fashion.complete" else "com.kocolor.pack.cosmetics.complete"
-            
-            // Hero Section: Complete Collection (Always visible, scrolls with list)
-            if (filter?.lowercase() != "clothing") {
-                val heroPack = uiState.availablePacks.find { it.id == heroPackId }
-                if (heroPack != null) {
-                    item {
-                        HeroPackageCard(
-                            pack = heroPack,
-                            status = uiState.installedPacks.find { it.packId == heroPack.id }?.status ?: PackStatus.AVAILABLE,
-                            onImportClick = { 
-                                onNavigateTo(KoColorRoute.PackPreview(
-                                    packId = heroPack.id, 
-                                    sha256 = heroPack.sha256, 
-                                    publisher = heroPack.publisher,
-                                    categoryFilter = filter
-                                )) 
-                            },
-                            onInfoClick = { selectedInfoPack = heroPack }
-                        )
-                    }
-                }
-            }
 
             // Section Header
             item {
