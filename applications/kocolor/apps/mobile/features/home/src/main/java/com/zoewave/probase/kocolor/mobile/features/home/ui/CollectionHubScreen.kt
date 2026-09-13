@@ -635,20 +635,33 @@ private fun TopRightVanityActionCard(
                                         overflow = TextOverflow.Ellipsis
                                     )
                                 }
-                                Row(verticalAlignment = Alignment.Bottom) {
+                                Row(
+                                    verticalAlignment = Alignment.Bottom,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    val percent = if (progress.target > 0) ((progress.owned.toFloat() / progress.target.toFloat()) * 100).toInt() else 0
                                     Text(
-                                        text = "${progress.owned}",
+                                        text = "$percent%",
                                         style = MaterialTheme.typography.labelSmall,
                                         fontWeight = FontWeight.ExtraBold,
                                         color = Color.White,
                                         fontSize = 10.sp
                                     )
-                                    Text(
-                                        text = "/${progress.target}",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = Color.White.copy(alpha = 0.6f),
-                                        fontSize = 8.sp
-                                    )
+                                    Row(verticalAlignment = Alignment.Bottom) {
+                                        Text(
+                                            text = "${progress.owned}",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.White.copy(alpha = 0.9f),
+                                            fontSize = 9.sp
+                                        )
+                                        Text(
+                                            text = "/${progress.target}",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = Color.White.copy(alpha = 0.6f),
+                                            fontSize = 7.sp
+                                        )
+                                    }
                                 }
                             }
 
