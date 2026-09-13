@@ -159,21 +159,30 @@ fun SyncHubScreen(
     Scaffold(
         modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing),
         topBar = {
-            Column {
-                val hubTitle = if (filter?.lowercase() == "clothing") "Explore Fashion" else "Discover Cosmetics"
-                GlowSyncTopAppBar(
-                    title = hubTitle,
-                    query = uiState.searchQuery,
-                    onQueryChange = { onEvent(StarterPackEvent.SearchQueryChanged(it)) },
-                    onBack = onBack
-                )
-                
-                // Top Hero Card
-                if (filter?.lowercase() != "clothing") {
-                    val heroPackId = "com.kocolor.pack.cosmetics.complete"
-                    val heroPack = uiState.availablePacks.find { it.id == heroPackId }
-                    if (heroPack != null) {
-                        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+            val hubTitle = if (filter?.lowercase() == "clothing") "Explore Fashion" else "Discover Cosmetics"
+            GlowSyncTopAppBar(
+                title = hubTitle,
+                query = uiState.searchQuery,
+                onQueryChange = { onEvent(StarterPackEvent.SearchQueryChanged(it)) },
+                onBack = onBack
+            )
+        }
+    ) { padding ->
+        LazyColumn(
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize(),
+            contentPadding = PaddingValues(bottom = 120.dp, top = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp)
+        ) {
+            val heroPackId = if (filter?.lowercase() == "clothing") "com.kocolor.pack.fashion.complete" else "com.kocolor.pack.cosmetics.complete"
+
+            // Top Hero Card (Scrolls with content)
+            if (filter?.lowercase() != "clothing") {
+                val heroPack = uiState.availablePacks.find { it.id == heroPackId }
+                if (heroPack != null) {
+                    item {
+                        Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                             HeroPackageCard(
                                 pack = heroPack,
                                 status = uiState.installedPacks.find { it.packId == heroPack.id }?.status ?: PackStatus.AVAILABLE,
@@ -190,8 +199,10 @@ fun SyncHubScreen(
                         }
                     }
                 }
-                
-                // Filter Chips
+            }
+
+            // Filter Chips
+            item {
                 val categories = if (filter?.lowercase() == "clothing") {
                     listOf("ALL", "TOPS", "BOTTOMS", "DRESSES", "OUTERWEAR", "ACTIVEWEAR", "SHOES")
                 } else {
@@ -202,7 +213,7 @@ fun SyncHubScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .horizontalScroll(rememberScrollState())
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                        .padding(horizontal = 16.dp, vertical = 4.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     categories.forEach { cat ->
@@ -229,16 +240,6 @@ fun SyncHubScreen(
                     Spacer(Modifier.width(16.dp))
                 }
             }
-        }
-    ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .padding(padding)
-                .fillMaxSize(),
-            contentPadding = PaddingValues(bottom = 120.dp, start = 16.dp, end = 16.dp, top = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
-        ) {
-            val heroPackId = if (filter?.lowercase() == "clothing") "com.kocolor.pack.fashion.complete" else "com.kocolor.pack.cosmetics.complete"
 
             // Section Header
             item {
@@ -247,7 +248,7 @@ fun SyncHubScreen(
                     style = MaterialTheme.typography.titleLarge,
                     fontFamily = serifFont,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(top = 8.dp)
+                    modifier = Modifier.padding(top = 8.dp, start = 16.dp, end = 16.dp)
                 )
             }
 
