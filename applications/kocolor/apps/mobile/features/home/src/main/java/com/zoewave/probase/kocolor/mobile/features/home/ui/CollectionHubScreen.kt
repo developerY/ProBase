@@ -173,24 +173,24 @@ fun CollectionHubScreen(
                 // 1. THE VANITY (with incorporated Discover Cosmetics pill, PAO hygiene, restock & chromatic DNA)
                 item {
                     val cosmeticsProgress = remember(uiState.cosmeticsByGroup) {
-                        val comp = uiState.cosmeticsByGroup.entries.find { it.key.contains("COMP", ignoreCase = true) }?.value ?: 0
-                        val eyes = uiState.cosmeticsByGroup.entries.find { it.key.contains("EYE", ignoreCase = true) }?.value ?: 0
-                        val nails = uiState.cosmeticsByGroup.entries.find { it.key.contains("NAIL", ignoreCase = true) }?.value ?: 0
-                        val lips = uiState.cosmeticsByGroup.entries.find { it.key.contains("LIP", ignoreCase = true) }?.value ?: 0
-                        val prep = uiState.cosmeticsByGroup.entries.find { it.key.contains("PREP", ignoreCase = true) || it.key.contains("SKIN", ignoreCase = true) }?.value ?: 0
-                        val hair = uiState.cosmeticsByGroup.entries.find { it.key.contains("HAIR", ignoreCase = true) }?.value ?: 0
-                        val oral = uiState.cosmeticsByGroup.entries.find { it.key.contains("ORAL", ignoreCase = true) }?.value ?: 0
-                        val body = uiState.cosmeticsByGroup.entries.find { it.key.contains("BODY", ignoreCase = true) || it.key.contains("FRAG", ignoreCase = true) }?.value ?: 0
+                        val comp = uiState.cosmeticsByGroup.entries.filter { it.key.contains("COMPLEXION", ignoreCase = true) || it.key.contains("DIMENSION", ignoreCase = true) }.sumOf { it.value }
+                        val eyes = uiState.cosmeticsByGroup.entries.filter { it.key.contains("EYE", ignoreCase = true) || it.key.startsWith("TOOL", ignoreCase = true) }.sumOf { it.value }
+                        val nails = uiState.cosmeticsByGroup.entries.filter { it.key.contains("NAIL", ignoreCase = true) }.sumOf { it.value }
+                        val lips = uiState.cosmeticsByGroup.entries.filter { it.key.contains("LIP", ignoreCase = true) }.sumOf { it.value }
+                        val prep = uiState.cosmeticsByGroup.entries.filter { it.key.contains("PREP", ignoreCase = true) || it.key.contains("SKIN", ignoreCase = true) }.sumOf { it.value }
+                        val hair = uiState.cosmeticsByGroup.entries.filter { it.key.contains("HAIR", ignoreCase = true) }.sumOf { it.value }
+                        val oral = uiState.cosmeticsByGroup.entries.filter { it.key.contains("ORAL", ignoreCase = true) }.sumOf { it.value }
+                        val body = uiState.cosmeticsByGroup.entries.filter { it.key.startsWith("HYGIENE", ignoreCase = true) || it.key.contains("FRAGRANCE", ignoreCase = true) || it.key.contains("GROOMING", ignoreCase = true) }.sumOf { it.value }
 
                         listOf(
-                            CategoryProgressItem("COMP", comp, 26, Color(0xFFD4AF37)),
-                            CategoryProgressItem("EYES", eyes, 63, Color(0xFF4A2B4B)),
-                            CategoryProgressItem("NAILS", nails, 15, Color(0xFF8B263E)),
-                            CategoryProgressItem("LIPS", lips, 24, Color(0xFFC25975)),
-                            CategoryProgressItem("PREP", prep, 18, Color(0xFF3B5249)),
-                            CategoryProgressItem("HAIR", hair, 14, Color(0xFF415A77)),
+                            CategoryProgressItem("COMP", comp, 27, Color(0xFFD4AF37)),
+                            CategoryProgressItem("EYES", eyes, 52, Color(0xFF4A2B4B)),
+                            CategoryProgressItem("NAILS", nails, 10, Color(0xFF8B263E)),
+                            CategoryProgressItem("LIPS", lips, 16, Color(0xFFC25975)),
+                            CategoryProgressItem("PREP", prep, 14, Color(0xFF3B5249)),
+                            CategoryProgressItem("HAIR", hair, 13, Color(0xFF415A77)),
                             CategoryProgressItem("ORAL", oral, 8, Color(0xFF5C6B73)),
-                            CategoryProgressItem("BODY", body, 5, Color(0xFF8D5B4C))
+                            CategoryProgressItem("BODY", body, 33, Color(0xFF8D5B4C))
                         )
                     }
 
