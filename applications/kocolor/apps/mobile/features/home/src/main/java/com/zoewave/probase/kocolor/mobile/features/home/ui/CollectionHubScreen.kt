@@ -173,16 +173,24 @@ fun CollectionHubScreen(
                 // 1. THE VANITY (with incorporated Discover Cosmetics pill, PAO hygiene, restock & chromatic DNA)
                 item {
                     val cosmeticsProgress = remember(uiState.cosmeticsByGroup) {
-                        val comp = uiState.cosmeticsByGroup["COMPLEXION"] ?: 0
-                        val eyes = uiState.cosmeticsByGroup["EYES & BROWS"] ?: 0
-                        val nails = uiState.cosmeticsByGroup["NAILS"] ?: 0
-                        val lips = uiState.cosmeticsByGroup["LIPS"] ?: 0
+                        val comp = uiState.cosmeticsByGroup.entries.find { it.key.contains("COMP", ignoreCase = true) }?.value ?: 0
+                        val eyes = uiState.cosmeticsByGroup.entries.find { it.key.contains("EYE", ignoreCase = true) }?.value ?: 0
+                        val nails = uiState.cosmeticsByGroup.entries.find { it.key.contains("NAIL", ignoreCase = true) }?.value ?: 0
+                        val lips = uiState.cosmeticsByGroup.entries.find { it.key.contains("LIP", ignoreCase = true) }?.value ?: 0
+                        val prep = uiState.cosmeticsByGroup.entries.find { it.key.contains("PREP", ignoreCase = true) || it.key.contains("SKIN", ignoreCase = true) }?.value ?: 0
+                        val hair = uiState.cosmeticsByGroup.entries.find { it.key.contains("HAIR", ignoreCase = true) }?.value ?: 0
+                        val oral = uiState.cosmeticsByGroup.entries.find { it.key.contains("ORAL", ignoreCase = true) }?.value ?: 0
+                        val body = uiState.cosmeticsByGroup.entries.find { it.key.contains("BODY", ignoreCase = true) || it.key.contains("FRAG", ignoreCase = true) }?.value ?: 0
 
                         listOf(
-                            CategoryProgressItem("COMP", comp, if (comp > 0) (comp * 1.4f).toInt().coerceAtLeast(20) else 20, Color(0xFFD4AF37)),
-                            CategoryProgressItem("EYES", eyes, if (eyes > 0) (eyes * 1.5f).toInt().coerceAtLeast(15) else 15, Color(0xFF4A2B4B)),
-                            CategoryProgressItem("NAILS", nails, if (nails > 0) (nails * 1.5f).toInt().coerceAtLeast(10) else 10, Color(0xFF8B263E)),
-                            CategoryProgressItem("LIPS", lips, if (lips > 0) (lips * 1.5f).toInt().coerceAtLeast(15) else 15, Color(0xFFC25975))
+                            CategoryProgressItem("COMP", comp, 26, Color(0xFFD4AF37)),
+                            CategoryProgressItem("EYES", eyes, 63, Color(0xFF4A2B4B)),
+                            CategoryProgressItem("NAILS", nails, 15, Color(0xFF8B263E)),
+                            CategoryProgressItem("LIPS", lips, 24, Color(0xFFC25975)),
+                            CategoryProgressItem("PREP", prep, 18, Color(0xFF3B5249)),
+                            CategoryProgressItem("HAIR", hair, 14, Color(0xFF415A77)),
+                            CategoryProgressItem("ORAL", oral, 8, Color(0xFF5C6B73)),
+                            CategoryProgressItem("BODY", body, 5, Color(0xFF8D5B4C))
                         )
                     }
 
@@ -219,16 +227,16 @@ fun CollectionHubScreen(
                 // 2. THE WARDROBE (with incorporated Explore Fashion pill, CPW & rotation health)
                 item {
                     val wardrobeProgress = remember(uiState.clothingByCategory) {
-                        val tops = uiState.clothingByCategory["TOPS"] ?: 0
-                        val bots = uiState.clothingByCategory["BOTTOMS"] ?: 0
-                        val shoes = uiState.clothingByCategory["SHOES"] ?: 0
-                        val outer = uiState.clothingByCategory["OUTERWEAR"] ?: 0
+                        val tops = uiState.clothingByCategory.entries.find { it.key.contains("TOP", ignoreCase = true) }?.value ?: 0
+                        val bots = uiState.clothingByCategory.entries.find { it.key.contains("BOT", ignoreCase = true) }?.value ?: 0
+                        val shoes = uiState.clothingByCategory.entries.find { it.key.contains("SHOE", ignoreCase = true) }?.value ?: 0
+                        val outer = uiState.clothingByCategory.entries.find { it.key.contains("OUTER", ignoreCase = true) }?.value ?: 0
 
                         listOf(
-                            CategoryProgressItem("TOPS", tops, if (tops > 0) (tops * 1.5f).toInt().coerceAtLeast(15) else 15, Color(0xFF3B5249)),
-                            CategoryProgressItem("BOTS", bots, if (bots > 0) (bots * 1.5f).toInt().coerceAtLeast(10) else 10, Color(0xFF415A77)),
-                            CategoryProgressItem("SHOES", shoes, if (shoes > 0) (shoes * 1.5f).toInt().coerceAtLeast(8) else 8, Color(0xFF774936)),
-                            CategoryProgressItem("OUTER", outer, if (outer > 0) (outer * 1.5f).toInt().coerceAtLeast(6) else 6, Color(0xFF8D5B4C))
+                            CategoryProgressItem("TOPS", tops, 22, Color(0xFF3B5249)),
+                            CategoryProgressItem("BOTS", bots, 14, Color(0xFF415A77)),
+                            CategoryProgressItem("SHOES", shoes, 10, Color(0xFF774936)),
+                            CategoryProgressItem("OUTER", outer, 8, Color(0xFF8D5B4C))
                         )
                     }
 
@@ -592,7 +600,7 @@ private fun TopRightVanityActionCard(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .heightIn(max = 160.dp)
+                        .heightIn(max = 320.dp)
                         .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
