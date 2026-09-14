@@ -77,6 +77,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -227,22 +228,26 @@ fun CollectionHubScreen(
                 // 2. THE WARDROBE (with incorporated Explore Fashion pill, CPW & rotation health)
                 item {
                     val wardrobeProgress = remember(uiState.clothingByCategory) {
-                        val tops = uiState.clothingByCategory.entries.find { it.key.contains("TOP", ignoreCase = true) }?.value ?: 0
-                        val bots = uiState.clothingByCategory.entries.find { it.key.contains("BOT", ignoreCase = true) }?.value ?: 0
-                        val shoes = uiState.clothingByCategory.entries.find { it.key.contains("SHOE", ignoreCase = true) }?.value ?: 0
-                        val outer = uiState.clothingByCategory.entries.find { it.key.contains("OUTER", ignoreCase = true) }?.value ?: 0
+                        val tops = uiState.clothingByCategory.entries.filter { it.key.contains("TOP", ignoreCase = true) || it.key.contains("SHIRT", ignoreCase = true) }.sumOf { it.value }
+                        val bots = uiState.clothingByCategory.entries.filter { it.key.contains("BOT", ignoreCase = true) || it.key.contains("PANT", ignoreCase = true) }.sumOf { it.value }
+                        val dress = uiState.clothingByCategory.entries.filter { it.key.contains("DRESS", ignoreCase = true) }.sumOf { it.value }
+                        val outer = uiState.clothingByCategory.entries.filter { it.key.contains("OUTER", ignoreCase = true) || it.key.contains("JACKET", ignoreCase = true) || it.key.contains("COAT", ignoreCase = true) }.sumOf { it.value }
+                        val active = uiState.clothingByCategory.entries.filter { it.key.contains("ACTIVE", ignoreCase = true) }.sumOf { it.value }
+                        val shoes = uiState.clothingByCategory.entries.filter { it.key.contains("SHOE", ignoreCase = true) }.sumOf { it.value }
 
                         listOf(
-                            CategoryProgressItem("TOPS", tops, 22, Color(0xFF3B5249)),
-                            CategoryProgressItem("BOTS", bots, 14, Color(0xFF415A77)),
-                            CategoryProgressItem("SHOES", shoes, 10, Color(0xFF774936)),
-                            CategoryProgressItem("OUTER", outer, 8, Color(0xFF8D5B4C))
+                            CategoryProgressItem("TOPS", tops, 9, Color(0xFF3B5249)),
+                            CategoryProgressItem("BOTS", bots, 9, Color(0xFF415A77)),
+                            CategoryProgressItem("DRESS", dress, 9, Color(0xFF8B263E)),
+                            CategoryProgressItem("OUTER", outer, 9, Color(0xFF8D5B4C)),
+                            CategoryProgressItem("ACTIVE", active, 9, Color(0xFFD4AF37)),
+                            CategoryProgressItem("SHOES", shoes, 9, Color(0xFF774936))
                         )
                     }
 
                     ArchiveVerticalCard(
                         uiState = ArchiveVerticalUiState(
-                            title = "Wardrobe",
+                            title = "Wear",
                             count = uiState.totalClothing,
                             countLabel = "pieces",
                             valueLabel = "TOTAL CLOSET INVESTMENT",
@@ -637,7 +642,7 @@ private fun TopRightVanityActionCard(
                                 }
                                 Row(
                                     verticalAlignment = Alignment.Bottom,
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                                 ) {
                                     val percent = if (progress.target > 0) ((progress.owned.toFloat() / progress.target.toFloat()) * 100).toInt() else 0
                                     Text(
@@ -645,9 +650,15 @@ private fun TopRightVanityActionCard(
                                         style = MaterialTheme.typography.labelSmall,
                                         fontWeight = FontWeight.ExtraBold,
                                         color = Color.White,
-                                        fontSize = 10.sp
+                                        fontSize = 10.sp,
+                                        textAlign = TextAlign.End,
+                                        modifier = Modifier.width(36.dp)
                                     )
-                                    Row(verticalAlignment = Alignment.Bottom) {
+                                    Row(
+                                        verticalAlignment = Alignment.Bottom,
+                                        horizontalArrangement = Arrangement.End,
+                                        modifier = Modifier.width(32.dp)
+                                    ) {
                                         Text(
                                             text = "${progress.owned}",
                                             style = MaterialTheme.typography.labelSmall,
