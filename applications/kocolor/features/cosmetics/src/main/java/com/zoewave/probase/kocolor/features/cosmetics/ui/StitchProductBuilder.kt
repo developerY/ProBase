@@ -801,8 +801,8 @@ private fun AtelierDatePicker(initialDate: Long, onDateSelected: (Long) -> Unit,
     val state = rememberDatePickerState(initialSelectedDateMillis = initialDate)
     DatePickerDialog(
         onDismissRequest = onDismiss,
-        confirmButton = { TextButton(onClick = { state.selectedDateMillis?.let { onDateSelected(it) } }) { Text("OK") } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } }
+        confirmButton = { TextButton(onClick = { state.selectedDateMillis?.let { onDateSelected(it) } }) { Text(androidx.compose.ui.res.stringResource(com.zoewave.probase.kocolor.features.cosmetics.R.string.applications_kocolor_features_cosmetics_ok)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(androidx.compose.ui.res.stringResource(com.zoewave.probase.kocolor.features.cosmetics.R.string.applications_kocolor_features_cosmetics_cancel)) } }
     ) {
         DatePicker(state = state)
     }

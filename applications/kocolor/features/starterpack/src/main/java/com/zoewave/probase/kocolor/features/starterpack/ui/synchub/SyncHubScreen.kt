@@ -134,8 +134,8 @@ fun SyncHubScreen(
     if (showWipeConfirmByPackId != null) {
         AlertDialog(
             onDismissRequest = { showWipeConfirmByPackId = null },
-            title = { Text("Wipe this Pack?", fontFamily = serifFont, fontWeight = FontWeight.Bold) },
-            text = { Text("This will permanently remove all items from this pack. Your personal scans will remain untouched.") },
+            title = { Text(androidx.compose.ui.res.stringResource(com.zoewave.probase.kocolor.features.starterpack.R.string.applications_kocolor_features_starterpack_wipe_pack_title), fontFamily = serifFont, fontWeight = FontWeight.Bold) },
+            text = { Text(androidx.compose.ui.res.stringResource(com.zoewave.probase.kocolor.features.starterpack.R.string.applications_kocolor_features_starterpack_wipe_pack_message)) },
             confirmButton = {
                 TextButton(
                     onClick = { 
@@ -144,12 +144,12 @@ fun SyncHubScreen(
                     },
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
                 ) {
-                    Text("WIPE DATA", fontWeight = FontWeight.Black)
+                    Text(androidx.compose.ui.res.stringResource(com.zoewave.probase.kocolor.features.starterpack.R.string.applications_kocolor_features_starterpack_wipe_data), fontWeight = FontWeight.Black)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showWipeConfirmByPackId = null }) {
-                    Text("CANCEL")
+                    Text(androidx.compose.ui.res.stringResource(com.zoewave.probase.kocolor.features.starterpack.R.string.applications_kocolor_features_starterpack_cancel))
                 }
             },
             shape = RoundedCornerShape(28.dp)

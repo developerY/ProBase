@@ -138,7 +138,7 @@ fun ProductEditorialNotesDialog(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 TextButton(onClick = { expandedLabels = allLabels }) {
-                                    Text("EXPAND ALL", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = Color.Gray)
+                                    Text(androidx.compose.ui.res.stringResource(com.zoewave.probase.kocolor.features.starterpack.R.string.applications_kocolor_features_starterpack_expand_all), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = Color.Gray)
                                 }
                                 Text(
                                     " • ", 
@@ -146,7 +146,7 @@ fun ProductEditorialNotesDialog(
                                     color = Color.Gray.copy(alpha = 0.5f)
                                 )
                                 TextButton(onClick = { expandedLabels = emptySet() }) {
-                                    Text("COLLAPSE ALL", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = Color.Gray)
+                                    Text(androidx.compose.ui.res.stringResource(com.zoewave.probase.kocolor.features.starterpack.R.string.applications_kocolor_features_starterpack_collapse_all), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = Color.Gray)
                                 }
                             }
                         } else {

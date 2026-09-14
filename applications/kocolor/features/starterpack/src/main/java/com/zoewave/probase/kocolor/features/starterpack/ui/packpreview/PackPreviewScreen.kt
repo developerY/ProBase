@@ -51,8 +51,8 @@ fun PackPreviewScreen(
     if (showWipeConfirm) {
         AlertDialog(
             onDismissRequest = { showWipeConfirm = false },
-            title = { Text("Wipe this Collection?", fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold) },
-            text = { Text("This will permanently remove all items from this collection. Your personal 'Make it Mine' items are safe.") },
+            title = { Text(androidx.compose.ui.res.stringResource(com.zoewave.probase.kocolor.features.starterpack.R.string.applications_kocolor_features_starterpack_wipe_collection_title), fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold) },
+            text = { Text(androidx.compose.ui.res.stringResource(com.zoewave.probase.kocolor.features.starterpack.R.string.applications_kocolor_features_starterpack_wipe_collection_message)) },
             confirmButton = {
                 TextButton(
                     onClick = { 
@@ -61,12 +61,12 @@ fun PackPreviewScreen(
                     },
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
                 ) {
-                    Text("WIPE DATA", fontWeight = FontWeight.Black)
+                    Text(androidx.compose.ui.res.stringResource(com.zoewave.probase.kocolor.features.starterpack.R.string.applications_kocolor_features_starterpack_wipe_data), fontWeight = FontWeight.Black)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showWipeConfirm = false }) {
-                    Text("CANCEL")
+                    Text(androidx.compose.ui.res.stringResource(com.zoewave.probase.kocolor.features.starterpack.R.string.applications_kocolor_features_starterpack_cancel))
                 }
             },
             shape = RoundedCornerShape(28.dp)

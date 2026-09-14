@@ -41,10 +41,10 @@ fun PackPreviewTopAppBar(
         },
         actions = {
             TextButton(onClick = onSelectAll) {
-                Text("Select All", style = MaterialTheme.typography.labelMedium)
+                Text(androidx.compose.ui.res.stringResource(com.zoewave.probase.kocolor.features.starterpack.R.string.applications_kocolor_features_starterpack_select_all), style = MaterialTheme.typography.labelMedium)
             }
             TextButton(onClick = onClear) {
-                Text("Clear", style = MaterialTheme.typography.labelMedium)
+                Text(androidx.compose.ui.res.stringResource(com.zoewave.probase.kocolor.features.starterpack.R.string.applications_kocolor_features_starterpack_clear), style = MaterialTheme.typography.labelMedium)
             }
         }
     )
