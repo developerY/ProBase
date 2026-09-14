@@ -5,9 +5,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -115,15 +115,15 @@ fun CollectionHubCard(
 
         // Main Collection Hub Card
         ElevatedCard(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
             shape = RoundedCornerShape(32.dp),
             onClick = { navTo(KoColorRoute.CollectionHub) }
         ) {
-            Box(modifier = Modifier.fillMaxSize()) {
+            Box(modifier = Modifier.fillMaxWidth()) {
                 AsyncImage(
                     model = R.drawable.collection_hub_background,
                     contentDescription = null,
-                    modifier = Modifier.fillMaxSize().alpha(0.2f),
+                    modifier = Modifier.matchParentSize().alpha(0.2f),
                     contentScale = ContentScale.Crop
                 )
 
