@@ -128,27 +128,104 @@ fun CollectionHubCard(
                 )
 
                 Column(
-                    modifier = Modifier.padding(28.dp),
+                    modifier = Modifier.padding(24.dp),
                     verticalArrangement = Arrangement.spacedBy(20.dp)
                 ) {
-                    Column {
-                        Text(
-                            text = "Collection\nHub",
-                            style = MaterialTheme.typography.displayMedium,
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = FontFamily.Serif,
-                            lineHeight = 44.sp,
-                            color = Color(0xFF1A1A1A)
-                        )
-                        Spacer(Modifier.height(8.dp))
-                        Text(
-                            text = "Unified Text, Color & Image\nSearch",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = Color.Gray,
-                            lineHeight = 22.sp
-                        )
+                    // Top Row: "Hub" + Subtitle on Left, Fashion Advisor AI on Right
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text(
+                                text = "Hub",
+                                style = MaterialTheme.typography.displayMedium,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = FontFamily.Serif,
+                                color = Color(0xFF1A1A1A)
+                            )
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                text = "$totalItems items\ntracked",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.Gray,
+                                lineHeight = 18.sp
+                            )
+                        }
+
+                        // Fashion Advisor AI Card (Top Right)
+                        Surface(
+                            onClick = { navTo(KoColorRoute.StyleSimulator) },
+                            shape = RoundedCornerShape(20.dp),
+                            color = Color(0xFFF8F3FA),
+                            border = BorderStroke(1.dp, Color(0xFFECE4EE))
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Surface(
+                                    shape = RoundedCornerShape(12.dp),
+                                    color = Color(0xFFEADBf4),
+                                    modifier = Modifier.size(36.dp)
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Icon(
+                                            imageVector = Icons.Default.AutoAwesome,
+                                            contentDescription = null,
+                                            tint = Color(0xFF6B3A8B),
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                    }
+                                }
+                                Column {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                    ) {
+                                        Text(
+                                            text = "Fashion Advisor",
+                                            style = MaterialTheme.typography.labelMedium,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.Black,
+                                            fontSize = 12.sp
+                                        )
+                                        Surface(
+                                            shape = RoundedCornerShape(50),
+                                            color = Color(0xFF5A3854)
+                                        ) {
+                                            Text(
+                                                text = "AI",
+                                                style = MaterialTheme.typography.labelSmall,
+                                                fontWeight = FontWeight.ExtraBold,
+                                                color = Color.White,
+                                                fontSize = 8.sp,
+                                                modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
+                                            )
+                                        }
+                                    }
+                                    Text(
+                                        text = "Visual Styling",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = Color.Gray,
+                                        fontSize = 10.sp
+                                    )
+                                }
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                    contentDescription = null,
+                                    tint = Color.Gray,
+                                    modifier = Modifier.size(12.dp)
+                                )
+                            }
+                        }
                     }
 
+                    HorizontalDivider(color = Color.Black.copy(alpha = 0.08f), thickness = 1.dp)
+
+                    // Bottom Row: Total Value & Big Arrow Button
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -168,102 +245,20 @@ fun CollectionHubCard(
                                 fontWeight = FontWeight.Bold,
                                 fontFamily = FontFamily.Serif
                             )
-                            Text(
-                                text = "$totalItems Items Tracked",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = Color.Gray
-                            )
                         }
 
                         Surface(
                             color = Color.White,
                             shape = CircleShape,
                             shadowElevation = 8.dp,
-                            modifier = Modifier.size(60.dp)
+                            modifier = Modifier.size(56.dp)
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.ArrowForward, 
                                     contentDescription = null, 
-                                    modifier = Modifier.size(26.dp),
+                                    modifier = Modifier.size(24.dp),
                                     tint = Color.Black
-                                )
-                            }
-                        }
-                    }
-
-                    HorizontalDivider(color = Color.Black.copy(alpha = 0.08f), thickness = 1.dp)
-
-                    // Embedded FashionAdvisor Card
-                    Surface(
-                        onClick = { navTo(KoColorRoute.StyleSimulator) },
-                        shape = RoundedCornerShape(20.dp),
-                        color = Color(0xFFF6EFF8), // Soft lavender tint
-                        border = BorderStroke(1.dp, Color(0xFFEADBf4))
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .padding(horizontal = 14.dp, vertical = 12.dp)
-                                .fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                Surface(
-                                    shape = RoundedCornerShape(14.dp),
-                                    color = Color(0xFFEADBf4),
-                                    modifier = Modifier.size(42.dp)
-                                ) {
-                                    Box(contentAlignment = Alignment.Center) {
-                                        Icon(
-                                            imageVector = Icons.Default.AutoAwesome,
-                                            contentDescription = null,
-                                            tint = Color(0xFF6B3A8B),
-                                            modifier = Modifier.size(20.dp)
-                                        )
-                                    }
-                                }
-                                Column {
-                                    Text(
-                                        text = "FashionAdvisor",
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color.Black
-                                    )
-                                    Text(
-                                        text = "AI Visual Styling",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = Color.Gray
-                                    )
-                                }
-                            }
-
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Surface(
-                                    shape = RoundedCornerShape(50),
-                                    color = Color(0xFF6B3A8B)
-                                ) {
-                                    Text(
-                                        text = "EXPERIMENTAL",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color.White,
-                                        fontSize = 9.sp,
-                                        letterSpacing = 0.8.sp,
-                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
-                                    )
-                                }
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                                    contentDescription = null,
-                                    tint = Color.Gray,
-                                    modifier = Modifier.size(14.dp)
                                 )
                             }
                         }
