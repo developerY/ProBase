@@ -211,9 +211,13 @@ fun HomeScreen(
                 BioStoreCard(
                     uiState = uiState.storeUiState,
                     onEvent = { event ->
+                        android.util.Log.d("HomeScreen", "StoreEvent received: $event")
                         when (event) {
                             StoreEvent.ToggleExpansion -> onEvent(HomeEvent.ToggleStoreExpansion)
-                            StoreEvent.EnterStore -> { /* TODO */ }
+                            StoreEvent.EnterStore -> {
+                                android.util.Log.d("HomeScreen", "Routing to Store")
+                                navTo(KoColorRoute.Store)
+                            }
                         }
                     },
                     navTo = navTo,
