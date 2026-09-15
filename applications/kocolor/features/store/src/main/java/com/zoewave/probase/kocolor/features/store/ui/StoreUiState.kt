@@ -13,7 +13,9 @@ data class StoreProductItem(
     val badge: String,
     val shadeName: String? = null,
     val shadeColor: Color? = null,
-    val imageModel: Any? = null
+    val imageModel: Any? = null,
+    val isAdded: Boolean = false,
+    val isFavorite: Boolean = false
 )
 
 data class StoreUiState(
@@ -21,6 +23,9 @@ data class StoreUiState(
     val fashionPacks: List<PackInfo> = emptyList(),
     val realCosmeticItems: List<StoreProductItem> = emptyList(),
     val realFashionItems: List<StoreProductItem> = emptyList(),
+    val addedItemIds: Set<String> = emptySet(),
+    val favoriteItemIds: Set<String> = emptySet(),
+    val cartCount: Int = 0,
     val isExpanded: Boolean = false,
     val backgroundModel: Any? = null
 )

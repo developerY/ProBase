@@ -24,6 +24,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -89,11 +91,11 @@ fun StoreScreen(
                             shape = CircleShape,
                             color = Color.Black,
                             modifier = Modifier
-                                .size(14.dp)
+                                .size(16.dp)
                                 .align(Alignment.TopEnd)
                         ) {
                             Box(contentAlignment = Alignment.Center) {
-                                Text("0", color = Color.White, fontSize = 8.sp, fontWeight = FontWeight.Bold)
+                                Text("${uiState.cartCount}", color = Color.White, fontSize = 8.sp, fontWeight = FontWeight.Bold)
                             }
                         }
                     }
@@ -319,7 +321,9 @@ fun StoreScreen(
                         items(cosmeticItems) { item ->
                             ProductCard(
                                 item = item,
-                                onClick = { navTo(KoColorRoute.PackPreview(packId = item.id)) }
+                                onClick = { navTo(KoColorRoute.PackPreview(packId = item.id)) },
+                                onAddClick = { onEvent(StoreEvent.AddProductToInventory(item.id)) },
+                                onFavoriteClick = { onEvent(StoreEvent.ToggleFavorite(item.id)) }
                             )
                         }
                     }
@@ -401,7 +405,9 @@ fun StoreScreen(
                         items(fashionItems) { item ->
                             ProductCard(
                                 item = item,
-                                onClick = { navTo(KoColorRoute.StarterPack(filter = "clothing")) }
+                                onClick = { navTo(KoColorRoute.PackPreview(packId = item.id)) },
+                                onAddClick = { onEvent(StoreEvent.AddProductToInventory(item.id)) },
+                                onFavoriteClick = { onEvent(StoreEvent.ToggleFavorite(item.id)) }
                             )
                         }
                     }
@@ -502,7 +508,9 @@ private fun TrustFeatureItem(
 @Composable
 private fun ProductCard(
     item: StoreProductItem,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onAddClick: () -> Unit,
+    onFavoriteClick: () -> Unit
 ) {
     Surface(
         shape = RoundedCornerShape(24.dp),
@@ -553,15 +561,16 @@ private fun ProductCard(
                     modifier = Modifier
                         .padding(12.dp)
                         .align(Alignment.TopEnd)
-                        .size(32.dp),
+                        .size(32.dp)
+                        .clickable(onClick = onFavoriteClick),
                     shape = CircleShape,
-                    color = Color.White.copy(alpha = 0.85f)
+                    color = if (item.isFavorite) Color(0xFFFFEBEE) else Color.White.copy(alpha = 0.85f)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
-                            imageVector = Icons.Default.FavoriteBorder,
+                            imageVector = if (item.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                             contentDescription = "Favorite",
-                            tint = Color.Black,
+                            tint = if (item.isFavorite) Color(0xFFE91E63) else Color.Black,
                             modifier = Modifier.size(16.dp)
                         )
                     }
@@ -638,10 +647,25 @@ private fun ProductCard(
                         color = Color.Black
                     )
 
-                    if (item.shadeName != null) {
+                    if (item.isAdded) {
                         Surface(
                             shape = RoundedCornerShape(50),
-                            color = Color.Black
+                            color = Color(0xFF1B5E20)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Text("Added", color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                                Icon(Icons.Default.Check, null, tint = Color.White, modifier = Modifier.size(10.dp))
+                            }
+                        }
+                    } else {
+                        Surface(
+                            shape = RoundedCornerShape(50),
+                            color = Color.Black,
+                            modifier = Modifier.clickable(onClick = onAddClick)
                         ) {
                             Row(
                                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
@@ -652,13 +676,6 @@ private fun ProductCard(
                                 Icon(Icons.Default.Add, null, tint = Color.White, modifier = Modifier.size(10.dp))
                             }
                         }
-                    } else {
-                        Text(
-                            text = item.detailTag,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = Color.Gray,
-                            fontSize = 11.sp
-                        )
                     }
                 }
             }

@@ -105,6 +105,36 @@ class StoreViewModel @Inject constructor(
             StoreEvent.ToggleExpansion -> {
                 _uiState.value = _uiState.value.copy(isExpanded = !_uiState.value.isExpanded)
             }
+            is StoreEvent.AddProductToInventory -> {
+                val newAdded = _uiState.value.addedItemIds + event.itemId
+                val updatedCosmetics = _uiState.value.realCosmeticItems.map {
+                    if (it.id == event.itemId) it.copy(isAdded = true) else it
+                }
+                val updatedFashion = _uiState.value.realFashionItems.map {
+                    if (it.id == event.itemId) it.copy(isAdded = true) else it
+                }
+                _uiState.value = _uiState.value.copy(
+                    addedItemIds = newAdded,
+                    cartCount = newAdded.size,
+                    realCosmeticItems = updatedCosmetics,
+                    realFashionItems = updatedFashion
+                )
+            }
+            is StoreEvent.ToggleFavorite -> {
+                val currentFavs = _uiState.value.favoriteItemIds
+                val newFavs = if (currentFavs.contains(event.itemId)) currentFavs - event.itemId else currentFavs + event.itemId
+                val updatedCosmetics = _uiState.value.realCosmeticItems.map {
+                    if (it.id == event.itemId) it.copy(isFavorite = newFavs.contains(it.id)) else it
+                }
+                val updatedFashion = _uiState.value.realFashionItems.map {
+                    if (it.id == event.itemId) it.copy(isFavorite = newFavs.contains(it.id)) else it
+                }
+                _uiState.value = _uiState.value.copy(
+                    favoriteItemIds = newFavs,
+                    realCosmeticItems = updatedCosmetics,
+                    realFashionItems = updatedFashion
+                )
+            }
             StoreEvent.EnterStore -> {}
         }
     }
