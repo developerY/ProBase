@@ -22,6 +22,7 @@ import com.zoewave.probase.seaweed.model.ExpenseFrequency
 import com.zoewave.probase.seaweed.model.RecurringExpense
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 import java.util.Locale
+import androidx.compose.ui.platform.LocalLocale
 
 @Composable
 fun WearBillsRoute(
@@ -80,7 +81,7 @@ fun WearBillsScreen(
                     }
                     item {
                         Text(
-                            text = stringResource(R.string.applications_seaweed_apps_wear_features_bills_monthly_format, String.format(Locale.getDefault(), "%.0f", uiState.totalMonthlyFixedCosts)),
+                            text = stringResource(R.string.applications_seaweed_apps_wear_features_bills_monthly_format, String.format(LocalLocale.current.platformLocale, "%.0f", uiState.totalMonthlyFixedCosts)),
                             style = MaterialTheme.typography.titleLarge,
                             color = MaterialTheme.colorScheme.tertiary,
                             textAlign = TextAlign.Center,

@@ -42,7 +42,6 @@ import com.zoewave.probase.kocolor.features.store.ui.components.BioStoreCard
 import com.zoewave.probase.kocolor.mobile.features.home.R
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.CollectionHubCard
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.LuxuryBrandLogo
-import com.zoewave.probase.kocolor.mobile.features.home.ui.components.QuickActions
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.SectionTitle
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.SectionTitleUiState
 import com.zoewave.probase.kocolor.model.KoColorRoute
@@ -192,31 +191,21 @@ fun HomeScreen(
             }
 
             item {
-                Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
-                    SectionTitle(
-                        uiState = SectionTitleUiState(
-                            stringResource(R.string.applications_kocolor_apps_mobile_features_home_the_hub), 
-                            stringResource(R.string.applications_kocolor_apps_mobile_features_home_unified_archive)
-                        ), 
-                        onEvent = {}, 
-                        navTo = {}
-                    )
-                    CollectionHubCard(
-                        uiState = uiState, 
-                        modifier = Modifier,
-                        onEvent = {}, 
-                        navTo = navTo
-                    )
-                }
+                CollectionHubCard(
+                    uiState = uiState, 
+                    modifier = Modifier,
+                    onEvent = {}, 
+                    navTo = navTo
+                )
             }
 
-            item {
+            /*item {
                 QuickActions(
                     uiState = Unit,
                     onEvent = {},
                     navTo = navTo
                 )
-            }
+            }*/
             
             item {
                 BioStoreCard(

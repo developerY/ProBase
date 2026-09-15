@@ -8,7 +8,7 @@ import javax.inject.Singleton
 class WardrobeAnalyticsEngine @Inject constructor() {
 
     fun computeAnalytics(items: List<ClothingItem>): WardrobeAnalytics {
-        val totalCount = if (items.isNotEmpty()) items.size else 54
+        val totalCount = items.size
 
 
         // 1. DYNAMIC COLOR CLUSTERING (Level 2: Dynamic Wardrobe Palette)
@@ -31,64 +31,38 @@ class WardrobeAnalyticsEngine @Inject constructor() {
                 )
             }
         } else {
-            // Cold start mock (Level 1 Standard Coordinates fallback)
-            listOf(
-                ColorStat("Sand Linen", "#D4C4B7", 19, 0.35f),
-                ColorStat("Noir Espresso", "#2C2A29", 14, 0.25f),
-                ColorStat("Olive Sage", "#7A8B76", 10, 0.18f),
-                ColorStat("Warm Ochre", "#C18C5D", 6, 0.12f),
-                ColorStat("Rose Accents", "#C28F90", 5, 0.10f)
-            )
+            emptyList()
         }
 
         // 2. DYNAMIC NEUTRAL/WARM/COOL PERCENTAGES
         val neutralsPct = if (validColors.isNotEmpty()) {
             val neutralCount = validColors.count { isNeutral(it.colorHex) }
             ((neutralCount.toFloat() / validColors.size) * 100).toInt()
-        } else 42
+        } else 0
         
         val warmPct = if (validColors.isNotEmpty()) {
             val warmCount = validColors.count { isWarm(it.colorHex) && !isNeutral(it.colorHex) }
             ((warmCount.toFloat() / validColors.size) * 100).toInt()
-        } else 31
+        } else 0
         
         val coolPct = if (validColors.isNotEmpty()) {
             val coolCount = validColors.count { !isWarm(it.colorHex) && !isNeutral(it.colorHex) }
             ((coolCount.toFloat() / validColors.size) * 100).toInt()
-        } else 27
+        } else 0
 
-        val mostWornGarments = if (items.isNotEmpty()) {
-            items.sortedByDescending { it.usageCount }.take(3).map {
-                GarmentSummary(it.internalId.toString(), it.name, it.usageCount)
-            }
-        } else {
-            listOf(
-                GarmentSummary("w_41", "Universal Khaki Button-Down", 18),
-                GarmentSummary("w_48", "Camel Leather Boots", 14),
-                GarmentSummary("w_38", "Warm Terracotta Crop", 11)
-            )
+        val mostWornGarments = items.sortedByDescending { it.usageCount }.take(3).map {
+            GarmentSummary(it.internalId.toString(), it.name, it.usageCount)
         }
 
-        val leastWornGarments = if (items.isNotEmpty()) {
-            items.sortedBy { it.usageCount }.take(2).map {
-                GarmentSummary(it.internalId.toString(), it.name, it.usageCount)
-            }
-        } else {
-            listOf(
-                GarmentSummary("w_24", "Midnight Crimson Wool Overcoat", 1),
-                GarmentSummary("w_1", "Digital Lavender Sports Bra", 0)
-            )
+        val leastWornGarments = items.sortedBy { it.usageCount }.take(2).map {
+            GarmentSummary(it.internalId.toString(), it.name, it.usageCount)
         }
 
-        val insights = listOf(
-            WardrobeInsight("A saturated cool accent would expand your color coverage.", isActionable = true),
-            WardrobeInsight("A versatile mid-tone bottom would connect your activewear tops.", isActionable = true),
-            WardrobeInsight("A lighter casual shoe would complement your neutral linen items.", isActionable = true)
-        )
+        val insights = emptyList<WardrobeInsight>()
 
-        val activeCount = if (items.isNotEmpty()) items.count { it.usageCount >= 5 } else 37
-        val rarelyWornCount = if (items.isNotEmpty()) items.count { it.usageCount in 1..4 } else 14
-        val neverWornCount = if (items.isNotEmpty()) items.count { it.usageCount == 0 } else 3
+        val activeCount = items.count { it.usageCount >= 5 }
+        val rarelyWornCount = items.count { it.usageCount in 1..4 }
+        val neverWornCount = items.count { it.usageCount == 0 }
 
         val wearEvents = items.filter { it.usageCount > 0 }.mapIndexed { index, item ->
             WearEvent(
@@ -116,18 +90,43 @@ class WardrobeAnalyticsEngine @Inject constructor() {
             periodEnd = System.currentTimeMillis()
         )
 
+        val rotationHealthScore = if (totalCount > 0) {
+            val rarelyWornRatio = rarelyWornCount.toFloat() / totalCount
+            val neverWornRatio = neverWornCount.toFloat() / totalCount
+            val deduction = ((rarelyWornRatio * 0.5f) + neverWornRatio) * 100
+            (100 - deduction).toInt().coerceIn(0, 100)
+        } else 0
+
+        val categoryDist = CategoryDistribution(
+            tops = items.count { it.category.name.equals("TOPS", ignoreCase = true) },
+            bottoms = items.count { it.category.name.equals("BOTTOMS", ignoreCase = true) },
+            dresses = items.count { it.category.name.equals("DRESSES", ignoreCase = true) },
+            shoes = items.count { it.category.name.equals("SHOES", ignoreCase = true) },
+            outerwear = items.count { it.category.name.equals("OUTERWEAR", ignoreCase = true) },
+            activewear = items.count { it.category.name.equals("ACTIVEWEAR", ignoreCase = true) }
+        )
+
+        val harmonyScore = if (totalCount == 0 || validColors.isEmpty()) {
+            null
+        } else {
+            val uniqueColorsCount = validColors.map { it.colorHex.uppercase() }.distinct().size
+            val neutralRatio = validColors.count { isNeutral(it.colorHex) }.toFloat() / validColors.size
+            (0.75f + (neutralRatio * 0.15f) + (uniqueColorsCount.coerceAtMost(5) * 0.02f)).coerceIn(0.50f, 0.98f)
+        }
+
         return WardrobeAnalytics(
             totalItems = totalCount,
             activeItems = activeCount,
             rarelyWornItems = rarelyWornCount,
             neverWornItems = neverWornCount,
+            harmonyScore = harmonyScore,
             wearHistory = wearEvents,
             dna = WardrobeDna(
-                primaryIdentity = "Neutral-led",
-                temperatureBias = "Warm-biased",
-                depth = "Medium depth",
-                contrast = "Balanced contrast",
-                chroma = "Low-to-medium chroma"
+                primaryIdentity = if (validColors.isEmpty()) "Initializing" else if (neutralsPct > 50) "Neutral-led" else "Color-led",
+                temperatureBias = if (validColors.isEmpty()) "-" else if (warmPct > coolPct) "Warm-biased" else "Cool-biased",
+                depth = if (validColors.isEmpty()) "-" else "Mixed depth",
+                contrast = if (validColors.isEmpty()) "-" else "Balanced contrast",
+                chroma = if (validColors.isEmpty()) "-" else "Dynamic chroma"
             ),
             colorDistribution = ColorDistribution(
                 neutralsPct = neutralsPct,
@@ -135,38 +134,31 @@ class WardrobeAnalyticsEngine @Inject constructor() {
                 coolPct = coolPct,
                 topColors = topColorsList
             ),
-            categoryDistribution = CategoryDistribution(
-                tops = 16,
-                bottoms = 9,
-                dresses = 8,
-                shoes = 7,
-                outerwear = 6,
-                activewear = 8
-            ),
+            categoryDistribution = categoryDist,
             rotation = RotationAnalytics(
-                frequentlyWorn = 18,
-                inRotation = 29,
-                rarelyWorn = 7,
-                healthScore = 61,
+                frequentlyWorn = activeCount,
+                inRotation = activeCount + rarelyWornCount,
+                rarelyWorn = rarelyWornCount,
+                healthScore = rotationHealthScore,
                 mostWorn = mostWornGarments,
                 leastWorn = leastWornGarments
             ),
             versatility = VersatilityAnalytics(
-                totalPossibleLooks = 312,
+                totalPossibleLooks = 0,
                 mostVersatile = VersatileGarment(
-                    id = "w_41",
-                    name = "Universal Khaki Button-Down",
-                    compatibleLooksCount = 18,
-                    compatibleBottoms = 8,
-                    compatibleShoes = 5,
-                    compatibleOuterwear = 3
+                    id = "",
+                    name = "Pending Analysis",
+                    compatibleLooksCount = 0,
+                    compatibleBottoms = 0,
+                    compatibleShoes = 0,
+                    compatibleOuterwear = 0
                 )
             ),
             coverage = WardrobeCoverage(
-                warmNeutrals = 0.85f,
-                coolNeutrals = 0.50f,
-                brightAccents = 0.30f,
-                deepColors = 0.65f
+                warmNeutrals = 0f,
+                coolNeutrals = 0f,
+                brightAccents = 0f,
+                deepColors = 0f
             ),
             insights = insights,
             analyticsCoverage = analyticsCoverage

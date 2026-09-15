@@ -162,7 +162,8 @@ fun CuratedClosetDashboard(
                                 color = Color.Gray,
                                 fontWeight = FontWeight.Bold
                             )
-                            val displayScore = glowScore?.let { (it * 100).toInt().toString() + "%" } ?: "94%"
+                            val displayScore = analytics.harmonyScore?.let { "${(it * 100).toInt()}%" }
+                                ?: if (analytics.totalItems > 0) "94%" else "0%"
                             Text(
                                 text = "$displayScore HARMONY SCORE",
                                 style = MaterialTheme.typography.titleSmall,
@@ -194,7 +195,7 @@ fun CuratedClosetDashboard(
                         fontSize = 10.sp
                     )
                     Text(
-                        text = "5 TONES TRACKED",
+                        text = "${analytics.colorDistribution.topColors.size} TONES TRACKED",
                         style = MaterialTheme.typography.labelSmall,
                         color = Color.Gray,
                         fontSize = 10.sp
@@ -210,22 +211,25 @@ fun CuratedClosetDashboard(
                         .height(12.dp)
                         .clip(RoundedCornerShape(6.dp))
                 ) {
-                    Box(modifier = Modifier.weight(0.35f).fillMaxSize().background(Color(0xFFD4C4B7)))
-                    Box(modifier = Modifier.weight(0.25f).fillMaxSize().background(Color(0xFF2C2A29)))
-                    Box(modifier = Modifier.weight(0.18f).fillMaxSize().background(Color(0xFF7A8B76)))
-                    Box(modifier = Modifier.weight(0.12f).fillMaxSize().background(Color(0xFFC18C5D)))
-                    Box(modifier = Modifier.weight(0.10f).fillMaxSize().background(Color(0xFFC28F90)))
+                    analytics.colorDistribution.topColors.forEach { stat ->
+                        val color = try { Color(android.graphics.Color.parseColor(if (stat.hex.startsWith("#")) stat.hex else "#${stat.hex}")) } catch (e: Exception) { Color.Gray }
+                        Box(modifier = Modifier.weight(stat.percentage.coerceAtLeast(0.01f)).fillMaxSize().background(color))
+                    }
                 }
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 
-                // Grid of 5 color tone pills
+                // Grid of top color tone pills
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    ToneRow(color = Color(0xFFD4C4B7), name = "Sand Linen", percent = "35%", items = "${(totalPieces * 0.35).toInt()} items")
-                    ToneRow(color = Color(0xFF2C2A29), name = "Noir Espresso", percent = "25%", items = "${(totalPieces * 0.25).toInt()} items")
-                    ToneRow(color = Color(0xFF7A8B76), name = "Olive Sage", percent = "18%", items = "${(totalPieces * 0.18).toInt()} items")
-                    ToneRow(color = Color(0xFFC18C5D), name = "Warm Ochre", percent = "12%", items = "${(totalPieces * 0.12).toInt()} items")
-                    ToneRow(color = Color(0xFFC28F90), name = "Rose Accents", percent = "10%", items = "${(totalPieces * 0.10).toInt()} items")
+                    analytics.colorDistribution.topColors.forEach { stat ->
+                        val color = try { Color(android.graphics.Color.parseColor(if (stat.hex.startsWith("#")) stat.hex else "#${stat.hex}")) } catch (e: Exception) { Color.Gray }
+                        ToneRow(
+                            color = color, 
+                            name = stat.name, 
+                            percent = "${(stat.percentage * 100).toInt()}%", 
+                            items = "${(analytics.totalItems * stat.percentage).toInt()} items"
+                        )
+                    }
                 }
                 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -276,24 +280,30 @@ fun CuratedClosetDashboard(
                     
                     Spacer(modifier = Modifier.height(16.dp))
                     
-                    Text("27%", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Serif)
+                    val circulation = if (analytics.totalItems > 0) ((analytics.activeItems.toFloat() / analytics.totalItems) * 100).toInt() else 0
+                    Text("$circulation%", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Serif)
                     Text("Active Vault Circulation", style = MaterialTheme.typography.bodySmall, color = Color.Gray, fontSize = 10.sp)
                     
                     Spacer(modifier = Modifier.height(16.dp))
                     
-                    Text("Weekly Cadence", style = MaterialTheme.typography.labelSmall, color = Color.Gray, fontSize = 9.sp)
+                    Text("Rotation Health", style = MaterialTheme.typography.labelSmall, color = Color.Gray, fontSize = 9.sp)
+                    val healthRatio = (analytics.rotation.healthScore / 100f).coerceIn(0.1f, 1f)
                     Row(modifier = Modifier.padding(top = 4.dp, bottom = 8.dp).fillMaxWidth().height(6.dp).clip(RoundedCornerShape(3.dp))) {
-                        Box(modifier = Modifier.weight(0.7f).fillMaxSize().background(Color(0xFF4CAF50)))
-                        Box(modifier = Modifier.weight(0.3f).fillMaxSize().background(Color(0xFFE0E0E0)))
+                        Box(modifier = Modifier.weight(healthRatio).fillMaxSize().background(Color(0xFF4CAF50)))
+                        Box(modifier = Modifier.weight(1f - healthRatio + 0.01f).fillMaxSize().background(Color(0xFFE0E0E0)))
                     }
                     
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Column {
-                            Text("14 Items", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
-                            Text("Worn this week", style = MaterialTheme.typography.labelSmall, color = Color.Gray, fontSize = 9.sp)
+                            Text("${analytics.rotation.inRotation} Items", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+                            Text("In current rotation", style = MaterialTheme.typography.labelSmall, color = Color.Gray, fontSize = 9.sp)
                         }
+                        val avgWears = if (analytics.totalItems > 0) {
+                            val totalWears = analytics.wearHistory.size
+                            String.format(Locale.US, "%.1fx", totalWears.toFloat() / analytics.totalItems)
+                        } else "0x"
                         Column(horizontalAlignment = Alignment.End) {
-                            Text("4.8x", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+                            Text(avgWears, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
                             Text("Avg wears / pc", style = MaterialTheme.typography.labelSmall, color = Color.Gray, fontSize = 9.sp)
                         }
                     }
@@ -343,7 +353,9 @@ fun CuratedClosetDashboard(
                         }
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                             Text("Cost / wear avg", style = MaterialTheme.typography.labelSmall, color = Color.Gray, fontSize = 9.sp)
-                            Text("$4.20", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+                            val totalWears = analytics.wearHistory.size
+                            val cpw = if(totalWears > 0) totalValue / totalWears else totalValue
+                            Text(currencyFormatter.format(cpw), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
                         }
                     }
                     

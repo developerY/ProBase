@@ -119,7 +119,7 @@ fun HeroPackageCard(
                     Icon(Icons.Default.Lock, null, modifier = Modifier.size(12.dp), tint = Color.Gray)
                     // Shortened to just "Verified"
                     Spacer(Modifier.width(4.dp))
-                    Text("Verified", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+                    Text(androidx.compose.ui.res.stringResource(com.zoewave.probase.kocolor.features.starterpack.R.string.applications_kocolor_features_starterpack_verified), style = MaterialTheme.typography.labelSmall, color = Color.Gray)
                 }
             }
         }

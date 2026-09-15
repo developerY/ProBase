@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="applications_kocolor_features_starterpack_explore_fashion">Explore Fashion</string>
+    <string name="applications_kocolor_features_starterpack_discover_cosmetics">Discover Cosmetics</string>
+    <string name="applications_kocolor_features_starterpack_search_products">Search products...</string>
+    <string name="applications_kocolor_features_starterpack_verified">Verified</string>
+    <string name="applications_kocolor_features_starterpack_fashion_catalog">The Fashion Catalog</string>
+    <string name="applications_kocolor_features_starterpack_cosmetics_catalog">The Cosmetics Catalog</string>
+    <string name="applications_kocolor_features_starterpack_wipe_pack_title">Wipe this Pack?</string>
+    <string name="applications_kocolor_features_starterpack_wipe_pack_message">This will permanently remove all items from this pack. Your personal scans will remain untouched.</string>
+    <string name="applications_kocolor_features_starterpack_wipe_data">WIPE DATA</string>
+    <string name="applications_kocolor_features_starterpack_cancel">CANCEL</string>
+    <string name="applications_kocolor_features_starterpack_wipe_collection_title">Wipe this Collection?</string>
+    <string name="applications_kocolor_features_starterpack_wipe_collection_message">This will permanently remove all items from this collection. Your personal \'Make it Mine\' overrides will be untouched.</string>
+    <string name="applications_kocolor_features_starterpack_search_placeholder">Search products or actives...</string>
+    <string name="applications_kocolor_features_starterpack_select_all">Select All</string>
+    <string name="applications_kocolor_features_starterpack_clear">Clear</string>
+    <string name="applications_kocolor_features_starterpack_expand_all">EXPAND ALL</string>
+    <string name="applications_kocolor_features_starterpack_collapse_all">COLLAPSE ALL</string>
+</resources>

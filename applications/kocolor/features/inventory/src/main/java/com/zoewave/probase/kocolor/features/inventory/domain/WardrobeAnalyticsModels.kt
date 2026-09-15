@@ -1,10 +1,11 @@
 package com.zoewave.probase.kocolor.features.inventory.domain
 
 data class WardrobeAnalytics(
-    val totalItems: Int = 54,
-    val activeItems: Int = 42,
-    val rarelyWornItems: Int = 7,
-    val neverWornItems: Int = 5,
+    val totalItems: Int = 0,
+    val activeItems: Int = 0,
+    val rarelyWornItems: Int = 0,
+    val neverWornItems: Int = 0,
+    val harmonyScore: Float? = null,
     val dna: WardrobeDna = WardrobeDna(),
     val colorDistribution: ColorDistribution = ColorDistribution(),
     val categoryDistribution: CategoryDistribution = CategoryDistribution(),

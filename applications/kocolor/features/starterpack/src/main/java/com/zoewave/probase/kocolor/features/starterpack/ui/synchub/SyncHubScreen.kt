@@ -1,22 +1,22 @@
 package com.zoewave.probase.kocolor.features.starterpack.ui.synchub
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
@@ -63,14 +63,16 @@ fun SyncHubScreen(
         val baseFiltered = if (filter.isNullOrBlank()) {
             uiState.availablePacks
         } else {
-            val fashionKeywords = listOf("fashion", "outerwear", "active", "dresses")
+            val fashionKeywords = listOf("fashion", "top", "bottom", "skirt", "pants", "shoes", "sneakers", "boots", "outerwear", "active", "dress")
             if (filter.lowercase() == "clothing") {
                 uiState.availablePacks.filter { pack -> 
-                    fashionKeywords.any { pack.id.lowercase().contains(it) } 
+                    fashionKeywords.any { pack.id.lowercase().contains(it) || pack.name.lowercase().contains(it) } || pack.id == "com.kocolor.pack.fashion.complete"
                 }
             } else if (filter.lowercase() == "cosmetics") {
                 uiState.availablePacks.filter { pack -> 
-                    !fashionKeywords.any { pack.id.lowercase().contains(it) } 
+                    // Exclude fashion items AND exclude the complete fashion hero pack!
+                    pack.id != "com.kocolor.pack.fashion.complete" &&
+                    !fashionKeywords.any { pack.id.lowercase().contains(it) || pack.name.lowercase().contains(it) || pack.description.lowercase().contains(it) }
                 }
             } else {
                 uiState.availablePacks
@@ -105,8 +107,9 @@ fun SyncHubScreen(
             }
             
             baseFiltered.filter { pack ->
-                pack.id == "com.kocolor.pack.cosmetics.complete" || 
-                pack.id == "com.kocolor.pack.fashion.complete" || 
+                if (filter?.lowercase() == "clothing" && pack.id == "com.kocolor.pack.fashion.complete") return@filter true
+                if (filter?.lowercase() != "clothing" && pack.id == "com.kocolor.pack.cosmetics.complete") return@filter true
+                
                 keywords.any { kw -> 
                     pack.id.lowercase().contains(kw) || 
                     pack.name.lowercase().contains(kw) ||
@@ -131,8 +134,8 @@ fun SyncHubScreen(
     if (showWipeConfirmByPackId != null) {
         AlertDialog(
             onDismissRequest = { showWipeConfirmByPackId = null },
-            title = { Text("Wipe this Pack?", fontFamily = serifFont, fontWeight = FontWeight.Bold) },
-            text = { Text("This will permanently remove all items from this pack. Your personal scans will remain untouched.") },
+            title = { Text(androidx.compose.ui.res.stringResource(com.zoewave.probase.kocolor.features.starterpack.R.string.applications_kocolor_features_starterpack_wipe_pack_title), fontFamily = serifFont, fontWeight = FontWeight.Bold) },
+            text = { Text(androidx.compose.ui.res.stringResource(com.zoewave.probase.kocolor.features.starterpack.R.string.applications_kocolor_features_starterpack_wipe_pack_message)) },
             confirmButton = {
                 TextButton(
                     onClick = { 
@@ -141,12 +144,12 @@ fun SyncHubScreen(
                     },
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
                 ) {
-                    Text("WIPE DATA", fontWeight = FontWeight.Black)
+                    Text(androidx.compose.ui.res.stringResource(com.zoewave.probase.kocolor.features.starterpack.R.string.applications_kocolor_features_starterpack_wipe_data), fontWeight = FontWeight.Black)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showWipeConfirmByPackId = null }) {
-                    Text("CANCEL")
+                    Text(androidx.compose.ui.res.stringResource(com.zoewave.probase.kocolor.features.starterpack.R.string.applications_kocolor_features_starterpack_cancel))
                 }
             },
             shape = RoundedCornerShape(28.dp)
@@ -156,16 +159,48 @@ fun SyncHubScreen(
     Scaffold(
         modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing),
         topBar = {
-            Column {
-                val hubTitle = if (filter?.lowercase() == "clothing") "Explore Fashion" else "Discover Cosmetics"
-                GlowSyncTopAppBar(
-                    title = hubTitle,
-                    query = uiState.searchQuery,
-                    onQueryChange = { onEvent(StarterPackEvent.SearchQueryChanged(it)) },
-                    onBack = onBack
-                )
-                
-                // Filter Chips
+            val hubTitle = if (filter?.lowercase() == "clothing") "Explore Fashion" else "Discover Cosmetics"
+            GlowSyncTopAppBar(
+                title = hubTitle,
+                query = uiState.searchQuery,
+                onQueryChange = { onEvent(StarterPackEvent.SearchQueryChanged(it)) },
+                onBack = onBack
+            )
+        }
+    ) { padding ->
+        LazyColumn(
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize(),
+            contentPadding = PaddingValues(bottom = 120.dp, top = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp)
+        ) {
+            val heroPackId = if (filter?.lowercase() == "clothing") "com.kocolor.pack.fashion.complete" else "com.kocolor.pack.cosmetics.complete"
+
+            // Top Hero Card (Scrolls with content)
+            val heroPack = uiState.availablePacks.find { it.id == heroPackId }
+            if (heroPack != null) {
+                item {
+                    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                        HeroPackageCard(
+                            pack = heroPack,
+                            status = uiState.installedPacks.find { it.packId == heroPack.id }?.status ?: PackStatus.AVAILABLE,
+                            onImportClick = { 
+                                onNavigateTo(KoColorRoute.PackPreview(
+                                    packId = heroPack.id, 
+                                    sha256 = heroPack.sha256, 
+                                    publisher = heroPack.publisher,
+                                    categoryFilter = filter
+                                )) 
+                            },
+                            onInfoClick = { selectedInfoPack = heroPack }
+                        )
+                    }
+                }
+            }
+
+            // Filter Chips
+            item {
                 val categories = if (filter?.lowercase() == "clothing") {
                     listOf("ALL", "TOPS", "BOTTOMS", "DRESSES", "OUTERWEAR", "ACTIVEWEAR", "SHOES")
                 } else {
@@ -176,10 +211,9 @@ fun SyncHubScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .horizontalScroll(rememberScrollState())
-                        .padding(vertical = 8.dp),
+                        .padding(horizontal = 16.dp, vertical = 4.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Spacer(Modifier.width(16.dp))
                     categories.forEach { cat ->
                         FilterChip(
                             selected = uiState.selectedCategory == cat,
@@ -204,36 +238,6 @@ fun SyncHubScreen(
                     Spacer(Modifier.width(16.dp))
                 }
             }
-        }
-    ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .padding(padding)
-                .fillMaxSize(),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
-        ) {
-            // Hero Section: Complete Collection
-            val heroPackId = if (filter?.lowercase() == "clothing") "com.kocolor.pack.fashion.complete" else "com.kocolor.pack.cosmetics.complete"
-            val heroPack = filteredAvailablePacks.find { it.id == heroPackId }
-            
-            if (heroPack != null) {
-                item {
-                    HeroPackageCard(
-                        pack = heroPack,
-                        status = uiState.installedPacks.find { it.packId == heroPack.id }?.status ?: PackStatus.AVAILABLE,
-                        onImportClick = { 
-                            onNavigateTo(KoColorRoute.PackPreview(
-                                packId = heroPack.id, 
-                                sha256 = heroPack.sha256, 
-                                publisher = heroPack.publisher,
-                                categoryFilter = filter
-                            )) 
-                        },
-                        onInfoClick = { selectedInfoPack = heroPack }
-                    )
-                }
-            }
 
             // Section Header
             item {
@@ -242,7 +246,7 @@ fun SyncHubScreen(
                     style = MaterialTheme.typography.titleLarge,
                     fontFamily = serifFont,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(top = 8.dp)
+                    modifier = Modifier.padding(top = 8.dp, start = 16.dp, end = 16.dp)
                 )
             }
 

@@ -74,7 +74,7 @@ fun BioStoreCard(
             )
 
             Column(
-                modifier = Modifier.padding(24.dp),
+                modifier = Modifier.padding(32.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
@@ -86,51 +86,49 @@ fun BioStoreCard(
                 )
                 Text(
                     text = stringResource(R.string.applications_kocolor_features_store_boutique_title),
-                    style = MaterialTheme.typography.headlineMedium,
+                    style = MaterialTheme.typography.displaySmall,
                     fontFamily = FontFamily.Serif,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF1A1A1A)
                 )
 
-                AnimatedVisibility(visible = uiState.isExpanded) {
-                    Column {
-                        Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(12.dp))
+                
+                Text(
+                    text = stringResource(R.string.applications_kocolor_features_store_boutique_description),
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        lineHeight = 24.sp,
+                        letterSpacing = 0.2.sp
+                    ),
+                    color = Color(0xFF4A4A4A)
+                )
+                
+                Spacer(Modifier.height(24.dp))
+                
+                Surface(
+                    onClick = { onEvent(StoreEvent.EnterStore) }, 
+                    color = Color(0xFFEBEBEB),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
                         Text(
-                            text = stringResource(R.string.applications_kocolor_features_store_boutique_description),
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                lineHeight = 22.sp,
-                                letterSpacing = 0.2.sp
+                            text = stringResource(R.string.applications_kocolor_features_store_enter_atelier),
+                            style = MaterialTheme.typography.labelLarge.copy(
+                                letterSpacing = 1.sp
                             ),
-                            color = Color(0xFF4A4A4A)
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF8B5A52) // Darker rust/brown
                         )
-                        
-                        Spacer(Modifier.height(32.dp))
-                        
-                        Surface(
-                            onClick = { onEvent(StoreEvent.EnterStore) }, 
-                            color = Color.Transparent,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.applications_kocolor_features_store_enter_atelier),
-                                    style = MaterialTheme.typography.labelLarge.copy(
-                                        fontWeight = FontWeight.Black,
-                                        letterSpacing = 1.sp
-                                    ),
-                                    color = Color(0xFF8D6E63)
-                                )
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                                    contentDescription = null,
-                                    tint = Color(0xFF8D6E63),
-                                    modifier = Modifier.size(16.dp)
-                                )
-                            }
-                        }
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = Color(0xFF8B5A52)
+                        )
                     }
                 }
             }

@@ -22,6 +22,7 @@ import com.zoewave.probase.photodo.data.util.loadAssetAsBitmap
 import com.zoewave.probase.photodo.wear.features.project.ProjectWearUiModel
 import com.zoewave.probase.photodo.wear.features.project.R
 import java.util.Locale
+import androidx.compose.ui.platform.LocalLocale
 
 @Composable
 fun ProjectCard(
@@ -76,7 +77,7 @@ fun ProjectCard(
         Text(
             text = stringResource(
                 R.string.applications_photodo_apps_wear_features_project_spent_format, 
-                String.format(Locale.getDefault(), "%.2f", project.currentSpend)
+                String.format(LocalLocale.current.platformLocale, "%.2f", project.currentSpend)
             )
         )
     }

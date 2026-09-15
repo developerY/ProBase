@@ -52,9 +52,6 @@ import com.zoewave.probase.kocolor.features.cosmetics.ui.StitchProductBuilder
 import com.zoewave.probase.kocolor.features.cosmetics.ui.VanityLandingScreen
 import com.zoewave.probase.kocolor.features.inventory.ui.ColorVerificationRoute
 import com.zoewave.probase.kocolor.features.inventory.ui.ColorVerificationUiState
-import com.zoewave.probase.kocolor.features.inventory.ui.analytics.StyleIntelligenceScreen
-import com.zoewave.probase.kocolor.features.inventory.ui.analytics.WardrobeBehaviorScreen
-import com.zoewave.probase.kocolor.features.inventory.ui.analytics.WardrobeFootprintScreen
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeCategoryCoverScreen
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeCategoryCoverUiState
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeDetailScreen
@@ -62,9 +59,12 @@ import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeDetailUiState
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeEditScreen
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeEditUiState
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeEvent
-import com.zoewave.probase.kocolor.features.inventory.ui.landing.WardrobeLandingScreen
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeRoute
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeViewModel
+import com.zoewave.probase.kocolor.features.inventory.ui.analytics.StyleIntelligenceScreen
+import com.zoewave.probase.kocolor.features.inventory.ui.analytics.WardrobeBehaviorScreen
+import com.zoewave.probase.kocolor.features.inventory.ui.analytics.WardrobeFootprintScreen
+import com.zoewave.probase.kocolor.features.inventory.ui.landing.WardrobeLandingScreen
 import com.zoewave.probase.kocolor.features.routines.ui.RoutineDetailUiRoute
 import com.zoewave.probase.kocolor.features.routines.ui.RoutineDetailUiState
 import com.zoewave.probase.kocolor.features.routines.ui.RoutineEditorScreen
@@ -617,6 +617,15 @@ fun koColorNavEntryProvider(
                 onEvent = viewModel::onEvent,
                 onNavigateTo = onNavigateTo,
                 onBack = onBack
+            )
+        }
+        is KoColorRoute.Store -> NavEntry(route) {
+            val viewModel: com.zoewave.probase.kocolor.features.store.ui.StoreViewModel = hiltViewModel()
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+            com.zoewave.probase.kocolor.features.store.ui.StoreScreen(
+                uiState = state,
+                onEvent = viewModel::onEvent,
+                navTo = onNavigateTo
             )
         }
         is KoColorRoute.PackPreview -> NavEntry(route) {
