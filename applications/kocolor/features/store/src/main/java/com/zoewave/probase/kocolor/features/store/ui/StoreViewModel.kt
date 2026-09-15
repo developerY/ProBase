@@ -3,9 +3,17 @@ package com.zoewave.probase.kocolor.features.store.ui
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.zoewave.probase.core.model.ritual.ClothingCategory
+import com.zoewave.probase.core.model.ritual.MacroCategory
+import com.zoewave.probase.core.model.ritual.MicroCategory
+import com.zoewave.probase.kocolor.db.dao.ClothingDao
+import com.zoewave.probase.kocolor.db.dao.CosmeticDao
+import com.zoewave.probase.kocolor.db.entity.ClothingItemEntity
+import com.zoewave.probase.kocolor.db.entity.CosmeticItemEntity
 import com.zoewave.probase.kocolor.features.starterpack.data.StarterPackRepository
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.ClothingItemDto
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.CosmeticItemDto
+import com.zoewave.probase.kocolor.features.starterpack.data.repository.PackSyncRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,7 +23,10 @@ import javax.inject.Inject
 
 @HiltViewModel
 class StoreViewModel @Inject constructor(
-    private val starterPackRepository: StarterPackRepository
+    private val starterPackRepository: StarterPackRepository,
+    private val packSyncRepository: PackSyncRepository,
+    private val cosmeticDao: CosmeticDao,
+    private val clothingDao: ClothingDao
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(StoreUiState())
@@ -166,12 +177,65 @@ class StoreViewModel @Inject constructor(
                 _uiState.value = _uiState.value.copy(isCartOpen = false)
             }
             StoreEvent.CheckoutCart -> {
-                // Checkout clears cart and signals success!
-                _uiState.value = _uiState.value.copy(
-                    cartItems = emptyList(),
-                    isCartOpen = false,
-                    isCheckoutSuccess = true
-                )
+                viewModelScope.launch {
+                    val currentCart = _uiState.value.cartItems
+                    val manifest = try { starterPackRepository.getManifest().data } catch (e: Exception) { null }
+
+                    currentCart.forEach { item ->
+                        val pack = manifest?.packs?.find { it.id == item.id }
+                        if (pack != null) {
+                            packSyncRepository.ingestPack(pack)
+                        } else {
+                            if (item.category == "OUTERWEAR" || item.category == "TOPS" || item.category == "BOTTOMS" || item.category == "DRESSES" || item.category == "SHOES" || item.category == "ACTIVEWEAR" || item.category == "APPAREL" || item.category == "FASHION") {
+                                val categoryEnum = try {
+                                    ClothingCategory.valueOf(item.category)
+                                } catch (e: Exception) {
+                                    ClothingCategory.TOPS
+                                }
+                                clothingDao.insertClothing(
+                                    ClothingItemEntity(
+                                        remoteId = item.id,
+                                        name = item.title,
+                                        brand = "KoColor Atelier",
+                                        category = categoryEnum,
+                                        colorHex = "#D4AF37",
+                                        price = item.numericPrice,
+                                        imageUrl = item.imageModel?.toString(),
+                                        notes = item.subtitle,
+                                        timestamp = System.currentTimeMillis()
+                                    )
+                                )
+                            } else {
+                                val macroEnum = try {
+                                    MacroCategory.valueOf(item.category)
+                                } catch (e: Exception) {
+                                    MacroCategory.COMPLEXION
+                                }
+                                cosmeticDao.insertCosmetic(
+                                    CosmeticItemEntity(
+                                        remoteId = item.id,
+                                        name = item.title,
+                                        brand = "KoColor",
+                                        macroCategory = macroEnum,
+                                        microCategory = MicroCategory.FOUNDATION,
+                                        colorHex = "#D4AF37",
+                                        shadeName = item.shadeName,
+                                        price = item.numericPrice,
+                                        imageUrl = item.imageModel?.toString(),
+                                        notes = item.subtitle,
+                                        timestamp = System.currentTimeMillis()
+                                    )
+                                )
+                            }
+                        }
+                    }
+
+                    _uiState.value = _uiState.value.copy(
+                        cartItems = emptyList(),
+                        isCartOpen = false,
+                        isCheckoutSuccess = true
+                    )
+                }
             }
             StoreEvent.ClearCheckoutSuccess -> {
                 _uiState.value = _uiState.value.copy(isCheckoutSuccess = false)
