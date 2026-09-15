@@ -3,4 +3,10 @@
     <string name="applications_kocolor_features_store_boutique_subtitle">THE ART OF COLOR</string>
     <string name="applications_kocolor_features_store_boutique_description">Enter our curated boutique where science meets aesthetics. Discover limited edition metabolic supplements and bio-synced color palettes designed for your specific biological profile.</string>
     <string name="applications_kocolor_features_store_enter_atelier">ENTER ATELIER</string>
+    <string name="applications_kocolor_features_store_title">KoColor Store</string>
+    <string name="applications_kocolor_features_store_cosmetics_vault">Cosmetics Vault</string>
+    <string name="applications_kocolor_features_store_fashion_archive">Fashion Archive</string>
+    <string name="applications_kocolor_features_store_see_all">See All</string>
+    <string name="applications_kocolor_features_store_items_curated">%1$d items curated</string>
+    <string name="applications_kocolor_features_store_back">Back</string>
 </resources>

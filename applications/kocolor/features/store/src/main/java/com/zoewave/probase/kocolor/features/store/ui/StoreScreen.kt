@@ -33,10 +33,10 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.PackInfo
+import com.zoewave.probase.kocolor.features.store.R
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -59,7 +60,7 @@ fun StoreScreen(
             CenterAlignedTopAppBar(
                 title = { 
                     Text(
-                        "KoColor Store",
+                        stringResource(R.string.applications_kocolor_features_store_title),
                         fontFamily = FontFamily.Serif,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 1.sp
@@ -67,7 +68,7 @@ fun StoreScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = { navTo(KoColorRoute.Back) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.applications_kocolor_features_store_back))
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent)
@@ -97,7 +98,7 @@ fun StoreScreen(
                         verticalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            text = "THE ART OF COLOR",
+                            text = stringResource(R.string.applications_kocolor_features_store_boutique_subtitle),
                             style = MaterialTheme.typography.labelSmall,
                             letterSpacing = 2.sp,
                             color = Color(0xFF8B5A52),
@@ -105,7 +106,7 @@ fun StoreScreen(
                         )
                         Spacer(Modifier.height(8.dp))
                         Text(
-                            text = "Atelier Boutique",
+                            text = stringResource(R.string.applications_kocolor_features_store_boutique_title),
                             style = MaterialTheme.typography.displaySmall,
                             fontFamily = FontFamily.Serif,
                             fontWeight = FontWeight.Bold,
@@ -113,7 +114,7 @@ fun StoreScreen(
                         )
                         Spacer(Modifier.height(16.dp))
                         Text(
-                            text = "Enter our curated boutique where science meets aesthetics.",
+                            text = stringResource(R.string.applications_kocolor_features_store_boutique_description),
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color.DarkGray
                         )
@@ -127,7 +128,7 @@ fun StoreScreen(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                Text("ENTER ATELIER", style = MaterialTheme.typography.labelMedium, color = Color.White, fontWeight = FontWeight.Bold)
+                                Text(stringResource(R.string.applications_kocolor_features_store_enter_atelier), style = MaterialTheme.typography.labelMedium, color = Color.White, fontWeight = FontWeight.Bold)
                                 Icon(Icons.AutoMirrored.Filled.ArrowForward, null, tint = Color.White, modifier = Modifier.size(16.dp))
                             }
                         }
@@ -144,13 +145,13 @@ fun StoreScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Cosmetics Vault",
+                            text = stringResource(R.string.applications_kocolor_features_store_cosmetics_vault),
                             style = MaterialTheme.typography.titleLarge,
                             fontFamily = FontFamily.Serif,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "See All",
+                            text = stringResource(R.string.applications_kocolor_features_store_see_all),
                             style = MaterialTheme.typography.labelMedium,
                             color = Color(0xFF8B5A52),
                             fontWeight = FontWeight.Bold,
@@ -181,13 +182,13 @@ fun StoreScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Fashion Archive",
+                            text = stringResource(R.string.applications_kocolor_features_store_fashion_archive),
                             style = MaterialTheme.typography.titleLarge,
                             fontFamily = FontFamily.Serif,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "See All",
+                            text = stringResource(R.string.applications_kocolor_features_store_see_all),
                             style = MaterialTheme.typography.labelMedium,
                             color = Color(0xFF8B5A52),
                             fontWeight = FontWeight.Bold,
@@ -227,7 +228,15 @@ private fun StorePackCard(
     ) {
         Column {
             Box(modifier = Modifier.fillMaxWidth().height(160.dp).background(Color(0xFFF5F5F5))) {
-                // If it has an image, great, otherwise soft gray box
+                // Background Image
+                if (pack.heroImageUrl != null) {
+                    AsyncImage(
+                        model = pack.heroImageUrl,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
             }
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
@@ -239,7 +248,7 @@ private fun StorePackCard(
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text = "${pack.itemCount} items curated",
+                    text = stringResource(R.string.applications_kocolor_features_store_items_curated, pack.itemCount),
                     style = MaterialTheme.typography.labelSmall,
                     color = Color.Gray
                 )

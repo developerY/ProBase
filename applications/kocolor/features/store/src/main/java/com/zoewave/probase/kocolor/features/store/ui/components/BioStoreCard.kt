@@ -78,14 +78,14 @@ fun BioStoreCard(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    text = "THE ART OF COLOR",
+                    text = stringResource(R.string.applications_kocolor_features_store_boutique_subtitle),
                     style = MaterialTheme.typography.labelSmall,
                     letterSpacing = 2.sp,
                     color = Color.Gray,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Atelier Boutique",
+                    text = stringResource(R.string.applications_kocolor_features_store_boutique_title),
                     style = MaterialTheme.typography.displaySmall,
                     fontFamily = FontFamily.Serif,
                     fontWeight = FontWeight.Bold,
@@ -95,7 +95,7 @@ fun BioStoreCard(
                 Spacer(Modifier.height(12.dp))
                 
                 Text(
-                    text = "Enter our curated boutique where science meets aesthetics. Discover limited edition metabolic supplements and bio-synced color palettes designed for your specific biological profile.",
+                    text = stringResource(R.string.applications_kocolor_features_store_boutique_description),
                     style = MaterialTheme.typography.bodyMedium.copy(
                         lineHeight = 24.sp,
                         letterSpacing = 0.2.sp
@@ -116,7 +116,7 @@ fun BioStoreCard(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(
-                            text = "ENTER ATELIER",
+                            text = stringResource(R.string.applications_kocolor_features_store_enter_atelier),
                             style = MaterialTheme.typography.labelLarge.copy(
                                 letterSpacing = 1.sp
                             ),
