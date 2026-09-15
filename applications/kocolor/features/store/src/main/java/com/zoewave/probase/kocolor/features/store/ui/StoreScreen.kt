@@ -12,32 +12,43 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.ShoppingBag
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.VerticalDivider
+import androidx.compose.material3.rememberModalBottomSheetState
+import java.text.NumberFormat
+import java.util.Locale
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -83,19 +94,25 @@ fun StoreScreen(
                     }
                 },
                 actions = {
-                    Box(modifier = Modifier.padding(end = 12.dp)) {
-                        IconButton(onClick = { /* Shopping Bag */ }) {
+                    Box(
+                        modifier = Modifier
+                            .padding(end = 12.dp)
+                            .clickable { onEvent(StoreEvent.OpenCart) }
+                    ) {
+                        IconButton(onClick = { onEvent(StoreEvent.OpenCart) }) {
                             Icon(Icons.Default.ShoppingBag, contentDescription = "Bag", tint = Color.Black)
                         }
-                        Surface(
-                            shape = CircleShape,
-                            color = Color.Black,
-                            modifier = Modifier
-                                .size(16.dp)
-                                .align(Alignment.TopEnd)
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Text("${uiState.cartCount}", color = Color.White, fontSize = 8.sp, fontWeight = FontWeight.Bold)
+                        if (uiState.cartCount > 0) {
+                            Surface(
+                                shape = CircleShape,
+                                color = Color(0xFF6B3A8B),
+                                modifier = Modifier
+                                    .size(18.dp)
+                                    .align(Alignment.TopEnd)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Text("${uiState.cartCount}", color = Color.White, fontSize = 9.sp, fontWeight = FontWeight.ExtraBold)
+                                }
                             }
                         }
                     }
@@ -476,6 +493,168 @@ fun StoreScreen(
                 }
             }
         }
+    }
+
+    if (uiState.isCartOpen) {
+        ModalBottomSheet(
+            onDismissRequest = { onEvent(StoreEvent.CloseCart) },
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+            containerColor = Color.White
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
+                verticalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Atelier Shopping Cart",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontFamily = FontFamily.Serif,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF1A1A1A)
+                    )
+                    Text(
+                        text = "${uiState.cartCount} items",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = Color.Gray
+                    )
+                }
+
+                HorizontalDivider(color = Color.Black.copy(alpha = 0.08f), thickness = 1.dp)
+
+                if (uiState.cartItems.isEmpty()) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 32.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(Icons.Default.ShoppingBag, contentDescription = null, tint = Color.LightGray, modifier = Modifier.size(48.dp))
+                        Text("Your shopping cart is empty", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        Text("Tap 'Add +' on any store item to add it to your cart.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                    }
+                } else {
+                    val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale.getDefault()) }
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 300.dp)
+                            .verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        uiState.cartItems.forEach { item ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(Color(0xFFF9F6F8), RoundedCornerShape(16.dp))
+                                    .padding(12.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(48.dp)
+                                            .clip(RoundedCornerShape(12.dp))
+                                            .background(Color(0xFFEDE7EA))
+                                    ) {
+                                        if (item.imageModel != null) {
+                                            AsyncImage(
+                                                model = item.imageModel,
+                                                contentDescription = null,
+                                                contentScale = ContentScale.Crop,
+                                                modifier = Modifier.fillMaxSize()
+                                            )
+                                        }
+                                    }
+                                    Column {
+                                        Text(item.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                        Text(item.subtitle, style = MaterialTheme.typography.bodySmall, color = Color.Gray, fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                    }
+                                }
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Text(item.price, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                                    IconButton(
+                                        onClick = { onEvent(StoreEvent.RemoveFromCart(item.id)) },
+                                        modifier = Modifier.size(28.dp)
+                                    ) {
+                                        Icon(Icons.Default.Delete, contentDescription = "Remove", tint = Color.Gray, modifier = Modifier.size(18.dp))
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    HorizontalDivider(color = Color.Black.copy(alpha = 0.08f), thickness = 1.dp)
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("Total Value", style = MaterialTheme.typography.titleMedium, color = Color.Gray)
+                        Text(
+                            currencyFormatter.format(uiState.cartTotalPrice),
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontFamily = FontFamily.Serif,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black
+                        )
+                    }
+
+                    Surface(
+                        onClick = { onEvent(StoreEvent.CheckoutCart) },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(50),
+                        color = Color(0xFF1E111F)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 16.dp),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text("CHECKOUT & INGEST TO VAULT", style = MaterialTheme.typography.labelLarge, color = Color.White, fontWeight = FontWeight.ExtraBold, letterSpacing = 1.sp)
+                            Spacer(Modifier.width(8.dp))
+                            Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                        }
+                    }
+                }
+                Spacer(Modifier.height(16.dp))
+            }
+        }
+    }
+
+    if (uiState.isCheckoutSuccess) {
+        AlertDialog(
+            onDismissRequest = { onEvent(StoreEvent.ClearCheckoutSuccess) },
+            title = { Text("Items Added to Vault!", fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold) },
+            text = { Text("Your selected Atelier items have been successfully checked out and ingested into your active Vanity & Wardrobe Vaults.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    onEvent(StoreEvent.ClearCheckoutSuccess)
+                    navTo(KoColorRoute.Home)
+                }) {
+                    Text("VIEW COLLECTION HUB", fontWeight = FontWeight.Black, color = Color(0xFF6B3A8B))
+                }
+            },
+            shape = RoundedCornerShape(28.dp)
+        )
     }
 }
 
