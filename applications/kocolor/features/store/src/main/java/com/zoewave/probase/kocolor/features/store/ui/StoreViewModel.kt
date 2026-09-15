@@ -31,11 +31,12 @@ class StoreViewModel @Inject constructor(
                 val cosmetics = manifest.packs.filter { pack -> 
                     pack.packType == "STARTER_PACK" && 
                     (pack.id.contains("cosmetics") || pack.id.contains("lips") || pack.id.contains("eyes") || pack.id.contains("nails") || pack.id.contains("hair") || pack.id.contains("prep") || pack.id.contains("frag")) 
-                }
+                }.shuffled()
+
                 val fashion = manifest.packs.filter { pack -> 
                     pack.packType == "STARTER_PACK" && 
                     (pack.id.contains("fashion") || pack.id.contains("shirts") || pack.id.contains("pants") || pack.id.contains("shoes") || pack.id.contains("dresses") || pack.id.contains("outerwear") || pack.id.contains("active")) 
-                }
+                }.shuffled()
 
                 _uiState.value = _uiState.value.copy(
                     cosmeticsPacks = cosmetics,
