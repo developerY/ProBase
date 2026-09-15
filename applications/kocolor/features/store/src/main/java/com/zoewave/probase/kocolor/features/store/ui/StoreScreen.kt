@@ -114,7 +114,7 @@ fun StoreScreen(
                         )
                         Spacer(Modifier.height(16.dp))
                         Text(
-                            text = stringResource(R.string.applications_kocolor_features_store_boutique_description),
+                            text = "Enter our curated boutique where science meets aesthetics.",
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color.DarkGray
                         )
