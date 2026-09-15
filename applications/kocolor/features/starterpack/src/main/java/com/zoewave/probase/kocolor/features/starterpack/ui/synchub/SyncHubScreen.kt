@@ -50,6 +50,7 @@ import com.zoewave.probase.kocolor.model.KoColorRoute
 fun SyncHubScreen(
     uiState: StarterPackUiState,
     filter: String? = null,
+    showHero: Boolean = false,
     onEvent: (StarterPackEvent) -> Unit,
     onNavigateTo: (KoColorRoute) -> Unit,
     onBack: () -> Unit
@@ -177,24 +178,26 @@ fun SyncHubScreen(
         ) {
             val heroPackId = if (filter?.lowercase() == "clothing") "com.kocolor.pack.fashion.complete" else "com.kocolor.pack.cosmetics.complete"
 
-            // Top Hero Card (Scrolls with content)
-            val heroPack = uiState.availablePacks.find { it.id == heroPackId }
-            if (heroPack != null) {
-                item {
-                    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-                        HeroPackageCard(
-                            pack = heroPack,
-                            status = uiState.installedPacks.find { it.packId == heroPack.id }?.status ?: PackStatus.AVAILABLE,
-                            onImportClick = { 
-                                onNavigateTo(KoColorRoute.PackPreview(
-                                    packId = heroPack.id, 
-                                    sha256 = heroPack.sha256, 
-                                    publisher = heroPack.publisher,
-                                    categoryFilter = filter
-                                )) 
-                            },
-                            onInfoClick = { selectedInfoPack = heroPack }
-                        )
+            // Top Hero Card (Only shown if showHero == true!)
+            if (showHero) {
+                val heroPack = uiState.availablePacks.find { it.id == heroPackId }
+                if (heroPack != null) {
+                    item {
+                        Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                            HeroPackageCard(
+                                pack = heroPack,
+                                status = uiState.installedPacks.find { it.packId == heroPack.id }?.status ?: PackStatus.AVAILABLE,
+                                onImportClick = { 
+                                    onNavigateTo(KoColorRoute.PackPreview(
+                                        packId = heroPack.id, 
+                                        sha256 = heroPack.sha256, 
+                                        publisher = heroPack.publisher,
+                                        categoryFilter = filter
+                                    )) 
+                                },
+                                onInfoClick = { selectedInfoPack = heroPack }
+                            )
+                        }
                     }
                 }
             }

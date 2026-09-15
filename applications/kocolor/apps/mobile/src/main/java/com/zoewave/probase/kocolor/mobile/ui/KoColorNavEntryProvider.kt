@@ -614,6 +614,7 @@ fun koColorNavEntryProvider(
             SyncHubScreen(
                 uiState = state,
                 filter = route.filter,
+                showHero = route.showHero,
                 onEvent = viewModel::onEvent,
                 onNavigateTo = onNavigateTo,
                 onBack = onBack

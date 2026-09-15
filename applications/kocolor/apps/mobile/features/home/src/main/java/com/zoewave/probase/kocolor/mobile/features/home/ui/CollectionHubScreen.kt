@@ -212,7 +212,7 @@ fun CollectionHubScreen(
                             discoverTitle = "DISCOVER",
                             discoverSubtitle = "Cosmetics Catalog",
                             discoverColor = Color(0xFF3D223B), // Dark Plum
-                            onDiscoverClick = { navTo(KoColorRoute.StarterPack(filter = "cosmetics")) },
+                            onDiscoverClick = { navTo(KoColorRoute.StarterPack(filter = "cosmetics", showHero = true)) },
                             categoryProgress = cosmeticsProgress,
                             healthMetric = healthText,
                             restockMetric = restockText,
@@ -257,7 +257,7 @@ fun CollectionHubScreen(
                             discoverTitle = "EXPLORE",
                             discoverSubtitle = "Fashion Catalog",
                             discoverColor = Color(0xFF1B2238), // Deep Navy
-                            onDiscoverClick = { navTo(KoColorRoute.StarterPack(filter = "clothing")) },
+                            onDiscoverClick = { navTo(KoColorRoute.StarterPack(filter = "clothing", showHero = true)) },
                             categoryProgress = wardrobeProgress,
                             healthMetric = if (uiState.totalClothing > 0) "Rotation Health: 94% Active" else null,
                             chromaticTone = if (uiState.totalClothing > 0) "Palette Baseline: Neutral-led · Warm-biased" else null,
