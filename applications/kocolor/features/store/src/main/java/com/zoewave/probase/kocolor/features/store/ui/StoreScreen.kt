@@ -55,19 +55,6 @@ import coil.compose.AsyncImage
 import com.zoewave.probase.kocolor.features.store.R
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
-data class StoreProductItem(
-    val id: String,
-    val title: String,
-    val subtitle: String,
-    val category: String,
-    val price: String,
-    val detailTag: String,
-    val badge: String,
-    val shadeName: String? = null,
-    val shadeColor: Color? = null,
-    val imageModel: Any? = null
-)
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StoreScreen(
@@ -256,8 +243,10 @@ fun StoreScreen(
 
             // 3. Cosmetics Vault Section
             item {
-                val cosmeticItems = remember(uiState.cosmeticsPacks) {
-                    if (uiState.cosmeticsPacks.isNotEmpty()) {
+                val cosmeticItems = remember(uiState.realCosmeticItems, uiState.cosmeticsPacks) {
+                    if (uiState.realCosmeticItems.isNotEmpty()) {
+                        uiState.realCosmeticItems
+                    } else if (uiState.cosmeticsPacks.isNotEmpty()) {
                         uiState.cosmeticsPacks.map { pack ->
                             StoreProductItem(
                                 id = pack.id,
@@ -272,34 +261,7 @@ fun StoreScreen(
                                 imageModel = pack.heroImageUrl ?: R.drawable.applications_kocolor_features_store_kocolor_fabric_clean
                             )
                         }
-                    } else {
-                        listOf(
-                            StoreProductItem(
-                                id = "kc-foundation-01",
-                                title = "Aura Silk Foundation",
-                                subtitle = "Micro-pigment breathable fluid",
-                                category = "COMPLEXION",
-                                price = "$68",
-                                detailTag = "30ml",
-                                badge = "98% Harmony",
-                                shadeName = "SHADE M04 WARM IVORY",
-                                shadeColor = Color(0xFFE2BA9D),
-                                imageModel = R.drawable.applications_kocolor_features_store_kocolor_fabric_clean
-                            ),
-                            StoreProductItem(
-                                id = "kc-lip-01",
-                                title = "Satin Glaze Lip Elixir",
-                                subtitle = "Peptide-infused conditioner",
-                                category = "LIPS",
-                                price = "$44",
-                                detailTag = "15ml",
-                                badge = "Seasonal Key",
-                                shadeName = "CINNABAR TINT",
-                                shadeColor = Color(0xFFC25975),
-                                imageModel = R.drawable.applications_kocolor_features_store_kocolor_fabric_clean
-                            )
-                        )
-                    }
+                    } else emptyList()
                 }
 
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -345,8 +307,10 @@ fun StoreScreen(
 
             // 4. Fashion Archive Section
             item {
-                val fashionItems = remember(uiState.fashionPacks) {
-                    if (uiState.fashionPacks.isNotEmpty()) {
+                val fashionItems = remember(uiState.realFashionItems, uiState.fashionPacks) {
+                    if (uiState.realFashionItems.isNotEmpty()) {
+                        uiState.realFashionItems
+                    } else if (uiState.fashionPacks.isNotEmpty()) {
                         uiState.fashionPacks.map { pack ->
                             StoreProductItem(
                                 id = pack.id,
@@ -359,30 +323,7 @@ fun StoreScreen(
                                 imageModel = pack.heroImageUrl ?: R.drawable.applications_kocolor_features_store_kocolor_fabric_clean
                             )
                         }
-                    } else {
-                        listOf(
-                            StoreProductItem(
-                                id = "kc-trench-01",
-                                title = "Belted Camel Trench",
-                                subtitle = "OUTERWEAR ARCHIVE",
-                                category = "OUTERWEAR",
-                                price = "$420",
-                                detailTag = "100% Wool",
-                                badge = "Warm Tone",
-                                imageModel = R.drawable.applications_kocolor_features_store_kocolor_fabric_clean
-                            ),
-                            StoreProductItem(
-                                id = "kc-blouse-01",
-                                title = "Pleated Crepe Blouse",
-                                subtitle = "SILK ATELIER",
-                                category = "TOPS",
-                                price = "$215",
-                                detailTag = "Raw Silk",
-                                badge = "Archival Cut",
-                                imageModel = R.drawable.applications_kocolor_features_store_kocolor_fabric_clean
-                            )
-                        )
-                    }
+                    } else emptyList()
                 }
 
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
