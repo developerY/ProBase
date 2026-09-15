@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
@@ -24,15 +24,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
 import com.zoewave.probase.kocolor.features.store.R
 import com.zoewave.probase.kocolor.features.store.ui.StoreEvent
 import com.zoewave.probase.kocolor.features.store.ui.StoreUiState
@@ -49,89 +49,104 @@ fun BioStoreCard(
         modifier = modifier
             .fillMaxWidth()
             .clickable { 
-                android.util.Log.d("BioStoreCard", "ElevatedCard Clicked!")
+                android.util.Log.d("BioStoreCard", "BioStoreCard Clicked -> Navigating to Store")
                 onEvent(StoreEvent.EnterStore) 
             },
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.elevatedCardColors(containerColor = Color.White),
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp)
+        shape = RoundedCornerShape(32.dp),
+        colors = CardDefaults.elevatedCardColors(containerColor = Color.Transparent),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp)
     ) {
-        Box(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
-            // Background Image
-            AsyncImage(
-                model = uiState.backgroundModel ?: R.drawable.applications_kocolor_features_store_kocolor_store_front,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.matchParentSize(),
-                alpha = 0.4f
-            )
-            
-            // Premium Frosted Overlay
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .background(Color.White.copy(alpha = 0.75f))
-            )
-
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    brush = Brush.linearGradient(
+                        colors = listOf(Color(0xFFFCF3F5), Color(0xFFF7E6EC))
+                    ),
+                    shape = RoundedCornerShape(32.dp)
+                )
+                .padding(24.dp)
+        ) {
             Column(
-                modifier = Modifier.padding(32.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                Text(
-                    text = stringResource(R.string.applications_kocolor_features_store_boutique_subtitle),
-                    style = MaterialTheme.typography.labelSmall,
-                    letterSpacing = 2.sp,
-                    color = Color.Gray,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = stringResource(R.string.applications_kocolor_features_store_boutique_title),
-                    style = MaterialTheme.typography.displaySmall,
-                    fontFamily = FontFamily.Serif,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1A1A1A)
-                )
+                // Top Pill Badge
+                Surface(
+                    shape = RoundedCornerShape(50),
+                    color = Color(0xFFE8D3D8).copy(alpha = 0.7f)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(Color(0xFF8B5A52)))
+                        Text(
+                            text = "CHROMATIC DNA: MUTED AUTUMN",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF6B3A32),
+                            fontSize = 9.sp,
+                            letterSpacing = 0.8.sp
+                        )
+                    }
+                }
 
-                Spacer(Modifier.height(12.dp))
-                
+                Column {
+                    Text(
+                        text = stringResource(R.string.applications_kocolor_features_store_boutique_subtitle),
+                        style = MaterialTheme.typography.labelSmall,
+                        letterSpacing = 2.sp,
+                        color = Color.Gray,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 10.sp
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = stringResource(R.string.applications_kocolor_features_store_boutique_title),
+                        style = MaterialTheme.typography.displaySmall.copy(fontSize = 32.sp),
+                        fontFamily = FontFamily.Serif,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF1A1A1A)
+                    )
+                }
+
                 Text(
-                    text = stringResource(R.string.applications_kocolor_features_store_boutique_description),
+                    text = "Enter our curated boutique where science meets aesthetics. Tailored formulas and archival silhouettes matched to your chromatic harmony.",
                     style = MaterialTheme.typography.bodyMedium.copy(
-                        lineHeight = 24.sp,
+                        lineHeight = 22.sp,
                         letterSpacing = 0.2.sp
                     ),
                     color = Color(0xFF4A4A4A)
                 )
-                
-                Spacer(Modifier.height(24.dp))
-                
-                Surface(
-                    onClick = { 
-                        android.util.Log.d("BioStoreCard", "Surface Button Clicked!")
-                        onEvent(StoreEvent.EnterStore) 
-                    }, 
-                    color = Color(0xFFEBEBEB),
-                    shape = RoundedCornerShape(12.dp)
+
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    Text(
+                        text = "EXPLORE ATELIER",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.2.sp,
+                        color = Color(0xFF8B5A52)
+                    )
+
+                    Surface(
+                        color = Color.White,
+                        shape = CircleShape,
+                        shadowElevation = 6.dp,
+                        modifier = Modifier.size(56.dp)
                     ) {
-                        Text(
-                            text = stringResource(R.string.applications_kocolor_features_store_enter_atelier),
-                            style = MaterialTheme.typography.labelLarge.copy(
-                                letterSpacing = 1.sp
-                            ),
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF8B5A52) // Darker rust/brown
-                        )
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp),
-                            tint = Color(0xFF8B5A52)
-                        )
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                contentDescription = "Enter Store",
+                                modifier = Modifier.size(24.dp),
+                                tint = Color(0xFF1A1A1A)
+                            )
+                        }
                     }
                 }
             }
@@ -146,20 +161,6 @@ private fun BioStoreCardPreview() {
         Box(modifier = Modifier.padding(16.dp)) {
             BioStoreCard(
                 uiState = StoreUiState(),
-                onEvent = {},
-                navTo = {}
-            )
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun BioStoreCardExpandedPreview() {
-    MaterialTheme {
-        Box(modifier = Modifier.padding(16.dp)) {
-            BioStoreCard(
-                uiState = StoreUiState(isExpanded = true),
                 onEvent = {},
                 navTo = {}
             )

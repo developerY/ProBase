@@ -200,35 +200,6 @@ fun StoreScreen(
                                 ),
                                 color = Color(0xFF4A4A4A)
                             )
-
-                            Spacer(Modifier.height(4.dp))
-
-                            Surface(
-                                onClick = { navTo(KoColorRoute.StarterPack(filter = "cosmetics")) }, 
-                                color = Color(0xFF18101A), // Dark Black-Plum
-                                shape = RoundedCornerShape(50)
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(horizontal = 22.dp, vertical = 12.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                                ) {
-                                    Text(
-                                        text = "ENTER ATELIER",
-                                        style = MaterialTheme.typography.labelLarge,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color.White,
-                                        fontSize = 11.sp,
-                                        letterSpacing = 1.2.sp
-                                    )
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(14.dp),
-                                        tint = Color.White
-                                    )
-                                }
-                            }
                         }
                     }
                 }
