@@ -282,13 +282,34 @@ fun StoreScreen(
                             )
                             Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(Color(0xFFE91E63)))
                         }
-                        Text(
-                            text = stringResource(R.string.applications_kocolor_features_store_see_all),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = Color.Gray,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.clickable { navTo(KoColorRoute.StarterPack(filter = "cosmetics")) }
-                        )
+                        Surface(
+                            onClick = { navTo(KoColorRoute.StarterPack(filter = "cosmetics")) },
+                            shape = RoundedCornerShape(50),
+                            color = Color.White,
+                            border = BorderStroke(1.dp, Color(0xFFECE4EE)),
+                            shadowElevation = 0.dp
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                val totalCosmeticsCount = if (uiState.cosmeticsPacks.isNotEmpty()) uiState.cosmeticsPacks.sumOf { it.itemCount } else 173
+                                Text(
+                                    text = stringResource(R.string.applications_kocolor_features_store_view_all_format, totalCosmeticsCount),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF2C1A2E),
+                                    fontSize = 11.sp
+                                )
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                    contentDescription = null,
+                                    tint = Color(0xFF2C1A2E),
+                                    modifier = Modifier.size(12.dp)
+                                )
+                            }
+                        }
                     }
 
                     LazyRow(
@@ -344,13 +365,33 @@ fun StoreScreen(
                             )
                             Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(Color(0xFFD4AF37)))
                         }
-                        Text(
-                            text = stringResource(R.string.applications_kocolor_features_store_see_all),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = Color.Gray,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.clickable { navTo(KoColorRoute.StarterPack(filter = "clothing")) }
-                        )
+                        Surface(
+                            onClick = { navTo(KoColorRoute.StarterPack(filter = "clothing")) },
+                            shape = RoundedCornerShape(50),
+                            color = Color.White,
+                            border = BorderStroke(1.dp, Color(0xFFECE4EE)),
+                            shadowElevation = 0.dp
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.applications_kocolor_features_store_explore_all),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF2C1A2E),
+                                    fontSize = 11.sp
+                                )
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                    contentDescription = null,
+                                    tint = Color(0xFF2C1A2E),
+                                    modifier = Modifier.size(12.dp)
+                                )
+                            }
+                        }
                     }
 
                     LazyRow(

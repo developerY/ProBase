@@ -7,6 +7,8 @@
     <string name="applications_kocolor_features_store_cosmetics_vault">Cosmetics Vault</string>
     <string name="applications_kocolor_features_store_fashion_archive">Fashion Archive</string>
     <string name="applications_kocolor_features_store_see_all">See All</string>
+    <string name="applications_kocolor_features_store_view_all_format">View All (%1$d)</string>
+    <string name="applications_kocolor_features_store_explore_all">Explore All</string>
     <string name="applications_kocolor_features_store_items_curated">%1$d items curated</string>
     <string name="applications_kocolor_features_store_back">Back</string>
 </resources>
