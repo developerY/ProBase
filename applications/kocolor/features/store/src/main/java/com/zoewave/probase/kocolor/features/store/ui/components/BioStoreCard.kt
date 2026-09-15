@@ -1,7 +1,5 @@
 package com.zoewave.probase.kocolor.features.store.ui.components
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -50,8 +48,10 @@ fun BioStoreCard(
     ElevatedCard(
         modifier = modifier
             .fillMaxWidth()
-            .animateContentSize()
-            .clickable { onEvent(StoreEvent.ToggleExpansion) },
+            .clickable { 
+                android.util.Log.d("BioStoreCard", "ElevatedCard Clicked!")
+                onEvent(StoreEvent.EnterStore) 
+            },
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.elevatedCardColors(containerColor = Color.White),
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp)
@@ -106,7 +106,10 @@ fun BioStoreCard(
                 Spacer(Modifier.height(24.dp))
                 
                 Surface(
-                    onClick = { onEvent(StoreEvent.EnterStore) }, 
+                    onClick = { 
+                        android.util.Log.d("BioStoreCard", "Surface Button Clicked!")
+                        onEvent(StoreEvent.EnterStore) 
+                    }, 
                     color = Color(0xFFEBEBEB),
                     shape = RoundedCornerShape(12.dp)
                 ) {
