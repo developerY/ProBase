@@ -66,6 +66,7 @@ dependencies {
     implementation(project(":applications:kocolor:features:routines"))
     implementation(project(":applications:kocolor:features:cosmetics"))
     implementation(project(":applications:kocolor:features:starterpack"))
+    implementation(project(":applications:kocolor:features:store"))
     implementation(project(":applications:kocolor:features:fda"))
     implementation(project(":applications:kocolor:features:chemicals"))
     implementation(project(":applications:kocolor:features:makeupapi"))
