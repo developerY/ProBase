@@ -13,6 +13,7 @@ dependencies {
     implementation(project(":core:model"))
     implementation(project(":core:ui"))
     implementation(project(":applications:kocolor:model"))
+    implementation(project(":applications:kocolor:db"))
     implementation(project(":applications:kocolor:features:starterpack"))
     
     implementation(libs.androidx.compose.material3)

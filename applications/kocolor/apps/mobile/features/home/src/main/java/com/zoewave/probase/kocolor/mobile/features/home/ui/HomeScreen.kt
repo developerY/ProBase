@@ -218,6 +218,7 @@ fun HomeScreen(
                                 android.util.Log.d("HomeScreen", "Routing to Store")
                                 navTo(KoColorRoute.Store)
                             }
+                            else -> {}
                         }
                     },
                     navTo = navTo,

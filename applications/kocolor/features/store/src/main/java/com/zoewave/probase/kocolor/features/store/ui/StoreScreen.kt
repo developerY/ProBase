@@ -24,11 +24,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -53,22 +54,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.PackInfo
 import com.zoewave.probase.kocolor.features.store.R
 import com.zoewave.probase.kocolor.model.KoColorRoute
-
-data class StoreProductItem(
-    val id: String,
-    val title: String,
-    val subtitle: String,
-    val category: String,
-    val price: String,
-    val detailTag: String,
-    val badge: String,
-    val shadeName: String? = null,
-    val shadeColor: Color? = null,
-    val imageUrl: String? = null
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -104,11 +91,11 @@ fun StoreScreen(
                             shape = CircleShape,
                             color = Color.Black,
                             modifier = Modifier
-                                .size(14.dp)
+                                .size(16.dp)
                                 .align(Alignment.TopEnd)
                         ) {
                             Box(contentAlignment = Alignment.Center) {
-                                Text("0", color = Color.White, fontSize = 8.sp, fontWeight = FontWeight.Bold)
+                                Text("${uiState.cartCount}", color = Color.White, fontSize = 8.sp, fontWeight = FontWeight.Bold)
                             }
                         }
                     }
@@ -258,31 +245,25 @@ fun StoreScreen(
 
             // 3. Cosmetics Vault Section
             item {
-                val cosmeticItems = remember {
-                    listOf(
-                        StoreProductItem(
-                            id = "kc-foundation-01",
-                            title = "Aura Silk Foundation",
-                            subtitle = "Micro-pigment breathable fluid",
-                            category = "COMPLEXION",
-                            price = "$68",
-                            detailTag = "30ml",
-                            badge = "98% Harmony",
-                            shadeName = "SHADE M04 WARM IVORY",
-                            shadeColor = Color(0xFFE2BA9D)
-                        ),
-                        StoreProductItem(
-                            id = "kc-lip-01",
-                            title = "Satin Glaze Lip Elixir",
-                            subtitle = "Peptide-infused conditioner",
-                            category = "LIPS",
-                            price = "$44",
-                            detailTag = "15ml",
-                            badge = "Seasonal Key",
-                            shadeName = "CINNABAR TINT",
-                            shadeColor = Color(0xFFC25975)
-                        )
-                    )
+                val cosmeticItems = remember(uiState.realCosmeticItems, uiState.cosmeticsPacks) {
+                    if (uiState.realCosmeticItems.isNotEmpty()) {
+                        uiState.realCosmeticItems
+                    } else if (uiState.cosmeticsPacks.isNotEmpty()) {
+                        uiState.cosmeticsPacks.map { pack ->
+                            StoreProductItem(
+                                id = pack.id,
+                                title = pack.name,
+                                subtitle = pack.description,
+                                category = "COSMETICS",
+                                price = "$${(28..78).random()}",
+                                detailTag = "${pack.itemCount} items",
+                                badge = "98% Harmony",
+                                shadeName = pack.previewItems.firstOrNull()?.name?.uppercase() ?: "SIGNATURE FORMULA",
+                                shadeColor = Color(0xFFD4AF37),
+                                imageModel = pack.heroImageUrl ?: R.drawable.applications_kocolor_features_store_kocolor_fabric_clean
+                            )
+                        }
+                    } else emptyList()
                 }
 
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -303,13 +284,34 @@ fun StoreScreen(
                             )
                             Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(Color(0xFFE91E63)))
                         }
-                        Text(
-                            text = stringResource(R.string.applications_kocolor_features_store_see_all),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = Color.Gray,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.clickable { navTo(KoColorRoute.StarterPack(filter = "cosmetics")) }
-                        )
+                        Surface(
+                            onClick = { navTo(KoColorRoute.StarterPack(filter = "cosmetics")) },
+                            shape = RoundedCornerShape(50),
+                            color = Color.White,
+                            border = BorderStroke(1.dp, Color(0xFFECE4EE)),
+                            shadowElevation = 0.dp
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                val totalCosmeticsCount = if (uiState.cosmeticsPacks.isNotEmpty()) uiState.cosmeticsPacks.sumOf { it.itemCount } else 173
+                                Text(
+                                    text = stringResource(R.string.applications_kocolor_features_store_view_all_format, totalCosmeticsCount),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF2C1A2E),
+                                    fontSize = 11.sp
+                                )
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                    contentDescription = null,
+                                    tint = Color(0xFF2C1A2E),
+                                    modifier = Modifier.size(12.dp)
+                                )
+                            }
+                        }
                     }
 
                     LazyRow(
@@ -319,7 +321,9 @@ fun StoreScreen(
                         items(cosmeticItems) { item ->
                             ProductCard(
                                 item = item,
-                                onClick = { navTo(KoColorRoute.StarterPack(filter = "cosmetics")) }
+                                onClick = { navTo(KoColorRoute.PackPreview(packId = item.id)) },
+                                onAddClick = { onEvent(StoreEvent.AddProductToInventory(item.id)) },
+                                onFavoriteClick = { onEvent(StoreEvent.ToggleFavorite(item.id)) }
                             )
                         }
                     }
@@ -328,27 +332,23 @@ fun StoreScreen(
 
             // 4. Fashion Archive Section
             item {
-                val fashionItems = remember {
-                    listOf(
-                        StoreProductItem(
-                            id = "kc-trench-01",
-                            title = "Belted Camel Trench",
-                            subtitle = "OUTERWEAR ARCHIVE",
-                            category = "OUTERWEAR",
-                            price = "$420",
-                            detailTag = "100% Wool",
-                            badge = "Warm Tone"
-                        ),
-                        StoreProductItem(
-                            id = "kc-blouse-01",
-                            title = "Pleated Crepe Blouse",
-                            subtitle = "SILK ATELIER",
-                            category = "TOPS",
-                            price = "$215",
-                            detailTag = "Raw Silk",
-                            badge = "Archival Cut"
-                        )
-                    )
+                val fashionItems = remember(uiState.realFashionItems, uiState.fashionPacks) {
+                    if (uiState.realFashionItems.isNotEmpty()) {
+                        uiState.realFashionItems
+                    } else if (uiState.fashionPacks.isNotEmpty()) {
+                        uiState.fashionPacks.map { pack ->
+                            StoreProductItem(
+                                id = pack.id,
+                                title = pack.name,
+                                subtitle = pack.description,
+                                category = "OUTERWEAR",
+                                price = "$${(120..420).random()}",
+                                detailTag = "${pack.itemCount} items",
+                                badge = "Warm Tone",
+                                imageModel = pack.heroImageUrl ?: R.drawable.applications_kocolor_features_store_kocolor_fabric_clean
+                            )
+                        }
+                    } else emptyList()
                 }
 
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -369,13 +369,33 @@ fun StoreScreen(
                             )
                             Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(Color(0xFFD4AF37)))
                         }
-                        Text(
-                            text = stringResource(R.string.applications_kocolor_features_store_see_all),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = Color.Gray,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.clickable { navTo(KoColorRoute.StarterPack(filter = "clothing")) }
-                        )
+                        Surface(
+                            onClick = { navTo(KoColorRoute.StarterPack(filter = "clothing")) },
+                            shape = RoundedCornerShape(50),
+                            color = Color.White,
+                            border = BorderStroke(1.dp, Color(0xFFECE4EE)),
+                            shadowElevation = 0.dp
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.applications_kocolor_features_store_explore_all),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF2C1A2E),
+                                    fontSize = 11.sp
+                                )
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                    contentDescription = null,
+                                    tint = Color(0xFF2C1A2E),
+                                    modifier = Modifier.size(12.dp)
+                                )
+                            }
+                        }
                     }
 
                     LazyRow(
@@ -385,7 +405,9 @@ fun StoreScreen(
                         items(fashionItems) { item ->
                             ProductCard(
                                 item = item,
-                                onClick = { navTo(KoColorRoute.StarterPack(filter = "clothing")) }
+                                onClick = { navTo(KoColorRoute.PackPreview(packId = item.id)) },
+                                onAddClick = { onEvent(StoreEvent.AddProductToInventory(item.id)) },
+                                onFavoriteClick = { onEvent(StoreEvent.ToggleFavorite(item.id)) }
                             )
                         }
                     }
@@ -486,7 +508,9 @@ private fun TrustFeatureItem(
 @Composable
 private fun ProductCard(
     item: StoreProductItem,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onAddClick: () -> Unit,
+    onFavoriteClick: () -> Unit
 ) {
     Surface(
         shape = RoundedCornerShape(24.dp),
@@ -505,9 +529,9 @@ private fun ProductCard(
                     .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
                     .background(Color(0xFFF3ECEF))
             ) {
-                if (item.imageUrl != null) {
+                if (item.imageModel != null) {
                     AsyncImage(
-                        model = item.imageUrl,
+                        model = item.imageModel,
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize()
@@ -537,15 +561,16 @@ private fun ProductCard(
                     modifier = Modifier
                         .padding(12.dp)
                         .align(Alignment.TopEnd)
-                        .size(32.dp),
+                        .size(32.dp)
+                        .clickable(onClick = onFavoriteClick),
                     shape = CircleShape,
-                    color = Color.White.copy(alpha = 0.85f)
+                    color = if (item.isFavorite) Color(0xFFFFEBEE) else Color.White.copy(alpha = 0.85f)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
-                            imageVector = Icons.Default.FavoriteBorder,
+                            imageVector = if (item.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                             contentDescription = "Favorite",
-                            tint = Color.Black,
+                            tint = if (item.isFavorite) Color(0xFFE91E63) else Color.Black,
                             modifier = Modifier.size(16.dp)
                         )
                     }
@@ -622,10 +647,25 @@ private fun ProductCard(
                         color = Color.Black
                     )
 
-                    if (item.shadeName != null) {
+                    if (item.isAdded) {
                         Surface(
                             shape = RoundedCornerShape(50),
-                            color = Color.Black
+                            color = Color(0xFF1B5E20)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Text("Added", color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                                Icon(Icons.Default.Check, null, tint = Color.White, modifier = Modifier.size(10.dp))
+                            }
+                        }
+                    } else {
+                        Surface(
+                            shape = RoundedCornerShape(50),
+                            color = Color.Black,
+                            modifier = Modifier.clickable(onClick = onAddClick)
                         ) {
                             Row(
                                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
@@ -636,13 +676,6 @@ private fun ProductCard(
                                 Icon(Icons.Default.Add, null, tint = Color.White, modifier = Modifier.size(10.dp))
                             }
                         }
-                    } else {
-                        Text(
-                            text = item.detailTag,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = Color.Gray,
-                            fontSize = 11.sp
-                        )
                     }
                 }
             }
