@@ -1,5 +1,6 @@
 package com.zoewave.probase.kocolor.features.store.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -10,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
@@ -88,7 +88,7 @@ fun BioStoreCard(
                     .fillMaxWidth()
                     .padding(24.dp)
             ) {
-                // Top-Right Arrow Action Circle [ ↗ ]
+                /* Top-Right Arrow Action Circle [ ↗ ]
                 Surface(
                     modifier = Modifier
                         .size(32.dp)
@@ -105,14 +105,14 @@ fun BioStoreCard(
                             modifier = Modifier.size(14.dp).rotate(-45f)
                         )
                     }
-                }
+                }*/
 
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
-                    /* Top Pill Badge (Centered)
+                    // Top Pill Badge (Centered)
                     Surface(
                         shape = RoundedCornerShape(50),
                         color = Color.White.copy(alpha = 0.8f),
@@ -123,7 +123,7 @@ fun BioStoreCard(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
-                            Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(Color(0xFF8B5A52)))
+                            //Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(Color(0xFF8B5A52)))
                             Text(
                                 text = "KoColor Store",
                                 style = MaterialTheme.typography.labelSmall,
@@ -132,8 +132,16 @@ fun BioStoreCard(
                                 fontSize = 9.sp,
                                 letterSpacing = 0.8.sp
                             )
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                    contentDescription = "Open Store",
+                                    tint = Color(0xFF3D223B),
+                                    modifier = Modifier.size(14.dp).rotate(-45f)
+                                )
+                            }
                         }
-                    }*/
+                    }
 
                     // Subtitle Row with Flanking Lines: — ATELIER BOUTIQUE — (Centered)
                     Row(
