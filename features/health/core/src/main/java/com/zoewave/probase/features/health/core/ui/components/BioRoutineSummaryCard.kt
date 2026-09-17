@@ -53,6 +53,8 @@ fun BioRoutineSummaryCard(
 ) {
     val progress = if (uiState.totalCount > 0) uiState.completedCount.toFloat() / uiState.totalCount else 0f
     val cardColor = Color(0xFFF1EFE7)
+    val cardHeight = if (showRitualActiveHeader) 260.dp else 170.dp
+    val paddingDp = if (showRitualActiveHeader) 28.dp else 20.dp
 
     Surface(
         modifier = modifier
@@ -61,7 +63,7 @@ fun BioRoutineSummaryCard(
         shape = RoundedCornerShape(32.dp),
         color = cardColor
     ) {
-        Box(modifier = Modifier.fillMaxWidth().height(260.dp)) {
+        Box(modifier = Modifier.fillMaxWidth().height(cardHeight)) {
             if (uiState.backgroundModel != null) {
                 AsyncImage(
                     model = uiState.backgroundModel,
@@ -72,7 +74,7 @@ fun BioRoutineSummaryCard(
             }
             
             Column(
-                modifier = Modifier.padding(28.dp).fillMaxSize(),
+                modifier = Modifier.padding(paddingDp).fillMaxSize(),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
                 Row(
@@ -93,12 +95,12 @@ fun BioRoutineSummaryCard(
                         shape = CircleShape,
                         onClick = onLayersClick
                     ) {
-                        Box(modifier = Modifier.size(48.dp), contentAlignment = Alignment.Center) {
+                        Box(modifier = Modifier.size(44.dp), contentAlignment = Alignment.Center) {
                             Icon(
                                 imageVector = Icons.Rounded.Layers,
                                 contentDescription = stringResource(R.string.features_health_core_manage_rituals),
                                 tint = Color.Black.copy(alpha = 0.7f),
-                                modifier = Modifier.size(24.dp)
+                                modifier = Modifier.size(22.dp)
                             )
                         }
                     }
@@ -123,18 +125,19 @@ fun BioRoutineSummaryCard(
                         )
                     }
                     
-                    Box(contentAlignment = Alignment.Center, modifier = Modifier.size(84.dp)) {
+                    val progressSize = if (showRitualActiveHeader) 84.dp else 72.dp
+                    Box(contentAlignment = Alignment.Center, modifier = Modifier.size(progressSize)) {
                         CircularProgressIndicator(
                             progress = { 1f },
                             modifier = Modifier.fillMaxSize(),
                             color = Color.Black.copy(alpha = 0.05f),
-                            strokeWidth = 6.dp
+                            strokeWidth = 5.dp
                         )
                         CircularProgressIndicator(
                             progress = { progress },
                             modifier = Modifier.fillMaxSize(),
                             color = Color.Black,
-                            strokeWidth = 6.dp,
+                            strokeWidth = 5.dp,
                             strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
                         )
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -154,8 +157,8 @@ fun BioRoutineSummaryCard(
                     }
                 }
 
-                Column {
-                    if (showRitualActiveHeader) {
+                if (showRitualActiveHeader) {
+                    Column {
                         Text(
                             text = stringResource(R.string.features_health_core_ritual_active),
                             style = MaterialTheme.typography.labelLarge,
