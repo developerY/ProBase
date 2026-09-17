@@ -26,7 +26,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
@@ -64,134 +63,120 @@ fun BioStoreCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(32.dp))
-                .background(
-                    brush = Brush.linearGradient(
-                        colors = listOf(
-                            Color(0xFFFFF8EC), // Warm Champagne Yellow
-                            Color(0xFFFAF0F5), // Soft Pink Transition
-                            Color(0xFFF7E6EC)  // Rose Blush
-                        )
-                    )
-                )
         ) {
-            // Background Image
-            AsyncImage(
-                model = R.drawable.applications_kocolor_features_store_kocolor_store_front,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.matchParentSize(),
-                alpha = 0.25f
-            )
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(24.dp)
-            ) {
-                /* Top-Right Arrow Action Circle [ ↗ ]
-                Surface(
+                // Background Image
+                AsyncImage(
+                    model = R.drawable.applications_kocolor_features_store_kocolor_store_front,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.matchParentSize(),
+                    alpha = 0.5f
+                )
+
+                // The central frosted glass panel
+                Box(
                     modifier = Modifier
-                        .size(32.dp)
-                        .align(Alignment.TopEnd),
-                    shape = CircleShape,
-                    color = Color.White.copy(alpha = 0.9f),
-                    shadowElevation = 2.dp
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                            contentDescription = "Open Store",
-                            tint = Color(0xFF3D223B),
-                            modifier = Modifier.size(14.dp).rotate(-45f)
-                        )
-                    }
-                }*/
+                        .matchParentSize()
+                        .background(Color.White.copy(alpha = 0.65f))
+                )
 
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(14.dp)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp, horizontal = 12.dp)
                 ) {
-                    // Subtitle Row with Flanking Lines: — ATELIER BOUTIQUE — (Centered)
-                    Row(
+                    Column(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        HorizontalDivider(
-                            modifier = Modifier.width(28.dp),
-                            color = Color(0xFF8B5A52).copy(alpha = 0.4f),
-                            thickness = 1.dp
-                        )
-                        Text(
-                            text = stringResource(R.string.applications_kocolor_features_store_boutique_title).uppercase(),
-                            style = MaterialTheme.typography.labelSmall,
-                            letterSpacing = 2.sp,
-                            color = Color(0xFF8B5A52),
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 10.sp,
-                            modifier = Modifier.padding(horizontal = 10.dp)
-                        )
-                        HorizontalDivider(
-                            modifier = Modifier.width(28.dp),
-                            color = Color(0xFF8B5A52).copy(alpha = 0.4f),
-                            thickness = 1.dp
-                        )
-                    }
-
-                    // Main Display Title: The Art of Color (Centered)
-                    Text(
-                        text = stringResource(R.string.applications_kocolor_features_store_boutique_subtitle).uppercase(),
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontFamily = FontFamily.Serif,
-                        color = Color(0xFF1A1A1A),
-                        textAlign = TextAlign.Center
-                    )
-
-                    // Body Description (Centered)
-                    Text(
-                        text = "Curated boutique — Science meets aesthetics",
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            lineHeight = 22.sp,
-                            letterSpacing = 0.2.sp
-                        ),
-                        color = Color(0xFF4A4A4A),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(horizontal = 4.dp)
-                    )
-
-                    // Top Pill Badge (Centered)
-                    Surface(
-                        shape = RoundedCornerShape(50),
-                        color = Color.White.copy(alpha = 0.8f),
-                        border = BorderStroke(1.dp, Color(0xFFEADBDF))
-                    ) {
+                        // Subtitle Row with Flanking Lines: — ATELIER BOUTIQUE — (Centered)
                         Row(
-                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            //Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(Color(0xFF8B5A52)))
-                            Text(
-                                text = "KoColor Store",
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFF8B5A52),
-                                fontSize = 9.sp,
-                                letterSpacing = 0.8.sp
+                            HorizontalDivider(
+                                modifier = Modifier.width(28.dp),
+                                color = Color(0xFF8C5A46).copy(alpha = 0.5f),
+                                thickness = 1.dp
                             )
-                            Box(contentAlignment = Alignment.Center) {
+                            Text(
+                                text = stringResource(R.string.applications_kocolor_features_store_boutique_title).uppercase(),
+                                style = MaterialTheme.typography.labelSmall,
+                                letterSpacing = 2.sp,
+                                color = Color(0xFF8C5A46),
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 11.sp,
+                                modifier = Modifier.padding(horizontal = 12.dp)
+                            )
+                            HorizontalDivider(
+                                modifier = Modifier.width(28.dp),
+                                color = Color(0xFF8C5A46).copy(alpha = 0.5f),
+                                thickness = 1.dp
+                            )
+                        }
+
+                        // Main Display Title: THE ART OF COLOR (Centered)
+                        Text(
+                            text = stringResource(R.string.applications_kocolor_features_store_boutique_subtitle).uppercase(),
+                            style = MaterialTheme.typography.displayMedium.copy(
+                                fontSize = 27.sp,
+                                shadow = androidx.compose.ui.graphics.Shadow(
+                                    color = Color.White.copy(alpha = 0.5f),
+                                    offset = androidx.compose.ui.geometry.Offset(2f, 2f),
+                                    blurRadius = 4f
+                                )
+                            ),
+                            fontFamily = FontFamily.Serif,
+                            color = Color(0xB28C523E), // Dark bronze
+                            textAlign = TextAlign.Center
+                        )
+
+                        // Body Description (Centered)
+                        Text(
+                            text = "Curated boutique - Science meets aesthetics",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color(0xFF8C5A46),
+                            fontSize = 14.sp,
+                            textAlign = TextAlign.Center,
+                            //modifier = Modifier.padding(horizontal = 4.dp)
+                        )
+
+                        // Spacer(Modifier.height(12.dp))
+
+                        // Bottom Pill Button (Centered)
+                        Surface(
+                            shape = RoundedCornerShape(50),
+                            color = Color.White.copy(alpha = 0.35f),
+                            border = BorderStroke(1.dp, Color(0xFFBCA69C).copy(alpha = 0.6f)),
+                            shadowElevation = 0.dp
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Text(
+                                    text = "KoColor Store",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF6B3A2C),
+                                    fontSize = 12.sp,
+                                    letterSpacing = 0.5.sp
+                                )
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                                    contentDescription = "Open Store",
-                                    tint = Color(0xFF3D223B),
+                                    contentDescription = null,
+                                    tint = Color(0xFF6B3A2C),
                                     modifier = Modifier.size(14.dp).rotate(-45f)
                                 )
                             }
                         }
                     }
                 }
-            }
+
         }
     }
 }
