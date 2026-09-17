@@ -84,6 +84,8 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.zoewave.probase.core.model.ritual.SavedAnalysis
 import com.zoewave.probase.core.ui.util.parseColor
+import com.zoewave.probase.kocolor.features.store.ui.StoreEvent
+import com.zoewave.probase.kocolor.features.store.ui.components.BioStoreCard
 import com.zoewave.probase.kocolor.mobile.features.home.R
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.LuxuryBrandLogo
 import com.zoewave.probase.kocolor.model.KoColorRoute
@@ -266,6 +268,27 @@ fun CollectionHubScreen(
                         ),
                         onEvent = { navTo(KoColorRoute.WardrobeLanding) },
                         navTo = navTo
+                    )
+                }
+
+                // The Store
+                //item { Spacer(modifier = Modifier.height(48.dp)) }
+                item {
+                    BioStoreCard(
+                        uiState = uiState.storeUiState,
+                        onEvent = { event ->
+                            android.util.Log.d("HomeScreen", "StoreEvent received: $event")
+                            when (event) {
+                                StoreEvent.ToggleExpansion -> onEvent(HomeEvent.ToggleStoreExpansion)
+                                StoreEvent.EnterStore -> {
+                                    android.util.Log.d("HomeScreen", "Routing to Store")
+                                    navTo(KoColorRoute.Store)
+                                }
+                                else -> {}
+                            }
+                        },
+                        navTo = navTo,
+                        modifier = Modifier.padding(top = 16.dp)
                     )
                 }
 
