@@ -127,41 +127,41 @@ private fun ShortHeader(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(onClick = onWeatherClick)
-                .padding(top = 28.dp, bottom = 20.dp, start = 24.dp, end = 24.dp),
+                .padding(top = 20.dp, bottom = 12.dp, start = 20.dp, end = 20.dp),
             contentAlignment = Alignment.Center
         ) {
             // The translucent pill
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(110.dp),
-                shape = RoundedCornerShape(40.dp),
+                    .height(86.dp),
+                shape = RoundedCornerShape(44.dp),
                 color = Color.White.copy(alpha = 0.25f),
                 border = BorderStroke(1.dp, Color.White.copy(alpha = 0.5f)),
                 shadowElevation = 0.dp
             ) {
                 Row(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
                     DynamicWeatherIcon(
                         conditions = uiState.weather?.conditions ?: listOf(LayeredWeatherCondition.SUNNY),
-                        modifier = Modifier.size(width = 100.dp, height = 100.dp).padding(start = 16.dp)
+                        modifier = Modifier.size(width = 80.dp, height = 80.dp)
                     )
                     
-                    Spacer(Modifier.width(8.dp))
+                    Spacer(Modifier.width(16.dp))
                     
                     Text(
                         text = "${uiState.weather?.temperature?.toInt() ?: 24}${if (uiState.tempUnit == "FAHRENHEIT") "°" else "°C"}",
                         style = MaterialTheme.typography.displayMedium.copy(
-                            fontSize = 60.sp,
+                            fontSize = 48.sp,
                             fontWeight = FontWeight.Bold,
-                            letterSpacing = (-2).sp
+                            letterSpacing = (-1.5).sp
                         ),
                         color = Color(0xFF1C1B1F)
                     )
-                    Spacer(Modifier.width(20.dp)) // padding for the uv badge
+                    Spacer(Modifier.width(28.dp)) // Padding to offset the UV badge
                 }
             }
 
@@ -170,7 +170,7 @@ private fun ShortHeader(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .offset(x = (-8).dp, y = (-12).dp)
-                    .size(56.dp),
+                    .size(52.dp),
                 shape = CircleShape,
                 color = Color(0xFFEFE8E1).copy(alpha = 0.95f),
                 border = BorderStroke(1.dp, Color.White),
@@ -209,24 +209,24 @@ private fun ShortHeader(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(onClick = onExpandClick)
-                .padding(bottom = 24.dp),
+                .padding(bottom = 20.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = if (uiState.isDaytime) stringResource(R.string.features_weather_atmospheric_greeting_day) else stringResource(R.string.features_weather_atmospheric_greeting_night),
-                style = MaterialTheme.typography.headlineMedium.copy(fontSize = 30.sp),
+                style = MaterialTheme.typography.headlineMedium.copy(fontSize = 24.sp),
                 fontFamily = FontFamily.Serif,
                 fontWeight = FontWeight.Medium,
                 color = Color(0xFF1F2937),
-                letterSpacing = (-0.5).sp
+                letterSpacing = (-0.2).sp
             )
             Spacer(modifier = Modifier.width(8.dp))
             Icon(
                 imageVector = Icons.Default.KeyboardArrowDown,
                 contentDescription = "Expand Header",
                 tint = Color(0xFF8C7F72),
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(20.dp)
             )
         }
     }
