@@ -48,7 +48,8 @@ fun BioRoutineSummaryCard(
     uiState: BioRoutineSummaryUiState,
     onClick: () -> Unit,
     onLayersClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    showRitualActiveHeader: Boolean = false
 ) {
     val progress = if (uiState.totalCount > 0) uiState.completedCount.toFloat() / uiState.totalCount else 0f
     val cardColor = Color(0xFFF1EFE7)
@@ -154,17 +155,20 @@ fun BioRoutineSummaryCard(
                 }
 
                 Column {
-                    Text(
-                        text = stringResource(R.string.features_health_core_ritual_active),
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black
-                    )
-                    Text(
-                        text = uiState.description,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Black.copy(alpha = 0.7f)
-                    )
+                    if (showRitualActiveHeader) {
+                        Text(
+                            text = stringResource(R.string.features_health_core_ritual_active),
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black
+                        )
+
+                        Text(
+                            text = uiState.description,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.Black.copy(alpha = 0.7f)
+                        )
+                    }
                 }
             }
         }
