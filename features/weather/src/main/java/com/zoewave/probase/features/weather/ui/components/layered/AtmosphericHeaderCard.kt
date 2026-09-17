@@ -127,7 +127,7 @@ private fun ShortHeader(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(onClick = onWeatherClick)
-                .padding(top = 20.dp, bottom = 12.dp, start = 20.dp, end = 20.dp),
+                .padding(top = 16.dp, start = 16.dp, end = 16.dp),
             contentAlignment = Alignment.Center
         ) {
             // The translucent pill
@@ -209,12 +209,11 @@ private fun ShortHeader(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(onClick = onExpandClick)
-                .padding(bottom = 20.dp),
+                .offset(y = (-8).dp), // Slide up under the pill
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = if (uiState.isDaytime) stringResource(R.string.features_weather_atmospheric_greeting_day) else stringResource(R.string.features_weather_atmospheric_greeting_night),
+            Text(                text = if (uiState.isDaytime) stringResource(R.string.features_weather_atmospheric_greeting_day) else stringResource(R.string.features_weather_atmospheric_greeting_night),
                 style = MaterialTheme.typography.headlineMedium.copy(fontSize = 24.sp),
                 fontFamily = FontFamily.Serif,
                 fontWeight = FontWeight.Medium,
