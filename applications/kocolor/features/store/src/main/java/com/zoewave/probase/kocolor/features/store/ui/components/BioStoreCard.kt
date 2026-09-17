@@ -112,37 +112,6 @@ fun BioStoreCard(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
-                    // Top Pill Badge (Centered)
-                    Surface(
-                        shape = RoundedCornerShape(50),
-                        color = Color.White.copy(alpha = 0.8f),
-                        border = BorderStroke(1.dp, Color(0xFFEADBDF))
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            //Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(Color(0xFF8B5A52)))
-                            Text(
-                                text = "KoColor Store",
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFF8B5A52),
-                                fontSize = 9.sp,
-                                letterSpacing = 0.8.sp
-                            )
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                                    contentDescription = "Open Store",
-                                    tint = Color(0xFF3D223B),
-                                    modifier = Modifier.size(14.dp).rotate(-45f)
-                                )
-                            }
-                        }
-                    }
-
                     // Subtitle Row with Flanking Lines: — ATELIER BOUTIQUE — (Centered)
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -190,6 +159,37 @@ fun BioStoreCard(
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(horizontal = 4.dp)
                     )
+
+                    // Top Pill Badge (Centered)
+                    Surface(
+                        shape = RoundedCornerShape(50),
+                        color = Color.White.copy(alpha = 0.8f),
+                        border = BorderStroke(1.dp, Color(0xFFEADBDF))
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            //Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(Color(0xFF8B5A52)))
+                            Text(
+                                text = "KoColor Store",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF8B5A52),
+                                fontSize = 9.sp,
+                                letterSpacing = 0.8.sp
+                            )
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                    contentDescription = "Open Store",
+                                    tint = Color(0xFF3D223B),
+                                    modifier = Modifier.size(14.dp).rotate(-45f)
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
