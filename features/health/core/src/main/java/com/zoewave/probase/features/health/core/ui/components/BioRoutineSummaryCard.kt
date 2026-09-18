@@ -7,6 +7,8 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,6 +17,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -37,12 +41,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -79,6 +86,7 @@ fun BioRoutineSummaryCard(
         color = cardColor
     ) {
         Box(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
+            // Background Image
             if (uiState.backgroundModel != null) {
                 AsyncImage(
                     model = uiState.backgroundModel,
@@ -87,75 +95,107 @@ fun BioRoutineSummaryCard(
                     contentScale = ContentScale.Crop
                 )
             }
-            
-            Column(
-                modifier = Modifier
-                    .padding(20.dp)
-                    .fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                // Top Row: Title + Layers Button & Chevron Expansion Toggle
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = uiState.title,
-                        style = MaterialTheme.typography.displaySmall.copy(fontSize = 32.sp),
-                        fontFamily = FontFamily.Serif,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black
-                    )
 
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // TOP HALF: Main Pill Widget (Glassmorphic pill matching weather card)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 20.dp, bottom = 12.dp, start = 20.dp, end = 20.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    // Translucent frosted glass pill
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(86.dp),
+                        shape = RoundedCornerShape(44.dp),
+                        color = Color.White.copy(alpha = 0.35f),
+                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.6f)),
+                        shadowElevation = 0.dp
                     ) {
-                        Surface(
-                            color = Color.Black.copy(alpha = 0.1f),
-                            shape = CircleShape,
-                            onClick = onLayersClick
+                        Row(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 24.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
                         ) {
-                            Box(modifier = Modifier.size(44.dp), contentAlignment = Alignment.Center) {
-                                Icon(
-                                    imageVector = Icons.Rounded.Layers,
-                                    contentDescription = stringResource(R.string.features_health_core_manage_rituals),
-                                    tint = Color.Black.copy(alpha = 0.7f),
-                                    modifier = Modifier.size(22.dp)
-                                )
-                            }
+                            Text(
+                                text = uiState.title,
+                                style = MaterialTheme.typography.displayMedium.copy(fontSize = 32.sp),
+                                fontFamily = FontFamily.Serif,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Black,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+
+                    // Floating Layers Stack Badge (Intersecting top-right of pill, matching weather UV badge)
+                    Surface(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .offset(x = (-8).dp, y = (-12).dp)
+                            .size(52.dp),
+                        shape = CircleShape,
+                        color = Color(0xFFEFE8E1).copy(alpha = 0.95f),
+                        border = BorderStroke(1.dp, Color.White),
+                        shadowElevation = 4.dp,
+                        onClick = onLayersClick
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Box(
+                                modifier = Modifier
+                                    .size(44.dp)
+                                    .clip(CircleShape)
+                                    .border(1.dp, Color(0xFFC6B492).copy(alpha = 0.4f), CircleShape)
+                            )
+                            Icon(
+                                imageVector = Icons.Rounded.Layers,
+                                contentDescription = stringResource(R.string.features_health_core_manage_rituals),
+                                tint = Color(0xFF1C1B1F),
+                                modifier = Modifier.size(20.dp)
+                            )
                         }
                     }
                 }
 
-                if (!showRitualActiveHeader) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { isExpanded = !isExpanded }
-                            .padding(vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        androidx.compose.material3.HorizontalDivider(
-                            modifier = Modifier.weight(1f),
-                            color = Color.Black.copy(alpha = 0.08f),
-                            thickness = 1.dp
-                        )
-                        Spacer(modifier = Modifier.width(16.dp))
-                        val chevronRotation by animateFloatAsState(
-                            targetValue = if (isExpanded) 180f else 0f,
-                            label = "ChevronRotation"
-                        )
-                        Icon(
-                            imageVector = Icons.Default.KeyboardArrowDown,
-                            contentDescription = "Expand",
-                            tint = Color.Black.copy(alpha = 0.5f),
-                            modifier = Modifier.size(20.dp).rotate(chevronRotation)
-                        )
-                    }
+                // BOTTOM HALF: Greeting/Description Row with Chevron (overlapping pill bottom edge)
+                val chevronRotation by animateFloatAsState(
+                    targetValue = if (isExpanded) 180f else 0f,
+                    label = "ChevronRotation"
+                )
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { isExpanded = !isExpanded }
+                        .offset(y = (-14).dp)
+                        .padding(bottom = 8.dp, start = 16.dp, end = 16.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.features_health_core_ritual_active),
+                        style = MaterialTheme.typography.headlineMedium.copy(fontSize = 20.sp),
+                        fontFamily = FontFamily.Serif,
+                        fontWeight = FontWeight.Medium,
+                        color = Color(0xFF1F2937),
+                        letterSpacing = (-0.2).sp
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Icon(
+                        imageVector = Icons.Default.KeyboardArrowDown,
+                        contentDescription = if (isExpanded) "Collapse" else "Expand",
+                        tint = Color(0xFF8C7F72),
+                        modifier = Modifier.size(20.dp).rotate(chevronRotation)
+                    )
                 }
-                
+
                 // Collapsible Content (Badge, Progress Ring & Description)
                 AnimatedVisibility(
                     visible = isExpanded || showRitualActiveHeader,
@@ -163,7 +203,9 @@ fun BioRoutineSummaryCard(
                     exit = fadeOut() + shrinkVertically()
                 ) {
                     Column(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 20.dp, end = 20.dp, bottom = 16.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         // Middle Row: CURRENT RITUAL Badge + Progress Ring
@@ -186,19 +228,19 @@ fun BioRoutineSummaryCard(
                                 )
                             }
                             
-                            Box(contentAlignment = Alignment.Center, modifier = Modifier.size(84.dp)) {
+                            Box(contentAlignment = Alignment.Center, modifier = Modifier.size(72.dp)) {
                                 CircularProgressIndicator(
                                     progress = { 1f },
                                     modifier = Modifier.fillMaxSize(),
                                     color = Color(0xFFEADBf4).copy(alpha = 0.5f),
-                                    strokeWidth = 5.dp
+                                    strokeWidth = 4.dp
                                 )
                                 CircularProgressIndicator(
                                     progress = { progress },
                                     modifier = Modifier.fillMaxSize(),
-                                    color = Color(0xFFD3BDE5),
-                                    strokeWidth = 5.dp,
-                                    strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
+                                    color = Color(0xFF8B5A82),
+                                    strokeWidth = 4.dp,
+                                    strokeCap = StrokeCap.Round
                                 )
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                     Text(
@@ -217,23 +259,14 @@ fun BioRoutineSummaryCard(
                             }
                         }
 
-                        // Bottom Section: Description
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Text(
-                                text = stringResource(R.string.features_health_core_ritual_active),
-                                style = MaterialTheme.typography.labelLarge,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.Black
-                            )
-
-                            Text(
-                                text = uiState.description,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = Color.Black.copy(alpha = 0.7f)
-                            )
-                        }
+                        // Description Section
+                        Text(
+                            text = uiState.description,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.Black.copy(alpha = 0.7f),
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     }
                 }
             }
@@ -248,11 +281,10 @@ private fun BioRoutineSummaryCardPreview() {
         Box(modifier = Modifier.padding(16.dp)) {
             BioRoutineSummaryCard(
                 uiState = BioRoutineSummaryUiState(
-                    title = "Morning Ritual",
-                    description = "Prepare for a balanced day ahead.",
-                    completedCount = 3,
-                    totalCount = 5,
-                    isDaytime = true
+                    title = "Meals Ritual",
+                    description = "Nourish your metabolism with precise biochemical timing.",
+                    completedCount = 0,
+                    totalCount = 5
                 ),
                 onClick = {},
                 onLayersClick = {}
