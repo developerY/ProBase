@@ -154,7 +154,8 @@ fun HomeScreen(
                     ),
                     modifier = Modifier.fillMaxWidth(),
                     onClick = { navTo(KoColorRoute.Health) },
-                    onGrantPermissionsClick = { navTo(KoColorRoute.Health) }
+                    onGrantPermissionsClick = { navTo(KoColorRoute.Health) },
+                    onHydrationClick = { navTo(KoColorRoute.Hydration) }
                 )
             }
 
