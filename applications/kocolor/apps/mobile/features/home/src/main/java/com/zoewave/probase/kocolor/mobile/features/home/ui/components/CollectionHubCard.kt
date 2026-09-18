@@ -159,7 +159,7 @@ fun CollectionHubCard(
                             )
                             Spacer(Modifier.height(4.dp))
                             Text(
-                                text = "$totalItems items\ntracked",
+                                text = "$totalItems items", // \ntracked",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = Color.Gray,
                                 lineHeight = 18.sp
@@ -243,6 +243,12 @@ fun CollectionHubCard(
                             .padding(vertical = 4.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        HorizontalDivider(
+                            modifier = Modifier.weight(1f),
+                            color = Color.Black.copy(alpha = 0.08f), 
+                            thickness = 1.dp
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowDown,
                             contentDescription = "Expand Hub details",
@@ -251,8 +257,6 @@ fun CollectionHubCard(
                                 .size(24.dp)
                                 .rotate(rotationAngle)
                         )
-                        Spacer(modifier = Modifier.width(16.dp))
-                        HorizontalDivider(color = Color.Black.copy(alpha = 0.08f), thickness = 1.dp)
                     }
 
                     // Collapsible Bottom Section: Total Value & Big Arrow Button
