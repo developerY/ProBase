@@ -1,7 +1,6 @@
 package com.zoewave.probase.kocolor.mobile.features.home.ui
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -13,13 +12,13 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -28,11 +27,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -41,6 +38,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Checkroom
@@ -74,6 +72,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
@@ -94,7 +93,7 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CollectionHubScreen(
+fun CollectionHubOrig(
     uiState: HomeUiState,
     modifier: Modifier = Modifier,
     onEvent: (HomeEvent) -> Unit,
@@ -377,7 +376,6 @@ private fun SyncHubButton(
         }
     }
 }
-
 @Composable
 private fun CuratedCollectionCard(
     uiState: CuratedCollectionUiState,
@@ -467,7 +465,233 @@ private fun CuratedCollectionCard(
     }
 }
 
+@Composable
+private fun TopRightVanityActionCard(
+    discoverTitle: String,
+    discoverSubtitle: String,
+    backgroundColor: Color,
+    icon: ImageVector,
+    categoryProgress: List<CategoryProgressItem>,
+    onDiscoverClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    // Collapsed by default to save space
+    var isExpanded by remember { mutableStateOf(false) }
+    val chevronRotation by animateFloatAsState(
+        targetValue = if (isExpanded) 180f else 0f,
+        label = "ChevronRotation"
+    )
 
+    Surface(
+        modifier = modifier.width(180.dp),
+        shape = RoundedCornerShape(22.dp),
+        color = backgroundColor,
+        shadowElevation = 0.dp
+    ) {
+        Column(
+            modifier = Modifier.padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            // Top Header: Dark Pill Button + Expand Toggle
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onDiscoverClick() },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Box(modifier = Modifier.size(28.dp)) {
+                        Surface(
+                            shape = CircleShape,
+                            color = Color.White.copy(alpha = 0.2f),
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = icon,
+                                    contentDescription = null,
+                                    tint = Color.White,
+                                    modifier = Modifier.size(15.dp)
+                                )
+                            }
+                        }
+                        // Small gold '+' add button badge
+                        Surface(
+                            shape = CircleShape,
+                            color = Color(0xFFFFD700), // Gold
+                            modifier = Modifier
+                                .size(11.dp)
+                                .align(Alignment.BottomEnd)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = Icons.Default.Add,
+                                    contentDescription = "Add",
+                                    tint = Color.Black,
+                                    modifier = Modifier.size(8.dp)
+                                )
+                            }
+                        }
+                    }
+                    Column {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(3.dp)
+                        ) {
+                            Text(
+                                text = discoverTitle.uppercase(),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = Color.White,
+                                fontSize = 10.sp,
+                                letterSpacing = 0.8.sp
+                            )
+                            Icon(
+                                imageVector = Icons.Default.AutoAwesome,
+                                contentDescription = null,
+                                tint = Color(0xFFFFD700),
+                                modifier = Modifier.size(10.dp)
+                            )
+                        }
+                        Text(
+                            text = discoverSubtitle,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color.White.copy(alpha = 0.8f),
+                            fontSize = 8.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+
+                IconButton(
+                    onClick = { isExpanded = !isExpanded },
+                    modifier = Modifier.size(20.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.KeyboardArrowDown,
+                        contentDescription = if (isExpanded) "Collapse" else "Expand",
+                        tint = Color.White.copy(alpha = 0.8f),
+                        modifier = Modifier.rotate(chevronRotation)
+                    )
+                }
+            }
+
+            // Divider Line
+            HorizontalDivider(
+                color = Color.White.copy(alpha = 0.15f),
+                thickness = 1.dp
+            )
+
+            // Collapsible / Vertically Scrollable Details Section
+            AnimatedVisibility(
+                visible = isExpanded,
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically()
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 320.dp)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    categoryProgress.forEach { progress ->
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(5.dp),
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(6.dp)
+                                            .clip(CircleShape)
+                                            .background(progress.color)
+                                    )
+                                    Text(
+                                        text = progress.label.uppercase(),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.White.copy(alpha = 0.9f),
+                                        fontSize = 8.sp,
+                                        letterSpacing = 0.5.sp,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                                Row(
+                                    verticalAlignment = Alignment.Bottom,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    val percent = if (progress.target > 0) ((progress.owned.toFloat() / progress.target.toFloat()) * 100).toInt() else 0
+                                    Text(
+                                        text = "$percent%",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        color = Color.White,
+                                        fontSize = 10.sp,
+                                        textAlign = TextAlign.End,
+                                        modifier = Modifier.width(36.dp)
+                                    )
+                                    Row(
+                                        verticalAlignment = Alignment.Bottom,
+                                        horizontalArrangement = Arrangement.End,
+                                        modifier = Modifier.width(32.dp)
+                                    ) {
+                                        Text(
+                                            text = "${progress.owned}",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.White.copy(alpha = 0.9f),
+                                            fontSize = 9.sp
+                                        )
+                                        Text(
+                                            text = "/${progress.target}",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = Color.White.copy(alpha = 0.6f),
+                                            fontSize = 7.sp
+                                        )
+                                    }
+                                }
+                            }
+
+                            // Progress Bar
+                            val fillRatio = if (progress.target > 0) (progress.owned.toFloat() / progress.target.toFloat()).coerceIn(0f, 1f) else 0f
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(3.dp)
+                                    .clip(CircleShape)
+                                    .background(Color.White.copy(alpha = 0.15f))
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth(fraction = fillRatio)
+                                        .fillMaxHeight()
+                                        .clip(CircleShape)
+                                        .background(progress.color)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 
 @Composable
 private fun ArchiveVerticalCard(
@@ -477,350 +701,230 @@ private fun ArchiveVerticalCard(
     navTo: (KoColorRoute) -> Unit
 ) {
     val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale.getDefault()) }
-    var isExpanded by remember { mutableStateOf(false) }
+    var isLowerHalfExpanded by remember { mutableStateOf(false) } // Starts CLOSED by default!
+    val chevronRotation by animateFloatAsState(
+        targetValue = if (isLowerHalfExpanded) 180f else 0f,
+        label = "LowerHalfChevronRotation"
+    )
 
-    Surface(
+    Card(
         modifier = modifier
             .fillMaxWidth()
-            .animateContentSize()
+            .height(IntrinsicSize.Min)
             .clickable { onEvent() },
         shape = RoundedCornerShape(32.dp),
-        color = Color(0xFFF3ECEF)
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Box(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
+        Box(modifier = Modifier.fillMaxSize()) {
             AsyncImage(
                 model = uiState.imageModel,
                 contentDescription = null,
-                modifier = Modifier.matchParentSize().alpha(0.2f),
+                modifier = Modifier.matchParentSize().alpha(0.15f),
                 contentScale = ContentScale.Crop
             )
 
             Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
+                modifier = Modifier.padding(24.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // TOP HALF: Main Glassmorphic Pill
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 20.dp, bottom = 12.dp, start = 20.dp, end = 20.dp),
-                    contentAlignment = Alignment.Center
+                // Header Row
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
                 ) {
-                    // Translucent frosted glass pill
-                    Surface(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(86.dp),
-                        shape = RoundedCornerShape(44.dp),
-                        color = Color.White.copy(alpha = 0.35f),
-                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.6f)),
-                        shadowElevation = 0.dp
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(horizontal = 24.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            Text(
-                                text = uiState.title,
-                                style = MaterialTheme.typography.displayMedium.copy(fontSize = 32.sp),
-                                fontFamily = FontFamily.Serif,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.Black,
-                                textAlign = TextAlign.Center
-                            )
-                        }
+                    Column(modifier = Modifier.weight(1f, fill = false)) {
+                        Text(
+                            text = uiState.title,
+                            style = MaterialTheme.typography.displaySmall.copy(fontSize = 32.sp),
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = FontFamily.Serif
+                        )
+                        Text(
+                            text = "${uiState.count} ${uiState.countLabel}",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = Color.Gray
+                        )
                     }
 
-                    if (uiState.onDiscoverClick != null) {
-                        // Floating Discover Badge (Intersecting top-right of pill)
+                    if (uiState.discoverTitle != null && uiState.onDiscoverClick != null) {
+                        TopRightVanityActionCard(
+                            discoverTitle = uiState.discoverTitle,
+                            discoverSubtitle = uiState.discoverSubtitle ?: "Cosmetics Catalog",
+                            backgroundColor = uiState.discoverColor,
+                            icon = uiState.icon,
+                            categoryProgress = uiState.categoryProgress,
+                            onDiscoverClick = uiState.onDiscoverClick
+                        )
+                    } else {
                         Surface(
-                            modifier = Modifier
-                                .align(Alignment.TopEnd)
-                                .offset(x = (-8).dp, y = (-12).dp)
-                                .size(52.dp),
+                            color = Color(0xFFF5F5F5),
                             shape = CircleShape,
-                            color = Color(0xFFEFE8E1).copy(alpha = 0.95f),
-                            border = BorderStroke(1.dp, Color.White),
-                            shadowElevation = 4.dp,
-                            onClick = uiState.onDiscoverClick
+                            modifier = Modifier.size(48.dp)
                         ) {
                             Box(contentAlignment = Alignment.Center) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(44.dp)
-                                        .clip(CircleShape)
-                                        .border(1.dp, Color(0xFFC6B492).copy(alpha = 0.4f), CircleShape)
-                                )
-                                Icon(
-                                    imageVector = uiState.icon,
-                                    contentDescription = uiState.discoverTitle ?: "Discover",
-                                    tint = Color(0xFF1C1B1F),
-                                    modifier = Modifier.size(20.dp)
-                                )
+                                Icon(uiState.icon, null, modifier = Modifier.size(24.dp))
                             }
                         }
                     }
                 }
 
-                // BOTTOM HALF: Items Tracked Row with Chevron (overlapping pill bottom edge)
-                val chevronRotation by animateFloatAsState(
-                    targetValue = if (isExpanded) 180f else 0f,
-                    label = "ChevronRotation"
-                )
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { isExpanded = !isExpanded }
-                        .offset(y = (-14).dp)
-                        .padding(bottom = 8.dp, start = 16.dp, end = 16.dp),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                // Total Value & Toggle Row
+                Column {
                     Text(
-                        text = "${uiState.count} ${uiState.countLabel}",
-                        style = MaterialTheme.typography.headlineMedium.copy(fontSize = 20.sp),
-                        fontFamily = FontFamily.Serif,
-                        fontWeight = FontWeight.Medium,
-                        color = Color(0xFF1F2937),
-                        letterSpacing = (-0.2).sp
+                        text = currencyFormatter.format(uiState.value),
+                        style = MaterialTheme.typography.headlineLarge.copy(fontSize = 38.sp),
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Serif
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Icon(
-                        imageVector = Icons.Default.KeyboardArrowDown,
-                        contentDescription = if (isExpanded) "Collapse" else "Expand",
-                        tint = Color(0xFF8C7F72),
-                        modifier = Modifier.size(20.dp).rotate(chevronRotation)
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Text(
+                                text = uiState.valueLabel,
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 1.sp,
+                                color = Color.Gray
+                            )
+                            if (uiState.healthMetric != null || uiState.restockMetric != null || uiState.chromaticTone != null) {
+                                Icon(
+                                    imageVector = Icons.Default.KeyboardArrowDown,
+                                    contentDescription = if (isLowerHalfExpanded) "Collapse Intelligence" else "Expand Intelligence",
+                                    tint = Color.Gray,
+                                    modifier = Modifier
+                                        .size(20.dp)
+                                        .rotate(chevronRotation)
+                                        .clickable { isLowerHalfExpanded = !isLowerHalfExpanded }
+                                )
+                            }
+                        }
+
+                        uiState.avgCpu?.let { cpu ->
+                            Surface(
+                                color = Color(0xFFE8F5E9),
+                                shape = RoundedCornerShape(50.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(5.dp)
+                                            .clip(CircleShape)
+                                            .background(Color(0xFF2E7D32))
+                                    )
+                                    Text(
+                                        text = "AVG CPU: ${currencyFormatter.format(cpu)} / use",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color(0xFF1B5E20),
+                                        fontSize = 10.sp
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
 
-                // Collapsible Content
+                // Collapsible Lower Half (Starts Closed!)
                 AnimatedVisibility(
-                    visible = isExpanded,
+                    visible = isLowerHalfExpanded,
                     enter = fadeIn() + expandVertically(),
                     exit = fadeOut() + shrinkVertically()
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 24.dp, end = 24.dp, bottom = 20.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        // TOTAL VALUE + AVG CPU / Health Metric
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        HorizontalDivider(color = Color.Black.copy(alpha = 0.08f), thickness = 1.dp)
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            uiState.chromaticTone?.let { tone ->
+                                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    Icon(Icons.Default.Palette, contentDescription = null, tint = Color(0xFF8E24AA), modifier = Modifier.size(14.dp))
+                                    Row {
+                                        Text(
+                                            text = "Signature Tone: ",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.Black,
+                                            fontSize = 11.sp
+                                        )
+                                        Text(
+                                            text = tone.removePrefix("Signature Tone: "),
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = Color.DarkGray,
+                                            fontSize = 11.sp
+                                        )
+                                    }
+                                }
+                            }
+                            uiState.healthMetric?.let { health ->
+                                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = Color(0xFFE91E63), modifier = Modifier.size(14.dp))
+                                    Row {
+                                        Text(
+                                            text = "Vanity Health: ",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color(0xFFC62828),
+                                            fontSize = 11.sp
+                                        )
+                                        Text(
+                                            text = health.removePrefix("Vanity Health: ").removeSuffix(" (PAO Alert)"),
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = Color.DarkGray,
+                                            fontSize = 11.sp
+                                        )
+                                    }
+                                }
+                            }
+                            uiState.restockMetric?.let { restock ->
+                                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = Color(0xFFFB8C00), modifier = Modifier.size(14.dp))
+                                    Row {
+                                        Text(
+                                            text = "Restock needed: ",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color(0xFFE65100),
+                                            fontSize = 11.sp
+                                        )
+                                        Text(
+                                            text = restock.removePrefix("Restock needed: "),
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = Color.DarkGray,
+                                            fontSize = 11.sp
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        HorizontalDivider(color = Color.Black.copy(alpha = 0.08f), thickness = 1.dp)
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.Bottom
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Column {
-                                Text(
-                                    text = uiState.valueLabel,
-                                    style = MaterialTheme.typography.labelMedium,
-                                    fontWeight = FontWeight.Black,
-                                    letterSpacing = 1.sp,
-                                    color = Color.Gray
-                                )
-                                Text(
-                                    text = currencyFormatter.format(uiState.value),
-                                    style = MaterialTheme.typography.headlineLarge.copy(fontSize = 36.sp),
-                                    fontWeight = FontWeight.Bold,
-                                    fontFamily = FontFamily.Serif
-                                )
-                            }
-
-                            uiState.avgCpu?.let { cpu ->
-                                Surface(
-                                    color = Color(0xFFE8F5E9),
-                                    shape = RoundedCornerShape(50.dp)
-                                ) {
-                                    Row(
-                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                    ) {
-                                        Box(
-                                            modifier = Modifier
-                                                .size(5.dp)
-                                                .clip(CircleShape)
-                                                .background(Color(0xFF2E7D32))
-                                        )
-                                        Text(
-                                            text = "AVG CPU: ${currencyFormatter.format(cpu)} / use",
-                                            style = MaterialTheme.typography.labelSmall,
-                                            fontWeight = FontWeight.Bold,
-                                            color = Color(0xFF1B5E20),
-                                            fontSize = 10.sp
-                                        )
-                                    }
-                                }
-                            }
-                        }
-
-                        if (uiState.categoryProgress.isNotEmpty()) {
-                            HorizontalDivider(color = Color.Black.copy(alpha = 0.08f), thickness = 1.dp)
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .heightIn(max = 320.dp)
-                                    .verticalScroll(rememberScrollState()),
-                                verticalArrangement = Arrangement.spacedBy(10.dp)
-                            ) {
-                                uiState.categoryProgress.forEach { progress ->
-                                    Column(
-                                        verticalArrangement = Arrangement.spacedBy(4.dp)
-                                    ) {
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            horizontalArrangement = Arrangement.SpaceBetween,
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            Row(
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                horizontalArrangement = Arrangement.spacedBy(5.dp),
-                                                modifier = Modifier.weight(1f)
-                                            ) {
-                                                Box(
-                                                    modifier = Modifier
-                                                        .size(6.dp)
-                                                        .clip(CircleShape)
-                                                        .background(progress.color)
-                                                )
-                                                Text(
-                                                    text = progress.label.uppercase(),
-                                                    style = MaterialTheme.typography.labelSmall,
-                                                    fontWeight = FontWeight.Bold,
-                                                    color = Color.DarkGray,
-                                                    fontSize = 8.sp,
-                                                    letterSpacing = 0.5.sp,
-                                                    maxLines = 1,
-                                                    overflow = TextOverflow.Ellipsis
-                                                )
-                                            }
-                                            Row(
-                                                verticalAlignment = Alignment.Bottom,
-                                                horizontalArrangement = Arrangement.spacedBy(6.dp)
-                                            ) {
-                                                val percent = if (progress.target > 0) ((progress.owned.toFloat() / progress.target.toFloat()) * 100).toInt() else 0
-                                                Text(
-                                                    text = "$percent%",
-                                                    style = MaterialTheme.typography.labelSmall,
-                                                    fontWeight = FontWeight.ExtraBold,
-                                                    color = Color.Black,
-                                                    fontSize = 10.sp,
-                                                    textAlign = TextAlign.End,
-                                                    modifier = Modifier.width(36.dp)
-                                                )
-                                                Row(
-                                                    verticalAlignment = Alignment.Bottom,
-                                                    horizontalArrangement = Arrangement.End,
-                                                    modifier = Modifier.width(32.dp)
-                                                ) {
-                                                    Text(
-                                                        text = "${progress.owned}",
-                                                        style = MaterialTheme.typography.labelSmall,
-                                                        fontWeight = FontWeight.Bold,
-                                                        color = Color.Black,
-                                                        fontSize = 9.sp
-                                                    )
-                                                    Text(
-                                                        text = "/${progress.target}",
-                                                        style = MaterialTheme.typography.labelSmall,
-                                                        color = Color.Gray,
-                                                        fontSize = 7.sp
-                                                    )
-                                                }
-                                            }
-                                        }
-
-                                        // Progress Bar
-                                        val fillRatio = if (progress.target > 0) (progress.owned.toFloat() / progress.target.toFloat()).coerceIn(0f, 1f) else 0f
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .height(3.dp)
-                                                .clip(CircleShape)
-                                                .background(Color.Black.copy(alpha = 0.08f))
-                                        ) {
-                                            Box(
-                                                modifier = Modifier
-                                                    .fillMaxWidth(fraction = fillRatio)
-                                                    .fillMaxHeight()
-                                                    .clip(CircleShape)
-                                                    .background(progress.color)
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        if (uiState.chromaticTone != null || uiState.healthMetric != null || uiState.restockMetric != null) {
-                            HorizontalDivider(color = Color.Black.copy(alpha = 0.08f), thickness = 1.dp)
-                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                uiState.chromaticTone?.let { tone ->
-                                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                        Icon(Icons.Default.Palette, contentDescription = null, tint = Color(0xFF8E24AA), modifier = Modifier.size(14.dp))
-                                        Row {
-                                            Text(
-                                                text = "Signature Tone: ",
-                                                style = MaterialTheme.typography.labelSmall,
-                                                fontWeight = FontWeight.Bold,
-                                                color = Color.Black,
-                                                fontSize = 11.sp
-                                            )
-                                            Text(
-                                                text = tone.removePrefix("Signature Tone: "),
-                                                style = MaterialTheme.typography.labelSmall,
-                                                color = Color.DarkGray,
-                                                fontSize = 11.sp
-                                            )
-                                        }
-                                    }
-                                }
-                                uiState.healthMetric?.let { health ->
-                                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                        Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = Color(0xFFE91E63), modifier = Modifier.size(14.dp))
-                                        Row {
-                                            Text(
-                                                text = "Vanity Health: ",
-                                                style = MaterialTheme.typography.labelSmall,
-                                                fontWeight = FontWeight.Bold,
-                                                color = Color(0xFFC62828),
-                                                fontSize = 11.sp
-                                            )
-                                            Text(
-                                                text = health.removePrefix("Vanity Health: ").removeSuffix(" (PAO Alert)"),
-                                                style = MaterialTheme.typography.labelSmall,
-                                                color = Color.DarkGray,
-                                                fontSize = 11.sp
-                                            )
-                                        }
-                                    }
-                                }
-                                uiState.restockMetric?.let { restock ->
-                                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                        Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = Color(0xFFFB8C00), modifier = Modifier.size(14.dp))
-                                        Row {
-                                            Text(
-                                                text = "Restock needed: ",
-                                                style = MaterialTheme.typography.labelSmall,
-                                                fontWeight = FontWeight.Bold,
-                                                color = Color(0xFFE65100),
-                                                fontSize = 11.sp
-                                            )
-                                            Text(
-                                                text = restock.removePrefix("Restock needed: "),
-                                                style = MaterialTheme.typography.labelSmall,
-                                                color = Color.DarkGray,
-                                                fontSize = 11.sp
-                                            )
-                                        }
-                                    }
-                                }
-                            }
+                            Text(
+                                text = "View Analytics ›",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.DarkGray
+                            )
+                            Text(
+                                text = "Updated 2h ago",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Color.Gray,
+                                fontSize = 10.sp
+                            )
                         }
                     }
                 }
@@ -831,9 +935,9 @@ private fun ArchiveVerticalCard(
 
 @androidx.compose.ui.tooling.preview.Preview(showBackground = true)
 @Composable
-private fun CollectionHubScreenPreview() {
+private fun CollectionHubOrigPreview() {
     MaterialTheme {
-        CollectionHubScreen(
+        CollectionHubOrig(
             uiState = HomeUiState(
                 totalCosmetics = 117,
                 totalClothing = 54,
