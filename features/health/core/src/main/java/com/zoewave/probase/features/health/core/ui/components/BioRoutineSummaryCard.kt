@@ -12,10 +12,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -124,27 +126,33 @@ fun BioRoutineSummaryCard(
                                 )
                             }
                         }
+                    }
+                }
 
-                        if (!showRitualActiveHeader) {
-                            val chevronRotation by animateFloatAsState(
-                                targetValue = if (isExpanded) 180f else 0f,
-                                label = "ChevronRotation"
-                            )
-                            Surface(
-                                color = Color.Black.copy(alpha = 0.1f),
-                                shape = CircleShape,
-                                onClick = { isExpanded = !isExpanded }
-                            ) {
-                                Box(modifier = Modifier.size(44.dp), contentAlignment = Alignment.Center) {
-                                    Icon(
-                                        imageVector = Icons.Default.KeyboardArrowDown,
-                                        contentDescription = if (isExpanded) "Collapse" else "Expand",
-                                        tint = Color.Black.copy(alpha = 0.7f),
-                                        modifier = Modifier.size(22.dp).rotate(chevronRotation)
-                                    )
-                                }
-                            }
-                        }
+                if (!showRitualActiveHeader) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { isExpanded = !isExpanded }
+                            .padding(vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        androidx.compose.material3.HorizontalDivider(
+                            modifier = Modifier.weight(1f),
+                            color = Color.Black.copy(alpha = 0.08f),
+                            thickness = 1.dp
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
+                        val chevronRotation by animateFloatAsState(
+                            targetValue = if (isExpanded) 180f else 0f,
+                            label = "ChevronRotation"
+                        )
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowDown,
+                            contentDescription = "Expand",
+                            tint = Color.Black.copy(alpha = 0.5f),
+                            modifier = Modifier.size(20.dp).rotate(chevronRotation)
+                        )
                     }
                 }
                 

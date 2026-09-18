@@ -66,6 +66,7 @@ data class AtmosphericHeaderUiState(
 fun AtmosphericHeaderCard(
     uiState: AtmosphericHeaderUiState,
     onWeatherClick: () -> Unit,
+    onUvClick: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     var isExpanded by remember { mutableStateOf(false) }
@@ -99,13 +100,15 @@ fun AtmosphericHeaderCard(
                 LongHeader(
                     uiState = uiState,
                     onWeatherClick = onWeatherClick,
-                    onCollapseClick = { isExpanded = false }
+                    onCollapseClick = { isExpanded = false },
+                    onUvClick = onUvClick
                 )
             } else {
                 ShortHeader(
                     uiState = uiState,
                     onWeatherClick = onWeatherClick,
-                    onExpandClick = { isExpanded = true }
+                    onExpandClick = { isExpanded = true },
+                    onUvClick = onUvClick
                 )
             }
         }
@@ -116,7 +119,8 @@ fun AtmosphericHeaderCard(
 private fun ShortHeader(
     uiState: AtmosphericHeaderUiState,
     onWeatherClick: () -> Unit,
-    onExpandClick: () -> Unit
+    onExpandClick: () -> Unit,
+    onUvClick: () -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -170,7 +174,8 @@ private fun ShortHeader(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .offset(x = (-8).dp, y = (-12).dp)
-                    .size(52.dp),
+                    .size(52.dp)
+                    .clickable { onUvClick() },
                 shape = CircleShape,
                 color = Color(0xFFEFE8E1).copy(alpha = 0.95f),
                 border = BorderStroke(1.dp, Color.White),
@@ -235,7 +240,8 @@ private fun ShortHeader(
 private fun LongHeader(
     uiState: AtmosphericHeaderUiState,
     onWeatherClick: () -> Unit,
-    onCollapseClick: () -> Unit
+    onCollapseClick: () -> Unit,
+    onUvClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -310,7 +316,8 @@ private fun LongHeader(
                     text = "UV ${uiState.weather?.uvIndex?.toInt() ?: 8}",
                     style = MaterialTheme.typography.titleMedium,
                     color = Color(0xFF1C1B1F),
-                    fontFamily = FontFamily.Serif
+                    fontFamily = FontFamily.Serif,
+                    modifier = Modifier.clickable { onUvClick() }
                 )
                 Surface(
                     color = Color(0xFF4A4458),

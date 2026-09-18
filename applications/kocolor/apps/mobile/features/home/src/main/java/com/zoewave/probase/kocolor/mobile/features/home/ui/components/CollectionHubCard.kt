@@ -151,85 +151,32 @@ fun CollectionHubCard(
                     ) {
                         Column {
                             Text(
-                                text = "Hub",
-                                style = MaterialTheme.typography.displayMedium,
-                                fontWeight = FontWeight.Bold,
+                                text = "Hub Collection",
+                                style = MaterialTheme.typography.displaySmall.copy(fontSize = 32.sp),
                                 fontFamily = FontFamily.Serif,
-                                color = Color(0xFF1A1A1A)
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Black
                             )
-                            Spacer(Modifier.height(4.dp))
                             Text(
-                                text = "$totalItems items", // \ntracked",
+                                text = "$totalItems items",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = Color.Gray,
                                 lineHeight = 18.sp
                             )
                         }
 
-                        // Fashion Advisor AI Card (Top Right)
+                        // Fashion Advisor AI Action (Top Right)
                         Surface(
-                            onClick = { navTo(KoColorRoute.StyleSimulator) },
-                            shape = RoundedCornerShape(20.dp),
-                            color = Color(0xFFF8F3FA),
-                            border = BorderStroke(1.dp, Color(0xFFECE4EE))
+                            color = Color.Black.copy(alpha = 0.1f),
+                            shape = CircleShape,
+                            onClick = { navTo(KoColorRoute.StyleSimulator) }
                         ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Surface(
-                                    shape = RoundedCornerShape(12.dp),
-                                    color = Color(0xFFEADBf4),
-                                    modifier = Modifier.size(36.dp)
-                                ) {
-                                    Box(contentAlignment = Alignment.Center) {
-                                        Icon(
-                                            imageVector = Icons.Default.AutoAwesome,
-                                            contentDescription = null,
-                                            tint = Color(0xFF6B3A8B),
-                                            modifier = Modifier.size(16.dp)
-                                        )
-                                    }
-                                }
-                                Column {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                    ) {
-                                        Text(
-                                            text = "Fashion Advisor",
-                                            style = MaterialTheme.typography.labelMedium,
-                                            fontWeight = FontWeight.Bold,
-                                            color = Color.Black,
-                                            fontSize = 12.sp
-                                        )
-                                        Surface(
-                                            shape = RoundedCornerShape(50),
-                                            color = Color(0xFF5A3854)
-                                        ) {
-                                            Text(
-                                                text = "AI",
-                                                style = MaterialTheme.typography.labelSmall,
-                                                fontWeight = FontWeight.ExtraBold,
-                                                color = Color.White,
-                                                fontSize = 8.sp,
-                                                modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
-                                            )
-                                        }
-                                    }
-                                    Text(
-                                        text = "Visual Styling",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = Color.Gray,
-                                        fontSize = 10.sp
-                                    )
-                                }
+                            Box(modifier = Modifier.size(44.dp), contentAlignment = Alignment.Center) {
                                 Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                                    contentDescription = null,
-                                    tint = Color.Gray,
-                                    modifier = Modifier.size(12.dp)
+                                    imageVector = Icons.Default.AutoAwesome,
+                                    contentDescription = "Fashion Advisor",
+                                    tint = Color.Black.copy(alpha = 0.7f),
+                                    modifier = Modifier.size(22.dp)
                                 )
                             }
                         }

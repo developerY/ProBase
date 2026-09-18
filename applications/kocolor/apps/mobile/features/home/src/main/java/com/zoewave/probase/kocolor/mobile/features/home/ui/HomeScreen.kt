@@ -138,7 +138,8 @@ fun HomeScreen(
                         backgroundUrl = uiState.headerBackgroundUrl,
                         tempUnit = uiState.temperatureUnit
                     ),
-                    onWeatherClick = { navTo(KoColorRoute.Weather) }
+                    onWeatherClick = { navTo(KoColorRoute.Weather) },
+                    onUvClick = { navTo(KoColorRoute.SunIntelligence) }
                 )
             }
 
