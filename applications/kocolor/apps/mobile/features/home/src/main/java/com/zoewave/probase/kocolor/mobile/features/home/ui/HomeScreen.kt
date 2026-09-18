@@ -160,14 +160,12 @@ fun HomeScreen(
 
             item {
                 if (uiState.currentRoutine != null && uiState.currentRoutineTitle != null && uiState.currentRoutineDescription != null) {
-                    Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         SectionTitle(
                             uiState = SectionTitleUiState(
                                 uiState.currentRoutineTitle, 
                                 stringResource(R.string.applications_kocolor_apps_mobile_features_home_biosynced_ritual)
-                            ), 
-                            onEvent = {}, 
-                            navTo = {}
+                            )
                         )
                         BioRoutineSummaryCard(
                             uiState = BioRoutineSummaryUiState(

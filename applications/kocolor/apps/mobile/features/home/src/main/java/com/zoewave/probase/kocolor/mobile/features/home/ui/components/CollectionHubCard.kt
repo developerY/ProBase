@@ -88,42 +88,15 @@ fun CollectionHubCard(
 
     Column(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Top Archive Header Row
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 4.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "UNIFIED OFFERING ARCHIVE",
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 1.2.sp,
-                color = Color.Gray
+        // Shared Section Header
+        SectionTitle(
+            uiState = SectionTitleUiState(
+                title = "Unified Offering Archive",
+                subtitle = "LIVE INDEX"
             )
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(6.dp)
-                        .clip(CircleShape)
-                        .background(Color(0xFF6B3A8B))
-                )
-                Text(
-                    text = "LIVE INDEX",
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF6B3A8B),
-                    letterSpacing = 1.sp
-                )
-            }
-        }
+        )
 
         // Main Collection Hub Card
         ElevatedCard(
