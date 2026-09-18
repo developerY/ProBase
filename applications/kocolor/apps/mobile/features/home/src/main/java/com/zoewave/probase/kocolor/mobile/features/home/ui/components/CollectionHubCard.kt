@@ -1,27 +1,34 @@
 package com.zoewave.probase.kocolor.mobile.features.home.ui.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -51,25 +58,6 @@ import com.zoewave.probase.kocolor.model.KoColorRoute
 import java.text.NumberFormat
 import java.util.Locale
 
-@Preview(showBackground = true)
-@Composable
-private fun CollectionHubCardPreview() {
-    MaterialTheme {
-        Box(modifier = Modifier.padding(16.dp)) {
-            CollectionHubCard(
-                uiState = HomeUiState(
-                    totalVanityValue = 1250.0,
-                    totalWardrobeValue = 3400.0,
-                    totalCosmetics = 12,
-                    totalClothing = 24
-                ),
-                onEvent = {},
-                navTo = {}
-            )
-        }
-    }
-}
-
 @Composable
 fun CollectionHubCard(
     uiState: HomeUiState,
@@ -81,10 +69,6 @@ fun CollectionHubCard(
     val totalValue = uiState.totalVanityValue + uiState.totalWardrobeValue
     val totalItems = uiState.totalCosmetics + uiState.totalClothing
     var isExpanded by remember { mutableStateOf(false) }
-    val rotationAngle by androidx.compose.animation.core.animateFloatAsState(
-        targetValue = if (isExpanded) 180f else 0f,
-        label = "caret_rotation"
-    )
 
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -98,13 +82,16 @@ fun CollectionHubCard(
             )
         )
 
-        // Main Collection Hub Card
-        ElevatedCard(
-            modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+        // Main Glassmorphic Collection Hub Card
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .animateContentSize()
+                .clickable { navTo(KoColorRoute.CollectionHub) },
             shape = RoundedCornerShape(32.dp),
-            onClick = { navTo(KoColorRoute.CollectionHub) }
+            color = Color(0xFFF3ECEF)
         ) {
-            Box(modifier = Modifier.fillMaxWidth()) {
+            Box(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
                 AsyncImage(
                     model = R.drawable.collection_hub_background,
                     contentDescription = null,
@@ -113,80 +100,115 @@ fun CollectionHubCard(
                 )
 
                 Column(
-                    modifier = Modifier.padding(24.dp),
-                    verticalArrangement = Arrangement.spacedBy(20.dp)
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // Top Row: "Hub" + Subtitle on Left, Fashion Advisor AI on Right
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                    // TOP HALF: Main Glassmorphic Pill
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 20.dp, bottom = 12.dp, start = 20.dp, end = 20.dp),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Column {
-                            Text(
-                                text = "Hub Collection",
-                                style = MaterialTheme.typography.displaySmall.copy(fontSize = 32.sp),
-                                fontFamily = FontFamily.Serif,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.Black
-                            )
-                            Text(
-                                text = "$totalItems items",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = Color.Gray,
-                                lineHeight = 18.sp
-                            )
+                        // Translucent frosted glass pill
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(86.dp),
+                            shape = RoundedCornerShape(44.dp),
+                            color = Color.White.copy(alpha = 0.35f),
+                            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.6f)),
+                            shadowElevation = 0.dp
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(horizontal = 24.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Text(
+                                    text = "Hub Collection",
+                                    style = MaterialTheme.typography.displayMedium.copy(fontSize = 32.sp),
+                                    fontFamily = FontFamily.Serif,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.Black,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
                         }
 
-                        // Fashion Advisor AI Action (Top Right)
+                        // Floating Fashion Advisor Badge (Intersecting top-right of pill, matching Weather/Routine badges)
                         Surface(
-                            color = Color.Black.copy(alpha = 0.1f),
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .offset(x = (-8).dp, y = (-12).dp)
+                                .size(52.dp),
                             shape = CircleShape,
+                            color = Color(0xFFEFE8E1).copy(alpha = 0.95f),
+                            border = BorderStroke(1.dp, Color.White),
+                            shadowElevation = 4.dp,
                             onClick = { navTo(KoColorRoute.StyleSimulator) }
                         ) {
-                            Box(modifier = Modifier.size(44.dp), contentAlignment = Alignment.Center) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(44.dp)
+                                        .clip(CircleShape)
+                                        .border(1.dp, Color(0xFFC6B492).copy(alpha = 0.4f), CircleShape)
+                                )
                                 Icon(
                                     imageVector = Icons.Default.AutoAwesome,
                                     contentDescription = "Fashion Advisor",
-                                    tint = Color.Black.copy(alpha = 0.7f),
-                                    modifier = Modifier.size(22.dp)
+                                    tint = Color(0xFF1C1B1F),
+                                    modifier = Modifier.size(20.dp)
                                 )
                             }
                         }
                     }
 
-                    // Expand / Collapse Divider
+                    // BOTTOM HALF: Items Tracked Row with Chevron (overlapping pill bottom edge)
+                    val chevronRotation by animateFloatAsState(
+                        targetValue = if (isExpanded) 180f else 0f,
+                        label = "ChevronRotation"
+                    )
+
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable { isExpanded = !isExpanded }
-                            .padding(vertical = 4.dp),
+                            .offset(y = (-14).dp)
+                            .padding(bottom = 8.dp, start = 16.dp, end = 16.dp),
+                        horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        HorizontalDivider(
-                            modifier = Modifier.weight(1f),
-                            color = Color.Black.copy(alpha = 0.08f), 
-                            thickness = 1.dp
+                        Text(
+                            text = "$totalItems items tracked",
+                            style = MaterialTheme.typography.headlineMedium.copy(fontSize = 20.sp),
+                            fontFamily = FontFamily.Serif,
+                            fontWeight = FontWeight.Medium,
+                            color = Color(0xFF1F2937),
+                            letterSpacing = (-0.2).sp
                         )
-                        Spacer(modifier = Modifier.width(16.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowDown,
-                            contentDescription = "Expand Hub details",
-                            tint = Color.Gray,
-                            modifier = Modifier
-                                .size(24.dp)
-                                .rotate(rotationAngle)
+                            contentDescription = if (isExpanded) "Collapse" else "Expand",
+                            tint = Color(0xFF8C7F72),
+                            modifier = Modifier.size(20.dp).rotate(chevronRotation)
                         )
                     }
 
-                    // Collapsible Bottom Section: Total Value & Big Arrow Button
-                    androidx.compose.animation.AnimatedVisibility(
+                    // Collapsible Content (Total Value & Navigation Action)
+                    AnimatedVisibility(
                         visible = isExpanded,
-                        enter = androidx.compose.animation.fadeIn() + androidx.compose.animation.expandVertically(),
-                        exit = androidx.compose.animation.fadeOut() + androidx.compose.animation.shrinkVertically()
+                        enter = fadeIn() + expandVertically(),
+                        exit = fadeOut() + shrinkVertically()
                     ) {
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 24.dp, end = 24.dp, bottom = 20.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.Bottom
                         ) {
@@ -210,12 +232,13 @@ fun CollectionHubCard(
                                 color = Color.White,
                                 shape = CircleShape,
                                 shadowElevation = 8.dp,
-                                modifier = Modifier.size(56.dp)
+                                modifier = Modifier.size(56.dp),
+                                onClick = { navTo(KoColorRoute.CollectionHub) }
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
                                     Icon(
-                                        imageVector = Icons.AutoMirrored.Filled.ArrowForward, 
-                                        contentDescription = null, 
+                                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                        contentDescription = "Collection Hub",
                                         modifier = Modifier.size(24.dp),
                                         tint = Color.Black
                                     )
@@ -236,5 +259,19 @@ fun CollectionHubCard(
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center
         )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun CollectionHubCardPreview() {
+    MaterialTheme {
+        Box(modifier = Modifier.padding(16.dp)) {
+            CollectionHubCard(
+                uiState = HomeUiState(),
+                onEvent = {},
+                navTo = {}
+            )
+        }
     }
 }
