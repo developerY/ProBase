@@ -29,7 +29,8 @@ data class StoreUiState(
     val isCartOpen: Boolean = false,
     val isCheckoutSuccess: Boolean = false,
     val isExpanded: Boolean = false,
-    val backgroundModel: Any? = null
+    val backgroundModel: Any? = null,
+    val categoryProgress: List<CategoryProgressItem> = emptyList()
 ) {
     val cartCount: Int get() = cartItems.size
     val cartTotalPrice: Double get() = cartItems.sumOf { it.numericPrice }

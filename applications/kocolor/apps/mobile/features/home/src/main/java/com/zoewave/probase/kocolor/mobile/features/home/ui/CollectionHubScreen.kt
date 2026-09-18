@@ -41,6 +41,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Checkroom
@@ -548,18 +549,41 @@ private fun ArchiveVerticalCard(
                             onClick = uiState.onDiscoverClick
                         ) {
                             Box(contentAlignment = Alignment.Center) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(44.dp)
-                                        .clip(CircleShape)
-                                        .border(1.dp, Color(0xFFC6B492).copy(alpha = 0.4f), CircleShape)
-                                )
-                                Icon(
-                                    imageVector = uiState.icon,
-                                    contentDescription = uiState.discoverTitle ?: "Discover",
-                                    tint = Color(0xFF1C1B1F),
-                                    modifier = Modifier.size(20.dp)
-                                )
+                                Box(modifier = Modifier.size(44.dp)) {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .clip(CircleShape)
+                                            .border(1.dp, Color(0xFFC6B492).copy(alpha = 0.4f), CircleShape),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(
+                                            imageVector = uiState.icon,
+                                            contentDescription = uiState.discoverTitle ?: "Discover",
+                                            tint = Color(0xFF1C1B1F),
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    }
+                                    
+                                    // Small gold '+' add button badge overlapping the bottom right corner
+                                    Surface(
+                                        shape = CircleShape,
+                                        color = Color(0xFFFFD700), // Gold
+                                        border = BorderStroke(1.5.dp, Color(0xFFEFE8E1).copy(alpha = 0.95f)),
+                                        modifier = Modifier
+                                            .size(18.dp)
+                                            .align(Alignment.BottomEnd)
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Icon(
+                                                imageVector = Icons.Default.Add,
+                                                contentDescription = "Add",
+                                                tint = Color.Black,
+                                                modifier = Modifier.size(14.dp)
+                                            )
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
