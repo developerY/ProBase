@@ -2,6 +2,7 @@ package com.zoewave.probase.kocolor.mobile.features.home.ui.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,11 +13,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -24,11 +27,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
@@ -73,6 +80,11 @@ fun CollectionHubCard(
     val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale.getDefault()) }
     val totalValue = uiState.totalVanityValue + uiState.totalWardrobeValue
     val totalItems = uiState.totalCosmetics + uiState.totalClothing
+    var isExpanded by remember { mutableStateOf(false) }
+    val rotationAngle by androidx.compose.animation.core.animateFloatAsState(
+        targetValue = if (isExpanded) 180f else 0f,
+        label = "caret_rotation"
+    )
 
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -223,43 +235,67 @@ fun CollectionHubCard(
                         }
                     }
 
-                    HorizontalDivider(color = Color.Black.copy(alpha = 0.08f), thickness = 1.dp)
-
-                    // Bottom Row: Total Value & Big Arrow Button
+                    // Expand / Collapse Divider
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.Bottom
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { isExpanded = !isExpanded }
+                            .padding(vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Column {
-                            Text(
-                                text = "TOTAL VALUE",
-                                style = MaterialTheme.typography.labelMedium,
-                                fontWeight = FontWeight.Black,
-                                letterSpacing = 1.sp,
-                                color = Color.Gray
-                            )
-                            Text(
-                                text = currencyFormatter.format(totalValue),
-                                style = MaterialTheme.typography.headlineLarge.copy(fontSize = 36.sp),
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Serif
-                            )
-                        }
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowDown,
+                            contentDescription = "Expand Hub details",
+                            tint = Color.Gray,
+                            modifier = Modifier
+                                .size(24.dp)
+                                .rotate(rotationAngle)
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
+                        HorizontalDivider(color = Color.Black.copy(alpha = 0.08f), thickness = 1.dp)
+                    }
 
-                        Surface(
-                            color = Color.White,
-                            shape = CircleShape,
-                            shadowElevation = 8.dp,
-                            modifier = Modifier.size(56.dp)
+                    // Collapsible Bottom Section: Total Value & Big Arrow Button
+                    androidx.compose.animation.AnimatedVisibility(
+                        visible = isExpanded,
+                        enter = androidx.compose.animation.fadeIn() + androidx.compose.animation.expandVertically(),
+                        exit = androidx.compose.animation.fadeOut() + androidx.compose.animation.shrinkVertically()
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.Bottom
                         ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowForward, 
-                                    contentDescription = null, 
-                                    modifier = Modifier.size(24.dp),
-                                    tint = Color.Black
+                            Column {
+                                Text(
+                                    text = "TOTAL VALUE",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.Black,
+                                    letterSpacing = 1.sp,
+                                    color = Color.Gray
                                 )
+                                Text(
+                                    text = currencyFormatter.format(totalValue),
+                                    style = MaterialTheme.typography.headlineLarge.copy(fontSize = 36.sp),
+                                    fontWeight = FontWeight.Bold,
+                                    fontFamily = FontFamily.Serif
+                                )
+                            }
+
+                            Surface(
+                                color = Color.White,
+                                shape = CircleShape,
+                                shadowElevation = 8.dp,
+                                modifier = Modifier.size(56.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Filled.ArrowForward, 
+                                        contentDescription = null, 
+                                        modifier = Modifier.size(24.dp),
+                                        tint = Color.Black
+                                    )
+                                }
                             }
                         }
                     }
