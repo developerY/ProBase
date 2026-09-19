@@ -1,6 +1,7 @@
 package com.zoewave.probase.kocolor.mobile.features.home.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColor
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
@@ -92,9 +93,19 @@ fun CollectionHubCard(
         label = "StarScale"
     )
 
+    val starColor by infiniteTransition.animateColor(
+        initialValue = Color(0xFFD4AF37), // Metallic Gold
+        targetValue = Color(0xFF1C1B1F), // Rich Charcoal Black
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1800, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "StarColorTransition"
+    )
+
     val auraScale by infiniteTransition.animateFloat(
         initialValue = 1.0f,
-        targetValue = 1.38f,
+        targetValue = 1.19f,
         animationSpec = infiniteRepeatable(
             animation = tween(durationMillis = 2000, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
