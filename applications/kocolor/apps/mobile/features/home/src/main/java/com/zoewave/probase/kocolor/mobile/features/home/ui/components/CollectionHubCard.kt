@@ -3,7 +3,6 @@ package com.zoewave.probase.kocolor.mobile.features.home.ui.components
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
@@ -82,16 +81,6 @@ fun CollectionHubCard(
 
     // Prismatic Chromatic Sparkle & Star Twinkle Animation for the master Collection Hub badge
     val infiniteTransition = rememberInfiniteTransition(label = "HubSparkleAnimation")
-
-    val starRotation by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 360f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 6000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "StarRotation"
-    )
 
     val starScale by infiniteTransition.animateFloat(
         initialValue = 1.0f,
@@ -238,11 +227,10 @@ fun CollectionHubCard(
                                 Icon(
                                     imageVector = Icons.Default.AutoAwesome,
                                     contentDescription = "Fashion Advisor",
-                                    tint = Color(0xFF5A2A54),
+                                    tint = Color(0xFFD4AF37), // Gold
                                     modifier = Modifier
                                         .size(20.dp)
                                         .graphicsLayer {
-                                            rotationZ = starRotation
                                             scaleX = starScale
                                             scaleY = starScale
                                         }
