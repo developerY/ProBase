@@ -23,11 +23,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -35,10 +33,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -88,6 +84,7 @@ import com.zoewave.probase.core.ui.util.parseColor
 import com.zoewave.probase.kocolor.features.store.ui.StoreEvent
 import com.zoewave.probase.kocolor.features.store.ui.components.BioStoreCard
 import com.zoewave.probase.kocolor.mobile.features.home.R
+import com.zoewave.probase.kocolor.mobile.features.home.ui.components.CategoryProgressSection
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.LuxuryBrandLogo
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import java.text.NumberFormat
@@ -683,103 +680,7 @@ private fun ArchiveVerticalCard(
                             }
                         }
 
-                        if (uiState.categoryProgress.isNotEmpty()) {
-                            HorizontalDivider(color = Color.Black.copy(alpha = 0.08f), thickness = 1.dp)
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .heightIn(max = 320.dp)
-                                    .verticalScroll(rememberScrollState()),
-                                verticalArrangement = Arrangement.spacedBy(10.dp)
-                            ) {
-                                uiState.categoryProgress.forEach { progress ->
-                                    Column(
-                                        verticalArrangement = Arrangement.spacedBy(4.dp)
-                                    ) {
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            horizontalArrangement = Arrangement.SpaceBetween,
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            Row(
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                horizontalArrangement = Arrangement.spacedBy(5.dp),
-                                                modifier = Modifier.weight(1f)
-                                            ) {
-                                                Box(
-                                                    modifier = Modifier
-                                                        .size(6.dp)
-                                                        .clip(CircleShape)
-                                                        .background(progress.color)
-                                                )
-                                                Text(
-                                                    text = progress.label.uppercase(),
-                                                    style = MaterialTheme.typography.labelSmall,
-                                                    fontWeight = FontWeight.Bold,
-                                                    color = Color.DarkGray,
-                                                    fontSize = 8.sp,
-                                                    letterSpacing = 0.5.sp,
-                                                    maxLines = 1,
-                                                    overflow = TextOverflow.Ellipsis
-                                                )
-                                            }
-                                            Row(
-                                                verticalAlignment = Alignment.Bottom,
-                                                horizontalArrangement = Arrangement.spacedBy(6.dp)
-                                            ) {
-                                                val percent = if (progress.target > 0) ((progress.owned.toFloat() / progress.target.toFloat()) * 100).toInt() else 0
-                                                Text(
-                                                    text = "$percent%",
-                                                    style = MaterialTheme.typography.labelSmall,
-                                                    fontWeight = FontWeight.ExtraBold,
-                                                    color = Color.Black,
-                                                    fontSize = 10.sp,
-                                                    textAlign = TextAlign.End,
-                                                    modifier = Modifier.width(36.dp)
-                                                )
-                                                Row(
-                                                    verticalAlignment = Alignment.Bottom,
-                                                    horizontalArrangement = Arrangement.End,
-                                                    modifier = Modifier.width(32.dp)
-                                                ) {
-                                                    Text(
-                                                        text = "${progress.owned}",
-                                                        style = MaterialTheme.typography.labelSmall,
-                                                        fontWeight = FontWeight.Bold,
-                                                        color = Color.Black,
-                                                        fontSize = 9.sp
-                                                    )
-                                                    Text(
-                                                        text = "/${progress.target}",
-                                                        style = MaterialTheme.typography.labelSmall,
-                                                        color = Color.Gray,
-                                                        fontSize = 7.sp
-                                                    )
-                                                }
-                                            }
-                                        }
-
-                                        // Progress Bar
-                                        val fillRatio = if (progress.target > 0) (progress.owned.toFloat() / progress.target.toFloat()).coerceIn(0f, 1f) else 0f
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .height(3.dp)
-                                                .clip(CircleShape)
-                                                .background(Color.Black.copy(alpha = 0.08f))
-                                        ) {
-                                            Box(
-                                                modifier = Modifier
-                                                    .fillMaxWidth(fraction = fillRatio)
-                                                    .fillMaxHeight()
-                                                    .clip(CircleShape)
-                                                    .background(progress.color)
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        CategoryProgressSection(categoryProgress = uiState.categoryProgress)
 
                         if (uiState.chromaticTone != null || uiState.healthMetric != null || uiState.restockMetric != null) {
                             HorizontalDivider(color = Color.Black.copy(alpha = 0.08f), thickness = 1.dp)
