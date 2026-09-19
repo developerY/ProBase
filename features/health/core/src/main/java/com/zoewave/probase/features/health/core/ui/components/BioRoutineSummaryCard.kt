@@ -2,12 +2,21 @@ package com.zoewave.probase.features.health.core.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -77,6 +86,39 @@ fun BioRoutineSummaryCard(
     val cardColor = Color(0xFFF1EFE7)
     var isExpanded by remember { mutableStateOf(showRitualActiveHeader) }
 
+    // Zen Layers animation: 12-degree icon sway and breathing lavender aura glow
+    val infiniteTransition = rememberInfiniteTransition(label = "RitualLayersAnimation")
+
+    val iconSway by infiniteTransition.animateFloat(
+        initialValue = -12f,
+        targetValue = 12f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1800, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "LayersSway"
+    )
+
+    val auraScale by infiniteTransition.animateFloat(
+        initialValue = 1.0f,
+        targetValue = 1.35f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 2200, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "AuraScale"
+    )
+
+    val auraAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.15f,
+        targetValue = 0.55f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 2200, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "AuraAlpha"
+    )
+
     Surface(
         modifier = modifier
             .fillMaxWidth()
@@ -135,6 +177,21 @@ fun BioRoutineSummaryCard(
                         }
                     }
 
+                    // Outer Lavender Zen Aura Glow Ring
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .offset(x = (-8).dp, y = (-12).dp)
+                            .size(52.dp)
+                            .graphicsLayer {
+                                scaleX = auraScale
+                                scaleY = auraScale
+                                alpha = auraAlpha
+                            }
+                            .clip(CircleShape)
+                            .background(Color(0xFF8B5A82))
+                    )
+
                     // Floating Layers Stack Badge (Intersecting top-right of pill, matching weather UV badge)
                     Surface(
                         modifier = Modifier
@@ -158,7 +215,11 @@ fun BioRoutineSummaryCard(
                                 imageVector = Icons.Rounded.Layers,
                                 contentDescription = stringResource(R.string.features_health_core_manage_rituals),
                                 tint = Color(0xFF1C1B1F),
-                                modifier = Modifier.size(20.dp)
+                                modifier = Modifier
+                                    .size(20.dp)
+                                    .graphicsLayer {
+                                        rotationZ = iconSway
+                                    }
                             )
                         }
                     }
