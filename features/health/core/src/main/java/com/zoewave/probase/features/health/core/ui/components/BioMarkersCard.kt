@@ -2,11 +2,19 @@ package com.zoewave.probase.features.health.core.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -77,6 +85,39 @@ fun BioMarkersCard(
     modifier: Modifier = Modifier
 ) {
     var isExpanded by remember { mutableStateOf(false) }
+
+    // Hydration Badge pulse and water ripple animation
+    val infiniteTransition = rememberInfiniteTransition(label = "HydrationPulse")
+
+    val scalePulse by infiniteTransition.animateFloat(
+        initialValue = 1.0f,
+        targetValue = 1.15f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "BadgeIconPulse"
+    )
+
+    val rippleScale by infiniteTransition.animateFloat(
+        initialValue = 0.9f,
+        targetValue = 1.4f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1600, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "RippleScale"
+    )
+
+    val rippleAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.45f,
+        targetValue = 0.0f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1600, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "RippleAlpha"
+    )
 
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         // Shared Section Header
@@ -153,7 +194,22 @@ fun BioMarkersCard(
                             }
                         }
 
-                        // Floating Hydration Icon Badge (Intersecting top-right of pill, matching Weather/Routine badges)
+                        // Outer Pulsing Water Ripple Ring
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .offset(x = (-8).dp, y = (-12).dp)
+                                .size(52.dp)
+                                .graphicsLayer {
+                                    scaleX = rippleScale
+                                    scaleY = rippleScale
+                                    alpha = rippleAlpha
+                                }
+                                .clip(CircleShape)
+                                .background(Color(0xFF2196F3))
+                        )
+
+                        // Floating Hydration Icon Badge (Intersecting top-right of pill)
                         Surface(
                             modifier = Modifier
                                 .align(Alignment.TopEnd)
@@ -176,7 +232,12 @@ fun BioMarkersCard(
                                     imageVector = Icons.Default.WaterDrop,
                                     contentDescription = "Hydration Tracking",
                                     tint = Color(0xFF2196F3),
-                                    modifier = Modifier.size(22.dp)
+                                    modifier = Modifier
+                                        .size(22.dp)
+                                        .graphicsLayer {
+                                            scaleX = scalePulse
+                                            scaleY = scalePulse
+                                        }
                                 )
                             }
                         }

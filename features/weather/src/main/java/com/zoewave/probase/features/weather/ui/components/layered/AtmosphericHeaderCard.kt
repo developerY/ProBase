@@ -2,6 +2,11 @@ package com.zoewave.probase.features.weather.ui.components.layered
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -122,6 +127,30 @@ private fun ShortHeader(
     onExpandClick: () -> Unit,
     onUvClick: () -> Unit
 ) {
+    // Periodic subtle sun-glint shimmer animation across the UV badge
+    val infiniteTransition = rememberInfiniteTransition(label = "UvShimmer")
+    val shimmerProgress by infiniteTransition.animateFloat(
+        initialValue = -1f,
+        targetValue = 3f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 4000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "UvShimmerProgress"
+    )
+
+    val shimmerBrush = Brush.linearGradient(
+        colors = listOf(
+            Color.Transparent,
+            Color.White.copy(alpha = 0.35f),
+            Color(0xFFFFD700).copy(alpha = 0.45f), // Golden sun glint
+            Color.White.copy(alpha = 0.35f),
+            Color.Transparent
+        ),
+        start = Offset(x = shimmerProgress * 150f, y = 0f),
+        end = Offset(x = (shimmerProgress + 0.6f) * 150f, y = 150f)
+    )
+
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -169,25 +198,33 @@ private fun ShortHeader(
                 }
             }
 
-            // UV Badge intersecting top right of the pill
+            // UV Badge intersecting top right of the pill (Clean disc + periodic sun-glint shimmer)
             Surface(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .offset(x = (-8).dp, y = (-12).dp)
-                    .size(52.dp)
+                    .size(54.dp)
                     .clickable { onUvClick() },
                 shape = CircleShape,
                 color = Color(0xFFEFE8E1).copy(alpha = 0.95f),
                 border = BorderStroke(1.dp, Color.White),
                 shadowElevation = 4.dp
             ) {
-                Box(contentAlignment = Alignment.Center) {
+                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                     Box(
                         modifier = Modifier
-                            .size(44.dp)
+                            .size(46.dp)
                             .clip(CircleShape)
                             .border(1.dp, Color(0xFFC6B492).copy(alpha = 0.4f), CircleShape)
                     )
+
+                    // Periodic Sun Glint Shimmer Sheen Layer
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .background(shimmerBrush)
+                    )
+
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
@@ -195,13 +232,14 @@ private fun ShortHeader(
                         Text(
                             text = "UV",
                             fontSize = 11.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = Color(0xFF4A4A4A)
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF4A4A4A),
+                            letterSpacing = 0.5.sp
                         )
                         Text(
                             text = "${uiState.weather?.uvIndex?.toInt() ?: 8}",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight.ExtraBold,
                             color = Color(0xFF1A1A1A)
                         )
                     }
