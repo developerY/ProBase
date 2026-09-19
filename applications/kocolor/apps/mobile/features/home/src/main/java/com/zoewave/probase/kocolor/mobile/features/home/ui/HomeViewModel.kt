@@ -202,10 +202,21 @@ class HomeViewModel @Inject constructor(
                 "BODY" -> androidx.compose.ui.graphics.Color(0xFF8D5B4C)
                 else -> androidx.compose.ui.graphics.Color(0xFF8B5A52)
             }
+            val target = when (key.uppercase()) {
+                "COMPLEXION" -> 27
+                "EYES & BROWS" -> 52
+                "NAILS" -> 10
+                "LIPS" -> 16
+                "PREP" -> 14
+                "HAIR" -> 13
+                "ORAL" -> 8
+                "BODY" -> 33
+                else -> 20
+            }
             com.zoewave.probase.kocolor.features.store.ui.CategoryProgressItem(
                 label = key.uppercase(),
                 owned = count,
-                target = maxOf(10, count * 100 / 300), // Mock target based on 300% fill like the image
+                target = target,
                 color = color
             )
         }

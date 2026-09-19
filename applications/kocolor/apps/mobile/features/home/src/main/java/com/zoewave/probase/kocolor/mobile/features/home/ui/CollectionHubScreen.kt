@@ -84,7 +84,6 @@ import com.zoewave.probase.core.ui.util.parseColor
 import com.zoewave.probase.kocolor.features.store.ui.StoreEvent
 import com.zoewave.probase.kocolor.features.store.ui.components.BioStoreCard
 import com.zoewave.probase.kocolor.mobile.features.home.R
-import com.zoewave.probase.kocolor.mobile.features.home.ui.components.CategoryProgressSection
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.LuxuryBrandLogo
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import java.text.NumberFormat
@@ -679,8 +678,6 @@ private fun ArchiveVerticalCard(
                                 }
                             }
                         }
-
-                        CategoryProgressSection(categoryProgress = uiState.categoryProgress)
 
                         if (uiState.chromaticTone != null || uiState.healthMetric != null || uiState.restockMetric != null) {
                             HorizontalDivider(color = Color.Black.copy(alpha = 0.08f), thickness = 1.dp)

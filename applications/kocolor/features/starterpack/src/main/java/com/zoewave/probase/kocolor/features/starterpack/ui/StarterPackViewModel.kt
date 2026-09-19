@@ -19,7 +19,8 @@ data class StarterPackUiState(
     val isRefreshing: Boolean = false,
     val searchQuery: String = "",
     val selectedCategory: String = "ALL",
-    val filteredSearchIndex: Map<String, List<String>> = emptyMap()
+    val filteredSearchIndex: Map<String, List<String>> = emptyMap(),
+    val ownedProductIds: Set<String> = emptySet()
 )
 
 sealed class StarterPackEvent {
@@ -62,8 +63,10 @@ class StarterPackViewModel @Inject constructor(
         _isRefreshing,
         _searchQuery,
         _selectedCategory,
-        filteredSearchIndex
+        filteredSearchIndex,
+        syncRepository.ownedProductIds
     ) { args ->
+        @Suppress("UNCHECKED_CAST")
         StarterPackUiState(
             availablePacks = args[0] as List<PackInfo>,
             installedPacks = args[1] as List<InstalledPackEntity>,
@@ -71,7 +74,8 @@ class StarterPackViewModel @Inject constructor(
             isRefreshing = args[3] as Boolean,
             searchQuery = args[4] as String,
             selectedCategory = args[5] as String,
-            filteredSearchIndex = args[6] as Map<String, List<String>>
+            filteredSearchIndex = args[6] as Map<String, List<String>>,
+            ownedProductIds = args[7] as Set<String>
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), StarterPackUiState())
 
