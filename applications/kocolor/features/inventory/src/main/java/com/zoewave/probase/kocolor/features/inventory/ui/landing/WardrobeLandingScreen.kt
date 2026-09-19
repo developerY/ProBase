@@ -151,18 +151,8 @@ fun WardrobeLandingScreen(
             item {
                 val engine = remember { com.zoewave.probase.kocolor.features.inventory.domain.WardrobeAnalyticsEngine() }
                 val analytics = remember(uiState.items) { engine.computeAnalytics(uiState.items) }
+                
                 WardrobInelCard(
-                    analytics = analytics,
-                    totalValue = 450.0,
-                    glowScore = null,
-                    diversityLabel = "Initializing",
-                    onViewIntelligenceClicked = {},
-                    onViewInventoryClicked = {},
-                    onViewFootprintClicked = {},
-                    onViewBehaviorClicked = {}
-                )
-                /*
-                CuratedClosetDashboard(
                     analytics = analytics,
                     totalValue = uiState.totalInvestment,
                     glowScore = uiState.glowScore?.toFloat(),
@@ -170,10 +160,26 @@ fun WardrobeLandingScreen(
                     onViewIntelligenceClicked = { navTo(KoColorRoute.WardrobeFootprint) },
                     onViewInventoryClicked = { navTo(KoColorRoute.Wardrobe) },
                     onViewFootprintClicked = { navTo(KoColorRoute.WardrobeFootprint) },
-                    onViewBehaviorClicked = { navTo(KoColorRoute.WardrobeBehavior) },
-                    onViewAnalyticsClicked = { navTo(KoColorRoute.WardrobeBehavior) }
+                    onViewBehaviorClicked = { navTo(KoColorRoute.WardrobeBehavior) }
                 )
-                */
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    BehaviorCard(
+                        analytics = analytics,
+                        onViewBehaviorClicked = { navTo(KoColorRoute.WardrobeBehavior) },
+                        modifier = Modifier.weight(1f)
+                    )
+                    
+                    TotalValueCard(
+                        analytics = analytics,
+                        totalValue = uiState.totalInvestment,
+                        onViewInventoryClicked = { navTo(KoColorRoute.Wardrobe) },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
             }
 
             item {
