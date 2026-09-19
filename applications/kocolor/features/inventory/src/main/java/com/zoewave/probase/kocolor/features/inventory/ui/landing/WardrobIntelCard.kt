@@ -352,7 +352,7 @@ fun WardrobeIntelCardPreview() {
             insights = emptyList(),
             analyticsCoverage = com.zoewave.probase.kocolor.features.inventory.domain.AnalyticsCoverage(1.0f, 0f, 0f, 0f, 0, System.currentTimeMillis(), System.currentTimeMillis())
         )
-        CuratedClosetDashboard(
+        WardrobInelCard(
             analytics = dummyAnalytics,
             totalValue = 450.0,
             glowScore = null,

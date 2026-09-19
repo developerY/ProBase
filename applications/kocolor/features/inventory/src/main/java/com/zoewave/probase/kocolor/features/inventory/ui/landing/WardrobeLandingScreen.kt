@@ -151,7 +151,17 @@ fun WardrobeLandingScreen(
             item {
                 val engine = remember { com.zoewave.probase.kocolor.features.inventory.domain.WardrobeAnalyticsEngine() }
                 val analytics = remember(uiState.items) { engine.computeAnalytics(uiState.items) }
-
+                WardrobInelCard(
+                    analytics = analytics,
+                    totalValue = 450.0,
+                    glowScore = null,
+                    diversityLabel = "Initializing",
+                    onViewIntelligenceClicked = {},
+                    onViewInventoryClicked = {},
+                    onViewFootprintClicked = {},
+                    onViewBehaviorClicked = {}
+                )
+                /*
                 CuratedClosetDashboard(
                     analytics = analytics,
                     totalValue = uiState.totalInvestment,
@@ -163,6 +173,7 @@ fun WardrobeLandingScreen(
                     onViewBehaviorClicked = { navTo(KoColorRoute.WardrobeBehavior) },
                     onViewAnalyticsClicked = { navTo(KoColorRoute.WardrobeBehavior) }
                 )
+                */
             }
 
             item {
