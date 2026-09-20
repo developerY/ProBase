@@ -67,8 +67,7 @@ fun TotalValueCard(
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .animateContentSize()
-            .clickable { isExpanded = !isExpanded },
+            .animateContentSize(),
         shape = RoundedCornerShape(32.dp),
         color = Color(0xFFF3F3F7)
     ) {
@@ -81,6 +80,7 @@ fun TotalValueCard(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .clickable { onViewInventoryClicked() }
                         .padding(top = 20.dp, bottom = 12.dp, start = 20.dp, end = 20.dp),
                     contentAlignment = Alignment.Center
                 ) {
@@ -177,6 +177,7 @@ fun TotalValueCard(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .clickable { isExpanded = !isExpanded }
                         .offset(y = (-14).dp)
                         .padding(bottom = 8.dp, start = 16.dp, end = 16.dp),
                     horizontalArrangement = Arrangement.Center,

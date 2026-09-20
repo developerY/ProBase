@@ -1,16 +1,14 @@
  package com.zoewave.probase.kocolor.features.inventory.ui.landing
 
 
-import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -52,6 +50,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -60,7 +59,7 @@ import androidx.compose.ui.unit.sp
 import com.zoewave.probase.kocolor.features.inventory.domain.WardrobeAnalytics
 import java.util.Locale
 
-@Composable
+ @Composable
 fun BehaviorCard(
     analytics: WardrobeAnalytics,
     onViewBehaviorClicked: () -> Unit,
@@ -87,8 +86,7 @@ fun BehaviorCard(
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .animateContentSize()
-            .clickable { isExpanded = !isExpanded },
+            .animateContentSize(),
         shape = RoundedCornerShape(32.dp),
         color = Color(0xFFF3F3F7)
     ) {
@@ -101,6 +99,7 @@ fun BehaviorCard(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .clickable { onViewBehaviorClicked() }
                         .padding(top = 20.dp, bottom = 12.dp, start = 20.dp, end = 20.dp),
                     contentAlignment = Alignment.Center
                 ) {
@@ -201,6 +200,7 @@ fun BehaviorCard(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .clickable { isExpanded = !isExpanded }
                         .offset(y = (-14).dp)
                         .padding(bottom = 8.dp, start = 16.dp, end = 16.dp),
                     horizontalArrangement = Arrangement.Center,
