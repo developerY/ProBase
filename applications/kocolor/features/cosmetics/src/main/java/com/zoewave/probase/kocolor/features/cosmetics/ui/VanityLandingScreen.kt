@@ -20,24 +20,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.CloudDone
-import androidx.compose.material.icons.filled.ColorLens
-import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material.icons.filled.Kitchen
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -56,8 +48,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
@@ -72,8 +62,6 @@ import com.zoewave.probase.core.model.ritual.MicroCategory
 import com.zoewave.probase.kocolor.features.cosmetics.R
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.ProfessionalTaxonomyDialog
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.RecentProductCard
-import com.zoewave.probase.kocolor.features.cosmetics.ui.components.SummaryStatCard
-import com.zoewave.probase.kocolor.features.cosmetics.ui.components.SummaryStatUiState
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.VanityCategoryCard
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.VanityCategoryUiState
 import com.zoewave.probase.kocolor.model.KoColorRoute
@@ -188,102 +176,21 @@ fun VanityLandingScreen(
 
             // --- PROMINENT COLOR HUB ENTRY ---
             item {
-                val chromaticBrush = Brush.linearGradient(
-                    colors = listOf(
-                        Color(0xFFA0C4FF), Color(0xFFBDB2FF), Color(0xFFFFADAD),
-                        Color(0xFFFFD6A5), Color(0xFFFDFFB6), Color(0xFFCAFFBF)
-                    )
+                com.zoewave.probase.kocolor.features.cosmetics.ui.components.CosmeticsIntelCard(
+                    totalItems = uiState.totalCosmetics,
+                    onViewIntelligenceClicked = { navTo(KoColorRoute.ColorHub) },
+                    onViewFootprintClicked = { navTo(KoColorRoute.ColorHub) }
                 )
-
-                Surface(
-                    onClick = { navTo(KoColorRoute.ColorHub) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(140.dp), // Taller as per image
-                    shape = RoundedCornerShape(24.dp),
-                    color = Color.White,
-                    shadowElevation = 4.dp,
-                    border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))
-                ) {
-                    val shimmerBrush = Brush.linearGradient(
-                        colors = listOf(
-                            Color.Transparent,
-                            Color.White.copy(alpha = 0.3f),
-                            Color(0xFFA0C4FF).copy(alpha = 0.1f),
-                            Color.White.copy(alpha = 0.3f),
-                            Color.Transparent
-                        ),
-                        start = Offset(x = shimmerProgress * 1000f, y = 0f),
-                        end = Offset(x = (shimmerProgress + 0.3f) * 1000f, y = 500f)
-                    )
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(shimmerBrush)
-                            .padding(horizontal = 24.dp)
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = "Color Intelligence\nHub", // Forced wrap to match image
-                                style = MaterialTheme.typography.headlineMedium,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Serif,
-                                color = Color(0xFF2C2420),
-                                lineHeight = 32.sp
-                            )
-                            Spacer(Modifier.height(4.dp))
-                            Text(
-                                text = "Spectral blueprint & chromatic DNA",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = Color.Gray,
-                                letterSpacing = 0.5.sp
-                            )
-                        }
-
-                        // Icon with Chromatic background circle on the RIGHT
-                        Box(
-                            modifier = Modifier
-                                .size(72.dp)
-                                .background(chromaticBrush, CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.ColorLens,
-                                contentDescription = null,
-                                tint = Color.White,
-                                modifier = Modifier.size(36.dp)
-                            )
-                        }
-                    }
-                }
             }
 
             item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    SummaryStatCard(
-                        uiState = SummaryStatUiState(
-                            label = "TOTAL_INVENTORY",
-                            value = uiState.totalCosmetics.toString(),
-                            icon = Icons.Default.Kitchen
-                        ),
-                        modifier = Modifier.weight(1f),
-                        onEvent = { navTo(KoColorRoute.InventoryManagement) }
-                    )
-                    SummaryStatCard(
-                        uiState = SummaryStatUiState(
-                            label = "EXPIRING_SOON",
-                            value = uiState.expiringCosmeticsCount.toString(),
-                            icon = Icons.Default.Warning
-                        ),
-                        modifier = Modifier.weight(1f),
-                        onEvent = { navTo(KoColorRoute.ExpiringSoon) }
-                    )
-                }
+                com.zoewave.probase.kocolor.features.cosmetics.ui.components.VanityInventoryCard(
+                    totalItems = uiState.totalCosmetics,
+                    totalValue = uiState.totalValue,
+                    expiringCount = uiState.expiringCosmeticsCount,
+                    onViewInventoryClicked = { navTo(KoColorRoute.InventoryManagement) },
+                    onViewExpiringClicked = { navTo(KoColorRoute.ExpiringSoon) }
+                )
             }
 
             item {

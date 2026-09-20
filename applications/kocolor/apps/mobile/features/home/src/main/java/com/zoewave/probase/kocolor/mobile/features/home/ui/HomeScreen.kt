@@ -5,10 +5,8 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -38,7 +36,7 @@ import com.zoewave.probase.features.weather.ui.components.layered.AtmosphericHea
 import com.zoewave.probase.features.weather.ui.components.layered.AtmosphericHeaderUiState
 import com.zoewave.probase.features.weather.ui.components.layered.LayeredWeatherUiState
 import com.zoewave.probase.kocolor.features.store.ui.StoreEvent
-import com.zoewave.probase.kocolor.features.store.ui.components.BioStoreCard
+import com.zoewave.probase.kocolor.features.store.ui.components.BioKoStore
 import com.zoewave.probase.kocolor.mobile.features.home.R
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.CollectionHubCard
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.LuxuryBrandLogo
@@ -140,7 +138,8 @@ fun HomeScreen(
                         backgroundUrl = uiState.headerBackgroundUrl,
                         tempUnit = uiState.temperatureUnit
                     ),
-                    onWeatherClick = { navTo(KoColorRoute.Weather) }
+                    onWeatherClick = { navTo(KoColorRoute.Weather) },
+                    onUvClick = { navTo(KoColorRoute.SunIntelligence) }
                 )
             }
 
@@ -155,20 +154,19 @@ fun HomeScreen(
                     ),
                     modifier = Modifier.fillMaxWidth(),
                     onClick = { navTo(KoColorRoute.Health) },
-                    onGrantPermissionsClick = { navTo(KoColorRoute.Health) }
+                    onGrantPermissionsClick = { navTo(KoColorRoute.Health) },
+                    onHydrationClick = { navTo(KoColorRoute.Hydration) }
                 )
             }
 
             item {
                 if (uiState.currentRoutine != null && uiState.currentRoutineTitle != null && uiState.currentRoutineDescription != null) {
-                    Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         SectionTitle(
                             uiState = SectionTitleUiState(
                                 uiState.currentRoutineTitle, 
                                 stringResource(R.string.applications_kocolor_apps_mobile_features_home_biosynced_ritual)
-                            ), 
-                            onEvent = {}, 
-                            navTo = {}
+                            )
                         )
                         BioRoutineSummaryCard(
                             uiState = BioRoutineSummaryUiState(
@@ -208,7 +206,7 @@ fun HomeScreen(
             }*/
             
             item {
-                BioStoreCard(
+                BioKoStore(
                     uiState = uiState.storeUiState,
                     onEvent = { event ->
                         android.util.Log.d("HomeScreen", "StoreEvent received: $event")
@@ -225,8 +223,6 @@ fun HomeScreen(
                     modifier = Modifier.padding(top = 16.dp)
                 )
             }
-            
-            item { Spacer(modifier = Modifier.height(48.dp)) }
         }
     }
 }

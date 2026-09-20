@@ -50,6 +50,7 @@ import com.zoewave.probase.kocolor.model.KoColorRoute
 fun SyncHubScreen(
     uiState: StarterPackUiState,
     filter: String? = null,
+    showHero: Boolean = false,
     onEvent: (StarterPackEvent) -> Unit,
     onNavigateTo: (KoColorRoute) -> Unit,
     onBack: () -> Unit
@@ -177,106 +178,191 @@ fun SyncHubScreen(
         ) {
             val heroPackId = if (filter?.lowercase() == "clothing") "com.kocolor.pack.fashion.complete" else "com.kocolor.pack.cosmetics.complete"
 
-            // Top Hero Card (Scrolls with content)
-            val heroPack = uiState.availablePacks.find { it.id == heroPackId }
-            if (heroPack != null) {
-                item {
-                    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-                        HeroPackageCard(
-                            pack = heroPack,
-                            status = uiState.installedPacks.find { it.packId == heroPack.id }?.status ?: PackStatus.AVAILABLE,
-                            onImportClick = { 
-                                onNavigateTo(KoColorRoute.PackPreview(
-                                    packId = heroPack.id, 
-                                    sha256 = heroPack.sha256, 
-                                    publisher = heroPack.publisher,
-                                    categoryFilter = filter
-                                )) 
-                            },
-                            onInfoClick = { selectedInfoPack = heroPack }
-                        )
+            // Top Hero Card (Only shown if showHero == true!)
+            if (showHero) {
+                val heroPack = uiState.availablePacks.find { it.id == heroPackId }
+                if (heroPack != null) {
+                    item {
+                        Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                            HeroPackageCard(
+                                pack = heroPack,
+                                status = uiState.installedPacks.find { it.packId == heroPack.id }?.status ?: PackStatus.AVAILABLE,
+                                onImportClick = { 
+                                    onNavigateTo(KoColorRoute.PackPreview(
+                                        packId = heroPack.id, 
+                                        sha256 = heroPack.sha256, 
+                                        publisher = heroPack.publisher,
+                                        categoryFilter = filter
+                                    )) 
+                                },
+                                onInfoClick = { selectedInfoPack = heroPack }
+                            )
+                        }
+                    }
+
+                    item {
+                        val heroStatus = uiState.installedPacks.find { it.packId == heroPack.id }?.status ?: PackStatus.AVAILABLE
+                        val isFullPackInstalled = heroStatus == PackStatus.INSTALLED || heroStatus == PackStatus.VERIFIED
+
+                        val categoryProgress = remember(filter, isFullPackInstalled, uiState.ownedProductIds) {
+                            if (filter?.lowercase() == "clothing") {
+                                val ownedMap = if (isFullPackInstalled) {
+                                    mapOf("TOPS" to 16, "BOTS" to 9, "DRESS" to 8, "OUTER" to 7, "ACTIVE" to 7, "SHOES" to 7)
+                                } else {
+                                    mapOf(
+                                        "TOPS" to uiState.ownedProductIds.count { it.contains("top", true) || it.contains("shirt", true) },
+                                        "BOTS" to uiState.ownedProductIds.count { it.contains("bot", true) || it.contains("pant", true) },
+                                        "DRESS" to uiState.ownedProductIds.count { it.contains("dress", true) },
+                                        "OUTER" to uiState.ownedProductIds.count { it.contains("outer", true) || it.contains("jacket", true) },
+                                        "ACTIVE" to uiState.ownedProductIds.count { it.contains("active", true) },
+                                        "SHOES" to uiState.ownedProductIds.count { it.contains("shoe", true) || it.contains("boot", true) }
+                                    )
+                                }
+
+                                listOf(
+                                    CategoryProgressItem("TOPS", ownedMap["TOPS"] ?: 0, 16, Color(0xFF3B5249)),
+                                    CategoryProgressItem("BOTS", ownedMap["BOTS"] ?: 0, 9, Color(0xFF415A77)),
+                                    CategoryProgressItem("DRESS", ownedMap["DRESS"] ?: 0, 8, Color(0xFF8B263E)),
+                                    CategoryProgressItem("OUTER", ownedMap["OUTER"] ?: 0, 7, Color(0xFF8D5B4C)),
+                                    CategoryProgressItem("ACTIVE", ownedMap["ACTIVE"] ?: 0, 7, Color(0xFFD4AF37)),
+                                    CategoryProgressItem("SHOES", ownedMap["SHOES"] ?: 0, 7, Color(0xFF774936))
+                                )
+                            } else {
+                                val ownedMap = if (isFullPackInstalled) {
+                                    mapOf("COMP" to 27, "EYES" to 52, "NAILS" to 10, "LIPS" to 16, "PREP" to 14, "HAIR" to 13, "ORAL" to 8, "BODY" to 33)
+                                } else {
+                                    val count = uiState.ownedProductIds.size
+                                    if (count == 0) emptyMap()
+                                    else {
+                                        val compCount = uiState.ownedProductIds.count { it.contains("comp", true) || it.contains("foundation", true) || it.contains("concealer", true) }
+                                        val eyesCount = uiState.ownedProductIds.count { it.contains("eye", true) || it.contains("brow", true) || it.contains("mascara", true) }
+                                        val nailsCount = uiState.ownedProductIds.count { it.contains("nail", true) || it.contains("polish", true) }
+                                        val lipsCount = uiState.ownedProductIds.count { it.contains("lip", true) }
+                                        val prepCount = uiState.ownedProductIds.count { it.contains("prep", true) || it.contains("skin", true) || it.contains("balm", true) }
+                                        val hairCount = uiState.ownedProductIds.count { it.contains("hair", true) }
+                                        val oralCount = uiState.ownedProductIds.count { it.contains("oral", true) }
+                                        val bodyCount = uiState.ownedProductIds.count { it.contains("body", true) || it.contains("hygiene", true) || it.contains("wash", true) }
+
+                                        val matchedSum = compCount + eyesCount + nailsCount + lipsCount + prepCount + hairCount + oralCount + bodyCount
+                                        val remaining = count - matchedSum
+
+                                        mapOf(
+                                            "COMP" to compCount + (if (remaining > 0) minOf(remaining, 1) else 0),
+                                            "EYES" to eyesCount,
+                                            "NAILS" to nailsCount,
+                                            "LIPS" to lipsCount + (if (remaining > 1) remaining - 1 else 0),
+                                            "PREP" to prepCount,
+                                            "HAIR" to hairCount,
+                                            "ORAL" to oralCount,
+                                            "BODY" to bodyCount
+                                        )
+                                    }
+                                }
+
+                                listOf(
+                                    CategoryProgressItem("COMP", ownedMap["COMP"] ?: 0, 27, Color(0xFFD4AF37)),
+                                    CategoryProgressItem("EYES", ownedMap["EYES"] ?: 0, 52, Color(0xFF4A2B4B)),
+                                    CategoryProgressItem("NAILS", ownedMap["NAILS"] ?: 0, 10, Color(0xFF8B263E)),
+                                    CategoryProgressItem("LIPS", ownedMap["LIPS"] ?: 0, 16, Color(0xFFC25975)),
+                                    CategoryProgressItem("PREP", ownedMap["PREP"] ?: 0, 14, Color(0xFF3B5249)),
+                                    CategoryProgressItem("HAIR", ownedMap["HAIR"] ?: 0, 13, Color(0xFF415A77)),
+                                    CategoryProgressItem("ORAL", ownedMap["ORAL"] ?: 0, 8, Color(0xFF5C6B73)),
+                                    CategoryProgressItem("BODY", ownedMap["BODY"] ?: 0, 33, Color(0xFF8D5B4C))
+                                )
+                            }
+                        }
+
+                        Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                            CategoryProgressSection(categoryProgress = categoryProgress)
+                        }
                     }
                 }
             }
 
             // Filter Chips
-            item {
-                val categories = if (filter?.lowercase() == "clothing") {
-                    listOf("ALL", "TOPS", "BOTTOMS", "DRESSES", "OUTERWEAR", "ACTIVEWEAR", "SHOES")
-                } else {
-                    listOf("ALL", "LIPS", "COMPLEXION", "DIMENSION", "EYES", "PREP", "HAIR", "HYGIENE", "ORAL", "FRAGRANCE", "TOOLS", "GROOMING", "NAILS")
-                }
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState())
-                        .padding(horizontal = 16.dp, vertical = 4.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    categories.forEach { cat ->
-                        FilterChip(
-                            selected = uiState.selectedCategory == cat,
-                            onClick = { onEvent(StarterPackEvent.CategorySelected(cat)) },
-                            label = { 
-                                Text(
-                                    text = cat,
-                                    style = MaterialTheme.typography.labelMedium,
-                                    fontWeight = if (uiState.selectedCategory == cat) FontWeight.Bold else FontWeight.Medium
-                                ) 
-                            },
-                            shape = RoundedCornerShape(16.dp),
-                            colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = Color(0xFF5A3854).copy(alpha = 0.15f),
-                                selectedLabelColor = Color(0xFF5A3854),
-                                containerColor = Color.Transparent,
-                                labelColor = Color.Gray
-                            ),
-                            border = null
-                        )
+            if (!showHero) {
+                item {
+                    val categories = if (filter?.lowercase() == "clothing") {
+                        listOf("ALL", "TOPS", "BOTTOMS", "DRESSES", "OUTERWEAR", "ACTIVEWEAR", "SHOES")
+                    } else {
+                        listOf("ALL", "LIPS", "COMPLEXION", "DIMENSION", "EYES", "PREP", "HAIR", "HYGIENE", "ORAL", "FRAGRANCE", "TOOLS", "GROOMING", "NAILS")
                     }
-                    Spacer(Modifier.width(16.dp))
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState())
+                            .padding(horizontal = 16.dp, vertical = 4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        categories.forEach { cat ->
+                            FilterChip(
+                                selected = uiState.selectedCategory == cat,
+                                onClick = { onEvent(StarterPackEvent.CategorySelected(cat)) },
+                                label = { 
+                                    Text(
+                                        text = cat,
+                                        style = MaterialTheme.typography.labelMedium,
+                                        fontWeight = if (uiState.selectedCategory == cat) FontWeight.Bold else FontWeight.Medium
+                                    ) 
+                                },
+                                shape = RoundedCornerShape(16.dp),
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = Color(0xFF5A3854).copy(alpha = 0.15f),
+                                    selectedLabelColor = Color(0xFF5A3854),
+                                    containerColor = Color.Transparent,
+                                    labelColor = Color.Gray
+                                ),
+                                border = null
+                            )
+                        }
+                        Spacer(Modifier.width(16.dp))
+                    }
                 }
             }
 
-            // Section Header
-            item {
-                Text(
-                    text = if (filter?.lowercase() == "clothing") "The Fashion Catalog" else "The Cosmetics Catalog",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontFamily = serifFont,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(top = 8.dp, start = 16.dp, end = 16.dp)
-                )
+            if (!showHero) {
+                // Section Header
+                item {
+                    Text(
+                        text = if (filter?.lowercase() == "clothing") "The Fashion Catalog" else "The Cosmetics Catalog",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontFamily = serifFont,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(top = 8.dp, start = 16.dp, end = 16.dp)
+                    )
+                }
             }
 
             // Grid Catalog: Other Packs
             val otherPacks = filteredAvailablePacks.filter { it.id != heroPackId }
-            items(otherPacks.chunked(2)) { rowPacks ->
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    rowPacks.forEach { pack ->
-                        val installed = uiState.installedPacks.find { it.packId == pack.id }
-                        CatalogPackageCard(
-                            pack = pack,
-                            status = installed?.status ?: PackStatus.AVAILABLE,
-                            onImportClick = { 
-                                onNavigateTo(KoColorRoute.PackPreview(
-                                    packId = pack.id, 
-                                    sha256 = pack.sha256, 
-                                    publisher = pack.publisher,
-                                    categoryFilter = filter
-                                )) 
-                            },
-                            onInfoClick = { selectedInfoPack = pack },
-                            isLoading = uiState.seedingState is SeedingState.Loading,
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                    if (rowPacks.size == 1) {
-                        Spacer(modifier = Modifier.weight(1f))
+            if (!showHero) {
+                items(otherPacks.chunked(2)) { rowPacks ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        rowPacks.forEach { pack ->
+                            val installed = uiState.installedPacks.find { it.packId == pack.id }
+                            CatalogPackageCard(
+                                pack = pack,
+                                status = installed?.status ?: PackStatus.AVAILABLE,
+                                onImportClick = { 
+                                    onNavigateTo(KoColorRoute.PackPreview(
+                                        packId = pack.id, 
+                                        sha256 = pack.sha256, 
+                                        publisher = pack.publisher,
+                                        categoryFilter = filter
+                                    )) 
+                                },
+                                onInfoClick = { selectedInfoPack = pack },
+                                isLoading = uiState.seedingState is SeedingState.Loading,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                        if (rowPacks.size == 1) {
+                            Spacer(modifier = Modifier.weight(1f))
+                        }
                     }
                 }
             }

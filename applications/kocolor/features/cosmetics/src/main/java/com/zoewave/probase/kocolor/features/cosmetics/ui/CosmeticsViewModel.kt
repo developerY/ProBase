@@ -72,6 +72,7 @@ data class CosmeticsUiState(
     val searchQuery: String = "",
     val sortOption: SortOption = SortOption.NEWEST,
     val totalCosmetics: Int = 0,
+    val totalValue: Double = 0.0,
     val expiringCosmeticsCount: Int = 0,
     val cosmeticsByGroup: Map<String, Int> = emptyMap(),
     val categoriesMetadata: Map<String, CategoryMetadata> = emptyMap(),
@@ -237,8 +238,11 @@ class CosmeticsViewModel @Inject constructor(
             }
         }
 
+        val totalVanityValue = models.sumOf { it.price ?: 0.0 }
+
         CosmeticsUiState(
             items = models,
+            totalValue = totalVanityValue,
             filteredItems = filtered,
             isLoading = false,
             capturedImageUri = draft.imageUrl,

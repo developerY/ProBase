@@ -189,6 +189,38 @@ class HomeViewModel @Inject constructor(
             item.estimatedExpiry?.let { expiry -> (expiry - now) in 0..thirtyDaysInMillis } ?: false
         }
 
+        
+        val categoryProgressList = cosmeticsByGroup.map { (key, count) ->
+            val color = when (key.uppercase()) {
+                "COMPLEXION" -> androidx.compose.ui.graphics.Color(0xFFD4AF37)
+                "EYES & BROWS" -> androidx.compose.ui.graphics.Color(0xFF4A3B52)
+                "NAILS" -> androidx.compose.ui.graphics.Color(0xFF8B263E)
+                "LIPS" -> androidx.compose.ui.graphics.Color(0xFFB55A75)
+                "PREP" -> androidx.compose.ui.graphics.Color(0xFF3B5249)
+                "HAIR" -> androidx.compose.ui.graphics.Color(0xFF415A77)
+                "ORAL" -> androidx.compose.ui.graphics.Color(0xFF5A7776)
+                "BODY" -> androidx.compose.ui.graphics.Color(0xFF8D5B4C)
+                else -> androidx.compose.ui.graphics.Color(0xFF8B5A52)
+            }
+            val target = when (key.uppercase()) {
+                "COMPLEXION" -> 27
+                "EYES & BROWS" -> 52
+                "NAILS" -> 10
+                "LIPS" -> 16
+                "PREP" -> 14
+                "HAIR" -> 13
+                "ORAL" -> 8
+                "BODY" -> 33
+                else -> 20
+            }
+            com.zoewave.probase.kocolor.features.store.ui.CategoryProgressItem(
+                label = key.uppercase(),
+                owned = count,
+                target = target,
+                color = color
+            )
+        }
+
         val processedWeather = weather?.let {
             if (tempUnit == "FAHRENHEIT") it.copy(temperature = (it.temperature * 9 / 5) + 32) else it
         }
@@ -221,7 +253,7 @@ class HomeViewModel @Inject constructor(
             weather = processedWeather,
             locationName = weather?.locationName,
             temperatureUnit = tempUnit,
-            storeUiState = StoreUiState(isExpanded = isStoreExpanded),
+            storeUiState = StoreUiState(isExpanded = isStoreExpanded, categoryProgress = categoryProgressList),
             savedSuggestions = savedSuggestions,
             isLocationFallback = weather?.locationName == "Location could not be found"
         )

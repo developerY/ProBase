@@ -2,19 +2,28 @@ package com.zoewave.probase.features.weather.ui.components.layered
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -38,8 +47,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shadow
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -64,6 +71,7 @@ data class AtmosphericHeaderUiState(
 fun AtmosphericHeaderCard(
     uiState: AtmosphericHeaderUiState,
     onWeatherClick: () -> Unit,
+    onUvClick: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     var isExpanded by remember { mutableStateOf(false) }
@@ -97,13 +105,15 @@ fun AtmosphericHeaderCard(
                 LongHeader(
                     uiState = uiState,
                     onWeatherClick = onWeatherClick,
-                    onCollapseClick = { isExpanded = false }
+                    onCollapseClick = { isExpanded = false },
+                    onUvClick = onUvClick
                 )
             } else {
                 ShortHeader(
                     uiState = uiState,
                     onWeatherClick = onWeatherClick,
-                    onExpandClick = { isExpanded = true }
+                    onExpandClick = { isExpanded = true },
+                    onUvClick = onUvClick
                 )
             }
         }
@@ -114,8 +124,33 @@ fun AtmosphericHeaderCard(
 private fun ShortHeader(
     uiState: AtmosphericHeaderUiState,
     onWeatherClick: () -> Unit,
-    onExpandClick: () -> Unit
+    onExpandClick: () -> Unit,
+    onUvClick: () -> Unit
 ) {
+    // Periodic subtle sun-glint shimmer animation across the UV badge
+    val infiniteTransition = rememberInfiniteTransition(label = "UvShimmer")
+    val shimmerProgress by infiniteTransition.animateFloat(
+        initialValue = -1f,
+        targetValue = 3f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 4000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "UvShimmerProgress"
+    )
+
+    val shimmerBrush = Brush.linearGradient(
+        colors = listOf(
+            Color.Transparent,
+            Color.White.copy(alpha = 0.35f),
+            Color(0xFFFFD700).copy(alpha = 0.45f), // Golden sun glint
+            Color.White.copy(alpha = 0.35f),
+            Color.Transparent
+        ),
+        start = Offset(x = shimmerProgress * 150f, y = 0f),
+        end = Offset(x = (shimmerProgress + 0.6f) * 150f, y = 150f)
+    )
+
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -125,78 +160,87 @@ private fun ShortHeader(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(onClick = onWeatherClick)
-                .padding(top = 20.dp, bottom = 4.dp),
+                .padding(top = 16.dp, start = 16.dp, end = 16.dp),
             contentAlignment = Alignment.Center
         ) {
-            // Weather Widget Container
-            Box(
-                modifier = Modifier.width(220.dp).height(120.dp),
-                contentAlignment = Alignment.Center
+            // The translucent pill
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(86.dp),
+                shape = RoundedCornerShape(44.dp),
+                color = Color.White.copy(alpha = 0.25f),
+                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.5f)),
+                shadowElevation = 0.dp
             ) {
-                // PREMIUM GRADIENT BORDER (Halo Glow) with Rounded Corners
-                Box(
-                    modifier = Modifier
-                        .size(width = 180.dp, height = 110.dp)
-                        .clip(RoundedCornerShape(40.dp)) // Soft rounded shadow container
-                        .background(
-                            brush = Brush.radialGradient(
-                                colors = listOf(Color.Black.copy(alpha = 0.12f), Color.Transparent),
-                                center = Offset.Unspecified,
-                                radius = 350f
-                            )
-                        )
-                )
-
-                // Dynamic Weather Icons with Premium Gradient
-                DynamicWeatherIcon(
-                    conditions = uiState.weather?.conditions ?: listOf(LayeredWeatherCondition.SUNNY),
-                    modifier = Modifier.size(width = 200.dp, height = 100.dp)
-                )
-
-                // Temperature Text (Popping Bolder Numbers with High Contrast)
-                Text(
-                    text = "${uiState.weather?.temperature?.toInt() ?: 24}${if (uiState.tempUnit == "FAHRENHEIT") "°" else "°C"}",
-                    style = MaterialTheme.typography.displayMedium.copy(
-                        fontSize = 56.sp,
-                        fontWeight = FontWeight.Black,
-                        letterSpacing = (-2.5).sp,
-                        shadow = Shadow(
-                            color = Color.Black.copy(alpha = 0.25f),
-                            offset = Offset(0f, 4f),
-                            blurRadius = 12f
-                        )
-                    ),
-                    color = Color(0xFF1C1B1F),
-                    modifier = Modifier.align(Alignment.Center).padding(top = 14.dp)
-                )
-
-                // UV Badge (Accented purple circle with shadow)
-                Surface(
-                    color = Color(0xFF9E84C1),
-                    shape = CircleShape,
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(top = 4.dp, end = 4.dp)
-                        .size(44.dp),
-                    shadowElevation = 8.dp
+                Row(
+                    modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
                 ) {
+                    DynamicWeatherIcon(
+                        conditions = uiState.weather?.conditions ?: listOf(LayeredWeatherCondition.SUNNY),
+                        modifier = Modifier.size(width = 80.dp, height = 80.dp)
+                    )
+                    
+                    Spacer(Modifier.width(16.dp))
+                    
+                    Text(
+                        text = "${uiState.weather?.temperature?.toInt() ?: 24}${if (uiState.tempUnit == "FAHRENHEIT") "°" else "°C"}",
+                        style = MaterialTheme.typography.displayMedium.copy(
+                            fontSize = 48.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = (-1.5).sp
+                        ),
+                        color = Color(0xFF1C1B1F)
+                    )
+                    Spacer(Modifier.width(28.dp)) // Padding to offset the UV badge
+                }
+            }
+
+            // UV Badge intersecting top right of the pill (Clean disc + periodic sun-glint shimmer)
+            Surface(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .offset(x = (-8).dp, y = (-12).dp)
+                    .size(54.dp)
+                    .clickable { onUvClick() },
+                shape = CircleShape,
+                color = Color(0xFFEFE8E1).copy(alpha = 0.95f),
+                border = BorderStroke(1.dp, Color.White),
+                shadowElevation = 4.dp
+            ) {
+                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                    Box(
+                        modifier = Modifier
+                            .size(46.dp)
+                            .clip(CircleShape)
+                            .border(1.dp, Color(0xFFC6B492).copy(alpha = 0.4f), CircleShape)
+                    )
+
+                    // Periodic Sun Glint Shimmer Sheen Layer
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .background(shimmerBrush)
+                    )
+
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
                         Text(
                             text = "UV",
-                            fontSize = 10.sp,
+                            fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color.White,
-                            lineHeight = 10.sp
+                            color = Color(0xFF4A4A4A),
+                            letterSpacing = 0.5.sp
                         )
                         Text(
                             text = "${uiState.weather?.uvIndex?.toInt() ?: 8}",
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Black,
-                            color = Color.White,
-                            lineHeight = 15.sp
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = Color(0xFF1A1A1A)
                         )
                     }
                 }
@@ -208,24 +252,23 @@ private fun ShortHeader(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(onClick = onExpandClick)
-                .padding(bottom = 20.dp),
+                .offset(y = (-8).dp), // Slide up under the pill
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = if (uiState.isDaytime) stringResource(R.string.features_weather_atmospheric_greeting_day) else stringResource(R.string.features_weather_atmospheric_greeting_night),
-                style = MaterialTheme.typography.titleLarge,
+            Text(                text = if (uiState.isDaytime) stringResource(R.string.features_weather_atmospheric_greeting_day) else stringResource(R.string.features_weather_atmospheric_greeting_night),
+                style = MaterialTheme.typography.headlineMedium.copy(fontSize = 24.sp),
                 fontFamily = FontFamily.Serif,
-                fontWeight = FontWeight.SemiBold,
+                fontWeight = FontWeight.Medium,
                 color = Color(0xFF1F2937),
-                letterSpacing = (-0.5).sp
+                letterSpacing = (-0.2).sp
             )
             Spacer(modifier = Modifier.width(8.dp))
             Icon(
                 imageVector = Icons.Default.KeyboardArrowDown,
                 contentDescription = "Expand Header",
-                tint = Color(0xFF1F2937).copy(alpha = 0.6f),
-                modifier = Modifier.size(24.dp)
+                tint = Color(0xFF8C7F72),
+                modifier = Modifier.size(20.dp)
             )
         }
     }
@@ -235,7 +278,8 @@ private fun ShortHeader(
 private fun LongHeader(
     uiState: AtmosphericHeaderUiState,
     onWeatherClick: () -> Unit,
-    onCollapseClick: () -> Unit
+    onCollapseClick: () -> Unit,
+    onUvClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -310,7 +354,8 @@ private fun LongHeader(
                     text = "UV ${uiState.weather?.uvIndex?.toInt() ?: 8}",
                     style = MaterialTheme.typography.titleMedium,
                     color = Color(0xFF1C1B1F),
-                    fontFamily = FontFamily.Serif
+                    fontFamily = FontFamily.Serif,
+                    modifier = Modifier.clickable { onUvClick() }
                 )
                 Surface(
                     color = Color(0xFF4A4458),

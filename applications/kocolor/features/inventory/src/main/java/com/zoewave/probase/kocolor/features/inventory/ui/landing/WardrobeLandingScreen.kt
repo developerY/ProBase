@@ -7,8 +7,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -149,9 +151,12 @@ fun WardrobeLandingScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {
-                val engine = remember { com.zoewave.probase.kocolor.features.inventory.domain.WardrobeAnalyticsEngine() }
+                val engine =
+                    remember { com.zoewave.probase.kocolor.features.inventory.domain.WardrobeAnalyticsEngine() }
                 val analytics = remember(uiState.items) { engine.computeAnalytics(uiState.items) }
 
+                // Not used rigth now ...
+                /*
                 CuratedClosetDashboard(
                     analytics = analytics,
                     totalValue = uiState.totalInvestment,
@@ -163,6 +168,36 @@ fun WardrobeLandingScreen(
                     onViewBehaviorClicked = { navTo(KoColorRoute.WardrobeBehavior) },
                     onViewAnalyticsClicked = { navTo(KoColorRoute.WardrobeBehavior) }
                 )
+                */
+
+                WardrobInelCard(
+                    analytics = analytics,
+                    totalValue = uiState.totalInvestment,
+                    glowScore = uiState.glowScore?.toFloat(),
+                    diversityLabel = uiState.diversityIndex,
+                    onViewIntelligenceClicked = { navTo(KoColorRoute.WardrobeFootprint) },
+                    onViewInventoryClicked = { navTo(KoColorRoute.Wardrobe) },
+                    onViewFootprintClicked = { navTo(KoColorRoute.WardrobeFootprint) },
+                    onViewBehaviorClicked = { navTo(KoColorRoute.WardrobeBehavior) }
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+
+                BehaviorCard(
+                    analytics = analytics,
+                    onViewBehaviorClicked = { navTo(KoColorRoute.WardrobeBehavior) },
+
+                    )
+
+                // NOT Needed
+                /*TotalValueCard(
+                    analytics = analytics,
+                    totalValue = uiState.totalInvestment,
+                    onViewInventoryClicked = { navTo(KoColorRoute.Wardrobe) },
+
+                    )*/
+
             }
 
             item {

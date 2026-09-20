@@ -1,35 +1,59 @@
 package com.zoewave.probase.kocolor.mobile.features.home.ui.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColor
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -44,25 +68,6 @@ import com.zoewave.probase.kocolor.model.KoColorRoute
 import java.text.NumberFormat
 import java.util.Locale
 
-@Preview(showBackground = true)
-@Composable
-private fun CollectionHubCardPreview() {
-    MaterialTheme {
-        Box(modifier = Modifier.padding(16.dp)) {
-            CollectionHubCard(
-                uiState = HomeUiState(
-                    totalVanityValue = 1250.0,
-                    totalWardrobeValue = 3400.0,
-                    totalCosmetics = 12,
-                    totalClothing = 24
-                ),
-                onEvent = {},
-                navTo = {}
-            )
-        }
-    }
-}
-
 @Composable
 fun CollectionHubCard(
     uiState: HomeUiState,
@@ -73,53 +78,83 @@ fun CollectionHubCard(
     val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale.getDefault()) }
     val totalValue = uiState.totalVanityValue + uiState.totalWardrobeValue
     val totalItems = uiState.totalCosmetics + uiState.totalClothing
+    var isExpanded by remember { mutableStateOf(false) }
+
+    // Prismatic Chromatic Sparkle & Star Twinkle Animation for the master Collection Hub badge
+    val infiniteTransition = rememberInfiniteTransition(label = "HubSparkleAnimation")
+
+    val starScale by infiniteTransition.animateFloat(
+        initialValue = 1.0f,
+        targetValue = 1.25f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1200, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "StarScale"
+    )
+
+    val starColor by infiniteTransition.animateColor(
+        initialValue = Color(0xFFD4AF37), // Metallic Gold
+        targetValue = Color(0xFF1C1B1F), // Rich Charcoal Black
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1800, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "StarColorTransition"
+    )
+
+    val auraScale by infiniteTransition.animateFloat(
+        initialValue = 1.0f,
+        targetValue = 1.19f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 2000, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "PrismaticAuraScale"
+    )
+
+    val auraAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.2f,
+        targetValue = 0.65f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 2000, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "PrismaticAuraAlpha"
+    )
+
+    val chromaticAuraBrush = Brush.sweepGradient(
+        colors = listOf(
+            Color(0xFFFFD700), // Gold
+            Color(0xFFE91E63), // Rose
+            Color(0xFF8E24AA), // Purple
+            Color(0xFF00BCD4), // Cyan
+            Color(0xFFFFD700)  // Gold wrap
+        )
+    )
 
     Column(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Top Archive Header Row
-        Row(
+        // Shared Section Header
+        SectionTitle(
+            uiState = SectionTitleUiState(
+                title = "Unified Offering Archive",
+                subtitle = "LIVE INDEX"
+            )
+        )
+
+        // Main Glassmorphic Collection Hub Card
+        Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 4.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "UNIFIED OFFERING ARCHIVE",
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 1.2.sp,
-                color = Color.Gray
-            )
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(6.dp)
-                        .clip(CircleShape)
-                        .background(Color(0xFF6B3A8B))
-                )
-                Text(
-                    text = "LIVE INDEX",
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF6B3A8B),
-                    letterSpacing = 1.sp
-                )
-            }
-        }
-
-        // Main Collection Hub Card
-        ElevatedCard(
-            modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+                .animateContentSize()
+                .clickable { navTo(KoColorRoute.CollectionHub) },
             shape = RoundedCornerShape(32.dp),
-            onClick = { navTo(KoColorRoute.CollectionHub) }
+            color = Color(0xFFF3ECEF)
         ) {
-            Box(modifier = Modifier.fillMaxWidth()) {
+            Box(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
                 AsyncImage(
                     model = R.drawable.collection_hub_background,
                     contentDescription = null,
@@ -128,138 +163,169 @@ fun CollectionHubCard(
                 )
 
                 Column(
-                    modifier = Modifier.padding(24.dp),
-                    verticalArrangement = Arrangement.spacedBy(20.dp)
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // Top Row: "Hub" + Subtitle on Left, Fashion Advisor AI on Right
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                    // TOP HALF: Main Glassmorphic Pill
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 20.dp, bottom = 12.dp, start = 20.dp, end = 20.dp),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Column {
-                            Text(
-                                text = "Hub",
-                                style = MaterialTheme.typography.displayMedium,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Serif,
-                                color = Color(0xFF1A1A1A)
-                            )
-                            Spacer(Modifier.height(4.dp))
-                            Text(
-                                text = "$totalItems items\ntracked",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = Color.Gray,
-                                lineHeight = 18.sp
-                            )
-                        }
-
-                        // Fashion Advisor AI Card (Top Right)
+                        // Translucent frosted glass pill
                         Surface(
-                            onClick = { navTo(KoColorRoute.StyleSimulator) },
-                            shape = RoundedCornerShape(20.dp),
-                            color = Color(0xFFF8F3FA),
-                            border = BorderStroke(1.dp, Color(0xFFECE4EE))
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(86.dp),
+                            shape = RoundedCornerShape(44.dp),
+                            color = Color.White.copy(alpha = 0.35f),
+                            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.6f)),
+                            shadowElevation = 0.dp
                         ) {
                             Row(
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(horizontal = 24.dp),
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                horizontalArrangement = Arrangement.Center
                             ) {
-                                Surface(
-                                    shape = RoundedCornerShape(12.dp),
-                                    color = Color(0xFFEADBf4),
-                                    modifier = Modifier.size(36.dp)
-                                ) {
-                                    Box(contentAlignment = Alignment.Center) {
-                                        Icon(
-                                            imageVector = Icons.Default.AutoAwesome,
-                                            contentDescription = null,
-                                            tint = Color(0xFF6B3A8B),
-                                            modifier = Modifier.size(16.dp)
-                                        )
-                                    }
+                                Text(
+                                    text = "Collection Hub",
+                                    style = MaterialTheme.typography.displayMedium.copy(fontSize = 32.sp),
+                                    fontFamily = FontFamily.Serif,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.Black,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
+
+                        // Outer Prismatic Multi-Chromatic Aura Glow Ring
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .offset(x = (-8).dp, y = (-12).dp)
+                                .size(52.dp)
+                                .graphicsLayer {
+                                    scaleX = auraScale
+                                    scaleY = auraScale
+                                    alpha = auraAlpha
                                 }
-                                Column {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                    ) {
-                                        Text(
-                                            text = "Fashion Advisor",
-                                            style = MaterialTheme.typography.labelMedium,
-                                            fontWeight = FontWeight.Bold,
-                                            color = Color.Black,
-                                            fontSize = 12.sp
-                                        )
-                                        Surface(
-                                            shape = RoundedCornerShape(50),
-                                            color = Color(0xFF5A3854)
-                                        ) {
-                                            Text(
-                                                text = "AI",
-                                                style = MaterialTheme.typography.labelSmall,
-                                                fontWeight = FontWeight.ExtraBold,
-                                                color = Color.White,
-                                                fontSize = 8.sp,
-                                                modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
-                                            )
-                                        }
-                                    }
-                                    Text(
-                                        text = "Visual Styling",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = Color.Gray,
-                                        fontSize = 10.sp
-                                    )
-                                }
+                                .clip(CircleShape)
+                                .background(chromaticAuraBrush)
+                        )
+
+                        // Floating Fashion Advisor / Hub Sparkle Badge (Intersecting top-right of pill, matching Weather/Routine badges)
+                        Surface(
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .offset(x = (-8).dp, y = (-12).dp)
+                                .size(52.dp),
+                            shape = CircleShape,
+                            color = Color(0xFFEFE8E1).copy(alpha = 0.95f),
+                            border = BorderStroke(1.dp, Color.White),
+                            shadowElevation = 4.dp,
+                            onClick = { navTo(KoColorRoute.StyleSimulator) }
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(44.dp)
+                                        .clip(CircleShape)
+                                        .border(1.dp, Color(0xFFC6B492).copy(alpha = 0.4f), CircleShape)
+                                )
                                 Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                                    contentDescription = null,
-                                    tint = Color.Gray,
-                                    modifier = Modifier.size(12.dp)
+                                    imageVector = Icons.Default.AutoAwesome,
+                                    contentDescription = "Fashion Advisor",
+                                    tint = Color(0xFFD4AF37), // Gold
+                                    modifier = Modifier
+                                        .size(20.dp)
+                                        .graphicsLayer {
+                                            scaleX = starScale
+                                            scaleY = starScale
+                                        }
                                 )
                             }
                         }
                     }
 
-                    HorizontalDivider(color = Color.Black.copy(alpha = 0.08f), thickness = 1.dp)
+                    // BOTTOM HALF: Items Tracked Row with Chevron (overlapping pill bottom edge)
+                    val chevronRotation by animateFloatAsState(
+                        targetValue = if (isExpanded) 180f else 0f,
+                        label = "ChevronRotation"
+                    )
 
-                    // Bottom Row: Total Value & Big Arrow Button
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.Bottom
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { isExpanded = !isExpanded }
+                            .offset(y = (-14).dp)
+                            .padding(bottom = 8.dp, start = 16.dp, end = 16.dp),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Column {
-                            Text(
-                                text = "TOTAL VALUE",
-                                style = MaterialTheme.typography.labelMedium,
-                                fontWeight = FontWeight.Black,
-                                letterSpacing = 1.sp,
-                                color = Color.Gray
-                            )
-                            Text(
-                                text = currencyFormatter.format(totalValue),
-                                style = MaterialTheme.typography.headlineLarge.copy(fontSize = 36.sp),
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Serif
-                            )
-                        }
+                        Text(
+                            text = "$totalItems items tracked",
+                            style = MaterialTheme.typography.headlineMedium.copy(fontSize = 20.sp),
+                            fontFamily = FontFamily.Serif,
+                            fontWeight = FontWeight.Medium,
+                            color = Color(0xFF1F2937),
+                            letterSpacing = (-0.2).sp
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowDown,
+                            contentDescription = if (isExpanded) "Collapse" else "Expand",
+                            tint = Color(0xFF8C7F72),
+                            modifier = Modifier.size(20.dp).rotate(chevronRotation)
+                        )
+                    }
 
-                        Surface(
-                            color = Color.White,
-                            shape = CircleShape,
-                            shadowElevation = 8.dp,
-                            modifier = Modifier.size(56.dp)
+                    // Collapsible Content (Total Value & Navigation Action)
+                    AnimatedVisibility(
+                        visible = isExpanded,
+                        enter = fadeIn() + expandVertically(),
+                        exit = fadeOut() + shrinkVertically()
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 24.dp, end = 24.dp, bottom = 20.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.Bottom
                         ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowForward, 
-                                    contentDescription = null, 
-                                    modifier = Modifier.size(24.dp),
-                                    tint = Color.Black
+                            Column {
+                                Text(
+                                    text = "TOTAL VALUE",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.Black,
+                                    letterSpacing = 1.sp,
+                                    color = Color.Gray
                                 )
+                                Text(
+                                    text = currencyFormatter.format(totalValue),
+                                    style = MaterialTheme.typography.headlineLarge.copy(fontSize = 36.sp),
+                                    fontWeight = FontWeight.Bold,
+                                    fontFamily = FontFamily.Serif
+                                )
+                            }
+
+                            Surface(
+                                color = Color.White,
+                                shape = CircleShape,
+                                shadowElevation = 8.dp,
+                                modifier = Modifier.size(56.dp),
+                                onClick = { navTo(KoColorRoute.CollectionHub) }
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                        contentDescription = "Collection Hub",
+                                        modifier = Modifier.size(24.dp),
+                                        tint = Color.Black
+                                    )
+                                }
                             }
                         }
                     }
@@ -276,5 +342,19 @@ fun CollectionHubCard(
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center
         )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun CollectionHubCardPreview() {
+    MaterialTheme {
+        Box(modifier = Modifier.padding(16.dp)) {
+            CollectionHubCard(
+                uiState = HomeUiState(),
+                onEvent = {},
+                navTo = {}
+            )
+        }
     }
 }
