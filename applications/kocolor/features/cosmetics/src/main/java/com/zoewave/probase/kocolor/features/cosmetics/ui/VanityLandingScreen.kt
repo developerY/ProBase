@@ -188,76 +188,11 @@ fun VanityLandingScreen(
 
             // --- PROMINENT COLOR HUB ENTRY ---
             item {
-                val chromaticBrush = Brush.linearGradient(
-                    colors = listOf(
-                        Color(0xFFA0C4FF), Color(0xFFBDB2FF), Color(0xFFFFADAD),
-                        Color(0xFFFFD6A5), Color(0xFFFDFFB6), Color(0xFFCAFFBF)
-                    )
+                com.zoewave.probase.kocolor.features.cosmetics.ui.components.CosmeticsIntelCard(
+                    totalItems = uiState.totalCosmetics,
+                    onViewIntelligenceClicked = { navTo(KoColorRoute.ColorHub) },
+                    onViewFootprintClicked = { navTo(KoColorRoute.ColorHub) }
                 )
-
-                Surface(
-                    onClick = { navTo(KoColorRoute.ColorHub) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(140.dp), // Taller as per image
-                    shape = RoundedCornerShape(24.dp),
-                    color = Color.White,
-                    shadowElevation = 4.dp,
-                    border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))
-                ) {
-                    val shimmerBrush = Brush.linearGradient(
-                        colors = listOf(
-                            Color.Transparent,
-                            Color.White.copy(alpha = 0.3f),
-                            Color(0xFFA0C4FF).copy(alpha = 0.1f),
-                            Color.White.copy(alpha = 0.3f),
-                            Color.Transparent
-                        ),
-                        start = Offset(x = shimmerProgress * 1000f, y = 0f),
-                        end = Offset(x = (shimmerProgress + 0.3f) * 1000f, y = 500f)
-                    )
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(shimmerBrush)
-                            .padding(horizontal = 24.dp)
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = "Color Intelligence\nHub", // Forced wrap to match image
-                                style = MaterialTheme.typography.headlineMedium,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Serif,
-                                color = Color(0xFF2C2420),
-                                lineHeight = 32.sp
-                            )
-                            Spacer(Modifier.height(4.dp))
-                            Text(
-                                text = "Spectral blueprint & chromatic DNA",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = Color.Gray,
-                                letterSpacing = 0.5.sp
-                            )
-                        }
-
-                        // Icon with Chromatic background circle on the RIGHT
-                        Box(
-                            modifier = Modifier
-                                .size(72.dp)
-                                .background(chromaticBrush, CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.ColorLens,
-                                contentDescription = null,
-                                tint = Color.White,
-                                modifier = Modifier.size(36.dp)
-                            )
-                        }
-                    }
-                }
             }
 
             item {
