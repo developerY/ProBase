@@ -1,5 +1,16 @@
 package com.zoewave.probase.kocolor.features.inventory.ui.landing
 
+
+import androidx.compose.animation.animateColor
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
@@ -66,7 +77,21 @@ fun WardrobInelCard(
     modifier: Modifier = Modifier
 ) {
     val currencyFormatter = remember { java.text.NumberFormat.getCurrencyInstance(java.util.Locale.US) }
+
+    val infiniteTransition = rememberInfiniteTransition(label = "IntelligenceIconAnimation")
+
+    val iconColor by infiniteTransition.animateColor(
+        initialValue = Color(0xFF6A1B9A), // Purple
+        targetValue = Color(0xFF1A1A1A), // Black
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1800, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "IconColorTransition"
+    )
+
     var isExpanded by remember { mutableStateOf(false) }
+
 
     Surface(
         modifier = modifier
@@ -165,7 +190,7 @@ fun WardrobInelCard(
                             Icon(
                                 imageVector = Icons.Default.Palette,
                                 contentDescription = "Explore Chromatic Blueprint",
-                                tint = Color(0xFF6A1B9A),
+                                tint = iconColor,
                                 modifier = Modifier.size(20.dp)
                             )
                         }
