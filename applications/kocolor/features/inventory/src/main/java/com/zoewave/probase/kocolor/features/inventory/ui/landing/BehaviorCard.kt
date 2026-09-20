@@ -1,5 +1,13 @@
  package com.zoewave.probase.kocolor.features.inventory.ui.landing
 
+
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
@@ -59,6 +67,20 @@ fun BehaviorCard(
     modifier: Modifier = Modifier
 ) {
     var isExpanded by remember { mutableStateOf(false) }
+
+    val infiniteTransition = rememberInfiniteTransition(label = "SyncRotationAnimation")
+    
+    // Smooth 360 rotation that pauses/slows down
+    val syncRotation by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 4000, easing = androidx.compose.animation.core.FastOutSlowInEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "SyncRotation"
+    )
+
     
     val circulation = if (analytics.totalItems > 0) ((analytics.activeItems.toFloat() / analytics.totalItems) * 100).toInt() else 0
 
@@ -160,7 +182,11 @@ fun BehaviorCard(
                                 imageVector = Icons.Default.Sync,
                                 contentDescription = "View Behavior",
                                 tint = Color(0xFFC62828),
-                                modifier = Modifier.size(20.dp)
+                                modifier = Modifier
+                                    .size(20.dp)
+                                    .graphicsLayer {
+                                        rotationZ = syncRotation
+                                    }
                             )
                         }
                     }
