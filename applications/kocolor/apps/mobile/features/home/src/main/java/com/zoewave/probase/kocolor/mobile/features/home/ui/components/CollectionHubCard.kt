@@ -191,7 +191,7 @@ fun CollectionHubCard(
                                 horizontalArrangement = Arrangement.Center
                             ) {
                                 Text(
-                                    text = "Hub Collection",
+                                    text = "Collection Hub",
                                     style = MaterialTheme.typography.displayMedium.copy(fontSize = 32.sp),
                                     fontFamily = FontFamily.Serif,
                                     fontWeight = FontWeight.Bold,

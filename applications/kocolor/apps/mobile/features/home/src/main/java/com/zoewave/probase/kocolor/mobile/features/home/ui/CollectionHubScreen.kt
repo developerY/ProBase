@@ -248,7 +248,7 @@ fun CollectionHubScreen(
 
                     ArchiveVerticalCard(
                         uiState = ArchiveVerticalUiState(
-                            title = "Wear",
+                            title = "Wardrobe",
                             count = uiState.totalClothing,
                             countLabel = "pieces",
                             valueLabel = "TOTAL CLOSET INVESTMENT",
