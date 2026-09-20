@@ -336,13 +336,6 @@ fun CosmeticsIntelCard(
                                 style = MaterialTheme.typography.bodySmall,
                                 color = Color.Gray
                             )
-                            Text(
-                                text = "EXPLORE CHROMATIC BLUEPRINT ->",
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.Black,
-                                modifier = Modifier.clickable { onViewFootprintClicked() }
-                            )
                         }
                     }
                 }
