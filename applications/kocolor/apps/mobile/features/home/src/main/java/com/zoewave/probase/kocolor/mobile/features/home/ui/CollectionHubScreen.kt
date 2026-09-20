@@ -2,6 +2,7 @@ package com.zoewave.probase.kocolor.mobile.features.home.ui
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -71,6 +72,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
@@ -474,7 +476,21 @@ private fun ArchiveVerticalCard(
     navTo: (KoColorRoute) -> Unit
 ) {
     val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale.getDefault()) }
+
+    val infiniteTransition = rememberInfiniteTransition(label = "HubActionPulseAnimation")
+
+    val pulseScale by infiniteTransition.animateFloat(
+        initialValue = 0.7f,
+        targetValue = 1.45f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1500, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "PulseScale"
+    )
+
     var isExpanded by remember { mutableStateOf(false) }
+
 
     Surface(
         modifier = modifier
@@ -575,7 +591,12 @@ private fun ArchiveVerticalCard(
                                                 imageVector = Icons.Default.Add,
                                                 contentDescription = "Add",
                                                 tint = Color.Black,
-                                                modifier = Modifier.size(14.dp)
+                                                modifier = Modifier
+                                                    .size(14.dp)
+                                                    .graphicsLayer {
+                                                        scaleX = pulseScale
+                                                        scaleY = pulseScale
+                                                    }
                                             )
                                         }
                                     }
