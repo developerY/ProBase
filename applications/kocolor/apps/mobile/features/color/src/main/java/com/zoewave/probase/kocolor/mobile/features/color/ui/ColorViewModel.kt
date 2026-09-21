@@ -31,7 +31,7 @@ class ColorViewModel @Inject constructor(
 ) : ViewModel() {
 
     val uiState: StateFlow<ColorUiState> = combine(
-        fashionRepository.getSavedSuggestions(),
+        fashionRepository.getCollectionSuggestions(),
         playlistRepository.observeLatestPlaylist()
     ) { suggestions, playlist ->
         ColorUiState(

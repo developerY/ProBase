@@ -61,8 +61,13 @@ class FashionRepository @Inject constructor(
         }
     }
 
-    fun getSavedSuggestions(): Flow<List<SavedAnalysis>> {
-        return savedSuggestionDao.getAllSuggestions()
+    fun getCollectionSuggestions(): Flow<List<SavedAnalysis>> {
+        return savedSuggestionDao.getSavedSuggestions()
+            .map { list -> list.map { it.toModel() } }
+    }
+
+    fun getBlueprintHistory(): Flow<List<SavedAnalysis>> {
+        return savedSuggestionDao.getUnsavedSuggestions()
             .map { list -> list.map { it.toModel() } }
             .catch { e ->
                 Log.e(TAG, "Error fetching saved suggestions", e)
@@ -79,9 +84,29 @@ class FashionRepository @Inject constructor(
         }
     }
 
+    suspend fun generatePrediction(advice: FashionAdvice) = withContext(Dispatchers.IO) {
+        try {
+            savedSuggestionDao.saveSuggestion(advice.toSavedSuggestionEntity().copy(isSavedToCollection = false))
+            savedSuggestionDao.trimUnsavedSuggestions()
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to generate prediction", e)
+        }
+    }
+
+    suspend fun savePredictionToCollection(id: Long) = withContext(Dispatchers.IO) {
+        try {
+            val entity = savedSuggestionDao.getSuggestionById(id)
+            if (entity != null) {
+                savedSuggestionDao.updateSuggestion(entity.copy(isSavedToCollection = true))
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to save prediction to collection", e)
+        }
+    }
+
     suspend fun saveSuggestion(advice: FashionAdvice) = withContext(Dispatchers.IO) {
         try {
-            savedSuggestionDao.saveSuggestion(advice.toSavedSuggestionEntity())
+            savedSuggestionDao.saveSuggestion(advice.toSavedSuggestionEntity().copy(isSavedToCollection = true))
         } catch (e: Exception) {
             Log.e(TAG, "Failed to save suggestion", e)
         }
