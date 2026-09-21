@@ -8,5 +8,6 @@ import com.zoewave.probase.core.model.ritual.FashionAdvice
 data class SavedSuggestionEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val timestamp: Long,
-    val advice: FashionAdvice
+    val advice: FashionAdvice,
+    val isSavedToCollection: Boolean = false
 )

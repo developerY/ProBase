@@ -85,7 +85,8 @@ data class FashionAdvice(
 data class SavedAnalysis(
     val id: Long,
     val timestamp: Long,
-    val advice: FashionAdvice
+    val advice: FashionAdvice,
+    val isSavedToCollection: Boolean = false
 )
 
 @Serializable

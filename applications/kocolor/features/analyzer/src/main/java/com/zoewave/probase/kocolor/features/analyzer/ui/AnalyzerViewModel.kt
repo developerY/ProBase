@@ -197,6 +197,7 @@ class AnalyzerViewModel @Inject constructor(
                     apiKey = apiKey,
                     modelName = modelName
                 )
+                fashionRepository.generatePrediction(result)
                 _analyzerState.value = AnalyzerUiState.Success(result)
             } catch (e: Exception) {
                 _analyzerState.value = AnalyzerUiState.Error("Analysis failed: ${e.localizedMessage}")

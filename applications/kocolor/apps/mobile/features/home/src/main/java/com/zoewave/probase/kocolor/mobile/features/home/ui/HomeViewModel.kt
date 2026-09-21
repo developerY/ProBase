@@ -141,7 +141,7 @@ class HomeViewModel @Inject constructor(
         _isStoreExpanded,
         atmosphericRepository.atmosphericState,
         getHealthSummaryUseCase(),
-        fashionRepository.getSavedSuggestions()
+        fashionRepository.getBlueprintHistory()
     ) { array ->
         val profile = array[0] as FashionProfile?
         val hydrationGoal = array[1] as Double

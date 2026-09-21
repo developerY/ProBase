@@ -51,6 +51,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
@@ -68,13 +69,12 @@ import com.zoewave.probase.core.model.ritual.FashionAdvice
 import com.zoewave.probase.core.model.ritual.SavedAnalysis
 import com.zoewave.probase.core.model.ritual.SeasonalType
 import com.zoewave.probase.core.model.ritual.Undertone
-import com.zoewave.probase.kocolor.mobile.features.color.R
 import com.zoewave.probase.kocolor.db.entity.PlaylistWithDays
+import com.zoewave.probase.kocolor.mobile.features.color.R
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import com.zoewave.probase.kocolor.model.playlist.DailyPlanStatus
 import java.text.SimpleDateFormat
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
 
@@ -191,15 +191,24 @@ fun ColorScreen(
 @Composable
 private fun StylePlaylistSummaryCard(
     playlist: PlaylistWithDays?,
+    isActive: Boolean = false, // 1. Add the state parameter
     onClick: () -> Unit
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() },
+            // 2. Fade the entire card to the standard M3 disabled opacity
+            .alpha(if (isActive) 1f else 0.47f)
+            // 3. Disable the click interaction and ripple effect
+            .clickable(
+                enabled = isActive,
+                onClick = { onClick() }
+            ),
         shape = RoundedCornerShape(28.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = if (isActive) 2.dp else 0.dp // Drop shadow removed when inactive
+        )
     ) {
         Column(modifier = Modifier.padding(24.dp)) {
             Row(
@@ -234,9 +243,10 @@ private fun StylePlaylistSummaryCard(
 
             if (playlist != null) {
                 val today = LocalDate.now()
+                // Assuming targetDate and status exist on your daily plan object
                 val todayPlan = playlist.dailyPlans.find { it.targetDate == today }
                 val completedCount = playlist.dailyPlans.count { it.status == DailyPlanStatus.COMMITTED }
-                
+
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = "$completedCount/7 DAYS COMPLETED",
@@ -245,9 +255,9 @@ private fun StylePlaylistSummaryCard(
                         color = Color.Gray
                     )
                 }
-                
+
                 Spacer(Modifier.height(8.dp))
-                
+
                 Text(
                     text = todayPlan?.rationale?.rotationReason ?: "Open to see your daily style recommendations.",
                     style = MaterialTheme.typography.bodyMedium,
@@ -272,7 +282,8 @@ private fun StylePlaylistSummaryCard(
             ) {
                 Box(modifier = Modifier.padding(12.dp), contentAlignment = Alignment.Center) {
                     Text(
-                        text = if (playlist != null) "VIEW FULL WEEK" else "START PLAN",
+                        //text = if (playlist != null) "VIEW FULL WEEK" else "START PLAN",
+                        text = "COMING SOON",
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold,
                         color = Color.Black
