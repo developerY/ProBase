@@ -317,12 +317,17 @@ class StarterPackRepository @Inject constructor(
                 "ACTIVEWEAR" -> ClothingCategory.ACTIVEWEAR
                 "DRESS" -> ClothingCategory.DRESSES
                 "ONE_PIECE" -> ClothingCategory.DRESSES
+                "ACCESSORY" -> ClothingCategory.ACCESSORIES
+                "BAG" -> ClothingCategory.ACCESSORIES
+                "HAT" -> ClothingCategory.ACCESSORIES
+                "JEWELRY" -> ClothingCategory.ACCESSORIES
                 else -> {
                     try {
                         ClothingCategory.valueOf(dto.macroCategory.uppercase())
                     } catch (e: Exception) {
                         // Fallback to macro if micro doesn't match
                         if (dto.macroCategory.uppercase() == "APPAREL") ClothingCategory.TOPS
+                        else if (dto.macroCategory.uppercase() == "ACCESSORIES" || dto.macroCategory.uppercase() == "ACCESSORY") ClothingCategory.ACCESSORIES
                         else ClothingCategory.OTHER
                     }
                 }

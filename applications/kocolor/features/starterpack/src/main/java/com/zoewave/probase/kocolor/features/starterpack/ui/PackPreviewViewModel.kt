@@ -91,6 +91,16 @@ class PackPreviewViewModel @Inject constructor(
         loadPackItems()
     }
 
+    private fun groupPackItem(item: PackItemDto): String {
+        return when (item.microCategory.uppercase()) {
+            "BAG", "HANDBAG", "PURSE" -> "BAGS"
+            "HAT", "CAP", "BEANIE" -> "HATS"
+            "JEWELRY", "RING", "NECKLACE", "EARRING" -> "JEWELRY"
+            "ACCESSORY", "BELT", "SCARF", "GLASSES", "SUNGLASSES" -> "ACCESSORIES"
+            else -> item.macroCategory.uppercase()
+        }
+    }
+
     private fun loadPackItems() {
         val currentPackId = packId ?: return
         
@@ -103,7 +113,7 @@ class PackPreviewViewModel @Inject constructor(
                     state.copy(
                         items = items, 
                         filteredItems = filtered,
-                        groupedItems = filtered.groupBy { it.macroCategory },
+                        groupedItems = filtered.groupBy { groupPackItem(it) },
                         isLoading = false,
                         selectedIds = if (state.targetItemId != null) setOf(state.targetItemId) else emptySet()
                     ) 
@@ -120,7 +130,7 @@ class PackPreviewViewModel @Inject constructor(
             state.copy(
                 searchQuery = query,
                 filteredItems = filtered,
-                groupedItems = filtered.groupBy { it.macroCategory }
+                groupedItems = filtered.groupBy { groupPackItem(it) }
             )
         }
     }
@@ -132,7 +142,7 @@ class PackPreviewViewModel @Inject constructor(
             state.copy(
                 sortByValue = newSort,
                 filteredItems = filtered,
-                groupedItems = filtered.groupBy { it.macroCategory }
+                groupedItems = filtered.groupBy { groupPackItem(it) }
             )
         }
     }
