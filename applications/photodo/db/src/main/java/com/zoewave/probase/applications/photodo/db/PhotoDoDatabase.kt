@@ -1,9 +1,8 @@
 package com.zoewave.probase.applications.photodo.db
 
-import androidx.room3.AutoMigration
+import androidx.room3.ColumnTypeConverters
 import androidx.room3.Database
 import androidx.room3.RoomDatabase
-import androidx.room3.ColumnTypeConverters
 import com.zoewave.probase.applications.photodo.db.converter.PhotoDoConverters
 import com.zoewave.probase.applications.photodo.db.entity.CategoryEntity
 import com.zoewave.probase.applications.photodo.db.entity.ExpenseEntity
@@ -21,13 +20,8 @@ import com.zoewave.probase.applications.photodo.db.entity.time.TimeLogEntity
         ExpenseEntity::class,
         TimeLogEntity::class
     ],
-    version = 4,
-    exportSchema = true,
-    autoMigrations = [
-        AutoMigration(from = 1, to = 2)
-        // Versions 3 and 4 were used for features now isolated into their own modules.
-        // We keep the version at 4 to maintain database compatibility.
-    ]
+    version = 1,
+    exportSchema = true
 )
 @ColumnTypeConverters(PhotoDoConverters::class)
 @Suppress("ROOM_MISSING_CONSTRUCTED_BY")

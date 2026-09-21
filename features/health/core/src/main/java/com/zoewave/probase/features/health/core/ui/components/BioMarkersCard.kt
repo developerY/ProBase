@@ -14,7 +14,6 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -52,12 +51,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -65,6 +67,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.zoewave.probase.features.health.core.R
 import com.zoewave.probase.features.health.core.SkinInsight
 
@@ -73,7 +76,8 @@ data class BioMarkersUiState(
     val sleepDuration: String? = null,
     val hydrationLiters: Double = 0.0,
     val hydrationGoalLiters: Double = 2.0,
-    val isPermissionGranted: Boolean = true
+    val isPermissionGranted: Boolean = true,
+    val backgroundModel: Any? = null
 )
 
 @Composable
@@ -140,6 +144,15 @@ fun BioMarkersCard(
             color = Color(0xFFEBF7F2) // Soft pastel mint/sky
         ) {
             Box(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
+                if (uiState.backgroundModel != null) {
+                    AsyncImage(
+                        model = uiState.backgroundModel,
+                        contentDescription = null,
+                        modifier = Modifier.matchParentSize().alpha(0.25f),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+                
                 // Background Gradient Wash
                 Box(
                     modifier = Modifier
@@ -147,9 +160,9 @@ fun BioMarkersCard(
                         .background(
                             brush = Brush.linearGradient(
                                 colors = listOf(
-                                    Color(0xFFF5EFFF), // Soft Lavender
-                                    Color(0xFFE0F2FF), // Soft Sky Blue
-                                    Color(0xFFE6F7ED)  // Soft Mint
+                                    Color(0xFFF5EFFF).copy(alpha = 0.34f), // Soft Lavender
+                                    Color(0xFFE0F2FF).copy(alpha = 0.34f), // Soft Sky Blue
+                                    Color(0xFFE6F7ED).copy(alpha = 0.34f)  // Soft Mint
                                 )
                             )
                         )
@@ -448,7 +461,8 @@ private fun BioMarkersCardPreview() {
                     sleepDuration = "7h 12m",
                     hydrationLiters = 1.2,
                     hydrationGoalLiters = 2.7,
-                    isPermissionGranted = true
+                    isPermissionGranted = true,
+                    backgroundModel = R.drawable.kocolor_runner
                 ),
                 onClick = {},
                 onGrantPermissionsClick = {}

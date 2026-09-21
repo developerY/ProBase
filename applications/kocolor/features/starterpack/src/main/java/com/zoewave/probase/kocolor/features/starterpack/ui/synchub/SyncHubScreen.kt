@@ -64,7 +64,7 @@ fun SyncHubScreen(
         val baseFiltered = if (filter.isNullOrBlank()) {
             uiState.availablePacks
         } else {
-            val fashionKeywords = listOf("fashion", "top", "bottom", "skirt", "pants", "shoes", "sneakers", "boots", "outerwear", "active", "dress")
+            val fashionKeywords = listOf("fashion", "top", "bottom", "skirt", "pants", "shoes", "sneakers", "boots", "outerwear", "active", "dress", "accessory", "bag", "hat")
             if (filter.lowercase() == "clothing") {
                 uiState.availablePacks.filter { pack -> 
                     fashionKeywords.any { pack.id.lowercase().contains(it) || pack.name.lowercase().contains(it) } || pack.id == "com.kocolor.pack.fashion.complete"
@@ -104,6 +104,10 @@ fun SyncHubScreen(
                 "OUTERWEAR" -> listOf("outerwear", "coat", "blazer", "jacket", "vest", "duster", "puffer")
                 "ACTIVEWEAR" -> listOf("active", "hoodie", "leggings", "bra", "tank", "shorts")
                 "SHOES" -> listOf("shoes", "boots", "flats", "heels", "sandals", "sneakers")
+                "BAGS" -> listOf("bag", "handbag", "purse", "backpack", "clutch", "tote")
+                "HATS" -> listOf("hat", "cap", "beanie", "fedora", "beret", "headwear")
+                "JEWELRY" -> listOf("jewelry", "ring", "necklace", "earring", "bracelet")
+                "ACCESSORIES" -> listOf("accessory", "glasses", "sunglasses", "belt", "scarf", "glove")
                 else -> listOf(uiState.selectedCategory.lowercase())
             }
             
@@ -207,15 +211,21 @@ fun SyncHubScreen(
                         val categoryProgress = remember(filter, isFullPackInstalled, uiState.ownedProductIds) {
                             if (filter?.lowercase() == "clothing") {
                                 val ownedMap = if (isFullPackInstalled) {
-                                    mapOf("TOPS" to 16, "BOTS" to 9, "DRESS" to 8, "OUTER" to 7, "ACTIVE" to 7, "SHOES" to 7)
+                                    mapOf("TOPS" to 16, "BOTS" to 9, "DRESS" to 8, "OUTER" to 7, "ACTIVE" to 7, "SHOES" to 7, "BAGS" to 3, "HATS" to 2, "JEWELRY" to 3, "ACC." to 2)
                                 } else {
+                                    if (uiState.ownedProductIds.isEmpty()) emptyMap()
+                                    else
                                     mapOf(
                                         "TOPS" to uiState.ownedProductIds.count { it.contains("top", true) || it.contains("shirt", true) },
-                                        "BOTS" to uiState.ownedProductIds.count { it.contains("bot", true) || it.contains("pant", true) },
-                                        "DRESS" to uiState.ownedProductIds.count { it.contains("dress", true) },
-                                        "OUTER" to uiState.ownedProductIds.count { it.contains("outer", true) || it.contains("jacket", true) },
-                                        "ACTIVE" to uiState.ownedProductIds.count { it.contains("active", true) },
-                                        "SHOES" to uiState.ownedProductIds.count { it.contains("shoe", true) || it.contains("boot", true) }
+                                        "BOTS" to uiState.ownedProductIds.count { it.contains("bot", true) || it.contains("pant", true) || it.contains("trouser", true) },
+                                        "DRESS" to uiState.ownedProductIds.count { it.contains("dress", true) || it.contains("jumpsuit", true) },
+                                        "OUTER" to uiState.ownedProductIds.count { it.contains("outer", true) || it.contains("jacket", true) || it.contains("coat", true) },
+                                        "ACTIVE" to uiState.ownedProductIds.count { it.contains("active", true) || it.contains("sport", true) },
+                                        "SHOES" to uiState.ownedProductIds.count { it.contains("shoe", true) || it.contains("boot", true) || it.contains("sneaker", true) },
+                                        "BAGS" to uiState.ownedProductIds.count { it.contains("bag", true) || it.contains("handbag", true) },
+                                        "HATS" to uiState.ownedProductIds.count { it.contains("hat", true) || it.contains("cap", true) },
+                                        "JEWELRY" to uiState.ownedProductIds.count { it.contains("jewelry", true) || it.contains("ring", true) || it.contains("necklace", true) },
+                                        "ACC." to uiState.ownedProductIds.count { it.contains("accessory", true) || it.contains("belt", true) || it.contains("scarf", true) || it.contains("glasses", true) }
                                     )
                                 }
 
@@ -225,7 +235,11 @@ fun SyncHubScreen(
                                     CategoryProgressItem("DRESS", ownedMap["DRESS"] ?: 0, 8, Color(0xFF8B263E)),
                                     CategoryProgressItem("OUTER", ownedMap["OUTER"] ?: 0, 7, Color(0xFF8D5B4C)),
                                     CategoryProgressItem("ACTIVE", ownedMap["ACTIVE"] ?: 0, 7, Color(0xFFD4AF37)),
-                                    CategoryProgressItem("SHOES", ownedMap["SHOES"] ?: 0, 7, Color(0xFF774936))
+                                    CategoryProgressItem("SHOES", ownedMap["SHOES"] ?: 0, 7, Color(0xFF774936)),
+                                    CategoryProgressItem("BAGS", ownedMap["BAGS"] ?: 0, 3, Color(0xFF8E24AA)),
+                                    CategoryProgressItem("HATS", ownedMap["HATS"] ?: 0, 2, Color(0xFF009688)),
+                                    CategoryProgressItem("JEWELRY", ownedMap["JEWELRY"] ?: 0, 3, Color(0xFFFF9800)),
+                                    CategoryProgressItem("ACC.", ownedMap["ACC."] ?: 0, 2, Color(0xFF8B5A82))
                                 )
                             } else {
                                 val ownedMap = if (isFullPackInstalled) {
@@ -283,7 +297,7 @@ fun SyncHubScreen(
             if (!showHero) {
                 item {
                     val categories = if (filter?.lowercase() == "clothing") {
-                        listOf("ALL", "TOPS", "BOTTOMS", "DRESSES", "OUTERWEAR", "ACTIVEWEAR", "SHOES")
+                        listOf("ALL", "TOPS", "BOTTOMS", "DRESSES", "OUTERWEAR", "ACTIVEWEAR", "SHOES", "BAGS", "HATS", "JEWELRY", "ACCESSORIES")
                     } else {
                         listOf("ALL", "LIPS", "COMPLEXION", "DIMENSION", "EYES", "PREP", "HAIR", "HYGIENE", "ORAL", "FRAGRANCE", "TOOLS", "GROOMING", "NAILS")
                     }

@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 enum class ClothingCategory {
-    TOPS, BOTTOMS, SHOES, DRESSES, OUTERWEAR, ACTIVEWEAR, ACCESSORIES, OTHER;
+    TOPS, BOTTOMS, SHOES, DRESSES, OUTERWEAR, ACTIVEWEAR, BAGS, HATS, JEWELRY, ACCESSORIES, OTHER;
 
     val displayName: String
         get() = when (this) {
@@ -14,6 +14,9 @@ enum class ClothingCategory {
             DRESSES -> "Dresses"
             OUTERWEAR -> "Outerwear"
             ACTIVEWEAR -> "Activewear"
+            BAGS -> "Bags"
+            HATS -> "Hats"
+            JEWELRY -> "Jewelry"
             ACCESSORIES -> "Accessories"
             OTHER -> "Other"
         }
@@ -26,6 +29,9 @@ enum class ClothingCategory {
             DRESSES -> "Standalone high-impact silhouettes for full-body expression."
             OUTERWEAR -> "Tailored layering pieces for protection and statement."
             ACTIVEWEAR -> "High-performance gear for movement and transition."
+            BAGS -> "Functional luxury carriers for daily essentials."
+            HATS -> "Expressive headwear framing your facial features."
+            JEWELRY -> "Precious metallic accents to highlight your undertones."
             ACCESSORIES -> "Curated enhancements to amplify your style DNA."
             OTHER -> "Miscellaneous archive entries."
         }

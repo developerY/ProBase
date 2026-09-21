@@ -82,12 +82,24 @@ import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.gra
 import com.zoewave.probase.kocolor.mobile.features.home.R
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
+
+data class CollectionDetailUiState(
+    val analysis: SavedAnalysis
+)
+
+sealed interface CollectionDetailEvent {
+    object Dismiss : CollectionDetailEvent
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CollectionDetailScreen(
-    analysis: SavedAnalysis,
-    navTo: (KoColorRoute) -> Unit
+    uiState: CollectionDetailUiState,
+    onEvent: (CollectionDetailEvent) -> Unit,
+    navTo: (KoColorRoute) -> Unit,
+    modifier: Modifier = Modifier
 ) {
+    val analysis = uiState.analysis
     val advice = analysis.advice
     var expandedSections by remember { mutableStateOf(setOf("BLUEPRINT")) }
     var isMagnified by remember { mutableStateOf(false) }
@@ -113,6 +125,7 @@ fun CollectionDetailScreen(
         ?: R.drawable.advice_clothes_fallback
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text("Atelier", style = MaterialTheme.typography.titleLarge, fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold) },
@@ -617,7 +630,7 @@ private fun VerticalCollectionItem(
 private fun CollectionDetailScreenPreview() {
     MaterialTheme {
         CollectionDetailScreen(
-            analysis = SavedAnalysis(
+            uiState = CollectionDetailUiState(SavedAnalysis(
                 id = 1,
                 timestamp = System.currentTimeMillis(),
                 advice = FashionAdvice(
@@ -629,7 +642,8 @@ private fun CollectionDetailScreenPreview() {
                     outfitSuggestions = listOf(OutfitSuggestion("Occasion", "Advice", listOf("Piece"), listOf("#000000"))),
                     recommendedPalette = listOf("#F3E5AB", "#8B4513", "#2C2C2C", "#EBC7B3")
                 )
-            ),
+            )),
+            onEvent = {},
             navTo = {}
         )
     }

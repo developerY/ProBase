@@ -189,7 +189,8 @@ fun koColorNavEntryProvider(
             val analysis = state.savedSuggestions.find { it.id == route.collectionId }
             if (analysis != null) {
                 CollectionDetailScreen(
-                    analysis = analysis,
+                    uiState = com.zoewave.probase.kocolor.mobile.features.home.ui.CollectionDetailUiState(analysis),
+                    onEvent = {},
                     navTo = onNavigateTo
                 )
             }

@@ -1,8 +1,8 @@
 package com.zoewave.probase.kocolor.db
 
+import androidx.room3.ColumnTypeConverters
 import androidx.room3.Database
 import androidx.room3.RoomDatabase
-import androidx.room3.ColumnTypeConverters
 import androidx.room3.Transaction
 import com.zoewave.probase.kocolor.db.converter.FashionConverters
 import com.zoewave.probase.kocolor.db.converter.KoColorTypeConverters
@@ -49,7 +49,7 @@ import com.zoewave.probase.kocolor.model.playlist.PlaylistStatus
         StylePlaylistEntity::class,
         DailyStylePlanEntity::class
     ],
-    version = 3,
+    version = 1,
     exportSchema = false
 )
 @ColumnTypeConverters(FashionConverters::class, KoColorTypeConverters::class)

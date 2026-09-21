@@ -3,7 +3,6 @@ package com.zoewave.probase.features.health.core.ui.components
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
@@ -14,7 +13,6 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -54,6 +52,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
@@ -259,7 +258,7 @@ fun BioRoutineSummaryCard(
 
                 // Collapsible Content (Badge, Progress Ring & Description)
                 AnimatedVisibility(
-                    visible = isExpanded || showRitualActiveHeader,
+                    visible = isExpanded,
                     enter = fadeIn() + expandVertically(),
                     exit = fadeOut() + shrinkVertically()
                 ) {
@@ -345,7 +344,9 @@ private fun BioRoutineSummaryCardPreview() {
                     title = "Meals Ritual",
                     description = "Nourish your metabolism with precise biochemical timing.",
                     completedCount = 0,
-                    totalCount = 5
+                    totalCount = 5,
+                    // ADD THIS LINE:
+                    backgroundModel = R.drawable.kocolor_runner
                 ),
                 onClick = {},
                 onLayersClick = {}

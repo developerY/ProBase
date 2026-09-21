@@ -150,7 +150,8 @@ fun HomeScreen(
                         sleepDuration = uiState.lastNightSleepDuration,
                         hydrationLiters = uiState.hydrationLiters,
                         hydrationGoalLiters = uiState.hydrationGoalLiters,
-                        isPermissionGranted = uiState.isHealthPermissionGranted
+                        isPermissionGranted = uiState.isHealthPermissionGranted,
+                        backgroundModel = com.zoewave.probase.features.health.core.R.drawable.kocolor_runner
                     ),
                     modifier = Modifier.fillMaxWidth(),
                     onClick = { navTo(KoColorRoute.Health) },
