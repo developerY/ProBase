@@ -239,10 +239,16 @@ fun WardrobeTaxonomyDialog(
                             title = stringResource(R.string.applications_kocolor_features_inventory_verticals_title),
                             description = stringResource(R.string.applications_kocolor_features_inventory_verticals_desc),
                             items = listOf(
-                                "Tops" to "Blazers, Shirts, Knitwear.",
-                                "Bottoms" to "Trousers, Skirts, Denim.",
-                                "Shoes" to "Heels, Flats, Sneakers.",
-                                "Accessories" to "Bags, Belts, Jewelry."
+                                "Tops" to "Blazers, Shirts, Knitwear, Tees.",
+                                "Bottoms" to "Trousers, Skirts, Denim, Slacks.",
+                                "Shoes" to "Heels, Flats, Sneakers, Boots.",
+                                "Dresses" to "Standalone full-body silhouettes.",
+                                "Outerwear" to "Coats, Jackets, Vests, Dusters.",
+                                "Activewear" to "Performance tops, leggings, bras.",
+                                "Bags" to "Handbags, Clutches, Totes, Backpacks.",
+                                "Hats" to "Caps, Beanies, Fedoras, Berets.",
+                                "Jewelry" to "Necklaces, Rings, Earrings, Bracelets.",
+                                "Accessories" to "Belts, Scarves, Sunglasses, Gloves."
                             )
                         ),
                         onEvent = {},

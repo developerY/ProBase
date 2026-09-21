@@ -9,7 +9,7 @@ import com.google.firebase.appcheck.playintegrity.PlayIntegrityAppCheckProviderF
 
 object AppCheckInitializer {
     fun initialize(context: Context) {
-        // 1. Always use application context to prevent Activity leaks
+        // 1. Lifecycle Safety: Always use application context so Firebase does not retain an Activity context
         val appContext = context.applicationContext
         val testing = true
 
@@ -20,7 +20,7 @@ object AppCheckInitializer {
                 Build.MODEL.contains("Emulator") ||
                 Build.MODEL.contains("Android SDK built for x86")
 
-        // 3. Emulators use Debug Provider, Physical devices ALWAYS use Play Integrity
+        // 3. DEBUG -> Debug App Check Provider, RELEASE -> Play Integrity App Check Provider
         val providerFactory = if (BuildConfig.DEBUG && isEmulator || testing) {
             DebugAppCheckProviderFactory.getInstance()
         } else {

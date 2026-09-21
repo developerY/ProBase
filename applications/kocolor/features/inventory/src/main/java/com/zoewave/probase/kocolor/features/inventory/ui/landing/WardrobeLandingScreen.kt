@@ -253,6 +253,9 @@ fun WardrobeLandingScreen(
                             "Activewear" to (Color(0xFFFDEEF4) to R.drawable.wardrobe_accessories),
                             "Dresses" to (Color(0xFFF5F2F8) to R.drawable.tops),
                             "Shoes" to (Color(0xFFE8F1FD) to R.drawable.wardrobe_shoes),
+                            "Bags" to (Color(0xFFFCE4EC) to R.drawable.wardrobe_accessories),
+                            "Hats" to (Color(0xFFE0F2F1) to R.drawable.wardrobe_accessories),
+                            "Jewelry" to (Color(0xFFFFF8E1) to R.drawable.wardrobe_accessories),
                             "Accessories" to (Color(0xFFF3EBFD) to R.drawable.wardrobe_accessories)
                         )
 

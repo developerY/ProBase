@@ -50,6 +50,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import coil.compose.AsyncImage
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -73,7 +76,8 @@ data class BioMarkersUiState(
     val sleepDuration: String? = null,
     val hydrationLiters: Double = 0.0,
     val hydrationGoalLiters: Double = 2.0,
-    val isPermissionGranted: Boolean = true
+    val isPermissionGranted: Boolean = true,
+    val backgroundModel: Any? = null
 )
 
 @Composable
@@ -140,6 +144,14 @@ fun BioMarkersCard(
             color = Color(0xFFEBF7F2) // Soft pastel mint/sky
         ) {
             Box(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
+                if (uiState.backgroundModel != null) {
+                    AsyncImage(
+                        model = uiState.backgroundModel,
+                        contentDescription = null,
+                        modifier = Modifier.matchParentSize().alpha(0.35f),
+                        contentScale = ContentScale.Crop
+                    )
+                }
                 // Background Gradient Wash
                 Box(
                     modifier = Modifier
@@ -448,7 +460,8 @@ private fun BioMarkersCardPreview() {
                     sleepDuration = "7h 12m",
                     hydrationLiters = 1.2,
                     hydrationGoalLiters = 2.7,
-                    isPermissionGranted = true
+                    isPermissionGranted = true,
+                    backgroundModel = R.drawable.kocolor_runner
                 ),
                 onClick = {},
                 onGrantPermissionsClick = {}
