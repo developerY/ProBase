@@ -31,6 +31,7 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Storefront
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -78,12 +79,12 @@ import com.zoewave.probase.core.model.ritual.Finish
 import com.zoewave.probase.core.model.ritual.Formulation
 import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.core.model.ritual.MicroCategory
-import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
-import com.zoewave.probase.features.camera.productcapture.ui.DiscoveryStatusScreen
-import com.zoewave.probase.features.graphics.colorpicker.ui.ColorPickerDialog
 import com.zoewave.probase.core.ui.util.isColorDark
 import com.zoewave.probase.core.ui.util.parseColor
 import com.zoewave.probase.core.ui.util.toHex
+import com.zoewave.probase.features.camera.productcapture.ui.DiscoveryStatusScreen
+import com.zoewave.probase.features.graphics.colorpicker.ui.ColorPickerDialog
+import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
 import com.zoewave.probase.kocolor.features.cosmetics.R
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.AtelierExpandableSection
 import com.zoewave.probase.kocolor.model.KoColorRoute
@@ -415,6 +416,14 @@ fun StitchProductBuilder(
                     icon = Icons.Default.PhotoCamera,
                     color = Color(0xFFf472b6),
                     onClick = { navTo(KoColorRoute.BoxCapture(mode = "PRODUCT")) },
+                    modifier = Modifier.weight(1f)
+                )
+                CaptureButton(
+                    title = "Store Catalog",
+                    subtitle = "Search OBF",
+                    icon = Icons.Default.Storefront,
+                    color = Color(0xFF10b981),
+                    onClick = { navTo(KoColorRoute.StarterPack(filter = "cosmetics")) },
                     modifier = Modifier.weight(1f)
                 )
             }

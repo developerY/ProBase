@@ -11,7 +11,7 @@ object AppCheckInitializer {
     fun initialize(context: Context) {
         // 1. Lifecycle Safety: Always use application context so Firebase does not retain an Activity context
         val appContext = context.applicationContext
-        val testing = true
+        // val testing = true
 
         // 2. Identify if the current device is an Android Emulator
         val isEmulator = Build.FINGERPRINT.contains("generic") ||
@@ -21,7 +21,7 @@ object AppCheckInitializer {
                 Build.MODEL.contains("Android SDK built for x86")
 
         // 3. DEBUG -> Debug App Check Provider, RELEASE -> Play Integrity App Check Provider
-        val providerFactory = if (BuildConfig.DEBUG && isEmulator || testing) {
+        val providerFactory = if (BuildConfig.DEBUG && isEmulator) {
             DebugAppCheckProviderFactory.getInstance()
         } else {
             // Note: For physical debug builds to work, ensure your local debug.keystore

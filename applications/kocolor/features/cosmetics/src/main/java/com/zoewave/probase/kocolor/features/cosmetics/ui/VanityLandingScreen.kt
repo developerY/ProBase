@@ -90,6 +90,7 @@ fun VanityLandingScreen(
     navTo: (KoColorRoute) -> Unit
 ) {
     var showTaxonomyInfo by remember { mutableStateOf(false) }
+    var showAddBottomSheet by remember { mutableStateOf(false) }
 
     // --- Shimmer Animation Logic ---
     val infiniteTransition = rememberInfiniteTransition(label = "shimmer")
@@ -137,7 +138,7 @@ fun VanityLandingScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { navTo(KoColorRoute.StarterPack(filter = "cosmetics")) },
+                onClick = { showAddBottomSheet = true },
                 containerColor = Color(0xFF5A3854), // Dark Plum matching image
                 contentColor = Color.White,
                 shape = CircleShape,
@@ -231,16 +232,18 @@ fun VanityLandingScreen(
                     
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         val sections = listOf(
-                            "Skincare & Prep" to (Color(0xFFF7F2EB) to R.drawable.vanity_skincare),
+                            "Skincare" to (Color(0xFFF7F2EB) to R.drawable.vanity_skincare),
                             "Complexion" to (Color(0xFFF9F6F0) to R.drawable.vanity_complexion),
-                            "Color & Dimension" to (Color(0xFFFDEEF4) to R.drawable.vanity_color),
-                            "Eyes & Brows" to (Color(0xFFE8F1FD) to R.drawable.vanity_eyes),
+                            "Color" to (Color(0xFFFDEEF4) to R.drawable.vanity_color),
+                            "Eyes" to (Color(0xFFE8F1FD) to R.drawable.vanity_eyes),
                             "Lips" to (Color(0xFFFEECEB) to R.drawable.vanity_lips)
                         )
                         
                         sections.forEach { (name, props) ->
                             val (bgColor, fallbackImage) = props
-                            val metadata = uiState.categoriesMetadata.entries.find { it.key.contains(name, ignoreCase = true) }?.value
+                            val metadata = uiState.categoriesMetadata.entries.find { 
+                                name.contains(it.key, ignoreCase = true) || it.key.contains(name.split(" ").first(), ignoreCase = true)
+                            }?.value
                             VanityCategoryCard(
                                 uiState = VanityCategoryUiState(
                                     name = name,
@@ -288,6 +291,16 @@ fun VanityLandingScreen(
                     }
                 }
             }
+        }
+        
+        if (showAddBottomSheet) {
+            com.zoewave.probase.kocolor.features.cosmetics.ui.components.AddProductBottomSheet(
+                onDismiss = { showAddBottomSheet = false },
+                onBarcodeScan = { navTo(KoColorRoute.BarcodeScanner) },
+                onProductScan = { navTo(KoColorRoute.BoxCapture(mode = "PRODUCT")) },
+                onBoxScan = { navTo(KoColorRoute.BoxCapture(mode = "BOX")) },
+                onStoreCatalog = { navTo(KoColorRoute.StarterPack(filter = "cosmetics")) }
+            )
         }
     }
 }

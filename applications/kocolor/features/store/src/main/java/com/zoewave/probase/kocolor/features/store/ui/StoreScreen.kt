@@ -306,7 +306,7 @@ fun StoreScreen(
                         contentPadding = PaddingValues(horizontal = 16.dp),
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        items(cosmeticItems) { item ->
+                        items(cosmeticItems.take(7)) { item ->
                             ProductCard(
                                 item = item,
                                 onClick = { navTo(KoColorRoute.PackPreview(packId = item.id)) },
@@ -390,7 +390,7 @@ fun StoreScreen(
                         contentPadding = PaddingValues(horizontal = 16.dp),
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        items(fashionItems) { item ->
+                        items(fashionItems.take(7)) { item ->
                             ProductCard(
                                 item = item,
                                 onClick = { navTo(KoColorRoute.PackPreview(packId = item.id)) },

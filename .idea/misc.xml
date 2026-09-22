@@ -13,8 +13,8 @@
       <file path="$PROJECT_DIR$/applications/kocolor/scripts" />
       <file path="$PROJECT_DIR$/applications/rxlogic/docs" />
       <file path="$PROJECT_DIR$/build-logic/docs" />
-      <file path="$PROJECT_DIR$/features/health/core/src/main/res/Orig" />
       <file path="$PROJECT_DIR$/features/health/docs" />
+      <file path="$PROJECT_DIR$/features/health/docs/GenAI/Orig" />
       <file path="$PROJECT_DIR$/features/health/hydration/docs" />
       <file path="$PROJECT_DIR$/features/payment/Docs" />
       <file path="$PROJECT_DIR$/features/weather/docs" />

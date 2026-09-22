@@ -91,6 +91,8 @@ fun WardrobeLandingScreen(
     onEvent: (WardrobeEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
+    var showAddBottomSheet by remember { mutableStateOf(false) }
+    
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -127,7 +129,7 @@ fun WardrobeLandingScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { navTo(KoColorRoute.StarterPack(filter = "clothing")) },
+                onClick = { showAddBottomSheet = true },
                 containerColor = Color(0xFF5A3854), // Dark Plum matching image
                 contentColor = Color.White,
                 shape = CircleShape,
