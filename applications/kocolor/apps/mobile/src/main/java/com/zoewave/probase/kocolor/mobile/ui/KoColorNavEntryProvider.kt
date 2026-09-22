@@ -56,8 +56,8 @@ import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeCategoryCoverSc
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeCategoryCoverUiState
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeDetailScreen
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeDetailUiState
-import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeEditScreen
-import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeEditUiState
+import com.zoewave.probase.kocolor.features.inventory.ui.management.WardrobeEditScreen
+import com.zoewave.probase.kocolor.features.inventory.ui.management.WardrobeEditUiState
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeEvent
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeRoute
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeViewModel
