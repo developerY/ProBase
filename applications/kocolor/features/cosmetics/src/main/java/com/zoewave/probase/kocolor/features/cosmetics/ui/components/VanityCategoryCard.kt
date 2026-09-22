@@ -81,7 +81,7 @@ fun VanityCategoryCard(
     val description = metadata?.description ?: when {
         name.contains("Skincare", ignoreCase = true) -> stringResource(R.string.applications_kocolor_features_cosmetics_desc_skincare)
         name.contains("Complexion", ignoreCase = true) -> stringResource(R.string.applications_kocolor_features_cosmetics_desc_complexion)
-        name.contains("Dimension", ignoreCase = true) -> stringResource(R.string.applications_kocolor_features_cosmetics_desc_dimension)
+        name.contains("Dimension", ignoreCase = true) || name.contains("Color", ignoreCase = true) -> stringResource(R.string.applications_kocolor_features_cosmetics_desc_dimension)
         name.contains("Eyes", ignoreCase = true) -> stringResource(R.string.applications_kocolor_features_cosmetics_desc_eyes)
         name.contains("Lips", ignoreCase = true) -> stringResource(R.string.applications_kocolor_features_cosmetics_desc_lips)
         else -> stringResource(R.string.applications_kocolor_features_cosmetics_desc_default)
