@@ -92,12 +92,29 @@ class PackPreviewViewModel @Inject constructor(
     }
 
     private fun groupPackItem(item: PackItemDto): String {
-        return when (item.microCategory.uppercase()) {
-            "BAG", "HANDBAG", "PURSE" -> "BAGS"
-            "HAT", "CAP", "BEANIE" -> "HATS"
-            "JEWELRY", "RING", "NECKLACE", "EARRING" -> "JEWELRY"
-            "ACCESSORY", "BELT", "SCARF", "GLASSES", "SUNGLASSES" -> "ACCESSORIES"
-            else -> item.macroCategory.uppercase()
+        val micro = item.microCategory.uppercase()
+        val macro = item.macroCategory.uppercase()
+        
+        return if (macro == "APPAREL") {
+            when {
+                micro in listOf("SHIRT", "TOP", "BLOUSE", "TEE", "SWEATER", "KNITWEAR", "CAMISOLE", "TURTLENECK") -> "TOPS"
+                micro in listOf("PANTS", "BOTTOMS", "TROUSERS", "SKIRT", "DENIM", "SLACKS", "CULOTTES", "LEGGINGS") -> "BOTTOMS"
+                micro in listOf("SHOES", "BOOTS", "FLATS", "HEELS", "SANDALS", "SNEAKERS", "SHOE") -> "SHOES"
+                micro in listOf("DRESS", "ONE_PIECE", "JUMPSUIT", "SLIP") -> "DRESSES"
+                micro in listOf("OUTERWEAR", "COAT", "BLAZER", "JACKET", "VEST", "DUSTER", "PUFFER") -> "OUTERWEAR"
+                micro in listOf("ACTIVEWEAR", "ACTIVE", "HOODIE", "BRA", "TANK", "SHORTS", "SPORT") -> "ACTIVEWEAR"
+                micro in listOf("BAG", "HANDBAG", "PURSE", "BACKPACK", "CLUTCH", "TOTE") -> "BAGS"
+                micro in listOf("HAT", "CAP", "BEANIE", "FEDORA", "BERET", "HEADWEAR") -> "HATS"
+                micro in listOf("JEWELRY", "RING", "NECKLACE", "EARRING", "BRACELET") -> "JEWELRY"
+                micro in listOf("ACCESSORY", "BELT", "SCARF", "GLASSES", "SUNGLASSES", "GLOVE") -> "ACCESSORIES"
+                // Fallback heuristic based on name if micro is generic
+                item.name.contains("Bra", ignoreCase = true) || item.name.contains("Leggings", ignoreCase = true) || item.name.contains("Hoodie", ignoreCase = true) -> "ACTIVEWEAR"
+                item.name.contains("Skirt", ignoreCase = true) || item.name.contains("Pants", ignoreCase = true) -> "BOTTOMS"
+                item.name.contains("Dress", ignoreCase = true) -> "DRESSES"
+                else -> "TOPS" // Default fallback for apparel if unmapped
+            }
+        } else {
+            macro
         }
     }
 
