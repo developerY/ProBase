@@ -90,6 +90,7 @@ fun VanityLandingScreen(
     navTo: (KoColorRoute) -> Unit
 ) {
     var showTaxonomyInfo by remember { mutableStateOf(false) }
+    var showAddBottomSheet by remember { mutableStateOf(false) }
 
     // --- Shimmer Animation Logic ---
     val infiniteTransition = rememberInfiniteTransition(label = "shimmer")
@@ -137,7 +138,7 @@ fun VanityLandingScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { navTo(KoColorRoute.StarterPack(filter = "cosmetics")) },
+                onClick = { showAddBottomSheet = true },
                 containerColor = Color(0xFF5A3854), // Dark Plum matching image
                 contentColor = Color.White,
                 shape = CircleShape,
@@ -290,6 +291,16 @@ fun VanityLandingScreen(
                     }
                 }
             }
+        }
+        
+        if (showAddBottomSheet) {
+            com.zoewave.probase.kocolor.features.cosmetics.ui.components.AddProductBottomSheet(
+                onDismiss = { showAddBottomSheet = false },
+                onBarcodeScan = { navTo(KoColorRoute.BarcodeScanner) },
+                onProductScan = { navTo(KoColorRoute.BoxCapture(mode = "PRODUCT")) },
+                onBoxScan = { navTo(KoColorRoute.BoxCapture(mode = "BOX")) },
+                onStoreCatalog = { navTo(KoColorRoute.StarterPack(filter = "cosmetics")) }
+            )
         }
     }
 }
