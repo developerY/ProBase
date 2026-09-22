@@ -322,5 +322,15 @@ fun WardrobeLandingScreen(
                 }
             }
         }
+        
+        if (showAddBottomSheet) {
+            AddProductBottomSheet(
+                onDismiss = { showAddBottomSheet = false },
+                onBarcodeScan = { navTo(KoColorRoute.BarcodeScanner) },
+                onProductScan = { navTo(KoColorRoute.ClothingCapture) },
+                onBoxScan = { navTo(KoColorRoute.ClothingCapture) },
+                onStoreCatalog = { navTo(KoColorRoute.StarterPack(filter = "clothing")) }
+            )
+        }
     }
 }
