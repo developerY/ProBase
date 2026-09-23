@@ -26,14 +26,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -60,6 +57,7 @@ import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.core.model.ritual.MicroCategory
 import com.zoewave.probase.kocolor.features.cosmetics.R
+import com.zoewave.probase.kocolor.features.cosmetics.ui.components.KoColorFabMenu
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.ProfessionalTaxonomyDialog
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.RecentProductCard
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.VanityCategoryCard
@@ -91,6 +89,7 @@ fun VanityLandingScreen(
 ) {
     var showTaxonomyInfo by remember { mutableStateOf(false) }
     var showAddBottomSheet by remember { mutableStateOf(false) }
+    var isFabMenuExpanded by remember { mutableStateOf(false) }
 
     // --- Shimmer Animation Logic ---
     val infiniteTransition = rememberInfiniteTransition(label = "shimmer")
@@ -137,15 +136,13 @@ fun VanityLandingScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = { showAddBottomSheet = true },
-                containerColor = Color(0xFF5A3854), // Dark Plum matching image
-                contentColor = Color.White,
-                shape = CircleShape,
-                elevation = FloatingActionButtonDefaults.elevation(8.dp)
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Discover Collections")
-            }
+            KoColorFabMenu(
+                expanded = isFabMenuExpanded,
+                onToggle = { isFabMenuExpanded = !isFabMenuExpanded },
+                onBarcodeClick = { navTo(KoColorRoute.BarcodeScanner) },
+                onCameraClick = { navTo(KoColorRoute.BoxCapture(mode = "PRODUCT")) },
+                onMoreOptionsClick = { showAddBottomSheet = true }
+            )
         },
         modifier = modifier
     ) { padding ->
