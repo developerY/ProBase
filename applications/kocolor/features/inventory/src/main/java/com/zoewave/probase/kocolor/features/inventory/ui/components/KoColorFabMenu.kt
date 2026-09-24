@@ -15,9 +15,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.QrCodeScanner
+import androidx.compose.material.icons.filled.Storefront
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
@@ -40,7 +41,8 @@ fun KoColorFabMenu(
     onToggle: () -> Unit,
     onBarcodeClick: () -> Unit,
     onCameraClick: () -> Unit,
-    onMoreOptionsClick: () -> Unit,
+    onStoreCatalogClick: () -> Unit,
+    onBoxScanClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -67,18 +69,26 @@ fun KoColorFabMenu(
                 )
                 FabMenuItem(
                     icon = Icons.Default.CameraAlt,
-                    label = "Capture Photo",
+                    label = "Product Scan",
                     onClick = { 
                         onToggle()
                         onCameraClick() 
                     }
                 )
                 FabMenuItem(
-                    icon = Icons.Default.MoreHoriz,
-                    label = "More Options",
+                    icon = Icons.Default.AutoAwesome,
+                    label = "Box Scan",
                     onClick = { 
                         onToggle()
-                        onMoreOptionsClick() 
+                        onBoxScanClick() 
+                    }
+                )
+                FabMenuItem(
+                    icon = Icons.Default.Storefront,
+                    label = "Store Catalog",
+                    onClick = { 
+                        onToggle()
+                        onStoreCatalogClick() 
                     }
                 )
             }

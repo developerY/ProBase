@@ -89,7 +89,6 @@ fun WardrobeLandingScreen(
     onEvent: (WardrobeEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    var showAddBottomSheet by remember { mutableStateOf(false) }
     var isFabMenuExpanded by remember { mutableStateOf(false) }
     
     Scaffold(
@@ -132,7 +131,9 @@ fun WardrobeLandingScreen(
                 onToggle = { isFabMenuExpanded = !isFabMenuExpanded },
                 onBarcodeClick = { navTo(KoColorRoute.BarcodeScanner) },
                 onCameraClick = { navTo(KoColorRoute.ClothingCapture) },
-                onMoreOptionsClick = { showAddBottomSheet = true }
+                onBoxScanClick = { navTo(KoColorRoute.ClothingCapture) },
+
+                onStoreCatalogClick = { navTo(KoColorRoute.StarterPack(filter = "clothing")) }
             )
         },
         modifier = modifier
@@ -320,14 +321,6 @@ fun WardrobeLandingScreen(
             }
         }
         
-        if (showAddBottomSheet) {
-            AddProductBottomSheet(
-                onDismiss = { showAddBottomSheet = false },
-                onBarcodeScan = { navTo(KoColorRoute.BarcodeScanner) },
-                onProductScan = { navTo(KoColorRoute.ClothingCapture) },
-                onBoxScan = { navTo(KoColorRoute.ClothingCapture) },
-                onStoreCatalog = { navTo(KoColorRoute.StarterPack(filter = "clothing")) }
-            )
-        }
+
     }
 }

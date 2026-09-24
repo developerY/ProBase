@@ -88,7 +88,6 @@ fun VanityLandingScreen(
     navTo: (KoColorRoute) -> Unit
 ) {
     var showTaxonomyInfo by remember { mutableStateOf(false) }
-    var showAddBottomSheet by remember { mutableStateOf(false) }
     var isFabMenuExpanded by remember { mutableStateOf(false) }
 
     // --- Shimmer Animation Logic ---
@@ -141,7 +140,9 @@ fun VanityLandingScreen(
                 onToggle = { isFabMenuExpanded = !isFabMenuExpanded },
                 onBarcodeClick = { navTo(KoColorRoute.BarcodeScanner) },
                 onCameraClick = { navTo(KoColorRoute.BoxCapture(mode = "PRODUCT")) },
-                onMoreOptionsClick = { showAddBottomSheet = true }
+                onBoxScanClick = { navTo(KoColorRoute.BoxCapture(mode = "BOX")) },
+
+                onStoreCatalogClick = { navTo(KoColorRoute.StarterPack(filter = "cosmetics")) }
             )
         },
         modifier = modifier
@@ -290,14 +291,6 @@ fun VanityLandingScreen(
             }
         }
         
-        if (showAddBottomSheet) {
-            com.zoewave.probase.kocolor.features.cosmetics.ui.components.AddProductBottomSheet(
-                onDismiss = { showAddBottomSheet = false },
-                onBarcodeScan = { navTo(KoColorRoute.BarcodeScanner) },
-                onProductScan = { navTo(KoColorRoute.BoxCapture(mode = "PRODUCT")) },
-                onBoxScan = { navTo(KoColorRoute.BoxCapture(mode = "BOX")) },
-                onStoreCatalog = { navTo(KoColorRoute.StarterPack(filter = "cosmetics")) }
-            )
-        }
+
     }
 }
