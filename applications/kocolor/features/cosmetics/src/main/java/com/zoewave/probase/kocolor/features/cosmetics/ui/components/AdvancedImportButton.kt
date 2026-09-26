@@ -1,5 +1,12 @@
 package com.zoewave.probase.kocolor.features.cosmetics.ui.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -17,7 +24,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Storefront
@@ -26,10 +33,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -47,10 +59,13 @@ fun AdvancedImportButton(
     onProductClick: () -> Unit,
     onBoxClick: () -> Unit,
     onCatalogClick: () -> Unit,
-    onExpandClick: () -> Unit,
     labelPrefix: String, // e.g. "COSMETICS VAULT" or "FASHION ARCHIVE"
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onExpandClick: (() -> Unit)? = null
 ) {
+    var expanded by remember { mutableStateOf(false) }
+    val rotation by animateFloatAsState(targetValue = if (expanded) 180f else 0f, label = "ChevronRotation")
+
     val gradientBrush = Brush.linearGradient(
         colors = listOf(
             Color(0xFF552C4E), // Top-left royal blackberry velvet
@@ -62,6 +77,7 @@ fun AdvancedImportButton(
     Surface(
         modifier = modifier
             .fillMaxWidth()
+            .animateContentSize()
             .clip(RoundedCornerShape(28.dp)),
         shape = RoundedCornerShape(28.dp),
         border = BorderStroke(1.6.dp, Color(0xFFC6B492).copy(alpha = 0.45f)), // Metallic champagne perimeter bezel
@@ -75,11 +91,14 @@ fun AdvancedImportButton(
                 .padding(horizontal = 22.dp, vertical = 20.dp)
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
-                // Header Row (Clickable to open bottom sheet)
+                // Header Row (Clickable to open/close card)
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { onExpandClick() },
+                        .clickable { 
+                            expanded = !expanded
+                            onExpandClick?.invoke()
+                        },
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -158,10 +177,12 @@ fun AdvancedImportButton(
                                 verticalArrangement = Arrangement.Center
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.KeyboardArrowUp,
-                                    contentDescription = "Expand Sheet",
+                                    imageVector = Icons.Default.KeyboardArrowDown,
+                                    contentDescription = "Expand Options",
                                     tint = Color.White,
-                                    modifier = Modifier.size(22.dp)
+                                    modifier = Modifier
+                                        .size(22.dp)
+                                        .rotate(rotation)
                                 )
                                 Spacer(modifier = Modifier.height(1.dp))
                                 // Horizontal bottom-sheet drag handle indicator line
@@ -176,53 +197,62 @@ fun AdvancedImportButton(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
+                // Collapsible 2x2 Grid Section
+                AnimatedVisibility(
+                    visible = expanded,
+                    enter = fadeIn() + expandVertically(),
+                    exit = fadeOut() + shrinkVertically()
+                ) {
+                    Column {
+                        Spacer(modifier = Modifier.height(20.dp))
 
-                // Method Icons Grid (2x2)
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        MethodItem(
-                            icon = Icons.Default.QrCodeScanner,
-                            title = "Bar Scan",
-                            subtitle = "Scan UPC",
-                            iconColor = Color(0xFF9CA3AF),
-                            onClick = onBarcodeClick,
-                            modifier = Modifier.weight(1f)
-                        )
-                        MethodItem(
-                            icon = Icons.Default.PhotoCamera,
-                            title = "Product",
-                            subtitle = "5-Step AI",
-                            iconColor = Color(0xFFEC4899),
-                            onClick = onProductClick,
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        MethodItem(
-                            icon = Icons.Default.AutoAwesome,
-                            title = "Box Scan",
-                            subtitle = "7-Step AI",
-                            iconColor = Color(0xFFA1887F),
-                            onClick = onBoxClick,
-                            modifier = Modifier.weight(1f)
-                        )
-                        MethodItem(
-                            icon = Icons.Default.Storefront,
-                            title = "Catalog",
-                            subtitle = "Search OBF",
-                            iconColor = Color(0xFF10B981),
-                            onClick = onCatalogClick,
-                            modifier = Modifier.weight(1f)
-                        )
+                        // Method Icons Grid (2x2)
+                        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                MethodItem(
+                                    icon = Icons.Default.QrCodeScanner,
+                                    title = "Bar Scan",
+                                    subtitle = "Scan UPC",
+                                    iconColor = Color(0xFF9CA3AF),
+                                    onClick = onBarcodeClick,
+                                    modifier = Modifier.weight(1f)
+                                )
+                                MethodItem(
+                                    icon = Icons.Default.PhotoCamera,
+                                    title = "Product",
+                                    subtitle = "5-Step AI",
+                                    iconColor = Color(0xFFEC4899),
+                                    onClick = onProductClick,
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                MethodItem(
+                                    icon = Icons.Default.AutoAwesome,
+                                    title = "Box Scan",
+                                    subtitle = "7-Step AI",
+                                    iconColor = Color(0xFFA1887F),
+                                    onClick = onBoxClick,
+                                    modifier = Modifier.weight(1f)
+                                )
+                                MethodItem(
+                                    icon = Icons.Default.Storefront,
+                                    title = "Catalog",
+                                    subtitle = "Search OBF",
+                                    iconColor = Color(0xFF10B981),
+                                    onClick = onCatalogClick,
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -310,7 +340,6 @@ private fun AdvancedImportButtonPreview() {
                 onProductClick = {},
                 onBoxClick = {},
                 onCatalogClick = {},
-                onExpandClick = {},
                 labelPrefix = "COSMETICS VAULT"
             )
         }
