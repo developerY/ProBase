@@ -48,6 +48,8 @@ import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.kocolor.features.inventory.R
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeEvent
+import com.zoewave.probase.kocolor.features.inventory.ui.components.AdvancedImportButton
+import com.zoewave.probase.kocolor.features.inventory.ui.landing.AddProductBottomSheet
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeUiState
 import com.zoewave.probase.kocolor.features.inventory.ui.components.AtelierWardrobeCard
 import com.zoewave.probase.kocolor.features.inventory.ui.components.AtelierWardrobeUiState
@@ -89,6 +91,7 @@ fun WardrobeLandingScreen(
     onEvent: (WardrobeEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
+    var showAddBottomSheet by remember { mutableStateOf(false) }
     var isFabMenuExpanded by remember { mutableStateOf(false) }
     
     Scaffold(
@@ -281,6 +284,14 @@ fun WardrobeLandingScreen(
                         }
                     }
                 }
+            }
+
+            item {
+                com.zoewave.probase.kocolor.features.inventory.ui.components.AdvancedImportButton(
+                    onClick = { showAddBottomSheet = true },
+                    labelPrefix = "FASHION ARCHIVE",
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
 
             item {

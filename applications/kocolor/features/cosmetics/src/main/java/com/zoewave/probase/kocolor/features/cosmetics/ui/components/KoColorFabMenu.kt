@@ -17,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Storefront
 import androidx.compose.material3.FloatingActionButton
@@ -69,7 +70,7 @@ fun KoColorFabMenu(
                 )
                 FabMenuItem(
                     icon = Icons.Default.CameraAlt,
-                    label = "Product Scan",
+                    label = "Capture Photo",
                     onClick = { 
                         onToggle()
                         onCameraClick() 

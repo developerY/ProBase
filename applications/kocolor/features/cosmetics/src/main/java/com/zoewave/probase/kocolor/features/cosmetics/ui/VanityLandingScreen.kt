@@ -29,6 +29,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -87,6 +88,7 @@ fun VanityLandingScreen(
     onEvent: (CosmeticsEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
+    var showAddBottomSheet by remember { mutableStateOf(false) }
     var showTaxonomyInfo by remember { mutableStateOf(false) }
     var isFabMenuExpanded by remember { mutableStateOf(false) }
 
@@ -259,6 +261,19 @@ fun VanityLandingScreen(
             }
 
             item {
+                Button(
+                    onClick = { showAddBottomSheet = true },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF5A3854),
+                        contentColor = Color.White
+                    )
+                ) {
+                    androidx.compose.material3.Text("Open Advanced Import Options")
+                }
+            }
+
+            item {
                 Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -291,6 +306,14 @@ fun VanityLandingScreen(
             }
         }
         
-
+        if (showAddBottomSheet) {
+            com.zoewave.probase.kocolor.features.cosmetics.ui.components.AddProductBottomSheet(
+                onDismiss = { showAddBottomSheet = false },
+                onBarcodeScan = { navTo(KoColorRoute.BarcodeScanner) },
+                onProductScan = { navTo(KoColorRoute.BoxCapture(mode = "PRODUCT")) },
+                onBoxScan = { navTo(KoColorRoute.BoxCapture(mode = "BOX")) },
+                onStoreCatalog = { navTo(KoColorRoute.StarterPack(filter = "cosmetics")) }
+            )
+        }
     }
 }
