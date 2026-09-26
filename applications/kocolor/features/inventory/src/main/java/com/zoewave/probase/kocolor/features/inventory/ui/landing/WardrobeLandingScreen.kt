@@ -13,16 +13,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Inventory2
-import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -152,54 +149,10 @@ fun WardrobeLandingScreen(
         ) {
             // Wardrobe Search Bar
             item {
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(52.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    color = Color.White,
-                    border = BorderStroke(1.dp, Color(0xFFE0E0E0))
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        // Left Text Search Area -> Opens Wardrobe Inventory
-                        Row(
-                            modifier = Modifier
-                                .weight(1f)
-                                .clickable { navTo(KoColorRoute.Wardrobe) },
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Search,
-                                contentDescription = "Search",
-                                tint = Color(0xFF757575),
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Text(
-                                text = "Search wardrobe collection...",
-                                style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp),
-                                color = Color(0xFF757575),
-                                maxLines = 1
-                            )
-                        }
-
-                        // Right Color Search Button -> Opens Color Search
-                        IconButton(
-                            onClick = { navTo(KoColorRoute.ColorSearch) },
-                            modifier = Modifier.size(36.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Palette,
-                                contentDescription = "Color Search",
-                                tint = Color(0xFF757575),
-                                modifier = Modifier.size(22.dp)
-                            )
-                        }
-                    }
-                }
+                com.zoewave.probase.kocolor.features.inventory.ui.components.WardrobeSearchBar(
+                    onTextSearchClick = { navTo(KoColorRoute.Wardrobe) },
+                    onColorSearchClick = { navTo(KoColorRoute.ColorSearch) }
+                )
             }
 
 
