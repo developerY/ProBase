@@ -132,7 +132,7 @@ fun AdvancedImportButton(
 
                         // Action Headline
                         Text(
-                            text = "Advanced Import Options",
+                            text = "Multi-Import Options",
                             style = MaterialTheme.typography.titleMedium.copy(
                                 fontSize = 19.sp,
                                 fontWeight = FontWeight.Bold

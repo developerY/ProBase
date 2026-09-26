@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -82,7 +83,7 @@ private fun VanityLandingScreenPreview() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
 @Composable
 fun VanityLandingScreen(
     uiState: CosmeticsUiState,
@@ -133,8 +134,12 @@ fun VanityLandingScreen(
                         Icon(Icons.Default.Search, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_filter), tint = Color.DarkGray) 
                     }
                 },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color(0xFFFCF9F6)
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color(0xFFFCF9F6),
+                    scrolledContainerColor = Color.Unspecified,
+                    navigationIconContentColor = Color.Unspecified,
+                    titleContentColor = Color.Unspecified,
+                    actionIconContentColor = Color.Unspecified
                 )
             )
         },
@@ -279,12 +284,12 @@ fun VanityLandingScreen(
                 Button(
                     onClick = { showAddBottomSheet = true },
                     modifier = Modifier.fillMaxWidth(),
-                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                    colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFF5A3854),
                         contentColor = Color.White
                     )
                 ) {
-                    androidx.compose.material3.Text("Open Advanced Import Options")
+                    Text("Open Advanced Import Options")
                 }
             }
 
@@ -319,16 +324,6 @@ fun VanityLandingScreen(
                     }
                 }
             }
-        }
-        
-        if (showAddBottomSheet) {
-            com.zoewave.probase.kocolor.features.cosmetics.ui.components.AddProductBottomSheet(
-                onDismiss = { showAddBottomSheet = false },
-                onBarcodeScan = { navTo(KoColorRoute.BarcodeScanner) },
-                onProductScan = { navTo(KoColorRoute.BoxCapture(mode = "PRODUCT")) },
-                onBoxScan = { navTo(KoColorRoute.BoxCapture(mode = "BOX")) },
-                onStoreCatalog = { navTo(KoColorRoute.StarterPack(filter = "cosmetics")) }
-            )
         }
     }
 }
