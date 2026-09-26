@@ -150,7 +150,7 @@ fun CollectionHubOrig(
                     Row(
                         modifier = Modifier
                             .weight(1f)
-                            .clickable { navTo(KoColorRoute.ColorSearch) },
+                            .clickable { navTo(KoColorRoute.InventoryManagement) },
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(

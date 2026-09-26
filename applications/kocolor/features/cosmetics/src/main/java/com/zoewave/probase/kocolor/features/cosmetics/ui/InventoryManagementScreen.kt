@@ -1,6 +1,9 @@
 package com.zoewave.probase.kocolor.features.cosmetics.ui
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.border
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -26,6 +29,11 @@ import androidx.compose.ui.unit.sp
 import com.zoewave.probase.kocolor.features.cosmetics.R
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.InventoryProductCard
 import com.zoewave.probase.core.model.ritual.CosmeticItem
+import androidx.compose.material.icons.filled.Checkroom
+import coil.compose.AsyncImage
+import androidx.compose.ui.layout.ContentScale
+import com.zoewave.probase.core.model.ritual.ClothingItem
+import com.zoewave.probase.core.ui.util.parseColor
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import com.zoewave.probase.core.model.ritual.MacroCategory
 
@@ -71,7 +79,7 @@ fun InventoryManagementScreen(
                 .background(Color(0xFFFBF8F5)) 
         ) {
             HeaderSection(
-                uiState = HeaderSectionUiState(uiState.totalCosmetics),
+                uiState = HeaderSectionUiState(uiState.totalCosmetics + uiState.filteredWardrobeItems.size),
                 onEvent = {},
                 navTo = {}
             )
@@ -106,8 +114,9 @@ fun InventoryManagementScreen(
             )
             
             InventoryList(
-                uiState = InventoryListUiState(displayItems),
-                onEvent = { item -> navTo(KoColorRoute.CosmeticDetail(item.internalId)) },
+                uiState = InventoryListUiState(displayItems, uiState.filteredWardrobeItems),
+                onCosmeticEvent = { item -> navTo(KoColorRoute.CosmeticDetail(item.internalId)) },
+                onWardrobeEvent = { item -> navTo(KoColorRoute.WardrobeDetail(item.internalId)) },
                 navTo = navTo
             )
         }
@@ -256,13 +265,14 @@ private fun CategoryChipsSection(
     }
 }
 
-data class InventoryListUiState(val items: List<CosmeticItem>)
+data class InventoryListUiState(val cosmeticItems: List<CosmeticItem>, val wardrobeItems: List<ClothingItem> = emptyList())
 
 @Composable
 private fun InventoryList(
     uiState: InventoryListUiState,
     modifier: Modifier = Modifier,
-    onEvent: (CosmeticItem) -> Unit,
+    onCosmeticEvent: (CosmeticItem) -> Unit,
+    onWardrobeEvent: (ClothingItem) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     LazyColumn(
@@ -270,12 +280,152 @@ private fun InventoryList(
         contentPadding = PaddingValues(start = 24.dp, end = 24.dp, bottom = 100.dp, top = 8.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        items(uiState.items) { item ->
-            InventoryProductCard(
-                uiState = item, 
-                onEvent = { onEvent(item) },
-                navTo = navTo
-            )
+        if (uiState.cosmeticItems.isNotEmpty()) {
+            item {
+                Text(
+                    text = "VANITY COSMETICS (${uiState.cosmeticItems.size})",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Gray,
+                    letterSpacing = 1.2.sp,
+                    modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
+                )
+            }
+            items(uiState.cosmeticItems) { item ->
+                InventoryProductCard(
+                    uiState = item, 
+                    onEvent = { onCosmeticEvent(item) },
+                    navTo = navTo
+                )
+            }
+        }
+
+        if (uiState.wardrobeItems.isNotEmpty()) {
+            item {
+                Text(
+                    text = "WARDROBE ARCHIVE (${uiState.wardrobeItems.size})",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Gray,
+                    letterSpacing = 1.2.sp,
+                    modifier = Modifier.padding(top = 16.dp, bottom = 4.dp)
+                )
+            }
+            items(uiState.wardrobeItems) { item ->
+                InventoryClothingCard(
+                    item = item,
+                    onClick = { onWardrobeEvent(item) }
+                )
+            }
+        }
+
+        if (uiState.cosmeticItems.isEmpty() && uiState.wardrobeItems.isEmpty()) {
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 48.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "No matching cosmetics or wardrobe items found.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.Gray
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun InventoryClothingCard(
+    item: ClothingItem,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(12.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color(0xFFF5F5F5))
+            ) {
+                if (item.imageUrl != null) {
+                    AsyncImage(
+                        model = item.imageUrl,
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Icon(
+                        Icons.Default.Checkroom,
+                        contentDescription = null,
+                        modifier = Modifier.align(Alignment.Center).size(32.dp),
+                        tint = Color.LightGray
+                    )
+                }
+            }
+            
+            Spacer(modifier = Modifier.width(16.dp))
+            
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "${item.category.displayName.uppercase()} • ${item.brand ?: "ARCHIVE"}",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.Gray,
+                    letterSpacing = 1.sp
+                )
+                
+                Spacer(modifier = Modifier.height(4.dp))
+                
+                Text(
+                    text = item.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontFamily = FontFamily.Serif,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF2C2420)
+                )
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                HorizontalDivider(color = Color(0xFFF0F0F0), thickness = 1.dp)
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Category: ${item.category.displayName}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray
+                    )
+                    
+                    item.colorHex?.let { hex ->
+                        Box(
+                            modifier = Modifier
+                                .size(14.dp)
+                                .clip(CircleShape)
+                                .background(parseColor(hex))
+                                .border(0.5.dp, Color.LightGray, CircleShape)
+                        )
+                    }
+                }
+            }
         }
     }
 }
