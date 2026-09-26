@@ -82,6 +82,14 @@ fun CollectionHubScreen(
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.applications_kocolor_apps_mobile_features_home_back))
                     }
                 },
+                actions = {
+                    IconButton(onClick = { navTo(KoColorRoute.ColorSearch) }) {
+                        Icon(
+                            Icons.Default.Search,
+                            contentDescription = stringResource(R.string.applications_kocolor_apps_mobile_features_home_hub_search_all)
+                        )
+                    }
+                },
 
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )

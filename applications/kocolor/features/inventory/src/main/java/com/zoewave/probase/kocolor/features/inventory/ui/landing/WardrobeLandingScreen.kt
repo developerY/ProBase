@@ -20,7 +20,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Inventory2
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -116,12 +115,7 @@ fun WardrobeLandingScreen(
                             contentDescription = stringResource(R.string.applications_kocolor_features_inventory_inventory)
                         )
                     }
-                    IconButton(onClick = { navTo(KoColorRoute.ColorSearch) }) {
-                        Icon(
-                            Icons.Default.Search,
-                            contentDescription = stringResource(R.string.applications_kocolor_features_inventory_search)
-                        )
-                    }
+
                 }
             )
         },
@@ -152,7 +146,7 @@ fun WardrobeLandingScreen(
                     remember { com.zoewave.probase.kocolor.features.inventory.domain.WardrobeAnalyticsEngine() }
                 val analytics = remember(uiState.items) { engine.computeAnalytics(uiState.items) }
 
-                // Not used rigth now ...
+                // Not used right now ... but we want to keep this
                 /*
                 CuratedClosetDashboard(
                     analytics = analytics,
