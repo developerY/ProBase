@@ -58,11 +58,13 @@ import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.core.model.ritual.MicroCategory
 import com.zoewave.probase.kocolor.features.cosmetics.R
+import com.zoewave.probase.kocolor.features.cosmetics.ui.components.AdvancedImportButton
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.KoColorFabMenu
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.ProfessionalTaxonomyDialog
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.RecentProductCard
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.VanityCategoryCard
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.VanityCategoryUiState
+import com.zoewave.probase.kocolor.features.cosmetics.ui.components.VanityInventoryCard
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
 @Preview(showBackground = true)
@@ -186,7 +188,7 @@ fun VanityLandingScreen(
             }
 
             item {
-                com.zoewave.probase.kocolor.features.cosmetics.ui.components.VanityInventoryCard(
+                VanityInventoryCard(
                     totalItems = uiState.totalCosmetics,
                     totalValue = uiState.totalValue,
                     expiringCount = uiState.expiringCosmeticsCount,
@@ -196,8 +198,12 @@ fun VanityLandingScreen(
             }
 
             item {
-                com.zoewave.probase.kocolor.features.cosmetics.ui.components.AdvancedImportButton(
-                    onClick = { showAddBottomSheet = true },
+               AdvancedImportButton(
+                    onBarcodeClick = { navTo(KoColorRoute.BarcodeScanner) },
+                    onProductClick = { navTo(KoColorRoute.BoxCapture(mode = "PRODUCT")) },
+                    onBoxClick = { navTo(KoColorRoute.BoxCapture(mode = "BOX")) },
+                    onCatalogClick = { navTo(KoColorRoute.StarterPack(filter = "cosmetics")) },
+                    onExpandClick = { showAddBottomSheet = true },
                     labelPrefix = "COSMETICS VAULT",
                     modifier = Modifier.fillMaxWidth()
                 )

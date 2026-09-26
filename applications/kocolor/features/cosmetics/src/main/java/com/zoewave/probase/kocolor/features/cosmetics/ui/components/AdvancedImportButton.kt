@@ -16,7 +16,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.filled.QrCodeScanner
+import androidx.compose.material.icons.filled.Storefront
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -25,8 +29,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -36,7 +43,11 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun AdvancedImportButton(
-    onClick: () -> Unit,
+    onBarcodeClick: () -> Unit,
+    onProductClick: () -> Unit,
+    onBoxClick: () -> Unit,
+    onCatalogClick: () -> Unit,
+    onExpandClick: () -> Unit,
     labelPrefix: String, // e.g. "COSMETICS VAULT" or "FASHION ARCHIVE"
     modifier: Modifier = Modifier
 ) {
@@ -51,8 +62,7 @@ fun AdvancedImportButton(
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(28.dp))
-            .clickable { onClick() },
+            .clip(RoundedCornerShape(28.dp)),
         shape = RoundedCornerShape(28.dp),
         border = BorderStroke(1.6.dp, Color(0xFFC6B492).copy(alpha = 0.45f)), // Metallic champagne perimeter bezel
         color = Color.Transparent,
@@ -64,103 +74,228 @@ fun AdvancedImportButton(
                 .background(gradientBrush)
                 .padding(horizontal = 22.dp, vertical = 20.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Left Text Block
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.Center
+            Column(modifier = Modifier.fillMaxWidth()) {
+                // Header Row (Clickable to open bottom sheet)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onExpandClick() },
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Eyebrow with rose-gold square glyph
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    // Left Text Block
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.Center
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(6.dp)
-                                .background(Color(0xFFC6B492), RoundedCornerShape(1.dp))
-                        )
+                        // Eyebrow with rose-gold square glyph
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(6.dp)
+                                    .background(Color(0xFFC6B492), RoundedCornerShape(1.dp))
+                            )
+                            Text(
+                                text = "$labelPrefix • 4 METHODS",
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontSize = 9.sp,
+                                    fontWeight = FontWeight.Black,
+                                    letterSpacing = 1.4.sp
+                                ),
+                                color = Color(0xFFC6B492) // Rose-gold tracked typography
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(6.dp))
+
+                        // Action Headline
                         Text(
-                            text = "$labelPrefix • 4 METHODS",
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                fontSize = 9.sp,
-                                fontWeight = FontWeight.Black,
-                                letterSpacing = 1.4.sp
+                            text = "Advanced Import Options",
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontSize = 19.sp,
+                                fontWeight = FontWeight.Bold
                             ),
-                            color = Color(0xFFC6B492) // Rose-gold tracked typography
+                            fontFamily = FontFamily.Serif,
+                            color = Color.White,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        // Descriptor Subtitle
+                        Text(
+                            text = "Tap any method or expand to browse the full import suite",
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Medium
+                            ),
+                            color = Color.White.copy(alpha = 0.65f),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Spacer(modifier = Modifier.width(16.dp))
 
-                    // Action Headline
-                    Text(
-                        text = "Advanced Import Options",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontSize = 19.sp,
-                            fontWeight = FontWeight.Bold
-                        ),
-                        fontFamily = FontFamily.Serif,
-                        color = Color.White,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-
-                    Spacer(modifier = Modifier.height(4.dp))
-
-                    // Descriptor Subtitle
-                    Text(
-                        text = "Tap any method or expand to browse the full import suite",
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Medium
-                        ),
-                        color = Color.White.copy(alpha = 0.65f),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(16.dp))
-
-                // High-Affordance Interactive Sheet Trigger Disc (62px / ~56dp)
-                Surface(
-                    modifier = Modifier.size(56.dp),
-                    shape = CircleShape,
-                    color = Color.White.copy(alpha = 0.08f),
-                    border = BorderStroke(1.2.dp, Color(0xFFC6B492).copy(alpha = 0.5f)),
-                    shadowElevation = 4.dp
-                ) {
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier.clip(CircleShape)
+                    // High-Affordance Interactive Sheet Trigger Disc (62px / ~56dp)
+                    Surface(
+                        modifier = Modifier.size(56.dp),
+                        shape = CircleShape,
+                        color = Color.White.copy(alpha = 0.08f),
+                        border = BorderStroke(1.2.dp, Color(0xFFC6B492).copy(alpha = 0.5f)),
+                        shadowElevation = 4.dp
                     ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.clip(CircleShape)
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.KeyboardArrowUp,
-                                contentDescription = "Expand Sheet",
-                                tint = Color.White,
-                                modifier = Modifier.size(22.dp)
-                            )
-                            Spacer(modifier = Modifier.height(1.dp))
-                            // Horizontal bottom-sheet drag handle indicator line
-                            Box(
-                                modifier = Modifier
-                                    .width(12.dp)
-                                    .height(2.dp)
-                                    .background(Color.White.copy(alpha = 0.75f), RoundedCornerShape(1.dp))
-                            )
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.KeyboardArrowUp,
+                                    contentDescription = "Expand Sheet",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(22.dp)
+                                )
+                                Spacer(modifier = Modifier.height(1.dp))
+                                // Horizontal bottom-sheet drag handle indicator line
+                                Box(
+                                    modifier = Modifier
+                                        .width(12.dp)
+                                        .height(2.dp)
+                                        .background(Color.White.copy(alpha = 0.75f), RoundedCornerShape(1.dp))
+                                )
+                            }
                         }
                     }
                 }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Method Icons Grid (2x2)
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        MethodItem(
+                            icon = Icons.Default.QrCodeScanner,
+                            title = "Bar Scan",
+                            subtitle = "Scan UPC",
+                            iconColor = Color(0xFF9CA3AF),
+                            onClick = onBarcodeClick,
+                            modifier = Modifier.weight(1f)
+                        )
+                        MethodItem(
+                            icon = Icons.Default.PhotoCamera,
+                            title = "Product",
+                            subtitle = "5-Step AI",
+                            iconColor = Color(0xFFEC4899),
+                            onClick = onProductClick,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        MethodItem(
+                            icon = Icons.Default.AutoAwesome,
+                            title = "Box Scan",
+                            subtitle = "7-Step AI",
+                            iconColor = Color(0xFFA1887F),
+                            onClick = onBoxClick,
+                            modifier = Modifier.weight(1f)
+                        )
+                        MethodItem(
+                            icon = Icons.Default.Storefront,
+                            title = "Catalog",
+                            subtitle = "Search OBF",
+                            iconColor = Color(0xFF10B981),
+                            onClick = onCatalogClick,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
             }
+        }
+    }
+}
+
+@Composable
+private fun MethodItem(
+    icon: ImageVector,
+    title: String,
+    subtitle: String,
+    iconColor: Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = modifier
+            .background(Color.White.copy(alpha = 0.05f), RoundedCornerShape(16.dp))
+            .clickable { onClick() }
+            .padding(start = 12.dp, end = 12.dp, top = 10.dp, bottom = 10.dp)
+    ) {
+        // Text Column
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold
+                ),
+                color = Color.White,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            
+            Spacer(modifier = Modifier.height(2.dp))
+            
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Medium
+                ),
+                color = Color.White.copy(alpha = 0.6f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+
+        Spacer(modifier = Modifier.width(6.dp))
+
+        // Icon Circle
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .drawBehind {
+                    drawCircle(color = iconColor.copy(alpha = 0.15f), radius = size.minDimension / 2f)
+                    drawCircle(
+                        color = iconColor,
+                        radius = size.minDimension / 2f,
+                        style = Stroke(width = 3f)
+                    )
+                },
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = iconColor,
+                modifier = Modifier.size(18.dp)
+            )
         }
     }
 }
@@ -171,7 +306,11 @@ private fun AdvancedImportButtonPreview() {
     MaterialTheme {
         Box(modifier = Modifier.padding(16.dp)) {
             AdvancedImportButton(
-                onClick = {},
+                onBarcodeClick = {},
+                onProductClick = {},
+                onBoxClick = {},
+                onCatalogClick = {},
+                onExpandClick = {},
                 labelPrefix = "COSMETICS VAULT"
             )
         }
