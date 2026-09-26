@@ -94,56 +94,7 @@ fun CollectionHubScreen(
                 .fillMaxSize()
                 .padding(horizontal = 20.dp)
         ) {
-            // Unified Search Section (Text Search Left, Color Search Right)
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 12.dp)
-                    .height(52.dp),
-                shape = RoundedCornerShape(16.dp),
-                color = MaterialTheme.colorScheme.surface,
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE0E0E0))
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Left Text Search Area
-                    Row(
-                        modifier = Modifier
-                            .weight(1f)
-                            .clickable { navTo(KoColorRoute.InventoryManagement) },
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = "Search",
-                            tint = Color(0xFF757575),
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Text(
-                            text = stringResource(R.string.applications_kocolor_apps_mobile_features_home_hub_search_all),
-                            style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp),
-                            color = Color(0xFF757575),
-                            maxLines = 1
-                        )
-                    }
 
-                    // Right Color Search Button
-                    IconButton(
-                        onClick = { navTo(KoColorRoute.ColorSearch) },
-                        modifier = Modifier.size(36.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Palette,
-                            contentDescription = "Color Search",
-                            tint = Color(0xFF757575),
-                            modifier = Modifier.size(22.dp)
-                        )
-                    }
-                }
-            }
 
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(24.dp),
