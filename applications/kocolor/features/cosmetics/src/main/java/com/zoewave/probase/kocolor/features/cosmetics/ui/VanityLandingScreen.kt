@@ -159,18 +159,6 @@ fun VanityLandingScreen(
         ) {
 
             item {
-                com.zoewave.probase.kocolor.features.cosmetics.ui.components.AdvancedImportButton(
-                    onBarcodeClick = { navTo(KoColorRoute.BarcodeScanner) },
-                    onProductClick = { navTo(KoColorRoute.BoxCapture(mode = "PRODUCT")) },
-                    onBoxClick = { navTo(KoColorRoute.BoxCapture(mode = "BOX")) },
-                    onCatalogClick = { navTo(KoColorRoute.StarterPack(filter = "cosmetics")) },
-                    onExpandClick = { showAddBottomSheet = true },
-                    labelPrefix = "COSMETICS VAULT",
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-
-            item {
                 Column {
                     Text(
                         text = "Good morning,\nBeautiful.", // Two-line to match image
@@ -204,6 +192,14 @@ fun VanityLandingScreen(
                     expiringCount = uiState.expiringCosmeticsCount,
                     onViewInventoryClicked = { navTo(KoColorRoute.InventoryManagement) },
                     onViewExpiringClicked = { navTo(KoColorRoute.ExpiringSoon) }
+                )
+            }
+
+            item {
+                com.zoewave.probase.kocolor.features.cosmetics.ui.components.AdvancedImportButton(
+                    onClick = { showAddBottomSheet = true },
+                    labelPrefix = "COSMETICS VAULT",
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
 
