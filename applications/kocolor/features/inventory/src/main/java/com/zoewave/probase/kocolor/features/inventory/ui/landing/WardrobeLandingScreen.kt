@@ -91,7 +91,6 @@ fun WardrobeLandingScreen(
     onEvent: (WardrobeEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    var showAddBottomSheet by remember { mutableStateOf(false) }
     var isFabMenuExpanded by remember { mutableStateOf(false) }
     
     Scaffold(
@@ -130,7 +129,7 @@ fun WardrobeLandingScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { navTo(KoColorRoute.StarterPack(filter = "clothing")) },
+                onClick = { navTo(KoColorRoute.ClothingCapture) },
                 containerColor = Color(0xFF5A3854), // Dark Plum matching image
                 contentColor = Color.White,
                 shape = CircleShape,
@@ -155,16 +154,7 @@ fun WardrobeLandingScreen(
         ) {
 
 
-            item {
-                com.zoewave.probase.kocolor.features.inventory.ui.components.AdvancedImportButton(
-                    onBarcodeClick = { navTo(KoColorRoute.BarcodeScanner) },
-                    onProductClick = { navTo(KoColorRoute.ClothingCapture) },
-                    onBoxClick = { navTo(KoColorRoute.ClothingCapture) },
-                    onCatalogClick = { navTo(KoColorRoute.StarterPack(filter = "clothing")) },
-                    labelPrefix = "FASHION ARCHIVE",
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
+
 
             item {
                 val engine =
