@@ -32,6 +32,8 @@ data class CategoryMetadata(
 
 data class WardrobeUiState(
     val items: List<ClothingItem> = emptyList(),
+    val filteredItems: List<ClothingItem> = emptyList(),
+    val searchQuery: String = "",
     val isLoading: Boolean = true,
     val draftItem: ClothingItem = ClothingItem(name = "", category = ClothingCategory.TOPS, colorHex = "#FFFFFF"),
     val totalInvestment: Double = 0.0,
@@ -45,6 +47,7 @@ data class WardrobeUiState(
 )
 
 sealed class WardrobeEvent {
+    data class UpdateSearchQuery(val query: String) : WardrobeEvent()
     data class AddItem(val item: ClothingItem) : WardrobeEvent()
     data class UpdateItem(val item: ClothingItem) : WardrobeEvent()
     data class DeleteItem(val id: Long) : WardrobeEvent()
@@ -64,6 +67,7 @@ class WardrobeViewModel @Inject constructor(
 
     private val _draftItem = MutableStateFlow(ClothingItem(name = "", category = ClothingCategory.TOPS, colorHex = "#FFFFFF"))
     private val _archiveStatuses = MutableStateFlow<Map<Long, ArchiveStatus>>(emptyMap())
+    private val _searchQuery = MutableStateFlow("")
 
     private var lastProcessedUri: String? = null
 
@@ -109,8 +113,9 @@ class WardrobeViewModel @Inject constructor(
         rotationScoringUseCase.observeAllClothingWithUsage(),
         rotationScoringUseCase.observeGlobalMetrics(),
         _draftItem,
-        _archiveStatuses
-    ) { itemsWithUsage, globalMetrics, draft, archiveStatuses ->
+        _archiveStatuses,
+        _searchQuery
+    ) { itemsWithUsage, globalMetrics, draft, archiveStatuses, query ->
         val enrichedModels = itemsWithUsage.map { wrapper ->
             wrapper.garment.copy(
                 usageCount = wrapper.usage?.useCount?.toInt() ?: 0,
@@ -162,8 +167,16 @@ class WardrobeViewModel @Inject constructor(
             "Focused"
         }
 
+        val filtered = enrichedModels.filter { item ->
+            item.name.contains(query, ignoreCase = true) ||
+            (item.brand?.contains(query, ignoreCase = true) == true) ||
+            item.category.displayName.contains(query, ignoreCase = true)
+        }
+
         WardrobeUiState(
             items = enrichedModels,
+            filteredItems = filtered,
+            searchQuery = query,
             isLoading = false,
             draftItem = draft,
             totalInvestment = totalInvestment,
@@ -179,6 +192,7 @@ class WardrobeViewModel @Inject constructor(
 
     fun onEvent(event: WardrobeEvent) {
         when (event) {
+            is WardrobeEvent.UpdateSearchQuery -> _searchQuery.value = event.query
             is WardrobeEvent.AddItem -> addItem(event.item)
             is WardrobeEvent.UpdateItem -> updateItem(event.item)
             is WardrobeEvent.DeleteItem -> deleteItem(event.id)

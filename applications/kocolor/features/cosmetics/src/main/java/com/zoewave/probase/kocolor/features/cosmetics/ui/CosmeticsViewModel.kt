@@ -13,8 +13,6 @@ import com.zoewave.probase.core.model.network.DiscoveryStatus
 import com.zoewave.probase.core.model.network.ServiceStatus
 import com.zoewave.probase.core.model.ritual.ArchiveStatus
 import com.zoewave.probase.core.model.ritual.CosmeticItem
-import com.zoewave.probase.core.model.ritual.ClothingItem
-import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
 import com.zoewave.probase.core.model.ritual.Finish
 import com.zoewave.probase.core.model.ritual.Formulation
 import com.zoewave.probase.core.model.ritual.MacroCategory
@@ -61,7 +59,6 @@ data class CategoryMetadata(
 data class CosmeticsUiState(
     val items: List<CosmeticItem> = emptyList(),
     val filteredItems: List<CosmeticItem> = emptyList(),
-    val filteredWardrobeItems: List<ClothingItem> = emptyList(),
     val isLoading: Boolean = true,
     val capturedImageUri: String? = null,
     val aiResult: CosmeticItem? = null,
@@ -120,7 +117,6 @@ sealed class CosmeticsEvent {
 class CosmeticsViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val cosmeticRepository: CosmeticInventoryRepository,
-    private val wardrobeRepository: WardrobeRepository,
     private val sessionRepository: FashionSessionRepository,
     private val fdaRepository: FdaRepository,
     private val chemicalRepository: ChemicalRepository,
@@ -175,7 +171,6 @@ class CosmeticsViewModel @Inject constructor(
 
     val uiState: StateFlow<CosmeticsUiState> = combine(
         cosmeticRepository.getAllCosmetics(),
-        wardrobeRepository.getAllClothing(),
         _aiResult,
         sessionRepository.cosmeticDraft.filterNotNull(),
         sessionRepository.scanState,
@@ -189,18 +184,17 @@ class CosmeticsViewModel @Inject constructor(
         _archiveStatuses
     ) { array ->
         val models = array[0] as List<CosmeticItem>
-        val wardrobeModels = array[1] as List<ClothingItem>
-        val aiResult = array[2] as CosmeticItem?
-        val draft = array[3] as CosmeticItem
-        val scanState = array[4] as FashionSessionRepository.ScanStatus
-        val discStatus = array[5] as DiscoveryStatus
-        val query = array[6] as String
-        val sort = array[7] as SortOption
-        val filter = array[8] as String?
-        val scanStatus = array[9] as String?
-        val contributionEnabled = array[10] as Boolean
-        val uvVal = array[11] as Double
-        val archiveStatuses = array[12] as Map<Long, ArchiveStatus>
+        val aiResult = array[1] as CosmeticItem?
+        val draft = array[2] as CosmeticItem
+        val scanState = array[3] as FashionSessionRepository.ScanStatus
+        val discStatus = array[4] as DiscoveryStatus
+        val query = array[5] as String
+        val sort = array[6] as SortOption
+        val filter = array[7] as String?
+        val scanStatus = array[8] as String?
+        val contributionEnabled = array[9] as Boolean
+        val uvVal = array[10] as Double
+        val archiveStatuses = array[11] as Map<Long, ArchiveStatus>
 
         val groupStats = models.groupBy { it.macroCategory.displayName }.mapValues { it.value.size }
         
@@ -246,17 +240,10 @@ class CosmeticsViewModel @Inject constructor(
 
         val totalVanityValue = models.sumOf { it.price ?: 0.0 }
 
-        val filteredWardrobe = wardrobeModels.filter { item ->
-            item.name.contains(query, ignoreCase = true) ||
-            (item.brand?.contains(query, ignoreCase = true) == true) ||
-            item.category.displayName.contains(query, ignoreCase = true)
-        }
-
         CosmeticsUiState(
             items = models,
             totalValue = totalVanityValue,
             filteredItems = filtered,
-            filteredWardrobeItems = filteredWardrobe,
             isLoading = false,
             capturedImageUri = draft.imageUrl,
             aiResult = aiResult,
