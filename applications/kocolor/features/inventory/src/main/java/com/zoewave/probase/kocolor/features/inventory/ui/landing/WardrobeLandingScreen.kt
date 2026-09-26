@@ -19,13 +19,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -54,6 +51,7 @@ import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeEvent
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeUiState
 import com.zoewave.probase.kocolor.features.inventory.ui.components.AtelierWardrobeCard
 import com.zoewave.probase.kocolor.features.inventory.ui.components.AtelierWardrobeUiState
+import com.zoewave.probase.kocolor.features.inventory.ui.components.KoColorFabMenu
 import com.zoewave.probase.kocolor.features.inventory.ui.components.RecentClothingCard
 import com.zoewave.probase.kocolor.features.inventory.ui.components.WardrobeTaxonomyDialog
 import com.zoewave.probase.kocolor.model.KoColorRoute
@@ -128,15 +126,12 @@ fun WardrobeLandingScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = { navTo(KoColorRoute.ClothingCapture) },
-                containerColor = Color(0xFF5A3854), // Dark Plum matching image
-                contentColor = Color.White,
-                shape = CircleShape,
-                elevation = FloatingActionButtonDefaults.elevation(8.dp)
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Add Item")
-            }
+            KoColorFabMenu(
+                expanded = isFabMenuExpanded,
+                onToggle = { isFabMenuExpanded = !isFabMenuExpanded },
+                onCameraClick = { navTo(KoColorRoute.ClothingCapture) },
+                onCatalogClick = { navTo(KoColorRoute.StarterPack(filter = "clothing")) }
+            )
         },
         modifier = modifier
     ) { padding ->

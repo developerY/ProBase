@@ -15,9 +15,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Storefront
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
@@ -39,10 +37,8 @@ import androidx.compose.ui.unit.dp
 fun KoColorFabMenu(
     expanded: Boolean,
     onToggle: () -> Unit,
-    onBarcodeClick: () -> Unit,
     onCameraClick: () -> Unit,
-    onStoreCatalogClick: () -> Unit,
-    onBoxScanClick: () -> Unit,
+    onCatalogClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -60,27 +56,11 @@ fun KoColorFabMenu(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 FabMenuItem(
-                    icon = Icons.Default.QrCodeScanner,
-                    label = "Bar Scan",
-                    onClick = { 
-                        onToggle()
-                        onBarcodeClick() 
-                    }
-                )
-                FabMenuItem(
                     icon = Icons.Default.CameraAlt,
-                    label = "Product Scan",
+                    label = "Capture Photo",
                     onClick = { 
                         onToggle()
                         onCameraClick() 
-                    }
-                )
-                FabMenuItem(
-                    icon = Icons.Default.AutoAwesome,
-                    label = "Box Scan",
-                    onClick = { 
-                        onToggle()
-                        onBoxScanClick() 
                     }
                 )
                 FabMenuItem(
@@ -88,7 +68,7 @@ fun KoColorFabMenu(
                     label = "Store Catalog",
                     onClick = { 
                         onToggle()
-                        onStoreCatalogClick() 
+                        onCatalogClick() 
                     }
                 )
             }
