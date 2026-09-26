@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -57,14 +58,14 @@ fun AdvancedImportButton(
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalAlignment = Alignment.Top
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = "■ $labelPrefix • 4 METHODS",
                         style = MaterialTheme.typography.labelSmall.copy(
-                            fontSize = 9.sp,
+                            fontSize = 10.sp,
                             fontWeight = FontWeight.Black,
                             letterSpacing = 1.2.sp
                         ),
@@ -74,7 +75,7 @@ fun AdvancedImportButton(
                     Text(
                         text = "Open Advanced Import Options",
                         style = MaterialTheme.typography.titleMedium.copy(
-                            fontSize = 18.sp,
+                            fontSize = 20.sp,
                             fontWeight = FontWeight.Bold
                         ),
                         color = Color.White
@@ -84,7 +85,7 @@ fun AdvancedImportButton(
                 // Expand Icon Button
                 Box(
                     modifier = Modifier
-                        .size(36.dp)
+                        .size(44.dp)
                         .clip(CircleShape)
                         .background(Color.White.copy(alpha = 0.1f))
                         .border(1.dp, Color.White.copy(alpha = 0.2f), CircleShape),
@@ -94,43 +95,55 @@ fun AdvancedImportButton(
                         imageVector = Icons.Default.KeyboardArrowUp,
                         contentDescription = "Open",
                         tint = Color.White,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(24.dp)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(28.dp))
 
-            // Method Icons Row
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                MethodItem(
-                    icon = Icons.Default.QrCodeScanner,
-                    title = "Bar Scan",
-                    subtitle = "Scan UPC",
-                    iconColor = Color(0xFF6B7280) // Gray
-                )
-                MethodItem(
-                    icon = Icons.Default.PhotoCamera,
-                    title = "Product",
-                    subtitle = "5-Step AI",
-                    iconColor = Color(0xFFEC4899) // Pink
-                )
-                MethodItem(
-                    icon = Icons.Default.AutoAwesome,
-                    title = "Box Scan",
-                    subtitle = "7-Step AI",
-                    iconColor = Color(0xFF8D6E63) // Brown
-                )
-                MethodItem(
-                    icon = Icons.Default.Storefront,
-                    title = "Catalog",
-                    subtitle = "Search OBF",
-                    iconColor = Color(0xFF10B981) // Green
-                )
+            // Method Icons Grid (2x2)
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    MethodItem(
+                        icon = Icons.Default.QrCodeScanner,
+                        title = "Bar Scan",
+                        subtitle = "Scan UPC",
+                        iconColor = Color(0xFF9CA3AF), // Lighter Gray for dark mode contrast
+                        modifier = Modifier.weight(1f)
+                    )
+                    MethodItem(
+                        icon = Icons.Default.PhotoCamera,
+                        title = "Product",
+                        subtitle = "5-Step AI",
+                        iconColor = Color(0xFFEC4899), // Pink
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    MethodItem(
+                        icon = Icons.Default.AutoAwesome,
+                        title = "Box Scan",
+                        subtitle = "7-Step AI",
+                        iconColor = Color(0xFFA1887F), // Lighter Brown
+                        modifier = Modifier.weight(1f)
+                    )
+                    MethodItem(
+                        icon = Icons.Default.Storefront,
+                        title = "Catalog",
+                        subtitle = "Search OBF",
+                        iconColor = Color(0xFF10B981), // Green
+                        modifier = Modifier.weight(1f)
+                    )
+                }
             }
         }
     }
@@ -141,13 +154,47 @@ private fun MethodItem(
     icon: ImageVector,
     title: String,
     subtitle: String,
-    iconColor: Color
+    iconColor: Color,
+    modifier: Modifier = Modifier
 ) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        // Icon Circle
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = modifier
+            .background(Color.White.copy(alpha = 0.05f), RoundedCornerShape(12.dp))
+            .padding(horizontal = 10.dp, vertical = 10.dp)
+    ) {
+        // Text Column
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold
+                ),
+                color = Color.White,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 8.sp,
+                    fontWeight = FontWeight.Medium
+                ),
+                color = Color.White.copy(alpha = 0.6f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+        
+        Spacer(modifier = Modifier.width(8.dp))
+        
+        // Icon Circle (Aligned Right)
         Box(
             modifier = Modifier
-                .size(28.dp)
+                .size(36.dp)
                 .drawBehind {
                     drawCircle(color = iconColor.copy(alpha = 0.2f), radius = size.minDimension / 2f)
                     drawCircle(
@@ -162,28 +209,7 @@ private fun MethodItem(
                 imageVector = icon,
                 contentDescription = null,
                 tint = iconColor,
-                modifier = Modifier.size(14.dp)
-            )
-        }
-        
-        Spacer(modifier = Modifier.width(6.dp))
-        
-        Column {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.labelSmall.copy(
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold
-                ),
-                color = Color.White
-            )
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.labelSmall.copy(
-                    fontSize = 8.sp,
-                    fontWeight = FontWeight.Medium
-                ),
-                color = Color.White.copy(alpha = 0.6f)
+                modifier = Modifier.size(18.dp)
             )
         }
     }
