@@ -41,14 +41,18 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun AdvancedImportButton(
-    onClick: () -> Unit,
+    onBarcodeClick: () -> Unit,
+    onProductClick: () -> Unit,
+    onBoxClick: () -> Unit,
+    onCatalogClick: () -> Unit,
+    onExpandClick: () -> Unit,
     labelPrefix: String, // e.g. "COSMETICS VAULT" or "FASHION ARCHIVE"
     modifier: Modifier = Modifier
 ) {
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .clickable { onClick() },
+            .clickable { onExpandClick() },
         shape = RoundedCornerShape(24.dp),
         color = Color(0xFF4A2B42), // Deep aubergine matching the design
         shadowElevation = 8.dp
@@ -79,6 +83,15 @@ fun AdvancedImportButton(
                             fontWeight = FontWeight.Bold
                         ),
                         color = Color.White
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Tap any method or expand to browse the full import suite",
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Medium
+                        ),
+                        color = Color.White.copy(alpha = 0.7f)
                     )
                 }
 
@@ -114,6 +127,7 @@ fun AdvancedImportButton(
                         title = "Bar Scan",
                         subtitle = "Scan UPC",
                         iconColor = Color(0xFF9CA3AF), // Lighter Gray for dark mode contrast
+                        onClick = onBarcodeClick,
                         modifier = Modifier.weight(1f)
                     )
                     MethodItem(
@@ -121,6 +135,7 @@ fun AdvancedImportButton(
                         title = "Product",
                         subtitle = "5-Step AI",
                         iconColor = Color(0xFFEC4899), // Pink
+                        onClick = onProductClick,
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -134,6 +149,7 @@ fun AdvancedImportButton(
                         title = "Box Scan",
                         subtitle = "7-Step AI",
                         iconColor = Color(0xFFA1887F), // Lighter Brown
+                        onClick = onBoxClick,
                         modifier = Modifier.weight(1f)
                     )
                     MethodItem(
@@ -141,6 +157,7 @@ fun AdvancedImportButton(
                         title = "Catalog",
                         subtitle = "Search OBF",
                         iconColor = Color(0xFF10B981), // Green
+                        onClick = onCatalogClick,
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -155,6 +172,7 @@ private fun MethodItem(
     title: String,
     subtitle: String,
     iconColor: Color,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -221,7 +239,11 @@ private fun AdvancedImportButtonPreview() {
     MaterialTheme {
         Box(modifier = Modifier.padding(16.dp)) {
             AdvancedImportButton(
-                onClick = {},
+                onBarcodeClick = {},
+                onProductClick = {},
+                onBoxClick = {},
+                onCatalogClick = {},
+                onExpandClick = {},
                 labelPrefix = "FASHION ARCHIVE"
             )
         }
