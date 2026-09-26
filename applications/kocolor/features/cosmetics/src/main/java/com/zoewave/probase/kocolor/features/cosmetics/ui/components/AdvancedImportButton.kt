@@ -1,7 +1,6 @@
 package com.zoewave.probase.kocolor.features.cosmetics.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,12 +11,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Storefront
@@ -28,7 +24,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -45,14 +40,12 @@ fun AdvancedImportButton(
     onProductClick: () -> Unit,
     onBoxClick: () -> Unit,
     onCatalogClick: () -> Unit,
-    onExpandClick: () -> Unit,
     labelPrefix: String, // e.g. "COSMETICS VAULT" or "FASHION ARCHIVE"
     modifier: Modifier = Modifier
 ) {
     Surface(
         modifier = modifier
-            .fillMaxWidth()
-            .clickable { onExpandClick() },
+            .fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
         color = Color(0xFF4A2B42), // Deep aubergine matching the design
         shadowElevation = 8.dp
@@ -62,7 +55,7 @@ fun AdvancedImportButton(
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.Top
             ) {
                 Column(modifier = Modifier.weight(1f)) {
@@ -95,31 +88,16 @@ fun AdvancedImportButton(
                     )
                 }
 
-                // Expand Icon Button
-                Box(
-                    modifier = Modifier
-                        .size(44.dp)
-                        .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.1f))
-                        .border(1.dp, Color.White.copy(alpha = 0.2f), CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.KeyboardArrowUp,
-                        contentDescription = "Open",
-                        tint = Color.White,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
+
             }
 
             Spacer(modifier = Modifier.height(28.dp))
 
             // Method Icons Grid (2x2)
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     MethodItem(
@@ -141,7 +119,7 @@ fun AdvancedImportButton(
                 }
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     MethodItem(
@@ -180,25 +158,28 @@ private fun MethodItem(
         horizontalArrangement = Arrangement.SpaceBetween,
         modifier = modifier
             .background(Color.White.copy(alpha = 0.05f), RoundedCornerShape(12.dp))
-            .padding(horizontal = 10.dp, vertical = 10.dp)
+            .clickable { onClick() }
+            .padding(start = 12.dp, end = 12.dp, top = 10.dp, bottom = 10.dp)
     ) {
         // Text Column
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.labelSmall.copy(
-                    fontSize = 11.sp,
+                    fontSize = 13.sp,
                     fontWeight = FontWeight.Bold
                 ),
                 color = Color.White,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
+            
             Spacer(modifier = Modifier.height(2.dp))
+            
             Text(
                 text = subtitle,
                 style = MaterialTheme.typography.labelSmall.copy(
-                    fontSize = 8.sp,
+                    fontSize = 9.sp,
                     fontWeight = FontWeight.Medium
                 ),
                 color = Color.White.copy(alpha = 0.6f),
@@ -207,18 +188,16 @@ private fun MethodItem(
             )
         }
         
-        Spacer(modifier = Modifier.width(8.dp))
-        
-        // Icon Circle (Aligned Right)
+        // Icon Circle
         Box(
             modifier = Modifier
                 .size(36.dp)
                 .drawBehind {
-                    drawCircle(color = iconColor.copy(alpha = 0.2f), radius = size.minDimension / 2f)
+                    drawCircle(color = iconColor.copy(alpha = 0.15f), radius = size.minDimension / 2f)
                     drawCircle(
                         color = iconColor,
                         radius = size.minDimension / 2f,
-                        style = Stroke(width = 4f)
+                        style = Stroke(width = 3f)
                     )
                 },
             contentAlignment = Alignment.Center
@@ -243,7 +222,6 @@ private fun AdvancedImportButtonPreview() {
                 onProductClick = {},
                 onBoxClick = {},
                 onCatalogClick = {},
-                onExpandClick = {},
                 labelPrefix = "COSMETICS VAULT"
             )
         }

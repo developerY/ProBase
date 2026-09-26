@@ -19,10 +19,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -51,7 +54,6 @@ import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeEvent
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeUiState
 import com.zoewave.probase.kocolor.features.inventory.ui.components.AtelierWardrobeCard
 import com.zoewave.probase.kocolor.features.inventory.ui.components.AtelierWardrobeUiState
-import com.zoewave.probase.kocolor.features.inventory.ui.components.KoColorFabMenu
 import com.zoewave.probase.kocolor.features.inventory.ui.components.RecentClothingCard
 import com.zoewave.probase.kocolor.features.inventory.ui.components.WardrobeTaxonomyDialog
 import com.zoewave.probase.kocolor.model.KoColorRoute
@@ -127,15 +129,15 @@ fun WardrobeLandingScreen(
             )
         },
         floatingActionButton = {
-            KoColorFabMenu(
-                expanded = isFabMenuExpanded,
-                onToggle = { isFabMenuExpanded = !isFabMenuExpanded },
-                onBarcodeClick = { navTo(KoColorRoute.BarcodeScanner) },
-                onCameraClick = { navTo(KoColorRoute.ClothingCapture) },
-                onBoxScanClick = { navTo(KoColorRoute.ClothingCapture) },
-
-                onStoreCatalogClick = { navTo(KoColorRoute.StarterPack(filter = "clothing")) }
-            )
+            FloatingActionButton(
+                onClick = { navTo(KoColorRoute.StarterPack(filter = "clothing")) },
+                containerColor = Color(0xFF5A3854), // Dark Plum matching image
+                contentColor = Color.White,
+                shape = CircleShape,
+                elevation = FloatingActionButtonDefaults.elevation(8.dp)
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Add Item")
+            }
         },
         modifier = modifier
     ) { padding ->
@@ -151,6 +153,19 @@ fun WardrobeLandingScreen(
             ),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+
+
+            item {
+                com.zoewave.probase.kocolor.features.inventory.ui.components.AdvancedImportButton(
+                    onBarcodeClick = { navTo(KoColorRoute.BarcodeScanner) },
+                    onProductClick = { navTo(KoColorRoute.ClothingCapture) },
+                    onBoxClick = { navTo(KoColorRoute.ClothingCapture) },
+                    onCatalogClick = { navTo(KoColorRoute.StarterPack(filter = "clothing")) },
+                    labelPrefix = "FASHION ARCHIVE",
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
             item {
                 val engine =
                     remember { com.zoewave.probase.kocolor.features.inventory.domain.WardrobeAnalyticsEngine() }
@@ -284,17 +299,7 @@ fun WardrobeLandingScreen(
                 }
             }
 
-            item {
-                com.zoewave.probase.kocolor.features.inventory.ui.components.AdvancedImportButton(
-                    onBarcodeClick = { navTo(KoColorRoute.BarcodeScanner) },
-                    onProductClick = { navTo(KoColorRoute.ClothingCapture) },
-                    onBoxClick = { navTo(KoColorRoute.ClothingCapture) },
-                    onCatalogClick = { navTo(KoColorRoute.StarterPack(filter = "clothing")) },
-                    onExpandClick = { showAddBottomSheet = true },
-                    labelPrefix = "FASHION ARCHIVE",
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
+
 
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
