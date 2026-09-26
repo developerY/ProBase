@@ -58,7 +58,6 @@ import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.core.model.ritual.MicroCategory
 import com.zoewave.probase.kocolor.features.cosmetics.R
-import com.zoewave.probase.kocolor.features.cosmetics.ui.components.AdvancedImportButton
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.KoColorFabMenu
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.ProfessionalTaxonomyDialog
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.RecentProductCard
@@ -160,12 +159,13 @@ fun VanityLandingScreen(
         ) {
 
             item {
-                AdvancedImportButton(
+                com.zoewave.probase.kocolor.features.cosmetics.ui.components.AdvancedImportButton(
                     onBarcodeClick = { navTo(KoColorRoute.BarcodeScanner) },
-                    onProductClick = { navTo(KoColorRoute.ClothingCapture) },
-                    onBoxClick = { navTo(KoColorRoute.ClothingCapture) },
-                    onCatalogClick = { navTo(KoColorRoute.StarterPack(filter = "clothing")) },
-                    labelPrefix = "FASHION ARCHIVE",
+                    onProductClick = { navTo(KoColorRoute.BoxCapture(mode = "PRODUCT")) },
+                    onBoxClick = { navTo(KoColorRoute.BoxCapture(mode = "BOX")) },
+                    onCatalogClick = { navTo(KoColorRoute.StarterPack(filter = "cosmetics")) },
+                    onExpandClick = { showAddBottomSheet = true },
+                    labelPrefix = "COSMETICS VAULT",
                     modifier = Modifier.fillMaxWidth()
                 )
             }
