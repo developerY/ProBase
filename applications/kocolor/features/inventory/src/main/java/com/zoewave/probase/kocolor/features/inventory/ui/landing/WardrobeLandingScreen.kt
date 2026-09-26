@@ -147,17 +147,6 @@ fun WardrobeLandingScreen(
             ),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Wardrobe Search Bar
-            item {
-                com.zoewave.probase.kocolor.features.inventory.ui.components.WardrobeSearchBar(
-                    onTextSearchClick = { navTo(KoColorRoute.Wardrobe) },
-                    onColorSearchClick = { navTo(KoColorRoute.ColorSearch) }
-                )
-            }
-
-
-
-
             item {
                 val engine =
                     remember { com.zoewave.probase.kocolor.features.inventory.domain.WardrobeAnalyticsEngine() }
