@@ -122,9 +122,16 @@ fun CollectionHubScreen(
                     }
 
                     val expiringCount = uiState.expiringCosmeticsCount
-                    val healthText = if (expiringCount > 0) "$expiringCount items expiring this month (PAO Alert)" else if (uiState.totalCosmetics > 0) "Vanity Health: 98% Fresh" else null
-                    val restockText = if (uiState.totalCosmetics > 0) "Restock needed: 2 formulas low" else null
-                    val toneText = if (uiState.totalCosmetics > 0) "Signature Tone: Roseate Sand · Warm/Matte" else null
+                    val healthText = if (expiringCount > 0) "Vanity Health: $expiringCount expiring items" else if (uiState.totalCosmetics > 0) "Vanity Health: Optimal" else null
+                    val lowStockCount = 0 // In real app, calculate from items where fillLevel < 0.1
+                    val restockText = if (lowStockCount > 0) "Restock needed: $lowStockCount formulas low" else null
+                    
+                    // Grab dominant tone from available groupings
+                    val topCategory = uiState.cosmeticsByGroup.maxByOrNull { it.value }?.key
+                    val toneText = if (topCategory != null) "Signature Tone: Dominated by ${topCategory.lowercase().replaceFirstChar { it.uppercase() }}" else null
+                    
+                    // CPU average (mock dynamic based on value and count for now until CPU is fully tracked)
+                    val dynamicCpu = if (uiState.totalCosmetics > 0) (uiState.totalVanityValue / uiState.totalCosmetics) * 0.15 else null
 
                     ArchiveVerticalCard(
                         uiState = ArchiveVerticalUiState(
@@ -143,7 +150,7 @@ fun CollectionHubScreen(
                             healthMetric = healthText,
                             restockMetric = restockText,
                             chromaticTone = toneText,
-                            avgCpu = if (uiState.totalCosmetics > 0) 1.20 else null,
+                            avgCpu = dynamicCpu,
                             breakdown = uiState.cosmeticsByGroup
                         ),
                         onEvent = { navTo(KoColorRoute.VanityLanding) },
@@ -171,6 +178,14 @@ fun CollectionHubScreen(
                         )
                     }
 
+                    val dynamicWardrobeCpu = if (uiState.totalClothing > 0) (uiState.totalWardrobeValue / uiState.totalClothing) * 0.05 else null
+                    
+                    val topWardrobeCategory = uiState.clothingByCategory.maxByOrNull { it.value }?.key
+                    val wardrobeToneText = if (topWardrobeCategory != null) "Signature Tone: Palette Baseline: $topWardrobeCategory" else null
+                    
+                    val activePercentage = if (uiState.totalClothing > 0) 84 else 0 // Should be computed dynamically based on usage
+                    val wardrobeHealthText = if (uiState.totalClothing > 0) "Vanity Health: Rotation Health: $activePercentage% Active" else null
+
                     ArchiveVerticalCard(
                         uiState = ArchiveVerticalUiState(
                             title = "Wardrobe",
@@ -185,9 +200,9 @@ fun CollectionHubScreen(
                             discoverColor = Color(0xFF1B2238), // Deep Navy
                             onDiscoverClick = { navTo(KoColorRoute.StarterPack(filter = "clothing", showHero = true)) },
                             categoryProgress = emptyList(),
-                            healthMetric = if (uiState.totalClothing > 0) "Rotation Health: 94% Active" else null,
-                            chromaticTone = if (uiState.totalClothing > 0) "Palette Baseline: Neutral-led · Warm-biased" else null,
-                            avgCpu = if (uiState.totalClothing > 0) 4.20 else null,
+                            healthMetric = wardrobeHealthText,
+                            chromaticTone = wardrobeToneText,
+                            avgCpu = dynamicWardrobeCpu,
                             breakdown = uiState.clothingByCategory
                         ),
                         onEvent = { navTo(KoColorRoute.WardrobeLanding) },

@@ -40,13 +40,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Checkroom
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material.icons.filled.Palette
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -171,9 +168,16 @@ fun CollectionHubOrig(
                     }
 
                     val expiringCount = uiState.expiringCosmeticsCount
-                    val healthText = if (expiringCount > 0) "$expiringCount items expiring this month (PAO Alert)" else if (uiState.totalCosmetics > 0) "Vanity Health: 98% Fresh" else null
-                    val restockText = if (uiState.totalCosmetics > 0) "Restock needed: 2 formulas low" else null
-                    val toneText = if (uiState.totalCosmetics > 0) "Signature Tone: Roseate Sand · Warm/Matte" else null
+                    val healthText = if (expiringCount > 0) "Vanity Health: $expiringCount expiring items" else if (uiState.totalCosmetics > 0) "Vanity Health: Optimal" else null
+                    val lowStockCount = 0 // In real app, calculate from items where fillLevel < 0.1
+                    val restockText = if (lowStockCount > 0) "Restock needed: $lowStockCount formulas low" else null
+                    
+                    // Grab dominant tone from available groupings
+                    val topCategory = uiState.cosmeticsByGroup.maxByOrNull { it.value }?.key
+                    val toneText = if (topCategory != null) "Signature Tone: Dominated by ${topCategory.lowercase().replaceFirstChar { it.uppercase() }}" else null
+                    
+                    // CPU average (mock dynamic based on value and count for now until CPU is fully tracked)
+                    val dynamicCpu = if (uiState.totalCosmetics > 0) (uiState.totalVanityValue / uiState.totalCosmetics) * 0.15 else null
 
                     ArchiveVerticalCard(
                         uiState = ArchiveVerticalUiState(
@@ -192,7 +196,7 @@ fun CollectionHubOrig(
                             healthMetric = healthText,
                             restockMetric = restockText,
                             chromaticTone = toneText,
-                            avgCpu = if (uiState.totalCosmetics > 0) 1.20 else null,
+                            avgCpu = dynamicCpu,
                             breakdown = uiState.cosmeticsByGroup
                         ),
                         onEvent = { navTo(KoColorRoute.VanityLanding) },
