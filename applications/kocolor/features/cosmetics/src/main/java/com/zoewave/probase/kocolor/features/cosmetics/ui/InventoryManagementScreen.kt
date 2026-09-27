@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
@@ -53,6 +54,19 @@ fun InventoryManagementScreen(
     val atelierBrown = Color(0xFF8B5E3C)
     
     Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(R.string.applications_kocolor_features_cosmetics_inventory_management_title), style = MaterialTheme.typography.titleLarge, fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold) },
+                navigationIcon = {
+                    IconButton(onClick = { navTo(KoColorRoute.Back) }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_back))
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color(0xFFFBF8F5)
+                )
+            )
+        },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { navTo(KoColorRoute.CosmeticAdd()) },
@@ -126,16 +140,8 @@ private fun HeaderSection(
 ) {
     Column(
         modifier = modifier
-            .padding(horizontal = 24.dp, vertical = 20.dp)
+            .padding(horizontal = 24.dp, vertical = 8.dp)
     ) {
-        Text(
-            text = stringResource(R.string.applications_kocolor_features_cosmetics_inventory_management_title),
-            style = MaterialTheme.typography.headlineMedium,
-            fontFamily = FontFamily.Serif,
-            fontWeight = FontWeight.Light,
-            color = Color(0xFF2C2420)
-        )
-        Spacer(modifier = Modifier.height(4.dp))
         Text(
             text = stringResource(R.string.applications_kocolor_features_cosmetics_inventory_management_desc, uiState.totalCount),
             style = MaterialTheme.typography.bodyMedium,
