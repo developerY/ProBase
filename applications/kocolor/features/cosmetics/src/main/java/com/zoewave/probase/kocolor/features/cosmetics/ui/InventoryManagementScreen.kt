@@ -14,6 +14,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -60,6 +61,11 @@ fun InventoryManagementScreen(
                 navigationIcon = {
                     IconButton(onClick = { navTo(KoColorRoute.Back) }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_back))
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { navTo(KoColorRoute.ColorSearch) }) {
+                        Icon(Icons.Default.Palette, contentDescription = "Color Search")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
