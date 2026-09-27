@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.sp
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.kocolor.features.inventory.R
+import com.zoewave.probase.kocolor.features.inventory.ui.components.KoColorFabMenu
 import com.zoewave.probase.kocolor.features.inventory.ui.components.WardrobeCard
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
@@ -70,6 +71,7 @@ fun WardrobeScreen(
     navTo: (KoColorRoute) -> Unit
 ) {
     val darkPlum = Color(0xFF5A3854)
+    var isFabMenuExpanded by remember { mutableStateOf(false) }
     
     Scaffold(
         topBar = {
@@ -88,14 +90,12 @@ fun WardrobeScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = { navTo(KoColorRoute.ClothingCapture) },
-                containerColor = darkPlum,
-                contentColor = Color.White,
-                shape = CircleShape
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Add Clothing")
-            }
+            KoColorFabMenu(
+                expanded = isFabMenuExpanded,
+                onToggle = { isFabMenuExpanded = !isFabMenuExpanded },
+                onCameraClick = { navTo(KoColorRoute.ClothingCapture) },
+                onCatalogClick = { navTo(KoColorRoute.StarterPack(filter = "clothing")) }
+            )
         },
         modifier = modifier
     ) { padding ->
