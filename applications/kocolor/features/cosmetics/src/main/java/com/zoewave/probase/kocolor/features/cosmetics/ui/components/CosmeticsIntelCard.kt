@@ -62,6 +62,8 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun CosmeticsIntelCard(
     totalItems: Int,
+    colorDistribution: List<Pair<String, Int>>,
+    harmonyScore: Int,
     onViewIntelligenceClicked: () -> Unit,
     onViewFootprintClicked: () -> Unit,
     modifier: Modifier = Modifier
@@ -266,9 +268,8 @@ fun CosmeticsIntelCard(
                                         color = Color.Gray,
                                         fontWeight = FontWeight.Bold
                                     )
-                                    val displayScore = if (totalItems > 0) "89%" else "0%"
                                     Text(
-                                        text = "$displayScore HARMONY SCORE",
+                                        text = "$harmonyScore% HARMONY SCORE",
                                         style = MaterialTheme.typography.titleSmall,
                                         fontWeight = FontWeight.Bold,
                                         color = Color.DarkGray
@@ -296,7 +297,7 @@ fun CosmeticsIntelCard(
                                 fontSize = 10.sp
                             )
                             Text(
-                                text = "5 TONES TRACKED",
+                                text = "${colorDistribution.size} TONES TRACKED",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = Color.Gray,
                                 fontSize = 10.sp
@@ -304,26 +305,45 @@ fun CosmeticsIntelCard(
                         }
 
                         // Continuous color bar
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(12.dp)
-                                .clip(RoundedCornerShape(6.dp))
-                        ) {
-                            Box(modifier = Modifier.weight(0.35f).fillMaxSize().background(Color(0xFFD4C4B7)))
-                            Box(modifier = Modifier.weight(0.25f).fillMaxSize().background(Color(0xFF2C2A29)))
-                            Box(modifier = Modifier.weight(0.18f).fillMaxSize().background(Color(0xFF7A8B76)))
-                            Box(modifier = Modifier.weight(0.12f).fillMaxSize().background(Color(0xFFC18C5D)))
-                            Box(modifier = Modifier.weight(0.10f).fillMaxSize().background(Color(0xFFC28F90)))
-                        }
-
-                        // Grid of top color tone pills
-                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            ToneRowStatic(color = Color(0xFFD4C4B7), name = "Sand Linen", percent = "35%", items = "${(totalItems * 0.35).toInt()} items")
-                            ToneRowStatic(color = Color(0xFF2C2A29), name = "Noir Espresso", percent = "25%", items = "${(totalItems * 0.25).toInt()} items")
-                            ToneRowStatic(color = Color(0xFF7A8B76), name = "Olive Sage", percent = "18%", items = "${(totalItems * 0.18).toInt()} items")
-                            ToneRowStatic(color = Color(0xFFC18C5D), name = "Warm Ochre", percent = "12%", items = "${(totalItems * 0.12).toInt()} items")
-                            ToneRowStatic(color = Color(0xFFC28F90), name = "Rose Accents", percent = "10%", items = "${(totalItems * 0.10).toInt()} items")
+                        val totalColors = colorDistribution.sumOf { it.second }.coerceAtLeast(1)
+                        if (colorDistribution.isNotEmpty()) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(12.dp)
+                                    .clip(RoundedCornerShape(6.dp))
+                            ) {
+                                colorDistribution.forEach { (hex, count) ->
+                                    val weight = (count.toFloat() / totalColors).coerceAtLeast(0.01f)
+                                    Box(
+                                        modifier = Modifier
+                                            .weight(weight)
+                                            .fillMaxSize()
+                                            .background(com.zoewave.probase.core.ui.util.parseColor(hex))
+                                    )
+                                }
+                            }
+    
+                            // Grid of top color tone pills
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                colorDistribution.forEach { (hex, count) ->
+                                    val percent = ((count.toFloat() / totalColors) * 100).toInt()
+                                    ToneRowStatic(
+                                        color = com.zoewave.probase.core.ui.util.parseColor(hex),
+                                        name = hex,
+                                        percent = "$percent%",
+                                        items = "$count items"
+                                    )
+                                }
+                            }
+                        } else {
+                            Text(
+                                text = "Add items with assigned colors to see your chromatic DNA.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.Gray,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp)
+                            )
                         }
 
                         Row(
@@ -332,7 +352,7 @@ fun CosmeticsIntelCard(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Season Match: 86% in active palette",
+                                text = "Season Match: ${harmonyScore.coerceAtMost(95)}% in active palette",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = Color.Gray
                             )
@@ -369,6 +389,8 @@ private fun CosmeticsIntelCardPreview() {
         Box(modifier = Modifier.padding(16.dp)) {
             CosmeticsIntelCard(
                 totalItems = 175,
+                colorDistribution = listOf("#D4C4B7" to 60, "#2C2A29" to 43, "#7A8B76" to 31),
+                harmonyScore = 89,
                 onViewIntelligenceClicked = {},
                 onViewFootprintClicked = {}
             )

@@ -63,6 +63,8 @@ data class HomeUiState(
     val wardrobeActivePercentage: Int = 0,
     val totalVanityValue: Double = 0.0,
     val totalWardrobeValue: Double = 0.0,
+    val vanityColorDistribution: List<Pair<String, Int>> = emptyList(),
+    val vanityHarmonyScore: Int = 0,
     val cosmeticsByGroup: Map<String, Int> = emptyMap(),
     val clothingByCategory: Map<String, Int> = emptyMap(),
     val wellnessInsights: List<SkinInsight> = emptyList(),
@@ -211,6 +213,12 @@ class HomeViewModel @Inject constructor(
         
         val activeItems = clothing.count { it.toModel().usageCount > 0 }
         val activePercentage = if (clothing.isNotEmpty()) ((activeItems.toDouble() / clothing.size.toDouble()) * 100).toInt() else 0
+        
+        // Calculate real color distribution for cosmetics
+        val cosmeticColors = cosmetics.mapNotNull { it.toModel().colorHex }.filter { it.isNotBlank() }
+        val colorCounts = cosmeticColors.groupingBy { it.uppercase() }.eachCount()
+        val sortedColors = colorCounts.entries.sortedByDescending { it.value }.take(5).map { it.key to it.value }
+        val harmonyScore = if (cosmeticColors.isNotEmpty()) minOf(100, (sortedColors.size * 20) + (totalVanityValue / 100).toInt()) else 0
 
         
         val categoryProgressList = cosmeticsByGroup.map { (key, count) ->
