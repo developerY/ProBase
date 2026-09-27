@@ -308,7 +308,7 @@ fun ArchiveVerticalCard(
                         }
 
                         if (uiState.categoryProgress.isNotEmpty()) {
-                            HorizontalDivider(color = Color.Black.copy(alpha = 0.08f), thickness = 1.dp)
+                            HorizontalDivider(color = Color.Black.copy(alpha = 0.05f), thickness = 1.dp)
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -406,7 +406,7 @@ fun ArchiveVerticalCard(
                         }
 
                         if (uiState.chromaticTone != null || uiState.healthMetric != null || uiState.restockMetric != null) {
-                            HorizontalDivider(color = Color.Black.copy(alpha = 0.08f), thickness = 1.dp)
+                            HorizontalDivider(color = Color.Black.copy(alpha = 0.05f), thickness = 1.dp)
                             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 uiState.chromaticTone?.let { tone ->
                                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -429,18 +429,19 @@ fun ArchiveVerticalCard(
                                     }
                                 }
                                 uiState.healthMetric?.let { health ->
+                                    val prefix = if (health.contains("Vanity Health:")) "Vanity Health: " else "Rotation Health: "
                                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                         Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = Color(0xFFE91E63), modifier = Modifier.size(14.dp))
                                         Row {
                                             Text(
-                                                text = "Vanity Health: ",
+                                                text = prefix,
                                                 style = MaterialTheme.typography.labelSmall,
                                                 fontWeight = FontWeight.Bold,
-                                                color = Color(0xFFC62828),
+                                                color = Color(0xFFE91E63), // Pink from original screenshot
                                                 fontSize = 11.sp
                                             )
                                             Text(
-                                                text = health.removePrefix("Vanity Health: ").removeSuffix(" (PAO Alert)"),
+                                                text = health.removePrefix(prefix).removePrefix("Vanity Health: ").removeSuffix(" (PAO Alert)"),
                                                 style = MaterialTheme.typography.labelSmall,
                                                 color = Color.DarkGray,
                                                 fontSize = 11.sp
@@ -456,7 +457,7 @@ fun ArchiveVerticalCard(
                                                 text = "Restock needed: ",
                                                 style = MaterialTheme.typography.labelSmall,
                                                 fontWeight = FontWeight.Bold,
-                                                color = Color(0xFFE65100),
+                                                color = Color(0xFFFB8C00),
                                                 fontSize = 11.sp
                                             )
                                             Text(

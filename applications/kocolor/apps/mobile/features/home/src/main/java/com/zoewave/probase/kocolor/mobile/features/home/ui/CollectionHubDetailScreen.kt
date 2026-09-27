@@ -167,18 +167,10 @@ fun CollectionHubOrig(
                         )
                     }
 
-                    val expiringCount = uiState.expiringCosmeticsCount
-                    val healthText = if (expiringCount > 0) "Vanity Health: $expiringCount expiring items" else if (uiState.totalCosmetics > 0) "Vanity Health: Optimal" else null
-                    val lowStockCount = 0 // In real app, calculate from items where fillLevel < 0.1
-                    val restockText = if (lowStockCount > 0) "Restock needed: $lowStockCount formulas low" else null
+                    val healthText = if (uiState.expiringCosmeticsCount > 0) "Vanity Health: ${uiState.expiringCosmeticsCount} expiring items" else if (uiState.totalCosmetics > 0) "Vanity Health: Optimal" else null
+                    val restockText = if (uiState.lowStockCosmeticsCount > 0) "Restock needed: ${uiState.lowStockCosmeticsCount} formulas low" else null
+                    val toneText = uiState.dominantCosmeticsTone?.let { "Signature Tone: Dominated by ${it.lowercase().replaceFirstChar { char -> char.uppercase() }}" }
                     
-                    // Grab dominant tone from available groupings
-                    val topCategory = uiState.cosmeticsByGroup.maxByOrNull { it.value }?.key
-                    val toneText = if (topCategory != null) "Signature Tone: Dominated by ${topCategory.lowercase().replaceFirstChar { it.uppercase() }}" else null
-                    
-                    // CPU average (mock dynamic based on value and count for now until CPU is fully tracked)
-                    val dynamicCpu = if (uiState.totalCosmetics > 0) (uiState.totalVanityValue / uiState.totalCosmetics) * 0.15 else null
-
                     ArchiveVerticalCard(
                         uiState = ArchiveVerticalUiState(
                             title = "Vanity",
@@ -196,7 +188,7 @@ fun CollectionHubOrig(
                             healthMetric = healthText,
                             restockMetric = restockText,
                             chromaticTone = toneText,
-                            avgCpu = dynamicCpu,
+                            avgCpu = uiState.avgCosmeticsCpu,
                             breakdown = uiState.cosmeticsByGroup
                         ),
                         onEvent = { navTo(KoColorRoute.VanityLanding) },

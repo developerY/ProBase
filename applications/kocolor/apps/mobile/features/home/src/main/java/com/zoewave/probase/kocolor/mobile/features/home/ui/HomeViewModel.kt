@@ -55,6 +55,12 @@ data class HomeUiState(
     val totalCosmetics: Int = 0,
     val totalClothing: Int = 0,
     val expiringCosmeticsCount: Int = 0,
+    val lowStockCosmeticsCount: Int = 0,
+    val dominantCosmeticsTone: String? = null,
+    val dominantWardrobeTone: String? = null,
+    val avgCosmeticsCpu: Double? = null,
+    val avgWardrobeCpu: Double? = null,
+    val wardrobeActivePercentage: Int = 0,
     val totalVanityValue: Double = 0.0,
     val totalWardrobeValue: Double = 0.0,
     val cosmeticsByGroup: Map<String, Int> = emptyMap(),
@@ -188,6 +194,23 @@ class HomeViewModel @Inject constructor(
             val item = entity.toModel()
             item.estimatedExpiry?.let { expiry -> (expiry - now) in 0..thirtyDaysInMillis } ?: false
         }
+        
+        val lowStockCount = cosmetics.count { entity ->
+            val item = entity.toModel()
+            item.fillLevel != null && item.fillLevel!! < 0.1
+        }
+        
+        val domCosmeticsTone = cosmeticsByGroup.maxByOrNull { it.value }?.key
+        val domWardrobeTone = clothingByCategory.maxByOrNull { it.value }?.key
+        
+        val totalCosmeticUses = cosmetics.sumOf { it.toModel().usageCount }.toDouble()
+        val avgCosCpu = if (totalCosmeticUses > 0) totalVanityValue / totalCosmeticUses else null
+        
+        val totalWardrobeUses = clothing.sumOf { it.toModel().usageCount }.toDouble()
+        val avgWardrobeCpu = if (totalWardrobeUses > 0) totalWardrobeValue / totalWardrobeUses else null
+        
+        val activeItems = clothing.count { it.toModel().usageCount > 0 }
+        val activePercentage = if (clothing.isNotEmpty()) ((activeItems.toDouble() / clothing.size.toDouble()) * 100).toInt() else 0
 
         
         val categoryProgressList = cosmeticsByGroup.map { (key, count) ->
