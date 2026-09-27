@@ -121,10 +121,14 @@ fun CollectionHubOrig(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { /* Notifications */ }) {
-                        Icon(Icons.Default.NotificationsNone, contentDescription = stringResource(R.string.applications_kocolor_apps_mobile_features_home_hub_notifications))
+                    IconButton(onClick = { navTo(KoColorRoute.ColorSearch) }) {
+                        Icon(
+                            Icons.Default.Palette,
+                            contentDescription = stringResource(R.string.applications_kocolor_apps_mobile_features_home_hub_search_all)
+                        )
                     }
                 },
+
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent)
             )
         },
@@ -136,37 +140,7 @@ fun CollectionHubOrig(
                 .fillMaxSize()
                 .padding(horizontal = 20.dp)
         ) {
-            // Unified Search Section
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 16.dp)
-                    .height(56.dp)
-                    .clickable { navTo(KoColorRoute.ColorSearch) },
-                shape = RoundedCornerShape(12.dp),
-                color = MaterialTheme.colorScheme.surface,
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE0E0E0))
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(Icons.Default.Search, null, tint = Color.Gray)
-                    Spacer(Modifier.width(12.dp))
-                    Text(
-                        text = stringResource(R.string.applications_kocolor_apps_mobile_features_home_hub_search_all),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Gray,
-                        modifier = Modifier.weight(1f)
-                    )
-                    IconButton(onClick = { navTo(KoColorRoute.ColorSearch) }) {
-                        Icon(Icons.Default.Palette, null, tint = Color.Gray)
-                    }
-                    IconButton(onClick = { navTo(KoColorRoute.Camera("color_scan")) }) {
-                        Icon(Icons.Default.CameraAlt, null, tint = Color.Gray)
-                    }
-                }
-            }
+
 
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(24.dp),

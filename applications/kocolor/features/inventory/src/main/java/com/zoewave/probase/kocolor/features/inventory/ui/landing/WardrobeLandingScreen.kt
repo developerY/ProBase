@@ -19,13 +19,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Inventory2
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -54,6 +50,7 @@ import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeEvent
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeUiState
 import com.zoewave.probase.kocolor.features.inventory.ui.components.AtelierWardrobeCard
 import com.zoewave.probase.kocolor.features.inventory.ui.components.AtelierWardrobeUiState
+import com.zoewave.probase.kocolor.features.inventory.ui.components.KoColorFabMenu
 import com.zoewave.probase.kocolor.features.inventory.ui.components.RecentClothingCard
 import com.zoewave.probase.kocolor.features.inventory.ui.components.WardrobeTaxonomyDialog
 import com.zoewave.probase.kocolor.model.KoColorRoute
@@ -91,7 +88,7 @@ fun WardrobeLandingScreen(
     onEvent: (WardrobeEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    var showAddBottomSheet by remember { mutableStateOf(false) }
+    var isFabMenuExpanded by remember { mutableStateOf(false) }
     
     Scaffold(
         topBar = {
@@ -118,25 +115,17 @@ fun WardrobeLandingScreen(
                             contentDescription = stringResource(R.string.applications_kocolor_features_inventory_inventory)
                         )
                     }
-                    IconButton(onClick = { navTo(KoColorRoute.ColorSearch) }) {
-                        Icon(
-                            Icons.Default.Search,
-                            contentDescription = stringResource(R.string.applications_kocolor_features_inventory_search)
-                        )
-                    }
+
                 }
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = { showAddBottomSheet = true },
-                containerColor = Color(0xFF5A3854), // Dark Plum matching image
-                contentColor = Color.White,
-                shape = CircleShape,
-                elevation = FloatingActionButtonDefaults.elevation(8.dp)
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Discover Fashion")
-            }
+            KoColorFabMenu(
+                expanded = isFabMenuExpanded,
+                onToggle = { isFabMenuExpanded = !isFabMenuExpanded },
+                onCameraClick = { navTo(KoColorRoute.ClothingCapture) },
+                onCatalogClick = { navTo(KoColorRoute.StarterPack(filter = "clothing")) }
+            )
         },
         modifier = modifier
     ) { padding ->
@@ -157,7 +146,7 @@ fun WardrobeLandingScreen(
                     remember { com.zoewave.probase.kocolor.features.inventory.domain.WardrobeAnalyticsEngine() }
                 val analytics = remember(uiState.items) { engine.computeAnalytics(uiState.items) }
 
-                // Not used rigth now ...
+                // Not used right now ... but we want to keep this
                 /*
                 CuratedClosetDashboard(
                     analytics = analytics,
@@ -285,6 +274,8 @@ fun WardrobeLandingScreen(
                 }
             }
 
+
+
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
                     Row(
@@ -322,5 +313,7 @@ fun WardrobeLandingScreen(
                 }
             }
         }
+        
+
     }
 }

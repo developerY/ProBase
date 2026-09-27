@@ -26,14 +26,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.Inventory2
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -60,10 +58,13 @@ import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.core.model.ritual.MicroCategory
 import com.zoewave.probase.kocolor.features.cosmetics.R
+import com.zoewave.probase.kocolor.features.cosmetics.ui.components.AdvancedImportButton
+import com.zoewave.probase.kocolor.features.cosmetics.ui.components.KoColorFabMenu
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.ProfessionalTaxonomyDialog
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.RecentProductCard
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.VanityCategoryCard
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.VanityCategoryUiState
+import com.zoewave.probase.kocolor.features.cosmetics.ui.components.VanityInventoryCard
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
 @Preview(showBackground = true)
@@ -81,7 +82,7 @@ private fun VanityLandingScreenPreview() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
 @Composable
 fun VanityLandingScreen(
     uiState: CosmeticsUiState,
@@ -89,8 +90,9 @@ fun VanityLandingScreen(
     onEvent: (CosmeticsEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    var showTaxonomyInfo by remember { mutableStateOf(false) }
     var showAddBottomSheet by remember { mutableStateOf(false) }
+    var showTaxonomyInfo by remember { mutableStateOf(false) }
+    var isFabMenuExpanded by remember { mutableStateOf(false) }
 
     // --- Shimmer Animation Logic ---
     val infiniteTransition = rememberInfiniteTransition(label = "shimmer")
@@ -127,25 +129,27 @@ fun VanityLandingScreen(
                     IconButton(onClick = { navTo(KoColorRoute.InventoryManagement) }) { 
                         Icon(Icons.Default.Inventory2, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_inventory_title), tint = Color.DarkGray) 
                     }
-                    IconButton(onClick = { navTo(KoColorRoute.ColorSearch) }) { 
-                        Icon(Icons.Default.Search, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_filter), tint = Color.DarkGray) 
-                    }
+
                 },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color(0xFFFCF9F6)
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color(0xFFFCF9F6),
+                    scrolledContainerColor = Color.Unspecified,
+                    navigationIconContentColor = Color.Unspecified,
+                    titleContentColor = Color.Unspecified,
+                    actionIconContentColor = Color.Unspecified
                 )
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = { showAddBottomSheet = true },
-                containerColor = Color(0xFF5A3854), // Dark Plum matching image
-                contentColor = Color.White,
-                shape = CircleShape,
-                elevation = FloatingActionButtonDefaults.elevation(8.dp)
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Discover Collections")
-            }
+            KoColorFabMenu(
+                expanded = isFabMenuExpanded,
+                onToggle = { isFabMenuExpanded = !isFabMenuExpanded },
+                onBarcodeClick = { navTo(KoColorRoute.BarcodeScanner) },
+                onCameraClick = { navTo(KoColorRoute.BoxCapture(mode = "PRODUCT")) },
+                onBoxScanClick = { navTo(KoColorRoute.BoxCapture(mode = "BOX")) },
+
+                onStoreCatalogClick = { navTo(KoColorRoute.StarterPack(filter = "cosmetics")) }
+            )
         },
         modifier = modifier
     ) { padding ->
@@ -157,6 +161,7 @@ fun VanityLandingScreen(
             contentPadding = PaddingValues(24.dp),
             verticalArrangement = Arrangement.spacedBy(32.dp)
         ) {
+
             item {
                 Column {
                     Text(
@@ -185,12 +190,24 @@ fun VanityLandingScreen(
             }
 
             item {
-                com.zoewave.probase.kocolor.features.cosmetics.ui.components.VanityInventoryCard(
+                VanityInventoryCard(
                     totalItems = uiState.totalCosmetics,
                     totalValue = uiState.totalValue,
                     expiringCount = uiState.expiringCosmeticsCount,
                     onViewInventoryClicked = { navTo(KoColorRoute.InventoryManagement) },
                     onViewExpiringClicked = { navTo(KoColorRoute.ExpiringSoon) }
+                )
+            }
+
+            item {
+               AdvancedImportButton(
+                    onBarcodeClick = { navTo(KoColorRoute.BarcodeScanner) },
+                    onProductClick = { navTo(KoColorRoute.BoxCapture(mode = "PRODUCT")) },
+                    onBoxClick = { navTo(KoColorRoute.BoxCapture(mode = "BOX")) },
+                    onCatalogClick = { navTo(KoColorRoute.StarterPack(filter = "cosmetics")) },
+                    onExpandClick = { showAddBottomSheet = true },
+                    labelPrefix = "COSMETICS VAULT",
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
 
@@ -261,6 +278,19 @@ fun VanityLandingScreen(
             }
 
             item {
+                Button(
+                    onClick = { showAddBottomSheet = true },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF5A3854),
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text("Open Advanced Import Options")
+                }
+            }
+
+            item {
                 Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -291,16 +321,6 @@ fun VanityLandingScreen(
                     }
                 }
             }
-        }
-        
-        if (showAddBottomSheet) {
-            com.zoewave.probase.kocolor.features.cosmetics.ui.components.AddProductBottomSheet(
-                onDismiss = { showAddBottomSheet = false },
-                onBarcodeScan = { navTo(KoColorRoute.BarcodeScanner) },
-                onProductScan = { navTo(KoColorRoute.BoxCapture(mode = "PRODUCT")) },
-                onBoxScan = { navTo(KoColorRoute.BoxCapture(mode = "BOX")) },
-                onStoreCatalog = { navTo(KoColorRoute.StarterPack(filter = "cosmetics")) }
-            )
         }
     }
 }

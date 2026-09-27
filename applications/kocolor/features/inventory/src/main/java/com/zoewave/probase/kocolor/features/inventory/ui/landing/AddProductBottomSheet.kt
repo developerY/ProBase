@@ -2,14 +2,13 @@ package com.zoewave.probase.kocolor.features.inventory.ui.landing
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.Box
-
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -30,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -115,7 +115,7 @@ fun AddProductBottomSheet(
                 )
                 BottomSheetCaptureButton(
                     title = "Store Catalog",
-                    subtitle = "Search OBF",
+                    subtitle = "Search Database",
                     icon = Icons.Default.Storefront,
                     color = Color(0xFF10b981),
                     onClick = { 
@@ -156,5 +156,19 @@ private fun BottomSheetCaptureButton(
                 Text(subtitle, style = MaterialTheme.typography.labelSmall, color = Color.Gray)
             }
         }
+    }
+}
+
+@Preview
+@Composable
+private fun AddProductBottomSheetPreview() {
+    MaterialTheme {
+        AddProductBottomSheet(
+            onDismiss = {},
+            onBarcodeScan = {},
+            onProductScan = {},
+            onBoxScan = {},
+            onStoreCatalog = {}
+        )
     }
 }
