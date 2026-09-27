@@ -123,7 +123,7 @@ fun CollectionHubOrig(
                 actions = {
                     IconButton(onClick = { navTo(KoColorRoute.ColorSearch) }) {
                         Icon(
-                            Icons.Default.Search,
+                            Icons.Default.Palette,
                             contentDescription = stringResource(R.string.applications_kocolor_apps_mobile_features_home_hub_search_all)
                         )
                     }
