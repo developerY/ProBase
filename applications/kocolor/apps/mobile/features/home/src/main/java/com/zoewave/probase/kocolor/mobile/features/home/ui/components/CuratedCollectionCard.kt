@@ -1,5 +1,11 @@
 package com.zoewave.probase.kocolor.mobile.features.home.ui.components
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.DeleteOutline
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Image
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -48,74 +54,151 @@ fun CuratedCollectionCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp)
-            .clickable { onEvent() },
+            .padding(vertical = 4.dp),
+        onClick = { onEvent() },
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(modifier = Modifier.padding(24.dp)) {
+        Column(modifier = Modifier.padding(16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.Top
             ) {
-                Text(
-                    text = dateStr,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = Color.Gray.copy(alpha = 0.6f)
-                )
-
-                // Seasonal Badge
-                Surface(
-                    color = Color(0xFFF3E5F5), // Light Lavender
-                    shape = RoundedCornerShape(4.dp)
-                ) {
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = analysis.advice.seasonalType.name.uppercase(),
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Black,
-                        color = Color(0xFF745E7A),
-                        letterSpacing = 1.sp
+                        text = dateStr,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = Color.Gray.copy(alpha = 0.8f)
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Surface(
+                        color = Color(0xFFE8E0FD), // Soft Lavender
+                        shape = RoundedCornerShape(6.dp)
+                    ) {
+                        Text(
+                            text = analysis.advice.seasonalType.name.uppercase(),
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF673AB7), // Deep Purple
+                            letterSpacing = 1.sp
+                        )
+                    }
+                }
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    androidx.compose.material3.IconButton(
+                        onClick = { /* TODO: Duplicate */ },
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        androidx.compose.material3.Icon(
+                            imageVector = Icons.Default.ContentCopy,
+                            contentDescription = "Duplicate",
+                            tint = Color.Gray,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                    androidx.compose.material3.IconButton(
+                        onClick = onEvent,
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        androidx.compose.material3.Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = "Edit",
+                            tint = Color.Gray,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                    androidx.compose.material3.IconButton(
+                        onClick = { /* TODO: Delete */ },
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        androidx.compose.material3.Icon(
+                            imageVector = Icons.Default.DeleteOutline,
+                            contentDescription = "Delete",
+                            tint = Color.Gray,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                val heroImage = analysis.advice.clothesUri 
+                    ?: analysis.advice.outfitSuggestions.flatMap { it.suggestedItems }.firstOrNull { it.imageUrl != null }?.imageUrl
+                    ?: analysis.advice.makeupSuggestions.firstOrNull { it.suggestedProductImageUrl != null }?.suggestedProductImageUrl
+                
+                if (heroImage != null) {
+                    coil.compose.AsyncImage(
+                        model = heroImage,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(100.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color(0xFFF5F5F5)),
+                        contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .size(100.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color(0xFFF5F5F5)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        androidx.compose.material3.Icon(
+                            Icons.Default.Image,
+                            contentDescription = null,
+                            tint = Color.LightGray
+                        )
+                    }
+                }
+
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = analysis.advice.title ?: "The Personal Collection",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
+                    
+                    Spacer(Modifier.height(8.dp))
+                    
+                    Text(
+                        text = analysis.advice.summary.removePrefix("Local Architect: "),
+                        style = MaterialTheme.typography.bodySmall,
+                        maxLines = 4,
+                        overflow = TextOverflow.Ellipsis,
+                        color = Color.DarkGray,
+                        lineHeight = 16.sp
                     )
                 }
             }
 
             Spacer(Modifier.height(16.dp))
 
-            Text(
-                text = analysis.advice.title ?: "The Personal Collection",
-                style = MaterialTheme.typography.headlineSmall,
-                fontFamily = FontFamily.Serif,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF1A1A1A)
-            )
-
-            Spacer(Modifier.height(8.dp))
-
-            Text(
-                text = "Local Architect: ${analysis.advice.summary}",
-                style = MaterialTheme.typography.bodyMedium,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                color = Color.Gray,
-                lineHeight = 20.sp
-            )
-
-            Spacer(Modifier.height(20.dp))
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 analysis.advice.recommendedPalette.take(4).forEach { hex ->
                     Box(
                         modifier = Modifier
-                            .size(32.dp)
+                            .size(28.dp)
                             .clip(CircleShape)
                             .background(parseColor(hex))
-                            .border(1.dp, Color.Black.copy(alpha = 0.05f), CircleShape)
+                            .border(1.dp, Color.Black.copy(alpha = 0.1f), CircleShape)
                     )
                 }
             }

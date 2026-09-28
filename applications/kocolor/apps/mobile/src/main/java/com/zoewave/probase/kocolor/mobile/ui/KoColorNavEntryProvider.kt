@@ -3,6 +3,9 @@ package com.zoewave.probase.kocolor.mobile.ui
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -84,6 +87,7 @@ import com.zoewave.probase.kocolor.mobile.features.color.ui.ColorViewModel
 import com.zoewave.probase.kocolor.mobile.features.color.ui.hub.ColorHubScreen
 import com.zoewave.probase.kocolor.mobile.features.color.ui.hub.ColorHubViewModel
 import com.zoewave.probase.kocolor.mobile.features.home.ui.CollectionDetailScreen
+import com.zoewave.probase.kocolor.mobile.features.home.ui.CollectionDetailViewModel
 import com.zoewave.probase.kocolor.mobile.features.home.ui.CollectionHubScreen
 import com.zoewave.probase.kocolor.mobile.features.home.ui.HomeUiRoute
 import com.zoewave.probase.kocolor.mobile.features.home.ui.HomeViewModel
@@ -184,15 +188,28 @@ fun koColorNavEntryProvider(
             )
         }
         is KoColorRoute.CollectionDetail -> NavEntry(route) {
-            val viewModel: HomeViewModel = hiltViewModel()
-            val state by viewModel.uiState.collectAsStateWithLifecycle()
-            val analysis = state.savedSuggestions.find { it.id == route.collectionId }
+            val viewModel: CollectionDetailViewModel = hiltViewModel()
+            val analysis by viewModel.analysis.collectAsStateWithLifecycle()
+            
+            LaunchedEffect(route.collectionId) {
+                viewModel.loadAnalysis(route.collectionId)
+            }
+            
+            // Add a fallback condition so it never renders a completely blank screen
             if (analysis != null) {
                 CollectionDetailScreen(
-                    uiState = com.zoewave.probase.kocolor.mobile.features.home.ui.CollectionDetailUiState(analysis),
+                    uiState = com.zoewave.probase.kocolor.mobile.features.home.ui.CollectionDetailUiState(analysis!!),
                     onEvent = {},
                     navTo = onNavigateTo
                 )
+            } else {
+                // If it"s still loading or not found, show a loader or fallback
+                androidx.compose.foundation.layout.Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    androidx.compose.material3.CircularProgressIndicator()
+                }
             }
         }
         is KoColorRoute.ColorSearch -> NavEntry(route) {
