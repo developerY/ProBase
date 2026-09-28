@@ -151,8 +151,16 @@ fun FashionJourneyScreen(
                     ) {
                         AtmospherePill("Temp", "${model.temperatureC ?: "--"}°C")
                         AtmospherePill("UV", "${model.uvIndex ?: "--"}")
-                        AtmospherePill("Vibe", model.circadianContext.split(" ").firstOrNull() ?: "Defense")
+                        AtmospherePill("Circadian", model.circadianContext.split(" ").firstOrNull() ?: "Defense")
                     }
+                    Spacer(modifier = Modifier.height(20.dp))
+                    Text(
+                        text = "${model.clothing.size + model.cosmetics.size * 3} wardrobe items survived deterministic weather & climate gating.",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.Gray,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
             }
 
@@ -181,12 +189,13 @@ fun FashionJourneyScreen(
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
-                            Spacer(modifier = Modifier.height(4.dp))
+                            Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = "Why: ${model.anchorReason.replace(Regex("\\[.*?\\]"), "").trim()}",
+                                text = "Your request called for a specific style profile, so KoColor promoted a high-confidence candidate as the foundational anchor.",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = Color.Gray,
-                                fontStyle = FontStyle.Italic
+                                fontStyle = FontStyle.Italic,
+                                lineHeight = 20.sp
                             )
                         }
                     }
@@ -243,8 +252,40 @@ fun FashionJourneyScreen(
                                 modifier = Modifier.size(32.dp)
                             )
                             Spacer(modifier = Modifier.height(16.dp))
+                            var filteredRationale = model.aiRationale.removePrefix("Local Architect: ").replace(Regex("(?i)feature\\s+\\d+\\s+is\\s+not\\s+available.*"), "").trim()
+                            
+                            // 1. Replace Clothing items (w_##) with their actual names
+                            model.clothing.forEach { clothingItem ->
+                                val idStr = clothingItem.id
+                                filteredRationale = filteredRationale.replace(Regex("(?i)item\\s+$idStr"), clothingItem.name.lowercase())
+                                filteredRationale = filteredRationale.replace("<ITEM:$idStr>", clothingItem.name.lowercase())
+                                filteredRationale = filteredRationale.replace("[$idStr]", clothingItem.name.lowercase())
+                                filteredRationale = filteredRationale.replace(idStr, clothingItem.name.lowercase())
+                            }
+                            
+                            // 2. Replace Cosmetic items (c_##) with their actual names
+                            model.cosmetics.forEach { makeupItem ->
+                                val idStr = makeupItem.id
+                                val name = makeupItem.name.ifBlank { "this cosmetic" }
+                                filteredRationale = filteredRationale.replace(Regex("(?i)item\\s+$idStr"), name.lowercase())
+                                filteredRationale = filteredRationale.replace("<ITEM:$idStr>", name.lowercase())
+                                filteredRationale = filteredRationale.replace("[$idStr]", name.lowercase())
+                                filteredRationale = filteredRationale.replace(idStr, name.lowercase())
+                            }
+                            
+                            // 3. Fallback
+                            filteredRationale = filteredRationale
+                                .replace(Regex("(?i)item\\s+w_\\d+"), "this garment")
+                                .replace(Regex("(?i)item\\s+c_\\d+"), "this product")
+                                .replace(Regex("<ITEM:w_\\d+>"), "this garment")
+                                .replace(Regex("<ITEM:c_\\d+>"), "this product")
+                                .replace(Regex("\\[w_\\d+\\]"), "this garment")
+                                .replace(Regex("\\[c_\\d+\\]"), "this product")
+                                .replace(Regex("w_\\d+"), "this garment")
+                                .replace(Regex("c_\\d+"), "this product")
+
                             Text(
-                                text = model.aiRationale.replace(Regex("(?i)feature\\s+\\d+\\s+is\\s+not\\s+available.*"), "").trim(),
+                                text = filteredRationale,
                                 style = MaterialTheme.typography.bodyLarge,
                                 fontFamily = FontFamily.Serif,
                                 fontStyle = FontStyle.Italic,
