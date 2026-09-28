@@ -93,7 +93,8 @@ data class StyleCreationUiModel(
         AuditStep(2, "Deterministic Pruning", "Inventory evaluated and weather-gated."),
         AuditStep(3, "Mathematical Scoring", "Top candidates ranked by relational color harmony."),
         AuditStep(4, "AI Synthesis & Validation", "Synthesized blueprint validated across 4 cosmetic roles.")
-    )
+    ),
+    val rawAuditLog: String? = null
 )
 
 data class StyleItemUiModel(
