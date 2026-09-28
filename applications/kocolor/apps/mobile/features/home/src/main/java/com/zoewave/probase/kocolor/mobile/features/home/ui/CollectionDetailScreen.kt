@@ -350,14 +350,14 @@ fun CollectionDetailScreen(
                         initialExpanded = false
                     )
                 }
-                item {
+item {
                     Spacer(Modifier.height(12.dp))
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(24.dp),
                         colors = CardDefaults.cardColors(containerColor = Color(0xFFF3F3F7)), // Very subtle light gray/lavender
                         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-                        onClick = { navTo(KoColorRoute.StyleResult(intent = advice.title ?: "Daily Outfit")) }
+                        onClick = { navTo(KoColorRoute.FashionJourney(intent = advice.title ?: "Daily Outfit")) }
                     ) {
                         Row(
                             modifier = Modifier
@@ -372,20 +372,20 @@ fun CollectionDetailScreen(
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.AutoAwesome,
-                                    contentDescription = "Style Result Analysis",
+                                    contentDescription = "Style Journey & Analysis",
                                     tint = Color(0xFFD4AF37), // Gold star/sparkle color
                                     modifier = Modifier.size(28.dp)
                                 )
                                 Spacer(modifier = Modifier.width(16.dp))
                                 Column {
                                     Text(
-                                        text = "View Style Result Analysis",
+                                        text = "View Style Journey & Analysis",
                                         style = MaterialTheme.typography.titleMedium,
                                         fontWeight = FontWeight.Bold,
                                         color = Color.Black
                                     )
                                     Text(
-                                        text = "Inspect complete score breakdown, intent fulfillment & audit logs",
+                                        text = "Inspect fashionista score, decision timeline & audit logs",
                                         style = MaterialTheme.typography.bodySmall,
                                         color = Color.Gray
                                     )
@@ -393,57 +393,7 @@ fun CollectionDetailScreen(
                             }
                             Icon(
                                 imageVector = Icons.Default.ChevronRight,
-                                contentDescription = "Open Analysis",
-                                tint = Color(0xFFD4AF37)
-                            )
-                        }
-                    }
-                }
-
-                item {
-                    Spacer(Modifier.height(12.dp))
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(24.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFF3F3F7)), // Very subtle light gray/lavender
-                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-                        onClick = { navTo(KoColorRoute.StyleCreationStory(intent = advice.title ?: "Daily Outfit")) }
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(24.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.AutoAwesome,
-                                    contentDescription = "Style Creation Story",
-                                    tint = Color(0xFFD4AF37), // Gold
-                                    modifier = Modifier.size(28.dp)
-                                )
-                                Spacer(modifier = Modifier.width(16.dp))
-                                Column {
-                                    Text(
-                                        text = "View Style Creation Story",
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color.Black
-                                    )
-                                    Text(
-                                        text = "Inspect step-by-step decision timeline & architecture logs",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = Color.Gray
-                                    )
-                                }
-                            }
-                            Icon(
-                                imageVector = Icons.Default.ChevronRight,
-                                contentDescription = "Open Story",
+                                contentDescription = "Open Journey",
                                 tint = Color(0xFFD4AF37)
                             )
                         }
