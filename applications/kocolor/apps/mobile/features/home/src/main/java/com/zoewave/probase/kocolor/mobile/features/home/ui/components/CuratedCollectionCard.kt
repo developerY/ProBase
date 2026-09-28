@@ -184,6 +184,7 @@ fun CuratedCollectionCard(
                             val idStr = "w_$itemId"
                             filteredSummary = filteredSummary.replace(Regex("(?i)item\\s+$idStr"), clothingName.lowercase())
                             filteredSummary = filteredSummary.replace("<ITEM:$idStr>", clothingName.lowercase())
+                            filteredSummary = filteredSummary.replace("[$idStr]", clothingName.lowercase())
                             filteredSummary = filteredSummary.replace(idStr, clothingName.lowercase())
                         }
                     }
@@ -195,6 +196,7 @@ fun CuratedCollectionCard(
                             val name = makeupItem.suggestedProductName ?: "this cosmetic"
                             filteredSummary = filteredSummary.replace(Regex("(?i)item\\s+$idStr"), name.lowercase())
                             filteredSummary = filteredSummary.replace("<ITEM:$idStr>", name.lowercase())
+                            filteredSummary = filteredSummary.replace("[$idStr]", name.lowercase())
                             filteredSummary = filteredSummary.replace(idStr, name.lowercase())
                         }
                     }

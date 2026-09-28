@@ -261,8 +261,10 @@ fun CollectionDetailScreen(
                                         outfit.wardrobeItemIds.forEachIndexed { index, itemId ->
                                             val clothingName = outfit.suggestedItems.getOrNull(index)?.name ?: "this garment"
                                             val idStr = "w_$itemId"
+                                            // Handle various AI output formats: "item w_32", "<ITEM:w_32>", "[w_32]", "w_32"
                                             filteredSummary = filteredSummary.replace(Regex("(?i)item\\s+$idStr"), clothingName.lowercase())
                                             filteredSummary = filteredSummary.replace("<ITEM:$idStr>", clothingName.lowercase())
+                                            filteredSummary = filteredSummary.replace("[$idStr]", clothingName.lowercase())
                                             filteredSummary = filteredSummary.replace(idStr, clothingName.lowercase())
                                         }
                                     }
@@ -274,6 +276,7 @@ fun CollectionDetailScreen(
                                             val name = makeupItem.suggestedProductName ?: "this cosmetic"
                                             filteredSummary = filteredSummary.replace(Regex("(?i)item\\s+$idStr"), name.lowercase())
                                             filteredSummary = filteredSummary.replace("<ITEM:$idStr>", name.lowercase())
+                                            filteredSummary = filteredSummary.replace("[$idStr]", name.lowercase())
                                             filteredSummary = filteredSummary.replace(idStr, name.lowercase())
                                         }
                                     }
@@ -352,13 +355,14 @@ fun CollectionDetailScreen(
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(24.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFF3F3F7)), // Very subtle light gray/lavender
+                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                         onClick = { navTo(KoColorRoute.StyleResult(intent = advice.title ?: "Daily Outfit")) }
                     ) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(20.dp),
+                                .padding(24.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -369,7 +373,7 @@ fun CollectionDetailScreen(
                                 Icon(
                                     imageVector = Icons.Default.AutoAwesome,
                                     contentDescription = "Style Result Analysis",
-                                    tint = MaterialTheme.colorScheme.primary,
+                                    tint = Color(0xFFD4AF37), // Gold star/sparkle color
                                     modifier = Modifier.size(28.dp)
                                 )
                                 Spacer(modifier = Modifier.width(16.dp))
@@ -378,7 +382,7 @@ fun CollectionDetailScreen(
                                         text = "View Style Result Analysis",
                                         style = MaterialTheme.typography.titleMedium,
                                         fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.onSurface
+                                        color = Color.Black
                                     )
                                     Text(
                                         text = "Inspect complete score breakdown, intent fulfillment & audit logs",
@@ -387,15 +391,11 @@ fun CollectionDetailScreen(
                                     )
                                 }
                             }
-                            IconButton(
-                                onClick = { navTo(KoColorRoute.StyleResult(intent = advice.title ?: "Daily Outfit")) }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.ChevronRight,
-                                    contentDescription = "Open Analysis",
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                            }
+                            Icon(
+                                imageVector = Icons.Default.ChevronRight,
+                                contentDescription = "Open Analysis",
+                                tint = Color(0xFFD4AF37)
+                            )
                         }
                     }
                 }
@@ -405,13 +405,14 @@ fun CollectionDetailScreen(
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(24.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFF3F3F7)), // Very subtle light gray/lavender
+                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                         onClick = { navTo(KoColorRoute.StyleCreationStory(intent = advice.title ?: "Daily Outfit")) }
                     ) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(20.dp),
+                                .padding(24.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -422,7 +423,7 @@ fun CollectionDetailScreen(
                                 Icon(
                                     imageVector = Icons.Default.AutoAwesome,
                                     contentDescription = "Style Creation Story",
-                                    tint = MaterialTheme.colorScheme.primary,
+                                    tint = Color(0xFFD4AF37), // Gold
                                     modifier = Modifier.size(28.dp)
                                 )
                                 Spacer(modifier = Modifier.width(16.dp))
@@ -431,7 +432,7 @@ fun CollectionDetailScreen(
                                         text = "View Style Creation Story",
                                         style = MaterialTheme.typography.titleMedium,
                                         fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.onSurface
+                                        color = Color.Black
                                     )
                                     Text(
                                         text = "Inspect step-by-step decision timeline & architecture logs",
@@ -440,15 +441,11 @@ fun CollectionDetailScreen(
                                     )
                                 }
                             }
-                            IconButton(
-                                onClick = { navTo(KoColorRoute.StyleCreationStory(intent = advice.title ?: "Daily Outfit")) }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.ChevronRight,
-                                    contentDescription = "Open Story",
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                            }
+                            Icon(
+                                imageVector = Icons.Default.ChevronRight,
+                                contentDescription = "Open Story",
+                                tint = Color(0xFFD4AF37)
+                            )
                         }
                     }
                 }
