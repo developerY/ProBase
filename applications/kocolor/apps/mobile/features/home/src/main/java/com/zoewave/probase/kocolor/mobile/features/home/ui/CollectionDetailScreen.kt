@@ -254,8 +254,41 @@ fun CollectionDetailScreen(
                                         .then(if (isCollapsed) Modifier else Modifier.verticalScroll(scrollState)),
                                     contentAlignment = Alignment.Center
                                 ) {
+                                    var filteredSummary = advice.summary.removePrefix("Local Architect: ")
+                                    
+                                    // 1. Replace Clothing items (w_##) with their actual names
+                                    advice.outfitSuggestions.forEach { outfit ->
+                                        outfit.wardrobeItemIds.forEachIndexed { index, itemId ->
+                                            val clothingName = outfit.suggestedItems.getOrNull(index)?.name ?: "this garment"
+                                            val idStr = "w_$itemId"
+                                            filteredSummary = filteredSummary.replace(Regex("(?i)item\\s+$idStr"), clothingName.lowercase())
+                                            filteredSummary = filteredSummary.replace("<ITEM:$idStr>", clothingName.lowercase())
+                                            filteredSummary = filteredSummary.replace(idStr, clothingName.lowercase())
+                                        }
+                                    }
+                                    
+                                    // 2. Replace Cosmetic items (c_##) with their actual names
+                                    advice.makeupSuggestions.forEach { makeupItem ->
+                                        if (makeupItem.productId != null) {
+                                            val idStr = "c_${makeupItem.productId}"
+                                            val name = makeupItem.suggestedProductName ?: "this cosmetic"
+                                            filteredSummary = filteredSummary.replace(Regex("(?i)item\\s+$idStr"), name.lowercase())
+                                            filteredSummary = filteredSummary.replace("<ITEM:$idStr>", name.lowercase())
+                                            filteredSummary = filteredSummary.replace(idStr, name.lowercase())
+                                        }
+                                    }
+                                    
+                                    // 3. Fallback for any leftover unmapped IDs
+                                    filteredSummary = filteredSummary
+                                        .replace(Regex("(?i)item\\s+w_\\d+"), "this garment")
+                                        .replace(Regex("(?i)item\\s+c_\\d+"), "this product")
+                                        .replace(Regex("<ITEM:w_\\d+>"), "this garment")
+                                        .replace(Regex("<ITEM:c_\\d+>"), "this product")
+                                        .replace(Regex("w_\\d+"), "this garment")
+                                        .replace(Regex("c_\\d+"), "this product")
+                                        
                                     Text(
-                                        text = advice.summary,
+                                        text = filteredSummary,
                                         style = MaterialTheme.typography.bodyLarge.copy(
                                             fontSize = fontSize.sp,
                                             lineHeight = lineHeight.sp,
