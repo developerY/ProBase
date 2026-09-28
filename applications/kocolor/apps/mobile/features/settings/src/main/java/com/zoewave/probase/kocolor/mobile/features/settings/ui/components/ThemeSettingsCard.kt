@@ -90,23 +90,27 @@ fun ThemeSettingsCard(
                 HorizontalDivider()
                 Column(modifier = Modifier.padding(16.dp)) {
                     themeOptions.forEach { (id, labelRes) ->
+                        val isLight = id == "LIGHT"
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .selectable(
                                     selected = currentTheme == id,
-                                    onClick = { onEvent(SettingsEvent.OnThemeSelected(id)) }
+                                    onClick = { if (isLight) onEvent(SettingsEvent.OnThemeSelected(id)) },
+                                    enabled = isLight
                                 )
                                 .padding(vertical = 8.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             RadioButton(
                                 selected = currentTheme == id,
-                                onClick = { onEvent(SettingsEvent.OnThemeSelected(id)) }
+                                onClick = { if (isLight) onEvent(SettingsEvent.OnThemeSelected(id)) },
+                                enabled = isLight
                             )
                             Text(
                                 text = stringResource(labelRes),
                                 style = MaterialTheme.typography.bodyLarge,
+                                color = if (isLight) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
                                 modifier = Modifier.padding(start = 16.dp)
                             )
                         }
