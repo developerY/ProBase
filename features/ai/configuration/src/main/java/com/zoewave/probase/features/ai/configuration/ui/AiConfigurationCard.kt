@@ -138,7 +138,11 @@ fun AiConfigurationCardContent(
                         trailingContent = {
                             Switch(
                                 checked = uiState.isAiEnabled,
-                                onCheckedChange = { onEvent(AiConfigurationEvent.OnAiEnabledToggled(it)) }
+                                onCheckedChange = { onEvent(AiConfigurationEvent.OnAiEnabledToggled(it)) },
+                                colors = androidx.compose.material3.SwitchDefaults.colors(
+                                    checkedThumbColor = Color.Black,
+                                    checkedTrackColor = Color(0xFFD4AF37) // Gold
+                                )
                             )
                         }
                     )

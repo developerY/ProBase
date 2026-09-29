@@ -77,7 +77,7 @@ class KoColorSettings @Inject constructor(
 
     // AiConfigurationSettings & SmartCaptureSettings
     override val isAiEnabledFlow: Flow<Boolean> = context.dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.IS_AI_ENABLED] ?: false
+        preferences[PreferencesKeys.IS_AI_ENABLED] ?: true
     }
 
     override suspend fun saveAiEnabled(enabled: Boolean) {
