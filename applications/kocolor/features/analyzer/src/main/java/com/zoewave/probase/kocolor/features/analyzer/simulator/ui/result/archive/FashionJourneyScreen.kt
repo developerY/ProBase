@@ -49,6 +49,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import com.zoewave.probase.kocolor.features.analyzer.R
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.AuditStep
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.clip
@@ -78,7 +80,7 @@ fun FashionJourneyScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = "THE JOURNEY",
+                        text = stringResource(R.string.applications_kocolor_features_analyzer_story_title),
                         fontFamily = FontFamily.Serif,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 2.sp
@@ -109,7 +111,7 @@ fun FashionJourneyScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "A Curated Editorial",
+                        text = stringResource(R.string.applications_kocolor_features_analyzer_story_subtitle).uppercase(),
                         style = MaterialTheme.typography.labelMedium,
                         color = Color.Gray,
                         letterSpacing = 3.sp
@@ -246,7 +248,7 @@ fun FashionJourneyScreen(
             item {
                 EditorialChapter(
                     chapterNumber = "04",
-                    title = "The Architect's Rationale",
+                    title = stringResource(R.string.applications_kocolor_features_analyzer_architects_rationale),
                     icon = Icons.Outlined.AutoAwesome
                 ) {
                     Card(

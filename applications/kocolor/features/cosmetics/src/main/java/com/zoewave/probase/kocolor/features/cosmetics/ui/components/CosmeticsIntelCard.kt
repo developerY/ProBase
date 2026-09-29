@@ -48,6 +48,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import com.zoewave.probase.kocolor.features.cosmetics.R
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
@@ -143,7 +145,7 @@ fun CosmeticsIntelCard(
                                             modifier = Modifier.size(10.dp)
                                         )
                                         Text(
-                                            text = "SPECTRAL & CHROMATIC DNA",
+                                            text = stringResource(R.string.applications_kocolor_features_cosmetics_spectral_dna),
                                             style = MaterialTheme.typography.labelSmall,
                                             fontWeight = FontWeight.Black,
                                             letterSpacing = 1.sp,
@@ -214,7 +216,7 @@ fun CosmeticsIntelCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "$totalItems ITEMS TRACKED",
+                        text = stringResource(R.string.applications_kocolor_features_cosmetics_items_tracked, totalItems),
                         style = MaterialTheme.typography.headlineMedium.copy(fontSize = 20.sp),
                         fontFamily = FontFamily.Serif,
                         fontWeight = FontWeight.Medium,
@@ -243,7 +245,7 @@ fun CosmeticsIntelCard(
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         Text(
-                            text = "Curated Capsule Archive",
+                            text = stringResource(R.string.applications_kocolor_features_cosmetics_curated_capsule),
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color.Gray,
                             textAlign = TextAlign.Center,
@@ -263,13 +265,13 @@ fun CosmeticsIntelCard(
                             ) {
                                 Column {
                                     Text(
-                                        text = "ALGORITHMIC COHESION",
+                                        text = stringResource(R.string.applications_kocolor_features_cosmetics_algorithmic_cohesion),
                                         style = MaterialTheme.typography.labelSmall,
                                         color = Color.Gray,
                                         fontWeight = FontWeight.Bold
                                     )
                                     Text(
-                                        text = "$harmonyScore% HARMONY SCORE",
+                                        text = stringResource(R.string.applications_kocolor_features_cosmetics_harmony_score, harmonyScore),
                                         style = MaterialTheme.typography.titleSmall,
                                         fontWeight = FontWeight.Bold,
                                         color = Color.DarkGray
@@ -290,7 +292,7 @@ fun CosmeticsIntelCard(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "CHROMATIC SPECTRUM DISTRIBUTION",
+                                text = stringResource(R.string.applications_kocolor_features_cosmetics_chromatic_distribution),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = Color.Gray,
                                 fontWeight = FontWeight.Bold,

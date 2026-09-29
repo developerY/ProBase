@@ -43,4 +43,8 @@
     <string name="applications_kocolor_apps_mobile_features_home_hub_items_tracked">items tracked</string>
     <string name="applications_kocolor_apps_mobile_features_home_hub_pieces_curated">pieces curated</string>
     <string name="applications_kocolor_apps_mobile_features_home_experimental">EXPERIMENTAL</string>
+    <string name="applications_kocolor_apps_mobile_features_home_blueprint_history">BLUEPRINT HISTORY</string>
+    <string name="applications_kocolor_apps_mobile_features_home_wardrobe">The Wardrobe</string>
+    <string name="applications_kocolor_apps_mobile_features_home_vanity">The Vanity</string>
+    <string name="applications_kocolor_apps_mobile_features_home_color_story">Color Story</string>
 </resources>

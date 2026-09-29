@@ -82,7 +82,7 @@
     <string name="applications_kocolor_features_analyzer_cool">Cool</string>
     <string name="applications_kocolor_features_analyzer_warm">Warm</string>
 
-    <string name="applications_kocolor_features_analyzer_story_title">Your Style</string>
+    <string name="applications_kocolor_features_analyzer_story_title">STYLE JOURNEY</string>
     <string name="applications_kocolor_features_analyzer_story_subtitle">How KoColor created this look</string>
     <string name="applications_kocolor_features_analyzer_story_view_journey">View Style Journey</string>
     <string name="applications_kocolor_features_analyzer_story_hide_journey">Hide Style Journey</string>
@@ -100,4 +100,11 @@
     <string name="applications_kocolor_features_analyzer_story_observed_style_title">OBSERVED STYLE</string>
     <string name="applications_kocolor_features_analyzer_story_surprise_me">Surprise Me!</string>
     <string name="applications_kocolor_features_analyzer_story_intent_fulfillment">YOUR REQUEST FULFILLMENT</string>
+    <string name="applications_kocolor_features_analyzer_audit_trail">KOCOLOR AUDIT TRAIL</string>
+    <string name="applications_kocolor_features_analyzer_making_of_look">The Making of Your Look</string>
+    <string name="applications_kocolor_features_analyzer_vision_atmosphere">The Vision &amp; Atmosphere</string>
+    <string name="applications_kocolor_features_analyzer_foundational_anchor">The Foundational Anchor</string>
+    <string name="applications_kocolor_features_analyzer_complete_ensemble">The Complete Ensemble</string>
+    <string name="applications_kocolor_features_analyzer_architects_rationale">The Architect\s Rationale</string>
+    <string name="applications_kocolor_features_analyzer_aesthetic_harmony">Aesthetic Harmony</string>
 </resources>

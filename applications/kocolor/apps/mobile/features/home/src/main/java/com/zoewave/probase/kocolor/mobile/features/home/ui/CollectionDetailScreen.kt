@@ -379,13 +379,13 @@ item {
                                 Spacer(modifier = Modifier.width(16.dp))
                                 Column {
                                     Text(
-                                        text = "View Style Journey & Analysis",
+                                        text = androidx.compose.ui.res.stringResource(com.zoewave.probase.kocolor.features.analyzer.R.string.applications_kocolor_features_analyzer_story_explore_journey),
                                         style = MaterialTheme.typography.titleMedium,
                                         fontWeight = FontWeight.Bold,
                                         color = Color.Black
                                     )
                                     Text(
-                                        text = "Inspect fashionista score, decision timeline & audit logs",
+                                        text = androidx.compose.ui.res.stringResource(com.zoewave.probase.kocolor.features.analyzer.R.string.applications_kocolor_features_analyzer_story_inspect_timeline),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = Color.Gray
                                     )
