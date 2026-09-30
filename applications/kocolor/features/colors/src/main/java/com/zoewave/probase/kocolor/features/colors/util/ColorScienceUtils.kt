@@ -103,9 +103,9 @@ object ColorScienceUtils {
         val rgb2 = hexToRgb(hex2) ?: return Double.MAX_VALUE
         
         return sqrt(
-            Math.pow((rgb1.first - rgb2.first).toDouble(), 2.0) +
-            Math.pow((rgb1.second - rgb2.second).toDouble(), 2.0) +
-            Math.pow((rgb1.third - rgb2.third).toDouble(), 2.0)
+            kotlin.math.pow((rgb1.first - rgb2.first).toDouble(), 2.0) +
+            kotlin.math.pow((rgb1.second - rgb2.second).toDouble(), 2.0) +
+            kotlin.math.pow((rgb1.third - rgb2.third).toDouble(), 2.0)
         )
     }
 

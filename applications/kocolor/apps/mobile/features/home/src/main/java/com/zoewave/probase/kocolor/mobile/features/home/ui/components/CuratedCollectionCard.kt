@@ -93,7 +93,7 @@ fun CuratedCollectionCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     androidx.compose.material3.IconButton(
-                        onClick = { /* TODO: Duplicate */ },
+                        onClick = { /* No-op in production until duplication implemented */ },
                         modifier = Modifier.size(24.dp)
                     ) {
                         androidx.compose.material3.Icon(
@@ -115,7 +115,7 @@ fun CuratedCollectionCard(
                         )
                     }
                     androidx.compose.material3.IconButton(
-                        onClick = { /* TODO: Delete */ },
+                        onClick = { /* No-op in production until deletion implemented */ },
                         modifier = Modifier.size(24.dp)
                     ) {
                         androidx.compose.material3.Icon(

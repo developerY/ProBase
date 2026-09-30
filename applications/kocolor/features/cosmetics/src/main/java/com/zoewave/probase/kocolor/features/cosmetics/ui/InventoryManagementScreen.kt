@@ -102,7 +102,7 @@ fun InventoryManagementScreen(
                 onEvent = { event ->
                     when (event) {
                         is SearchBarAndFilterEvent.QueryChange -> onEvent(CosmeticsEvent.UpdateSearchQuery(event.query))
-                        SearchBarAndFilterEvent.FilterClick -> { /* TODO */ }
+                        SearchBarAndFilterEvent.FilterClick -> { /* Future Feature: Advanced filtering */ }
                     }
                 },
                 navTo = navTo
