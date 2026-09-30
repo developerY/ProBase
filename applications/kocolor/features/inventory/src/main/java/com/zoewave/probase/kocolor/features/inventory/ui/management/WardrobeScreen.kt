@@ -76,7 +76,7 @@ fun WardrobeScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Wardrobe Inventory", style = MaterialTheme.typography.titleLarge, fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.applications_kocolor_features_inventory_wardrobe_title), style = MaterialTheme.typography.titleLarge, fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = { navTo(KoColorRoute.Back) }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.applications_kocolor_features_inventory_back))
@@ -115,7 +115,7 @@ fun WardrobeScreen(
                 onFilterClick = { /* Filter */ }
             )
             
-            val allPiecesLabel = "All Pieces"
+            val allPiecesLabel = stringResource(R.string.applications_kocolor_features_inventory_all_pieces)
             val categories = remember { listOf(allPiecesLabel) + ClothingCategory.entries.map { it.displayName } }
             var selectedCategory by remember { mutableStateOf(allPiecesLabel) }
             

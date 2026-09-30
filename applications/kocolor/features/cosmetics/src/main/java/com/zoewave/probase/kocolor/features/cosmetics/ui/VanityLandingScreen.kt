@@ -28,8 +28,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.Inventory2
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -66,21 +64,6 @@ import com.zoewave.probase.kocolor.features.cosmetics.ui.components.VanityCatego
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.VanityCategoryUiState
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.VanityInventoryCard
 import com.zoewave.probase.kocolor.model.KoColorRoute
-
-@Preview(showBackground = true)
-@Composable
-private fun VanityLandingScreenPreview() {
-    MaterialTheme {
-        VanityLandingScreen(
-            uiState = CosmeticsUiState(
-                totalCosmetics = 34,
-                items = listOf(CosmeticItem(name = "Sample", brand = "Brand", macroCategory = MacroCategory.COMPLEXION, microCategory = MicroCategory.FOUNDATION, colorHex = "#FFFFFF"))
-            ),
-            onEvent = {},
-            navTo = {}
-        )
-    }
-}
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -184,6 +167,8 @@ fun VanityLandingScreen(
             item {
                 com.zoewave.probase.kocolor.features.cosmetics.ui.components.CosmeticsIntelCard(
                     totalItems = uiState.totalCosmetics,
+                    colorDistribution = emptyList(), // Pass dynamically if added to UI State in the future
+                    harmonyScore = 89,
                     onViewIntelligenceClicked = { navTo(KoColorRoute.ColorHub) },
                     onViewFootprintClicked = { navTo(KoColorRoute.ColorHub) }
                 )
@@ -278,19 +263,6 @@ fun VanityLandingScreen(
             }
 
             item {
-                Button(
-                    onClick = { showAddBottomSheet = true },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF5A3854),
-                        contentColor = Color.White
-                    )
-                ) {
-                    Text("Open Advanced Import Options")
-                }
-            }
-
-            item {
                 Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -324,3 +296,19 @@ fun VanityLandingScreen(
         }
     }
 }
+
+@Preview(showBackground = true)
+@Composable
+private fun VanityLandingScreenPreview() {
+    MaterialTheme {
+        VanityLandingScreen(
+            uiState = CosmeticsUiState(
+                totalCosmetics = 34,
+                items = listOf(CosmeticItem(name = "Sample", brand = "Brand", macroCategory = MacroCategory.COMPLEXION, microCategory = MicroCategory.FOUNDATION, colorHex = "#FFFFFF"))
+            ),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+

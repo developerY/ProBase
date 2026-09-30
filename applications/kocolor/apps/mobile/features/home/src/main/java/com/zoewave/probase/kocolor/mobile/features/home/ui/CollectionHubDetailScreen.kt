@@ -40,13 +40,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Checkroom
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material.icons.filled.Palette
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -170,11 +167,10 @@ fun CollectionHubOrig(
                         )
                     }
 
-                    val expiringCount = uiState.expiringCosmeticsCount
-                    val healthText = if (expiringCount > 0) "$expiringCount items expiring this month (PAO Alert)" else if (uiState.totalCosmetics > 0) "Vanity Health: 98% Fresh" else null
-                    val restockText = if (uiState.totalCosmetics > 0) "Restock needed: 2 formulas low" else null
-                    val toneText = if (uiState.totalCosmetics > 0) "Signature Tone: Roseate Sand · Warm/Matte" else null
-
+                    val healthText = if (uiState.expiringCosmeticsCount > 0) "Vanity Health: ${uiState.expiringCosmeticsCount} expiring items" else if (uiState.totalCosmetics > 0) "Vanity Health: Optimal" else null
+                    val restockText = if (uiState.lowStockCosmeticsCount > 0) "Restock needed: ${uiState.lowStockCosmeticsCount} formulas low" else null
+                    val toneText = uiState.dominantCosmeticsTone?.let { "Signature Tone: Dominated by ${it.lowercase().replaceFirstChar { char -> char.uppercase() }}" }
+                    
                     ArchiveVerticalCard(
                         uiState = ArchiveVerticalUiState(
                             title = "Vanity",
@@ -188,11 +184,11 @@ fun CollectionHubOrig(
                             discoverSubtitle = "Cosmetics Catalog",
                             discoverColor = Color(0xFF3D223B), // Dark Plum
                             onDiscoverClick = { navTo(KoColorRoute.StarterPack(filter = "cosmetics", showHero = true)) },
-                            categoryProgress = cosmeticsProgress,
+                            categoryProgress = emptyList(),
                             healthMetric = healthText,
                             restockMetric = restockText,
                             chromaticTone = toneText,
-                            avgCpu = if (uiState.totalCosmetics > 0) 1.20 else null,
+                            avgCpu = uiState.avgCosmeticsCpu,
                             breakdown = uiState.cosmeticsByGroup
                         ),
                         onEvent = { navTo(KoColorRoute.VanityLanding) },
@@ -233,7 +229,7 @@ fun CollectionHubOrig(
                             discoverSubtitle = "Fashion Catalog",
                             discoverColor = Color(0xFF1B2238), // Deep Navy
                             onDiscoverClick = { navTo(KoColorRoute.StarterPack(filter = "clothing", showHero = true)) },
-                            categoryProgress = wardrobeProgress,
+                            categoryProgress = emptyList(),
                             healthMetric = if (uiState.totalClothing > 0) "Rotation Health: 94% Active" else null,
                             chromaticTone = if (uiState.totalClothing > 0) "Palette Baseline: Neutral-led · Warm-biased" else null,
                             avgCpu = if (uiState.totalClothing > 0) 4.20 else null,

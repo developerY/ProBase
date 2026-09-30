@@ -254,8 +254,44 @@ fun CollectionDetailScreen(
                                         .then(if (isCollapsed) Modifier else Modifier.verticalScroll(scrollState)),
                                     contentAlignment = Alignment.Center
                                 ) {
+                                    var filteredSummary = advice.summary.removePrefix("Local Architect: ")
+                                    
+                                    // 1. Replace Clothing items (w_##) with their actual names
+                                    advice.outfitSuggestions.forEach { outfit ->
+                                        outfit.wardrobeItemIds.forEachIndexed { index, itemId ->
+                                            val clothingName = outfit.suggestedItems.getOrNull(index)?.name ?: "this garment"
+                                            val idStr = "w_$itemId"
+                                            // Handle various AI output formats: "item w_32", "<ITEM:w_32>", "[w_32]", "w_32"
+                                            filteredSummary = filteredSummary.replace(Regex("(?i)item\\s+$idStr"), clothingName.lowercase())
+                                            filteredSummary = filteredSummary.replace("<ITEM:$idStr>", clothingName.lowercase())
+                                            filteredSummary = filteredSummary.replace("[$idStr]", clothingName.lowercase())
+                                            filteredSummary = filteredSummary.replace(idStr, clothingName.lowercase())
+                                        }
+                                    }
+                                    
+                                    // 2. Replace Cosmetic items (c_##) with their actual names
+                                    advice.makeupSuggestions.forEach { makeupItem ->
+                                        if (makeupItem.productId != null) {
+                                            val idStr = "c_${makeupItem.productId}"
+                                            val name = makeupItem.suggestedProductName ?: "this cosmetic"
+                                            filteredSummary = filteredSummary.replace(Regex("(?i)item\\s+$idStr"), name.lowercase())
+                                            filteredSummary = filteredSummary.replace("<ITEM:$idStr>", name.lowercase())
+                                            filteredSummary = filteredSummary.replace("[$idStr]", name.lowercase())
+                                            filteredSummary = filteredSummary.replace(idStr, name.lowercase())
+                                        }
+                                    }
+                                    
+                                    // 3. Fallback for any leftover unmapped IDs
+                                    filteredSummary = filteredSummary
+                                        .replace(Regex("(?i)item\\s+w_\\d+"), "this garment")
+                                        .replace(Regex("(?i)item\\s+c_\\d+"), "this product")
+                                        .replace(Regex("<ITEM:w_\\d+>"), "this garment")
+                                        .replace(Regex("<ITEM:c_\\d+>"), "this product")
+                                        .replace(Regex("w_\\d+"), "this garment")
+                                        .replace(Regex("c_\\d+"), "this product")
+                                        
                                     Text(
-                                        text = advice.summary,
+                                        text = filteredSummary,
                                         style = MaterialTheme.typography.bodyLarge.copy(
                                             fontSize = fontSize.sp,
                                             lineHeight = lineHeight.sp,
@@ -314,18 +350,19 @@ fun CollectionDetailScreen(
                         initialExpanded = false
                     )
                 }
-                item {
+item {
                     Spacer(Modifier.height(12.dp))
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(24.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
-                        onClick = { navTo(KoColorRoute.StyleResult(intent = advice.title ?: "Daily Outfit")) }
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFF3F3F7)), // Very subtle light gray/lavender
+                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                        onClick = { navTo(KoColorRoute.FashionJourney(intent = advice.title ?: "Daily Outfit")) }
                     ) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(20.dp),
+                                .padding(24.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -335,87 +372,30 @@ fun CollectionDetailScreen(
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.AutoAwesome,
-                                    contentDescription = "Style Result Analysis",
-                                    tint = MaterialTheme.colorScheme.primary,
+                                    contentDescription = "Style Journey & Analysis",
+                                    tint = Color(0xFFD4AF37), // Gold star/sparkle color
                                     modifier = Modifier.size(28.dp)
                                 )
                                 Spacer(modifier = Modifier.width(16.dp))
                                 Column {
                                     Text(
-                                        text = "View Style Result Analysis",
+                                        text = androidx.compose.ui.res.stringResource(com.zoewave.probase.kocolor.features.analyzer.R.string.applications_kocolor_features_analyzer_story_explore_journey),
                                         style = MaterialTheme.typography.titleMedium,
                                         fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.onSurface
+                                        color = Color.Black
                                     )
                                     Text(
-                                        text = "Inspect complete score breakdown, intent fulfillment & audit logs",
+                                        text = androidx.compose.ui.res.stringResource(com.zoewave.probase.kocolor.features.analyzer.R.string.applications_kocolor_features_analyzer_story_inspect_timeline),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = Color.Gray
                                     )
                                 }
                             }
-                            IconButton(
-                                onClick = { navTo(KoColorRoute.StyleResult(intent = advice.title ?: "Daily Outfit")) }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.ChevronRight,
-                                    contentDescription = "Open Analysis",
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                            }
-                        }
-                    }
-                }
-
-                item {
-                    Spacer(Modifier.height(12.dp))
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(24.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
-                        onClick = { navTo(KoColorRoute.StyleCreationStory(intent = advice.title ?: "Daily Outfit")) }
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(20.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.AutoAwesome,
-                                    contentDescription = "Style Creation Story",
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(28.dp)
-                                )
-                                Spacer(modifier = Modifier.width(16.dp))
-                                Column {
-                                    Text(
-                                        text = "View Style Creation Story",
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                    Text(
-                                        text = "Inspect step-by-step decision timeline & architecture logs",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = Color.Gray
-                                    )
-                                }
-                            }
-                            IconButton(
-                                onClick = { navTo(KoColorRoute.StyleCreationStory(intent = advice.title ?: "Daily Outfit")) }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.ChevronRight,
-                                    contentDescription = "Open Story",
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                            }
+                            Icon(
+                                imageVector = Icons.Default.ChevronRight,
+                                contentDescription = "Open Journey",
+                                tint = Color(0xFFD4AF37)
+                            )
                         }
                     }
                 }

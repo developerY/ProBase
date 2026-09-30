@@ -49,7 +49,7 @@ class FirebaseAiClientImpl @Inject constructor() : FirebaseAiClient {
     
     private fun getModel(temperatureOverride: Float? = null) = Firebase.ai(
         backend = GenerativeBackend.googleAI(),
-        useLimitedUseAppCheckTokens = true
+        useLimitedUseAppCheckTokens = false
     ).generativeModel(
         modelName = MODEL_NAME,
         generationConfig = generationConfig {

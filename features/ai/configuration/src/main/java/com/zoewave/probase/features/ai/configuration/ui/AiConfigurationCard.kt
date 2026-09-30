@@ -94,7 +94,8 @@ fun AiConfigurationCardContent(
     Card(
         modifier = modifier
             .padding(horizontal = 16.dp, vertical = 8.dp)
-            .fillMaxWidth()
+            .fillMaxWidth(),
+        colors = androidx.compose.material3.CardDefaults.cardColors(containerColor = Color(0xFFE8E0FD)) // Soft lavender
     ) {
         Column {
             Row(
@@ -106,11 +107,11 @@ fun AiConfigurationCardContent(
                 Icon(
                     imageVector = Icons.Default.AutoAwesome,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = Color(0xFFD4AF37) // Gold
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(text = title, style = MaterialTheme.typography.titleMedium)
+                    Text(text = title, style = MaterialTheme.typography.titleMedium, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold, color = Color.Black)
                     val statusText = when {
                         !uiState.isAiEnabled -> stringResource(R.string.features_ai_configuration_status_off)
                         !uiState.isApiKeySet -> stringResource(R.string.features_ai_configuration_status_local)
@@ -119,7 +120,7 @@ fun AiConfigurationCardContent(
                     Text(
                         text = statusText,
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = Color.DarkGray
                     )
                 }
                 Icon(
@@ -131,12 +132,17 @@ fun AiConfigurationCardContent(
             AnimatedVisibility(visible = expanded) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     ListItem(
-                        headlineContent = { Text(stringResource(R.string.features_ai_configuration_enable_features)) },
+                        colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = Color(0xFFFBF8F5)),
+                        headlineContent = { Text(stringResource(R.string.features_ai_configuration_enable_features), fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold) },
                         supportingContent = { Text(description) },
                         trailingContent = {
                             Switch(
                                 checked = uiState.isAiEnabled,
-                                onCheckedChange = { onEvent(AiConfigurationEvent.OnAiEnabledToggled(it)) }
+                                onCheckedChange = { onEvent(AiConfigurationEvent.OnAiEnabledToggled(it)) },
+                                colors = androidx.compose.material3.SwitchDefaults.colors(
+                                    checkedThumbColor = Color.Black,
+                                    checkedTrackColor = Color(0xFFD4AF37) // Gold
+                                )
                             )
                         }
                     )
@@ -144,12 +150,17 @@ fun AiConfigurationCardContent(
                     Spacer(modifier = Modifier.padding(vertical = 8.dp))
 
                     ListItem(
-                        headlineContent = { Text(stringResource(R.string.features_ai_configuration_use_firebase_title)) },
+                        colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = Color(0xFFFBF8F5)),
+                        headlineContent = { Text(stringResource(R.string.features_ai_configuration_use_firebase_title), fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold) },
                         supportingContent = { Text(stringResource(R.string.features_ai_configuration_use_firebase_desc)) },
                         trailingContent = {
                             Switch(
                                 checked = uiState.useFirebaseVertexAi,
-                                onCheckedChange = { onEvent(AiConfigurationEvent.OnUseFirebaseVertexAiToggled(it)) }
+                                onCheckedChange = { onEvent(AiConfigurationEvent.OnUseFirebaseVertexAiToggled(it)) },
+                                colors = androidx.compose.material3.SwitchDefaults.colors(
+                                    checkedThumbColor = Color.Black,
+                                    checkedTrackColor = Color(0xFFD4AF37) // Gold
+                                )
                             )
                         }
                     )
@@ -159,7 +170,7 @@ fun AiConfigurationCardContent(
                     Text(
                         text = stringResource(R.string.features_ai_configuration_byok_title),
                         style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.primary
+                        color = Color(0xFFD4AF37) // Gold
                     )
                     Text(
                         text = stringResource(R.string.features_ai_configuration_byok_desc),

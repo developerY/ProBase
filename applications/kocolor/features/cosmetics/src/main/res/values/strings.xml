@@ -248,4 +248,11 @@
 
     <string name="applications_kocolor_features_cosmetics_no_box_scan_title">No Box</string>
     <string name="applications_kocolor_features_cosmetics_no_box_scan_desc">2-pic AI (front/back)</string>
+    <string name="applications_kocolor_features_cosmetics_spectral_dna">SPECTRAL &amp; CHROMATIC DNA</string>
+    <string name="applications_kocolor_features_cosmetics_color_intelligence_hub">Color Intelligence Hub</string>
+    <string name="applications_kocolor_features_cosmetics_items_tracked">%1$d ITEMS TRACKED</string>
+    <string name="applications_kocolor_features_cosmetics_curated_capsule">Curated Capsule Archive</string>
+    <string name="applications_kocolor_features_cosmetics_algorithmic_cohesion">ALGORITHMIC COHESION</string>
+    <string name="applications_kocolor_features_cosmetics_harmony_score">%1$d%% HARMONY SCORE</string>
+    <string name="applications_kocolor_features_cosmetics_chromatic_distribution">CHROMATIC SPECTRUM DISTRIBUTION</string>
 </resources>
