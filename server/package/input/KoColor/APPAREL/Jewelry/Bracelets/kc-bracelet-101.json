@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "id": "kc-bracelet-101",
+  "name": "Rose Gold Minimalist Cuff",
+  "brand": "KoColor",
+  "macro_category": "JEWELRY",
+  "micro_category": "BRACELETS",
+  "shade_name": "Standard",
+  "color_hex": "#B76E79",
+  "raw_image_input": "./kc-bracelet-101.png",
+  "price": 120.0,
+  "volume": "One Size",
+  "ingredients": [
+    "Mixed Materials"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}
