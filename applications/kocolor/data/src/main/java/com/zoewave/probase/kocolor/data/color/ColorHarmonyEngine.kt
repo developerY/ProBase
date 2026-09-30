@@ -8,6 +8,7 @@ import javax.inject.Singleton
 import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.cos
+import kotlin.math.pow
 import kotlin.math.sin
 import kotlin.math.sqrt
 
@@ -28,7 +29,7 @@ class ColorHarmonyEngine @Inject constructor() {
 
         // Convert RGB to XYZ
         fun pivotRgb(c: Float): Double {
-            return if (c > 0.04045f) kotlin.math.pow((c + 0.055) / 1.055, 2.4) else (c / 12.92)
+            return if (c > 0.04045f) ((c + 0.055) / 1.055).pow(2.4) else (c / 12.92)
         }
 
         val x = (pivotRgb(r) * 0.4124 + pivotRgb(g) * 0.3576 + pivotRgb(b) * 0.1805) / 0.95047
