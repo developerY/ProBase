@@ -7,6 +7,7 @@ import com.zoewave.probase.kocolor.features.colors.domain.model.LabValue
 import com.zoewave.probase.kocolor.features.colors.domain.model.PantoneMatch
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.pow
 import kotlin.math.sqrt
 
 object ColorScienceUtils {
@@ -103,9 +104,9 @@ object ColorScienceUtils {
         val rgb2 = hexToRgb(hex2) ?: return Double.MAX_VALUE
         
         return sqrt(
-            kotlin.math.pow((rgb1.first - rgb2.first).toDouble(), 2.0) +
-            kotlin.math.pow((rgb1.second - rgb2.second).toDouble(), 2.0) +
-            kotlin.math.pow((rgb1.third - rgb2.third).toDouble(), 2.0)
+            (rgb1.first - rgb2.first).toDouble().pow(2.0) +
+            (rgb1.second - rgb2.second).toDouble().pow(2.0) +
+            (rgb1.third - rgb2.third).toDouble().pow(2.0)
         )
     }
 
