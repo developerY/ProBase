@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "id": "kc-ring-101",
+  "name": "Midnight Sapphire Ring",
+  "brand": "KoColor",
+  "macro_category": "JEWELRY",
+  "micro_category": "RINGS",
+  "shade_name": "Standard",
+  "color_hex": "#0F52BA",
+  "raw_image_input": "./kc-ring-101.png",
+  "price": 250.0,
+  "volume": "One Size",
+  "ingredients": [
+    "Mixed Materials"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

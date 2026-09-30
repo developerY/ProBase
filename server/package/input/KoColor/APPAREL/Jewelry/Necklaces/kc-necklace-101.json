@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "id": "kc-necklace-101",
+  "name": "Astral Gold Pendant",
+  "brand": "KoColor",
+  "macro_category": "JEWELRY",
+  "micro_category": "NECKLACES",
+  "shade_name": "Brushed Gold",
+  "color_hex": "#D4AF37",
+  "raw_image_input": "./kc-necklace-101.png",
+  "price": 145.0,
+  "volume": "18 inch",
+  "ingredients": [
+    "14k Gold Plated Brass",
+    "Cubic Zirconia"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

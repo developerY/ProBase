@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "id": "kc-watch-101",
+  "name": "Onyx Leather Timepiece",
+  "brand": "KoColor",
+  "macro_category": "JEWELRY",
+  "micro_category": "WATCHES",
+  "shade_name": "Standard",
+  "color_hex": "#1A1A1A",
+  "raw_image_input": "./kc-watch-101.png",
+  "price": 295.0,
+  "volume": "One Size",
+  "ingredients": [
+    "Mixed Materials"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}

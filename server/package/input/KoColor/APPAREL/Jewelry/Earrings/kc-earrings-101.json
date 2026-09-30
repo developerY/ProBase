@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "id": "kc-earrings-101",
+  "name": "Lunar Silver Hoops",
+  "brand": "KoColor",
+  "macro_category": "JEWELRY",
+  "micro_category": "EARRINGS",
+  "shade_name": "Standard",
+  "color_hex": "#C0C0C0",
+  "raw_image_input": "./kc-earrings-101.png",
+  "price": 85.0,
+  "volume": "One Size",
+  "ingredients": [
+    "Mixed Materials"
+  ],
+  "Contains_Fragrance": false,
+  "fda_data_verified": true
+}
