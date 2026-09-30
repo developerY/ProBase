@@ -15,7 +15,8 @@ enum class MacroCategory(val displayName: String, val description: String) {
     ORAL("Oral Care", "Smile preservation and hygiene."),
     FRAGRANCE("Fragrances", "Olfactory signatures."),
     GROOMING("Grooming & Shaving", "Precision care and hair removal."),
-    TOOLS("Tools & Hygiene", "Brushes, sponges, and maintenance.")
+    TOOLS("Tools & Hygiene", "Brushes, sponges, and maintenance."),
+    JEWELRY("Jewelry", "Fine and fashion jewelry pieces.")
 }
 
 @Serializable
@@ -113,6 +114,13 @@ enum class MicroCategory(val macro: MacroCategory) {
     ORGANIZERS(MacroCategory.TOOLS),
     OTHER(MacroCategory.TOOLS),
     
+    // Jewelry
+    NECKLACES(MacroCategory.JEWELRY),
+    EARRINGS(MacroCategory.JEWELRY),
+    BRACELETS(MacroCategory.JEWELRY),
+    RINGS(MacroCategory.JEWELRY),
+    WATCHES(MacroCategory.JEWELRY),
+    
     // AI Pending
     AI_PENDING(MacroCategory.TOOLS);
 
@@ -152,6 +160,11 @@ enum class MicroCategory(val macro: MacroCategory) {
             HAND_CREAM -> "Hand Cream"
             NAIL_POLISH -> "Nail Polish"
             AI_PENDING -> "New Capture"
+            NECKLACES -> "Necklaces"
+            EARRINGS -> "Earrings"
+            BRACELETS -> "Bracelets"
+            RINGS -> "Rings"
+            WATCHES -> "Watches"
             else -> name.lowercase().replace("_", " ").replaceFirstChar { it.uppercase() }
         }
 
@@ -182,6 +195,7 @@ enum class MicroCategory(val macro: MacroCategory) {
             PERFUME, EAU_DE_PARFUM, EAU_DE_TOILETTE, COLOGNE -> 0.1
             SHAVING_CREAM, AFTERSHAVE, BEARD_CARE -> 1.0
             EXFOLIANT -> 2.0
+            NECKLACES, EARRINGS, BRACELETS, RINGS, WATCHES -> 0.0
             OTHER -> 0.1
         }
 }
