@@ -75,7 +75,7 @@ class StyleSimulatorEngine @Inject constructor(
                         val blueprint = decodeBlueprint(cachedResponse)
                         auditLogger.logAnchorSynthesisResult(requestContext.requestId, blueprint.selectedClothingIds)
                         val isOuterwearForbidden = (requestContext.weatherTempC != null && requestContext.weatherTempC > 17f)
-                        val thermalStr = when {
+                val thermalStr = when {
                             requestContext.weatherTempC == null -> "MODERATE"
                             requestContext.weatherTempC > 25f -> "HOT"
                             requestContext.weatherTempC > 18f -> "WARM"
@@ -319,33 +319,57 @@ class StyleSimulatorEngine @Inject constructor(
                 } else {
                     "Automatic context anchor"
                 }
+                
+                // Adjust contextual score for the anchor itself so it stands out distinctly
+                val overrideScore = if (isUserLock || context.intentProfile != null) 4.0f else 2.5f
                 CandidateProvenance(
                     clothingItem = anchor,
-                    contextScore = 1.0f,
-                    colorScore = 1.0f,
-                    appearanceScore = 1.0f,
-                    freshnessScore = 1.0f,
+                    contextScore = overrideScore,
+                    colorScore = overrideScore,
+                    appearanceScore = overrideScore,
+                    freshnessScore = overrideScore,
+                    compositeScore = overrideScore,
                     retrievalReason = rationaleText
                 )
             }
 
-            // 2. Combine locked anchors with ranked pool
+            // 2. Role Partitioning & Combined Pool
+            // The architecture demands slot eligibility first, ranking second.
             val anchorIds = anchorProv.mapNotNull { it.clothingItem?.internalId }.toSet()
-            val poolWithoutAnchors = selectionState.fullRankedCandidatePool.filter { 
-                (it.clothingItem?.internalId ?: -1) !in anchorIds &&
-                // Limit to categories the AI is actually allowed to select from
-                (it.clothingItem?.category == ClothingCategory.TOPS || 
-                 it.clothingItem?.category == ClothingCategory.BOTTOMS || 
-                 it.clothingItem?.category == ClothingCategory.SHOES ||
-                 it.clothingItem?.category == ClothingCategory.OUTERWEAR)
+            
+            // Outerwear permission check
+            val isOuterwearForbidden = (context.weatherTempC != null && context.weatherTempC > 17f)
+            
+            val validCategories = mutableSetOf(ClothingCategory.TOPS, ClothingCategory.BOTTOMS, ClothingCategory.SHOES)
+            if (!isOuterwearForbidden) {
+                validCategories.add(ClothingCategory.OUTERWEAR)
             }
-            var topWardrobeProv = (anchorProv + poolWithoutAnchors).take(currentK.coerceAtLeast(anchorProv.size))
+            
+            val eligiblePool = selectionState.fullRankedCandidatePool.filter { 
+                (it.clothingItem?.internalId ?: -1) !in anchorIds && it.clothingItem?.category in validCategories
+            }
+            
+            // Group by category to ensure proportional representation rather than letting one category dominate
+            val categorizedPool = eligiblePool.groupBy { it.clothingItem?.category }
+            
+            // We want roughly an even split of the remaining budget (currentK - anchorProv.size)
+            val budgetRemaining = (currentK - anchorProv.size).coerceAtLeast(0)
+            val slotsPerCategory = if (validCategories.isNotEmpty()) (budgetRemaining / validCategories.size).coerceAtLeast(2) else 3
+            
+            val partitionedCandidates = mutableListOf<CandidateProvenance>()
+            validCategories.forEach { category ->
+                val categoryItems = categorizedPool[category]?.take(slotsPerCategory) ?: emptyList()
+                partitionedCandidates.addAll(categoryItems)
+            }
+            
+            // Re-sort the combined partitioned pool by score so the highest items are at the top of the manifest
+            val sortedPartitionedPool = partitionedCandidates.sortedByDescending { it.compositeScore }
+            
+            var topWardrobeProv = anchorProv + sortedPartitionedPool
 
             // 3. Category diversity guarantee (ensure TOPS, BOTTOMS, SHOES are all present)
             val presentCategories = topWardrobeProv.mapNotNull { it.clothingItem?.category }.toSet()
             val missingCategories = mutableListOf<ClothingCategory>()
-            // Ensure we are only enforcing diversity guarantees for the valid categories
-            // Removes DRESSES from the strict necessity list
             if (!presentCategories.contains(ClothingCategory.TOPS)) {
                 missingCategories.add(ClothingCategory.TOPS)
             }
@@ -360,7 +384,7 @@ class StyleSimulatorEngine @Inject constructor(
                 val currentIds = topWardrobeProv.mapNotNull { it.clothingItem?.internalId }.toSet()
                 val supplementaryCandidates = mutableListOf<CandidateProvenance>()
                 for (cat in missingCategories) {
-                    val suppItem = poolWithoutAnchors.find { it.clothingItem?.category == cat && (it.clothingItem?.internalId ?: -1) !in currentIds }
+                    val suppItem = eligiblePool.find { it.clothingItem?.category == cat && (it.clothingItem?.internalId ?: -1) !in currentIds }
                         ?: wardrobe.find { it.category == cat && it.internalId !in currentIds }?.let { item ->
                             CandidateProvenance(
                                 clothingItem = item,

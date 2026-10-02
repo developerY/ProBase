@@ -85,6 +85,7 @@ class StyleAuditLogger @Inject constructor() {
                 appendLine("    Source: ${it.source.name}")
                 appendLine("    Item: [${it.id}] \"${it.name}\"")
                 appendLine("    Reason: ${it.reason}")
+                appendLine("    Anchor Score: 4.00 / 4.00")
                 it.wasSelected?.let { selected ->
                     val statusText = if (selected) "SELECTED" else "NOT_SELECTED"
                     appendLine("    Resolution: $statusText")
@@ -107,7 +108,12 @@ class StyleAuditLogger @Inject constructor() {
             appendLine("[4] MATHEMATICAL COLOR & ROLE SCORING (Top ${trail.reasoningSet?.size ?: 0})")
             trail.reasoningSet?.forEach { prov ->
                 val score = "%.2f".format(prov.totalScore)
-                appendLine("    - [${prov.id}] \"${prov.name}\" (Score: $score) -> Reason: ${prov.retrievalReason}")
+                if (prov.totalScore > 2.0f) {
+                    val anchorScale = if (prov.totalScore >= 4.0f) "4.00" else "2.50"
+                    appendLine("    - [${prov.id}] \"${prov.name}\" (ANCHOR SCORE: $score / $anchorScale) -> Reason: ${prov.retrievalReason}")
+                } else {
+                    appendLine("    - [${prov.id}] \"${prov.name}\" (COMPATIBILITY SCORE: $score / 1.00): ${prov.retrievalReason}")
+                }
             }
             appendLine()
 
