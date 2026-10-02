@@ -116,7 +116,7 @@ class PromptAssembler @Inject constructor() {
             - Temperature Balance: ${if (profile.undertone.toString().contains("Warm", ignoreCase = true)) "Warm-led" else if (profile.undertone.toString().contains("Cool", ignoreCase = true)) "Cool-led" else "Neutral"}
             - Lightness Distribution: ${profile.depth}
             - Contrast Profile: ${profile.contrast}
-            - Palette Role Strategy: Anchor base + accent highlights
+            - Palette Role Strategy: Primary chromatic focus guided by anchor item
             
             AVAILABLE CANDIDATES (COMPACT MANIFEST):
             $compactManifest

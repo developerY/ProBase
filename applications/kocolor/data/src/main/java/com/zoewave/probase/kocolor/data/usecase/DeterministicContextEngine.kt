@@ -240,6 +240,8 @@ class DeterministicContextEngine @Inject constructor(
         if (isHot) {
             // Strictly exclude heavy layers in hot weather
             if (item.category == ClothingCategory.OUTERWEAR) return false
+            
+            // Fallback heuristics
             if (item.material?.contains("Wool", ignoreCase = true) == true || 
                 item.material?.contains("Fleece", ignoreCase = true) == true ||
                 item.material?.contains("Shearling", ignoreCase = true) == true ||
@@ -252,6 +254,7 @@ class DeterministicContextEngine @Inject constructor(
         if (isWarm) {
             // Exclude extreme winter wear in warm weather
             if (item.category == ClothingCategory.OUTERWEAR) return false
+            
             if (item.material?.contains("Fleece", ignoreCase = true) == true ||
                 item.name.contains("Puffer", ignoreCase = true) ||
                 item.name.contains("Overcoat", ignoreCase = true)) {

@@ -14,6 +14,7 @@ enum class AnchorSource {
 data class AnchorRecord(
     val id: String, 
     val name: String, 
+    val role: String,
     val source: AnchorSource, 
     val reason: String,
     var wasSelected: Boolean? = null
