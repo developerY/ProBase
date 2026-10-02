@@ -73,6 +73,7 @@ class StyleSimulatorEngine @Inject constructor(
                 if (cachedResponse != null) {
                     return try {
                         val blueprint = decodeBlueprint(cachedResponse)
+                        auditLogger.logAnchorSynthesisResult(requestContext.requestId, blueprint.selectedClothingIds)
                         auditLogger.logAiExecution(
                             requestId = requestContext.requestId,
                             providerId = "CACHE_${provider.capability.id}",
@@ -98,6 +99,7 @@ class StyleSimulatorEngine @Inject constructor(
 
                 val blueprint = executeAndCache(provider, fitResult, fingerprint, providerStartTime, requestContext)
                 if (blueprint != null) {
+                    auditLogger.logAnchorSynthesisResult(requestContext.requestId, blueprint.selectedClothingIds)
                     auditLogger.printAuditTrail(requestContext.requestId)
                     return blueprint
                 }

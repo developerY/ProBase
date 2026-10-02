@@ -15,7 +15,8 @@ data class AnchorRecord(
     val id: String, 
     val name: String, 
     val source: AnchorSource, 
-    val reason: String
+    val reason: String,
+    var wasSelected: Boolean? = null
 )
 
 data class PruningRecord(
