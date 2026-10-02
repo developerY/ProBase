@@ -58,11 +58,43 @@ class WardrobeAnalyticsEngine @Inject constructor() {
             GarmentSummary(it.internalId.toString(), it.name, it.usageCount)
         }
 
-        val insights = emptyList<WardrobeInsight>()
-
         val activeCount = items.count { it.usageCount >= 5 }
         val rarelyWornCount = items.count { it.usageCount in 1..4 }
         val neverWornCount = items.count { it.usageCount == 0 }
+
+        val presentCategories = items.map { it.category }.toSet()
+        val insights = mutableListOf<WardrobeInsight>()
+
+        if (!presentCategories.contains(com.zoewave.probase.core.model.ritual.ClothingCategory.DRESSES) && !presentCategories.contains(com.zoewave.probase.core.model.ritual.ClothingCategory.TOPS)) {
+            insights.add(WardrobeInsight("Missing core upper-silhouette anchors (Tops or Dresses).", true))
+        }
+        if (!presentCategories.contains(com.zoewave.probase.core.model.ritual.ClothingCategory.DRESSES) && !presentCategories.contains(com.zoewave.probase.core.model.ritual.ClothingCategory.BOTTOMS)) {
+            insights.add(WardrobeInsight("Missing structural lower-silhouette foundations (Bottoms or Dresses).", true))
+        }
+        if (!presentCategories.contains(com.zoewave.probase.core.model.ritual.ClothingCategory.SHOES)) {
+            insights.add(WardrobeInsight("No performance-driven anchors (Shoes) recorded.", true))
+        }
+        if (!presentCategories.contains(com.zoewave.probase.core.model.ritual.ClothingCategory.OUTERWEAR)) {
+            insights.add(WardrobeInsight("Outerwear pieces are missing, limiting weather and climate defense.", true))
+        }
+
+        // Color temperature balancing
+        if (validColors.isNotEmpty()) {
+            if (warmPct > 85) {
+                insights.add(WardrobeInsight("A saturated cool accent would expand your rotational versatility.", true))
+            } else if (coolPct > 85) {
+                insights.add(WardrobeInsight("Integrating warm earthy tones could ground your current cool-biased palette.", true))
+            }
+        }
+        
+        // Wear efficiency
+        if (totalCount > 10 && neverWornCount > totalCount * 0.3) {
+            insights.add(WardrobeInsight("${neverWornCount} items have zero recorded wears. Consider archiving.", true))
+        }
+        
+        if (insights.isEmpty()) {
+            insights.add(WardrobeInsight("Your wardrobe exhibits excellent structural coverage and chromatic balance. No immediate gaps detected.", false))
+        }
 
         val wearEvents = items.filter { it.usageCount > 0 }.mapIndexed { index, item ->
             WearEvent(
@@ -112,6 +144,38 @@ class WardrobeAnalyticsEngine @Inject constructor() {
             val uniqueColorsCount = validColors.map { it.colorHex.uppercase() }.distinct().size
             val neutralRatio = validColors.count { isNeutral(it.colorHex) }.toFloat() / validColors.size
             (0.75f + (neutralRatio * 0.15f) + (uniqueColorsCount.coerceAtMost(5) * 0.02f)).coerceIn(0.50f, 0.98f)
+        }
+
+        // Missing category gaps
+        if (!presentCategories.contains(com.zoewave.probase.core.model.ritual.ClothingCategory.DRESSES) && !presentCategories.contains(com.zoewave.probase.core.model.ritual.ClothingCategory.TOPS)) {
+            insights.add(WardrobeInsight("Missing core upper-silhouette anchors (Tops or Dresses).", true))
+        }
+        if (!presentCategories.contains(com.zoewave.probase.core.model.ritual.ClothingCategory.DRESSES) && !presentCategories.contains(com.zoewave.probase.core.model.ritual.ClothingCategory.BOTTOMS)) {
+            insights.add(WardrobeInsight("Missing structural lower-silhouette foundations (Bottoms or Dresses).", true))
+        }
+        if (!presentCategories.contains(com.zoewave.probase.core.model.ritual.ClothingCategory.SHOES)) {
+            insights.add(WardrobeInsight("No performance-driven anchors (Shoes) recorded.", true))
+        }
+        if (!presentCategories.contains(com.zoewave.probase.core.model.ritual.ClothingCategory.OUTERWEAR)) {
+            insights.add(WardrobeInsight("Outerwear pieces are missing, limiting weather and climate defense.", true))
+        }
+
+        // Color temperature balancing
+        if (validColors.isNotEmpty()) {
+            if (warmPct > 85) {
+                insights.add(WardrobeInsight("A saturated cool accent would expand your rotational versatility.", true))
+            } else if (coolPct > 85) {
+                insights.add(WardrobeInsight("Integrating warm earthy tones could ground your current cool-biased palette.", true))
+            }
+        }
+        
+        // Wear efficiency
+        if (totalCount > 10 && neverWornCount > totalCount * 0.3) {
+            insights.add(WardrobeInsight("${neverWornCount} items have zero recorded wears. Consider archiving.", true))
+        }
+        
+        if (insights.isEmpty()) {
+            insights.add(WardrobeInsight("Your wardrobe exhibits excellent structural coverage and chromatic balance. No immediate gaps detected.", false))
         }
 
         return WardrobeAnalytics(

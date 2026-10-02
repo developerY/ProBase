@@ -513,10 +513,11 @@ fun WardrobeFootprintScreen(
             }
 
             // 4. Wardrobe Opportunities
-            item {
-                Column {
+            if (analytics.insights.isNotEmpty()) {
+                item {
+                    Column {
                     Text(
-                        text = "WARDROBE OPPORTUNITIES",
+                        text = androidx.compose.ui.res.stringResource(com.zoewave.probase.kocolor.features.inventory.R.string.applications_kocolor_features_inventory_wardrobe_opportunities),
                         fontFamily = FontFamily.Serif,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
@@ -546,6 +547,7 @@ fun WardrobeFootprintScreen(
                         }
                     }
                 }
+            }
             }
         }
     }

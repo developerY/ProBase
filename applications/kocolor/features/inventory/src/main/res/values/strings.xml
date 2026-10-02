@@ -82,4 +82,5 @@
     <string name="applications_kocolor_features_inventory_diversity_label">DIVERSITY</string>
     <string name="applications_kocolor_features_inventory_glow_score_description">A high Glow Score indicates that you are utilizing a significant portion of your wardrobe. The distribution above highlights which items are becoming \'Wardrobe Heroes\' and which might be ripe for archival or re-styling.</string>
     <string name="applications_kocolor_features_inventory_all_pieces">All Pieces</string>
+    <string name="applications_kocolor_features_inventory_wardrobe_opportunities">WARDROBE OPPORTUNITIES</string>
 </resources>
