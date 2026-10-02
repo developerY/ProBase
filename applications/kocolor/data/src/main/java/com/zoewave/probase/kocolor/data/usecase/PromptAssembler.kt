@@ -23,10 +23,26 @@ class PromptAssembler @Inject constructor() {
         val availableClothingCategories = clothingCandidates.mapNotNull { it.clothingItem?.category }.toSet()
         val hasShoes = availableClothingCategories.contains(ClothingCategory.SHOES) || (clothingCandidates.isEmpty() && compactManifest.contains("SHOES", ignoreCase = true))
 
-        val clothingGoal = if (hasShoes) {
-            "1. CLOTHING COMPOSITION:\n- TOP: exactly 1\n- BOTTOM: exactly 1\n- SHOES: exactly 1\n- OUTERWEAR: optional, only when composition rules permit."
+        val isOuterwearForbidden = (context.weatherTempC != null && context.weatherTempC > 17f) // HOT or WARM
+        
+        val thermalStr = when {
+            context.weatherTempC == null -> "MODERATE"
+            context.weatherTempC > 25f -> "HOT"
+            context.weatherTempC > 18f -> "WARM"
+            context.weatherTempC < 10f -> "COLD"
+            else -> "COOL"
+        }
+
+        val outerwearInstruction = if (isOuterwearForbidden) {
+            "- OUTERWEAR: FORBIDDEN. Do not add outerwear merely to improve aesthetics."
         } else {
-            "1. CLOTHING COMPOSITION:\n- TOP: exactly 1\n- BOTTOM: exactly 1\n- OUTERWEAR: optional, only when composition rules permit."
+            "- OUTERWEAR: select ONLY when the deterministic composition context explicitly marks OUTERWEAR as permitted."
+        }
+
+        val clothingGoal = if (hasShoes) {
+            "1. CLOTHING COMPOSITION:\n- TOP: exactly 1\n- BOTTOM: exactly 1\n- SHOES: exactly 1\n$outerwearInstruction"
+        } else {
+            "1. CLOTHING COMPOSITION:\n- TOP: exactly 1\n- BOTTOM: exactly 1\n$outerwearInstruction"
         }
 
         val cosmeticCategories = cosmeticCandidates.mapNotNull { prov ->
@@ -77,6 +93,7 @@ class PromptAssembler @Inject constructor() {
                     else -> "COOL"
                 }
             }
+            OUTERWEAR_PERMISSION: ${if (isOuterwearForbidden) "FORBIDDEN" else "OPTIONAL_IF_ENVIRONMENTALLY_REQUIRED"}
             UV_CONTEXT: ${
                 when {
                     context.uvIndex == null -> "MINIMAL"

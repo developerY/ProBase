@@ -19,6 +19,10 @@ class StyleAuditLogger @Inject constructor() {
         trails[requestId] = StyleAuditTrail(requestId)
     }
 
+    fun logCompositionPolicy(requestId: String, requiredRoles: String, outerwearPermission: String, reason: String) {
+        trails[requestId]?.compositionRecord = CompositionRecord(requiredRoles, outerwearPermission, reason)
+    }
+
     fun logAnchorResolution(requestId: String, anchor: ClothingItem, source: AnchorSource, reason: String) {
         trails[requestId]?.anchorRecord = AnchorRecord(
             id = "w_${anchor.internalId}",
@@ -68,7 +72,15 @@ class StyleAuditLogger @Inject constructor() {
             appendLine("              KOCOLOR AUDIT TRAIL                 ")
             appendLine("==================================================")
             
-            appendLine("[1] ANCHOR ESTABLISHMENT")
+            appendLine("[1] COMPOSITION POLICY")
+            trail.compositionRecord?.let {
+                appendLine("    Required: ${it.requiredRoles}")
+                appendLine("    Outerwear: ${it.outerwearPermission}")
+                appendLine("    Reason: ${it.reason}")
+            } ?: appendLine("    NO COMPOSITION RECORDED")
+            appendLine()
+
+            appendLine("[2] ANCHOR ESTABLISHMENT")
             trail.anchorRecord?.let {
                 appendLine("    Source: ${it.source.name}")
                 appendLine("    Item: [${it.id}] \"${it.name}\"")
@@ -83,7 +95,7 @@ class StyleAuditLogger @Inject constructor() {
             } ?: appendLine("    NO ANCHOR RESOLVED")
             appendLine()
 
-            appendLine("[2] DETERMINISTIC PRUNING")
+            appendLine("[3] DETERMINISTIC PRUNING")
             trail.pruningRecord?.let {
                 appendLine("    Initial Wardrobe: ${it.initialCount} items")
                 appendLine("    Passed Weather/Occasion: ${it.afterWeather} items")
@@ -92,21 +104,21 @@ class StyleAuditLogger @Inject constructor() {
             } ?: appendLine("    NO PRUNING RECORDED")
             appendLine()
 
-            appendLine("[3] MATHEMATICAL COLOR & ROLE SCORING (Top ${trail.reasoningSet?.size ?: 0})")
+            appendLine("[4] MATHEMATICAL COLOR & ROLE SCORING (Top ${trail.reasoningSet?.size ?: 0})")
             trail.reasoningSet?.forEach { prov ->
                 val score = "%.2f".format(prov.totalScore)
                 appendLine("    - [${prov.id}] \"${prov.name}\" (Score: $score) -> Reason: ${prov.retrievalReason}")
             }
             appendLine()
 
-            appendLine("[4] AI AESTHETIC SYNTHESIS")
+            appendLine("[5] AI AESTHETIC SYNTHESIS")
             appendLine("    Provider: ${trail.aiProviderUsed ?: "N/A"} (Tokens: ${trail.tokensUsed ?: 0})")
             appendLine("    Selected Clothing: ${trail.finalBlueprint?.selectedClothingIds}")
             appendLine("    Selected Cosmetics: ${trail.finalBlueprint?.selectedCosmeticIds}")
             appendLine("    AI Rationale: \"${trail.finalBlueprint?.rationale ?: "N/A"}\"")
             appendLine()
 
-            appendLine("[5] AESTHETIC CALIBRATION (FASHIONISTA)")
+            appendLine("[6] AESTHETIC CALIBRATION (FASHIONISTA)")
             trail.fashionistaScore?.let { score ->
                 val statusText = if (score.isApproved) "APPROVED" else "REJECTED"
                 appendLine("    Color Harmony Score: ${"%.1f".format(score.colorHarmonyScore)} / 100")
@@ -117,7 +129,7 @@ class StyleAuditLogger @Inject constructor() {
             } ?: appendLine("    NO CALIBRATION RECORDED")
             appendLine()
 
-            appendLine("[6] INTENT FULFILLMENT")
+            appendLine("[7] INTENT FULFILLMENT")
             trail.intentFulfillment?.let { fulfillment ->
                 if (fulfillment.isSpecified && fulfillment.score != null) {
                     appendLine("    Status: SPECIFIED")
