@@ -91,7 +91,7 @@ class DeterministicContextEngine @Inject constructor(
             // Add categorical and deterministic jitter for fine-grained ranking
             val lightness = try { 
                 val lch = DoubleArray(3)
-                androidx.core.graphics.ColorUtils.colorToLAB(android.graphics.Color.parseColor(item.colorHex), lch)
+                ColorUtils.colorToLAB(Color.parseColor(item.colorHex), lch)
                 lch[0] / 100f
             } catch (e: Exception) { 0.5f }.toFloat()
             val lightnessJitter = (lightness * 0.04f)
