@@ -27,6 +27,7 @@ class StyleAuditLogger @Inject constructor() {
         trails[requestId]?.anchorRecord = AnchorRecord(
             id = "w_${anchor.internalId}",
             name = anchor.name,
+            role = anchor.category.name,
             source = source,
             reason = reason
         )
@@ -82,10 +83,11 @@ class StyleAuditLogger @Inject constructor() {
 
             appendLine("[2] ANCHOR ESTABLISHMENT")
             trail.anchorRecord?.let {
-                appendLine("    Source: ${it.source.name}")
                 appendLine("    Item: [${it.id}] \"${it.name}\"")
+                appendLine("    Role: ${it.role}")
+                appendLine("    Source: ${it.source.name}")
+                appendLine("    Priority: 4.00 / 4.00")
                 appendLine("    Reason: ${it.reason}")
-                appendLine("    Anchor Score: 4.00 / 4.00")
                 it.wasSelected?.let { selected ->
                     val statusText = if (selected) "SELECTED" else "NOT_SELECTED"
                     appendLine("    Resolution: $statusText")
@@ -110,16 +112,19 @@ class StyleAuditLogger @Inject constructor() {
                 val score = "%.2f".format(prov.totalScore)
                 if (prov.totalScore > 2.0f && !prov.id.startsWith("c_")) {
                     val anchorScale = if (prov.totalScore >= 4.0f) "4.00" else "2.50"
-                    appendLine("    - [${prov.id}] \"${prov.name}\" (ANCHOR PRIORITY: $score / $anchorScale)")
-                    appendLine("      Reason: ${prov.retrievalReason}")
+                    appendLine("    - [${prov.id}] \"${prov.name}\"")
+                    appendLine("      ANCHOR PRIORITY: $score / $anchorScale")
+                    appendLine("      Reason: ${prov.retrievalReason.replace("\n", "\n  ")}")
                 } else if (prov.id.startsWith("c_")) {
                     // Normalize cosmetic scores to a 1.00 scale for cleaner comparison
                     val normalizedScore = "%.3f".format(prov.totalScore / 6.0f)
-                    appendLine("    - [${prov.id}] \"${prov.name}\" (COSMETIC COMPATIBILITY SCORE: $normalizedScore / 1.000)")
+                    appendLine("    - [${prov.id}] \"${prov.name}\"")
+                    appendLine("      COSMETIC COMPATIBILITY SCORE: $normalizedScore / 1.000")
                     appendLine("      Reason: ${prov.retrievalReason}")
                 } else {
-                    appendLine("    - [${prov.id}] \"${prov.name}\" (COMPATIBILITY SCORE: $score / 1.00)")
-                    appendLine("      Breakdown: ${prov.retrievalReason}")
+                    appendLine("    - [${prov.id}] \"${prov.name}\"")
+                    appendLine("      COMPATIBILITY SCORE: $score / 1.00")
+                    appendLine("      Breakdown: ${prov.retrievalReason.replace("\n", "\n  ")}")
                 }
             }
             appendLine()
@@ -131,18 +136,18 @@ class StyleAuditLogger @Inject constructor() {
             appendLine("    AI Rationale: \"${trail.finalBlueprint?.rationale ?: "N/A"}\"")
             appendLine()
 
-            appendLine("[6] AESTHETIC CALIBRATION (FASHIONISTA)")
+            appendLine("[6] FASHIONISTA EVALUATION")
             trail.fashionistaScore?.let { score ->
                 val statusText = if (score.isApproved) "APPROVED" else "REJECTED"
-                appendLine("    Color Harmony Score: ${"%.1f".format(score.colorHarmonyScore)} / 100")
-                appendLine("    Silhouette Proportion Score: ${"%.1f".format(score.silhouetteScore)} / 100")
-                appendLine("    Contrast & Depth Score: ${"%.1f".format(score.contrastScore)} / 100")
-                appendLine("    Final FASHIONISTA Score: ${"%.1f".format(score.totalScore)} / 100")
-                appendLine("    Status: $statusText")
+                appendLine("    Color Harmony: ${"%.1f".format(score.colorHarmonyScore)} / 100")
+                appendLine("    Silhouette: ${"%.1f".format(score.silhouetteScore)} / 100")
+                appendLine("    Contrast & Depth: ${"%.1f".format(score.contrastScore)} / 100")
+                appendLine("    FINAL FASHIONISTA SCORE: ${"%.1f".format(score.totalScore)} / 100")
+                appendLine("    STATUS: $statusText")
             } ?: appendLine("    NO CALIBRATION RECORDED")
             appendLine()
 
-            appendLine("[7] INTENT FULFILLMENT")
+            appendLine("[7] INTENT FULFILLMENT EVALUATION")
             trail.intentFulfillment?.let { fulfillment ->
                 if (fulfillment.isSpecified && fulfillment.score != null) {
                     appendLine("    Status: SPECIFIED")

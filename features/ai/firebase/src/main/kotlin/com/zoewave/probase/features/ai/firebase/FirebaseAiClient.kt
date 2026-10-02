@@ -83,7 +83,7 @@ class FirebaseAiClientImpl @Inject constructor() : FirebaseAiClient {
             CRITICAL SYNTAX RULE: When referencing ANY selected item in your rationale, you MUST use the exact inline tag format <ITEM:id>.
             EXAMPLE RATIONALE: "The <ITEM:w_55> creates a warm focal point against the cool <ITEM:w_38>, while the <ITEM:c_151> keeps the palette grounded."
             
-            Provide a styling blueprint optimized for this intent: "${telemetry.userIntent}".
+            Provide a styling blueprint optimized for this context.
             
             Respond ONLY with a valid JSON object matching this schema:
             {

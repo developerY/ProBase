@@ -80,7 +80,6 @@ class LocalAiEngine @Inject constructor() {
                 0 -> "STATUS_CHECK_FAILED"
                 else -> "UNKNOWN ($status)"
             }
-            Log.d("LocalAiEngine", "ML Kit GenAI Status: $statusString")
             
             when (status) {
                 3 -> { // MODEL_AVAILABLE
@@ -100,7 +99,7 @@ class LocalAiEngine @Inject constructor() {
         } catch (e: Exception) {
             val msg = e.message ?: ""
             if (msg.contains("606") || msg.contains("FEATURE_NOT_FOUND")) {
-                Log.w("LocalAiEngine", "ML Kit GenAI Status: STATUS_CHECK_FAILED\nReason: FEATURE_NOT_FOUND (606)\nProvider fallback: FIREBASE_AI_LOGIC")
+                Log.d("KoColor_Audit", "\nLOCAL AI\nStatus: UNAVAILABLE\nReason: AICore FEATURE_NOT_FOUND (606)")
                 return@withContext NanoState.Unsupported
             }
             Log.e("LocalAiEngine", "ML Kit Status Check Failed: $msg")
