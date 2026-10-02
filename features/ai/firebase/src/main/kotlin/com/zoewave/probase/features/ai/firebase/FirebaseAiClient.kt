@@ -81,7 +81,7 @@ class FirebaseAiClientImpl @Inject constructor() : FirebaseAiClient {
             4. Create a 4-color Palette (HEX codes) harmonizing the whole look.
             
             CRITICAL SYNTAX RULE: When referencing ANY selected item in your rationale, you MUST use the exact inline tag format <ITEM:id>.
-            EXAMPLE RATIONALE: "The <ITEM:w_55> is selected because the weather requires <ITEM:c_151>."
+            EXAMPLE RATIONALE: "The <ITEM:w_55> creates a warm focal point against the cool <ITEM:w_38>, while the <ITEM:c_151> keeps the palette grounded."
             
             Provide a styling blueprint optimized for this intent: "${telemetry.userIntent}".
             

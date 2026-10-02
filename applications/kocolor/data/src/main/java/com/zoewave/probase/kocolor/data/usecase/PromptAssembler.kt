@@ -39,7 +39,7 @@ class PromptAssembler @Inject constructor() {
             listOf("Eye", "Cheek", "Lip", "Nail")
         }
 
-        val cosmeticGoal = "2. Select 1 item from each available cosmetic role (${activeCategories.joinToString(", ")}) from the COSMETICS section."
+        val cosmeticGoal = "2. COSMETIC COMPOSITION: Select 1 item from each available cosmetic role (${activeCategories.joinToString(", ")}) from the COSMETICS section."
 
         val lockedAnchors = clothingCandidates.filter {
             it.retrievalReason.contains("LOCKED ANCHOR", ignoreCase = true) ||
@@ -94,6 +94,10 @@ class PromptAssembler @Inject constructor() {
             - Rotation Health Score: ${context.rotationHealth ?: 100}/100
             - Anchor Versatility Target: ${context.wardrobeVersatility ?: 0} compatible looks
             
+            COLOR RELATIONSHIPS:
+            - Overall Chroma Profile: ${if ((context.intentProfile?.colorfulness ?: 0.5f) > 0.6f) "High/Vibrant" else "Muted/Balanced"}
+            - Palette Role Strategy: Anchor base + accent highlights
+            
             AVAILABLE CANDIDATES (COMPACT MANIFEST):
             $compactManifest
             
@@ -101,7 +105,7 @@ class PromptAssembler @Inject constructor() {
             $anchorInstruction
             $clothingGoal
             $cosmeticGoal
-            4. Construct a harmonic style where all colors work together, including a rationale referencing ONLY selected item IDs.
+            3. HARMONIC SYNTHESIS: Construct a harmonic style where all colors work together, including a rationale referencing ONLY selected item IDs.
             
             Respond ONLY with a valid JSON object matching this schema:
             {

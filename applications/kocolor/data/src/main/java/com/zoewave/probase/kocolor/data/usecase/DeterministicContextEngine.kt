@@ -194,11 +194,15 @@ class DeterministicContextEngine @Inject constructor(
         }
 
         val anchor = viableItems
-            .sortedByDescending { calculateContextScore(it, context) + calculateFreshnessScore(it, context) }
+            .sortedByDescending { 
+                calculateContextScore(it, context) + 
+                calculateFreshnessScore(it, context) + 
+                if (calculateChroma(it.colorHex) > 20f) 0.1f else 0.0f
+            }
             .firstOrNull()
             
         anchor?.let {
-            auditLogger.logAnchorResolution(context.requestId, it, AnchorSource.AUTOMATIC_CONTEXT, "Highest context + freshness score")
+            auditLogger.logAnchorResolution(context.requestId, it, AnchorSource.AUTOMATIC_CONTEXT, "Highest context, freshness, and thermal compatibility score")
         }
         
         return anchor
@@ -228,9 +232,31 @@ class DeterministicContextEngine @Inject constructor(
             if (penalty >= 0.7) return false
         }
         
-        // Basic weather check
-        val isHot = context.weather.contains("Temp: 2", ignoreCase = true) || context.weather.contains("Temp: 3", ignoreCase = true)
-        if (isHot && item.category == ClothingCategory.OUTERWEAR) return false
+        // Advanced Environmental Weather Gating
+        val isHot = context.weatherTempC != null && context.weatherTempC > 24f
+        val isWarm = context.weatherTempC != null && context.weatherTempC in 18f..24f
+        val isCool = context.weatherTempC != null && context.weatherTempC in 10f..17f
+        
+        if (isHot) {
+            // Strictly exclude heavy layers in hot weather
+            if (item.category == ClothingCategory.OUTERWEAR) return false
+            if (item.material?.contains("Wool", ignoreCase = true) == true || 
+                item.material?.contains("Fleece", ignoreCase = true) == true ||
+                item.material?.contains("Shearling", ignoreCase = true) == true ||
+                item.name.contains("Overcoat", ignoreCase = true) ||
+                item.name.contains("Puffer", ignoreCase = true)) {
+                return false
+            }
+        }
+        
+        if (isWarm) {
+            // Exclude extreme winter wear in warm weather
+            if (item.material?.contains("Fleece", ignoreCase = true) == true ||
+                item.name.contains("Puffer", ignoreCase = true) ||
+                item.name.contains("Overcoat", ignoreCase = true)) {
+                return false
+            }
+        }
         
         return true
     }
