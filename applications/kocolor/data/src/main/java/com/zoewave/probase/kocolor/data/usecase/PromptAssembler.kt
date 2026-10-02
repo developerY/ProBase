@@ -56,7 +56,7 @@ class PromptAssembler @Inject constructor() {
         }
 
         val prompt = """
-            You are the KoColor Style Architect AI. Generate a "Style Blueprint" that is both stylistically harmonic and protective.
+            You are the KoColor Style Architect AI. Generate a "Style Blueprint" that is stylistically harmonic and appropriate to the supplied environmental context.
             
             STRICT GROUNDING RULES & CONSTRAINTS:
             1. DESCRIPTIVE ACCURACY: Do not invent stylistic adjectives (e.g., do not call nylon 'structural'). Describe items strictly using the physical materials and attributes listed in the manifest.
@@ -85,7 +85,7 @@ class PromptAssembler @Inject constructor() {
             $anchorInstruction
             $clothingGoal
             $cosmeticGoal
-            3. Construct a harmonic style where all colors work together, including a rationale referencing ONLY selected item IDs.
+            4. Construct a harmonic style where all colors work together, including a rationale referencing ONLY selected item IDs.
             
             Respond ONLY with a valid JSON object matching this schema:
             {
@@ -96,7 +96,7 @@ class PromptAssembler @Inject constructor() {
             }
         """.trimIndent()
 
-        val tempOverride = if (context.intent.equals("Surprise Me", ignoreCase = true) || context.intentProfile.colorfulness >= 0.85f) {
+        val tempOverride = if (context.intent.equals("Surprise Me", ignoreCase = true) || (context.intentProfile?.colorfulness ?: 0.5f) >= 0.85f) {
             0.85f
         } else {
             null
