@@ -291,6 +291,12 @@ fun FashionJourneyScreen(
                                 .replace("with mild conditions", "with the environmental conditions")
                                 .replace("under mild conditions", "under the current conditions")
                                 .replace(Regex("(?i)item\\s+w_\\d+"), "this garment")
+                            
+                            // Re-write generic "protective" assumptions into more grounded terms
+                            filteredRationale = filteredRationale
+                                .replace("and protective aesthetic", "and environmentally appropriate aesthetic")
+                                .replace("protective look", "balanced look")
+                                .replace("protect your", "complement your")
                                 .replace(Regex("(?i)item\\s+c_\\d+"), "this product")
                                 .replace(Regex("<ITEM:w_\\d+>"), "this garment")
                                 .replace(Regex("<ITEM:c_\\d+>"), "this product")
