@@ -26,8 +26,15 @@ data class PruningRecord(
     val finalEligible: Int
 )
 
+data class CompositionRecord(
+    val requiredRoles: String,
+    val outerwearPermission: String,
+    val reason: String
+)
+
 data class StyleAuditTrail(
     val requestId: String,
+    var compositionRecord: CompositionRecord? = null,
     var anchorRecord: AnchorRecord? = null,
     var pruningRecord: PruningRecord? = null,
     var reasoningSet: List<CandidateProvenance>? = null,

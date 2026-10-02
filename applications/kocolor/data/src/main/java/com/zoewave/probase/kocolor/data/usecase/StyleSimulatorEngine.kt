@@ -74,6 +74,22 @@ class StyleSimulatorEngine @Inject constructor(
                     return try {
                         val blueprint = decodeBlueprint(cachedResponse)
                         auditLogger.logAnchorSynthesisResult(requestContext.requestId, blueprint.selectedClothingIds)
+                        val isOuterwearForbidden = (requestContext.weatherTempC != null && requestContext.weatherTempC > 17f)
+                        val thermalStr = when {
+                            requestContext.weatherTempC == null -> "MODERATE"
+                            requestContext.weatherTempC > 25f -> "HOT"
+                            requestContext.weatherTempC > 18f -> "WARM"
+                            requestContext.weatherTempC < 10f -> "COLD"
+                            else -> "COOL"
+                        }
+                        
+                        auditLogger.logCompositionPolicy(
+                            requestId = requestContext.requestId,
+                            requiredRoles = if (fitResult.request.promptString.contains("SHOES: exactly 1")) "TOP + BOTTOM + SHOES" else "TOP + BOTTOM",
+                            outerwearPermission = if (isOuterwearForbidden) "FORBIDDEN" else "OPTIONAL_IF_ENVIRONMENTALLY_REQUIRED",
+                            reason = "Thermal context = $thermalStr"
+                        )
+                        
                         auditLogger.logAiExecution(
                             requestId = requestContext.requestId,
                             providerId = "CACHE_${provider.capability.id}",
@@ -97,6 +113,22 @@ class StyleSimulatorEngine @Inject constructor(
                     }
                 }
 
+                val isOuterwearForbidden = (requestContext.weatherTempC != null && requestContext.weatherTempC > 17f)
+                val thermalStr = when {
+                    requestContext.weatherTempC == null -> "MODERATE"
+                    requestContext.weatherTempC > 25f -> "HOT"
+                    requestContext.weatherTempC > 18f -> "WARM"
+                    requestContext.weatherTempC < 10f -> "COLD"
+                    else -> "COOL"
+                }
+                
+                auditLogger.logCompositionPolicy(
+                    requestId = requestContext.requestId,
+                    requiredRoles = if (fitResult.request.promptString.contains("SHOES: exactly 1")) "TOP + BOTTOM + SHOES" else "TOP + BOTTOM",
+                    outerwearPermission = if (isOuterwearForbidden) "FORBIDDEN" else "OPTIONAL_IF_ENVIRONMENTALLY_REQUIRED",
+                    reason = "Thermal context = $thermalStr"
+                )
+                
                 val blueprint = executeAndCache(provider, fitResult, fingerprint, providerStartTime, requestContext)
                 if (blueprint != null) {
                     auditLogger.logAnchorSynthesisResult(requestContext.requestId, blueprint.selectedClothingIds)
