@@ -34,9 +34,9 @@ class PromptAssembler @Inject constructor() {
         }
 
         val outerwearInstruction = if (isOuterwearForbidden) {
-            "- OUTERWEAR: FORBIDDEN. Do not add outerwear merely to improve aesthetics."
+            "- OUTERWEAR: FORBIDDEN. Do not add outerwear merely to improve aesthetics.\n- If OUTERWEAR is not permitted, select exactly 3 clothing items: 1 TOP, 1 BOTTOM, 1 SHOES."
         } else {
-            "- OUTERWEAR: select ONLY when the deterministic composition context explicitly marks OUTERWEAR as permitted."
+            "- OUTERWEAR: select ONLY when the deterministic composition context explicitly marks OUTERWEAR as permitted.\n- Do not add outerwear merely to improve aesthetics.\n- If OUTERWEAR is not permitted, select exactly 3 clothing items: 1 TOP, 1 BOTTOM, 1 SHOES."
         }
 
         val clothingGoal = if (hasShoes) {

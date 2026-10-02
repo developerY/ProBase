@@ -287,6 +287,9 @@ fun FashionJourneyScreen(
                             
                             // 3. Fallback
                             filteredRationale = filteredRationale
+                                .replace("with mild weather conditions", "with the thermal conditions")
+                                .replace("with mild conditions", "with the environmental conditions")
+                                .replace("under mild conditions", "under the current conditions")
                                 .replace(Regex("(?i)item\\s+w_\\d+"), "this garment")
                                 .replace(Regex("(?i)item\\s+c_\\d+"), "this product")
                                 .replace(Regex("<ITEM:w_\\d+>"), "this garment")
