@@ -73,7 +73,14 @@ class LocalAiEngine @Inject constructor() {
     suspend fun checkCapability(): NanoState = withContext(Dispatchers.Default) {
         try {
             val status = localModel.checkStatus()
-            Log.d("LocalAiEngine", "ML Kit GenAI Status: $status")
+            val statusString = when (status) {
+                3 -> "AVAILABLE"
+                2 -> "DOWNLOADING"
+                1 -> "DOWNLOADABLE"
+                0 -> "STATUS_CHECK_FAILED"
+                else -> "UNKNOWN ($status)"
+            }
+            Log.d("LocalAiEngine", "ML Kit GenAI Status: $statusString")
             
             when (status) {
                 3 -> { // MODEL_AVAILABLE
@@ -93,9 +100,8 @@ class LocalAiEngine @Inject constructor() {
         } catch (e: Exception) {
             val msg = e.message ?: ""
             if (msg.contains("606") || msg.contains("FEATURE_NOT_FOUND")) {
-                Log.w("LocalAiEngine", "Feature 636 missing. Attempting explicit download...")
-                triggerBackgroundDownload()
-                return@withContext NanoState.Downloading()
+                Log.w("LocalAiEngine", "ML Kit GenAI Status: STATUS_CHECK_FAILED\nReason: FEATURE_NOT_FOUND (606)\nProvider fallback: FIREBASE_AI_LOGIC")
+                return@withContext NanoState.Unsupported
             }
             Log.e("LocalAiEngine", "ML Kit Status Check Failed: $msg")
             NanoState.Unsupported
