@@ -108,11 +108,18 @@ class StyleAuditLogger @Inject constructor() {
             appendLine("[4] MATHEMATICAL COLOR & ROLE SCORING (Top ${trail.reasoningSet?.size ?: 0})")
             trail.reasoningSet?.forEach { prov ->
                 val score = "%.2f".format(prov.totalScore)
-                if (prov.totalScore > 2.0f) {
+                if (prov.totalScore > 2.0f && !prov.id.startsWith("c_")) {
                     val anchorScale = if (prov.totalScore >= 4.0f) "4.00" else "2.50"
-                    appendLine("    - [${prov.id}] \"${prov.name}\" (ANCHOR SCORE: $score / $anchorScale) -> Reason: ${prov.retrievalReason}")
+                    appendLine("    - [${prov.id}] \"${prov.name}\" (ANCHOR PRIORITY: $score / $anchorScale)")
+                    appendLine("      Reason: ${prov.retrievalReason}")
+                } else if (prov.id.startsWith("c_")) {
+                    // Normalize cosmetic scores to a 1.00 scale for cleaner comparison
+                    val normalizedScore = "%.3f".format(prov.totalScore / 6.0f)
+                    appendLine("    - [${prov.id}] \"${prov.name}\" (COSMETIC COMPATIBILITY SCORE: $normalizedScore / 1.000)")
+                    appendLine("      Reason: ${prov.retrievalReason}")
                 } else {
-                    appendLine("    - [${prov.id}] \"${prov.name}\" (COMPATIBILITY SCORE: $score / 1.00): ${prov.retrievalReason}")
+                    appendLine("    - [${prov.id}] \"${prov.name}\" (COMPATIBILITY SCORE: $score / 1.00)")
+                    appendLine("      Breakdown: ${prov.retrievalReason}")
                 }
             }
             appendLine()

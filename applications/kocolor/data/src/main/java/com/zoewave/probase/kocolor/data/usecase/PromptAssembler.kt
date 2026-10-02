@@ -113,6 +113,9 @@ class PromptAssembler @Inject constructor() {
             
             COLOR RELATIONSHIPS:
             - Overall Chroma Profile: ${if ((context.intentProfile?.colorfulness ?: 0.5f) > 0.6f) "High/Vibrant" else "Muted/Balanced"}
+            - Temperature Balance: ${if (profile.undertone.toString().contains("Warm", ignoreCase = true)) "Warm-led" else if (profile.undertone.toString().contains("Cool", ignoreCase = true)) "Cool-led" else "Neutral"}
+            - Lightness Distribution: ${profile.depth}
+            - Contrast Profile: ${profile.contrast}
             - Palette Role Strategy: Anchor base + accent highlights
             
             AVAILABLE CANDIDATES (COMPACT MANIFEST):
