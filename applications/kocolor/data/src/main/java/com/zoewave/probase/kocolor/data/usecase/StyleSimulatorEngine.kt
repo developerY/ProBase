@@ -275,7 +275,7 @@ class StyleSimulatorEngine @Inject constructor(
                 }
                 val rationaleText = if (isUserLock) {
                     "[LOCKED ANCHOR] Required outfit anchor"
-                } else if (!context.intent.isNullOrBlank()) {
+                } else if (context.intentProfile != null && context.intentProfile.colorfulness > 0.7f) {
                     "[INTENT ANCHOR] High-chroma intent override"
                 } else {
                     "Automatic context anchor"

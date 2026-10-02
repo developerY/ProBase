@@ -73,7 +73,12 @@ class DeterministicContextEngine @Inject constructor(
             val freshnessScore = calculateFreshnessScore(item, context)
 
             val baseReason = if (lockedAnchors.isNotEmpty()) {
-                "Harmonic with locked ${lockedAnchors.first().name}"
+                val anchorSource = context.lockedConstraints.find { it.itemId == "w_${lockedAnchors.first().internalId}" || it.itemId == lockedAnchors.first().remoteId }?.tier
+                if (anchorSource != null) {
+                    "Harmonic with locked ${lockedAnchors.first().name}"
+                } else {
+                    "Color harmony + role compatibility with automatic context anchor"
+                }
             } else {
                 "Color harmony + role compatibility"
             }
@@ -83,8 +88,17 @@ class DeterministicContextEngine @Inject constructor(
             val temperatureBonus = if (calculateChroma(item.colorHex) > 20f) 0.05f else 0f
             val usagePenalty = if (item.usageCount > 10) -0.05f else if (item.usageCount == 0) 0.05f else 0f
             
+            // Add categorical and deterministic jitter for fine-grained ranking
+            val lightness = try { 
+                val lch = DoubleArray(3)
+                androidx.core.graphics.ColorUtils.colorToLAB(android.graphics.Color.parseColor(item.colorHex), lch)
+                lch[0] / 100f
+            } catch (e: Exception) { 0.5f }.toFloat()
+            val lightnessJitter = (lightness * 0.04f)
+            val hashJitter = (item.name.hashCode() % 100) / 10000f
+            
             // Recompute composite to avoid all elements landing on 0.85
-            val refinedComposite = (colorScore * 0.4f + contextScore * 0.3f + freshnessScore * 0.2f + 0.1f) + temperatureBonus + usagePenalty
+            val refinedComposite = (colorScore * 0.4f + contextScore * 0.3f + freshnessScore * 0.2f + 0.1f) + temperatureBonus + usagePenalty + lightnessJitter + hashJitter
 
             CandidateProvenance(
                 clothingItem = item,
@@ -157,9 +171,13 @@ class DeterministicContextEngine @Inject constructor(
         // 3. Automatic Anchor (pass hard constraints with high-chroma intent override)
         val viableItems = inventory.filter { isContextuallyViable(it, context) }
 
-        Log.d("KoColor", "Parsed Intent Colorfulness: ${context.intentProfile.colorfulness} for intent '${context.intent}'")
+        if (context.intent.isNullOrBlank() || context.intentProfile == null) {
+            Log.d("KoColor", "Parsed Intent: NOT_SPECIFIED\nStyleIntentProfile: null")
+        } else {
+            Log.d("KoColor", "Parsed Intent Colorfulness: ${context.intentProfile?.colorfulness} for intent '${context.intent}'")
+        }
 
-        if (!context.intent.isNullOrBlank() && context.intentProfile.colorfulness > 0.7f) {
+        if (context.intentProfile != null && context.intentProfile?.colorfulness ?: 0.5f > 0.7f) {
             val chromaticAnchor = viableItems
                 .filter { calculateChroma(it.colorHex) > 30f }
                 .maxByOrNull { calculateChroma(it.colorHex) + calculateContextScore(it, context).toFloat() }

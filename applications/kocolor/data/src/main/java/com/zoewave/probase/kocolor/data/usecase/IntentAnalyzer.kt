@@ -6,6 +6,7 @@ import javax.inject.Singleton
 @Singleton
 class IntentAnalyzer @Inject constructor() {
 
+
     fun analyzeState(intentString: String): StyleIntentState {
         val trimmed = intentString.trim()
         if (trimmed.isBlank() || trimmed.equals("Daily Outfit", ignoreCase = true) || trimmed.equals("Daily", ignoreCase = true)) {
