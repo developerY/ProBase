@@ -116,7 +116,7 @@ class WardrobeCandidateFilter @Inject constructor(
 
         // 3. Pre-Gemini High-Chroma Intent Boost & Neutral Demotion
         val chroma = calculateChroma(item.colorHex)
-        if (context.intentProfile.colorfulness > 0.7f) {
+        if (!context.intent.isNullOrBlank() && context.intentProfile.colorfulness > 0.7f) {
             if (chroma > 30.0f) {
                 score += RecommendationWeights.HIGH_CHROMA_INTENT_BONUS // +2.5f
             } else if (chroma < 15.0f) {

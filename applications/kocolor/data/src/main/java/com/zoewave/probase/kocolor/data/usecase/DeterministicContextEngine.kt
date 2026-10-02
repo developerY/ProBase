@@ -75,9 +75,16 @@ class DeterministicContextEngine @Inject constructor(
             val baseReason = if (lockedAnchors.isNotEmpty()) {
                 "Harmonic with locked ${lockedAnchors.first().name}"
             } else {
-                "Contextually compatible"
+                "Color harmony + role compatibility"
             }
             val finalReason = if (item.isSignature) "[Signature Item] Rotation bypassed. $baseReason" else baseReason
+            
+            // Introduce more variation in the total score to fix the "flat scoring" weakness
+            val temperatureBonus = if (calculateChroma(item.colorHex) > 20f) 0.05f else 0f
+            val usagePenalty = if (item.usageCount > 10) -0.05f else if (item.usageCount == 0) 0.05f else 0f
+            
+            // Recompute composite to avoid all elements landing on 0.85
+            val refinedComposite = (colorScore * 0.4f + contextScore * 0.3f + freshnessScore * 0.2f + 0.1f) + temperatureBonus + usagePenalty
 
             CandidateProvenance(
                 clothingItem = item,
@@ -85,7 +92,7 @@ class DeterministicContextEngine @Inject constructor(
                 colorScore = colorScore,
                 appearanceScore = 0.8f,
                 freshnessScore = freshnessScore,
-                compositeScore = (colorScore * 0.4f + contextScore * 0.3f + freshnessScore * 0.3f),
+                compositeScore = refinedComposite.coerceIn(0f, 1f),
                 retrievalReason = finalReason
             )
         }.sortedByDescending { it.compositeScore }
@@ -152,7 +159,7 @@ class DeterministicContextEngine @Inject constructor(
 
         Log.d("KoColor", "Parsed Intent Colorfulness: ${context.intentProfile.colorfulness} for intent '${context.intent}'")
 
-        if (context.intentProfile.colorfulness > 0.7f) {
+        if (!context.intent.isNullOrBlank() && context.intentProfile.colorfulness > 0.7f) {
             val chromaticAnchor = viableItems
                 .filter { calculateChroma(it.colorHex) > 30f }
                 .maxByOrNull { calculateChroma(it.colorHex) + calculateContextScore(it, context).toFloat() }

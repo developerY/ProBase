@@ -275,8 +275,10 @@ class StyleSimulatorEngine @Inject constructor(
                 }
                 val rationaleText = if (isUserLock) {
                     "[LOCKED ANCHOR] Required outfit anchor"
-                } else {
+                } else if (!context.intent.isNullOrBlank()) {
                     "[INTENT ANCHOR] High-chroma intent override"
+                } else {
+                    "Automatic context anchor"
                 }
                 CandidateProvenance(
                     clothingItem = anchor,
@@ -290,16 +292,25 @@ class StyleSimulatorEngine @Inject constructor(
 
             // 2. Combine locked anchors with ranked pool
             val anchorIds = anchorProv.mapNotNull { it.clothingItem?.internalId }.toSet()
-            val poolWithoutAnchors = selectionState.fullRankedCandidatePool.filter { (it.clothingItem?.internalId ?: -1) !in anchorIds }
+            val poolWithoutAnchors = selectionState.fullRankedCandidatePool.filter { 
+                (it.clothingItem?.internalId ?: -1) !in anchorIds &&
+                // Limit to categories the AI is actually allowed to select from
+                (it.clothingItem?.category == ClothingCategory.TOPS || 
+                 it.clothingItem?.category == ClothingCategory.BOTTOMS || 
+                 it.clothingItem?.category == ClothingCategory.SHOES ||
+                 it.clothingItem?.category == ClothingCategory.OUTERWEAR)
+            }
             var topWardrobeProv = (anchorProv + poolWithoutAnchors).take(currentK.coerceAtLeast(anchorProv.size))
 
             // 3. Category diversity guarantee (ensure TOPS, BOTTOMS, SHOES are all present)
             val presentCategories = topWardrobeProv.mapNotNull { it.clothingItem?.category }.toSet()
             val missingCategories = mutableListOf<ClothingCategory>()
-            if (!presentCategories.contains(ClothingCategory.TOPS) && !presentCategories.contains(ClothingCategory.DRESSES)) {
+            // Ensure we are only enforcing diversity guarantees for the valid categories
+            // Removes DRESSES from the strict necessity list
+            if (!presentCategories.contains(ClothingCategory.TOPS)) {
                 missingCategories.add(ClothingCategory.TOPS)
             }
-            if (!presentCategories.contains(ClothingCategory.BOTTOMS) && !presentCategories.contains(ClothingCategory.DRESSES)) {
+            if (!presentCategories.contains(ClothingCategory.BOTTOMS)) {
                 missingCategories.add(ClothingCategory.BOTTOMS)
             }
             if (!presentCategories.contains(ClothingCategory.SHOES)) {
