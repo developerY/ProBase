@@ -73,6 +73,7 @@ class StyleSimulatorEngine @Inject constructor(
                 if (cachedResponse != null) {
                     return try {
                         val blueprint = decodeBlueprint(cachedResponse)
+                        auditLogger.logAnchorSynthesisResult(requestContext.requestId, blueprint.selectedClothingIds)
                         auditLogger.logAiExecution(
                             requestId = requestContext.requestId,
                             providerId = "CACHE_${provider.capability.id}",
@@ -98,6 +99,7 @@ class StyleSimulatorEngine @Inject constructor(
 
                 val blueprint = executeAndCache(provider, fitResult, fingerprint, providerStartTime, requestContext)
                 if (blueprint != null) {
+                    auditLogger.logAnchorSynthesisResult(requestContext.requestId, blueprint.selectedClothingIds)
                     auditLogger.printAuditTrail(requestContext.requestId)
                     return blueprint
                 }
@@ -266,6 +268,11 @@ class StyleSimulatorEngine @Inject constructor(
             val selectionState = contextEngine.generateSelectionState(wardrobe, context.lockedConstraints, context)
             val cCandidatesProv = candidateFilter.getCosmeticCandidateProvenance(cosmetics, context, limit = currentK)
             val cCandidates = cCandidatesProv.mapNotNull { it.cosmeticItem }
+            
+            // Critical Guard: Abort if deterministic pruning leaves zero eligible items
+            if (selectionState.fullRankedCandidatePool.isEmpty() && selectionState.activeAnchors.isEmpty()) {
+                throw IllegalStateException("Your wardrobe has 0 eligible items for this context. Please add more pieces or adjust your environmental filters.")
+            }
 
             // 1. Convert active anchors to candidate provenance with accurate rationale
             val anchorProv = selectionState.activeAnchors.map { anchor ->

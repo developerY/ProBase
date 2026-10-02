@@ -27,6 +27,14 @@ class StyleAuditLogger @Inject constructor() {
             reason = reason
         )
     }
+    
+    fun logAnchorSynthesisResult(requestId: String, selectedIds: List<String>) {
+        trails[requestId]?.let { trail ->
+            trail.anchorRecord?.let { anchor ->
+                anchor.wasSelected = selectedIds.contains(anchor.id) || selectedIds.contains(anchor.id.replace("w_", ""))
+            }
+        }
+    }
 
     fun logDeterministicPruning(requestId: String, record: PruningRecord) {
         trails[requestId]?.pruningRecord = record
@@ -65,6 +73,13 @@ class StyleAuditLogger @Inject constructor() {
                 appendLine("    Source: ${it.source.name}")
                 appendLine("    Item: [${it.id}] \"${it.name}\"")
                 appendLine("    Reason: ${it.reason}")
+                it.wasSelected?.let { selected ->
+                    val statusText = if (selected) "SELECTED" else "NOT_SELECTED"
+                    appendLine("    Resolution: $statusText")
+                    if (!selected && it.source == AnchorSource.AUTOMATIC_CONTEXT) {
+                        appendLine("    Final Context: Final composition optimized across required roles")
+                    }
+                }
             } ?: appendLine("    NO ANCHOR RESOLVED")
             appendLine()
 

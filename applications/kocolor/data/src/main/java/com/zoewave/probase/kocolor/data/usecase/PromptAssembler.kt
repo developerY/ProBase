@@ -24,9 +24,9 @@ class PromptAssembler @Inject constructor() {
         val hasShoes = availableClothingCategories.contains(ClothingCategory.SHOES) || (clothingCandidates.isEmpty() && compactManifest.contains("SHOES", ignoreCase = true))
 
         val clothingGoal = if (hasShoes) {
-            "1. Select BEST 3 clothing items (1 Top, 1 Bottom, 1 Shoes) from the WARDROBE section."
+            "1. CLOTHING COMPOSITION:\n- TOP: exactly 1\n- BOTTOM: exactly 1\n- SHOES: exactly 1\n- OUTERWEAR: optional, only when composition rules permit."
         } else {
-            "1. Select BEST 2 clothing items (1 Top, 1 Bottom) from the WARDROBE section."
+            "1. CLOTHING COMPOSITION:\n- TOP: exactly 1\n- BOTTOM: exactly 1\n- OUTERWEAR: optional, only when composition rules permit."
         }
 
         val cosmeticCategories = cosmeticCandidates.mapNotNull { prov ->
@@ -61,14 +61,30 @@ class PromptAssembler @Inject constructor() {
             STRICT GROUNDING RULES & CONSTRAINTS:
             1. DESCRIPTIVE ACCURACY: Do not invent stylistic adjectives (e.g., do not call nylon 'structural'). Describe items strictly using the physical materials and attributes listed in the manifest.
             2. CATEGORY ISOLATION: You may ONLY select cosmetics from the requested roles (Eye, Cheek, Lip, Nail). You are STRICTLY FORBIDDEN from selecting or referencing items categorized as PREP, HAIR, or COMPLEXION, regardless of the environmental context. You must only select clothing items from the TOPS, BOTTOMS, SHOES, or OUTERWEAR categories.
-            3. RATIONALE FORMATTING: Write the rationale as fluid prose. Do not use decimals or decimal numbers (e.g., write "high UV" instead of "6.9 UV") to ensure clean downstream text processing.
+            3. RATIONALE FORMATTING: Write the rationale as fluid prose. Do not invent qualitative weather adjectives (like "mild" or "breezy"). Use ONLY the provided THERMAL_CONTEXT and UV_CONTEXT. Do not use decimals.
             
             APPEARANCE TELEMETRY:
             - Temperature: ${profile.undertone}
             - Depth: ${profile.depth}
             - Contrast: ${profile.contrast}
             
-            WEATHER/ATMOSPHERIC: Temp: ${context.weatherTempC ?: 22.0f}°C, UV: ${context.uvIndex ?: 3.0f}
+            THERMAL_CONTEXT: ${
+                when {
+                    context.weatherTempC == null -> "MODERATE"
+                    context.weatherTempC > 25f -> "HOT"
+                    context.weatherTempC > 18f -> "WARM"
+                    context.weatherTempC < 10f -> "COLD"
+                    else -> "COOL"
+                }
+            }
+            UV_CONTEXT: ${
+                when {
+                    context.uvIndex == null -> "MINIMAL"
+                    context.uvIndex > 6f -> "HIGH"
+                    context.uvIndex > 3f -> "MODERATE"
+                    else -> "MINIMAL"
+                }
+            }
             CIRCADIAN CONTEXT: ${context.circadianContext} (Wellness Score: ${context.wellnessScore})
             USER INTENT: ${context.intent}
             OCCASION: ${context.occasion}
