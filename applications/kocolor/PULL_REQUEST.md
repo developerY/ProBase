@@ -45,3 +45,15 @@ It also introduces the structural expansion required for the `JEWELRY` taxonomy 
 
 ---
 *Status: Ready for Production | Build: Passes with 0 errors / 0 warnings.*
+
+Summary of Changes:
+1.
+Cosmetic Compatibility Labels: Fixed a logging bug where cosmetic item compatibility scores incorrectly inherited the ANCHOR SCORE string. Cosmetic scores are now securely normalized to a 1.000 scale and logged as COSMETIC COMPATIBILITY SCORE in the StyleAuditLogger.
+2.
+Decomposable Deterministic Ranking: Upgraded the generic candidate retrieval reasoning strings into a transparent, multi-dimensional score breakdown. The engine now explicitly logs Color Harmony, Thermal Fit, Role/Occasion Fit, and Rotation Freshness metrics for every processed candidate.
+3.
+Anchor Audits & Scaling Transparency: The AnchorRecord now captures and logs the assigned category Role (e.g. BOTTOM). During Candidate Scoring, the anchor's override score is now clearly labeled as ANCHOR PRIORITY: 4.00 / 4.00 to distinguish it from the standard 1.00-scaled items.
+4.
+Prompt Semantic Guidelines: Fixed instruction numbering in PromptAssembler and updated the Palette Role Strategy context to provide Gemini with dynamic semantic direction. Improved the EXAMPLE RATIONALE to encourage elegant stylistic prose rather than mechanical token recitation.
+5.
+Rogue AI Rationale Filtering: Added fallback Regex filters to the FashionJourneyScreen UI layer. If the LLM disobeys strict prompt rules and hallucinates qualitative weather adjectives (e.g. "mild conditions"), they are seamlessly rewritten into grounded terms ("environmental conditions").
