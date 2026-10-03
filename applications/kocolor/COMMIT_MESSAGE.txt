@@ -1,9 +1,17 @@
-Rename Data Deletion Policy and Update App References
+Align CapabilityRouter Execution Order and Settings UI Status with Application Architecture
 
-This commit fixes a typo in the Data Deletion Policy filename (`DateDeletionPolicy.md` -> `DataDeletionPolicy.md`) which caused a 404 Page Not Found error during the Google Play Console Data Safety declaration review.
+This commit aligns the AI provider execution order and the Settings UI status display with the codebase logic.
 
 Summary of Changes:
-1. Renamed `DateDeletionPolicy.md` to `DataDeletionPolicy.md` in the Legal/PlayStore documentation directory to match standard naming conventions.
-2. Updated the `applications_kocolor_apps_mobile_core_data_deletion_url` string resource in the Android application to point to the freshly renamed markdown file, ensuring the in-app settings link is active and valid.
+1. **Capability Router Execution Order (`CapabilityRouterImpl.kt`)**: Re-ordered provider resolution to match the architectural pipeline:
+   - Priority 1: BYOK Cloud AI (if user configures a custom Gemini API Key).
+   - Priority 2: On-Device Local AI (Gemini Nano).
+   - Priority 3: Enterprise Security / Firebase AI Logic (Managed Cloud Fallback, if enabled).
+2. **BYOK Provider State (`ByokAiProvider.kt`)**: Implemented API key configuration setter and availability check based on custom key presence.
+3. **Settings Status Header (`AiConfigurationCard.kt`)**: Updated `statusText` calculation in the Settings UI to reflect active provider hierarchy accurately:
+   - Displays "On (BYOK - Gemini Key)" when a key is configured.
+   - Displays "On (Local AI)" when executing on-device.
+   - Displays "On (Enterprise Firebase)" when using the managed cloud fallback.
+   - Displays "Off (AI Features Disabled)" or "Off (No Active Provider)" when disabled.
 
-Status: Ready for Play Console URL resubmission.
+Status: Build successful.

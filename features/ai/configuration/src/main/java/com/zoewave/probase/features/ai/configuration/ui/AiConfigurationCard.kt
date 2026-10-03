@@ -114,8 +114,10 @@ fun AiConfigurationCardContent(
                     Text(text = title, style = MaterialTheme.typography.titleMedium, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold, color = Color.Black)
                     val statusText = when {
                         !uiState.isAiEnabled -> stringResource(R.string.features_ai_configuration_status_off)
-                        !uiState.isApiKeySet -> stringResource(R.string.features_ai_configuration_status_local)
-                        else -> stringResource(R.string.features_ai_configuration_status_cloud)
+                        uiState.isApiKeySet -> stringResource(R.string.features_ai_configuration_status_byok)
+                        uiState.isLocalAiAvailable -> stringResource(R.string.features_ai_configuration_status_local)
+                        uiState.useFirebaseVertexAi -> stringResource(R.string.features_ai_configuration_status_firebase)
+                        else -> stringResource(R.string.features_ai_configuration_status_no_provider)
                     }
                     Text(
                         text = statusText,
