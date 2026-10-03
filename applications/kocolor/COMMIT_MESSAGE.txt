@@ -1,10 +1,9 @@
-Fix Health Connect Permissions per Google Play Policy Review
+Rename Data Deletion Policy and Update App References
 
-This commit addresses the "Excessive data access for declared feature" violation flagged during Google Play's policy review regarding the Health Connect "Minimum Scope" requirements.
+This commit fixes a typo in the Data Deletion Policy filename (`DateDeletionPolicy.md` -> `DataDeletionPolicy.md`) which caused a 404 Page Not Found error during the Google Play Console Data Safety declaration review.
 
 Summary of Changes:
-1. **Manifest Stripping**: Actively removed `READ_DISTANCE`, `READ_EXERCISE`, `READ_HEART_RATE`, `READ_NUTRITION`, and `READ_WEIGHT` declarations from `AndroidManifest.xml` via `tools:node="remove"`.
-2. **Runtime Exclusions**: Purged the corresponding permission constants from the `permissions` Set across `HealthViewModel.kt` and `GetHealthSummaryUseCase.kt` to ensure the application no longer prompts the user for these unjustified metrics during the Health Connect onboarding flow.
-3. **Calorie Fix**: Reinstated the `READ_ACTIVE_CALORIES_BURNED` permission into the core Kotlin permission arrays to maintain parity with the manifest declarations, supporting existing baseline activity calculations.
+1. Renamed `DateDeletionPolicy.md` to `DataDeletionPolicy.md` in the Legal/PlayStore documentation directory to match standard naming conventions.
+2. Updated the `applications_kocolor_apps_mobile_core_data_deletion_url` string resource in the Android application to point to the freshly renamed markdown file, ensuring the in-app settings link is active and valid.
 
-Status: Play Store compliant. Ready for immediate resubmission.
+Status: Ready for Play Console URL resubmission.
