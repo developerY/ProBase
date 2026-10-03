@@ -110,40 +110,7 @@ fun MessagingStep(
                     )
                 }
                 
-                // Pipeline Status Indicator & Quick Settings Link
-                Surface(
-                    onClick = { navTo(KoColorRoute.Settings(null)) },
-                    modifier = Modifier.padding(end = 16.dp),
-                    shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
-                    color = Color.White,
-                    border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f)),
-                    shadowElevation = 2.dp
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        val aiProviderStr = uiState.activeAiProvider
-                        val isOffline = aiProviderStr.contains("Nano") || aiProviderStr.contains("Math")
-                        val dotColor = if (isOffline) Color(0xFF4CAF50) else Color(0xFFD4AF37) // Green for local/free, Gold for Cloud/Paid
 
-                        Box(
-                            modifier = Modifier
-                                .size(8.dp)
-                                .background(
-                                    color = dotColor,
-                                    shape = CircleShape
-                                )
-                        )
-                        Text(
-                            text = aiProviderStr,
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.SemiBold,
-                            color = Color.Black.copy(alpha = 0.8f)
-                        )
-                    }
-                }
             }
         }
 
@@ -304,14 +271,42 @@ fun MessagingStep(
 
         item {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Button(
-                    onClick = { onEvent(SimulatorEvent.StartSimulation) },
-                    modifier = Modifier.fillMaxWidth().height(64.dp),
-                    shape = RoundedCornerShape(32.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Black),
-                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
-                ) {
-                    Text(stringResource(R.string.applications_kocolor_features_analyzer_simulator_begin_action), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Color.White)
+                Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Button(
+                        onClick = { onEvent(SimulatorEvent.StartSimulation) },
+                        modifier = Modifier.fillMaxWidth().height(64.dp),
+                        shape = RoundedCornerShape(32.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Black),
+                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
+                    ) {
+                        Text(stringResource(R.string.applications_kocolor_features_analyzer_simulator_begin_action), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Color.White)
+                    }
+                    
+                    Spacer(modifier = Modifier.height(12.dp))
+                    
+                    // 4-Color AI Execution Context Legend
+                    val providerName = uiState.activeAiProvider
+                    val (dotColor, statusString) = when {
+                        providerName.contains("Math", ignoreCase = true) -> Color(0xFF9E9E9E) to "Math Engine (Offline)"
+                        providerName.contains("Nano", ignoreCase = true) -> Color(0xFF4CAF50) to "Local AI (Gemini Nano)"
+                        providerName.contains("Firebase", ignoreCase = true) -> Color(0xFFD4AF37) to "Enterprise Security (Firebase)"
+                        providerName.contains("BYOK", ignoreCase = true) -> Color(0xFFE91E63) to "BYOK Cloud (Gemini API Key)"
+                        else -> Color.Gray to "Determining Engine..."
+                    }
+                    
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(8.dp)
+                                .background(color = dotColor, shape = CircleShape)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = statusString,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color.Gray
+                        )
+                    }
                 }
 
                 OutlinedButton(
