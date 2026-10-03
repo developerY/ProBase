@@ -437,3 +437,44 @@ fun AiConfigurationCardContent(
         }
     }
 }
+
+
+@androidx.compose.ui.tooling.preview.Preview(showBackground = true, name = "AI Config Card - Expanded")
+@Composable
+private fun AiConfigurationCardExpandedPreview() {
+    MaterialTheme {
+        AiConfigurationCardContent(
+            expanded = true,
+            onExpandToggle = {},
+            uiState = AiConfigurationUiState(
+                isAiEnabled = true,
+                isApiKeySet = false,
+                useLocalAi = true,
+                useFirebaseVertexAi = true,
+                availableModels = listOf("gemini-1.5-flash", "gemini-1.5-pro")
+            ),
+            onEvent = {},
+            title = "AI Configuration",
+            description = "Configure your generative AI settings."
+        )
+    }
+}
+
+@androidx.compose.ui.tooling.preview.Preview(showBackground = true, name = "AI Config Card - Collapsed")
+@Composable
+private fun AiConfigurationCardCollapsedPreview() {
+    MaterialTheme {
+        AiConfigurationCardContent(
+            expanded = false,
+            onExpandToggle = {},
+            uiState = AiConfigurationUiState(
+                isAiEnabled = true,
+                useLocalAi = true,
+                useFirebaseVertexAi = true
+            ),
+            onEvent = {},
+            title = "AI Configuration",
+            description = "Configure your generative AI settings."
+        )
+    }
+}

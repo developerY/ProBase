@@ -1,15 +1,9 @@
-Implement Multi-Step Fallback Pipeline UI in AI Configuration Settings
+Add Compose Previews for AiConfigurationCard UI
 
-This commit restructures the AI Configuration Settings card into an explicit multi-step fallback pipeline UI, giving users granular control over each stage of the AI execution chain.
+This commit adds `@Preview` functions for `AiConfigurationCardContent` in both expanded and collapsed states.
 
 Summary of Changes:
-1. **Multi-Stage Pipeline UI (`AiConfigurationCard.kt`)**:
-   - Structured the card into explicit stages:
-     - **Stage 1 (Priority 1)**: BYOK (Bring Your Own Key) - Input Gemini API key, discover models, and select preferred model.
-     - **Stage 2 (Priority 2)**: On-Device Local AI (Gemini Nano) - Independent toggle to enable/disable local NPU/GPU processing.
-     - **Stage 3 (Priority 3)**: Enterprise Security (Firebase AI) - Independent toggle to enable/disable cloud proxy execution via App Check.
-   - Added a dynamic header status subtitle that clearly communicates the active pipeline state to the user (e.g. `Stage 2 Active (Local AI → Firebase Fallback)`).
-2. **Local AI Preference Persistence (`AiConfigurationSettings.kt` / `KoColorSettings.kt`)**: Added `useLocalAi` preference flow and DataStore persistence.
-3. **Pipeline Routing (`CapabilityRouterImpl.kt`)**: Updated capability router to respect individual stage toggles (`useLocalAi` and `useFirebaseVertexAi`) alongside BYOK key availability.
+1. Added `AiConfigurationCardExpandedPreview` and `AiConfigurationCardCollapsedPreview` to `AiConfigurationCard.kt` to allow instant visual inspection of the multi-stage fallback pipeline UI inside Android Studio.
+2. Verified preview rendering using the Compose Preview tool.
 
-Status: Build successful. Ready for release.
+Status: Verified & build successful.
