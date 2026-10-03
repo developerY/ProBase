@@ -76,6 +76,10 @@ fun AiConfigurationCard(
     )
 }
 
+
+/**
+ * Configure AI
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AiConfigurationCardContent(
