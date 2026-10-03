@@ -1,8 +1,10 @@
 package com.zoewave.probase.features.ai.configuration.ui
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.ExpandLess
@@ -53,6 +56,32 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.zoewave.probase.features.ai.configuration.R
 import com.zoewave.probase.core.ui.R as CoreUiR
 
+
+@Composable
+private fun PipelineStageIndicator(
+    isActive: Boolean,
+    label: String
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(8.dp)
+                .background(
+                    color = if (isActive) Color(0xFF4CAF50) else Color(0xFFE53935), // Green vs Red
+                    shape = CircleShape
+                )
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodySmall,
+            fontWeight = if (isActive) FontWeight.SemiBold else FontWeight.Normal,
+            color = if (isActive) Color.Black else Color.Gray
+        )
+    }
+}
 
 @Composable
 fun AiConfigurationCard(
@@ -120,21 +149,24 @@ fun AiConfigurationCardContent(
                     val isStage2Active = uiState.useLocalAi && uiState.isLocalAiAvailable
                     val isStage3Active = uiState.useFirebaseVertexAi
 
-                    val statusText = when {
-                        isStage1Active && isStage2Active && isStage3Active -> "Stage 1 Active (BYOK → Local AI → Firebase)"
-                        isStage1Active && isStage2Active -> "Stage 1 Active (BYOK → Local AI)"
-                        isStage1Active && isStage3Active -> "Stage 1 Active (BYOK → Firebase Fallback)"
-                        isStage1Active -> "Stage 1 Active (BYOK Only)"
-                        isStage2Active && isStage3Active -> "Stage 2 Active (Local AI → Firebase Fallback)"
-                        isStage2Active -> "Stage 2 Active (Local AI Only)"
-                        isStage3Active -> "Stage 3 Active (Enterprise Firebase Only)"
-                        else -> "Off (No Stages Enabled)"
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        modifier = Modifier.padding(top = 4.dp)
+                    ) {
+                        // Stage 1: BYOK
+                        PipelineStageIndicator(isActive = isStage1Active, label = "BYOK")
+
+                        Text("→", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+
+                        // Stage 2: Local AI
+                        PipelineStageIndicator(isActive = isStage2Active, label = "Local AI")
+
+                        Text("→", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+
+                        // Stage 3: Firebase
+                        PipelineStageIndicator(isActive = isStage3Active, label = "Firebase")
                     }
-                    Text(
-                        text = statusText,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color.DarkGray
-                    )
                 }
                 Icon(
                     imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
