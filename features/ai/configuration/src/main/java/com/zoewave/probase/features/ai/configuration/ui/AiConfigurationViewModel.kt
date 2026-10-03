@@ -14,10 +14,14 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+import com.zoewave.probase.features.ai.local.data.LocalAiEngine
+import com.zoewave.probase.features.ai.local.data.NanoState
+
 @HiltViewModel
 class AiConfigurationViewModel @Inject constructor(
     private val settings: AiConfigurationSettings,
-    private val orchestrator: SmartCaptureOrchestrator
+    private val orchestrator: SmartCaptureOrchestrator,
+    private val localAiEngine: LocalAiEngine
 ) : ViewModel() {
 
     private val _isTestingKey = MutableStateFlow(false)
@@ -27,11 +31,27 @@ class AiConfigurationViewModel @Inject constructor(
     private val _fetchedModels = MutableStateFlow<List<String>?>(null)
 
     @Suppress("UNCHECKED_CAST")
+    private val _isLocalAiAvailable = MutableStateFlow(false)
+
+    init {
+        checkLocalAiAvailability()
+    }
+
+    private fun checkLocalAiAvailability() {
+        viewModelScope.launch {
+            val capability = localAiEngine.checkCapability()
+            _isLocalAiAvailable.value = capability == NanoState.Available || capability == NanoState.MultimodalAvailable
+        }
+    }
+
+    @Suppress("UNCHECKED_CAST")
     val uiState: StateFlow<AiConfigurationUiState> = combine(
         settings.isGeminiApiKeySetFlow,
+        settings.useByokKey,
         settings.isAiEnabledFlow,
         settings.aiModelFlow,
         settings.useFirebaseVertexAi,
+        _isLocalAiAvailable,
         _isTestingKey,
         _keyTestResult,
         _isTestingModel,
@@ -40,14 +60,16 @@ class AiConfigurationViewModel @Inject constructor(
     ) { args: Array<Any?> ->
         AiConfigurationUiState(
             isApiKeySet = args[0] as Boolean,
-            isAiEnabled = args[1] as Boolean,
-            currentAiModel = args[2] as String,
-            useFirebaseVertexAi = args[3] as Boolean,
-            isTestingKey = args[4] as Boolean,
-            keyTestResult = args[5] as String?,
-            isTestingModel = args[6] as Boolean,
-            modelTestResult = args[7] as String?,
-            availableModels = (args[8] as List<String>?) ?: emptyList()
+            useByokKey = args[1] as Boolean,
+            isAiEnabled = args[2] as Boolean,
+            currentAiModel = args[3] as String,
+            useFirebaseVertexAi = args[4] as Boolean,
+            isLocalAiAvailable = args[5] as Boolean,
+            isTestingKey = args[6] as Boolean,
+            keyTestResult = args[7] as String?,
+            isTestingModel = args[8] as Boolean,
+            modelTestResult = args[9] as String?,
+            availableModels = (args[10] as List<String>?) ?: emptyList()
         )
     }.stateIn(
         scope = viewModelScope,
@@ -65,6 +87,12 @@ class AiConfigurationViewModel @Inject constructor(
             }
             is AiConfigurationEvent.OnAiModelSelected -> {
                 viewModelScope.launch { settings.saveAiModel(event.model) }
+            }
+            is AiConfigurationEvent.OnUseByokKeyToggled -> {
+                viewModelScope.launch { settings.saveUseByokKey(event.enabled) }
+            }
+            is AiConfigurationEvent.OnUseLocalAiToggled -> {
+                viewModelScope.launch { settings.saveUseLocalAi(event.enabled) }
             }
             is AiConfigurationEvent.OnUseFirebaseVertexAiToggled -> {
                 viewModelScope.launch { settings.saveUseFirebaseVertexAi(event.enabled) }

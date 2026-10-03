@@ -1,8 +1,10 @@
 package com.zoewave.probase.features.ai.configuration.ui
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.ExpandLess
@@ -55,6 +58,32 @@ import com.zoewave.probase.core.ui.R as CoreUiR
 
 
 @Composable
+private fun PipelineStageIndicator(
+    isActive: Boolean,
+    label: String
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(8.dp)
+                .background(
+                    color = if (isActive) Color(0xFF4CAF50) else Color(0xFFE53935), // Green vs Red
+                    shape = CircleShape
+                )
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodySmall,
+            fontWeight = if (isActive) FontWeight.SemiBold else FontWeight.Normal,
+            color = if (isActive) Color.Black else Color.Gray
+        )
+    }
+}
+
+@Composable
 fun AiConfigurationCard(
     expanded: Boolean,
     onExpandToggle: () -> Unit,
@@ -76,6 +105,10 @@ fun AiConfigurationCard(
     )
 }
 
+
+/**
+ * Configure AI
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AiConfigurationCardContent(
@@ -112,16 +145,28 @@ fun AiConfigurationCardContent(
                 Spacer(modifier = Modifier.width(16.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(text = title, style = MaterialTheme.typography.titleMedium, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold, color = Color.Black)
-                    val statusText = when {
-                        !uiState.isAiEnabled -> stringResource(R.string.features_ai_configuration_status_off)
-                        !uiState.isApiKeySet -> stringResource(R.string.features_ai_configuration_status_local)
-                        else -> stringResource(R.string.features_ai_configuration_status_cloud)
+                    val isStage1Active = uiState.isApiKeySet && uiState.useByokKey
+                    val isStage2Active = uiState.isLocalAiAvailable
+                    val isStage3Active = uiState.useFirebaseVertexAi
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        modifier = Modifier.padding(top = 4.dp)
+                    ) {
+                        // Stage 1: BYOK
+                        PipelineStageIndicator(isActive = isStage1Active, label = "BYOK")
+
+                        Text("→", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+
+                        // Stage 2: Local AI
+                        PipelineStageIndicator(isActive = isStage2Active, label = "Local AI")
+
+                        Text("→", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+
+                        // Stage 3: Firebase
+                        PipelineStageIndicator(isActive = isStage3Active, label = "Firebase")
                     }
-                    Text(
-                        text = statusText,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color.DarkGray
-                    )
                 }
                 Icon(
                     imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
@@ -131,46 +176,39 @@ fun AiConfigurationCardContent(
 
             AnimatedVisibility(visible = expanded) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    ListItem(
-                        colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = Color(0xFFFBF8F5)),
-                        headlineContent = { Text(stringResource(R.string.features_ai_configuration_enable_features), fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold) },
-                        supportingContent = { Text(description) },
-                        trailingContent = {
-                            Switch(
-                                checked = uiState.isAiEnabled,
-                                onCheckedChange = { onEvent(AiConfigurationEvent.OnAiEnabledToggled(it)) },
-                                colors = androidx.compose.material3.SwitchDefaults.colors(
-                                    checkedThumbColor = Color.Black,
-                                    checkedTrackColor = Color(0xFFD4AF37) // Gold
-                                )
-                            )
-                        }
-                    )
-
-                    Spacer(modifier = Modifier.padding(vertical = 8.dp))
-
-                    ListItem(
-                        colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = Color(0xFFFBF8F5)),
-                        headlineContent = { Text(stringResource(R.string.features_ai_configuration_use_firebase_title), fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold) },
-                        supportingContent = { Text(stringResource(R.string.features_ai_configuration_use_firebase_desc)) },
-                        trailingContent = {
-                            Switch(
-                                checked = uiState.useFirebaseVertexAi,
-                                onCheckedChange = { onEvent(AiConfigurationEvent.OnUseFirebaseVertexAiToggled(it)) },
-                                colors = androidx.compose.material3.SwitchDefaults.colors(
-                                    checkedThumbColor = Color.Black,
-                                    checkedTrackColor = Color(0xFFD4AF37) // Gold
-                                )
-                            )
-                        }
-                    )
-
-                    Spacer(modifier = Modifier.padding(vertical = 8.dp))
-
+                    // Pipeline Section Header
                     Text(
-                        text = stringResource(R.string.features_ai_configuration_byok_title),
+                        text = stringResource(R.string.features_ai_configuration_pipeline_title),
                         style = MaterialTheme.typography.labelMedium,
-                        color = Color(0xFFD4AF37) // Gold
+                        color = Color(0xFFD4AF37), // Gold
+                        fontWeight = FontWeight.Bold
+                    )
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // STAGE 1: BYOK with toggle
+                    ListItem(
+                        colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = Color(0xFFFBF8F5)),
+                        headlineContent = { Text(stringResource(R.string.features_ai_configuration_stage_1_title), fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold) },
+                        supportingContent = { 
+                            Text(
+                                if (uiState.isApiKeySet) 
+                                    stringResource(R.string.features_ai_configuration_stage_1_desc) 
+                                else 
+                                    "Configure a Gemini API key below to unlock Stage 1."
+                            ) 
+                        },
+                        trailingContent = {
+                            Switch(
+                                checked = uiState.isApiKeySet && uiState.useByokKey,
+                                enabled = uiState.isApiKeySet,
+                                onCheckedChange = { onEvent(AiConfigurationEvent.OnUseByokKeyToggled(it)) },
+                                colors = androidx.compose.material3.SwitchDefaults.colors(
+                                    checkedThumbColor = Color.Black,
+                                    checkedTrackColor = Color(0xFFD4AF37) // Gold
+                                )
+                            )
+                        }
                     )
                     Text(
                         text = stringResource(R.string.features_ai_configuration_byok_desc),
@@ -327,6 +365,55 @@ fun AiConfigurationCardContent(
                         modifier = Modifier.padding(top = 4.dp)
                     )
 
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // STAGE 2: On-Device Local AI (Hardware Capability Badge)
+                    ListItem(
+                        colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = Color(0xFFFBF8F5)),
+                        headlineContent = { Text(stringResource(R.string.features_ai_configuration_stage_2_title), fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold) },
+                        supportingContent = { Text(stringResource(R.string.features_ai_configuration_stage_2_desc)) },
+                        trailingContent = {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(10.dp)
+                                        .background(
+                                            color = if (uiState.isLocalAiAvailable) Color(0xFF4CAF50) else Color(0xFFE53935),
+                                            shape = androidx.compose.foundation.shape.CircleShape
+                                        )
+                                )
+                                Text(
+                                    text = if (uiState.isLocalAiAvailable) "NPU Active" else "Unsupported",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (uiState.isLocalAiAvailable) Color(0xFF4CAF50) else Color(0xFFE53935)
+                                )
+                            }
+                        }
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // STAGE 3: Enterprise Security (Firebase)
+                    ListItem(
+                        colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = Color(0xFFFBF8F5)),
+                        headlineContent = { Text(stringResource(R.string.features_ai_configuration_stage_3_title), fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold) },
+                        supportingContent = { Text(stringResource(R.string.features_ai_configuration_stage_3_desc)) },
+                        trailingContent = {
+                            Switch(
+                                checked = uiState.useFirebaseVertexAi,
+                                onCheckedChange = { onEvent(AiConfigurationEvent.OnUseFirebaseVertexAiToggled(it)) },
+                                colors = androidx.compose.material3.SwitchDefaults.colors(
+                                    checkedThumbColor = Color.Black,
+                                    checkedTrackColor = Color(0xFFD4AF37) // Gold
+                                )
+                            )
+                        }
+                    )
+
                     if (uiState.availableModels.isNotEmpty()) {
                         val statusColor = when {
                             uiState.modelTestResult == null -> MaterialTheme.colorScheme.outline
@@ -389,5 +476,47 @@ fun AiConfigurationCardContent(
                 }
             }
         }
+    }
+}
+
+
+@androidx.compose.ui.tooling.preview.Preview(showBackground = true, name = "AI Config Card - Expanded")
+@Composable
+private fun AiConfigurationCardExpandedPreview() {
+    MaterialTheme {
+        AiConfigurationCardContent(
+            expanded = true,
+            onExpandToggle = {},
+            uiState = AiConfigurationUiState(
+                isApiKeySet = false,
+                useByokKey = false,
+                isLocalAiAvailable = true,
+                useFirebaseVertexAi = true,
+                availableModels = listOf("gemini-1.5-flash", "gemini-1.5-pro")
+            ),
+            onEvent = {},
+            title = "AI Configuration",
+            description = "Configure your generative AI settings."
+        )
+    }
+}
+
+// Update
+@androidx.compose.ui.tooling.preview.Preview(showBackground = true, name = "AI Config Card - Collapsed")
+@Composable
+private fun AiConfigurationCardCollapsedPreview() {
+    MaterialTheme {
+        AiConfigurationCardContent(
+            expanded = false,
+            onExpandToggle = {},
+            uiState = AiConfigurationUiState(
+                isAiEnabled = true,
+                isLocalAiAvailable = true,
+                useFirebaseVertexAi = true
+            ),
+            onEvent = {},
+            title = "AI Configuration",
+            description = "Configure your generative AI settings."
+        )
     }
 }

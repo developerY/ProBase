@@ -18,6 +18,14 @@ interface AiConfigurationSettings {
     val isGeminiApiKeySetFlow: Flow<Boolean>
     suspend fun saveGeminiApiKey(apiKey: String?)
 
+    // BYOK Key
+    val useByokKey: Flow<Boolean>
+    suspend fun saveUseByokKey(enabled: Boolean)
+
+    // Local On-Device AI
+    val useLocalAi: Flow<Boolean>
+    suspend fun saveUseLocalAi(enabled: Boolean)
+
     // Firebase Vertex AI
     val useFirebaseVertexAi: Flow<Boolean>
     suspend fun saveUseFirebaseVertexAi(enabled: Boolean)

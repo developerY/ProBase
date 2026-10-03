@@ -17,6 +17,7 @@ dependencies {
 
     // --- Feature Dependencies ---
     implementation(project(":features:ai:capture"))
+    implementation(project(":features:ai:local"))
 
     // --- Third Party ---
     implementation(libs.androidx.compose.material.icons.extended)

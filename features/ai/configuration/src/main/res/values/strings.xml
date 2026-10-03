@@ -2,9 +2,11 @@
 <resources>
     <string name="features_ai_configuration_title">AI Configuration</string>
     <string name="features_ai_configuration_desc">Configure your generative AI settings.</string>
-    <string name="features_ai_configuration_status_off">Off (No AI)</string>
+    <string name="features_ai_configuration_status_off">Off (AI Features Disabled)</string>
+    <string name="features_ai_configuration_status_byok">On (BYOK - Gemini Key)</string>
     <string name="features_ai_configuration_status_local">On (Local AI)</string>
-    <string name="features_ai_configuration_status_cloud">On (Cloud-Enhanced)</string>
+    <string name="features_ai_configuration_status_firebase">On (Enterprise Firebase)</string>
+    <string name="features_ai_configuration_status_no_provider">Off (No Active Provider)</string>
     <string name="features_ai_configuration_enable_features">Enable AI Features</string>
     <string name="features_ai_configuration_byok_title">BYOK (Bring Your Own Key)</string>
     <string name="features_ai_configuration_byok_desc">Get your free API key from Google AI Studio. Cloud features include mandatory reporting tools; flagging an output will redirect you to Google’s external feedback portal.</string>
@@ -21,6 +23,13 @@
     <string name="features_ai_configuration_verify_model_title">Step 2: Verify Model Functionality</string>
     <string name="features_ai_configuration_verify_model_desc">Ping the selected model to confirm it responds.</string>
     <string name="features_ai_configuration_ping_model">Ping Selected Model</string>
+    <string name="features_ai_configuration_pipeline_title">FALLBACK PIPELINE STAGES</string>
+    <string name="features_ai_configuration_stage_1_title">Stage 1: BYOK (Bring Your Own Key)</string>
+    <string name="features_ai_configuration_stage_1_desc">Priority 1: Attempted first if a Gemini API key is configured.</string>
+    <string name="features_ai_configuration_stage_2_title">Stage 2: On-Device Local AI (Gemini Nano)</string>
+    <string name="features_ai_configuration_stage_2_desc">Priority 2: Process styling 100% locally on device NPU/GPU when hardware supports it.</string>
+    <string name="features_ai_configuration_stage_3_title">Stage 3: Enterprise Security (Firebase AI)</string>
+    <string name="features_ai_configuration_stage_3_desc">Priority 3: Route requests through a secure Firebase proxy protected by App Check as a final cloud fallback.</string>
     <string name="features_ai_configuration_use_firebase_title">Enterprise Security (Firebase)</string>
     <string name="features_ai_configuration_use_firebase_desc">Route requests through a secure Firebase proxy. Protects your quota and ensures data privacy via App Check.</string>
 </resources>

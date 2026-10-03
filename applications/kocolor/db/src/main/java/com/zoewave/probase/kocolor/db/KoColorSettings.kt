@@ -32,6 +32,8 @@ class KoColorSettings @Inject constructor(
         val COLOR_PALETTE = stringPreferencesKey("color_palette")
         val HYDRATION_GOAL = androidx.datastore.preferences.core.doublePreferencesKey("hydration_goal")
         val TEMPERATURE_UNIT = stringPreferencesKey("temperature_unit")
+        val USE_BYOK_KEY = booleanPreferencesKey("use_byok_key")
+        val USE_LOCAL_AI = booleanPreferencesKey("use_local_ai")
         val USE_FIREBASE_VERTEX_AI = booleanPreferencesKey("use_firebase_vertex_ai")
     }
 
@@ -110,6 +112,26 @@ class KoColorSettings @Inject constructor(
             secureApiKeyRepository.deleteKey()
         } else {
             secureApiKeyRepository.saveKey(apiKey)
+        }
+    }
+
+    override val useByokKey: Flow<Boolean> = context.dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.USE_BYOK_KEY] ?: true
+    }
+
+    override suspend fun saveUseByokKey(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.USE_BYOK_KEY] = enabled
+        }
+    }
+
+    override val useLocalAi: Flow<Boolean> = context.dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.USE_LOCAL_AI] ?: true // Default to true for local execution
+    }
+
+    override suspend fun saveUseLocalAi(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.USE_LOCAL_AI] = enabled
         }
     }
 
