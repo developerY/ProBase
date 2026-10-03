@@ -14,10 +14,14 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+import com.zoewave.probase.features.ai.local.data.LocalAiEngine
+import com.zoewave.probase.features.ai.local.data.NanoState
+
 @HiltViewModel
 class AiConfigurationViewModel @Inject constructor(
     private val settings: AiConfigurationSettings,
-    private val orchestrator: SmartCaptureOrchestrator
+    private val orchestrator: SmartCaptureOrchestrator,
+    private val localAiEngine: LocalAiEngine
 ) : ViewModel() {
 
     private val _isTestingKey = MutableStateFlow(false)
@@ -35,9 +39,8 @@ class AiConfigurationViewModel @Inject constructor(
 
     private fun checkLocalAiAvailability() {
         viewModelScope.launch {
-            // Ideally we"d inject LocalAiEngine directly here or observe it via a flow.
-            // For now we default to true to allow the pipeline to proceed until fully tested.
-            _isLocalAiAvailable.value = true 
+            val capability = localAiEngine.checkCapability()
+            _isLocalAiAvailable.value = capability == NanoState.Available || capability == NanoState.MultimodalAvailable
         }
     }
 
