@@ -1,4 +1,6 @@
 package com.zoewave.probase.kocolor.features.analyzer.simulator.ui
+import com.zoewave.probase.kocolor.data.usecase.CapabilityRouter
+
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -100,6 +102,7 @@ data class FaceTelemetryData(
 )
 
 data class StyleSimulatorUiState(
+    val activeAiProvider: String = "Determining Engine...",
     val creationPhase: CreationPhase = CreationPhase.IDLE,
     val creationResult: StyleCreationResult? = null,
     val morningRoutineCompleted: Boolean = false,
@@ -174,6 +177,7 @@ sealed class SimulatorEffect {
 @HiltViewModel
 class StyleSimulatorViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
+    private val capabilityRouter: CapabilityRouter,
     private val routineDao: RoutineDao,
     private val wardrobeRepository: WardrobeRepository,
     private val cosmeticRepository: CosmeticInventoryRepository,
@@ -206,8 +210,17 @@ class StyleSimulatorViewModel @Inject constructor(
     private val _creationResult = MutableStateFlow<StyleCreationResult?>(null)
     private val _fashionistaScore = MutableStateFlow<FashionistaScore?>(null)
     private val _intentFulfillment = MutableStateFlow<IntentFulfillment?>(null)
+    private val _activeAiProvider = MutableStateFlow("Determining Engine...")
 
     private var simulationJob: Job? = null
+
+    init {
+        viewModelScope.launch {
+            // Retrieve string directly via data layer without exposing internal AI provider class structure to UI
+            val providerName = capabilityRouter.getActiveProviderName()
+            _activeAiProvider.value = providerName
+        }
+    }
 
     private val detector = FaceDetection.getClient(
         FaceDetectorOptions.Builder()
@@ -238,7 +251,8 @@ class StyleSimulatorViewModel @Inject constructor(
         _creationPhase,
         _creationResult,
         _fashionistaScore,
-        _intentFulfillment
+        _intentFulfillment,
+        _activeAiProvider
     ) { array ->
         val faceUri = array[0] as String?
         val profile = array[1] as FashionProfile?
@@ -261,6 +275,7 @@ class StyleSimulatorViewModel @Inject constructor(
         val creationResult = array[17] as StyleCreationResult?
         val fashionScore = array[18] as FashionistaScore?
         val fulfillment = array[19] as IntentFulfillment?
+        val aiProvider = array[20] as String
 
         val clothingFamilies = allClothing.filter { it.category == selectedClothingCat }
             .groupBy { it.colorFamily }
@@ -296,6 +311,7 @@ class StyleSimulatorViewModel @Inject constructor(
             recommendedCosmetics = recommendedCosmetics,
             fashionistaScore = fashionScore,
             intentFulfillment = fulfillment,
+            activeAiProvider = aiProvider,
             isLocalResult = result?.rationale?.startsWith("Local Architect") ?: false,
             fashionProfileLabel = profile?.let { "${it.undertone} ${it.seasonalType}" },
             selectedResultTab = resultTab,

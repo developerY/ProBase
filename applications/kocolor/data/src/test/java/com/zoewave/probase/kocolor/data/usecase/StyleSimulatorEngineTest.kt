@@ -91,6 +91,7 @@ class StyleSimulatorEngineTest {
         coEvery { provider1.execute(any()) } returns Result.success("{\"rationale\": \"P1 result\", \"selectedClothingIds\": [], \"selectedCosmeticIds\": [\"c_1\", \"c_2\", \"c_3\", \"c_4\"], \"recommendedPalette\": []}")
         
         coEvery { capabilityRouter.getRankedAvailableProviders() } returns listOf(provider1, provider2)
+        coEvery { capabilityRouter.getActiveProviderName() } returns "Mock AI"
         coEvery { contextEngine.generateSelectionState(any(), any(), any()) } returns StyleSelectionState()
         coEvery { candidateFilter.getCosmeticCandidateProvenance(any(), any(), any()) } returns mockCosmetics
 
@@ -104,6 +105,7 @@ class StyleSimulatorEngineTest {
         val context = StyleRequestContext(intent = "party", weather = "warm", appearanceTelemetry = ColorTelemetry())
         
         coEvery { capabilityRouter.getRankedAvailableProviders() } returns emptyList()
+        coEvery { capabilityRouter.getActiveProviderName() } returns "Math/Deterministic (No AI)"
         every { fallbackEngine.generate(any()) } returns StyleBlueprint("Fallback", emptyList(), emptyList(), emptyList())
 
         val result = engine.generateBlueprint(emptyList(), emptyList(), context)
@@ -133,6 +135,7 @@ class StyleSimulatorEngineTest {
         coEvery { provider.execute(any()) } returns Result.success("{\"rationale\": \"Success\", \"selectedClothingIds\": [], \"selectedCosmeticIds\": [], \"recommendedPalette\": []}")
         
         coEvery { capabilityRouter.getRankedAvailableProviders() } returns listOf(provider)
+        coEvery { capabilityRouter.getActiveProviderName() } returns "Mock AI"
         coEvery { contextEngine.generateSelectionState(any(), any(), any()) } returns StyleSelectionState(fullRankedCandidatePool = provList)
         coEvery { candidateFilter.getCosmeticCandidateProvenance(any(), any(), any()) } returns emptyList()
         every { fallbackEngine.generate(any()) } returns StyleBlueprint("Fallback", emptyList(), emptyList(), emptyList())
@@ -161,6 +164,7 @@ class StyleSimulatorEngineTest {
         coEvery { provider.execute(any()) } returns Result.success("{\"rationale\": \"Success\", \"selectedClothingIds\": [], \"selectedCosmeticIds\": [], \"recommendedPalette\": []}")
         
         coEvery { capabilityRouter.getRankedAvailableProviders() } returns listOf(provider)
+        coEvery { capabilityRouter.getActiveProviderName() } returns "Mock AI"
         coEvery { contextEngine.generateSelectionState(any(), any(), any()) } returns StyleSelectionState(fullRankedCandidatePool = provList)
         coEvery { candidateFilter.getCosmeticCandidateProvenance(any(), any(), any()) } returns emptyList()
 
