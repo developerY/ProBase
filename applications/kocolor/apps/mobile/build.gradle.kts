@@ -12,8 +12,8 @@ android {
 
     defaultConfig {
         applicationId = "com.zoewave.probase.kocolor"
-        versionCode = 4
-        versionName = "0.2-dev"
+        versionCode = 5
+        versionName = "0.3-dev"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
