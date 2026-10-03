@@ -17,6 +17,10 @@ class CapabilityRouterImpl @Inject constructor(
     private val settings: com.zoewave.probase.core.data.repository.AiConfigurationSettings
 ) : CapabilityRouter {
 
+    override suspend fun getActiveProviderName(): String {
+        return getRankedAvailableProviders().firstOrNull()?.capability?.displayName ?: "Math/Deterministic (No AI)"
+    }
+
     override suspend fun getRankedAvailableProviders(): List<AiProvider> {
         val providers = mutableListOf<AiProvider>()
         

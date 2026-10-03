@@ -4,6 +4,7 @@ import com.zoewave.probase.features.ai.core.AiProvider
 
 interface CapabilityRouter {
     suspend fun getRankedAvailableProviders(): List<AiProvider>
+    suspend fun getActiveProviderName(): String
 }
 
 interface DeterministicStyleEngine {

@@ -86,6 +86,7 @@ class StyleSimulatorIntegrationTest {
         )
 
         coEvery { capabilityRouter.getRankedAvailableProviders() } returns listOf(provider)
+        coEvery { capabilityRouter.getActiveProviderName() } returns "Mock AI"
         coEvery { contextEngine.generateSelectionState(any(), any(), any()) } returns StyleSelectionState()
         coEvery { candidateFilter.getCosmeticCandidateProvenance(any(), any(), any()) } returns mockCosmetics
 
@@ -100,6 +101,7 @@ class StyleSimulatorIntegrationTest {
         val context = StyleRequestContext(intent = "party", weather = "warm", appearanceTelemetry = ColorTelemetry())
         
         coEvery { capabilityRouter.getRankedAvailableProviders() } returns emptyList()
+        coEvery { capabilityRouter.getActiveProviderName() } returns "Math/Deterministic (No AI)"
         every { fallbackEngine.generate(context) } returns StyleBlueprint("Fallback Rationale", emptyList(), emptyList(), emptyList())
 
         val result = engine.generateBlueprint(emptyList(), emptyList(), context)

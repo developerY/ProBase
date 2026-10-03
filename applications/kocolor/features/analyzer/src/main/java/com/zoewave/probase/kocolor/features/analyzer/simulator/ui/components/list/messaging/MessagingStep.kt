@@ -1,4 +1,5 @@
 package com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.list.messaging
+import androidx.compose.foundation.background
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -51,6 +52,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -88,19 +90,60 @@ fun MessagingStep(
         contentPadding = PaddingValues(bottom = 32.dp)
     ) {
         item {
-            Column(modifier = Modifier.padding(top = 16.dp)) {
-                Text(
-                    text = "KoColor",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily.Serif
-                )
-                Text(
-                    text = "Boutique",
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontFamily = FontFamily.Serif,
-                    modifier = Modifier.offset(y = (-4).dp)
-                )
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
+            ) {
+                Column {
+                    Text(
+                        text = "KoColor",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Serif
+                    )
+                    Text(
+                        text = "Boutique",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontFamily = FontFamily.Serif,
+                        modifier = Modifier.offset(y = (-4).dp)
+                    )
+                }
+                
+                // Pipeline Status Indicator & Quick Settings Link
+                Surface(
+                    onClick = { navTo(KoColorRoute.Settings(null)) },
+                    modifier = Modifier.padding(end = 16.dp),
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
+                    color = Color.White,
+                    border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f)),
+                    shadowElevation = 2.dp
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        val aiProviderStr = uiState.activeAiProvider
+                        val isOffline = aiProviderStr.contains("Nano") || aiProviderStr.contains("Math")
+                        val dotColor = if (isOffline) Color(0xFF4CAF50) else Color(0xFFD4AF37) // Green for local/free, Gold for Cloud/Paid
+
+                        Box(
+                            modifier = Modifier
+                                .size(8.dp)
+                                .background(
+                                    color = dotColor,
+                                    shape = CircleShape
+                                )
+                        )
+                        Text(
+                            text = aiProviderStr,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.Black.copy(alpha = 0.8f)
+                        )
+                    }
+                }
             }
         }
 
