@@ -1,9 +1,13 @@
-Add Compose Previews for AiConfigurationCard UI
+Add Stage 1 BYOK Toggle, Remove Top Master Toggle, and Align Pipeline Status Message
 
-This commit adds `@Preview` functions for `AiConfigurationCardContent` in both expanded and collapsed states.
+This commit updates the AI Configuration card layout and logic to strictly follow user controls per stage:
 
 Summary of Changes:
-1. Added `AiConfigurationCardExpandedPreview` and `AiConfigurationCardCollapsedPreview` to `AiConfigurationCard.kt` to allow instant visual inspection of the multi-stage fallback pipeline UI inside Android Studio.
-2. Verified preview rendering using the Compose Preview tool.
+1. **Removed Master Toggle**: Removed the top "Enable AI Features" master switch. AI capabilities are now controlled directly by the state of individual stage toggles.
+2. **Added Stage 1 (BYOK) Toggle**: Added a dedicated switch for `Stage 1: BYOK (Bring Your Own Key)`.
+   - The switch is disabled (`enabled = false`) until an API key is configured.
+   - Once a key is configured, the user can toggle `useByokKey` on/off.
+3. **Aligned Header Status Subtitle**: Updated `statusText` to evaluate active stage toggles in order (`isStage1Active`, `isStage2Active`, `isStage3Active`) and display the precise fallback chain (e.g. `Stage 2 Active (Local AI → Firebase Fallback)`).
+4. **Updated Previews**: Refreshed `@Preview` functions to reflect the updated Stage 1 toggle state and removed master switch.
 
-Status: Verified & build successful.
+Status: Build successful and preview verified.

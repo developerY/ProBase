@@ -116,12 +116,18 @@ fun AiConfigurationCardContent(
                 Spacer(modifier = Modifier.width(16.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(text = title, style = MaterialTheme.typography.titleMedium, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold, color = Color.Black)
+                    val isStage1Active = uiState.isApiKeySet && uiState.useByokKey
+                    val isStage2Active = uiState.useLocalAi && uiState.isLocalAiAvailable
+                    val isStage3Active = uiState.useFirebaseVertexAi
+
                     val statusText = when {
-                        !uiState.isAiEnabled -> stringResource(R.string.features_ai_configuration_status_off)
-                        uiState.isApiKeySet -> "Stage 1 Active (BYOK Key)"
-                        uiState.useLocalAi && uiState.useFirebaseVertexAi -> "Stage 2 Active (Local AI → Firebase Fallback)"
-                        uiState.useLocalAi -> "Stage 2 Active (Local AI Only)"
-                        uiState.useFirebaseVertexAi -> "Stage 3 Active (Enterprise Firebase Only)"
+                        isStage1Active && isStage2Active && isStage3Active -> "Stage 1 Active (BYOK → Local AI → Firebase)"
+                        isStage1Active && isStage2Active -> "Stage 1 Active (BYOK → Local AI)"
+                        isStage1Active && isStage3Active -> "Stage 1 Active (BYOK → Firebase Fallback)"
+                        isStage1Active -> "Stage 1 Active (BYOK Only)"
+                        isStage2Active && isStage3Active -> "Stage 2 Active (Local AI → Firebase Fallback)"
+                        isStage2Active -> "Stage 2 Active (Local AI Only)"
+                        isStage3Active -> "Stage 3 Active (Enterprise Firebase Only)"
                         else -> "Off (No Stages Enabled)"
                     }
                     Text(
@@ -138,25 +144,6 @@ fun AiConfigurationCardContent(
 
             AnimatedVisibility(visible = expanded) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    // Master Switch
-                    ListItem(
-                        colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = Color(0xFFFBF8F5)),
-                        headlineContent = { Text(stringResource(R.string.features_ai_configuration_enable_features), fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold) },
-                        supportingContent = { Text(description) },
-                        trailingContent = {
-                            Switch(
-                                checked = uiState.isAiEnabled,
-                                onCheckedChange = { onEvent(AiConfigurationEvent.OnAiEnabledToggled(it)) },
-                                colors = androidx.compose.material3.SwitchDefaults.colors(
-                                    checkedThumbColor = Color.Black,
-                                    checkedTrackColor = Color(0xFFD4AF37) // Gold
-                                )
-                            )
-                        }
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
                     // Pipeline Section Header
                     Text(
                         text = stringResource(R.string.features_ai_configuration_pipeline_title),
@@ -167,18 +154,29 @@ fun AiConfigurationCardContent(
                     
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // STAGE 1: BYOK
-                    Text(
-                        text = stringResource(R.string.features_ai_configuration_stage_1_title),
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black
-                    )
-                    Text(
-                        text = stringResource(R.string.features_ai_configuration_stage_1_desc),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(vertical = 2.dp)
+                    // STAGE 1: BYOK with toggle
+                    ListItem(
+                        colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = Color(0xFFFBF8F5)),
+                        headlineContent = { Text(stringResource(R.string.features_ai_configuration_stage_1_title), fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold) },
+                        supportingContent = { 
+                            Text(
+                                if (uiState.isApiKeySet) 
+                                    stringResource(R.string.features_ai_configuration_stage_1_desc) 
+                                else 
+                                    "Configure a Gemini API key below to unlock Stage 1."
+                            ) 
+                        },
+                        trailingContent = {
+                            Switch(
+                                checked = uiState.isApiKeySet && uiState.useByokKey,
+                                enabled = uiState.isApiKeySet,
+                                onCheckedChange = { onEvent(AiConfigurationEvent.OnUseByokKeyToggled(it)) },
+                                colors = androidx.compose.material3.SwitchDefaults.colors(
+                                    checkedThumbColor = Color.Black,
+                                    checkedTrackColor = Color(0xFFD4AF37) // Gold
+                                )
+                            )
+                        }
                     )
                     Text(
                         text = stringResource(R.string.features_ai_configuration_byok_desc),
@@ -447,8 +445,8 @@ private fun AiConfigurationCardExpandedPreview() {
             expanded = true,
             onExpandToggle = {},
             uiState = AiConfigurationUiState(
-                isAiEnabled = true,
                 isApiKeySet = false,
+                useByokKey = false,
                 useLocalAi = true,
                 useFirebaseVertexAi = true,
                 availableModels = listOf("gemini-1.5-flash", "gemini-1.5-pro")

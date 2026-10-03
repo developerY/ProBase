@@ -9,6 +9,7 @@ data class AiConfigurationUiState(
     val keyTestResult: String? = null,
     val isTestingModel: Boolean = false,
     val modelTestResult: String? = null,
+    val useByokKey: Boolean = true,
     val useLocalAi: Boolean = true,
     val useFirebaseVertexAi: Boolean = true,
     val isLocalAiAvailable: Boolean = true

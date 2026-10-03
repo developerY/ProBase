@@ -18,26 +18,23 @@ class CapabilityRouterImpl @Inject constructor(
 ) : CapabilityRouter {
 
     override suspend fun getRankedAvailableProviders(): List<AiProvider> {
-        val isEnabled = settings.isAiEnabledFlow.firstOrNull() ?: true
-        if (!isEnabled) {
-            return emptyList()
-        }
-
         val providers = mutableListOf<AiProvider>()
         
-        // Priority 1: BYOK with Gemini API Key
+        // Priority 1: BYOK with Gemini API Key (if Stage 1 enabled & key present)
+        val useByok = settings.useByokKey.firstOrNull() ?: true
         val apiKey = settings.getGeminiApiKey()
         byokProvider.setApiKey(apiKey)
-        if (byokProvider.isAvailable()) {
+        if (useByok && byokProvider.isAvailable()) {
             providers.add(byokProvider)
         }
         
-        // Priority 2: Local Nano (On-Device AI)
-        if (localProvider.isAvailable()) {
+        // Priority 2: Local Nano (On-Device AI) (if Stage 2 enabled)
+        val useLocal = settings.useLocalAi.firstOrNull() ?: true
+        if (useLocal && localProvider.isAvailable()) {
             providers.add(localProvider)
         }
         
-        // Priority 3: Firebase AI Logic (Managed Cloud Fallback)
+        // Priority 3: Firebase AI Logic (Managed Cloud Fallback) (if Stage 3 enabled)
         val useFirebase = settings.useFirebaseVertexAi.firstOrNull() ?: true
         if (useFirebase && firebaseProvider.isAvailable()) {
             providers.add(firebaseProvider)
