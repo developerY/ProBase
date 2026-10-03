@@ -460,6 +460,7 @@ private fun AiConfigurationCardExpandedPreview() {
     }
 }
 
+// Update
 @androidx.compose.ui.tooling.preview.Preview(showBackground = true, name = "AI Config Card - Collapsed")
 @Composable
 private fun AiConfigurationCardCollapsedPreview() {
