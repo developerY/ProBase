@@ -23,6 +23,9 @@ class GetHealthSummaryUseCase @Inject constructor(
         return healthSessionManager.availability.flatMapLatest { availability ->
             if (availability == HealthConnectClient.SDK_AVAILABLE) {
                 val permissions = setOf(
+                    HealthPermission.getReadPermission(androidx.health.connect.client.records.StepsRecord::class),
+                    HealthPermission.getReadPermission(androidx.health.connect.client.records.TotalCaloriesBurnedRecord::class),
+                    HealthPermission.getReadPermission(androidx.health.connect.client.records.ActiveCaloriesBurnedRecord::class),
                     HealthPermission.getReadPermission(SleepSessionRecord::class),
                     HealthPermission.getReadPermission(HydrationRecord::class),
                     HealthPermission.getWritePermission(HydrationRecord::class)
