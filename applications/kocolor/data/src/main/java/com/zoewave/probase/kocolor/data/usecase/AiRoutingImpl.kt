@@ -28,9 +28,8 @@ class CapabilityRouterImpl @Inject constructor(
             providers.add(byokProvider)
         }
         
-        // Priority 2: Local Nano (On-Device AI) (if Stage 2 enabled)
-        val useLocal = settings.useLocalAi.firstOrNull() ?: true
-        if (useLocal && localProvider.isAvailable()) {
+        // Priority 2: Local Nano (On-Device AI) (Always preferred if hardware allows & BYOK is bypassed)
+        if (localProvider.isAvailable()) {
             providers.add(localProvider)
         }
         

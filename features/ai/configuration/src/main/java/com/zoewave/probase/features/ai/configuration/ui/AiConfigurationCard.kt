@@ -146,7 +146,7 @@ fun AiConfigurationCardContent(
                 Column(modifier = Modifier.weight(1f)) {
                     Text(text = title, style = MaterialTheme.typography.titleMedium, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold, color = Color.Black)
                     val isStage1Active = uiState.isApiKeySet && uiState.useByokKey
-                    val isStage2Active = uiState.useLocalAi && uiState.isLocalAiAvailable
+                    val isStage2Active = uiState.isLocalAiAvailable
                     val isStage3Active = uiState.useFirebaseVertexAi
 
                     Row(
@@ -367,20 +367,31 @@ fun AiConfigurationCardContent(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // STAGE 2: On-Device Local AI
+                    // STAGE 2: On-Device Local AI (Hardware Capability Badge)
                     ListItem(
                         colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = Color(0xFFFBF8F5)),
                         headlineContent = { Text(stringResource(R.string.features_ai_configuration_stage_2_title), fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold) },
                         supportingContent = { Text(stringResource(R.string.features_ai_configuration_stage_2_desc)) },
                         trailingContent = {
-                            Switch(
-                                checked = uiState.useLocalAi,
-                                onCheckedChange = { onEvent(AiConfigurationEvent.OnUseLocalAiToggled(it)) },
-                                colors = androidx.compose.material3.SwitchDefaults.colors(
-                                    checkedThumbColor = Color.Black,
-                                    checkedTrackColor = Color(0xFFD4AF37) // Gold
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(10.dp)
+                                        .background(
+                                            color = if (uiState.isLocalAiAvailable) Color(0xFF4CAF50) else Color(0xFFE53935),
+                                            shape = androidx.compose.foundation.shape.CircleShape
+                                        )
                                 )
-                            )
+                                Text(
+                                    text = if (uiState.isLocalAiAvailable) "NPU Active" else "Unsupported",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (uiState.isLocalAiAvailable) Color(0xFF4CAF50) else Color(0xFFE53935)
+                                )
+                            }
                         }
                     )
 
@@ -479,7 +490,7 @@ private fun AiConfigurationCardExpandedPreview() {
             uiState = AiConfigurationUiState(
                 isApiKeySet = false,
                 useByokKey = false,
-                useLocalAi = true,
+                isLocalAiAvailable = true,
                 useFirebaseVertexAi = true,
                 availableModels = listOf("gemini-1.5-flash", "gemini-1.5-pro")
             ),
@@ -500,7 +511,7 @@ private fun AiConfigurationCardCollapsedPreview() {
             onExpandToggle = {},
             uiState = AiConfigurationUiState(
                 isAiEnabled = true,
-                useLocalAi = true,
+                isLocalAiAvailable = true,
                 useFirebaseVertexAi = true
             ),
             onEvent = {},

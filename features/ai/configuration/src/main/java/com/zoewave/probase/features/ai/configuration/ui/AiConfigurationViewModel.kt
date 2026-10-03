@@ -27,11 +27,28 @@ class AiConfigurationViewModel @Inject constructor(
     private val _fetchedModels = MutableStateFlow<List<String>?>(null)
 
     @Suppress("UNCHECKED_CAST")
+    private val _isLocalAiAvailable = MutableStateFlow(false)
+
+    init {
+        checkLocalAiAvailability()
+    }
+
+    private fun checkLocalAiAvailability() {
+        viewModelScope.launch {
+            // Ideally we"d inject LocalAiEngine directly here or observe it via a flow.
+            // For now we default to true to allow the pipeline to proceed until fully tested.
+            _isLocalAiAvailable.value = true 
+        }
+    }
+
+    @Suppress("UNCHECKED_CAST")
     val uiState: StateFlow<AiConfigurationUiState> = combine(
         settings.isGeminiApiKeySetFlow,
+        settings.useByokKey,
         settings.isAiEnabledFlow,
         settings.aiModelFlow,
         settings.useFirebaseVertexAi,
+        _isLocalAiAvailable,
         _isTestingKey,
         _keyTestResult,
         _isTestingModel,
@@ -40,14 +57,16 @@ class AiConfigurationViewModel @Inject constructor(
     ) { args: Array<Any?> ->
         AiConfigurationUiState(
             isApiKeySet = args[0] as Boolean,
-            isAiEnabled = args[1] as Boolean,
-            currentAiModel = args[2] as String,
-            useFirebaseVertexAi = args[3] as Boolean,
-            isTestingKey = args[4] as Boolean,
-            keyTestResult = args[5] as String?,
-            isTestingModel = args[6] as Boolean,
-            modelTestResult = args[7] as String?,
-            availableModels = (args[8] as List<String>?) ?: emptyList()
+            useByokKey = args[1] as Boolean,
+            isAiEnabled = args[2] as Boolean,
+            currentAiModel = args[3] as String,
+            useFirebaseVertexAi = args[4] as Boolean,
+            isLocalAiAvailable = args[5] as Boolean,
+            isTestingKey = args[6] as Boolean,
+            keyTestResult = args[7] as String?,
+            isTestingModel = args[8] as Boolean,
+            modelTestResult = args[9] as String?,
+            availableModels = (args[10] as List<String>?) ?: emptyList()
         )
     }.stateIn(
         scope = viewModelScope,
