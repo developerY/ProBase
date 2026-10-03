@@ -31,6 +31,10 @@ abstract class BaseMindWaveEngine(
             isStarted = true, 
             score = 0, 
             level = 1, 
+            stage = 1,
+            levelsInCurrentStage = 0,
+            isStageCleared = false,
+            stageBonus = 0,
             isGameOver = false, 
             feedbackMessageResId = null,
             grid = createInitialGrid(),
@@ -118,16 +122,46 @@ abstract class BaseMindWaveEngine(
             }
 
             if (newUserInput.size == state.sequence.size) {
-                // Level Complete
-                _state.update { it.copy(
-                    userInput = newUserInput,
-                    score = it.score + (it.level * 10),
-                    feedbackMessageResId = R.string.applications_gotmind_features_mindwave_perfect
-                ) }
-                triggerHaptic(HapticSignal.MEDIUM)
-                scope.launch {
-                    delay(1200)
-                    startNextLevel()
+                // Level & Stage Check
+                val newLevelsInStage = state.levelsInCurrentStage + 1
+                val isStageComplete = newLevelsInStage >= state.stageTargetLevels
+                val stageBonusPoints = if (isStageComplete) state.stage * 150 else 0
+                val isFinalStage = state.stage >= state.maxStage
+                val isVictory = isStageComplete && isFinalStage
+                val isStageCleared = isStageComplete && !isFinalStage
+
+                if (isStageCleared) {
+                    _state.update { it.copy(
+                        userInput = newUserInput,
+                        score = it.score + (it.level * 10) + stageBonusPoints,
+                        levelsInCurrentStage = newLevelsInStage,
+                        isStageCleared = true,
+                        stageBonus = stageBonusPoints,
+                        feedbackMessageResId = R.string.applications_gotmind_features_mindwave_perfect
+                    ) }
+                    triggerHaptic(HapticSignal.HEAVY)
+                } else if (isVictory) {
+                    _state.update { it.copy(
+                        userInput = newUserInput,
+                        score = it.score + (it.level * 10) + stageBonusPoints,
+                        isVictory = true,
+                        stageBonus = stageBonusPoints,
+                        feedbackMessageResId = R.string.applications_gotmind_features_mindwave_perfect
+                    ) }
+                    triggerHaptic(HapticSignal.HEAVY)
+                    onGameOver(state.score + (state.level * 10) + stageBonusPoints, state.level)
+                } else {
+                    _state.update { it.copy(
+                        userInput = newUserInput,
+                        score = it.score + (it.level * 10),
+                        levelsInCurrentStage = newLevelsInStage,
+                        feedbackMessageResId = R.string.applications_gotmind_features_mindwave_perfect
+                    ) }
+                    triggerHaptic(HapticSignal.MEDIUM)
+                    scope.launch {
+                        delay(1200)
+                        startNextLevel()
+                    }
                 }
             } else {
                 _state.update { it.copy(userInput = newUserInput) }
@@ -156,6 +190,20 @@ abstract class BaseMindWaveEngine(
             hapticsEnabled = current.hapticsEnabled,
             soundEnabled = current.soundEnabled
         )
+    }
+
+    override fun nextStage() {
+        _state.update { state ->
+            val nextStageNum = state.stage + 1
+            state.copy(
+                stage = nextStageNum,
+                levelsInCurrentStage = 0,
+                isStageCleared = false,
+                stageBonus = 0
+            )
+        }
+        triggerHaptic(HapticSignal.MEDIUM)
+        startNextLevel()
     }
 
     override fun togglePause() {

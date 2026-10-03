@@ -145,7 +145,12 @@ fun MindWaveScreen(
                         Text(text = uiState.score.toString(), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.primary)
                         Text(text = stringResource(R.string.applications_gotmind_features_mindwave_score), style = MaterialTheme.typography.labelSmall, color = Color.Gray)
                     }
-                    Spacer(modifier = Modifier.width(24.dp))
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(text = stringResource(R.string.applications_gotmind_features_mindwave_stage_format, uiState.stage), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Color(0xFFFFB74D))
+                        Text(text = stringResource(R.string.applications_gotmind_features_mindwave_stage), style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+                    }
+                    Spacer(modifier = Modifier.width(16.dp))
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(text = uiState.level.toString(), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Color.White)
                         Text(text = stringResource(R.string.applications_gotmind_features_mindwave_level), style = MaterialTheme.typography.labelSmall, color = Color.Gray)
@@ -358,6 +363,28 @@ fun MindWaveScreen(
                 }
             }
         }
+    }
+
+    if (uiState.isStageCleared && !uiState.isGameOver && !uiState.isVictory) {
+        AlertDialog(
+            onDismissRequest = { /* No-op */ },
+            containerColor = Color(0xFF1E1E1E),
+            titleContentColor = Color(0xFFFFB74D),
+            textContentColor = Color.White,
+            title = { Text(stringResource(R.string.applications_gotmind_features_mindwave_stage_cleared), fontWeight = FontWeight.Black) },
+            text = {
+                Column {
+                    Text(stringResource(R.string.applications_gotmind_features_mindwave_stage_format, uiState.stage), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Color.White)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(stringResource(R.string.applications_gotmind_features_mindwave_stage_bonus, uiState.stageBonus), color = Color(0xFF4CAF50), fontWeight = FontWeight.Bold)
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { onEvent(MindWaveEvent.NextStage) }) {
+                    Text(stringResource(R.string.applications_gotmind_features_mindwave_next_stage, uiState.stage + 1), color = Color(0xFFFFB74D), fontWeight = FontWeight.Black)
+                }
+            }
+        )
     }
 
     if (uiState.isGameOver) {

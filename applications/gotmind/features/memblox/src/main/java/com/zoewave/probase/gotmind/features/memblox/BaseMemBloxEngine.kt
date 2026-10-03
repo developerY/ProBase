@@ -97,7 +97,7 @@ abstract class BaseMemBloxEngine(
                 val boardLoad = _state.value.grid.size.toFloat() / (difficulty.cols * difficulty.rows)
                 _state.update { it.copy(isStressed = boardLoad > 0.75f) }
                 
-                if (!_state.value.isFrozen && !_state.value.isPaused) {
+                if (!_state.value.isFrozen && !_state.value.isPaused && !_state.value.isStageCleared) {
                     delay((difficulty.spawnDelayMillis * speedFactor).toLong())
                     spawnLogic()
                     applyGravity()
@@ -270,16 +270,35 @@ abstract class BaseMemBloxEngine(
                 
                 lastMatchTime = now
                 
-                val isVictory = newPairsMatched >= state.targetPairs && newGrid.isEmpty()
+                val newPairsInStage = state.pairsMatchedInStage + 1
+                val isStageComplete = newPairsInStage >= state.targetPairsForStage
+                val stageBonusPoints = if (isStageComplete) state.stage * 200 else 0
+                val isFinalStage = state.stage >= state.maxStage
+                val isVictory = (isStageComplete && isFinalStage) || (newPairsMatched >= state.targetPairs && newGrid.isEmpty())
+                val isStageCleared = isStageComplete && !isFinalStage
                 val newAccuracy = (state.successfulMatches + 1).toFloat() / (state.successfulMatches + state.missedMatches + 1)
                 
-                val scorePopup = ScorePopup(score = points, col = flipped[0].col, row = flipped[0].row)
+                val scorePopup = ScorePopup(score = points + stageBonusPoints, col = flipped[0].col, row = flipped[0].row)
+
+                // Refill power ups on stage clear
+                val stageRefilledPowerUps = if (isStageCleared) {
+                    updatedPowerUps.mapValues { (type, count) ->
+                        when (type) {
+                            PowerUpType.FREEZE, PowerUpType.REVEAL, PowerUpType.HINT, PowerUpType.SLOW -> count + 1
+                            PowerUpType.NUKE -> count + 1
+                            else -> count
+                        }
+                    }
+                } else updatedPowerUps
 
                 state.copy(
                     grid = newGrid,
                     flippedBlocks = emptyList(),
-                    score = state.score + points,
+                    score = state.score + points + stageBonusPoints,
                     pairsMatched = newPairsMatched,
+                    pairsMatchedInStage = newPairsInStage,
+                    isStageCleared = isStageCleared,
+                    stageBonus = stageBonusPoints,
                     isVictory = isVictory,
                     combo = newCombo,
                     multiplier = baseMultiplier * frenzyMultiplier,
@@ -293,9 +312,9 @@ abstract class BaseMemBloxEngine(
                     confettiBursts = state.confettiBursts + matchBursts,
                     floatingTexts = newFloatingTexts,
                     matchGhosts = state.matchGhosts + ghosts,
-                    powerUps = updatedPowerUps,
+                    powerUps = stageRefilledPowerUps,
                     floatingScores = state.floatingScores + scorePopup,
-                    finalRankResId = if (isVictory) calculateRankResId(state.copy(score = state.score + points, matchAccuracy = newAccuracy, bestMatchStreak = newBestStreak)) else null
+                    finalRankResId = if (isVictory) calculateRankResId(state.copy(score = state.score + points + stageBonusPoints, matchAccuracy = newAccuracy, bestMatchStreak = newBestStreak)) else null
                 ).also {
                     scope.launch { applyGravity() }
                     scope.launch {
@@ -507,5 +526,21 @@ abstract class BaseMemBloxEngine(
                 }
             }
         }
+    }
+
+    override fun nextStage() {
+        _state.update { state ->
+            val nextStageNum = state.stage + 1
+            val newTargetPairs = 10 + (nextStageNum - 1) * 3
+            state.copy(
+                stage = nextStageNum,
+                pairsMatchedInStage = 0,
+                targetPairsForStage = newTargetPairs,
+                isStageCleared = false,
+                stageBonus = 0,
+                speedMultiplier = state.speedMultiplier * 1.05f
+            )
+        }
+        triggerHaptic(HapticSignal.MEDIUM)
     }
 }

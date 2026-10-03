@@ -49,10 +49,32 @@ fun GameScreen(
                 text = stringResource(R.string.classic_title), 
                 style = MaterialTheme.typography.headlineMedium
             )
+            Text(
+                text = stringResource(R.string.classic_stage_format, gameState.stage),
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.primary
+            )
             Text(text = stringResource(R.string.classic_current_score, gameState.currentScore))
-            Button(onClick = { onEvent(GotMindClassicEvent.ScoreUpdate(10)) }, modifier = Modifier.padding(top = 16.dp)) {
-                Text(stringResource(R.string.classic_tap_to_score))
+
+            if (gameState.isStageCleared) {
+                Text(
+                    text = stringResource(R.string.classic_stage_cleared, gameState.stage),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = androidx.compose.ui.graphics.Color(0xFF4CAF50),
+                    modifier = Modifier.padding(top = 12.dp)
+                )
+                Button(
+                    onClick = { onEvent(GotMindClassicEvent.NextStage) },
+                    modifier = Modifier.padding(top = 8.dp)
+                ) {
+                    Text(stringResource(R.string.classic_next_stage))
+                }
+            } else {
+                Button(onClick = { onEvent(GotMindClassicEvent.ScoreUpdate(10)) }, modifier = Modifier.padding(top = 16.dp)) {
+                    Text(stringResource(R.string.classic_tap_to_score))
+                }
             }
+
             Button(onClick = { onEvent(GotMindClassicEvent.GameOver) }, modifier = Modifier.padding(top = 8.dp)) {
                 Text(stringResource(R.string.classic_end_game))
             }

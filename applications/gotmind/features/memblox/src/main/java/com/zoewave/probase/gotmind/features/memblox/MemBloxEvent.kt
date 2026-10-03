@@ -8,6 +8,7 @@ sealed interface MemBloxEvent {
     data class StartGame(val difficulty: MemBloxDifficulty) : MemBloxEvent
     data class BlockClick(val block: MemBloxBlock) : MemBloxEvent
     data class UsePowerUp(val type: PowerUpType) : MemBloxEvent
+    data object NextStage : MemBloxEvent
     data object ResetToSelection : MemBloxEvent
     data object HapticConsumed : MemBloxEvent
     data object TogglePause : MemBloxEvent

@@ -17,6 +17,12 @@ data class MindWaveState(
     val sequence: List<Int> = emptyList(),
     val userInput: List<Int> = emptyList(),
     val level: Int = 1,
+    val stage: Int = 1,
+    val maxStage: Int = 5,
+    val levelsInCurrentStage: Int = 0,
+    val stageTargetLevels: Int = 3,
+    val isStageCleared: Boolean = false,
+    val stageBonus: Int = 0,
     val isPlayingSequence: Boolean = false,
     val isGameOver: Boolean = false,
     val isVictory: Boolean = false,
@@ -43,6 +49,7 @@ sealed interface MindWaveEvent {
     data class NodeClick(val nodeId: Int) : MindWaveEvent
     data object ResetGame : MindWaveEvent
     data object NextLevel : MindWaveEvent
+    data object NextStage : MindWaveEvent
     data object TogglePause : MindWaveEvent
     data object HapticConsumed : MindWaveEvent
     data class SetHapticsEnabled(val enabled: Boolean) : MindWaveEvent

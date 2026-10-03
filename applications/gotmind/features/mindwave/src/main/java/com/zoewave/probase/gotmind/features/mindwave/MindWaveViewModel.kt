@@ -87,6 +87,7 @@ class MindWaveViewModel @Inject constructor(
             is MindWaveEvent.NodeClick -> currentEngine.onNodeClick(event.nodeId)
             MindWaveEvent.ResetGame -> currentEngine.reset()
             MindWaveEvent.NextLevel -> { /* Handled internally by engine for now */ }
+            MindWaveEvent.NextStage -> currentEngine.nextStage()
             MindWaveEvent.TogglePause -> currentEngine.togglePause()
             MindWaveEvent.HapticConsumed -> currentEngine.onHapticConsumed()
             is MindWaveEvent.SetHapticsEnabled -> viewModelScope.launch {

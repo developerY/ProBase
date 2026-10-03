@@ -8,6 +8,7 @@ interface IMindWaveEngine {
     
     fun start()
     fun reset()
+    fun nextStage()
     fun togglePause()
     fun onNodeClick(nodeId: Int)
     fun onHapticConsumed()

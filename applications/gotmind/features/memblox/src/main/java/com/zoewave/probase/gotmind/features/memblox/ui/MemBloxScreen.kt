@@ -182,9 +182,14 @@ fun MemBloxScreen(
                             Text(text = game.score.toString(), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Black, color = if (game.isFrenzy) Color(0xFFE91E63) else MaterialTheme.colorScheme.primary)
                             Text(text = stringResource(R.string.applications_gotmind_features_memblox_score), style = MaterialTheme.typography.labelSmall, color = Color.Gray)
                         }
-                        Spacer(modifier = Modifier.width(24.dp))
+                        Spacer(modifier = Modifier.width(16.dp))
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(text = stringResource(R.string.applications_gotmind_features_memblox_pairs_format, game.pairsMatched, game.targetPairs), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Color.White)
+                            Text(text = stringResource(R.string.applications_gotmind_features_memblox_stage_format, game.stage), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Color(0xFFFFB74D))
+                            Text(text = stringResource(R.string.applications_gotmind_features_memblox_stage), style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+                        }
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(text = stringResource(R.string.applications_gotmind_features_memblox_pairs_format, game.pairsMatchedInStage, game.targetPairsForStage), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Color.White)
                             Text(text = stringResource(R.string.applications_gotmind_features_memblox_pairs), style = MaterialTheme.typography.labelSmall, color = Color.Gray)
                         }
                     }
@@ -343,6 +348,13 @@ fun MemBloxScreen(
                                 .padding(horizontal = 16.dp, vertical = 4.dp)
                         )
                     }
+                }
+
+                if (game.isStageCleared && !game.isVictory && !game.isGameOver) {
+                    StageClearOverlay(
+                        state = game,
+                        onNextStage = { onEvent(MemBloxEvent.NextStage) }
+                    )
                 }
 
                 if (game.isGameOver || game.isVictory) {
@@ -828,6 +840,87 @@ fun EndGameOverlay(
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
             ) {
                 Text(stringResource(R.string.applications_gotmind_features_memblox_change_difficulty), fontWeight = FontWeight.Bold)
+            }
+        }
+    }
+}
+
+@Composable
+fun StageClearOverlay(
+    state: MemBloxState,
+    onNextStage: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.85f)),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .padding(32.dp)
+                .clip(RoundedCornerShape(24.dp))
+                .background(Color(0xFF1E1E1E))
+                .border(2.dp, Color(0xFFFFB74D), RoundedCornerShape(24.dp))
+                .padding(24.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.applications_gotmind_features_memblox_stage_cleared),
+                color = Color(0xFFFFB74D),
+                style = MaterialTheme.typography.displaySmall,
+                fontWeight = FontWeight.Black
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text(
+                text = stringResource(R.string.applications_gotmind_features_memblox_stage_format, state.stage),
+                color = Color.White,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.White.copy(alpha = 0.05f), RoundedCornerShape(16.dp))
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = stringResource(R.string.applications_gotmind_features_memblox_stage_bonus, state.stageBonus),
+                    color = Color(0xFF4CAF50),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Black
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = stringResource(R.string.applications_gotmind_features_memblox_powerups_refilled),
+                    color = Color.Cyan,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Button(
+                onClick = onNextStage,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFB74D))
+            ) {
+                Text(
+                    text = stringResource(R.string.applications_gotmind_features_memblox_next_stage),
+                    color = Color.Black,
+                    fontWeight = FontWeight.Black,
+                    style = MaterialTheme.typography.titleMedium
+                )
             }
         }
     }
