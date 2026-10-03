@@ -478,8 +478,7 @@ fun koColorNavEntryProvider(
             )
         }
         is KoColorRoute.Back -> NavEntry(route) {
-            onBack()
-            androidx.compose.runtime.LaunchedEffect(Unit) { onBack() }
+            // No-op. MainViewModel already handles KoColorRoute.Back directly in `navigateTo()`
         }
         is KoColorRoute.Wardrobe -> NavEntry(route) {
             val viewModel: WardrobeViewModel = hiltViewModel()

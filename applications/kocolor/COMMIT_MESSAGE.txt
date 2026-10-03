@@ -1,10 +1,13 @@
-Wire Local AI NPU Hardware Check to UI Badge
+Add 4-Color Status Indicator to Simulator Action Button
 
-This commit fixes the hardcoded Local AI availability state in the Settings menu so that it accurately reflects the physical hardware capabilities of the user's device (e.g. Pixel 9a without a working NPU vs Pixel 9 Pro).
+This commit updates the "Get Fashion Advice" action button on the Simulator messaging step to clearly broadcast the resolved execution backend using a 4-color categorization system.
 
 Summary of Changes:
-1. **Module Dependencies**: Added `:features:ai:local` as an explicit dependency for `:features:ai:configuration` in `build.gradle.kts` to expose the local engine.
-2. **Dynamic Hardware Validation**: Injected `LocalAiEngine` into `AiConfigurationViewModel.kt` and updated `checkLocalAiAvailability()` to evaluate `localAiEngine.checkCapability()` asynchronously on init.
-3. **UI Badge Reflection**: The `NPU Active` / `Unsupported` badge in the UI will now accurately display a red circle and state "Unsupported" if the device lacks Gemini Nano compatibility.
+1. **Action Button UI (`MessagingStep.kt`)**: Extracted the previously embedded status dot and moved it to a dedicated descriptive legend directly below the main action button.
+2. **4-Color Designation System**:
+   - `🟢 Green`: "Local AI (Gemini Nano)" - Zero latency, private, on-device NPU execution.
+   - `🟡 Gold`: "Enterprise Security (Firebase)" - Secure, quota-protected proxy cloud execution.
+   - `🟣 Pink/Rose`: "BYOK Cloud (Gemini API Key)" - Unrestricted, user-provided API key cloud execution.
+   - `🔘 Gray`: "Math Engine (Offline)" - Ultimate deterministic fallback when all ML models are disabled or uninitialized.
 
-Status: Verified and build successful.
+Status: Verified and built successfully.

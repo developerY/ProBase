@@ -1,5 +1,6 @@
 package com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.list.messaging
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -272,6 +273,39 @@ fun MessagingStep(
         item {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                    // 4-Color AI Execution Context Legend (Clickable to Settings)
+                    val providerName = uiState.activeAiProvider
+                    val (dotColor, statusString) = when {
+                        providerName.contains("Math", ignoreCase = true) -> Color(0xFF9E9E9E) to "Using Offline Math (No AI)"
+                        providerName.contains("Nano", ignoreCase = true) -> Color(0xFF4CAF50) to "Using Local AI (Gemini Nano)"
+                        providerName.contains("Firebase", ignoreCase = true) -> Color(0xFFD4AF37) to "Using Secure Cloud (Firebase)"
+                        providerName.contains("BYOK", ignoreCase = true) -> Color(0xFFE91E63) to "Using Custom Key (BYOK Cloud)"
+                        else -> Color.Gray to "Determining Engine..."
+                    }
+                    
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier
+                            .clickable { navTo(KoColorRoute.Settings(null)) }
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(10.dp)
+                                .background(color = dotColor, shape = CircleShape)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = statusString,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.DarkGray
+                        )
+                    }
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
                     Button(
                         onClick = { onEvent(SimulatorEvent.StartSimulation) },
                         modifier = Modifier.fillMaxWidth().height(64.dp),
@@ -280,32 +314,6 @@ fun MessagingStep(
                         elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
                     ) {
                         Text(stringResource(R.string.applications_kocolor_features_analyzer_simulator_begin_action), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Color.White)
-                    }
-                    
-                    Spacer(modifier = Modifier.height(12.dp))
-                    
-                    // 4-Color AI Execution Context Legend
-                    val providerName = uiState.activeAiProvider
-                    val (dotColor, statusString) = when {
-                        providerName.contains("Math", ignoreCase = true) -> Color(0xFF9E9E9E) to "Math Engine (Offline)"
-                        providerName.contains("Nano", ignoreCase = true) -> Color(0xFF4CAF50) to "Local AI (Gemini Nano)"
-                        providerName.contains("Firebase", ignoreCase = true) -> Color(0xFFD4AF37) to "Enterprise Security (Firebase)"
-                        providerName.contains("BYOK", ignoreCase = true) -> Color(0xFFE91E63) to "BYOK Cloud (Gemini API Key)"
-                        else -> Color.Gray to "Determining Engine..."
-                    }
-                    
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier
-                                .size(8.dp)
-                                .background(color = dotColor, shape = CircleShape)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = statusString,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = Color.Gray
-                        )
                     }
                 }
 
