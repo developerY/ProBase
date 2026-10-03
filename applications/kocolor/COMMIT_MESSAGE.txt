@@ -1,0 +1,9 @@
+Rename Data Deletion Policy and Update App References
+
+This commit fixes a typo in the Data Deletion Policy filename (`DateDeletionPolicy.md` -> `DataDeletionPolicy.md`) which caused a 404 Page Not Found error during the Google Play Console Data Safety declaration review.
+
+Summary of Changes:
+1. Renamed `DateDeletionPolicy.md` to `DataDeletionPolicy.md` in the Legal/PlayStore documentation directory to match standard naming conventions.
+2. Updated the `applications_kocolor_apps_mobile_core_data_deletion_url` string resource in the Android application to point to the freshly renamed markdown file, ensuring the in-app settings link is active and valid.
+
+Status: Ready for Play Console URL resubmission.

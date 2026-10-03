@@ -8,6 +8,9 @@
     <string name="classic_score_label">Score: %1$d</string>
     <string name="classic_title">GotMind Game</string>
     <string name="classic_current_score">Current Score: %1$d</string>
+    <string name="classic_stage_format">Stage %1$d</string>
+    <string name="classic_stage_cleared">Stage %1$d Cleared!</string>
+    <string name="classic_next_stage">Next Stage</string>
     <string name="classic_high_scores">High Scores:</string>
     <string name="classic_restart">Restart</string>
     <string name="classic_tap_to_score">Tap to Score!</string>

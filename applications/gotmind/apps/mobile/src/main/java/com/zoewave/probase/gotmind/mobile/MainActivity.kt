@@ -179,6 +179,7 @@ class MainActivity : ComponentActivity() {
                                                     when (event) {
                                                         com.zoewave.probase.gotmind.mobile.ui.components.GotMindClassicEvent.GameOver -> viewModel.onGameOver()
                                                         com.zoewave.probase.gotmind.mobile.ui.components.GotMindClassicEvent.ResetGame -> viewModel.resetGame()
+                                                        com.zoewave.probase.gotmind.mobile.ui.components.GotMindClassicEvent.NextStage -> viewModel.onNextStage()
                                                         is com.zoewave.probase.gotmind.mobile.ui.components.GotMindClassicEvent.ScoreUpdate -> viewModel.onScoreUpdate(event.delta)
                                                     }
                                                 },

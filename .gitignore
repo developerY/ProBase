@@ -24,6 +24,9 @@ google-services-zoewave.json
 /.kotlin/
 /.idea/
 
+# AI scratch area
+/.scratch/
+
 # SeaWeed
 # /applications/seaweed/docs/BlockChain
 

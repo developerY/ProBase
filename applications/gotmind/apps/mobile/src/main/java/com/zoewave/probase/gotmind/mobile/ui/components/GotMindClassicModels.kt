@@ -11,5 +11,6 @@ data class GotMindClassicUiState(
 sealed interface GotMindClassicEvent {
     data object ResetGame : GotMindClassicEvent
     data class ScoreUpdate(val delta: Int) : GotMindClassicEvent
+    data object NextStage : GotMindClassicEvent
     data object GameOver : GotMindClassicEvent
 }

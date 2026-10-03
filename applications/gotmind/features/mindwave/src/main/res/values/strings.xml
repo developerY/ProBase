@@ -12,6 +12,11 @@
 
     <string name="applications_gotmind_features_mindwave_score">SCORE</string>
     <string name="applications_gotmind_features_mindwave_level">LEVEL</string>
+    <string name="applications_gotmind_features_mindwave_stage">STAGE</string>
+    <string name="applications_gotmind_features_mindwave_stage_format">STAGE %1$d</string>
+    <string name="applications_gotmind_features_mindwave_stage_cleared">STAGE CLEARED!</string>
+    <string name="applications_gotmind_features_mindwave_next_stage">PROCEED TO STAGE %1$d</string>
+    <string name="applications_gotmind_features_mindwave_stage_bonus">Stage Bonus: +%1$d</string>
     <string name="applications_gotmind_features_mindwave_quit">QUIT</string>
     <string name="applications_gotmind_features_mindwave_resume">RESUME</string>
     <string name="applications_gotmind_features_mindwave_pause">PAUSE</string>

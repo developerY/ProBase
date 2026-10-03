@@ -55,6 +55,14 @@
     <string name="applications_gotmind_features_memblox_medal_streak">Streak</string>
     <string name="applications_gotmind_features_memblox_medal_pro">Pro</string>
 
+    <!-- Stages -->
+    <string name="applications_gotmind_features_memblox_stage">Stage</string>
+    <string name="applications_gotmind_features_memblox_stage_format">STAGE %1$d</string>
+    <string name="applications_gotmind_features_memblox_stage_cleared">STAGE CLEARED!</string>
+    <string name="applications_gotmind_features_memblox_next_stage">NEXT STAGE</string>
+    <string name="applications_gotmind_features_memblox_stage_bonus">Stage Bonus: +%1$d</string>
+    <string name="applications_gotmind_features_memblox_powerups_refilled">Power-Ups Refilled!</string>
+
     <!-- Ranks -->
     <string name="applications_gotmind_features_memblox_rank_s">S</string>
     <string name="applications_gotmind_features_memblox_rank_a">A</string>

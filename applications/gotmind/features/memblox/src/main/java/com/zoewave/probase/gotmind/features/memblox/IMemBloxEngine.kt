@@ -18,5 +18,6 @@ interface IMemBloxEngine {
     fun setAudioSynthesizer(synthesizer: com.zoewave.probase.core.util.audio.WaveSynthesizer?)
     fun onBlockClick(block: MemBloxBlock)
     fun usePowerUp(type: PowerUpType)
+    fun nextStage()
     fun onHapticConsumed()
 }

@@ -27,7 +27,25 @@ class GameViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     fun onScoreUpdate(points: Int) {
-        _gameState.update { it.copy(currentScore = it.currentScore + points) }
+        _gameState.update { state ->
+            val newScore = state.currentScore + points
+            val isCleared = newScore >= state.targetScoreForStage
+            state.copy(
+                currentScore = newScore,
+                isStageCleared = isCleared
+            )
+        }
+    }
+
+    fun onNextStage() {
+        _gameState.update { state ->
+            val nextStageNum = state.stage + 1
+            state.copy(
+                stage = nextStageNum,
+                targetScoreForStage = nextStageNum * 50,
+                isStageCleared = false
+            )
+        }
     }
 
     fun onGameOver() {

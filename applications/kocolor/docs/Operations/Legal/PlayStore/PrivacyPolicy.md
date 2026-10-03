@@ -29,9 +29,10 @@ To provide core fashion, skin-defense, and wellness correlation features, KoColo
 * **Camera & Storage:** Used solely to capture or select portrait photos for facial color calibration and wardrobe item photography locally on your device.
 * **Location & Weather Parameters (Optional):** Used to retrieve ambient temperature (°C) and UV Index from weather services to calibrate environmental garment and sunscreen recommendations. Location query is optional; users can deny permission, opt out in app settings, or rely on ambient defaults.
 * **Google Health Connect (Bio-Data Integration):** Users may optionally grant permission to synchronize local Health Connect bio-markers:
-  * **Activity & Fitness:** Steps, distance, total calories burned, exercise sessions, and heart rate records.
-  * **Nutrition & Hydration:** Hydration logs, daily volume targets, and weight metrics.
-  * **Strict On-Device Processing:** All Health Connect bio-data is processed **100% locally on-device** (in-memory & local DB) to generate personal skin and style insights. ZoeWave LLC **never stores, transmits, or shares** Health Connect bio-data on external cloud servers or with third parties.
+  * **Activity & Fitness:** Steps, active calories burned, and total calories burned to correlate physical exertion with stylistic breathability requirements.
+  * **Sleep & Recovery:** Sleep session records to inform biological freshness and circadian aesthetic targets.
+  * **Hydration:** Hydration logs and daily volume targets.
+  * **Strict On-Device Processing:** All Health Connect bio-data is processed **100% locally on-device** (in-memory & local DB) to generate personal skin and style insights. ZoeWave LLC **never stores, transmits, or shares** Health Connect bio-data on external cloud servers or with third parties. KoColor strictly adheres to Google Play's Minimum Scope policy and DOES NOT request access to Distance, Heart Rate, Exercise Sessions, Weight, or Nutrition data.
 
 ---
 

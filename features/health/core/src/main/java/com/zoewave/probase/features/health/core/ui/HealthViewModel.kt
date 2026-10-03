@@ -8,6 +8,7 @@ import androidx.health.connect.client.records.DistanceRecord
 import androidx.health.connect.client.records.ExerciseSessionRecord
 import androidx.health.connect.client.records.HeartRateRecord
 import androidx.health.connect.client.records.StepsRecord
+import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
 import androidx.health.connect.client.records.TotalCaloriesBurnedRecord
 import androidx.health.connect.client.records.WeightRecord
 import androidx.health.connect.client.records.SleepSessionRecord
@@ -83,16 +84,12 @@ class HealthViewModel @Inject constructor(
 
     // 3. Define Permissions (Read permissions for wellness sync + Write permission for Hydration ONLY)
     val permissions = setOf(
-        HealthPermission.getReadPermission(ExerciseSessionRecord::class),
         HealthPermission.getReadPermission(StepsRecord::class),
-        HealthPermission.getReadPermission(DistanceRecord::class),
         HealthPermission.getReadPermission(TotalCaloriesBurnedRecord::class),
-        HealthPermission.getReadPermission(HeartRateRecord::class),
-        HealthPermission.getReadPermission(WeightRecord::class),
+        HealthPermission.getReadPermission(ActiveCaloriesBurnedRecord::class),
         HealthPermission.getReadPermission(SleepSessionRecord::class),
         HealthPermission.getReadPermission(HydrationRecord::class),
-        HealthPermission.getWritePermission(HydrationRecord::class),
-        HealthPermission.getReadPermission(NutritionRecord::class)
+        HealthPermission.getWritePermission(HydrationRecord::class)
     )
 
     // Note: Acceptable for specific UI toggles, though Flow is preferred for data
