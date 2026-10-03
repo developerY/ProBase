@@ -66,6 +66,9 @@ class AiConfigurationViewModel @Inject constructor(
             is AiConfigurationEvent.OnAiModelSelected -> {
                 viewModelScope.launch { settings.saveAiModel(event.model) }
             }
+            is AiConfigurationEvent.OnUseLocalAiToggled -> {
+                viewModelScope.launch { settings.saveUseLocalAi(event.enabled) }
+            }
             is AiConfigurationEvent.OnUseFirebaseVertexAiToggled -> {
                 viewModelScope.launch { settings.saveUseFirebaseVertexAi(event.enabled) }
             }

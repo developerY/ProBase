@@ -118,10 +118,11 @@ fun AiConfigurationCardContent(
                     Text(text = title, style = MaterialTheme.typography.titleMedium, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold, color = Color.Black)
                     val statusText = when {
                         !uiState.isAiEnabled -> stringResource(R.string.features_ai_configuration_status_off)
-                        uiState.isApiKeySet -> stringResource(R.string.features_ai_configuration_status_byok)
-                        uiState.isLocalAiAvailable -> stringResource(R.string.features_ai_configuration_status_local)
-                        uiState.useFirebaseVertexAi -> stringResource(R.string.features_ai_configuration_status_firebase)
-                        else -> stringResource(R.string.features_ai_configuration_status_no_provider)
+                        uiState.isApiKeySet -> "Stage 1 Active (BYOK Key)"
+                        uiState.useLocalAi && uiState.useFirebaseVertexAi -> "Stage 2 Active (Local AI → Firebase Fallback)"
+                        uiState.useLocalAi -> "Stage 2 Active (Local AI Only)"
+                        uiState.useFirebaseVertexAi -> "Stage 3 Active (Enterprise Firebase Only)"
+                        else -> "Off (No Stages Enabled)"
                     }
                     Text(
                         text = statusText,
@@ -137,6 +138,7 @@ fun AiConfigurationCardContent(
 
             AnimatedVisibility(visible = expanded) {
                 Column(modifier = Modifier.padding(16.dp)) {
+                    // Master Switch
                     ListItem(
                         colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = Color(0xFFFBF8F5)),
                         headlineContent = { Text(stringResource(R.string.features_ai_configuration_enable_features), fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold) },
@@ -153,30 +155,30 @@ fun AiConfigurationCardContent(
                         }
                     )
 
-                    Spacer(modifier = Modifier.padding(vertical = 8.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                    ListItem(
-                        colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = Color(0xFFFBF8F5)),
-                        headlineContent = { Text(stringResource(R.string.features_ai_configuration_use_firebase_title), fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold) },
-                        supportingContent = { Text(stringResource(R.string.features_ai_configuration_use_firebase_desc)) },
-                        trailingContent = {
-                            Switch(
-                                checked = uiState.useFirebaseVertexAi,
-                                onCheckedChange = { onEvent(AiConfigurationEvent.OnUseFirebaseVertexAiToggled(it)) },
-                                colors = androidx.compose.material3.SwitchDefaults.colors(
-                                    checkedThumbColor = Color.Black,
-                                    checkedTrackColor = Color(0xFFD4AF37) // Gold
-                                )
-                            )
-                        }
-                    )
-
-                    Spacer(modifier = Modifier.padding(vertical = 8.dp))
-
+                    // Pipeline Section Header
                     Text(
-                        text = stringResource(R.string.features_ai_configuration_byok_title),
+                        text = stringResource(R.string.features_ai_configuration_pipeline_title),
                         style = MaterialTheme.typography.labelMedium,
-                        color = Color(0xFFD4AF37) // Gold
+                        color = Color(0xFFD4AF37), // Gold
+                        fontWeight = FontWeight.Bold
+                    )
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // STAGE 1: BYOK
+                    Text(
+                        text = stringResource(R.string.features_ai_configuration_stage_1_title),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
+                    Text(
+                        text = stringResource(R.string.features_ai_configuration_stage_1_desc),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(vertical = 2.dp)
                     )
                     Text(
                         text = stringResource(R.string.features_ai_configuration_byok_desc),
@@ -331,6 +333,44 @@ fun AiConfigurationCardContent(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(top = 4.dp)
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // STAGE 2: On-Device Local AI
+                    ListItem(
+                        colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = Color(0xFFFBF8F5)),
+                        headlineContent = { Text(stringResource(R.string.features_ai_configuration_stage_2_title), fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold) },
+                        supportingContent = { Text(stringResource(R.string.features_ai_configuration_stage_2_desc)) },
+                        trailingContent = {
+                            Switch(
+                                checked = uiState.useLocalAi,
+                                onCheckedChange = { onEvent(AiConfigurationEvent.OnUseLocalAiToggled(it)) },
+                                colors = androidx.compose.material3.SwitchDefaults.colors(
+                                    checkedThumbColor = Color.Black,
+                                    checkedTrackColor = Color(0xFFD4AF37) // Gold
+                                )
+                            )
+                        }
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // STAGE 3: Enterprise Security (Firebase)
+                    ListItem(
+                        colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = Color(0xFFFBF8F5)),
+                        headlineContent = { Text(stringResource(R.string.features_ai_configuration_stage_3_title), fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold) },
+                        supportingContent = { Text(stringResource(R.string.features_ai_configuration_stage_3_desc)) },
+                        trailingContent = {
+                            Switch(
+                                checked = uiState.useFirebaseVertexAi,
+                                onCheckedChange = { onEvent(AiConfigurationEvent.OnUseFirebaseVertexAiToggled(it)) },
+                                colors = androidx.compose.material3.SwitchDefaults.colors(
+                                    checkedThumbColor = Color.Black,
+                                    checkedTrackColor = Color(0xFFD4AF37) // Gold
+                                )
+                            )
+                        }
                     )
 
                     if (uiState.availableModels.isNotEmpty()) {

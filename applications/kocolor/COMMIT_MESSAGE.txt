@@ -1,17 +1,15 @@
-Align CapabilityRouter Execution Order and Settings UI Status with Application Architecture
+Implement Multi-Step Fallback Pipeline UI in AI Configuration Settings
 
-This commit aligns the AI provider execution order and the Settings UI status display with the codebase logic.
+This commit restructures the AI Configuration Settings card into an explicit multi-step fallback pipeline UI, giving users granular control over each stage of the AI execution chain.
 
 Summary of Changes:
-1. **Capability Router Execution Order (`CapabilityRouterImpl.kt`)**: Re-ordered provider resolution to match the architectural pipeline:
-   - Priority 1: BYOK Cloud AI (if user configures a custom Gemini API Key).
-   - Priority 2: On-Device Local AI (Gemini Nano).
-   - Priority 3: Enterprise Security / Firebase AI Logic (Managed Cloud Fallback, if enabled).
-2. **BYOK Provider State (`ByokAiProvider.kt`)**: Implemented API key configuration setter and availability check based on custom key presence.
-3. **Settings Status Header (`AiConfigurationCard.kt`)**: Updated `statusText` calculation in the Settings UI to reflect active provider hierarchy accurately:
-   - Displays "On (BYOK - Gemini Key)" when a key is configured.
-   - Displays "On (Local AI)" when executing on-device.
-   - Displays "On (Enterprise Firebase)" when using the managed cloud fallback.
-   - Displays "Off (AI Features Disabled)" or "Off (No Active Provider)" when disabled.
+1. **Multi-Stage Pipeline UI (`AiConfigurationCard.kt`)**:
+   - Structured the card into explicit stages:
+     - **Stage 1 (Priority 1)**: BYOK (Bring Your Own Key) - Input Gemini API key, discover models, and select preferred model.
+     - **Stage 2 (Priority 2)**: On-Device Local AI (Gemini Nano) - Independent toggle to enable/disable local NPU/GPU processing.
+     - **Stage 3 (Priority 3)**: Enterprise Security (Firebase AI) - Independent toggle to enable/disable cloud proxy execution via App Check.
+   - Added a dynamic header status subtitle that clearly communicates the active pipeline state to the user (e.g. `Stage 2 Active (Local AI → Firebase Fallback)`).
+2. **Local AI Preference Persistence (`AiConfigurationSettings.kt` / `KoColorSettings.kt`)**: Added `useLocalAi` preference flow and DataStore persistence.
+3. **Pipeline Routing (`CapabilityRouterImpl.kt`)**: Updated capability router to respect individual stage toggles (`useLocalAi` and `useFirebaseVertexAi`) alongside BYOK key availability.
 
-Status: Build successful.
+Status: Build successful. Ready for release.
