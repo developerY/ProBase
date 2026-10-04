@@ -32,4 +32,7 @@
     <string name="features_ai_configuration_stage_3_desc">Priority 3: Route requests through a secure Firebase proxy protected by App Check as a final cloud fallback.</string>
     <string name="features_ai_configuration_use_firebase_title">Enterprise Security (Firebase)</string>
     <string name="features_ai_configuration_use_firebase_desc">Route requests through a secure Firebase proxy. Protects your quota and ensures data privacy via App Check.</string>
+    <string name="features_ai_configuration_stage_1_locked_hint">Configure a Gemini API key below to unlock Stage 1.</string>
+    <string name="features_ai_configuration_npu_active">NPU Active</string>
+    <string name="features_ai_configuration_npu_unsupported">Unsupported</string>
 </resources>

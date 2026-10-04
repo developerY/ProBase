@@ -125,9 +125,7 @@ fun AiConfigurationCardContent(
     var isModelDropdownExpanded by remember { mutableStateOf(false) }
 
     Card(
-        modifier = modifier
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-            .fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         colors = androidx.compose.material3.CardDefaults.cardColors(containerColor = Color(0xFFE8E0FD)) // Soft lavender
     ) {
         Column {
@@ -195,7 +193,7 @@ fun AiConfigurationCardContent(
                                 if (uiState.isApiKeySet) 
                                     stringResource(R.string.features_ai_configuration_stage_1_desc) 
                                 else 
-                                    "Configure a Gemini API key below to unlock Stage 1."
+                                    stringResource(R.string.features_ai_configuration_stage_1_locked_hint)
                             ) 
                         },
                         trailingContent = {
@@ -386,7 +384,7 @@ fun AiConfigurationCardContent(
                                         )
                                 )
                                 Text(
-                                    text = if (uiState.isLocalAiAvailable) "NPU Active" else "Unsupported",
+                                    text = if (uiState.isLocalAiAvailable) stringResource(R.string.features_ai_configuration_npu_active) else stringResource(R.string.features_ai_configuration_npu_unsupported),
                                     style = MaterialTheme.typography.labelSmall,
                                     fontWeight = FontWeight.Bold,
                                     color = if (uiState.isLocalAiAvailable) Color(0xFF4CAF50) else Color(0xFFE53935)

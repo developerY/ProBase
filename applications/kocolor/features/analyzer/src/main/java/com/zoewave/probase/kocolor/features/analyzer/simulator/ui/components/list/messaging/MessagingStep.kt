@@ -1,5 +1,6 @@
 package com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.list.messaging
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -19,6 +20,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AutoAwesome
@@ -110,40 +112,7 @@ fun MessagingStep(
                     )
                 }
                 
-                // Pipeline Status Indicator & Quick Settings Link
-                Surface(
-                    onClick = { navTo(KoColorRoute.Settings(null)) },
-                    modifier = Modifier.padding(end = 16.dp),
-                    shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
-                    color = Color.White,
-                    border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f)),
-                    shadowElevation = 2.dp
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        val aiProviderStr = uiState.activeAiProvider
-                        val isOffline = aiProviderStr.contains("Nano") || aiProviderStr.contains("Math")
-                        val dotColor = if (isOffline) Color(0xFF4CAF50) else Color(0xFFD4AF37) // Green for local/free, Gold for Cloud/Paid
 
-                        Box(
-                            modifier = Modifier
-                                .size(8.dp)
-                                .background(
-                                    color = dotColor,
-                                    shape = CircleShape
-                                )
-                        )
-                        Text(
-                            text = aiProviderStr,
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.SemiBold,
-                            color = Color.Black.copy(alpha = 0.8f)
-                        )
-                    }
-                }
             }
         }
 
@@ -170,7 +139,7 @@ fun MessagingStep(
         item {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(
-                    text = "ANCHOR CONSTRAINTS",
+                    text = stringResource(R.string.applications_kocolor_features_analyzer_anchor_constraints),
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Black,
                     letterSpacing = 1.2.sp,
@@ -218,7 +187,7 @@ fun MessagingStep(
                     }
                     
                     Text(
-                        text = "Add anchor garment",
+                        text = stringResource(R.string.applications_kocolor_features_analyzer_add_anchor_garment),
                         style = MaterialTheme.typography.bodySmall,
                         color = Color.Gray
                     )
@@ -231,16 +200,16 @@ fun MessagingStep(
             AnchorSection(
                 title = stringResource(R.string.applications_kocolor_features_analyzer_simulator_clothing_anchors),
                 categories = listOf(
-                    Triple("Top", Icons.Default.Checkroom, ClothingCategory.TOPS),
-                    Triple("Bottom", Icons.Default.Layers, ClothingCategory.BOTTOMS),
-                    Triple("Shoes", Icons.AutoMirrored.Filled.DirectionsWalk, ClothingCategory.SHOES)
+                    Triple(stringResource(R.string.applications_kocolor_features_analyzer_top), Icons.Default.Checkroom, ClothingCategory.TOPS),
+                    Triple(stringResource(R.string.applications_kocolor_features_analyzer_bottom), Icons.Default.Layers, ClothingCategory.BOTTOMS),
+                    Triple(stringResource(R.string.applications_kocolor_features_analyzer_shoes), Icons.AutoMirrored.Filled.DirectionsWalk, ClothingCategory.SHOES)
                 ),
                 selectedCategory = uiState.selectedClothingCategory,
                 onCategorySelect = { onEvent(SimulatorEvent.SelectClothingCategory(it as ClothingCategory)) },
                 families = uiState.clothingFamilies,
                 anchoredFamily = uiState.anchoredClothingFamilies[uiState.selectedClothingCategory],
                 onToggle = { onEvent(SimulatorEvent.ToggleClothingFamily(uiState.selectedClothingCategory, it)) },
-                emptyMessage = "No clothes in this category. Tap + in Collection to add pieces."
+                emptyMessage = stringResource(R.string.applications_kocolor_features_analyzer_no_clothes_in_category)
             )
         }
 
@@ -249,17 +218,17 @@ fun MessagingStep(
             AnchorSection(
                 title = stringResource(R.string.applications_kocolor_features_analyzer_simulator_makeup_anchors),
                 categories = listOf(
-                    Triple("Eyes", Icons.Default.Visibility, MacroCategory.EYES),
-                    Triple("Cheeks", Icons.Default.FaceRetouchingNatural, MacroCategory.DIMENSION),
-                    Triple("Lips", Icons.Default.Face, MacroCategory.LIPS),
-                    Triple("Nails", Icons.Default.PanTool, MacroCategory.NAILS)
+                    Triple(stringResource(R.string.applications_kocolor_features_analyzer_eyes), Icons.Default.Visibility, MacroCategory.EYES),
+                    Triple(stringResource(R.string.applications_kocolor_features_analyzer_cheeks), Icons.Default.FaceRetouchingNatural, MacroCategory.DIMENSION),
+                    Triple(stringResource(R.string.applications_kocolor_features_analyzer_lips), Icons.Default.Face, MacroCategory.LIPS),
+                    Triple(stringResource(R.string.applications_kocolor_features_analyzer_nails), Icons.Default.PanTool, MacroCategory.NAILS)
                 ),
                 selectedCategory = uiState.selectedCosmeticCategory,
                 onCategorySelect = { onEvent(SimulatorEvent.SelectCosmeticCategory(it as MacroCategory)) },
                 families = uiState.cosmeticFamilies,
                 anchoredFamily = uiState.anchoredCosmeticFamilies[uiState.selectedCosmeticCategory],
                 onToggle = { onEvent(SimulatorEvent.ToggleCosmeticFamily(uiState.selectedCosmeticCategory, it)) },
-                emptyMessage = "No makeup in this category. Tap + in Collection to add products."
+                emptyMessage = stringResource(R.string.applications_kocolor_features_analyzer_no_makeup_in_category)
             )
         }
         
@@ -277,7 +246,7 @@ fun MessagingStep(
                     OutlinedTextField(
                         value = uiState.userMessage,
                         onValueChange = { onEvent(SimulatorEvent.UpdateMessage(it)) },
-                        placeholder = { Text(stringResource(R.string.applications_kocolor_features_analyzer_simulator_intent_placeholder), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.alpha(0.5f)) },
+                        placeholder = { Text(stringResource(R.string.applications_kocolor_features_analyzer_simulator_intent_placeholder), style = MaterialTheme.typography.labelLarge, modifier = Modifier.alpha(0.5f)) },
                         modifier = Modifier.weight(1f).height(140.dp),
                         shape = RoundedCornerShape(24.dp),
                         colors = OutlinedTextFieldDefaults.colors(
@@ -304,14 +273,129 @@ fun MessagingStep(
 
         item {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Button(
-                    onClick = { onEvent(SimulatorEvent.StartSimulation) },
-                    modifier = Modifier.fillMaxWidth().height(64.dp),
-                    shape = RoundedCornerShape(32.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Black),
-                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
-                ) {
-                    Text(stringResource(R.string.applications_kocolor_features_analyzer_simulator_begin_action), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Color.White)
+                Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                    // Polished 4-Color AI Execution Context Legend (Clickable to Settings)
+                    val providerName = uiState.activeAiProvider
+                    val (dotColor, titleString, subtitleString) = when {
+                        providerName.contains("Math", ignoreCase = true) -> Triple(Color(0xFF9E9E9E), "Offline Math", "Algorithm Mode (No AI)")
+                        providerName.contains("Nano", ignoreCase = true) -> Triple(Color(0xFF4CAF50), "Local AI", "Gemini Nano On-Device")
+                        providerName.contains("Firebase", ignoreCase = true) -> Triple(Color(0xFFD4AF37), "Secure Cloud", "Firebase Vault Encrypted")
+                        providerName.contains("BYOK", ignoreCase = true) -> Triple(Color(0xFFE91E63), "Custom Key", "BYOK Cloud Execution")
+                        else -> Triple(Color.Gray, "Determining...", "Initializing Engine")
+                    }
+                    
+                    Surface(
+                        onClick = { navTo(KoColorRoute.Settings(null)) },
+                        shape = RoundedCornerShape(32.dp),
+                        color = Color.White,
+                        border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f)),
+                        shadowElevation = 2.dp,
+                        modifier = Modifier.padding(bottom = 12.dp).fillMaxWidth()
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                // Nested box for a glowing dot effect
+                                Box(
+                                    contentAlignment = Alignment.Center,
+                                    modifier = Modifier.size(20.dp)
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(14.dp)
+                                            .background(color = dotColor.copy(alpha = 0.2f), shape = CircleShape)
+                                    )
+                                    Box(
+                                        modifier = Modifier
+                                            .size(8.dp)
+                                            .background(color = dotColor, shape = CircleShape)
+                                    )
+                                }
+                                
+                                Spacer(modifier = Modifier.width(12.dp))
+                                
+                                Column {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text(
+                                            text = titleString,
+                                            style = MaterialTheme.typography.titleSmall,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.Black
+                                        )
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Text(
+                                            text = "Active",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = dotColor
+                                        )
+                                    }
+                                    Text(
+                                        text = subtitleString,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = Color.Gray,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
+                            }
+
+                            // Circular navigation icon container
+                            Surface(
+                                shape = CircleShape,
+                                color = Color.Black.copy(alpha = 0.04f),
+                                modifier = Modifier.size(28.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        imageVector = androidx.compose.material.icons.Icons.AutoMirrored.Filled.ArrowForwardIos,
+                                        contentDescription = "Settings",
+                                        modifier = Modifier.size(12.dp),
+                                        tint = Color.DarkGray
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    Button(
+                        onClick = { onEvent(SimulatorEvent.StartSimulation) },
+                        modifier = Modifier.fillMaxWidth().height(64.dp),
+                        shape = RoundedCornerShape(32.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF1E1E1E) // Slightly lighter than pure black for 3D effect depth
+                        ),
+                        elevation = ButtonDefaults.buttonElevation(
+                            defaultElevation = 8.dp,
+                            pressedElevation = 2.dp
+                        )
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Spacer(modifier = Modifier.width(32.dp))
+                            Text(
+                                text = stringResource(R.string.applications_kocolor_features_analyzer_simulator_begin_action), 
+                                style = MaterialTheme.typography.titleMedium, 
+                                fontWeight = FontWeight.Bold, 
+                                color = Color.White,
+                                modifier = Modifier.weight(1f),
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                            )
+                            Icon(
+                                imageVector = androidx.compose.material.icons.Icons.Default.AutoAwesome,
+                                contentDescription = null,
+                                tint = Color(0xFFD4AF37), // Gold spark
+                                modifier = Modifier.size(32.dp).padding(end = 12.dp)
+                            )
+                        }
+                    }
                 }
 
                 OutlinedButton(

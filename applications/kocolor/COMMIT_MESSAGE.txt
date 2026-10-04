@@ -1,10 +1,10 @@
-Wire Local AI NPU Hardware Check to UI Badge
+Enhance AI Status Badge to Surface Card UI
 
-This commit fixes the hardcoded Local AI availability state in the Settings menu so that it accurately reflects the physical hardware capabilities of the user's device (e.g. Pixel 9a without a working NPU vs Pixel 9 Pro).
+This commit refines the visual language and interaction model of the AI status indicator above the "Get Fashion Advice" button.
 
 Summary of Changes:
-1. **Module Dependencies**: Added `:features:ai:local` as an explicit dependency for `:features:ai:configuration` in `build.gradle.kts` to expose the local engine.
-2. **Dynamic Hardware Validation**: Injected `LocalAiEngine` into `AiConfigurationViewModel.kt` and updated `checkLocalAiAvailability()` to evaluate `localAiEngine.checkCapability()` asynchronously on init.
-3. **UI Badge Reflection**: The `NPU Active` / `Unsupported` badge in the UI will now accurately display a red circle and state "Unsupported" if the device lacks Gemini Nano compatibility.
+1. **Surface Card Enclosure**: Promoted the raw text/dot combination to a fully outlined `Surface` component matching the app's standard material interaction language.
+2. **Action Affordance**: Injected an `ArrowForwardIos` icon on the right trailing edge to explicitly communicate to the user that the element is an actionable navigation surface that routes to Settings.
+3. **Typography Scaling**: Increased the status text weight and scaled the styling to `labelMedium` for enhanced readability.
 
-Status: Verified and build successful.
+Status: Verified and built successfully.
