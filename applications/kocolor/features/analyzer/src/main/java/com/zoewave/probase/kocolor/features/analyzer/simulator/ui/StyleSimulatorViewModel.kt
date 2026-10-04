@@ -1,5 +1,4 @@
 package com.zoewave.probase.kocolor.features.analyzer.simulator.ui
-import com.zoewave.probase.kocolor.data.usecase.CapabilityRouter
 
 
 import android.content.Context
@@ -18,6 +17,7 @@ import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetectorOptions
 import com.google.mlkit.vision.face.FaceLandmark
+import com.zoewave.probase.core.data.repository.AiConfigurationSettings
 import com.zoewave.probase.core.data.repository.weather.AtmosphericRepository
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
@@ -41,6 +41,7 @@ import com.zoewave.probase.kocolor.data.repository.StyleResultRepository
 import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
 import com.zoewave.probase.kocolor.data.telemetry.StyleAuditTrail
 import com.zoewave.probase.kocolor.data.usecase.AppearanceProfile
+import com.zoewave.probase.kocolor.data.usecase.CapabilityRouter
 import com.zoewave.probase.kocolor.data.usecase.ColorTelemetry
 import com.zoewave.probase.kocolor.data.usecase.CreationPhase
 import com.zoewave.probase.kocolor.data.usecase.GeneratePlaylistUseCase
@@ -178,6 +179,7 @@ sealed class SimulatorEffect {
 class StyleSimulatorViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val capabilityRouter: CapabilityRouter,
+    private val settings: AiConfigurationSettings,
     private val routineDao: RoutineDao,
     private val wardrobeRepository: WardrobeRepository,
     private val cosmeticRepository: CosmeticInventoryRepository,
@@ -216,9 +218,15 @@ class StyleSimulatorViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            // Retrieve string directly via data layer without exposing internal AI provider class structure to UI
-            val providerName = capabilityRouter.getActiveProviderName()
-            _activeAiProvider.value = providerName
+            // Re-evaluate active AI provider whenever relevant configuration settings change
+            kotlinx.coroutines.flow.combine(
+                settings.isAiEnabledFlow,
+                settings.useByokKey,
+                settings.isGeminiApiKeySetFlow,
+                settings.useFirebaseVertexAi
+            ) { _, _, _, _ -> true }.collect {
+                _activeAiProvider.value = capabilityRouter.getActiveProviderName()
+            }
         }
     }
 
