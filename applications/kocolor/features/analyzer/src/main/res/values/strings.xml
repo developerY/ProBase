@@ -107,4 +107,15 @@
     <string name="applications_kocolor_features_analyzer_complete_ensemble">The Complete Ensemble</string>
     <string name="applications_kocolor_features_analyzer_architects_rationale">The Architect\s Rationale</string>
     <string name="applications_kocolor_features_analyzer_aesthetic_harmony">Aesthetic Harmony</string>
+    <string name="applications_kocolor_features_analyzer_anchor_constraints">ANCHOR CONSTRAINTS</string>
+    <string name="applications_kocolor_features_analyzer_add_anchor_garment">Add anchor garment</string>
+    <string name="applications_kocolor_features_analyzer_no_clothes_in_category">No clothes in this category. Tap + in Collection to add pieces.</string>
+    <string name="applications_kocolor_features_analyzer_no_makeup_in_category">No makeup in this category. Tap + in Collection to add products.</string>
+    <string name="applications_kocolor_features_analyzer_top">Top</string>
+    <string name="applications_kocolor_features_analyzer_bottom">Bottom</string>
+    <string name="applications_kocolor_features_analyzer_shoes">Shoes</string>
+    <string name="applications_kocolor_features_analyzer_eyes">Eyes</string>
+    <string name="applications_kocolor_features_analyzer_cheeks">Cheeks</string>
+    <string name="applications_kocolor_features_analyzer_lips">Lips</string>
+    <string name="applications_kocolor_features_analyzer_nails">Nails</string>
 </resources>

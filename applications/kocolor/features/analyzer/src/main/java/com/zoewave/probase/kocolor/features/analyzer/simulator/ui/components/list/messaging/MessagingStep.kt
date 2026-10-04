@@ -139,7 +139,7 @@ fun MessagingStep(
         item {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(
-                    text = "ANCHOR CONSTRAINTS",
+                    text = stringResource(R.string.applications_kocolor_features_analyzer_anchor_constraints),
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Black,
                     letterSpacing = 1.2.sp,
@@ -187,7 +187,7 @@ fun MessagingStep(
                     }
                     
                     Text(
-                        text = "Add anchor garment",
+                        text = stringResource(R.string.applications_kocolor_features_analyzer_add_anchor_garment),
                         style = MaterialTheme.typography.bodySmall,
                         color = Color.Gray
                     )
@@ -200,16 +200,16 @@ fun MessagingStep(
             AnchorSection(
                 title = stringResource(R.string.applications_kocolor_features_analyzer_simulator_clothing_anchors),
                 categories = listOf(
-                    Triple("Top", Icons.Default.Checkroom, ClothingCategory.TOPS),
-                    Triple("Bottom", Icons.Default.Layers, ClothingCategory.BOTTOMS),
-                    Triple("Shoes", Icons.AutoMirrored.Filled.DirectionsWalk, ClothingCategory.SHOES)
+                    Triple(stringResource(R.string.applications_kocolor_features_analyzer_top), Icons.Default.Checkroom, ClothingCategory.TOPS),
+                    Triple(stringResource(R.string.applications_kocolor_features_analyzer_bottom), Icons.Default.Layers, ClothingCategory.BOTTOMS),
+                    Triple(stringResource(R.string.applications_kocolor_features_analyzer_shoes), Icons.AutoMirrored.Filled.DirectionsWalk, ClothingCategory.SHOES)
                 ),
                 selectedCategory = uiState.selectedClothingCategory,
                 onCategorySelect = { onEvent(SimulatorEvent.SelectClothingCategory(it as ClothingCategory)) },
                 families = uiState.clothingFamilies,
                 anchoredFamily = uiState.anchoredClothingFamilies[uiState.selectedClothingCategory],
                 onToggle = { onEvent(SimulatorEvent.ToggleClothingFamily(uiState.selectedClothingCategory, it)) },
-                emptyMessage = "No clothes in this category. Tap + in Collection to add pieces."
+                emptyMessage = stringResource(R.string.applications_kocolor_features_analyzer_no_clothes_in_category)
             )
         }
 
@@ -218,17 +218,17 @@ fun MessagingStep(
             AnchorSection(
                 title = stringResource(R.string.applications_kocolor_features_analyzer_simulator_makeup_anchors),
                 categories = listOf(
-                    Triple("Eyes", Icons.Default.Visibility, MacroCategory.EYES),
-                    Triple("Cheeks", Icons.Default.FaceRetouchingNatural, MacroCategory.DIMENSION),
-                    Triple("Lips", Icons.Default.Face, MacroCategory.LIPS),
-                    Triple("Nails", Icons.Default.PanTool, MacroCategory.NAILS)
+                    Triple(stringResource(R.string.applications_kocolor_features_analyzer_eyes), Icons.Default.Visibility, MacroCategory.EYES),
+                    Triple(stringResource(R.string.applications_kocolor_features_analyzer_cheeks), Icons.Default.FaceRetouchingNatural, MacroCategory.DIMENSION),
+                    Triple(stringResource(R.string.applications_kocolor_features_analyzer_lips), Icons.Default.Face, MacroCategory.LIPS),
+                    Triple(stringResource(R.string.applications_kocolor_features_analyzer_nails), Icons.Default.PanTool, MacroCategory.NAILS)
                 ),
                 selectedCategory = uiState.selectedCosmeticCategory,
                 onCategorySelect = { onEvent(SimulatorEvent.SelectCosmeticCategory(it as MacroCategory)) },
                 families = uiState.cosmeticFamilies,
                 anchoredFamily = uiState.anchoredCosmeticFamilies[uiState.selectedCosmeticCategory],
                 onToggle = { onEvent(SimulatorEvent.ToggleCosmeticFamily(uiState.selectedCosmeticCategory, it)) },
-                emptyMessage = "No makeup in this category. Tap + in Collection to add products."
+                emptyMessage = stringResource(R.string.applications_kocolor_features_analyzer_no_makeup_in_category)
             )
         }
         
