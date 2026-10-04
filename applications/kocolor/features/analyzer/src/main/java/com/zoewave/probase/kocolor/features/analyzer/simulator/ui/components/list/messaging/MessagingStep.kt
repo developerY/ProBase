@@ -274,47 +274,89 @@ fun MessagingStep(
         item {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                    // 4-Color AI Execution Context Legend (Clickable to Settings)
+                    // Polished 4-Color AI Execution Context Legend (Clickable to Settings)
                     val providerName = uiState.activeAiProvider
-                    val (dotColor, statusString) = when {
-                        providerName.contains("Math", ignoreCase = true) -> Color(0xFF9E9E9E) to "Using Offline Math (No AI)"
-                        providerName.contains("Nano", ignoreCase = true) -> Color(0xFF4CAF50) to "Using Local AI (Gemini Nano)"
-                        providerName.contains("Firebase", ignoreCase = true) -> Color(0xFFD4AF37) to "Using Secure Cloud (Firebase)"
-                        providerName.contains("BYOK", ignoreCase = true) -> Color(0xFFE91E63) to "Using Custom Key (BYOK Cloud)"
-                        else -> Color.Gray to "Determining Engine..."
+                    val (dotColor, titleString, subtitleString) = when {
+                        providerName.contains("Math", ignoreCase = true) -> Triple(Color(0xFF9E9E9E), "Offline Math", "Algorithm Mode (No AI)")
+                        providerName.contains("Nano", ignoreCase = true) -> Triple(Color(0xFF4CAF50), "Local AI", "Gemini Nano On-Device")
+                        providerName.contains("Firebase", ignoreCase = true) -> Triple(Color(0xFFD4AF37), "Secure Cloud", "Firebase Vault Encrypted")
+                        providerName.contains("BYOK", ignoreCase = true) -> Triple(Color(0xFFE91E63), "Custom Key", "BYOK Cloud Execution")
+                        else -> Triple(Color.Gray, "Determining...", "Initializing Engine")
                     }
                     
                     Surface(
                         onClick = { navTo(KoColorRoute.Settings(null)) },
-                        shape = RoundedCornerShape(16.dp),
+                        shape = RoundedCornerShape(32.dp),
                         color = Color.White,
                         border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f)),
                         shadowElevation = 2.dp,
-                        modifier = Modifier.padding(bottom = 12.dp)
+                        modifier = Modifier.padding(bottom = 12.dp).fillMaxWidth()
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(10.dp)
-                                    .background(color = dotColor, shape = CircleShape)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = statusString,
-                                style = MaterialTheme.typography.labelMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                color = Color.DarkGray
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Icon(
-                                imageVector = androidx.compose.material.icons.Icons.AutoMirrored.Filled.ArrowForwardIos,
-                                contentDescription = "Settings",
-                                modifier = Modifier.size(14.dp),
-                                tint = Color.Gray
-                            )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                // Nested box for a glowing dot effect
+                                Box(
+                                    contentAlignment = Alignment.Center,
+                                    modifier = Modifier.size(20.dp)
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(14.dp)
+                                            .background(color = dotColor.copy(alpha = 0.2f), shape = CircleShape)
+                                    )
+                                    Box(
+                                        modifier = Modifier
+                                            .size(8.dp)
+                                            .background(color = dotColor, shape = CircleShape)
+                                    )
+                                }
+                                
+                                Spacer(modifier = Modifier.width(12.dp))
+                                
+                                Column {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text(
+                                            text = titleString,
+                                            style = MaterialTheme.typography.titleSmall,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.Black
+                                        )
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Text(
+                                            text = "Active",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = dotColor
+                                        )
+                                    }
+                                    Text(
+                                        text = subtitleString,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = Color.Gray,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
+                            }
+
+                            // Circular navigation icon container
+                            Surface(
+                                shape = CircleShape,
+                                color = Color.Black.copy(alpha = 0.04f),
+                                modifier = Modifier.size(28.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        imageVector = androidx.compose.material.icons.Icons.AutoMirrored.Filled.ArrowForwardIos,
+                                        contentDescription = "Settings",
+                                        modifier = Modifier.size(12.dp),
+                                        tint = Color.DarkGray
+                                    )
+                                }
+                            }
                         }
                     }
                     
@@ -324,10 +366,35 @@ fun MessagingStep(
                         onClick = { onEvent(SimulatorEvent.StartSimulation) },
                         modifier = Modifier.fillMaxWidth().height(64.dp),
                         shape = RoundedCornerShape(32.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Black),
-                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF1E1E1E) // Slightly lighter than pure black for 3D effect depth
+                        ),
+                        elevation = ButtonDefaults.buttonElevation(
+                            defaultElevation = 8.dp,
+                            pressedElevation = 2.dp
+                        )
                     ) {
-                        Text(stringResource(R.string.applications_kocolor_features_analyzer_simulator_begin_action), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Color.White)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Spacer(modifier = Modifier.width(32.dp))
+                            Text(
+                                text = stringResource(R.string.applications_kocolor_features_analyzer_simulator_begin_action), 
+                                style = MaterialTheme.typography.titleMedium, 
+                                fontWeight = FontWeight.Bold, 
+                                color = Color.White,
+                                modifier = Modifier.weight(1f),
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                            )
+                            Icon(
+                                imageVector = androidx.compose.material.icons.Icons.Default.AutoAwesome,
+                                contentDescription = null,
+                                tint = Color(0xFFD4AF37), // Gold spark
+                                modifier = Modifier.size(32.dp).padding(end = 12.dp)
+                            )
+                        }
                     }
                 }
 
