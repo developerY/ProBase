@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AutoAwesome
@@ -245,7 +246,7 @@ fun MessagingStep(
                     OutlinedTextField(
                         value = uiState.userMessage,
                         onValueChange = { onEvent(SimulatorEvent.UpdateMessage(it)) },
-                        placeholder = { Text(stringResource(R.string.applications_kocolor_features_analyzer_simulator_intent_placeholder), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.alpha(0.5f)) },
+                        placeholder = { Text(stringResource(R.string.applications_kocolor_features_analyzer_simulator_intent_placeholder), style = MaterialTheme.typography.labelLarge, modifier = Modifier.alpha(0.5f)) },
                         modifier = Modifier.weight(1f).height(140.dp),
                         shape = RoundedCornerShape(24.dp),
                         colors = OutlinedTextFieldDefaults.colors(
@@ -283,25 +284,38 @@ fun MessagingStep(
                         else -> Color.Gray to "Determining Engine..."
                     }
                     
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center,
-                        modifier = Modifier
-                            .clickable { navTo(KoColorRoute.Settings(null)) }
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    Surface(
+                        onClick = { navTo(KoColorRoute.Settings(null)) },
+                        shape = RoundedCornerShape(16.dp),
+                        color = Color.White,
+                        border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f)),
+                        shadowElevation = 2.dp,
+                        modifier = Modifier.padding(bottom = 12.dp)
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(10.dp)
-                                .background(color = dotColor, shape = CircleShape)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = statusString,
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.SemiBold,
-                            color = Color.DarkGray
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(10.dp)
+                                    .background(color = dotColor, shape = CircleShape)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = statusString,
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color.DarkGray
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Icon(
+                                imageVector = androidx.compose.material.icons.Icons.AutoMirrored.Filled.ArrowForwardIos,
+                                contentDescription = "Settings",
+                                modifier = Modifier.size(14.dp),
+                                tint = Color.Gray
+                            )
+                        }
                     }
                     
                     Spacer(modifier = Modifier.height(8.dp))

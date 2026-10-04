@@ -1,9 +1,10 @@
-Fix Settings Navigation Backstack Clearing Bug
+Enhance AI Status Badge to Surface Card UI
 
-This commit resolves an issue where navigating to the Settings screen from deep within the application (e.g., via the AI Status pill on the Style Simulator) would clear the navigation backstack, rendering the top back arrow non-functional.
+This commit refines the visual language and interaction model of the AI status indicator above the "Get Fashion Advice" button.
 
 Summary of Changes:
-1. **Intelligent Stack Pushing**: Updated `MainViewModel.kt`'s `navigateTo()` function. If the user navigates to a top-level route (like Settings) while a deep backstack already exists (`size > 1`), the route is pushed onto the stack rather than resetting it.
-2. **Top-Level Route Matching**: Refactored the `topLevelRoutes` check to evaluate `it::class == route::class` instead of an exact object match, ensuring routes with nullable payload arguments (like `KoColorRoute.Settings(null)`) are correctly identified.
+1. **Surface Card Enclosure**: Promoted the raw text/dot combination to a fully outlined `Surface` component matching the app's standard material interaction language.
+2. **Action Affordance**: Injected an `ArrowForwardIos` icon on the right trailing edge to explicitly communicate to the user that the element is an actionable navigation surface that routes to Settings.
+3. **Typography Scaling**: Increased the status text weight and scaled the styling to `labelMedium` for enhanced readability.
 
-Status: Build successful.
+Status: Verified and built successfully.
