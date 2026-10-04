@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "178c2813f968271dab9365c834ac4099",
+    "identityHash": "cdee837d107c6ea43b6202c6900424d3",
     "entities": [
       {
         "tableName": "categories",
@@ -69,7 +69,7 @@
       },
       {
         "tableName": "projects",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`projectId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `categoryId` INTEGER NOT NULL, `name` TEXT NOT NULL, `notes` TEXT, `status` TEXT NOT NULL, `isFavorite` INTEGER NOT NULL, `isUrgent` INTEGER NOT NULL, `projectBudget` REAL NOT NULL, `currentSpend` REAL NOT NULL, `priority` INTEGER NOT NULL, `creationDate` INTEGER NOT NULL, `dueDate` INTEGER, `isAlarmEnabled` INTEGER NOT NULL, `isArchived` INTEGER NOT NULL, `globalSyncId` TEXT NOT NULL, `lastModified` INTEGER NOT NULL, FOREIGN KEY(`categoryId`) REFERENCES `categories`(`categoryId`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`projectId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `categoryId` INTEGER NOT NULL, `name` TEXT NOT NULL, `notes` TEXT, `status` TEXT NOT NULL, `isFavorite` INTEGER NOT NULL, `isUrgent` INTEGER NOT NULL, `projectBudget` REAL NOT NULL, `currentSpend` REAL NOT NULL, `priority` INTEGER NOT NULL, `creationDate` INTEGER NOT NULL, `dueDate` INTEGER, `isAlarmEnabled` INTEGER NOT NULL, `isArchived` INTEGER NOT NULL, `durationMillis` INTEGER, `globalSyncId` TEXT NOT NULL, `lastModified` INTEGER NOT NULL, FOREIGN KEY(`categoryId`) REFERENCES `categories`(`categoryId`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "projectId",
@@ -152,6 +152,11 @@
             "columnName": "isArchived",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "durationMillis",
+            "columnName": "durationMillis",
+            "affinity": "INTEGER"
           },
           {
             "fieldPath": "globalSyncId",
@@ -305,7 +310,7 @@
       },
       {
         "tableName": "tasks",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`taskId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `projectId` INTEGER NOT NULL, `text` TEXT NOT NULL, `isChecked` INTEGER NOT NULL, `sortOrder` INTEGER NOT NULL, `globalSyncId` TEXT NOT NULL, `lastModified` INTEGER NOT NULL, `assignedTo` TEXT, `estimatedCost` REAL, `actualCost` REAL, FOREIGN KEY(`projectId`) REFERENCES `projects`(`projectId`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`taskId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `projectId` INTEGER NOT NULL, `text` TEXT NOT NULL, `isChecked` INTEGER NOT NULL, `sortOrder` INTEGER NOT NULL, `globalSyncId` TEXT NOT NULL, `lastModified` INTEGER NOT NULL, `assignedTo` TEXT, `estimatedCost` REAL, `actualCost` REAL, `estimatedTimeMillis` INTEGER, FOREIGN KEY(`projectId`) REFERENCES `projects`(`projectId`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "taskId",
@@ -363,6 +368,11 @@
             "fieldPath": "actualCost",
             "columnName": "actualCost",
             "affinity": "REAL"
+          },
+          {
+            "fieldPath": "estimatedTimeMillis",
+            "columnName": "estimatedTimeMillis",
+            "affinity": "INTEGER"
           }
         ],
         "primaryKey": {
@@ -455,11 +465,81 @@
             ]
           }
         ]
+      },
+      {
+        "tableName": "time_logs",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`logId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `taskId` INTEGER NOT NULL, `startTimeMillis` INTEGER NOT NULL, `endTimeMillis` INTEGER, `note` TEXT, `lastModified` INTEGER NOT NULL, FOREIGN KEY(`taskId`) REFERENCES `tasks`(`taskId`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "logId",
+            "columnName": "logId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "taskId",
+            "columnName": "taskId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startTimeMillis",
+            "columnName": "startTimeMillis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endTimeMillis",
+            "columnName": "endTimeMillis",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "note",
+            "columnName": "note",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "lastModified",
+            "columnName": "lastModified",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "logId"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_time_logs_taskId",
+            "unique": false,
+            "columnNames": [
+              "taskId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_time_logs_taskId` ON `${TABLE_NAME}` (`taskId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "tasks",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "taskId"
+            ],
+            "referencedColumns": [
+              "taskId"
+            ]
+          }
+        ]
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '178c2813f968271dab9365c834ac4099')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'cdee837d107c6ea43b6202c6900424d3')"
     ]
   }
 }
