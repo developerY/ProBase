@@ -37,8 +37,7 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                 // Enable 16 KB page size support
                 packaging.jniLibs.useLegacyPackaging = false
                 
-                // Workaround for 16KB page size compatibility warning on 3rd party SDKs (like ARCore and ML Kit) that aren"t yet fully aligned
-                packaging.jniLibs.useLegacyPackaging = true
+
             }
         }
     }
