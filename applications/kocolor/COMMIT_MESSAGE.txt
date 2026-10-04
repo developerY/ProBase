@@ -1,10 +1,12 @@
-Enhance AI Status Badge to Surface Card UI
+Refactor AI Configuration to Enforce Strict Mutual Exclusivity
 
-This commit refines the visual language and interaction model of the AI status indicator above the "Get Fashion Advice" button.
+This commit re-architects the AI Configuration pipeline to enforce strict mutual exclusivity across provider selection stages.
 
 Summary of Changes:
-1. **Surface Card Enclosure**: Promoted the raw text/dot combination to a fully outlined `Surface` component matching the app's standard material interaction language.
-2. **Action Affordance**: Injected an `ArrowForwardIos` icon on the right trailing edge to explicitly communicate to the user that the element is an actionable navigation surface that routes to Settings.
-3. **Typography Scaling**: Increased the status text weight and scaled the styling to `labelMedium` for enhanced readability.
+1. **Event Dispatch & Persistence (`AiConfigurationViewModel.kt`)**: Refactored the stage toggle events (`OnUseByokKeyToggled`, `OnUseLocalAiToggled`, `OnUseFirebaseVertexAiToggled`). Activating any single stage now actively disables the others, persisting a 1:1 mutually exclusive state to the underlying `DataStore`.
+2. **Settings UI Visualization (`AiConfigurationCard.kt`)**:
+   - Restructured the status header to accurately map the mutually exclusive active provider.
+   - Matched dot indication colors with the user's high-fidelity mockups (`BYOK` = Magenta/Pink, `Local AI` = Green, `Firebase` = Red).
+3. **Execution Routing (`AiRoutingImpl.kt`)**: Upgraded the priority fallback tree to perform an immediate `return` when a valid mutually-exclusive stage is detected, ensuring the execution context mathematically aligns with the strictly gated UI state.
 
-Status: Verified and built successfully.
+Status: Verified and compiled successfully.

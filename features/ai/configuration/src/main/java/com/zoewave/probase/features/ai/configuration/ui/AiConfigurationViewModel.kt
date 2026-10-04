@@ -89,13 +89,31 @@ class AiConfigurationViewModel @Inject constructor(
                 viewModelScope.launch { settings.saveAiModel(event.model) }
             }
             is AiConfigurationEvent.OnUseByokKeyToggled -> {
-                viewModelScope.launch { settings.saveUseByokKey(event.enabled) }
+                viewModelScope.launch { 
+                    settings.saveUseByokKey(event.enabled) 
+                    if (event.enabled) {
+                        settings.saveUseLocalAi(false)
+                        settings.saveUseFirebaseVertexAi(false)
+                    }
+                }
             }
             is AiConfigurationEvent.OnUseLocalAiToggled -> {
-                viewModelScope.launch { settings.saveUseLocalAi(event.enabled) }
+                viewModelScope.launch { 
+                    settings.saveUseLocalAi(event.enabled) 
+                    if (event.enabled) {
+                        settings.saveUseByokKey(false)
+                        settings.saveUseFirebaseVertexAi(false)
+                    }
+                }
             }
             is AiConfigurationEvent.OnUseFirebaseVertexAiToggled -> {
-                viewModelScope.launch { settings.saveUseFirebaseVertexAi(event.enabled) }
+                viewModelScope.launch { 
+                    settings.saveUseFirebaseVertexAi(event.enabled) 
+                    if (event.enabled) {
+                        settings.saveUseByokKey(false)
+                        settings.saveUseLocalAi(false)
+                    }
+                }
             }
             is AiConfigurationEvent.OnTestApiKeyClicked -> {
                 testApiKey()
