@@ -7,7 +7,7 @@ android-targetSdk = "37"
 # -- Build Tools --
 agp = "9.4.1"
 kotlin = "2.4.20"
-# KSP version must match Kotlin version exactly
+# KSP version is independently versioned; use a release compatible with the Kotlin Gradle plugin.
 ksp = "2.3.9"
 
 # -- Android Libraries --
