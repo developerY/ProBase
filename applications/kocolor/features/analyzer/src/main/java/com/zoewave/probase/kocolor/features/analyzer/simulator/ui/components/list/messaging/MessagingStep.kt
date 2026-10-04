@@ -276,12 +276,13 @@ fun MessagingStep(
                 Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                     // Polished 4-Color AI Execution Context Legend (Clickable to Settings)
                     val providerName = uiState.activeAiProvider
+                    // Blues, Purples, and Shades of Greens (Strictly No Red, No Yellow/Gold)
                     val (dotColor, titleString, subtitleString) = when {
-                        providerName.contains("Math", ignoreCase = true) -> Triple(Color(0xFF9E9E9E), "Offline Math", "Algorithm Mode (No AI)")
-                        providerName.contains("Nano", ignoreCase = true) -> Triple(Color(0xFF4CAF50), "Local AI", "Gemini Nano On-Device")
-                        providerName.contains("Firebase", ignoreCase = true) -> Triple(Color(0xFFD4AF37), "Secure Cloud", "Firebase Vault Encrypted")
-                        providerName.contains("BYOK", ignoreCase = true) -> Triple(Color(0xFFE91E63), "Custom Key", "BYOK Cloud Execution")
-                        else -> Triple(Color.Gray, "Determining...", "Initializing Engine")
+                        providerName.contains("Math", ignoreCase = true) -> Triple(Color(0xFF00897B), "Offline Math", "Algorithm Mode (No AI)") // Teal/Mint Green
+                        providerName.contains("Nano", ignoreCase = true) -> Triple(Color(0xFF2E7D32), "Local AI", "Gemini Nano On-Device") // Forest Green
+                        providerName.contains("Firebase", ignoreCase = true) -> Triple(Color(0xFF1976D2), "Secure Cloud", "Firebase Vault Encrypted") // Ocean Blue
+                        providerName.contains("BYOK", ignoreCase = true) -> Triple(Color(0xFF7E57C2), "Custom Key", "BYOK Cloud Execution") // Deep Purple
+                        else -> Triple(Color(0xFF5C6BC0), "Determining...", "Initializing Engine") // Soft Indigo
                     }
                     
                     Surface(
