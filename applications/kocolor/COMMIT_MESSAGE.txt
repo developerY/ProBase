@@ -1,13 +1,9 @@
-Add 4-Color Status Indicator to Simulator Action Button
+Fix Settings Navigation Backstack Clearing Bug
 
-This commit updates the "Get Fashion Advice" action button on the Simulator messaging step to clearly broadcast the resolved execution backend using a 4-color categorization system.
+This commit resolves an issue where navigating to the Settings screen from deep within the application (e.g., via the AI Status pill on the Style Simulator) would clear the navigation backstack, rendering the top back arrow non-functional.
 
 Summary of Changes:
-1. **Action Button UI (`MessagingStep.kt`)**: Extracted the previously embedded status dot and moved it to a dedicated descriptive legend directly below the main action button.
-2. **4-Color Designation System**:
-   - `🟢 Green`: "Local AI (Gemini Nano)" - Zero latency, private, on-device NPU execution.
-   - `🟡 Gold`: "Enterprise Security (Firebase)" - Secure, quota-protected proxy cloud execution.
-   - `🟣 Pink/Rose`: "BYOK Cloud (Gemini API Key)" - Unrestricted, user-provided API key cloud execution.
-   - `🔘 Gray`: "Math Engine (Offline)" - Ultimate deterministic fallback when all ML models are disabled or uninitialized.
+1. **Intelligent Stack Pushing**: Updated `MainViewModel.kt`'s `navigateTo()` function. If the user navigates to a top-level route (like Settings) while a deep backstack already exists (`size > 1`), the route is pushed onto the stack rather than resetting it.
+2. **Top-Level Route Matching**: Refactored the `topLevelRoutes` check to evaluate `it::class == route::class` instead of an exact object match, ensuring routes with nullable payload arguments (like `KoColorRoute.Settings(null)`) are correctly identified.
 
-Status: Verified and built successfully.
+Status: Build successful.

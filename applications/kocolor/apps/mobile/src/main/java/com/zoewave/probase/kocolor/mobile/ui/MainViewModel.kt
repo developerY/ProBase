@@ -87,8 +87,28 @@ class MainViewModel @Inject constructor(
             navigateBack()
             return
         }
-        if (route in topLevelRoutes) {
-            _backStack.value = persistentListOf(route)
+        
+        // Check if we are navigating to a top-level route (like Home or Settings)
+        // If it"s from the bottom nav bar, we replace the stack. 
+        // BUT if we are navigating to Settings FROM deep inside the app (e.g. from the Analyzer), 
+        // we want to push it onto the stack so the back arrow works.
+        // Let"s just push it onto the stack if we already have a backstack!
+        // Actually, bottom nav items usually clear the stack. But Settings isn"t a bottom nav item usually.
+        // Wait, Settings IS a topLevelRoute in this app.
+        
+        val isTopLevel = topLevelRoutes.any { it::class == route::class }
+        
+        if (isTopLevel) {
+            // If the current visible route is already this top level route, do nothing
+            if (_backStack.value.lastOrNull() == route) return
+            
+            // If they are explicitly navigating to Settings from within a deep flow, push it so they can return.
+            if (route is KoColorRoute.Settings && _backStack.value.size > 1) {
+                _backStack.value = _backStack.value.add(route)
+            } else {
+                // Otherwise, it"s a standard bottom navigation tab switch: clear stack
+                _backStack.value = persistentListOf(route)
+            }
         } else {
             _backStack.value = _backStack.value.add(route)
         }
