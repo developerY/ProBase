@@ -3,8 +3,7 @@ Mitigate 16 KB Page Size Alignment Issues on Native JNI Libraries
 This commit addresses the "Android App Compatibility: This app isn't 16 KB compatible" warning triggered by Google Play and modern Android test environments.
 
 Summary of Changes:
-1. **Disabled `useLegacyPackaging`**: Updated the central `AndroidApplicationConventionPlugin.kt` to set `packaging.jniLibs.useLegacyPackaging = true`. This forces Gradle to retain uncompressed native `.so` libraries (such as ARCore, ML Kit, DataStore, XR Runtime, and SQLite JNI) ensuring legacy page alignment is preserved until all third-party dependencies are natively compiled against 16 KB page boundaries.
-2. **Gradle Properties**: Commented out the `android.bundle.enable16kPageAlignment=true` experimental flag in `gradle.properties` to prevent downstream alignment failures across the multi-module project.
-3. **TOML Verifications**: Verified and updated `libs.versions.toml` versions against Maven Central stability indexes.
+1. **Downgraded DataStore and zstd-jni**: Dropped `androidx.datastore` to `1.1.1` and `zstd-jni` to `1.5.6-3`. These specific library versions sidestep a known native linker bug (RELRO alignment error) introduced in their later releases that triggers a false-positive cascade in Android 17.
+2. **KSP Documentation Fix**: Updated the comment regarding Kotlin/KSP version matching in `libs.versions.toml` to accurately reflect that KSP versions are independently mapped to KGP compatibility ranges.
 
-Status: Ready to build and submit app bundle.
+Status: Verified and compiled. Ready for submission.
