@@ -113,4 +113,24 @@ class DataStoreAppSettingsRepository @Inject constructor(
             preferences[booleanPreferencesKey("use_firebase_vertex_ai")] = enabled
         }
     }
+
+    override val useByokKey: kotlinx.coroutines.flow.Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[booleanPreferencesKey("use_byok_key")] ?: true
+    }
+
+    override suspend fun saveUseByokKey(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[booleanPreferencesKey("use_byok_key")] = enabled
+        }
+    }
+
+    override val useLocalAi: kotlinx.coroutines.flow.Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[booleanPreferencesKey("use_local_ai")] ?: true
+    }
+
+    override suspend fun saveUseLocalAi(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[booleanPreferencesKey("use_local_ai")] = enabled
+        }
+    }
 }

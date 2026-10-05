@@ -6,12 +6,12 @@ android-targetSdk = "37"
 
 # -- Build Tools --
 agp = "9.4.1"
-kotlin = "2.4.10"
-# KSP version must match Kotlin version exactly
+kotlin = "2.4.20"
+# KSP version is independently versioned; use a release compatible with the Kotlin Gradle plugin.
 ksp = "2.3.9"
 
 # -- Android Libraries --
-coreKtx = "1.19.0"
+coreKtx = "1.19.1"
 coreSplashscreen = "1.2.0"
 lifecycleRuntimeKtx = "2.11.0"
 lifecycleService = "2.11.0"
@@ -21,12 +21,12 @@ material = "1.14.0"
 constraintLayout = "2.2.2"
 
 # -- Jetpack Compose --
-composeBom = "2026.08.00"
+composeBom = "2026.09.00"
 composeMaterial = "1.7.8"  # Jetpack Compose Material (used for icons, wear material)
-composeMaterial3Expressive = "1.5.0-alpha26"
+composeMaterial3Expressive = "1.5.0-alpha29"
 
 # -- Nav3 --
-nav3Core = "1.1.6"
+nav3Core = "1.2.0"
 lifecycleViewmodelNav3 = "2.11.0"
 material3AdaptiveNav3 = "1.3.0"
 
@@ -39,27 +39,27 @@ hiltWork = "1.4.0"
 
 # -- Kotlin & Serialization --
 kotlinxSerializationCore = "1.11.0"
-kotlinSerialization = "2.4.10" # Matches Kotlin version for plugin
+kotlinSerialization = "2.4.20" # Matches Kotlin version for plugin
 kotlinxDatetime = "0.8.0"
-immutableCollections = "0.5.1"
+immutableCollections = "0.5.2"
 coroutines = "1.11.0"
 retrofitKotlinxSerializationConverter = "1.0.0"
 
 # -- Data Persistence --
-room = "3.0.1"
+room = "3.0.3"
 datastore = "1.2.1"
-sqlite = "2.7.0"
+sqlite = "2.7.1"
 androidxSecurity = "1.1.0"
 tink = "1.23.0"
 
 # -- Background --
-work = "2.11.2"
-zstd-jni = "1.5.6-3"
+work = "2.12.0"
+zstd-jni = "1.5.7-21"
 
 # -- Networking (Rest & GQL) --
-okhttp = "5.4.0"
+okhttp = "5.5.0"
 squareupRetrofit = "3.0.0"
-apollo = "5.0.1"
+apollo = "5.2.0"
 
 # -- UI Utilities --
 coil = "2.7.0"
@@ -68,34 +68,34 @@ accompanistPermissions = "0.37.3"
 accompanistDrawablePainter = "0.37.3"
 
 # -- Camera --
-cameraX = "1.6.1"
+cameraX = "1.6.2"
 
 # -- Maps & Location --
-mapsCompose = "8.4.0"
+mapsCompose = "9.0.0"
 mapsplatformSecretsPlugin = "2.0.1"
 playServicesMaps = "20.0.0"
 playServicesLocation = "21.4.0"
 
 # -- Health & Wear --
-healthConnect = "1.2.0-alpha04"
-wearHealthServices = "1.1.0-rc02"
+healthConnect = "1.2.0-alpha06"
+wearHealthServices = "1.1.0"
 wearOngoing = "1.1.0"
-wearComposeMaterial3 = "1.6.2"
-wearCompose = "1.6.2"
-wearComposeNav3 = "1.6.2"
+wearComposeMaterial3 = "1.7.0"
+wearCompose = "1.7.0"
+wearComposeNav3 = "1.7.0"
 playServicesWearable = "20.0.1"
 wearToolingPreview = "1.0.0"
-tiles = "1.6.1"
+tiles = "1.6.2"
 horologist = "0.7.15"
 watchfaceComplicationsDataSourceKtx = "1.3.0"
 
 # -- XR & Glass --
-glimmer = "1.0.0-alpha15"
-projectedXR = "1.0.0-alpha10"
-xrRuntime = "1.0.0-beta01"
-arcore = "1.0.0-beta01"
-xrCompose = "1.0.0-alpha16"
-xrScenecore = "1.0.0-beta01"
+glimmer = "1.0.0-alpha20"
+projectedXR = "1.0.0-alpha13"
+xrRuntime = "1.0.0-rc01"
+arcore = "1.0.0-rc01"
+xrCompose = "1.0.0-beta01"
+xrScenecore = "1.0.0-rc01"
 
 # -- Google Services & Firebase --
 playAgeSignals = "0.0.4"
@@ -109,11 +109,11 @@ googleGenerativeAi = "0.9.0"
 mediaPipe = "1.0.0"
 playServicesCodeScanner = "16.1.0"
 playServicesWallet = "20.0.0"
-stripe = "23.13.1"
+stripe = "23.21.0"
 composePayButton = "1.2.0"
-firebaseBom = "34.18.0"
+firebaseBom = "34.19.0"
 googleGmsGoogleServices = "4.5.0"
-googleFirebaseCrashlytics = "3.0.7"
+googleFirebaseCrashlytics = "3.0.8"
 
 # -- Testing --
 junit = "4.13.2"
@@ -122,13 +122,13 @@ espressoCore = "3.7.0"
 uiautomator = "2.4.0"
 androidxProfiling = "1.4.1"
 runner = "1.7.0"
-composeMaterialVersion = "1.6.2"
+composeMaterialVersion = "1.7.0"
 truth = "1.4.5"
 mockk = "1.14.11"
-mockito = "5.11.0"
-mockito-kotlin = "5.2.1"
-junitPlatformLauncher = "6.1.2"
-junitPlatformEngine = "6.1.2"
+mockito = "5.24.0"
+mockito-kotlin = "6.4.0"
+junitPlatformLauncher = "6.1.3"
+junitPlatformEngine = "6.1.3"
 journeysJunitEngine = "0.3.0"
 
 

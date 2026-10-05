@@ -61,4 +61,10 @@ class UserSettingsRepositoryImpl @Inject constructor(
         val current = getUserSettings().first()
         saveUserSettings(current.copy(useFirebaseVertexAi = enabled))
     }
+    
+    override val useByokKey: Flow<Boolean> = kotlinx.coroutines.flow.flowOf(true)
+    override suspend fun saveUseByokKey(enabled: Boolean) {}
+
+    override val useLocalAi: Flow<Boolean> = kotlinx.coroutines.flow.flowOf(true)
+    override suspend fun saveUseLocalAi(enabled: Boolean) {}
 }

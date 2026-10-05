@@ -104,6 +104,12 @@ class DataStoreAppSettingsRepository @Inject constructor(
     override suspend fun saveUseFirebaseVertexAi(enabled: Boolean) {
         dataStore.edit { it[booleanPreferencesKey("use_firebase_vertex_ai")] = enabled }
     }
+    
+    override val useByokKey: Flow<Boolean> = kotlinx.coroutines.flow.flowOf(true)
+    override suspend fun saveUseByokKey(enabled: Boolean) {}
+
+    override val useLocalAi: Flow<Boolean> = kotlinx.coroutines.flow.flowOf(true)
+    override suspend fun saveUseLocalAi(enabled: Boolean) {}
 
     override fun getGeminiApiKey(): String? = secureApiKeyRepository.getKey()
 
