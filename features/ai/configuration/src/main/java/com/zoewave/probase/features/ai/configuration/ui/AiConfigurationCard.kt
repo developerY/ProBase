@@ -363,55 +363,6 @@ fun AiConfigurationCardContent(
                         modifier = Modifier.padding(top = 4.dp)
                     )
 
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // STAGE 2: On-Device Local AI (Hardware Capability Badge)
-                    ListItem(
-                        colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = Color(0xFFFBF8F5)),
-                        headlineContent = { Text(stringResource(R.string.features_ai_configuration_stage_2_title), fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold) },
-                        supportingContent = { Text(stringResource(R.string.features_ai_configuration_stage_2_desc)) },
-                        trailingContent = {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(10.dp)
-                                        .background(
-                                            color = if (uiState.isLocalAiAvailable) Color(0xFF4CAF50) else Color(0xFFE53935),
-                                            shape = androidx.compose.foundation.shape.CircleShape
-                                        )
-                                )
-                                Text(
-                                    text = if (uiState.isLocalAiAvailable) stringResource(R.string.features_ai_configuration_npu_active) else stringResource(R.string.features_ai_configuration_npu_unsupported),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    fontWeight = FontWeight.Bold,
-                                    color = if (uiState.isLocalAiAvailable) Color(0xFF4CAF50) else Color(0xFFE53935)
-                                )
-                            }
-                        }
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    // STAGE 3: Enterprise Security (Firebase)
-                    ListItem(
-                        colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = Color(0xFFFBF8F5)),
-                        headlineContent = { Text(stringResource(R.string.features_ai_configuration_stage_3_title), fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold) },
-                        supportingContent = { Text(stringResource(R.string.features_ai_configuration_stage_3_desc)) },
-                        trailingContent = {
-                            Switch(
-                                checked = uiState.useFirebaseVertexAi,
-                                onCheckedChange = { onEvent(AiConfigurationEvent.OnUseFirebaseVertexAiToggled(it)) },
-                                colors = androidx.compose.material3.SwitchDefaults.colors(
-                                    checkedThumbColor = Color.Black,
-                                    checkedTrackColor = Color(0xFFD4AF37) // Gold
-                                )
-                            )
-                        }
-                    )
-
                     if (uiState.availableModels.isNotEmpty()) {
                         val statusColor = when {
                             uiState.modelTestResult == null -> MaterialTheme.colorScheme.outline
@@ -471,6 +422,55 @@ fun AiConfigurationCardContent(
                             }
                         }
                     }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // STAGE 2: On-Device Local AI (Hardware Capability Badge)
+                    ListItem(
+                        colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = Color(0xFFFBF8F5)),
+                        headlineContent = { Text(stringResource(R.string.features_ai_configuration_stage_2_title), fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold) },
+                        supportingContent = { Text(stringResource(R.string.features_ai_configuration_stage_2_desc)) },
+                        trailingContent = {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(10.dp)
+                                        .background(
+                                            color = if (uiState.isLocalAiAvailable) Color(0xFF4CAF50) else Color(0xFFE53935),
+                                            shape = androidx.compose.foundation.shape.CircleShape
+                                        )
+                                )
+                                Text(
+                                    text = if (uiState.isLocalAiAvailable) stringResource(R.string.features_ai_configuration_npu_active) else stringResource(R.string.features_ai_configuration_npu_unsupported),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (uiState.isLocalAiAvailable) Color(0xFF4CAF50) else Color(0xFFE53935)
+                                )
+                            }
+                        }
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // STAGE 3: Enterprise Security (Firebase)
+                    ListItem(
+                        colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = Color(0xFFFBF8F5)),
+                        headlineContent = { Text(stringResource(R.string.features_ai_configuration_stage_3_title), fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold) },
+                        supportingContent = { Text(stringResource(R.string.features_ai_configuration_stage_3_desc)) },
+                        trailingContent = {
+                            Switch(
+                                checked = uiState.useFirebaseVertexAi,
+                                onCheckedChange = { onEvent(AiConfigurationEvent.OnUseFirebaseVertexAiToggled(it)) },
+                                colors = androidx.compose.material3.SwitchDefaults.colors(
+                                    checkedThumbColor = Color.Black,
+                                    checkedTrackColor = Color(0xFFD4AF37) // Gold
+                                )
+                            )
+                        }
+                    )
                 }
             }
         }

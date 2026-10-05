@@ -11,8 +11,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import javax.inject.Inject
 
 @Serializable
@@ -58,14 +60,31 @@ class CloudCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
         }
     }
 
-    override suspend fun testModel(apiKey: String, modelName: String): String {
-        val generativeModel = GenerativeModel(
-            modelName = modelName,
-            apiKey = apiKey
-        )
-        return try {
-            val response = generativeModel.generateContent("What is your name and version?")
-            response.text ?: "No response from model"
+    override suspend fun testModel(apiKey: String, modelName: String): String = withContext(Dispatchers.IO) {
+        val url = "https://generativelanguage.googleapis.com/v1beta/models/$modelName:generateContent?key=$apiKey"
+        val jsonBody = """
+            {
+                "contents": [{
+                    "parts": [{"text": "What is your name and version?"}]
+                }]
+            }
+        """.trimIndent()
+        
+        val requestBody = jsonBody.toRequestBody("application/json".toMediaTypeOrNull())
+        val request = Request.Builder()
+            .url(url)
+            .post(requestBody)
+            .build()
+            
+        try {
+            httpClient.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) {
+                    val err = response.body?.string() ?: ""
+                    return@withContext "Error: ${response.code} $err"
+                }
+                val body = response.body?.string() ?: return@withContext "Error: Empty response"
+                if (body.contains("candidates")) "Valid Response Received" else "Unknown Response"
+            }
         } catch (e: Exception) {
             e.localizedMessage ?: "Connection Error"
         }
