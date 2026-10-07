@@ -429,6 +429,8 @@ private fun MindWaveScreenPreview() {
 fun MusicalStaff(activeNodeId: Int?) {
     val lineSpacing = 10.dp
     val staffHeight = lineSpacing * 8
+    val trebleClefSymbol = stringResource(R.string.applications_gotmind_features_mindwave_treble_clef)
+    val sharpSymbol = stringResource(R.string.applications_gotmind_features_mindwave_sharp_accidental)
     
     Box(
         modifier = Modifier
@@ -450,7 +452,7 @@ fun MusicalStaff(activeNodeId: Int?) {
                     textSize = spacing * 5f
                     typeface = android.graphics.Typeface.DEFAULT_BOLD
                 }
-                drawText("𝄞", 0f, centerY + spacing * 1.5f, paint)
+                drawText(trebleClefSymbol, 0f, centerY + spacing * 1.5f, paint)
             }
 
             // Draw 5 staff lines
@@ -521,7 +523,7 @@ fun MusicalStaff(activeNodeId: Int?) {
                             textSize = spacing * 1.5f
                             typeface = android.graphics.Typeface.DEFAULT_BOLD
                         }
-                        drawText("#", width/2f + spacing * 0.6f, noteY + spacing * 0.4f, p)
+                        drawText(sharpSymbol, width/2f + spacing * 0.6f, noteY + spacing * 0.4f, p)
                     }
                 }
             }

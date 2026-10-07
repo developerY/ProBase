@@ -75,4 +75,16 @@
     <string name="applications_seaweed_apps_mobile_features_transaction_impact_pace">At current pace, you\'ll reach your monthly target in %1$d days.</string>
     <string name="applications_seaweed_apps_mobile_features_transaction_impact_deficit">This purchase creates a %1$s deficit in your monthly cash flow.</string>
     <string name="applications_seaweed_apps_mobile_features_transaction_impact_savings">This reduces your potential savings for the \'Vacation Fund\' by %1$s.</string>
+
+    <!-- Add Bill Strings -->
+    <string name="applications_seaweed_apps_mobile_features_transaction_add_bill">Add Bill</string>
+    <string name="applications_seaweed_apps_mobile_features_transaction_add_transaction">Add Transaction</string>
+    <string name="applications_seaweed_apps_mobile_features_transaction_add_menu">Add Menu</string>
+    <string name="applications_seaweed_apps_mobile_features_transaction_add_recurring_bill">Add Recurring Bill</string>
+    <string name="applications_seaweed_apps_mobile_features_transaction_name">Name</string>
+    <string name="applications_seaweed_apps_mobile_features_transaction_add">Add</string>
+    <string name="applications_seaweed_apps_mobile_features_transaction_cancel">Cancel</string>
+
+    <string name="applications_seaweed_apps_mobile_features_transaction_capture_location">Capture Location</string>
+    <string name="applications_seaweed_apps_mobile_features_transaction_clear_date">Clear Date</string>
 </resources>

@@ -26,20 +26,36 @@ import androidx.compose.ui.platform.LocalLocale
 
 @Composable
 fun WearBillsRoute(
+    navTo: (SeaweedDestination) -> Unit,
+    onBack: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: WearBillsViewModel = hiltViewModel(),
-    onBack: () -> Unit
+    viewModel: WearBillsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    WearBillsScreen(
+    WearBillsRoute(
         uiState = uiState,
         onEvent = { event ->
             when (event) {
                 WearBillsUiEvent.NavigateBack -> onBack()
             }
         },
-        navTo = {},
+        navTo = navTo,
+        modifier = modifier
+    )
+}
+
+@Composable
+internal fun WearBillsRoute(
+    uiState: WearBillsUiState,
+    onEvent: (WearBillsUiEvent) -> Unit,
+    navTo: (SeaweedDestination) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    WearBillsScreen(
+        uiState = uiState,
+        onEvent = onEvent,
+        navTo = navTo,
         modifier = modifier
     )
 }
@@ -48,7 +64,7 @@ fun WearBillsRoute(
 fun WearBillsScreen(
     uiState: WearBillsUiState,
     onEvent: (WearBillsUiEvent) -> Unit,
-    @Suppress("UnusedParameter") navTo: (SeaweedDestination) -> Unit,
+    navTo: (SeaweedDestination) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val listState = rememberScalingLazyListState()

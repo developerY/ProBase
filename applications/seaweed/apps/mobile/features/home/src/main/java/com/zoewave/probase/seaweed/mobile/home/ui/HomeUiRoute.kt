@@ -81,34 +81,15 @@ import kotlin.math.absoluteValue
 fun HomeUiRoute(
     navTo: (SeaweedDestination) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: HomeViewModel = hiltViewModel(),
-    topBarActions: @Composable RowScope.() -> Unit = {},
+    viewModel: HomeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    HomeUiRoute(
+    HomeScreen(
         uiState = uiState,
         onEvent = viewModel::onEvent,
         navTo = navTo,
-        modifier = modifier,
-        topBarActions = topBarActions
-    )
-}
-
-@Composable
-internal fun HomeUiRoute(
-    uiState: HomeUiState,
-    onEvent: (HomeUiEvent) -> Unit,
-    navTo: (SeaweedDestination) -> Unit,
-    modifier: Modifier = Modifier,
-    topBarActions: @Composable RowScope.() -> Unit = {},
-) {
-    HomeScreen(
-        uiState = uiState,
-        onEvent = onEvent,
-        navTo = navTo,
-        modifier = modifier,
-        topBarActions = topBarActions
+        modifier = modifier
     )
 }
 
@@ -118,8 +99,7 @@ fun HomeScreen(
     uiState: HomeUiState,
     onEvent: (HomeUiEvent) -> Unit,
     navTo: (SeaweedDestination) -> Unit,
-    modifier: Modifier = Modifier,
-    topBarActions: @Composable RowScope.() -> Unit = {},
+    modifier: Modifier = Modifier
 ) {
     val adaptiveInfo = currentWindowAdaptiveInfo()
     val isExpanded = adaptiveInfo.windowSizeClass.windowWidthSizeClass == androidx.window.core.layout.WindowWidthSizeClass.EXPANDED
@@ -129,7 +109,6 @@ fun HomeScreen(
             TopAppBar(
                 title = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_home_summary_title)) },
                 actions = {
-                    topBarActions()
                     IconButton(onClick = { onEvent(HomeUiEvent.AddRandomTransaction) }) {
                         Icon(
                             Icons.Default.Add,
@@ -438,79 +417,7 @@ private fun HomeCompactScreen(
     }
 }
 
-@Composable
-fun AffordabilityCheckCard(onClick: () -> Unit) {
-    Card(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f),
-            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-        )
-    ) {
-        Row(
-            modifier = Modifier.padding(20.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    "Seaweed Smart Capture",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    "Extract price & check affordability",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
-                )
-            }
-            Icon(
-                Icons.Default.AutoAwesome,
-                contentDescription = null,
-                modifier = Modifier.size(32.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
-        }
-    }
-}
 
-@Composable
-fun SmartCameraPromotionCard(onClick: () -> Unit) {
-    Card(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-            contentColor = MaterialTheme.colorScheme.onTertiaryContainer
-        )
-    ) {
-        Row(
-            modifier = Modifier.padding(20.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    "Can I Afford This?",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    "Use AI Camera to check item impact",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.8f)
-                )
-            }
-            Icon(
-                Icons.Default.AutoAwesome,
-                contentDescription = null,
-                modifier = Modifier.size(32.dp),
-                tint = MaterialTheme.colorScheme.tertiary
-            )
-        }
-    }
-}
 
 @Composable
 fun CashFlowAwarenessCard(onClick: () -> Unit) {

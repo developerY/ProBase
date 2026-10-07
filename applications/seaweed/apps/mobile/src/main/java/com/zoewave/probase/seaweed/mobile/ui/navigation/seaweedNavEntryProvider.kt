@@ -40,8 +40,7 @@ fun seaweedNavEntryProvider(
             SeaweedDestination.Home -> {
                 HomeUiRoute(
                     modifier = Modifier.fillMaxSize(),
-                    navTo = navigateTo,
-                    topBarActions = topBarActions
+                    navTo = navigateTo
                 )
             }
             SeaweedDestination.CategoryGrid -> {

@@ -35,4 +35,7 @@
     <string name="applications_gotmind_features_mindwave_melody_midnight_call">Midnight Call</string>
     <string name="applications_gotmind_features_mindwave_melody_high_peak">High Peak</string>
     <string name="applications_gotmind_features_mindwave_melody_ready">Ready for Melody</string>
+
+    <string name="applications_gotmind_features_mindwave_treble_clef">𝄞</string>
+    <string name="applications_gotmind_features_mindwave_sharp_accidental">#</string>
 </resources>

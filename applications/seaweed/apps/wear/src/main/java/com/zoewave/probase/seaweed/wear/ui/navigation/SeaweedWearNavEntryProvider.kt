@@ -18,28 +18,28 @@ fun seaweedWearNavEntryProvider(
             SeaweedDestination.Home -> {
                 HomeRoute(
                     modifier = Modifier.fillMaxSize(),
-                    onTransactionsClick = { navigateTo(SeaweedDestination.Transactions(category = null)) },
-                    onBillsClick = { navigateTo(SeaweedDestination.Bills) }
+                    navTo = navigateTo
                 )
             }
             SeaweedDestination.Bills -> {
                 WearBillsRoute(
                     modifier = Modifier.fillMaxSize(),
-                    onBack = onBack
+                    onBack = onBack,
+                    navTo = navigateTo
                 )
             }
             is SeaweedDestination.Transactions -> {
                 TransactionListRoute(
                     modifier = Modifier.fillMaxSize(),
-                    onBack = onBack
+                    onBack = onBack,
+                    navTo = navigateTo
                 )
             }
             else -> {
                 // Not supported on Wear yet
                 HomeRoute(
                     modifier = Modifier.fillMaxSize(),
-                    onTransactionsClick = { navigateTo(SeaweedDestination.Transactions(category = null)) },
-                    onBillsClick = { navigateTo(SeaweedDestination.Bills) }
+                    navTo = navigateTo
                 )
             }
         }

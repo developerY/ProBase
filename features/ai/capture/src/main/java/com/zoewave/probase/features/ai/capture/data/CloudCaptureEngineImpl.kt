@@ -1,6 +1,7 @@
 package com.zoewave.probase.features.ai.capture.data
 
 import android.graphics.Bitmap
+import android.util.Log
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.content
 import com.google.ai.client.generativeai.type.generationConfig
@@ -61,7 +62,12 @@ class CloudCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
     }
 
     override suspend fun testModel(apiKey: String, modelName: String): String = withContext(Dispatchers.IO) {
-        val url = "https://generativelanguage.googleapis.com/v1beta/models/$modelName:generateContent?key=$apiKey"
+        // Models fetched from the API usually start with "models/" (e.g. "models/gemini-1.5-flash")
+        // If we naively append it to "/v1beta/models/", it becomes "/v1beta/models/models/..." and returns a 404.
+        val normalizedModelName = modelName.removePrefix("models/")
+        val url = "https://generativelanguage.googleapis.com/v1beta/models/$normalizedModelName:generateContent?key=$apiKey"
+        Log.d("CloudCaptureEngine", "testModel URL: $url")
+        
         val jsonBody = """
             {
                 "contents": [{
@@ -69,6 +75,7 @@ class CloudCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
                 }]
             }
         """.trimIndent()
+        Log.d("CloudCaptureEngine", "testModel Request body: $jsonBody")
         
         val requestBody = jsonBody.toRequestBody("application/json".toMediaTypeOrNull())
         val request = Request.Builder()
@@ -80,12 +87,15 @@ class CloudCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
             httpClient.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) {
                     val err = response.body?.string() ?: ""
+                    Log.e("CloudCaptureEngine", "testModel HTTP Error ${response.code}: $err")
                     return@withContext "Error: ${response.code} $err"
                 }
                 val body = response.body?.string() ?: return@withContext "Error: Empty response"
+                Log.d("CloudCaptureEngine", "testModel Success response: $body")
                 if (body.contains("candidates")) "Valid Response Received" else "Unknown Response"
             }
         } catch (e: Exception) {
+            Log.e("CloudCaptureEngine", "testModel Exception", e)
             e.localizedMessage ?: "Connection Error"
         }
     }

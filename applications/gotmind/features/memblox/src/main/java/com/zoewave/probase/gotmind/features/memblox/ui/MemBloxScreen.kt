@@ -381,7 +381,7 @@ fun MemBloxScreen(
                     val isAvailable = count > 0 && !game.isGameOver && !game.isVictory && !game.isPaused
                     ElevatedAssistChip(
                         onClick = { onEvent(MemBloxEvent.UsePowerUp(type)) },
-                        label = { Text("${stringResource(type.labelResId)} ($count)", style = MaterialTheme.typography.labelSmall, color = if (isAvailable) Color.White else Color.Gray) },
+                        label = { Text(stringResource(R.string.applications_gotmind_features_memblox_powerup_format, stringResource(type.labelResId), count), style = MaterialTheme.typography.labelSmall, color = if (isAvailable) Color.White else Color.Gray) },
                         leadingIcon = { Text(type.icon, fontSize = 14.sp) },
                         enabled = isAvailable,
                         shape = RoundedCornerShape(24.dp),
@@ -1043,7 +1043,9 @@ fun HallOfFameCard(score: MemBloxScoreEntity) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column {
-                    Text(score.difficulty, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                    val difficultyResId = MemBloxDifficulty.entries.find { it.name == score.difficulty }?.labelResId
+                        ?: com.zoewave.probase.gotmind.model.R.string.applications_gotmind_model_diff_expert
+                    Text(stringResource(difficultyResId), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
                     Text(score.score.toString(), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black, color = Color.White)
                 }
                 
@@ -1063,7 +1065,7 @@ fun HallOfFameCard(score: MemBloxScoreEntity) {
                 }
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(stringResource(R.string.applications_gotmind_features_memblox_hit_rate), style = MaterialTheme.typography.labelSmall, color = Color.Gray)
-                    Text("${(score.accuracy * 100).toInt()}%", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, color = Color.White)
+                    Text(stringResource(R.string.applications_gotmind_features_memblox_percent_format, (score.accuracy * 100).toInt()), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, color = Color.White)
                 }
             }
         }

@@ -1,6 +1,6 @@
 # Data Deletion Instructions
 
-**App Name:** Concentration Game
+**App Name:** GotMind: MemBlox Arcade
 **Developer:** developer@ZoeWave.com
 
 At ZoeWave, we prioritize your privacy through a "Local-First" architecture. We do not maintain user accounts or central servers. Below are the steps and information regarding the deletion of your data.
@@ -15,7 +15,7 @@ All gameplay data is stored exclusively on your device.
 ### Analytics and Stability Data (Firebase)
 The app uses Google Firebase to monitor stability (Crashlytics) and anonymized usage trends (Google Analytics). This data is not tied to a personal account, but is associated with an installation identifier.
 
-* **Action:** If you wish to request the manual deletion of the anonymized analytics data associated with your device, please contact us at **[Insert Support Email]** and provide your **Firebase Device ID**.
+* **Action:** If you wish to request the manual deletion of the anonymized analytics data associated with your device, please contact us at **developer@ZoeWave.com** and provide your **Firebase Device ID**.
 * **Finding your ID:** You can find your unique Firebase Device ID within the app by navigating to **Settings > About**.
 * **Result:** Upon receiving your ID, we will initiate a deletion request through the Firebase console to remove all records associated with that identifier.
 

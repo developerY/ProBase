@@ -27,7 +27,9 @@ class CapabilityRouterImpl @Inject constructor(
         // Priority 1: BYOK with Gemini API Key (if Stage 1 enabled & key present)
         val useByok = settings.useByokKey.firstOrNull() ?: true
         val apiKey = settings.getGeminiApiKey()
+        val modelName = settings.aiModelFlow.firstOrNull() ?: "gemini-1.5-flash"
         byokProvider.setApiKey(apiKey)
+        byokProvider.setModelName(modelName)
         if (useByok && byokProvider.isAvailable()) {
             providers.add(byokProvider)
         }

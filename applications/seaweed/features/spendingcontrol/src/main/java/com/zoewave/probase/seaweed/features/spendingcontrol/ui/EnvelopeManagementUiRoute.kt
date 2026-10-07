@@ -43,28 +43,16 @@ fun EnvelopeManagementUiRoute(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    EnvelopeManagementUiRoute(
-        uiState = uiState,
-        onEvent = viewModel::onEvent,
-        navTo = navTo,
-        onBack = onBack,
-        modifier = modifier
-    )
-}
-
-@Composable
-internal fun EnvelopeManagementUiRoute(
-    uiState: EnvelopeUiState,
-    onEvent: (EnvelopeUiEvent) -> Unit,
-    @Suppress("UnusedParameter") navTo: (SeaweedDestination) -> Unit,
-    onBack: () -> Unit,
-    modifier: Modifier = Modifier
-) {
     EnvelopeManagementScreen(
         uiState = uiState,
-        onEvent = onEvent,
+        onEvent = { event ->
+            if (event is EnvelopeUiEvent.OnBackClicked) {
+                onBack()
+            } else {
+                viewModel.onEvent(event)
+            }
+        },
         navTo = navTo,
-        onBack = onBack,
         modifier = modifier
     )
 }
@@ -74,8 +62,7 @@ internal fun EnvelopeManagementUiRoute(
 fun EnvelopeManagementScreen(
     uiState: EnvelopeUiState,
     onEvent: (EnvelopeUiEvent) -> Unit,
-    @Suppress("UnusedParameter") navTo: (SeaweedDestination) -> Unit,
-    onBack: () -> Unit,
+    navTo: (SeaweedDestination) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showAddDialog by remember { mutableStateOf(false) }
@@ -88,7 +75,7 @@ fun EnvelopeManagementScreen(
                 TopAppBar(
                     title = { Text(stringResource(R.string.applications_seaweed_features_spendingcontrol_title), fontWeight = FontWeight.Black) },
                     navigationIcon = {
-                        IconButton(onClick = onBack) {
+                        IconButton(onClick = { onEvent(EnvelopeUiEvent.OnBackClicked) }) {
                             Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.applications_seaweed_features_spendingcontrol_back))
                         }
                     },
@@ -464,8 +451,7 @@ private fun EnvelopeManagementScreenSuccessPreview() {
                 )
             ),
             onEvent = {},
-            navTo = {},
-            onBack = {}
+            navTo = {}
         )
     }
 }
@@ -477,8 +463,7 @@ private fun EnvelopeManagementScreenEmptyPreview() {
         EnvelopeManagementScreen(
             uiState = EnvelopeUiState(envelopes = emptyList()),
             onEvent = {},
-            navTo = {},
-            onBack = {}
+            navTo = {}
         )
     }
 }

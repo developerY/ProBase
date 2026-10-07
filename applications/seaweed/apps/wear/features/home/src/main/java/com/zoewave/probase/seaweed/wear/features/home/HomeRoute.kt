@@ -31,23 +31,31 @@ import java.util.Locale
 
 @Composable
 fun HomeRoute(
+    navTo: (SeaweedDestination) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: HomeViewModel = hiltViewModel(),
-    onTransactionsClick: () -> Unit,
-    onBillsClick: () -> Unit
+    viewModel: HomeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+    HomeRoute(
+        uiState = uiState,
+        onEvent = viewModel::onEvent,
+        navTo = navTo,
+        modifier = modifier
+    )
+}
+
+@Composable
+internal fun HomeRoute(
+    uiState: HomeUiState,
+    onEvent: (HomeUiEvent) -> Unit,
+    navTo: (SeaweedDestination) -> Unit,
+    modifier: Modifier = Modifier
+) {
     HomeScreen(
         uiState = uiState,
-        onEvent = { event ->
-            when (event) {
-                HomeUiEvent.NavigateToTransactions -> onTransactionsClick()
-                HomeUiEvent.NavigateToBills -> onBillsClick()
-                else -> viewModel.onEvent(event)
-            }
-        },
-        navTo = {},
+        onEvent = onEvent,
+        navTo = navTo,
         modifier = modifier
     )
 }
@@ -56,7 +64,7 @@ fun HomeRoute(
 fun HomeScreen(
     uiState: HomeUiState,
     onEvent: (HomeUiEvent) -> Unit,
-    @Suppress("UnusedParameter") navTo: (SeaweedDestination) -> Unit,
+    navTo: (SeaweedDestination) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val listState = rememberScalingLazyListState()
@@ -198,7 +206,7 @@ fun HomeScreen(
 
                     item {
                         Button(
-                            onClick = { onEvent(HomeUiEvent.NavigateToTransactions) },
+                            onClick = { navTo(SeaweedDestination.Transactions(category = null)) },
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -211,7 +219,7 @@ fun HomeScreen(
 
                     item {
                         Button(
-                            onClick = { onEvent(HomeUiEvent.NavigateToBills) },
+                            onClick = { navTo(SeaweedDestination.Bills) },
                             modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
                         ) {

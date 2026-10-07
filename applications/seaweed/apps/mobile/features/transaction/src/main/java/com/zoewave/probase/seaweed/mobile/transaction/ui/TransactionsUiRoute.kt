@@ -431,7 +431,7 @@ private fun TransactionsFabMenu(
                         shape = RoundedCornerShape(8.dp),
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                     ) {
-                        Text("Add Bill", modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.labelMedium)
+                        Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_add_bill), modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.labelMedium)
                     }
                     Spacer(Modifier.width(8.dp))
                     FloatingActionButton(
@@ -439,7 +439,7 @@ private fun TransactionsFabMenu(
                         modifier = Modifier.size(40.dp),
                         containerColor = MaterialTheme.colorScheme.tertiaryContainer
                     ) {
-                        Icon(Icons.AutoMirrored.Filled.ReceiptLong, contentDescription = "Add Bill", modifier = Modifier.size(20.dp))
+                        Icon(Icons.AutoMirrored.Filled.ReceiptLong, contentDescription = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_add_bill), modifier = Modifier.size(20.dp))
                     }
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -448,7 +448,7 @@ private fun TransactionsFabMenu(
                         shape = RoundedCornerShape(8.dp),
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                     ) {
-                        Text("Add Transaction", modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.labelMedium)
+                        Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_add_transaction), modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.labelMedium)
                     }
                     Spacer(Modifier.width(8.dp))
                     FloatingActionButton(
@@ -456,7 +456,7 @@ private fun TransactionsFabMenu(
                         modifier = Modifier.size(40.dp),
                         containerColor = MaterialTheme.colorScheme.secondaryContainer
                     ) {
-                        Icon(Icons.Default.Add, contentDescription = "Add Transaction", modifier = Modifier.size(20.dp))
+                        Icon(Icons.Default.Add, contentDescription = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_add_transaction), modifier = Modifier.size(20.dp))
                     }
                 }
             }
@@ -464,7 +464,7 @@ private fun TransactionsFabMenu(
         FloatingActionButton(onClick = onToggle) {
             Icon(
                 Icons.Default.Add,
-                contentDescription = "Add Menu",
+                contentDescription = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_add_menu),
                 modifier = Modifier.rotate(if (isExpanded) 45f else 0f)
             )
         }
@@ -511,19 +511,19 @@ private fun AddBillDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Add Recurring Bill") },
+        title = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_add_recurring_bill)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Name") },
+                    label = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_name)) },
                     modifier = Modifier.fillMaxWidth()
                 )
                 OutlinedTextField(
                     value = amount,
                     onValueChange = { amount = it },
-                    label = { Text("Amount") },
+                    label = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_amount_label)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -538,12 +538,12 @@ private fun AddBillDialog(
                     }
                 }
             ) {
-                Text("Add")
+                Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_add))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_cancel))
             }
         }
     )

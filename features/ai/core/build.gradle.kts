@@ -13,4 +13,5 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.javax.inject)
+    implementation(libs.squareup.okhttp)
 }
