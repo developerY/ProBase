@@ -34,7 +34,7 @@ fun CategoryGridRoute(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    CategoryGridScreen(
+    CategoryGridRoute(
         uiState = uiState,
         onEvent = { event ->
             if (event is HomeUiEvent.OnBackClicked) {
@@ -43,6 +43,21 @@ fun CategoryGridRoute(
                 viewModel.onEvent(event)
             }
         },
+        navTo = navTo,
+        modifier = modifier
+    )
+}
+
+@Composable
+internal fun CategoryGridRoute(
+    uiState: HomeUiState,
+    onEvent: (HomeUiEvent) -> Unit,
+    navTo: (SeaweedDestination) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    CategoryGridScreen(
+        uiState = uiState,
+        onEvent = onEvent,
         navTo = navTo,
         modifier = modifier
     )

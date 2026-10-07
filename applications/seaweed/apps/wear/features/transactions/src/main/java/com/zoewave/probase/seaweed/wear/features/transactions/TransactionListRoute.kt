@@ -26,20 +26,36 @@ import java.util.Locale
 
 @Composable
 fun TransactionListRoute(
+    navTo: (SeaweedDestination) -> Unit,
+    onBack: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: TransactionListViewModel = hiltViewModel(),
-    onBack: () -> Unit
+    viewModel: TransactionListViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    TransactionListScreen(
+    TransactionListRoute(
         uiState = uiState,
         onEvent = { event ->
             when (event) {
                 TransactionListUiEvent.NavigateBack -> onBack()
             }
         },
-        navTo = {},
+        navTo = navTo,
+        modifier = modifier
+    )
+}
+
+@Composable
+internal fun TransactionListRoute(
+    uiState: TransactionListUiState,
+    onEvent: (TransactionListUiEvent) -> Unit,
+    navTo: (SeaweedDestination) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    TransactionListScreen(
+        uiState = uiState,
+        onEvent = onEvent,
+        navTo = navTo,
         modifier = modifier
     )
 }
@@ -48,7 +64,7 @@ fun TransactionListRoute(
 fun TransactionListScreen(
     uiState: TransactionListUiState,
     onEvent: (TransactionListUiEvent) -> Unit,
-    @Suppress("UnusedParameter") navTo: (SeaweedDestination) -> Unit,
+    navTo: (SeaweedDestination) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val listState = rememberScalingLazyListState()
