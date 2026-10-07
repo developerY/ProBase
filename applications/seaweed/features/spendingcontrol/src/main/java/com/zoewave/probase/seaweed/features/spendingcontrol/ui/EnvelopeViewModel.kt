@@ -29,6 +29,7 @@ sealed interface EnvelopeUiEvent {
         val categoryIds: List<String>
     ) : EnvelopeUiEvent
     data class DeleteEnvelope(val id: String) : EnvelopeUiEvent
+    object OnBackClicked : EnvelopeUiEvent
 }
 
 @HiltViewModel
@@ -69,6 +70,7 @@ class EnvelopeViewModel @Inject constructor(
                 is EnvelopeUiEvent.DeleteEnvelope -> {
                     // TODO: Implement delete in repository
                 }
+                EnvelopeUiEvent.OnBackClicked -> { /* Handled in route */ }
             }
         }
     }

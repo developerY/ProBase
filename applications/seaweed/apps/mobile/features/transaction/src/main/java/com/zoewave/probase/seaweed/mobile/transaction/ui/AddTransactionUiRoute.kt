@@ -96,18 +96,16 @@ fun AddTransactionUiRoute(
     viewModel: AddTransactionViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val interventionState by viewModel.spendingControlOrchestrator.interventionState.collectAsStateWithLifecycle()
-    val scope = rememberCoroutineScope()
 
     LaunchedEffect(uiState.isSuccess) {
         if (uiState.isSuccess) {
             onBack()
+            viewModel.onEvent(AddTransactionUiEvent.SuccessConsumed)
         }
     }
 
-    AddTransactionScreen(
+    AddTransactionUiRoute(
         uiState = uiState,
-        interventionState = interventionState,
         onEvent = { event ->
             when (event) {
                 is AddTransactionUiEvent.BackClicked -> onBack()
@@ -125,14 +123,21 @@ fun AddTransactionUiRoute(
                 else -> viewModel.onEvent(event)
             }
         },
-        resolveIntervention = { action ->
-            scope.launch {
-                viewModel.spendingControlOrchestrator.resolveIntervention(action)
-                if (action == InterventionAction.Override) {
-                    viewModel.onEvent(AddTransactionUiEvent.SaveTransaction)
-                }
-            }
-        },
+        navTo = navTo,
+        modifier = modifier
+    )
+}
+
+@Composable
+internal fun AddTransactionUiRoute(
+    uiState: AddTransactionUiState,
+    onEvent: (AddTransactionUiEvent) -> Unit,
+    navTo: (SeaweedDestination) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    AddTransactionScreen(
+        uiState = uiState,
+        onEvent = onEvent,
         navTo = navTo,
         modifier = modifier
     )
@@ -142,9 +147,7 @@ fun AddTransactionUiRoute(
 @Composable
 fun AddTransactionScreen(
     uiState: AddTransactionUiState,
-    interventionState: InterventionState?,
     onEvent: (AddTransactionUiEvent) -> Unit,
-    resolveIntervention: (InterventionAction) -> Unit,
     navTo: (SeaweedDestination) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -203,11 +206,11 @@ fun AddTransactionScreen(
         }
     }
 
-    interventionState?.let { state ->
+    uiState.interventionState?.let { state ->
         InterventionDialog(
             state = state,
-            onAction = resolveIntervention,
-            onDismiss = { resolveIntervention(InterventionAction.Cancel) }
+            onAction = { onEvent(AddTransactionUiEvent.ResolveIntervention(it)) },
+            onDismiss = { onEvent(AddTransactionUiEvent.ResolveIntervention(InterventionAction.Cancel)) }
         )
     }
 }
@@ -291,7 +294,7 @@ private fun AddTransactionContent(
             ) {
                 Icon(
                     imageVector = Icons.Default.MyLocation,
-                    contentDescription = "Capture Location",
+                    contentDescription = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_capture_location),
                     tint = if (uiState.latitude != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -408,7 +411,7 @@ private fun TransactionDateBadge(
         ) {
             Icon(
                 imageVector = Icons.Default.Close,
-                contentDescription = "Clear Date",
+                contentDescription = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_clear_date),
                 tint = MaterialTheme.colorScheme.onPrimaryContainer,
                 modifier = Modifier.size(16.dp)
             )
@@ -675,9 +678,7 @@ private fun AddTransactionScreenPreview() {
                 splitCount = 3,
                 recentCategories = listOf("Groceries", "Entertainment", "Gifts")
             ),
-            interventionState = null,
             onEvent = {},
-            resolveIntervention = {},
             navTo = {}
         )
     }
@@ -691,17 +692,16 @@ private fun AddTransactionScreenInterventionPreview() {
             uiState = AddTransactionUiState(
                 amount = "60.00",
                 category = "Dining",
-                description = "Expensive Dinner"
-            ),
-            interventionState = InterventionState(
-                merchantName = "Starbucks",
-                amountCents = 6000,
-                categoryId = "dining_id",
-                envelopeId = "dining_env",
-                reason = "Dining limit exceeded"
+                description = "Expensive Dinner",
+                interventionState = InterventionState(
+                    merchantName = "Starbucks",
+                    amountCents = 6000,
+                    categoryId = "dining_id",
+                    envelopeId = "dining_env",
+                    reason = "Dining limit exceeded"
+                )
             ),
             onEvent = {},
-            resolveIntervention = {},
             navTo = {}
         )
     }

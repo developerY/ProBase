@@ -14,7 +14,9 @@ import com.zoewave.probase.seaweed.data.BudgetTargetRepository
 import com.zoewave.probase.seaweed.data.CategoryRepository
 import com.zoewave.probase.seaweed.data.TransactionRepository
 import com.zoewave.probase.seaweed.features.cashflow.domain.CashFlowRepository
+import com.zoewave.probase.seaweed.features.spendingcontrol.domain.InterventionAction
 import com.zoewave.probase.seaweed.features.spendingcontrol.domain.InterventionFlowOrchestrator
+import com.zoewave.probase.seaweed.features.spendingcontrol.domain.InterventionState
 import com.zoewave.probase.seaweed.features.spendingcontrol.domain.TransactionStatus
 import com.zoewave.probase.seaweed.mobile.transaction.R
 import com.zoewave.probase.seaweed.model.SpendingType
@@ -56,7 +58,8 @@ data class AddTransactionUiState(
     val latitude: Double? = null,
     val longitude: Double? = null,
     val isCapturingLocation: Boolean = false,
-    val transactionDate: Long? = null
+    val transactionDate: Long? = null,
+    val interventionState: InterventionState? = null
 )
 
 @Serializable
@@ -91,6 +94,7 @@ sealed interface AddTransactionUiEvent {
     object CancelCaptureSelection : AddTransactionUiEvent
     object DebugAiClicked : AddTransactionUiEvent
     object CaptureLocation : AddTransactionUiEvent
+    data class ResolveIntervention(val action: InterventionAction) : AddTransactionUiEvent
 }
 
 @HiltViewModel
@@ -112,12 +116,16 @@ class AddTransactionViewModel @Inject constructor(
     val uiState: StateFlow<AddTransactionUiState> = combine(
         _uiState,
         repository.getAllTransactions(),
-        budgetRepository.getAllBudgets()
-    ) { state, transactions, budgets ->
+        budgetRepository.getAllBudgets(),
+        spendingControlOrchestrator.interventionState
+    ) { state, transactions, budgets, intervention ->
         val transactionCategories = transactions.map { it.categoryId }.distinct()
         val budgetCategories = budgets.map { it.categoryId }
         val allCategories = (transactionCategories + budgetCategories).distinct().sorted()
-        state.copy(recentCategories = allCategories)
+        state.copy(
+            recentCategories = allCategories,
+            interventionState = intervention
+        )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
@@ -165,6 +173,14 @@ class AddTransactionViewModel @Inject constructor(
                 }
             }
             AddTransactionUiEvent.DebugAiClicked -> { /* Handled in Route */ }
+            is AddTransactionUiEvent.ResolveIntervention -> {
+                viewModelScope.launch {
+                    spendingControlOrchestrator.resolveIntervention(event.action)
+                    if (event.action == InterventionAction.Override) {
+                        saveTransaction()
+                    }
+                }
+            }
             AddTransactionUiEvent.SaveTransaction -> saveTransaction()
             AddTransactionUiEvent.BackClicked -> { /* Handled in Route */ }
             AddTransactionUiEvent.SuccessConsumed -> _uiState.update { it.copy(isSuccess = false) }
