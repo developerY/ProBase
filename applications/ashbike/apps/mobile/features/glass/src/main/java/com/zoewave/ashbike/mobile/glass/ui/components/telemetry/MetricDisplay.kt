@@ -32,7 +32,7 @@ fun MetricDisplay(
             // so we rely on default or explicit Theme colors if needed.
             // But Glimmer handles default text color automatically.
             // color = GlassColors.TextSecondary, // might remove
-            color = GlimmerTheme.colors.outline // Use outline color for subtle labels
+            color = androidx.compose.ui.graphics.Color(0xFF606460) // Use outline color for subtle labels
         )
         // VALUE
         Text(

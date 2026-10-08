@@ -57,7 +57,7 @@ fun HeaderBar(
                             modifier = Modifier
                                 .size(6.dp)
                                 .clip(CircleShape)
-                                .background(if (index < gear) GlimmerTheme.colors.positive else GlimmerTheme.colors.outline)
+                                .background(if (index < gear) GlimmerTheme.colors.positive else androidx.compose.ui.graphics.Color(0xFF606460))
                         )
                     }
                 }

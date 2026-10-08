@@ -46,7 +46,7 @@ fun SummaryStatCard(
                 Text(
                     text = label.uppercase(),
                     style = GlimmerTheme.typography.caption,
-                    color = GlimmerTheme.colors.outline
+                    color = androidx.compose.ui.graphics.Color(0xFF606460)
                 )
             }
         }
@@ -87,7 +87,7 @@ private fun MiniStat(label: String, value: String, icon: ImageVector) {
         Spacer(Modifier.width(8.dp))
         Column {
             Text(text = value, style = GlimmerTheme.typography.bodyLarge, color = Color.White)
-            Text(text = label.uppercase(), style = GlimmerTheme.typography.caption, color = GlimmerTheme.colors.outline)
+            Text(text = label.uppercase(), style = GlimmerTheme.typography.caption, color = androidx.compose.ui.graphics.Color(0xFF606460))
         }
     }
 }

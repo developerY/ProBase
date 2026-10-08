@@ -112,3 +112,16 @@ fun AshGlassLayout(
         }
     }
 }
+
+@androidx.compose.ui.tooling.preview.Preview
+@Composable
+fun AshGlassLayoutPreview() {
+    GlimmerTheme {
+        AshGlassLayout(
+            uiState = GlassUiState(),
+            areVisualsOn = true,
+            isVisualUiSupported = true,
+            onEvent = {}
+        )
+    }
+}
