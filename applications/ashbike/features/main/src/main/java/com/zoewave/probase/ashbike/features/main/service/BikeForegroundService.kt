@@ -87,7 +87,7 @@ class BikeForegroundService : LifecycleService() {
     private var formalRideSegmentStartTimeMillis: Long = 0L
     private var formalRideSegmentStartOffsetDistanceMeters: Float = 0f
     private var formalRideSegmentMaxSpeedKph: Double = 0.0
-    private var currentFormalRideHighestCalories: Int = 0
+    private var formalRideCaloriesBurned: Float = 0f
     private var formalRideElevationGainMeters: Double = 0.0
     private var formalRideElevationLossMeters: Double = 0.0
 
@@ -127,7 +127,7 @@ class BikeForegroundService : LifecycleService() {
         }
 
         setupObservers()
-        startOrRestartCalorieCalculation(isFormalRideActive = false)
+        startOrRestartCalorieCalculation()
     }
 
     private fun setupObservers() {
@@ -357,7 +357,7 @@ class BikeForegroundService : LifecycleService() {
         formalRideTrackPoints.clear()
         formalRideSegmentStartOffsetDistanceMeters = continuousDistanceMeters
         formalRideSegmentMaxSpeedKph = 0.0
-        currentFormalRideHighestCalories = 0
+        formalRideCaloriesBurned = 0f
         formalRideElevationGainMeters = 0.0
         formalRideElevationLossMeters = 0.0
 
@@ -381,7 +381,7 @@ class BikeForegroundService : LifecycleService() {
             startLocationUpdates(level.activeRideIntervalMillis, level.activeRideMinUpdateIntervalMillis, appSettingsRepository.longRideEnabledFlow.first())
         }
 
-        startOrRestartCalorieCalculation(true)
+        startOrRestartCalorieCalculation()
     }
 
     private fun stopAndFinalizeFormalRide() {
@@ -409,7 +409,7 @@ class BikeForegroundService : LifecycleService() {
             endLng = formalRideTrackPoints.lastOrNull()?.longitude ?: 0.0,
             elevationGain = formalRideElevationGainMeters.toFloat(),
             elevationLoss = formalRideElevationLossMeters.toFloat(),
-            caloriesBurned = currentFormalRideHighestCalories,
+            caloriesBurned = formalRideCaloriesBurned.toInt(),
             isHealthDataSynced = false,
             weatherCondition = _rideInfo.value.bikeWeatherInfo?.conditionDescription
         )
@@ -476,31 +476,31 @@ class BikeForegroundService : LifecycleService() {
             startLocationUpdates(level.passiveTrackingIntervalMillis, level.passiveTrackingMinUpdateIntervalMillis, appSettingsRepository.longRideEnabledFlow.first())
         }
 
-        startOrRestartCalorieCalculation(false)
+        startOrRestartCalorieCalculation()
     }
 
     // --- Helpers ---
 
-    private fun startOrRestartCalorieCalculation(isFormalRideActive: Boolean) {
+    private fun startOrRestartCalorieCalculation() {
         caloriesCalculationJob?.cancel()
 
-        // Define inputs for UseCase
-        val distanceFlow = _rideInfo.map {
-            if(isFormalRideActive) (continuousDistanceMeters - formalRideSegmentStartOffsetDistanceMeters) / 1000f
-            else continuousDistanceMeters / 1000f
-        }
+        // Always use continuous distance, because delta distance is all that matters
+        val distanceFlow = _rideInfo.map { continuousDistanceMeters / 1000f }
         val speedFlow = _rideInfo.map { it.currentSpeed.toFloat() }
 
         caloriesCalculationJob = lifecycleScope.launch {
-            calculateCaloriesUseCase(distanceFlow, speedFlow, userStatsFlow).collect { cal ->
-                if (isFormalRideActive) {
-                    currentFormalRideHighestCalories = cal.toInt()
-                    _rideInfo.value = _rideInfo.value.copy(caloriesBurned = currentFormalRideHighestCalories)
+            calculateCaloriesUseCase(distanceFlow, speedFlow, userStatsFlow).collect { deltaCal ->
+                // Accumulate to the session total
+                continuousCaloriesBurned += deltaCal
+
+                if (_rideInfo.value.rideState == RideState.Riding) {
+                    // Accumulate to the formal ride
+                    formalRideCaloriesBurned += deltaCal
+                    // Update UI with formal ride calories
+                    _rideInfo.value = _rideInfo.value.copy(caloriesBurned = formalRideCaloriesBurned.toInt())
                 } else {
-                    continuousCaloriesBurned = cal
-                    if (_rideInfo.value.rideState != RideState.Riding) {
-                        _rideInfo.value = _rideInfo.value.copy(caloriesBurned = cal.toInt())
-                    }
+                    // Update UI with continuous calories
+                    _rideInfo.value = _rideInfo.value.copy(caloriesBurned = continuousCaloriesBurned.toInt())
                 }
             }
         }
