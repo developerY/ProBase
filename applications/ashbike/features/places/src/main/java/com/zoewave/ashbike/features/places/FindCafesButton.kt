@@ -39,3 +39,12 @@ fun FindCafesButton(
         )
     }
 }
+
+@androidx.compose.ui.tooling.preview.Preview(showBackground = true)
+@Composable
+fun FindCafesButtonPreview() {
+    FindCafesButton(
+        cafesVisible = true,
+        onClick = {}
+    )
+}

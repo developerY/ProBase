@@ -31,3 +31,9 @@ fun ErrorScreen(errorMessage: String, onRetry: () -> Unit) {
         )
     }
 }
+
+@androidx.compose.ui.tooling.preview.Preview(showBackground = true)
+@Composable
+fun ErrorScreenPreview() {
+    ErrorScreen(errorMessage = "Network Error", onRetry = {})
+}

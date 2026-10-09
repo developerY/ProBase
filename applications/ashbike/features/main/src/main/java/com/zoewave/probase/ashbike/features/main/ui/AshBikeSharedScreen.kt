@@ -64,3 +64,9 @@ fun AshBikeSharedScreen(
         }
     }
 }
+
+@androidx.compose.ui.tooling.preview.Preview
+@Composable
+fun AshBikeSharedScreenPreview() {
+    AshBikeSharedScreen(title = "Title")
+}

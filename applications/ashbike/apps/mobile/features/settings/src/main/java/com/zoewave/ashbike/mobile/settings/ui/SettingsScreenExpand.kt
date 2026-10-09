@@ -11,7 +11,10 @@ package com.zoewave.ashbike.mobile.settings.ui
 // import androidx.compose.material3.CardDefaults // Not directly used after removing ProfileBikeInfoCardEx
 // import androidx.compose.material3.Icon // Not directly used after removing ProfileBikeInfoCardEx
 // import androidx.compose.ui.text.font.FontWeight // Not directly used after removing ProfileBikeInfoCardEx
-//import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Preview
+import com.zoewave.probase.ashbike.database.ProfileData
+import com.zoewave.ashbike.model.bike.LocationEnergyLevel
+import com.zoewave.probase.core.ui.theme.AshBikeTheme
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Spacer
@@ -234,7 +237,6 @@ fun SettingsScreenEx(
 
 // ProfileBikeInfoCardEx has been removed.
 
-/*
 @Preview(showBackground = true)
 @Composable
 fun SettingsScreenExPreview() {
@@ -261,8 +263,7 @@ fun SettingsScreenExPreview() {
             uiState = dummyUiState, onEvent = { }, navTo = { },
             nfcUiState = NfcUiState.Stopped, nfcEvent = { },
             bleUiState = BluetoothLeUiState.Loading, bleEvent = { },
-            initialCardKeyToExpand = null // Updated preview call
+            initialCardKeyToExpand = null
         )
     }
 }
-*/

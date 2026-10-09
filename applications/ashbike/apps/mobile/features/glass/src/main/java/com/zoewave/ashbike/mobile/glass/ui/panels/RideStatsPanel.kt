@@ -107,6 +107,6 @@ private fun ListDivider() {
     HorizontalDivider(
         modifier = Modifier.padding(start = 36.dp, end = 8.dp),
         thickness = 1.dp,
-        color = GlimmerTheme.colors.outlineVariant
+        color = androidx.compose.ui.graphics.Color(0xFF404040)
     )
 }

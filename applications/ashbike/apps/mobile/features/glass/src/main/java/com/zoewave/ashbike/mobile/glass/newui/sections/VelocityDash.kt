@@ -37,7 +37,7 @@ fun VelocityDash(
                 Text(
                     text = stringResource(R.string.applications_ashbike_apps_mobile_features_glass_speed).uppercase(),
                     style = GlimmerTheme.typography.caption,
-                    color = GlimmerTheme.colors.outline
+                    color = androidx.compose.ui.graphics.Color(0xFF606460)
                 )
                 Text(
                     text = speed,
@@ -47,7 +47,7 @@ fun VelocityDash(
                 Text(
                     text = "MPH",
                     style = GlimmerTheme.typography.caption,
-                    color = GlimmerTheme.colors.outline
+                    color = androidx.compose.ui.graphics.Color(0xFF606460)
                 )
             }
 

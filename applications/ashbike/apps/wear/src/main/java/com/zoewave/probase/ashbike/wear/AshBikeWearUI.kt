@@ -9,8 +9,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
-import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import androidx.wear.compose.material3.AppScaffold
 import androidx.wear.compose.material3.Button
@@ -60,25 +58,17 @@ fun AshBikeWearUI() {
     // 4. The Main App Scaffold & Navigation Engine
     AppScaffold {
         NavDisplay(
-            backStack = backStack,
-            // Enables native Wear OS swipe-to-dismiss behavior for drill-down screens
-            sceneStrategy = SwipeDismissableSceneStrategy(),
+            entries = backStack.map { key ->
+                ashBikeWearNavEntryProvider(
+                    key = key,
+                    navigateTo = { dest -> backStack.add(dest) }
+                )
+            },
+            sceneStrategies = listOf(SwipeDismissableSceneStrategy()),
             onBack = {
                 if (backStack.size > 1) {
                     backStack.removeLast()
                 }
-            },
-            entryDecorators = listOf(
-                rememberSaveableStateHolderNavEntryDecorator(),
-                rememberViewModelStoreNavEntryDecorator()
-            ),
-            entryProvider = { key ->
-                ashBikeWearNavEntryProvider(
-                    key = key,
-                    // When the Pager requests a drill-down (like RideDetail),
-                    // add it to the top of the Navigation 3 backStack
-                    navigateTo = { dest -> backStack.add(dest) }
-                )
             }
         )
     }

@@ -44,3 +44,9 @@ fun IdleScreen(
         }
     }
 }
+
+@androidx.compose.ui.tooling.preview.Preview(showBackground = true)
+@Composable
+fun IdleScreenPreview() {
+    IdleScreen(onStart = {})
+}

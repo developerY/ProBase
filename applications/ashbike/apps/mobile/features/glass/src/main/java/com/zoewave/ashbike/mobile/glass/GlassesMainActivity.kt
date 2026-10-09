@@ -19,8 +19,7 @@ import androidx.xr.projected.ProjectedDeviceController
 import androidx.xr.projected.ProjectedDeviceController.Capability.Companion.CAPABILITY_VISUAL_UI
 import androidx.xr.projected.ProjectedDisplayController
 import androidx.xr.projected.experimental.ExperimentalProjectedApi
-import androidx.xr.projected.permissions.ProjectedPermissionsRequestParams
-import androidx.xr.projected.permissions.ProjectedPermissionsResultContract
+import androidx.xr.projected.ProjectedActivityCompat
 import com.zoewave.ashbike.data.repository.bike.BikeRepository
 import com.zoewave.ashbike.mobile.glass.audio.VoiceGearController
 import com.zoewave.ashbike.mobile.glass.ui.GlassApp
@@ -47,15 +46,7 @@ class GlassesMainActivity : ComponentActivity() {
     private var isVisualUiSupported by mutableStateOf(false)
     private var areVisualsOn by mutableStateOf(true)
 
-    @OptIn(ExperimentalProjectedApi::class)
-    private val requestPermissionLauncher =
-        registerForActivityResult(ProjectedPermissionsResultContract()) { results ->
-            if (results[Manifest.permission.RECORD_AUDIO] == true) {
-                onPermissionGranted()
-            } else {
-                onPermissionDenied()
-            }
-        }
+    private val REQUEST_CODE_AUDIO = 1001
 
     @OptIn(ExperimentalProjectedApi::class, ExperimentalComposeUiApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -149,13 +140,35 @@ class GlassesMainActivity : ComponentActivity() {
 
     @OptIn(ExperimentalProjectedApi::class)
     private fun requestAudioPermission() {
-        val params = ProjectedPermissionsRequestParams(
-            permissions = listOf(Manifest.permission.RECORD_AUDIO),
-            rationale = "Microphone access is essential for hands-free gear changes on these AI glasses."
-        )
         // Speak rationale as recommended by XR docs
         audioInterface.speak("Please review the microphone permission request on your phone to enable voice commands.")
-        requestPermissionLauncher.launch(listOf(params))
+        try {
+            ProjectedActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.RECORD_AUDIO), REQUEST_CODE_AUDIO)
+        } catch (e: Exception) {
+            requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO), REQUEST_CODE_AUDIO)
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray, deviceId: Int) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults, deviceId)
+        if (requestCode == REQUEST_CODE_AUDIO) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                onPermissionGranted()
+            } else {
+                onPermissionDenied()
+            }
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUEST_CODE_AUDIO) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                onPermissionGranted()
+            } else {
+                onPermissionDenied()
+            }
+        }
     }
 
     private fun onPermissionGranted() {

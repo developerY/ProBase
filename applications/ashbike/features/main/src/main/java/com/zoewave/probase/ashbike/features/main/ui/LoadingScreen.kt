@@ -12,3 +12,9 @@ fun LoadingScreen() {
         modifier = Modifier.fillMaxSize()
     )
 }
+
+@androidx.compose.ui.tooling.preview.Preview(showBackground = true)
+@Composable
+fun LoadingScreenPreview() {
+    LoadingScreen()
+}

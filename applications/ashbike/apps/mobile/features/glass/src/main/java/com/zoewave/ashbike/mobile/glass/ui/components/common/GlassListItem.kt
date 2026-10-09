@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -51,7 +53,7 @@ fun GlassListItem(
             // Glimmer typically handles focus via outline, but simple background highlight is okay
             .background(
                 // Allowed: Use 'outlineVariant' for focus highlight (subtle grey)
-                color = if (isFocused) GlimmerTheme.colors.outlineVariant else Color.Transparent,
+                color = if (isFocused) androidx.compose.ui.graphics.Color(0xFF404040) else Color.Transparent,
                 shape = RoundedCornerShape(8.dp)
             )
             .padding(vertical = 4.dp, horizontal = 4.dp) // Tighter padding
@@ -86,6 +88,19 @@ fun GlassListItem(
                 overflow = TextOverflow.Clip
             )
         }
+    }
+}
+
+@androidx.compose.ui.tooling.preview.Preview(showBackground = true)
+@Composable
+fun GlassListItemPreview() {
+    GlimmerTheme {
+        GlassListItem(
+            icon = Icons.Filled.Info,
+            label = "SPEED",
+            value = "15.0 mph",
+            iconTint = Color.Green
+        )
     }
 }
 

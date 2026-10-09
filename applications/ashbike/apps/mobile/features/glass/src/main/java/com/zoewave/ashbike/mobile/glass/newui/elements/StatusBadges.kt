@@ -20,7 +20,7 @@ fun BatteryBadge(
     modifier: Modifier = Modifier
 ) {
     val (icon, tint) = when (zone) {
-        BatteryZone.UNKNOWN -> Icons.AutoMirrored.Rounded.BatteryUnknown to GlimmerTheme.colors.outline
+        BatteryZone.UNKNOWN -> Icons.AutoMirrored.Rounded.BatteryUnknown to androidx.compose.ui.graphics.Color(0xFF606460)
         BatteryZone.CRITICAL -> Icons.Rounded.BatteryAlert to GlimmerTheme.colors.negative
         BatteryZone.WARNING -> Icons.Rounded.BatteryStd to GlimmerTheme.colors.positive
         BatteryZone.GOOD -> Icons.Rounded.BatteryFull to GlimmerTheme.colors.positive
@@ -44,7 +44,7 @@ fun BatteryBadge(
 
 @Composable
 fun ConnectionBadge(active: Boolean, modifier: Modifier = Modifier) {
-    val color = if (active) GlimmerTheme.colors.secondary else GlimmerTheme.colors.outline
+    val color = if (active) GlimmerTheme.colors.secondary else androidx.compose.ui.graphics.Color(0xFF606460)
     val icon = if (active) Icons.Rounded.BluetoothConnected else Icons.Rounded.BluetoothDisabled
     val text = if (active) "CNX" else "DISC"
 
