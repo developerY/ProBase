@@ -55,8 +55,10 @@ class CalculateCaloriesUseCase @Inject constructor() {
         val deltaMs = nowMs - state.lastTickMs
         val deltaDistance = distanceKm - state.lastDistanceKm
 
-        // 2. Pause Guard (If Flow is paused for > 10 seconds, ignore the gap)
-        if (deltaMs > 10_000L) {
+        // 2. Pause Guard (If Flow is paused for > 30 seconds, ignore the gap entirely)
+        // We use 30 seconds to safely accommodate 10-20 second passive GPS intervals 
+        // without dropping valid active tracking gaps.
+        if (deltaMs > 30_000L) {
             return@scan state.copy(lastTickMs = nowMs, lastDistanceKm = distanceKm)
         }
 
@@ -66,19 +68,23 @@ class CalculateCaloriesUseCase @Inject constructor() {
             return@scan state.copy(lastTickMs = nowMs)
         }*/
 
-        // 4. Phantom Speed Guard (YOUR NEW CHECK):
-        // If the distance hasn't increased, do not add calories, even if speed > 0.
-        // We use maxOf to protect against weird negative GPS jumps.
-        if (deltaDistance <= 0f) {
-            return@scan state.copy(
-                lastTickMs = nowMs,
-                lastDistanceKm = maxOf(distanceKm, state.lastDistanceKm)
-            )
-        }
-
-        // 5. Stoplight Guard (If speed is 0, hold state)
+        // 4. Stoplight Guard (If speed is 0, hold state)
+        // Check this FIRST. If we are stationary, advance the clock so we don't
+        // retroactively charge calories for time spent waiting at a stoplight.
         if (currentSpeedKmh <= 0f) {
             return@scan state.copy(lastTickMs = nowMs, lastDistanceKm = distanceKm)
+        }
+
+        // 5. Phantom Speed Guard:
+        // If the distance hasn't increased, do not add calories, even if speed > 0.
+        // We use maxOf to protect against weird negative GPS jumps.
+        // IMPORTANT: We do NOT advance lastTickMs here. This ensures that when distance
+        // finally increases, deltaMs will represent the full time elapsed since the last
+        // distance increase, properly calculating calories for the whole interval.
+        if (deltaDistance <= 0f) {
+            return@scan state.copy(
+                lastDistanceKm = maxOf(distanceKm, state.lastDistanceKm)
+            )
         }
 
         // 6. Convert elapsed MS to Hours for this specific tick
@@ -107,10 +113,10 @@ class CalculateCaloriesUseCase @Inject constructor() {
         CalorieState(
             lastTickMs = nowMs,
             lastDistanceKm = distanceKm,
-            totalCalories = state.totalCalories + tickCalories
+            totalCalories = tickCalories // Emit the DELTA, not the total
         )
     }.map { state ->
-        // Expose only the accumulated Float to the UI
+        // Expose only the DELTA Float to the UI
         state.totalCalories
     }
 }
