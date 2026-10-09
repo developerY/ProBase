@@ -87,7 +87,8 @@ class StyleSimulatorIntegrationTest {
 
         coEvery { capabilityRouter.getRankedAvailableProviders() } returns listOf(provider)
         coEvery { capabilityRouter.getActiveProviderName() } returns "Mock AI"
-        coEvery { contextEngine.generateSelectionState(any(), any(), any()) } returns StyleSelectionState()
+        val mockProv = listOf(CandidateProvenance(clothingItem = ClothingItem(internalId = 1, name = "Silk Top", category = ClothingCategory.TOPS, colorHex = "#FF0000")))
+        coEvery { contextEngine.generateSelectionState(any(), any(), any()) } returns StyleSelectionState(fullRankedCandidatePool = mockProv)
         coEvery { candidateFilter.getCosmeticCandidateProvenance(any(), any(), any()) } returns mockCosmetics
 
         val result = engine.generateBlueprint(items, emptyList(), context)

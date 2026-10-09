@@ -301,14 +301,10 @@ class StyleSimulatorEngine @Inject constructor(
             val cCandidatesProv = candidateFilter.getCosmeticCandidateProvenance(cosmetics, context, limit = currentK)
             val cCandidates = cCandidatesProv.mapNotNull { it.cosmeticItem }
             
-            // Critical Guard: Abort if deterministic pruning leaves zero eligible items
+            // Critical Guard: Abort provider adaptation if deterministic pruning leaves zero eligible items
             if (selectionState.fullRankedCandidatePool.isEmpty() && selectionState.activeAnchors.isEmpty()) {
-                throw IllegalStateException("Your wardrobe has 0 eligible items for this context. Please add more pieces or adjust your environmental filters.")
-            }
-            
-            // Critical Guard: Abort if deterministic pruning leaves zero eligible items
-            if (selectionState.fullRankedCandidatePool.isEmpty() && selectionState.activeAnchors.isEmpty()) {
-                throw IllegalStateException("Your wardrobe has 0 eligible items for this context. Please add more pieces or adjust your environmental filters.")
+                Log.w("StyleSimulatorEngine", "Wardrobe has 0 eligible items for this context.")
+                return null
             }
 
             // 1. Convert active anchors to candidate provenance with accurate rationale
