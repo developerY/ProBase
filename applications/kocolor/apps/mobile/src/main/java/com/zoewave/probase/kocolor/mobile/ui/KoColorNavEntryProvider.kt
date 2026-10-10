@@ -637,6 +637,15 @@ fun koColorNavEntryProvider(
                 onBack = onBack
             )
         }
+        is KoColorRoute.TravelCapsule -> NavEntry(route) {
+            val viewModel: com.zoewave.probase.kocolor.features.travel.ui.TravelCapsuleViewModel = hiltViewModel()
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+            com.zoewave.probase.kocolor.features.travel.ui.TravelCapsuleScreen(
+                uiState = state,
+                onEvent = viewModel::onEvent,
+                onBack = onBack
+            )
+        }
         is KoColorRoute.Store -> NavEntry(route) {
             val viewModel: com.zoewave.probase.kocolor.features.store.ui.StoreViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()

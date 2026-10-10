@@ -109,6 +109,9 @@ sealed class KoColorRoute {
     data object WardrobeColorVerification : KoColorRoute()
 
     @Serializable
+    data object TravelCapsule : KoColorRoute()
+
+    @Serializable
     data object Store : KoColorRoute()
 
     @Serializable
