@@ -110,6 +110,9 @@ class StarterPackViewModel @Inject constructor(
             syncRepository.fetchManifest()
                 .onSuccess { packs ->
                     _availablePacks.value = packs
+                    // Pre-warm the pack hero images on edge nodes as soon as manifest arrives
+                    val heroUrls = packs.mapNotNull { it.heroImageUrl }.filter { it.isNotBlank() }
+                    repository.prefetchUrls(heroUrls)
                 }
                 .onFailure { error ->
                     Log.e("StarterPackVM", "Failed to fetch manifest", error)

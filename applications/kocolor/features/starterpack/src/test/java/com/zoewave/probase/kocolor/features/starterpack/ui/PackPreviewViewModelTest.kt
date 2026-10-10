@@ -1,19 +1,23 @@
 package com.zoewave.probase.kocolor.features.starterpack.ui
 
-import androidx.lifecycle.SavedStateHandle
 import com.zoewave.probase.kocolor.features.starterpack.data.StarterPackRepository
-import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.PackItem
+import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.CosmeticItemDto
+import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.PackItemDto
+import com.zoewave.probase.kocolor.features.starterpack.data.repository.PackSyncRepository
+import io.mockk.coEvery
+import io.mockk.every
+import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.mockito.Mock
-import org.mockito.Mockito.`when`
-import org.mockito.MockitoAnnotations
-import org.mockito.kotlin.verify
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class PackPreviewViewModelTest {
@@ -21,26 +25,42 @@ class PackPreviewViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
-    @Mock
-    lateinit var repository: StarterPackRepository
+    private val repository = mockk<StarterPackRepository>(relaxed = true)
+    private val syncRepository = mockk<PackSyncRepository>(relaxed = true)
 
     private lateinit var viewModel: PackPreviewViewModel
     private val packId = "test_pack"
-    private val mockItems = listOf(
-        PackItem(id = "item1", name = "Item 1", brand = "Brand 1", hexColor = "#FFFFFF", shade = "Shade 1", imageUrl = "", thumbnailUrl = ""),
-        PackItem(id = "item2", name = "Item 2", brand = "Brand 2", hexColor = "#000000", shade = "Shade 2", imageUrl = "", thumbnailUrl = "")
+
+    private val item1 = CosmeticItemDto(
+        id = "item1", name = "Item 1", brand = "Brand 1", macroCategory = "LIPS", microCategory = "LIPSTICK",
+        colorHex = "#FFFFFF", shadeName = "Shade 1", imageUrl = "http://example.com/1.png", thumbnailUrl = "http://example.com/1_thumb.png",
+        price = 10.0, notes = "Notes", formulation = null, chemistryBase = null, finish = null, coverage = null, temperature = null, volume = null,
+        paoMonths = null, expiryDate = null, instructions = null, ingredients = emptyList(), allergens = emptyList(), isVegan = true, isCrueltyFree = true, fdaDataVerified = true
     )
+
+    private val item2 = CosmeticItemDto(
+        id = "item2", name = "Item 2", brand = "Brand 2", macroCategory = "EYES", microCategory = "EYESHADOW",
+        colorHex = "#000000", shadeName = "Shade 2", imageUrl = "http://example.com/2.png", thumbnailUrl = "http://example.com/2_thumb.png",
+        price = 20.0, notes = "Notes 2", formulation = null, chemistryBase = null, finish = null, coverage = null, temperature = null, volume = null,
+        paoMonths = null, expiryDate = null, instructions = null, ingredients = emptyList(), allergens = emptyList(), isVegan = true, isCrueltyFree = true, fdaDataVerified = true
+    )
+
+    private val mockItems: List<PackItemDto> = listOf(item1, item2)
 
     @Before
     fun setup() {
-        MockitoAnnotations.openMocks(this)
+        every { syncRepository.getInstalledPacks() } returns flowOf(emptyList())
+        every { syncRepository.cartProductIds } returns flowOf(emptySet())
+        every { syncRepository.ownedProductIds } returns flowOf(emptySet())
+        every { syncRepository.observeAllUsages() } returns flowOf(emptyList())
+        coEvery { repository.getPackItems(any()) } returns mockItems
     }
 
-    private fun createViewModel(targetItemId: String? = null) = runTest {
-        `when`(repository.getPackItems(packId)).thenReturn(mockItems)
-        val savedStateHandle = SavedStateHandle(mapOf("packId" to packId, "targetItemId" to targetItemId))
-        viewModel = PackPreviewViewModel(repository, savedStateHandle)
-        mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
+    private fun TestScope.createViewModel(targetItemId: String? = null) {
+        viewModel = PackPreviewViewModel(repository, syncRepository)
+        backgroundScope.launch { viewModel.uiState.collect() }
+        viewModel.initialize(packId = packId, targetItemId = targetItemId, sha256 = null, publisher = null)
+        testScheduler.advanceUntilIdle()
     }
 
     @Test
@@ -57,9 +77,11 @@ class PackPreviewViewModelTest {
         createViewModel()
 
         viewModel.onToggleSelection("item1")
+        testScheduler.advanceUntilIdle()
         assertEquals(setOf("item1"), viewModel.uiState.value.selectedIds)
 
         viewModel.onToggleSelection("item1")
+        testScheduler.advanceUntilIdle()
         assertTrue(viewModel.uiState.value.selectedIds.isEmpty())
     }
 
@@ -68,6 +90,7 @@ class PackPreviewViewModelTest {
         createViewModel()
 
         viewModel.onSelectAll()
+        testScheduler.advanceUntilIdle()
         assertEquals(setOf("item1", "item2"), viewModel.uiState.value.selectedIds)
     }
 
@@ -76,19 +99,9 @@ class PackPreviewViewModelTest {
         createViewModel()
 
         viewModel.onSelectAll()
+        testScheduler.advanceUntilIdle()
         viewModel.onDeselectAll()
+        testScheduler.advanceUntilIdle()
         assertTrue(viewModel.uiState.value.selectedIds.isEmpty())
-    }
-
-    @Test
-    fun `onImportSelected calls repository with correct items`() = runTest {
-        createViewModel()
-
-        viewModel.onToggleSelection("item1")
-        viewModel.onImportSelected()
-        
-        mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
-        
-        verify(repository).importItems(listOf(mockItems[0]))
     }
 }

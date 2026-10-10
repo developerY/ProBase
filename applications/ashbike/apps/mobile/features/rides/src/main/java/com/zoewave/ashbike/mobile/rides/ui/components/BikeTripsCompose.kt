@@ -19,6 +19,7 @@ import com.zoewave.ashbike.mobile.rides.R
 import com.zoewave.ashbike.mobile.rides.ui.RidesEvent
 import com.zoewave.ashbike.mobile.rides.ui.model.BikeRideUiModel
 import com.zoewave.probase.features.health.core.ui.HealthEvent
+import androidx.compose.ui.tooling.preview.Preview
 import com.zoewave.probase.features.health.core.ui.HealthUiState
 
 @Composable
@@ -85,8 +86,7 @@ fun BikeTripsCompose(
         }
     }
 }
-/*
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun BikeTripsComposePreview() {
     val previewRides = listOf(
@@ -115,16 +115,17 @@ fun BikeTripsComposePreview() {
             isSynced = true
         )
     )
-    BikeTripsCompose(
-        bikeRides = previewRides,
-        onDeleteClick = {},
-        onSyncClick = {},
-        navTo = {},
-        modifier = TODO(),
-        bikeEvent = TODO(),
-        syncedIds = TODO(),
-        healthEvent = TODO(),
-        healthUiState = TODO()
-    )
+    com.zoewave.probase.core.ui.theme.AshBikeTheme {
+        BikeTripsCompose(
+            bikeRides = previewRides,
+            onDeleteClick = {},
+            onSyncClick = {},
+            navTo = {},
+            modifier = Modifier,
+            bikeEvent = {},
+            syncedIds = emptySet(),
+            healthEvent = {},
+            healthUiState = com.zoewave.probase.features.health.core.ui.HealthUiState.Uninitialized
+        )
+    }
 }
-*/

@@ -307,8 +307,14 @@ private fun LongHeader(
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(4.dp))
+                val locationDisplayText = if (uiState.isLocationFallback) {
+                    "Location could not be found"
+                } else {
+                    uiState.locationName?.replace(", ", ",\n") ?: "San Francisco,\nCA"
+                }
+                
                 Text(
-                    text = uiState.locationName?.replace(", ", ",\n") ?: "San Francisco,\nCA",
+                    text = locationDisplayText,
                     style = MaterialTheme.typography.headlineMedium,
                     fontFamily = FontFamily.Serif,
                     fontWeight = FontWeight.Medium,
