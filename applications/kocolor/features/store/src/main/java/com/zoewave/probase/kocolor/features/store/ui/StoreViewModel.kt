@@ -241,7 +241,7 @@ class StoreViewModel @Inject constructor(
                 _uiState.value = _uiState.value.copy(isCheckoutSuccess = false)
             }
             StoreEvent.EnterStore -> {
-                // Pre-warm the store thumbnails in the background when the user enters the store.
+                // Pre-warm ONLY the large full-resolution image URLs when the user enters the store.
                 val initialUrls = _uiState.value.realCosmeticItems.take(6).map { it.imageModel } +
                                   _uiState.value.realFashionItems.take(6).map { it.imageModel }
                 starterPackRepository.prefetchUrls(initialUrls.filterIsInstance<String>())

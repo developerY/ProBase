@@ -128,7 +128,8 @@ class HomeViewModel @Inject constructor(
     private fun prewarmStoreData() {
         viewModelScope.launch {
             try {
-                // Fetch the manifest and parse the "Complete" packs to grab the top store items
+                // Fetch the manifest and parse the "Complete" packs to grab ONLY the larger full-res image URLs
+                // (bypassing small thumbnails which load instantly anyway).
                 val envelope = starterPackRepository.getManifest()
                 val manifest = envelope.data
                 
@@ -139,17 +140,17 @@ class HomeViewModel @Inject constructor(
                     starterPackRepository.getPackItems(completeCosmeticPack.id)
                         .filterIsInstance<CosmeticItemDto>()
                         .take(6)
-                        .map { it.imageUrl.ifBlank { it.thumbnailUrl.toString() } }
+                        .map { it.imageUrl } // Strictly high-res full image URL
                 } else emptyList()
                 
                 val fashionUrls = if (completeFashionPack != null) {
                     starterPackRepository.getPackItems(completeFashionPack.id)
                         .filterIsInstance<ClothingItemDto>()
                         .take(6)
-                        .map { it.imageUrl.ifBlank { it.thumbnailUrl.toString() } }
+                        .map { it.imageUrl } // Strictly high-res full image URL
                 } else emptyList()
                 
-                val allUrlsToPrewarm = (cosmeticUrls + fashionUrls).filterNotNull().filter { it.isNotBlank() }
+                val allUrlsToPrewarm = (cosmeticUrls + fashionUrls).filter { it.isNotBlank() }
                 if (allUrlsToPrewarm.isNotEmpty()) {
                     starterPackRepository.prefetchUrls(allUrlsToPrewarm)
                 }

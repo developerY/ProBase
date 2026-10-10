@@ -40,7 +40,11 @@ To prevent network spam and respect device resources, pre-warming utilizes a **t
 - Targets the exact items that render "above the fold" in the user's initial screen viewport.
 - Subsequent items are lazy-loaded naturally via Coil as the user scrolls.
 
-#### 3. Lifecycle-Driven Pre-Warming Stages
+#### 3. Targeted Large Image Filtering Strategy
+- **Thumbnail Bypass**: Pre-warming deliberately bypasses small thumbnail image URLs (`thumbnailUrl`). Since low-resolution thumbnails are lightweight and load near-instantly, pre-warming them provides zero noticeable UI benefit.
+- **Large Image Focus**: The system strictly targets high-resolution primary asset URLs (`imageUrl` & `heroImageUrl`), ensuring the backend edge cache is pre-warmed for the largest, heaviest assets before full-screen rendering.
+
+#### 4. Lifecycle-Driven Pre-Warming Stages
 The pre-warming engine triggers at strategic navigation junctures:
 1. **Home Screen Startup (`HomeViewModel`)**:
    - `prewarmStoreData()` fetches the manifest on app launch and pre-pings top Store products in the background.

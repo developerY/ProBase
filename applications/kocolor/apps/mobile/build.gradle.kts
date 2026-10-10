@@ -12,8 +12,8 @@ android {
 
     defaultConfig {
         applicationId = "com.zoewave.probase.kocolor"
-        versionCode = 5
-        versionName = "0.3-dev"
+        versionCode = 6
+        versionName = "0.4-dev"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -67,6 +67,7 @@ dependencies {
     implementation(project(":applications:kocolor:features:cosmetics"))
     implementation(project(":applications:kocolor:features:starterpack"))
     implementation(project(":applications:kocolor:features:store"))
+    implementation(project(":applications:kocolor:features:travel"))
     implementation(project(":applications:kocolor:features:fda"))
     implementation(project(":applications:kocolor:features:chemicals"))
     implementation(project(":applications:kocolor:features:makeupapi"))

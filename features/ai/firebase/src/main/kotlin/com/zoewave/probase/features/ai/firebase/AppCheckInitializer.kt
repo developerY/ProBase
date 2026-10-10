@@ -21,7 +21,7 @@ object AppCheckInitializer {
                 Build.MODEL.contains("Android SDK built for x86")
 
         // 3. DEBUG -> Debug App Check Provider, RELEASE -> Play Integrity App Check Provider
-        val providerFactory = if (BuildConfig.DEBUG) {
+        val providerFactory = if (BuildConfig.DEBUG && isEmulator) {
             DebugAppCheckProviderFactory.getInstance()
         } else {
             // Note: For physical debug builds to work, ensure your local debug.keystore
