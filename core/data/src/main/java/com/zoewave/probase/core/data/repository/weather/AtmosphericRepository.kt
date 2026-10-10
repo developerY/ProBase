@@ -91,4 +91,24 @@ class AtmosphericRepository @Inject constructor(
             }
         }
     }
+
+    suspend fun fetchTravelForecast(destination: String, startDate: Long, endDate: Long): AtmosphericState? {
+        return try {
+            val response = weatherRepo.openCurrentWeatherByCity(destination)
+            val envContext = response?.coord?.let { 
+                weatherRepo.getEnvironmentalContext(it.lat, it.lon) 
+            }
+            if (response != null && envContext != null) {
+                AtmosphericState(
+                    weather = response,
+                    environmentalContext = envContext,
+                    lastUpdated = System.currentTimeMillis(),
+                    isFallback = false
+                )
+            } else null
+        } catch (e: Exception) {
+            Log.e("AtmosphericRepository", "Error fetching travel forecast for $destination", e)
+            null
+        }
+    }
 }
