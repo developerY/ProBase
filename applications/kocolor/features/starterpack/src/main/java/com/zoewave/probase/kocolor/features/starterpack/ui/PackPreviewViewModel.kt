@@ -125,6 +125,16 @@ class PackPreviewViewModel @Inject constructor(
             _baseUiState.update { it.copy(isLoading = true) }
             try {
                 val items = repository.getPackItems(currentPackId)
+                
+                // PERFORMANCE OPTIMIZATION: Pre-warm backend edge cache for the exact items 
+                // about to be rendered in this pack preview.
+                runCatching {
+                    val prefetchTargets = items.mapNotNull { it.imageUrl.takeIf { url -> url.isNotBlank() } }.take(12)
+                    if (prefetchTargets.isNotEmpty()) {
+                        repository.prefetchUrls(prefetchTargets)
+                    }
+                }
+                
                 _baseUiState.update { state ->
                     val filtered = applyFilterAndSort(items, state.searchQuery, state.sortByValue)
                     state.copy(
@@ -175,7 +185,7 @@ class PackPreviewViewModel @Inject constructor(
             items.filter { item ->
                 item.name.contains(query, ignoreCase = true) ||
                 item.brand?.contains(query, ignoreCase = true) == true ||
-                item.calculatedSearchTokens.any { it.contains(query, ignoreCase = true) }
+                item.calculatedSearchTokens?.any { it.contains(query, ignoreCase = true) } == true
             }
         }
 

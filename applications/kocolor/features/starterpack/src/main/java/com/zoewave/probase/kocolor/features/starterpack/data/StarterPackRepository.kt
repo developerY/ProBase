@@ -2,8 +2,6 @@ package com.zoewave.probase.kocolor.features.starterpack.data
 
 import android.content.Context
 import android.util.Log
-import coil.imageLoader
-import coil.request.ImageRequest
 import com.github.luben.zstd.Zstd
 import com.zoewave.probase.core.model.ritual.ChemistryBase
 import com.zoewave.probase.core.model.ritual.ClothingCategory
@@ -37,6 +35,12 @@ import okio.HashingSink
 import okio.buffer
 import okio.sink
 import okio.source
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Callback
+import okhttp3.Call
+import okhttp3.Response
+import java.io.IOException
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -49,6 +53,7 @@ class StarterPackRepository @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
     private var searchIndexCache: Map<String, List<String>>? = null
+    private val httpClient = OkHttpClient()
 
     private companion object {
         const val TAG = "StarterPackRepo"
@@ -366,11 +371,29 @@ class StarterPackRepository @Inject constructor(
     }
 
     fun prefetchImages(payload: KcpsPayload) {
-        (payload.cosmetics.map { it.imageUrl } + payload.clothing.map { it.imageUrl }).forEach { url ->
-            val request = ImageRequest.Builder(context)
-                .data(url)
+        // "Smart Math" Prioritization: Only pre-warm the first 12 items of each category
+        val prioritizedUrls = payload.cosmetics.take(12).map { it.imageUrl } + 
+                              payload.clothing.take(12).map { it.imageUrl }
+        prefetchUrls(prioritizedUrls)
+    }
+
+    fun prefetchUrls(urls: List<String>) {
+        // "Hit the server and throw it away" strategy to force your backend server to cache
+        // the resources onto its own edge nodes.
+        // We use an HTTP HEAD request to minimize data usage for the user on mobile networks.
+        urls.take(24).forEach { url ->
+            if (url.isBlank()) return@forEach
+            val request = Request.Builder()
+                .url(url)
+                .head() // Crucial: Only request headers, do NOT download the massive image payload
                 .build()
-            context.imageLoader.enqueue(request)
+                
+            httpClient.newCall(request).enqueue(object : Callback {
+                override fun onFailure(call: Call, e: IOException) {}
+                override fun onResponse(call: Call, response: Response) {
+                    response.close()
+                }
+            })
         }
     }
 }

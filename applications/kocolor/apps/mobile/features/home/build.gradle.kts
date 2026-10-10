@@ -20,6 +20,7 @@ dependencies {
     implementation(project(":applications:kocolor:features:suggestions"))
     implementation(project(":applications:kocolor:features:routines"))
     implementation(project(":applications:kocolor:features:store"))
+    implementation(project(":applications:kocolor:features:starterpack"))
     implementation(project(":features:ai:configuration"))
     implementation(project(":features:ai:capture"))
     implementation(project(":features:graphics"))

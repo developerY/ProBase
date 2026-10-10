@@ -25,6 +25,9 @@ import com.zoewave.probase.kocolor.db.entity.ClothingItemEntity
 import com.zoewave.probase.kocolor.db.entity.CosmeticItemEntity
 import com.zoewave.probase.kocolor.db.entity.RoutineEntity
 import com.zoewave.probase.kocolor.features.routines.data.RoutineDefaults
+import com.zoewave.probase.kocolor.features.starterpack.data.StarterPackRepository
+import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.ClothingItemDto
+import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.CosmeticItemDto
 import com.zoewave.probase.kocolor.features.store.ui.StoreUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -100,7 +103,8 @@ class HomeViewModel @Inject constructor(
     private val getActiveRitualUseCase: GetActiveRitualUseCase,
     private val logHydrationUseCase: LogHydrationUseCase,
     private val atmosphericRepository: AtmosphericRepository,
-    private val koColorSettings: KoColorSettings
+    private val koColorSettings: KoColorSettings,
+    private val starterPackRepository: StarterPackRepository
 ) : ViewModel() {
 
     private val _currentDate = MutableStateFlow(Calendar.getInstance().apply {
@@ -118,6 +122,41 @@ class HomeViewModel @Inject constructor(
             atmosphericRepository.fetchWeatherIfNeeded()
         }
         initializeTip()
+        prewarmStoreData()
+    }
+
+    private fun prewarmStoreData() {
+        viewModelScope.launch {
+            try {
+                // Fetch the manifest and parse the "Complete" packs to grab the top store items
+                val envelope = starterPackRepository.getManifest()
+                val manifest = envelope.data
+                
+                val completeCosmeticPack = manifest.packs.find { it.id == "com.kocolor.pack.cosmetics.complete" }
+                val completeFashionPack = manifest.packs.find { it.id == "com.kocolor.pack.fashion.complete" }
+                
+                val cosmeticUrls = if (completeCosmeticPack != null) {
+                    starterPackRepository.getPackItems(completeCosmeticPack.id)
+                        .filterIsInstance<CosmeticItemDto>()
+                        .take(6)
+                        .map { it.imageUrl.ifBlank { it.thumbnailUrl.toString() } }
+                } else emptyList()
+                
+                val fashionUrls = if (completeFashionPack != null) {
+                    starterPackRepository.getPackItems(completeFashionPack.id)
+                        .filterIsInstance<ClothingItemDto>()
+                        .take(6)
+                        .map { it.imageUrl.ifBlank { it.thumbnailUrl.toString() } }
+                } else emptyList()
+                
+                val allUrlsToPrewarm = (cosmeticUrls + fashionUrls).filterNotNull().filter { it.isNotBlank() }
+                if (allUrlsToPrewarm.isNotEmpty()) {
+                    starterPackRepository.prefetchUrls(allUrlsToPrewarm)
+                }
+            } catch (e: Exception) {
+                // Ignore silent pre-warm failures
+            }
+        }
     }
 
     private fun initializeTip() {

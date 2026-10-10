@@ -1,11 +1,14 @@
 package com.zoewave.probase.kocolor.features.starterpack.ui
 
 import com.zoewave.probase.kocolor.features.starterpack.data.StarterPackRepository
-import com.zoewave.probase.kocolor.features.starterpack.data.remote.model.SearchIndexEntry
 import com.zoewave.probase.kocolor.features.starterpack.data.repository.PackSyncRepository
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.every
+import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
@@ -13,11 +16,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.mockito.Mock
-import org.mockito.Mockito.`when`
-import org.mockito.Mockito.clearInvocations
-import org.mockito.MockitoAnnotations
-import org.mockito.kotlin.verify
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class StarterPackViewModelTest {
@@ -25,40 +23,33 @@ class StarterPackViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
-    @Mock
-    lateinit var repository: StarterPackRepository
-
-    @Mock
-    lateinit var syncRepository: PackSyncRepository
+    private val repository = mockk<StarterPackRepository>(relaxed = true)
+    private val syncRepository = mockk<PackSyncRepository>(relaxed = true)
 
     private lateinit var viewModel: StarterPackViewModel
 
-    private val mockSearchIndex = listOf(
-        SearchIndexEntry(id = "1", term = "Foundation", brand = "BrandA", packId = "p1"),
-        SearchIndexEntry(id = "2", term = "Lipstick", brand = "BrandB", packId = "p2"),
-        SearchIndexEntry(id = "3", term = "Concealer", brand = "BrandA", packId = "p3")
+    private val mockSearchIndex: Map<String, List<String>> = mapOf(
+        "1" to listOf("Foundation", "BrandA", "p1"),
+        "2" to listOf("Lipstick", "BrandB", "p2"),
+        "3" to listOf("Concealer", "BrandA", "p3")
     )
 
     @Before
     fun setup() = runTest {
-        MockitoAnnotations.openMocks(this@StarterPackViewModelTest)
-        `when`(repository.getSearchIndex()).thenReturn(mockSearchIndex)
-        `when`(syncRepository.getInstalledPacks()).thenReturn(flowOf(emptyList()))
-        `when`(syncRepository.fetchManifest()).thenReturn(Result.success(emptyList()))
+        coEvery { repository.getSearchIndex() } returns mockSearchIndex
+        every { syncRepository.getInstalledPacks() } returns flowOf(emptyList())
+        coEvery { syncRepository.fetchManifest() } returns Result.success(emptyList())
 
         viewModel = StarterPackViewModel(repository, syncRepository)
         // Wait for init blocks
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
-        
-        // Clear invocations from init
-        clearInvocations(syncRepository)
     }
 
     @Test
     fun `RefreshManifest event triggers manifest fetch`() = runTest {
         viewModel.onEvent(StarterPackEvent.RefreshManifest)
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
-        verify(syncRepository).fetchManifest()
+        coVerify { syncRepository.fetchManifest() }
     }
 
     @Test
@@ -78,8 +69,8 @@ class StarterPackViewModelTest {
         
         val filtered = viewModel.filteredSearchIndex.value
         assertEquals(2, filtered.size)
-        assertEquals("BrandA", filtered[0].brand)
-        assertEquals("BrandA", filtered[1].brand)
+        assertEquals(listOf("Foundation", "BrandA", "p1"), filtered["1"])
+        assertEquals(listOf("Concealer", "BrandA", "p3"), filtered["3"])
     }
 
     @Test
@@ -92,6 +83,6 @@ class StarterPackViewModelTest {
 
         val filtered = viewModel.filteredSearchIndex.value
         assertEquals(1, filtered.size)
-        assertEquals("Lipstick", filtered[0].term)
+        assertEquals(listOf("Lipstick", "BrandB", "p2"), filtered["2"])
     }
 }

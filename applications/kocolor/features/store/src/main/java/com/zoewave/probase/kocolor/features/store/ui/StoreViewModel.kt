@@ -240,7 +240,12 @@ class StoreViewModel @Inject constructor(
             StoreEvent.ClearCheckoutSuccess -> {
                 _uiState.value = _uiState.value.copy(isCheckoutSuccess = false)
             }
-            StoreEvent.EnterStore -> {}
+            StoreEvent.EnterStore -> {
+                // Pre-warm the store thumbnails in the background when the user enters the store.
+                val initialUrls = _uiState.value.realCosmeticItems.take(6).map { it.imageModel } +
+                                  _uiState.value.realFashionItems.take(6).map { it.imageModel }
+                starterPackRepository.prefetchUrls(initialUrls.filterIsInstance<String>())
+            }
         }
     }
 }
