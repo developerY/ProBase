@@ -26,16 +26,20 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AddShoppingCart
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Luggage
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -44,9 +48,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -63,6 +69,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -101,6 +108,17 @@ fun CollectionDetailScreen(
 ) {
     val analysis = uiState.analysis
     val advice = analysis.advice
+
+    val isTravelCapsule = advice.title?.contains("Trip", ignoreCase = true) == true
+
+    if (isTravelCapsule) {
+        TravelChecklistDetailView(
+            advice = advice,
+            onBack = { navTo(KoColorRoute.Back) }
+        )
+        return
+    }
+
     var expandedSections by remember { mutableStateOf(setOf("BLUEPRINT")) }
     var isMagnified by remember { mutableStateOf(false) }
     var isCollapsed by remember { mutableStateOf(true) }
@@ -601,6 +619,169 @@ private fun VerticalCollectionItem(
                 color = if (isOwned) Color.Gray else Color.Gray.copy(alpha = 0.6f),
                 lineHeight = 18.sp
             )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun TravelChecklistDetailView(
+    advice: FashionAdvice,
+    onBack: () -> Unit
+) {
+    val checkedStateMap = remember { mutableStateMapOf<String, Boolean>() }
+
+    // Parse items from outfitSuggestions and makeupSuggestions
+    val suggestedItems = advice.outfitSuggestions.firstOrNull()?.suggestedItems ?: emptyList()
+    val makeupItems = advice.makeupSuggestions
+
+    // Group suggestedItems by category
+    val groupedClothing = suggestedItems.groupBy { it.category }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Destination Capsule", fontFamily = FontFamily.Serif) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                }
+            )
+        }
+    ) { padding ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding),
+            contentPadding = PaddingValues(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            item {
+                Text(
+                    advice.title ?: "Destination Capsule",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontFamily = FontFamily.Serif
+                )
+                Text(advice.summary, style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
+            }
+
+            // Render Documents & Essentials, Tops, Bottoms, Outerwear, Undergarments, Shoes
+            groupedClothing.forEach { (categoryName, items) ->
+                item {
+                    Text(
+                        text = categoryName,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
+                    )
+                }
+
+                items(items) { item ->
+                    val isChecked = checkedStateMap[item.name] ?: false
+                    TravelDetailRow(
+                        name = item.name,
+                        imageUrl = item.imageUrl,
+                        isOwned = item.isOwned,
+                        isChecked = isChecked,
+                        onToggle = { checkedStateMap[item.name] = !isChecked }
+                    )
+                }
+            }
+
+            // Render Cosmetics & Toiletries if present
+            if (makeupItems.isNotEmpty()) {
+                item {
+                    Text(
+                        text = "Cosmetics & Toiletries",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
+                    )
+                }
+
+                items(makeupItems) { item ->
+                    val name = item.suggestedProductName ?: "Cosmetic Item"
+                    val isChecked = checkedStateMap[name] ?: false
+                    val isOwned = item.advice == "Owned"
+                    TravelDetailRow(
+                        name = name,
+                        imageUrl = item.suggestedProductImageUrl,
+                        isOwned = isOwned,
+                        isChecked = isChecked,
+                        onToggle = { checkedStateMap[name] = !isChecked }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TravelDetailRow(
+    name: String,
+    imageUrl: String?,
+    isOwned: Boolean,
+    isChecked: Boolean,
+    onToggle: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(if (isChecked) Color(0xFFF0FDF4) else Color.White)
+            .clickable { onToggle() }
+            .padding(12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Checkbox(
+            checked = isChecked,
+            onCheckedChange = { onToggle() },
+            colors = CheckboxDefaults.colors(checkedColor = Color(0xFF22C55E))
+        )
+
+        Spacer(Modifier.width(8.dp))
+
+        if (imageUrl != null) {
+            AsyncImage(
+                model = imageUrl,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(8.dp))
+            )
+        } else {
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(Color(0xFFE5E7EB)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    if (isOwned) Icons.Default.Luggage else Icons.Default.AddShoppingCart,
+                    contentDescription = null,
+                    tint = Color.Gray
+                )
+            }
+        }
+
+        Spacer(Modifier.width(12.dp))
+
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = name,
+                fontWeight = FontWeight.Bold,
+                fontSize = 15.sp,
+                textDecoration = if (isChecked) TextDecoration.LineThrough else TextDecoration.None,
+                color = if (isChecked) Color.Gray else Color.Black
+            )
+            val subText = if (!isOwned) "To Buy/Pack" else "Owned"
+            val subColor = if (!isOwned) Color(0xFFEF4444) else Color.Gray
+            Text(subText, color = subColor, fontSize = 12.sp, fontWeight = if (!isOwned) FontWeight.Bold else FontWeight.Normal)
         }
     }
 }

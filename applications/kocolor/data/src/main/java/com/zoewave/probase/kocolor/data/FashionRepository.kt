@@ -61,6 +61,15 @@ class FashionRepository @Inject constructor(
         }
     }
 
+    fun getAllSuggestions(): Flow<List<SavedAnalysis>> {
+        return savedSuggestionDao.getAllSuggestions()
+            .map { list -> list.map { it.toModel() } }
+            .catch { e ->
+                Log.e(TAG, "Error fetching all suggestions", e)
+                emit(emptyList())
+            }
+    }
+
     fun getCollectionSuggestions(): Flow<List<SavedAnalysis>> {
         return savedSuggestionDao.getSavedSuggestions()
             .map { list -> list.map { it.toModel() } }

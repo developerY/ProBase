@@ -139,13 +139,48 @@ class TravelCapsuleViewModel @Inject constructor(
             val title = "Trip to $dest ($occ)"
             val summary = _uiState.value.rationale.ifBlank { "Destination Capsule for $dest ($occ)" }
 
+            val checklist = _uiState.value.checklist
+
+            // 1. Map Clothing, Documents & Essentials to OutfitSuggestion
+            val clothingChecklist = checklist.filter { it.category != PackingCategory.COSMETICS }
+            val suggestedPieces = clothingChecklist.map { item ->
+                com.zoewave.probase.core.model.ritual.SuggestedPiece(
+                    name = if (item.quantity > 1) "${item.name} (${item.quantity}x)" else item.name,
+                    category = item.category.displayName,
+                    colorHex = "#1E88E5",
+                    imageUrl = item.imageUrl,
+                    description = if (item.isOwned) "Owned" else "To Buy/Pack",
+                    isOwned = item.isOwned
+                )
+            }
+
+            val outfitSuggestion = com.zoewave.probase.core.model.ritual.OutfitSuggestion(
+                occasion = occ,
+                advice = summary,
+                keyPieces = clothingChecklist.map { it.name },
+                colorCombinations = listOf("#1E88E5", "#22C55E", "#D4AF37"),
+                suggestedItems = suggestedPieces
+            )
+
+            // 2. Map Cosmetics & Toiletries to MakeupSuggestion
+            val cosmeticChecklist = checklist.filter { it.category == PackingCategory.COSMETICS }
+            val makeupSuggestions = cosmeticChecklist.map { item ->
+                com.zoewave.probase.core.model.ritual.MakeupSuggestion(
+                    category = "Cosmetics & Toiletries",
+                    advice = if (item.isOwned) "Owned" else "To Buy/Pack",
+                    recommendedColors = listOf("#D4AF37"),
+                    suggestedProductName = item.name,
+                    suggestedProductImageUrl = item.imageUrl
+                )
+            }
+
             val advice = FashionAdvice(
                 title = title,
                 summary = summary,
                 seasonalType = seasonalType,
                 undertone = undertone,
-                makeupSuggestions = emptyList(),
-                outfitSuggestions = emptyList(),
+                makeupSuggestions = makeupSuggestions,
+                outfitSuggestions = listOf(outfitSuggestion),
                 recommendedPalette = listOf("#1E88E5", "#22C55E", "#D4AF37")
             )
 

@@ -125,6 +125,7 @@ fun koColorNavEntryProvider(
             val state by viewModel.uiState.collectAsStateWithLifecycle()
             CollectionHubScreen(
                 uiState = state,
+                filter = route.filter,
                 onEvent = viewModel::onEvent,
                 navTo = onNavigateTo
             )

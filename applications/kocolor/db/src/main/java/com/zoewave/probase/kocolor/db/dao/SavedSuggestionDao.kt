@@ -6,6 +6,9 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface SavedSuggestionDao {
+    @Query("SELECT * FROM saved_suggestions ORDER BY timestamp DESC")
+    fun getAllSuggestions(): Flow<List<SavedSuggestionEntity>>
+
     @Query("SELECT * FROM saved_suggestions WHERE isSavedToCollection = 1 ORDER BY timestamp DESC")
     fun getSavedSuggestions(): Flow<List<SavedSuggestionEntity>>
 

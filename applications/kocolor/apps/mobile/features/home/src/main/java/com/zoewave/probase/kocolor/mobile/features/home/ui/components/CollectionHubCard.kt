@@ -150,7 +150,7 @@ fun CollectionHubCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .animateContentSize()
-                .clickable { navTo(KoColorRoute.CollectionHub) },
+                .clickable { navTo(KoColorRoute.CollectionHub()) },
             shape = RoundedCornerShape(32.dp),
             color = Color(0xFFF3ECEF)
         ) {
@@ -316,7 +316,7 @@ fun CollectionHubCard(
                                 shape = CircleShape,
                                 shadowElevation = 8.dp,
                                 modifier = Modifier.size(56.dp),
-                                onClick = { navTo(KoColorRoute.CollectionHub) }
+                                onClick = { navTo(KoColorRoute.CollectionHub()) }
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
                                     Icon(
