@@ -442,62 +442,65 @@ private fun AiFashionAdvisorSummaryCard(
                 thickness = 1.dp
             )
 
-            Spacer(Modifier.height(20.dp))
-
-            // Single Action Button (View Saved List)
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp)
-                    .clickable { onListClick() },
-                shape = CircleShape,
-                color = Color.White,
-                border = BorderStroke(1.dp, Color(0xFFE6E0EC))
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Bookmark,
-                        contentDescription = null,
-                        tint = Color(0xFF4A347F),
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        "Saved Looks",
-                        color = Color(0xFF1C1B1F),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp
-                    )
-                }
-            }
-
             Spacer(Modifier.height(16.dp))
 
-            // Subtext Footer
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    "• Color Formula DNA: ",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = Color(0xFF8F8A98),
-                    fontSize = 11.sp
-                )
-                Text(
-                    "Soft Autumn",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = Color(0xFF1C1B1F),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 11.sp
-                )
-                Text(
-                    "  • 112 Vault Items",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = Color(0xFF8F8A98),
-                    fontSize = 11.sp
-                )
+            // Bottom Section: Left Info, Right Button
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // LEFT: Info about the saved lists & metadata
+                Column(horizontalAlignment = Alignment.Start) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "DNA: ",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color(0xFF8F8A98),
+                            fontSize = 11.sp
+                        )
+                        Text(
+                            text = "Soft Autumn",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color(0xFF1C1B1F),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 11.sp
+                        )
+                    }
+                    Text(
+                        text = "112 Vault Items",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color(0xFF8F8A98),
+                        fontSize = 11.sp
+                    )
+                }
+
+                // RIGHT: Button Icon to navigate to the saved list
+                Surface(
+                    onClick = onListClick,
+                    shape = CircleShape,
+                    color = Color(0xFFF3EDF7),
+                    border = BorderStroke(1.dp, Color(0xFFE6E0EC))
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Bookmark,
+                            contentDescription = null,
+                            tint = Color(0xFF4A347F),
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            text = "Saved Looks",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 13.sp,
+                            color = Color(0xFF1C1B1F)
+                        )
+                    }
+                }
             }
         }
     }
@@ -579,48 +582,58 @@ private fun TravelCapsuleSummaryCard(
                 thickness = 1.dp
             )
 
-            Spacer(Modifier.height(20.dp))
-
-            // Single Action Button (View Saved List)
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp)
-                    .clickable { onListClick() },
-                shape = CircleShape,
-                color = Color.White,
-                border = BorderStroke(1.dp, Color(0xFFD6E4FF))
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Bookmark,
-                        contentDescription = null,
-                        tint = Color(0xFF1E88E5),
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        "Saved Trips",
-                        color = Color(0xFF1C1B1F),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp
-                    )
-                }
-            }
-
             Spacer(Modifier.height(16.dp))
 
-            // Subtext Footer
-            Text(
-                "• Weather & UV Synced • Destination Temperature Matching",
-                style = MaterialTheme.typography.labelSmall,
-                color = Color(0xFF8F8A98),
-                fontSize = 11.sp
-            )
+            // Bottom Section: Left Info, Right Button
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // LEFT: Info about the saved lists & metadata
+                Column(horizontalAlignment = Alignment.Start) {
+                    Text(
+                        text = "Weather & UV Synced",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color(0xFF1C1B1F),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 11.sp
+                    )
+                    Text(
+                        text = "Destination Temp Match",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color(0xFF8F8A98),
+                        fontSize = 11.sp
+                    )
+                }
+
+                // RIGHT: Button Icon to navigate to the saved list
+                Surface(
+                    onClick = onListClick,
+                    shape = CircleShape,
+                    color = Color(0xFFE8F1FF),
+                    border = BorderStroke(1.dp, Color(0xFFD6E4FF))
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Bookmark,
+                            contentDescription = null,
+                            tint = Color(0xFF1E88E5),
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            text = "Saved Trips",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 13.sp,
+                            color = Color(0xFF1C1B1F)
+                        )
+                    }
+                }
+            }
         }
     }
 }
