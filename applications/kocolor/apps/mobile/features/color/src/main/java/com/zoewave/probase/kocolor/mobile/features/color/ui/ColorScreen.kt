@@ -1,5 +1,11 @@
 package com.zoewave.probase.kocolor.mobile.features.color.ui
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -54,6 +60,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -62,6 +69,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
@@ -272,6 +281,92 @@ fun ColorScreen(
 }
 
 @Composable
+private fun AnimatedActionBadge(
+    icon: ImageVector,
+    badgeColor: Color,
+    iconTint: Color,
+    auraColors: List<Color>,
+    onClick: () -> Unit
+) {
+    val infiniteTransition = rememberInfiniteTransition(label = "BadgeSparkleAnimation")
+
+    val iconScale by infiniteTransition.animateFloat(
+        initialValue = 1.0f,
+        targetValue = 1.25f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1400, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "BadgeIconScale"
+    )
+
+    val auraScale by infiniteTransition.animateFloat(
+        initialValue = 1.0f,
+        targetValue = 1.22f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 2000, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "BadgeAuraScale"
+    )
+
+    val auraAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.25f,
+        targetValue = 0.65f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 2000, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "BadgeAuraAlpha"
+    )
+
+    val auraBrush = Brush.sweepGradient(auraColors)
+
+    Box(contentAlignment = Alignment.Center) {
+        Box(
+            modifier = Modifier
+                .size(52.dp)
+                .graphicsLayer {
+                    scaleX = auraScale
+                    scaleY = auraScale
+                    alpha = auraAlpha
+                }
+                .clip(CircleShape)
+                .background(auraBrush)
+        )
+
+        Surface(
+            modifier = Modifier.size(48.dp),
+            shape = CircleShape,
+            color = badgeColor.copy(alpha = 0.95f),
+            border = BorderStroke(1.5.dp, Color.White),
+            shadowElevation = 4.dp,
+            onClick = onClick
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .border(1.dp, iconTint.copy(alpha = 0.25f), CircleShape)
+                )
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = iconTint,
+                    modifier = Modifier
+                        .size(20.dp)
+                        .graphicsLayer {
+                            scaleX = iconScale
+                            scaleY = iconScale
+                        }
+                )
+            }
+        }
+    }
+}
+
+@Composable
 private fun AiFashionAdvisorSummaryCard(
     onPrimaryClick: () -> Unit,
     onListClick: () -> Unit
@@ -307,21 +402,13 @@ private fun AiFashionAdvisorSummaryCard(
                     }
                 }
 
-                Surface(
-                    shape = CircleShape,
-                    color = Color(0xFFF3EDF7),
-                    shadowElevation = 2.dp,
-                    modifier = Modifier.size(48.dp)
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            imageVector = Icons.Default.AutoAwesome,
-                            contentDescription = null,
-                            tint = Color(0xFF6750A4),
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                }
+                AnimatedActionBadge(
+                    icon = Icons.Default.AutoAwesome,
+                    badgeColor = Color(0xFFF3EDF7),
+                    iconTint = Color(0xFF6750A4),
+                    auraColors = listOf(Color(0xFFD4AF37), Color(0xFFE91E63), Color(0xFF8E24AA), Color(0xFF6750A4), Color(0xFFD4AF37)),
+                    onClick = onPrimaryClick
+                )
             }
 
             Spacer(Modifier.height(16.dp))
@@ -489,21 +576,13 @@ private fun TravelCapsuleSummaryCard(
                     }
                 }
 
-                Surface(
-                    shape = CircleShape,
-                    color = Color(0xFFE8F1FF),
-                    shadowElevation = 2.dp,
-                    modifier = Modifier.size(48.dp)
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            imageVector = Icons.Default.Flight,
-                            contentDescription = null,
-                            tint = Color(0xFF1E88E5),
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                }
+                AnimatedActionBadge(
+                    icon = Icons.Default.Flight,
+                    badgeColor = Color(0xFFE8F1FF),
+                    iconTint = Color(0xFF1E88E5),
+                    auraColors = listOf(Color(0xFF00BCD4), Color(0xFF1E88E5), Color(0xFF1565C0), Color(0xFF00BCD4)),
+                    onClick = onPrimaryClick
+                )
             }
 
             Spacer(Modifier.height(16.dp))
