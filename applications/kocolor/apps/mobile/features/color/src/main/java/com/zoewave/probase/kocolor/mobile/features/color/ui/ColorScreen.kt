@@ -2,14 +2,19 @@ package com.zoewave.probase.kocolor.mobile.features.color.ui
 
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,6 +26,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -59,6 +65,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.VerticalDivider
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -87,9 +94,7 @@ import com.zoewave.probase.core.model.ritual.Undertone
 import com.zoewave.probase.kocolor.db.entity.PlaylistWithDays
 import com.zoewave.probase.kocolor.mobile.features.color.R
 import com.zoewave.probase.kocolor.model.KoColorRoute
-import com.zoewave.probase.kocolor.model.playlist.DailyPlanStatus
 import java.text.SimpleDateFormat
-import java.time.LocalDate
 import java.util.Date
 import java.util.Locale
 
@@ -126,6 +131,13 @@ fun ColorScreen(
     onEvent: (ColorEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
+    val savedTripsCount = remember(uiState.savedSuggestions) {
+        uiState.savedSuggestions.count { it.advice.title?.contains("Trip", ignoreCase = true) == true }
+    }
+    val savedLooksCount = remember(uiState.savedSuggestions) {
+        uiState.savedSuggestions.count { it.advice.title?.contains("Trip", ignoreCase = true) != true }
+    }
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -189,6 +201,7 @@ fun ColorScreen(
             // 1. AI Fashion Advisor (Style Simulator)
             item {
                 AiFashionAdvisorSummaryCard(
+                    savedCount = savedLooksCount,
                     onPrimaryClick = { navTo(KoColorRoute.StyleSimulator) },
                     onListClick = { navTo(KoColorRoute.CollectionHub(filter = "LOOKS")) }
                 )
@@ -197,6 +210,7 @@ fun ColorScreen(
             // 2. Destination Capsule Architect (Travel Mode)
             item {
                 TravelCapsuleSummaryCard(
+                    savedCount = savedTripsCount,
                     onPrimaryClick = { navTo(KoColorRoute.TravelCapsule) },
                     onListClick = { navTo(KoColorRoute.CollectionHub(filter = "TRAVEL")) }
                 )
@@ -288,6 +302,19 @@ private fun AnimatedActionBadge(
     auraColors: List<Color>,
     onClick: () -> Unit
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+
+    // 3D Tactile Press Scale Effect
+    val buttonScale by animateFloatAsState(
+        targetValue = if (isPressed) 0.90f else 1.0f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessHigh
+        ),
+        label = "Badge3DPressScale"
+    )
+
     val infiniteTransition = rememberInfiniteTransition(label = "BadgeSparkleAnimation")
 
     val iconScale by infiniteTransition.animateFloat(
@@ -302,7 +329,7 @@ private fun AnimatedActionBadge(
 
     val auraScale by infiniteTransition.animateFloat(
         initialValue = 1.0f,
-        targetValue = 1.22f,
+        targetValue = 1.25f,
         animationSpec = infiniteRepeatable(
             animation = tween(durationMillis = 2000, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
@@ -311,8 +338,8 @@ private fun AnimatedActionBadge(
     )
 
     val auraAlpha by infiniteTransition.animateFloat(
-        initialValue = 0.25f,
-        targetValue = 0.65f,
+        initialValue = 0.30f,
+        targetValue = 0.70f,
         animationSpec = infiniteRepeatable(
             animation = tween(durationMillis = 2000, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
@@ -322,10 +349,28 @@ private fun AnimatedActionBadge(
 
     val auraBrush = Brush.sweepGradient(auraColors)
 
-    Box(contentAlignment = Alignment.Center) {
+    // Top-down specular light gradient for true 3D curvature
+    val specularLightGradient = Brush.verticalGradient(
+        colors = listOf(
+            Color.White.copy(alpha = 0.55f),
+            Color.Transparent,
+            Color.Black.copy(alpha = 0.35f)
+        )
+    )
+
+    Box(
+        modifier = Modifier
+            .size(56.dp)
+            .graphicsLayer {
+                scaleX = buttonScale
+                scaleY = buttonScale
+            },
+        contentAlignment = Alignment.Center
+    ) {
+        // 1. Outer Prismatic Multi-Chromatic Aura Glow Ring
         Box(
             modifier = Modifier
-                .size(52.dp)
+                .size(56.dp)
                 .graphicsLayer {
                     scaleX = auraScale
                     scaleY = auraScale
@@ -335,28 +380,46 @@ private fun AnimatedActionBadge(
                 .background(auraBrush)
         )
 
+        // 2. Main 3D Sphere Interactive Orb
         Box(
             modifier = Modifier
-                .size(48.dp)
-                .shadow(elevation = 6.dp, shape = CircleShape)
+                .size(50.dp)
+                .shadow(elevation = 10.dp, shape = CircleShape, spotColor = Color.Black.copy(alpha = 0.5f))
                 .background(brush = badgeGradient, shape = CircleShape)
-                .border(1.5.dp, Color.White.copy(alpha = 0.8f), CircleShape)
+                // 3D Specular Light Bevel Overlay
+                .background(brush = specularLightGradient, shape = CircleShape)
+                .border(
+                    BorderStroke(
+                        1.5.dp,
+                        Brush.verticalGradient(
+                            listOf(Color.White, Color.White.copy(alpha = 0.3f))
+                        )
+                    ),
+                    CircleShape
+                )
                 .clip(CircleShape)
-                .clickable { onClick() },
+                .clickable(
+                    interactionSource = interactionSource,
+                    indication = ripple(bounded = true, radius = 28.dp),
+                    onClick = onClick
+                ),
             contentAlignment = Alignment.Center
         ) {
+            // Recessed Inner Bevel Ring
             Box(
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(42.dp)
                     .clip(CircleShape)
-                    .border(1.dp, Color.White.copy(alpha = 0.35f), CircleShape)
+                    .border(1.dp, Color.White.copy(alpha = 0.40f), CircleShape)
             )
+
+            // Sparkling 3D Floating Icon
             Icon(
                 imageVector = icon,
                 contentDescription = null,
                 tint = iconTint,
                 modifier = Modifier
-                    .size(20.dp)
+                    .size(22.dp)
                     .graphicsLayer {
                         scaleX = iconScale
                         scaleY = iconScale
@@ -368,137 +431,173 @@ private fun AnimatedActionBadge(
 
 @Composable
 private fun AiFashionAdvisorSummaryCard(
+    savedCount: Int = 0,
     onPrimaryClick: () -> Unit,
     onListClick: () -> Unit
 ) {
-    Card(
+    Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(32.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        color = Color(0xFFF6EEF8),
+        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.6f)),
+        shadowElevation = 2.dp
     ) {
-        Column(modifier = Modifier.padding(24.dp)) {
-            // Top Badge & Icon Header
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Surface(
-                    shape = CircleShape,
-                    color = Color(0xFFF3EDF7)
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            "✦  AI FASHION ADVISOR",
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF6750A4),
-                            letterSpacing = 0.8.sp
-                        )
-                    }
-                }
-
-                AnimatedActionBadge(
-                    icon = Icons.Default.AutoAwesome,
-                    badgeGradient = Brush.horizontalGradient(
-                        colors = listOf(Color(0xFF4A347F), Color(0xFF6246A3))
-                    ),
-                    iconTint = Color.White,
-                    auraColors = listOf(Color(0xFFD4AF37), Color(0xFFE91E63), Color(0xFF8E24AA), Color(0xFF6750A4), Color(0xFFD4AF37)),
-                    onClick = onPrimaryClick
-                )
-            }
-
-            Spacer(Modifier.height(16.dp))
-
-            // Headline
-            Text(
-                "Define Your Intent",
-                style = MaterialTheme.typography.headlineMedium,
-                fontFamily = FontFamily.Serif,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF1F1B24)
-            )
-
-            Spacer(Modifier.height(8.dp))
-
-            // Body
-            Text(
-                text = "Generate a personalized outfit and cosmetic coordination from your vault based on daily mood and constraints.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color(0xFF5A5760),
-                lineHeight = 22.sp
-            )
-
-            Spacer(Modifier.height(16.dp))
-
-            // Thin Horizontal Divider Line
-            HorizontalDivider(
-                color = Color(0xFFF3F0EC),
-                thickness = 1.dp
-            )
-
-            Spacer(Modifier.height(16.dp))
-
-            // Bottom Section: Left Info, Right Button
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // LEFT: Info about the saved lists & metadata
-                Column(horizontalAlignment = Alignment.Start) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = "DNA: ",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = Color(0xFF8F8A98),
-                            fontSize = 11.sp
-                        )
-                        Text(
-                            text = "Soft Autumn",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = Color(0xFF1C1B1F),
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 11.sp
-                        )
-                    }
-                    Text(
-                        text = "112 Vault Items",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Color(0xFF8F8A98),
-                        fontSize = 11.sp
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    brush = Brush.radialGradient(
+                        colors = listOf(Color.White.copy(alpha = 0.65f), Color(0xFFF3E7F5)),
+                        radius = 800f
                     )
+                )
+                .padding(20.dp)
+        ) {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                // Top Header & Frosted Glass Pill
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.TopStart
+                ) {
+                    // Frosted Glass Pill
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp, end = 12.dp),
+                        shape = RoundedCornerShape(24.dp),
+                        color = Color.White.copy(alpha = 0.55f),
+                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.8f))
+                    ) {
+                        Column(modifier = Modifier.padding(20.dp)) {
+                            // Badge Pill
+                            Surface(
+                                shape = CircleShape,
+                                color = Color(0xFFEADBEE)
+                            ) {
+                                Text(
+                                    "✦  AI FASHION ADVISOR",
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF6750A4),
+                                    letterSpacing = 0.8.sp
+                                )
+                            }
+
+                            Spacer(Modifier.height(14.dp))
+
+                            // Headline
+                            Text(
+                                "Define Your Intent",
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontFamily = FontFamily.Serif,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF1F1B24)
+                            )
+
+                            Spacer(Modifier.height(6.dp))
+
+                            // Body
+                            Text(
+                                text = "Generate a personalized outfit and cosmetic coordination from your vault based on daily mood and constraints.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color(0xFF5A5760),
+                                lineHeight = 20.sp
+                            )
+                        }
+                    }
+
+                    // Floating Animated Badge Overlapping Top Right of Glass Pill
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .offset(x = (4).dp, y = (-2).dp)
+                    ) {
+                        AnimatedActionBadge(
+                            icon = Icons.Default.AutoAwesome,
+                            badgeGradient = Brush.horizontalGradient(
+                                colors = listOf(Color(0xFF4A347F), Color(0xFF6246A3))
+                            ),
+                            iconTint = Color.White,
+                            auraColors = listOf(Color(0xFFD4AF37), Color(0xFFE91E63), Color(0xFF8E24AA), Color(0xFF6750A4), Color(0xFFD4AF37)),
+                            onClick = onPrimaryClick
+                        )
+                    }
                 }
 
-                // RIGHT: Button Icon to navigate to the saved list
-                Surface(
-                    onClick = onListClick,
-                    shape = CircleShape,
-                    color = Color(0xFFF3EDF7),
-                    border = BorderStroke(1.dp, Color(0xFFE6E0EC))
+                Spacer(Modifier.height(16.dp))
+
+                // Translucent Divider Line
+                HorizontalDivider(
+                    color = Color.White.copy(alpha = 0.7f),
+                    thickness = 1.dp
+                )
+
+                Spacer(Modifier.height(14.dp))
+
+                // Bottom Section: Left Metadata, Right Glassy Button
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Bookmark,
-                            contentDescription = null,
-                            tint = Color(0xFF4A347F),
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(Modifier.width(8.dp))
+                    // LEFT: Info
+                    Column(horizontalAlignment = Alignment.Start) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "DNA: ",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Color(0xFF7A7382),
+                                fontSize = 11.sp
+                            )
+                            Text(
+                                text = "Soft Autumn",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Color(0xFF1C1B1F),
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 11.sp
+                            )
+                        }
+                        val looksText = when (savedCount) {
+                            0 -> "None Saved"
+                            1 -> "1 Saved Look"
+                            else -> "$savedCount Saved Looks"
+                        }
                         Text(
-                            text = "Saved Looks",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 13.sp,
-                            color = Color(0xFF1C1B1F)
+                            text = looksText,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = if (savedCount > 0) Color(0xFF6750A4) else Color(0xFF7A7382),
+                            fontWeight = if (savedCount > 0) FontWeight.Bold else FontWeight.Normal,
+                            fontSize = 11.sp
                         )
+                    }
+
+                    // RIGHT: Glassy Button
+                    Surface(
+                        onClick = onListClick,
+                        shape = CircleShape,
+                        color = Color.White.copy(alpha = 0.75f),
+                        border = BorderStroke(1.dp, Color.White),
+                        shadowElevation = 2.dp
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 9.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Bookmark,
+                                contentDescription = null,
+                                tint = Color(0xFF6750A4),
+                                modifier = Modifier.size(15.dp)
+                            )
+                            Spacer(Modifier.width(6.dp))
+                            Text(
+                                text = "Saved Looks",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 13.sp,
+                                color = Color(0xFF1C1B1F)
+                            )
+                        }
                     }
                 }
             }
@@ -508,129 +607,165 @@ private fun AiFashionAdvisorSummaryCard(
 
 @Composable
 private fun TravelCapsuleSummaryCard(
+    savedCount: Int = 0,
     onPrimaryClick: () -> Unit,
     onListClick: () -> Unit
 ) {
-    Card(
+    Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(32.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        color = Color(0xFFEEF5FF),
+        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.6f)),
+        shadowElevation = 2.dp
     ) {
-        Column(modifier = Modifier.padding(24.dp)) {
-            // Top Badge & Icon Header
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Surface(
-                    shape = CircleShape,
-                    color = Color(0xFFE8F1FF)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    brush = Brush.radialGradient(
+                        colors = listOf(Color.White.copy(alpha = 0.65f), Color(0xFFE1EDFF)),
+                        radius = 800f
+                    )
+                )
+                .padding(20.dp)
+        ) {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                // Top Header & Frosted Glass Pill
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.TopStart
                 ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                    // Frosted Glass Pill
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp, end = 12.dp),
+                        shape = RoundedCornerShape(24.dp),
+                        color = Color.White.copy(alpha = 0.55f),
+                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.8f))
                     ) {
-                        Text(
-                            "✦  DESTINATION CAPSULE",
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF1E88E5),
-                            letterSpacing = 0.8.sp
+                        Column(modifier = Modifier.padding(20.dp)) {
+                            // Badge Pill
+                            Surface(
+                                shape = CircleShape,
+                                color = Color(0xFFD9E8FF)
+                            ) {
+                                Text(
+                                    "✦  DESTINATION CAPSULE",
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF1E88E5),
+                                    letterSpacing = 0.8.sp
+                                )
+                            }
+
+                            Spacer(Modifier.height(14.dp))
+
+                            // Headline
+                            Text(
+                                "Travel Packing AI",
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontFamily = FontFamily.Serif,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF1F1B24)
+                            )
+
+                            Spacer(Modifier.height(6.dp))
+
+                            // Body
+                            Text(
+                                text = "Generate a curated wardrobe and cosmetic plan for your next international voyage.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color(0xFF5A5760),
+                                lineHeight = 20.sp
+                            )
+                        }
+                    }
+
+                    // Floating Animated Badge Overlapping Top Right of Glass Pill
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .offset(x = (4).dp, y = (-2).dp)
+                    ) {
+                        AnimatedActionBadge(
+                            icon = Icons.Default.Flight,
+                            badgeGradient = Brush.horizontalGradient(
+                                colors = listOf(Color(0xFF1E88E5), Color(0xFF1565C0))
+                            ),
+                            iconTint = Color.White,
+                            auraColors = listOf(Color(0xFF00BCD4), Color(0xFF1E88E5), Color(0xFF1565C0), Color(0xFF00BCD4)),
+                            onClick = onPrimaryClick
                         )
                     }
                 }
 
-                AnimatedActionBadge(
-                    icon = Icons.Default.Flight,
-                    badgeGradient = Brush.horizontalGradient(
-                        colors = listOf(Color(0xFF1E88E5), Color(0xFF1565C0))
-                    ),
-                    iconTint = Color.White,
-                    auraColors = listOf(Color(0xFF00BCD4), Color(0xFF1E88E5), Color(0xFF1565C0), Color(0xFF00BCD4)),
-                    onClick = onPrimaryClick
+                Spacer(Modifier.height(16.dp))
+
+                // Translucent Divider Line
+                HorizontalDivider(
+                    color = Color.White.copy(alpha = 0.7f),
+                    thickness = 1.dp
                 )
-            }
 
-            Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(14.dp))
 
-            // Headline
-            Text(
-                "Travel Packing AI",
-                style = MaterialTheme.typography.headlineMedium,
-                fontFamily = FontFamily.Serif,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF1F1B24)
-            )
-
-            Spacer(Modifier.height(8.dp))
-
-            // Body
-            Text(
-                text = "Generate a curated wardrobe and cosmetic plan for your next international voyage.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color(0xFF5A5760),
-                lineHeight = 22.sp
-            )
-
-            Spacer(Modifier.height(16.dp))
-
-            // Thin Horizontal Divider Line
-            HorizontalDivider(
-                color = Color(0xFFF3F0EC),
-                thickness = 1.dp
-            )
-
-            Spacer(Modifier.height(16.dp))
-
-            // Bottom Section: Left Info, Right Button
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // LEFT: Info about the saved lists & metadata
-                Column(horizontalAlignment = Alignment.Start) {
-                    Text(
-                        text = "Weather & UV Synced",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Color(0xFF1C1B1F),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 11.sp
-                    )
-                    Text(
-                        text = "Destination Temp Match",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Color(0xFF8F8A98),
-                        fontSize = 11.sp
-                    )
-                }
-
-                // RIGHT: Button Icon to navigate to the saved list
-                Surface(
-                    onClick = onListClick,
-                    shape = CircleShape,
-                    color = Color(0xFFE8F1FF),
-                    border = BorderStroke(1.dp, Color(0xFFD6E4FF))
+                // Bottom Section: Left Metadata, Right Glassy Button
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Bookmark,
-                            contentDescription = null,
-                            tint = Color(0xFF1E88E5),
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(Modifier.width(8.dp))
+                    // LEFT: Info
+                    Column(horizontalAlignment = Alignment.Start) {
                         Text(
-                            text = "Saved Trips",
+                            text = "Weather & UV Synced",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color(0xFF1C1B1F),
                             fontWeight = FontWeight.Bold,
-                            fontSize = 13.sp,
-                            color = Color(0xFF1C1B1F)
+                            fontSize = 11.sp
                         )
+                        val tripsText = when (savedCount) {
+                            0 -> "None Saved"
+                            1 -> "1 Saved Trip"
+                            else -> "$savedCount Saved Trips"
+                        }
+                        Text(
+                            text = tripsText,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = if (savedCount > 0) Color(0xFF1E88E5) else Color(0xFF7A7382),
+                            fontWeight = if (savedCount > 0) FontWeight.Bold else FontWeight.Normal,
+                            fontSize = 11.sp
+                        )
+                    }
+
+                    // RIGHT: Glassy Button
+                    Surface(
+                        onClick = onListClick,
+                        shape = CircleShape,
+                        color = Color.White.copy(alpha = 0.75f),
+                        border = BorderStroke(1.dp, Color.White),
+                        shadowElevation = 2.dp
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 9.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Bookmark,
+                                contentDescription = null,
+                                tint = Color(0xFF1E88E5),
+                                modifier = Modifier.size(15.dp)
+                            )
+                            Spacer(Modifier.width(6.dp))
+                            Text(
+                                text = "Saved Trips",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 13.sp,
+                                color = Color(0xFF1C1B1F)
+                            )
+                        }
                     }
                 }
             }
