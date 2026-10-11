@@ -42,6 +42,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -140,6 +141,42 @@ fun ColorScreen(
             contentPadding = PaddingValues(20.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
+            // 0. Archive Title Header Section
+            item {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp, bottom = 4.dp)
+                ) {
+                    Text(
+                        text = "KOCOLOR ARCHIVE • CHROMATIC ADVISORY",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.5.sp,
+                        color = Color(0xFF8A7165)
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = "Color Analysis History",
+                        style = MaterialTheme.typography.headlineLarge,
+                        fontFamily = FontFamily.Serif,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF1F1B24)
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = "Curated aesthetic recommendations saved to your chromatic profile.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color(0xFF7A736E)
+                    )
+                    Spacer(Modifier.height(16.dp))
+                    HorizontalDivider(
+                        color = Color(0xFFEFE8E1),
+                        thickness = 1.dp
+                    )
+                }
+            }
+
             // 1. AI Fashion Advisor (Style Simulator)
             item {
                 AiFashionAdvisorSummaryCard(
@@ -217,6 +254,18 @@ fun ColorScreen(
                         }
                     }
                 }
+            }
+
+            // 5. Contextual Intelligence Disclaimer Footer
+            item {
+                Text(
+                    text = "* Contextual Intelligence: Dynamic calculations based on your chromatic profile.",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color(0xFF9E8E81),
+                    fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                )
             }
         }
     }
@@ -296,7 +345,15 @@ private fun AiFashionAdvisorSummaryCard(
                 lineHeight = 22.sp
             )
 
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(16.dp))
+
+            // Thin Horizontal Divider Line
+            HorizontalDivider(
+                color = Color(0xFFF3F0EC),
+                thickness = 1.dp
+            )
+
+            Spacer(Modifier.height(20.dp))
 
             // Two Buttons Row
             Row(
@@ -371,12 +428,27 @@ private fun AiFashionAdvisorSummaryCard(
             Spacer(Modifier.height(16.dp))
 
             // Subtext Footer
-            Text(
-                "• Color Formula DNA • Micro-Features Synced",
-                style = MaterialTheme.typography.labelSmall,
-                color = Color(0xFF8F8A98),
-                fontSize = 11.sp
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    "• Color Formula DNA: ",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color(0xFF8F8A98),
+                    fontSize = 11.sp
+                )
+                Text(
+                    "Soft Autumn",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color(0xFF1C1B1F),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 11.sp
+                )
+                Text(
+                    "  • 112 Vault Items",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color(0xFF8F8A98),
+                    fontSize = 11.sp
+                )
+            }
         }
     }
 }
@@ -455,7 +527,15 @@ private fun TravelCapsuleSummaryCard(
                 lineHeight = 22.sp
             )
 
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(16.dp))
+
+            // Thin Horizontal Divider Line
+            HorizontalDivider(
+                color = Color(0xFFF3F0EC),
+                thickness = 1.dp
+            )
+
+            Spacer(Modifier.height(20.dp))
 
             // Two Buttons Row
             Row(
