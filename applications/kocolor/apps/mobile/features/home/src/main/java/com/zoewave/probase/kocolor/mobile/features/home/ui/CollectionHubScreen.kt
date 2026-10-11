@@ -8,10 +8,13 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.Alignment
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -73,7 +76,23 @@ fun CollectionHubScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { LuxuryBrandLogo(uiState = Unit, modifier = Modifier, onEvent = {}, navTo = {}) },
+                title = { 
+                    if (filter != null) {
+                        val titleText = when (filter.uppercase()) {
+                            "TRAVEL", "TRIPS" -> "Saved Travel Trips"
+                            "LOOKS", "FASHION" -> "Saved AI Looks"
+                            else -> "Saved Collections"
+                        }
+                        Text(
+                            text = titleText,
+                            fontFamily = androidx.compose.ui.text.font.FontFamily.Serif,
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                    } else {
+                        LuxuryBrandLogo(uiState = Unit, modifier = Modifier, onEvent = {}, navTo = {})
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClick = { navTo(KoColorRoute.Back) }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.applications_kocolor_apps_mobile_features_home_back))
@@ -105,127 +124,130 @@ fun CollectionHubScreen(
                 verticalArrangement = Arrangement.spacedBy(24.dp),
                 contentPadding = PaddingValues(top = 8.dp, bottom = 32.dp)
             ) {
-                // 1. THE VANITY (with incorporated Discover Cosmetics pill, PAO hygiene, restock & chromatic DNA)
-                item {
-                    val cosmeticsProgress = remember(uiState.cosmeticsByGroup) {
-                        val comp = uiState.cosmeticsByGroup.entries.filter { it.key.contains("COMPLEXION", ignoreCase = true) || it.key.contains("DIMENSION", ignoreCase = true) }.sumOf { it.value }
-                        val eyes = uiState.cosmeticsByGroup.entries.filter { it.key.contains("EYE", ignoreCase = true) || it.key.startsWith("TOOL", ignoreCase = true) }.sumOf { it.value }
-                        val nails = uiState.cosmeticsByGroup.entries.filter { it.key.contains("NAIL", ignoreCase = true) }.sumOf { it.value }
-                        val lips = uiState.cosmeticsByGroup.entries.filter { it.key.contains("LIP", ignoreCase = true) }.sumOf { it.value }
-                        val prep = uiState.cosmeticsByGroup.entries.filter { it.key.contains("PREP", ignoreCase = true) || it.key.contains("SKIN", ignoreCase = true) }.sumOf { it.value }
-                        val hair = uiState.cosmeticsByGroup.entries.filter { it.key.contains("HAIR", ignoreCase = true) }.sumOf { it.value }
-                        val oral = uiState.cosmeticsByGroup.entries.filter { it.key.contains("ORAL", ignoreCase = true) }.sumOf { it.value }
-                        val body = uiState.cosmeticsByGroup.entries.filter { it.key.startsWith("HYGIENE", ignoreCase = true) || it.key.contains("FRAGRANCE", ignoreCase = true) || it.key.contains("GROOMING", ignoreCase = true) }.sumOf { it.value }
+                // Show Overview Cards (Vanity, Wardrobe, Store) only when viewing general CollectionHub without a filter
+                if (filter == null) {
+                    // 1. THE VANITY (with incorporated Discover Cosmetics pill, PAO hygiene, restock & chromatic DNA)
+                    item {
+                        val cosmeticsProgress = remember(uiState.cosmeticsByGroup) {
+                            val comp = uiState.cosmeticsByGroup.entries.filter { it.key.contains("COMPLEXION", ignoreCase = true) || it.key.contains("DIMENSION", ignoreCase = true) }.sumOf { it.value }
+                            val eyes = uiState.cosmeticsByGroup.entries.filter { it.key.contains("EYE", ignoreCase = true) || it.key.startsWith("TOOL", ignoreCase = true) }.sumOf { it.value }
+                            val nails = uiState.cosmeticsByGroup.entries.filter { it.key.contains("NAIL", ignoreCase = true) }.sumOf { it.value }
+                            val lips = uiState.cosmeticsByGroup.entries.filter { it.key.contains("LIP", ignoreCase = true) }.sumOf { it.value }
+                            val prep = uiState.cosmeticsByGroup.entries.filter { it.key.contains("PREP", ignoreCase = true) || it.key.contains("SKIN", ignoreCase = true) }.sumOf { it.value }
+                            val hair = uiState.cosmeticsByGroup.entries.filter { it.key.contains("HAIR", ignoreCase = true) }.sumOf { it.value }
+                            val oral = uiState.cosmeticsByGroup.entries.filter { it.key.contains("ORAL", ignoreCase = true) }.sumOf { it.value }
+                            val body = uiState.cosmeticsByGroup.entries.filter { it.key.startsWith("HYGIENE", ignoreCase = true) || it.key.contains("FRAGRANCE", ignoreCase = true) || it.key.contains("GROOMING", ignoreCase = true) }.sumOf { it.value }
 
-                        listOf(
-                            CategoryProgressItem("COMP", comp, 27, Color(0xFFD4AF37)),
-                            CategoryProgressItem("EYES", eyes, 52, Color(0xFF4A2B4B)),
-                            CategoryProgressItem("NAILS", nails, 10, Color(0xFF8B263E)),
-                            CategoryProgressItem("LIPS", lips, 16, Color(0xFFC25975)),
-                            CategoryProgressItem("PREP", prep, 14, Color(0xFF3B5249)),
-                            CategoryProgressItem("HAIR", hair, 13, Color(0xFF415A77)),
-                            CategoryProgressItem("ORAL", oral, 8, Color(0xFF5C6B73)),
-                            CategoryProgressItem("BODY", body, 33, Color(0xFF8D5B4C))
+                            listOf(
+                                CategoryProgressItem("COMP", comp, 27, Color(0xFFD4AF37)),
+                                CategoryProgressItem("EYES", eyes, 52, Color(0xFF4A2B4B)),
+                                CategoryProgressItem("NAILS", nails, 10, Color(0xFF8B263E)),
+                                CategoryProgressItem("LIPS", lips, 16, Color(0xFFC25975)),
+                                CategoryProgressItem("PREP", prep, 14, Color(0xFF3B5249)),
+                                CategoryProgressItem("HAIR", hair, 13, Color(0xFF415A77)),
+                                CategoryProgressItem("ORAL", oral, 8, Color(0xFF5C6B73)),
+                                CategoryProgressItem("BODY", body, 33, Color(0xFF8D5B4C))
+                            )
+                        }
+
+                        val healthText = if (uiState.expiringCosmeticsCount > 0) "Vanity Health: ${uiState.expiringCosmeticsCount} expiring items" else if (uiState.totalCosmetics > 0) "Vanity Health: Optimal" else null
+                        val restockText = if (uiState.lowStockCosmeticsCount > 0) "Restock needed: ${uiState.lowStockCosmeticsCount} formulas low" else null
+                        val toneText = uiState.dominantCosmeticsTone?.let { "Signature Tone: Dominated by ${it.lowercase().replaceFirstChar { char -> char.uppercase() }}" }
+                        
+                        ArchiveVerticalCard(
+                            uiState = ArchiveVerticalUiState(
+                                title = "Vanity",
+                                count = uiState.totalCosmetics,
+                                countLabel = "items",
+                                valueLabel = stringResource(R.string.applications_kocolor_apps_mobile_features_home_total_value),
+                                value = uiState.totalVanityValue,
+                                imageModel = R.drawable.vanity_white_background,
+                                icon = Icons.Default.Face,
+                                discoverTitle = "DISCOVER",
+                                discoverSubtitle = "Cosmetics Catalog",
+                                discoverColor = Color(0xFF3D223B), // Dark Plum
+                                onDiscoverClick = { navTo(KoColorRoute.StarterPack(filter = "cosmetics", showHero = true)) },
+                                categoryProgress = emptyList(),
+                                healthMetric = healthText,
+                                restockMetric = restockText,
+                                chromaticTone = toneText,
+                                avgCpu = uiState.avgCosmeticsCpu,
+                                breakdown = uiState.cosmeticsByGroup
+                            ),
+                            onEvent = { navTo(KoColorRoute.VanityLanding) },
+                            navTo = navTo
                         )
                     }
 
-                    val healthText = if (uiState.expiringCosmeticsCount > 0) "Vanity Health: ${uiState.expiringCosmeticsCount} expiring items" else if (uiState.totalCosmetics > 0) "Vanity Health: Optimal" else null
-                    val restockText = if (uiState.lowStockCosmeticsCount > 0) "Restock needed: ${uiState.lowStockCosmeticsCount} formulas low" else null
-                    val toneText = uiState.dominantCosmeticsTone?.let { "Signature Tone: Dominated by ${it.lowercase().replaceFirstChar { char -> char.uppercase() }}" }
-                    
-                    ArchiveVerticalCard(
-                        uiState = ArchiveVerticalUiState(
-                            title = "Vanity",
-                            count = uiState.totalCosmetics,
-                            countLabel = "items",
-                            valueLabel = stringResource(R.string.applications_kocolor_apps_mobile_features_home_total_value),
-                            value = uiState.totalVanityValue,
-                            imageModel = R.drawable.vanity_white_background,
-                            icon = Icons.Default.Face,
-                            discoverTitle = "DISCOVER",
-                            discoverSubtitle = "Cosmetics Catalog",
-                            discoverColor = Color(0xFF3D223B), // Dark Plum
-                            onDiscoverClick = { navTo(KoColorRoute.StarterPack(filter = "cosmetics", showHero = true)) },
-                            categoryProgress = emptyList(),
-                            healthMetric = healthText,
-                            restockMetric = restockText,
-                            chromaticTone = toneText,
-                            avgCpu = uiState.avgCosmeticsCpu,
-                            breakdown = uiState.cosmeticsByGroup
-                        ),
-                        onEvent = { navTo(KoColorRoute.VanityLanding) },
-                        navTo = navTo
-                    )
-                }
+                    // 2. THE WARDROBE (with incorporated Explore Fashion pill, CPW & rotation health)
+                    item {
+                        val wardrobeProgress = remember(uiState.clothingByCategory) {
+                            val tops = uiState.clothingByCategory.entries.filter { it.key.contains("TOP", ignoreCase = true) || it.key.contains("SHIRT", ignoreCase = true) }.sumOf { it.value }
+                            val bots = uiState.clothingByCategory.entries.filter { it.key.contains("BOT", ignoreCase = true) || it.key.contains("PANT", ignoreCase = true) }.sumOf { it.value }
+                            val dress = uiState.clothingByCategory.entries.filter { it.key.contains("DRESS", ignoreCase = true) }.sumOf { it.value }
+                            val outer = uiState.clothingByCategory.entries.filter { it.key.contains("OUTER", ignoreCase = true) || it.key.contains("JACKET", ignoreCase = true) || it.key.contains("COAT", ignoreCase = true) }.sumOf { it.value }
+                            val active = uiState.clothingByCategory.entries.filter { it.key.contains("ACTIVE", ignoreCase = true) }.sumOf { it.value }
+                            val shoes = uiState.clothingByCategory.entries.filter { it.key.contains("SHOE", ignoreCase = true) }.sumOf { it.value }
 
-                // 2. THE WARDROBE (with incorporated Explore Fashion pill, CPW & rotation health)
-                item {
-                    val wardrobeProgress = remember(uiState.clothingByCategory) {
-                        val tops = uiState.clothingByCategory.entries.filter { it.key.contains("TOP", ignoreCase = true) || it.key.contains("SHIRT", ignoreCase = true) }.sumOf { it.value }
-                        val bots = uiState.clothingByCategory.entries.filter { it.key.contains("BOT", ignoreCase = true) || it.key.contains("PANT", ignoreCase = true) }.sumOf { it.value }
-                        val dress = uiState.clothingByCategory.entries.filter { it.key.contains("DRESS", ignoreCase = true) }.sumOf { it.value }
-                        val outer = uiState.clothingByCategory.entries.filter { it.key.contains("OUTER", ignoreCase = true) || it.key.contains("JACKET", ignoreCase = true) || it.key.contains("COAT", ignoreCase = true) }.sumOf { it.value }
-                        val active = uiState.clothingByCategory.entries.filter { it.key.contains("ACTIVE", ignoreCase = true) }.sumOf { it.value }
-                        val shoes = uiState.clothingByCategory.entries.filter { it.key.contains("SHOE", ignoreCase = true) }.sumOf { it.value }
+                            listOf(
+                                CategoryProgressItem("TOPS", tops, 9, Color(0xFF3B5249)),
+                                CategoryProgressItem("BOTS", bots, 9, Color(0xFF415A77)),
+                                CategoryProgressItem("DRESS", dress, 9, Color(0xFF8B263E)),
+                                CategoryProgressItem("OUTER", outer, 9, Color(0xFF8D5B4C)),
+                                CategoryProgressItem("ACTIVE", active, 9, Color(0xFFD4AF37)),
+                                CategoryProgressItem("SHOES", shoes, 9, Color(0xFF774936))
+                            )
+                        }
 
-                        listOf(
-                            CategoryProgressItem("TOPS", tops, 9, Color(0xFF3B5249)),
-                            CategoryProgressItem("BOTS", bots, 9, Color(0xFF415A77)),
-                            CategoryProgressItem("DRESS", dress, 9, Color(0xFF8B263E)),
-                            CategoryProgressItem("OUTER", outer, 9, Color(0xFF8D5B4C)),
-                            CategoryProgressItem("ACTIVE", active, 9, Color(0xFFD4AF37)),
-                            CategoryProgressItem("SHOES", shoes, 9, Color(0xFF774936))
+                        val wardrobeToneText = uiState.dominantWardrobeTone?.let { "Signature Tone: Palette Baseline: $it" }
+                        val wardrobeHealthText = if (uiState.totalClothing > 0) "Rotation Health: ${uiState.wardrobeActivePercentage}% Active" else null
+
+                        ArchiveVerticalCard(
+                            uiState = ArchiveVerticalUiState(
+                                title = "Wardrobe",
+                                count = uiState.totalClothing,
+                                countLabel = "pieces",
+                                valueLabel = "TOTAL CLOSET INVESTMENT",
+                                value = uiState.totalWardrobeValue,
+                                imageModel = R.drawable.wardrobe_background,
+                                icon = Icons.Default.Checkroom,
+                                discoverTitle = "EXPLORE",
+                                discoverSubtitle = "Fashion Catalog",
+                                discoverColor = Color(0xFF1B2238), // Deep Navy
+                                onDiscoverClick = { navTo(KoColorRoute.StarterPack(filter = "clothing", showHero = true)) },
+                                categoryProgress = emptyList(),
+                                healthMetric = wardrobeHealthText,
+                                chromaticTone = wardrobeToneText,
+                                avgCpu = uiState.avgWardrobeCpu,
+                                breakdown = uiState.clothingByCategory
+                            ),
+                            onEvent = { navTo(KoColorRoute.WardrobeLanding) },
+                            navTo = navTo
                         )
                     }
 
-                    val wardrobeToneText = uiState.dominantWardrobeTone?.let { "Signature Tone: Palette Baseline: $it" }
-                    val wardrobeHealthText = if (uiState.totalClothing > 0) "Rotation Health: ${uiState.wardrobeActivePercentage}% Active" else null
-
-                    ArchiveVerticalCard(
-                        uiState = ArchiveVerticalUiState(
-                            title = "Wardrobe",
-                            count = uiState.totalClothing,
-                            countLabel = "pieces",
-                            valueLabel = "TOTAL CLOSET INVESTMENT",
-                            value = uiState.totalWardrobeValue,
-                            imageModel = R.drawable.wardrobe_background,
-                            icon = Icons.Default.Checkroom,
-                            discoverTitle = "EXPLORE",
-                            discoverSubtitle = "Fashion Catalog",
-                            discoverColor = Color(0xFF1B2238), // Deep Navy
-                            onDiscoverClick = { navTo(KoColorRoute.StarterPack(filter = "clothing", showHero = true)) },
-                            categoryProgress = emptyList(),
-                            healthMetric = wardrobeHealthText,
-                            chromaticTone = wardrobeToneText,
-                            avgCpu = uiState.avgWardrobeCpu,
-                            breakdown = uiState.clothingByCategory
-                        ),
-                        onEvent = { navTo(KoColorRoute.WardrobeLanding) },
-                        navTo = navTo
-                    )
-                }
-
-                // The Store
-                //item { Spacer(modifier = Modifier.height(48.dp)) }
-                item {
-                    BioStoreCard(
-                        uiState = uiState.storeUiState,
-                        onEvent = { event ->
-                            android.util.Log.d("HomeScreen", "StoreEvent received: $event")
-                            when (event) {
-                                StoreEvent.ToggleExpansion -> onEvent(HomeEvent.ToggleStoreExpansion)
-                                StoreEvent.EnterStore -> {
-                                    android.util.Log.d("HomeScreen", "Routing to Store")
-                                    navTo(KoColorRoute.Store)
+                    // The Store
+                    item {
+                        BioStoreCard(
+                            uiState = uiState.storeUiState,
+                            onEvent = { event ->
+                                android.util.Log.d("HomeScreen", "StoreEvent received: $event")
+                                when (event) {
+                                    StoreEvent.ToggleExpansion -> onEvent(HomeEvent.ToggleStoreExpansion)
+                                    StoreEvent.EnterStore -> {
+                                        android.util.Log.d("HomeScreen", "Routing to Store")
+                                        navTo(KoColorRoute.Store)
+                                    }
+                                    else -> {}
                                 }
-                                else -> {}
-                            }
-                        },
-                        navTo = navTo,
-                        modifier = Modifier.padding(top = 16.dp)
-                    )
+                            },
+                            navTo = navTo,
+                            modifier = Modifier.padding(top = 16.dp)
+                        )
+                    }
                 }
 
+                // FILTERED SAVED LIST
                 if (filteredSuggestions.isNotEmpty()) {
                     item {
                         Text(
@@ -247,6 +269,18 @@ fun CollectionHubScreen(
                             onEvent = { navTo(KoColorRoute.CollectionDetail(analysis.id)) },
                             navTo = navTo
                         )
+                    }
+                } else if (filter != null) {
+                    item {
+                        androidx.compose.foundation.layout.Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 48.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            val emptyMsg = if (filter.equals("TRAVEL", ignoreCase = true)) "No saved travel capsules found." else "No saved AI fashion looks found."
+                            Text(emptyMsg, style = MaterialTheme.typography.bodyLarge, color = Color.Gray)
+                        }
                     }
                 }
             }
