@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Flight
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -135,7 +136,21 @@ fun ColorScreen(
             contentPadding = PaddingValues(20.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            // Style Playlist Summary
+            // 1. AI Fashion Advisor (Style Simulator)
+            item {
+                AiFashionAdvisorSummaryCard(
+                    onClick = { navTo(KoColorRoute.StyleSimulator) }
+                )
+            }
+
+            // 2. Destination Capsule Architect (Travel Mode)
+            item {
+                TravelCapsuleSummaryCard(
+                    onClick = { navTo(KoColorRoute.TravelCapsule) }
+                )
+            }
+
+            // 3. Style Playlist Summary (7-Day Forecast)
             item {
                 StylePlaylistSummaryCard(
                     playlist = uiState.latestPlaylist,
@@ -143,7 +158,7 @@ fun ColorScreen(
                 )
             }
 
-            // Section Divider/Title for History
+            // 3. Section Divider/Title for History
             if (uiState.savedSuggestions.isNotEmpty()) {
                 item {
                     Text(
@@ -184,6 +199,102 @@ fun ColorScreen(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun AiFashionAdvisorSummaryCard(onClick: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(28.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(modifier = Modifier.padding(24.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        "AI FASHION ADVISOR",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 1.2.sp,
+                        color = Color(0xFF6750A4)
+                    )
+                    Text(
+                        "Define Your Intent",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontFamily = FontFamily.Serif,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                Icon(
+                    imageVector = Icons.Default.AutoAwesome,
+                    contentDescription = null,
+                    tint = Color(0xFF6750A4),
+                    modifier = Modifier.size(32.dp)
+                )
+            }
+            Spacer(Modifier.height(16.dp))
+            Text(
+                text = "Generate a personalized outfit and cosmetic coordination from your vault based on daily mood and constraints.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.DarkGray
+            )
+        }
+    }
+}
+
+@Composable
+private fun TravelCapsuleSummaryCard(onClick: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(28.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(modifier = Modifier.padding(24.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        "DESTINATION CAPSULE",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 1.2.sp,
+                        color = Color(0xFF1E88E5)
+                    )
+                    Text(
+                        "Travel Packing AI",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontFamily = FontFamily.Serif,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                Icon(
+                    imageVector = Icons.Default.Flight,
+                    contentDescription = null,
+                    tint = Color(0xFF1E88E5),
+                    modifier = Modifier.size(32.dp)
+                )
+            }
+            Spacer(Modifier.height(16.dp))
+            Text(
+                text = "Generate a curated wardrobe and cosmetic plan for your next international trip.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.DarkGray
+            )
         }
     }
 }
