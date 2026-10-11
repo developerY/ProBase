@@ -283,8 +283,8 @@ fun ColorScreen(
 @Composable
 private fun AnimatedActionBadge(
     icon: ImageVector,
-    badgeColor: Color,
-    iconTint: Color,
+    badgeGradient: Brush,
+    iconTint: Color = Color.White,
     auraColors: List<Color>,
     onClick: () -> Unit
 ) {
@@ -335,33 +335,33 @@ private fun AnimatedActionBadge(
                 .background(auraBrush)
         )
 
-        Surface(
-            modifier = Modifier.size(48.dp),
-            shape = CircleShape,
-            color = badgeColor.copy(alpha = 0.95f),
-            border = BorderStroke(1.5.dp, Color.White),
-            shadowElevation = 4.dp,
-            onClick = onClick
+        Box(
+            modifier = Modifier
+                .size(48.dp)
+                .shadow(elevation = 6.dp, shape = CircleShape)
+                .background(brush = badgeGradient, shape = CircleShape)
+                .border(1.5.dp, Color.White.copy(alpha = 0.8f), CircleShape)
+                .clip(CircleShape)
+                .clickable { onClick() },
+            contentAlignment = Alignment.Center
         ) {
-            Box(contentAlignment = Alignment.Center) {
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .border(1.dp, iconTint.copy(alpha = 0.25f), CircleShape)
-                )
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = iconTint,
-                    modifier = Modifier
-                        .size(20.dp)
-                        .graphicsLayer {
-                            scaleX = iconScale
-                            scaleY = iconScale
-                        }
-                )
-            }
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .border(1.dp, Color.White.copy(alpha = 0.35f), CircleShape)
+            )
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = iconTint,
+                modifier = Modifier
+                    .size(20.dp)
+                    .graphicsLayer {
+                        scaleX = iconScale
+                        scaleY = iconScale
+                    }
+            )
         }
     }
 }
@@ -404,8 +404,10 @@ private fun AiFashionAdvisorSummaryCard(
 
                 AnimatedActionBadge(
                     icon = Icons.Default.AutoAwesome,
-                    badgeColor = Color(0xFFF3EDF7),
-                    iconTint = Color(0xFF6750A4),
+                    badgeGradient = Brush.horizontalGradient(
+                        colors = listOf(Color(0xFF4A347F), Color(0xFF6246A3))
+                    ),
+                    iconTint = Color.White,
                     auraColors = listOf(Color(0xFFD4AF37), Color(0xFFE91E63), Color(0xFF8E24AA), Color(0xFF6750A4), Color(0xFFD4AF37)),
                     onClick = onPrimaryClick
                 )
@@ -442,73 +444,34 @@ private fun AiFashionAdvisorSummaryCard(
 
             Spacer(Modifier.height(20.dp))
 
-            // Two Buttons Row
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            // Single Action Button (View Saved List)
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp)
+                    .clickable { onListClick() },
+                shape = CircleShape,
+                color = Color.White,
+                border = BorderStroke(1.dp, Color(0xFFE6E0EC))
             ) {
-                // Primary Gradient Button
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(52.dp)
-                        .shadow(elevation = 6.dp, shape = CircleShape)
-                        .background(
-                            brush = Brush.horizontalGradient(
-                                colors = listOf(Color(0xFF4A347F), Color(0xFF6246A3))
-                            ),
-                            shape = CircleShape
-                        )
-                        .clip(CircleShape)
-                        .clickable { onPrimaryClick() },
-                    contentAlignment = Alignment.Center
+                Row(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            "Define Intent",
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 14.sp
-                        )
-                        Spacer(Modifier.width(4.dp))
-                        Text(
-                            "↗",
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 14.sp
-                        )
-                    }
-                }
-
-                // Secondary Outlined Pill Button
-                Surface(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(52.dp)
-                        .clickable { onListClick() },
-                    shape = CircleShape,
-                    color = Color.White,
-                    border = BorderStroke(1.dp, Color(0xFFE6E0EC))
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxSize(),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Bookmark,
-                            contentDescription = null,
-                            tint = Color(0xFF4A347F),
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        Text(
-                            "Saved Looks",
-                            color = Color(0xFF1C1B1F),
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 14.sp
-                        )
-                    }
+                    Icon(
+                        imageVector = Icons.Default.Bookmark,
+                        contentDescription = null,
+                        tint = Color(0xFF4A347F),
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        "Saved Looks",
+                        color = Color(0xFF1C1B1F),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp
+                    )
                 }
             }
 
@@ -578,8 +541,10 @@ private fun TravelCapsuleSummaryCard(
 
                 AnimatedActionBadge(
                     icon = Icons.Default.Flight,
-                    badgeColor = Color(0xFFE8F1FF),
-                    iconTint = Color(0xFF1E88E5),
+                    badgeGradient = Brush.horizontalGradient(
+                        colors = listOf(Color(0xFF1E88E5), Color(0xFF1565C0))
+                    ),
+                    iconTint = Color.White,
                     auraColors = listOf(Color(0xFF00BCD4), Color(0xFF1E88E5), Color(0xFF1565C0), Color(0xFF00BCD4)),
                     onClick = onPrimaryClick
                 )
@@ -616,73 +581,34 @@ private fun TravelCapsuleSummaryCard(
 
             Spacer(Modifier.height(20.dp))
 
-            // Two Buttons Row
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            // Single Action Button (View Saved List)
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp)
+                    .clickable { onListClick() },
+                shape = CircleShape,
+                color = Color.White,
+                border = BorderStroke(1.dp, Color(0xFFD6E4FF))
             ) {
-                // Primary Gradient Button
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(52.dp)
-                        .shadow(elevation = 6.dp, shape = CircleShape)
-                        .background(
-                            brush = Brush.horizontalGradient(
-                                colors = listOf(Color(0xFF1E88E5), Color(0xFF1565C0))
-                            ),
-                            shape = CircleShape
-                        )
-                        .clip(CircleShape)
-                        .clickable { onPrimaryClick() },
-                    contentAlignment = Alignment.Center
+                Row(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            "Plan Trip",
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 14.sp
-                        )
-                        Spacer(Modifier.width(4.dp))
-                        Text(
-                            "↗",
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 14.sp
-                        )
-                    }
-                }
-
-                // Secondary Outlined Pill Button
-                Surface(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(52.dp)
-                        .clickable { onListClick() },
-                    shape = CircleShape,
-                    color = Color.White,
-                    border = BorderStroke(1.dp, Color(0xFFD6E4FF))
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxSize(),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Bookmark,
-                            contentDescription = null,
-                            tint = Color(0xFF1E88E5),
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        Text(
-                            "Saved Trips",
-                            color = Color(0xFF1C1B1F),
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 14.sp
-                        )
-                    }
+                    Icon(
+                        imageVector = Icons.Default.Bookmark,
+                        contentDescription = null,
+                        tint = Color(0xFF1E88E5),
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        "Saved Trips",
+                        color = Color(0xFF1C1B1F),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp
+                    )
                 }
             }
 
