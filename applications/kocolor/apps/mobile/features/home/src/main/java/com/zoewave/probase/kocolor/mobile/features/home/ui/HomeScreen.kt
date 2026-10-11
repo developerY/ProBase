@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -193,16 +192,6 @@ fun HomeScreen(
                     onEvent = {}, 
                     navTo = navTo
                 )
-            }
-
-            item {
-                androidx.compose.material3.Button(
-                    onClick = { navTo(KoColorRoute.TravelCapsule) },
-                    modifier = Modifier.fillMaxWidth().height(56.dp).padding(horizontal = 16.dp),
-                    shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
-                ) {
-                    androidx.compose.material3.Text("Destination Capsule Architect")
-                }
             }
 
             /*item {
