@@ -47,9 +47,17 @@ import com.zoewave.probase.kocolor.model.KoColorRoute
 fun CollectionHubScreen(
     uiState: HomeUiState,
     modifier: Modifier = Modifier,
+    filter: String? = null,
     onEvent: (HomeEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
+    val filteredSuggestions = remember(uiState.savedSuggestions, filter) {
+        when (filter?.uppercase()) {
+            "TRAVEL", "TRIPS" -> uiState.savedSuggestions.filter { it.advice.title?.contains("Trip", ignoreCase = true) == true }
+            "LOOKS", "FASHION" -> uiState.savedSuggestions.filter { it.advice.title?.contains("Trip", ignoreCase = true) != true }
+            else -> uiState.savedSuggestions
+        }
+    }
     // --- Shimmer Animation Logic ---
     val infiniteTransition = rememberInfiniteTransition(label = "shimmer")
     val shimmerProgress by infiniteTransition.animateFloat(
@@ -218,10 +226,14 @@ fun CollectionHubScreen(
                     )
                 }
 
-                if (uiState.savedSuggestions.isNotEmpty()) {
+                if (filteredSuggestions.isNotEmpty()) {
                     item {
                         Text(
-                            text = "BLUEPRINT HISTORY",
+                            text = when (filter?.uppercase()) {
+                                "TRAVEL", "TRIPS" -> "SAVED TRAVEL CAPSULES"
+                                "LOOKS", "FASHION" -> "SAVED AI FASHION LOOKS"
+                                else -> "BLUEPRINT HISTORY"
+                            },
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.ExtraBold,
                             letterSpacing = 1.5.sp,
@@ -229,7 +241,7 @@ fun CollectionHubScreen(
                         )
                     }
 
-                    items(uiState.savedSuggestions) { analysis ->
+                    items(filteredSuggestions) { analysis ->
                         CuratedCollectionCard(
                             uiState = CuratedCollectionUiState(analysis),
                             onEvent = { navTo(KoColorRoute.CollectionDetail(analysis.id)) },

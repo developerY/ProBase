@@ -13,7 +13,7 @@ sealed class KoColorRoute {
     data object Home : KoColorRoute()
 
     @Serializable
-    data object CollectionHub : KoColorRoute()
+    data class CollectionHub(val filter: String? = null) : KoColorRoute()
     
     @Serializable
     data object VanityLanding : KoColorRoute()

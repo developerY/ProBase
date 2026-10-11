@@ -35,6 +35,7 @@ import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Flight
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -42,6 +43,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -139,14 +141,16 @@ fun ColorScreen(
             // 1. AI Fashion Advisor (Style Simulator)
             item {
                 AiFashionAdvisorSummaryCard(
-                    onClick = { navTo(KoColorRoute.StyleSimulator) }
+                    onPrimaryClick = { navTo(KoColorRoute.StyleSimulator) },
+                    onListClick = { navTo(KoColorRoute.CollectionHub(filter = "LOOKS")) }
                 )
             }
 
             // 2. Destination Capsule Architect (Travel Mode)
             item {
                 TravelCapsuleSummaryCard(
-                    onClick = { navTo(KoColorRoute.TravelCapsule) }
+                    onPrimaryClick = { navTo(KoColorRoute.TravelCapsule) },
+                    onListClick = { navTo(KoColorRoute.CollectionHub(filter = "TRAVEL")) }
                 )
             }
 
@@ -154,15 +158,16 @@ fun ColorScreen(
             item {
                 StylePlaylistSummaryCard(
                     playlist = uiState.latestPlaylist,
-                    onClick = { navTo(KoColorRoute.StylePlaylist) }
+                    onPrimaryClick = { navTo(KoColorRoute.StylePlaylist) },
+                    onListClick = { navTo(KoColorRoute.StylePlaylist) }
                 )
             }
 
-            // 3. Section Divider/Title for History
+            // 4. Section Divider/Title for Recent History (7 Most Recent)
             if (uiState.savedSuggestions.isNotEmpty()) {
                 item {
                     Text(
-                        text = "PAST ANALYSES",
+                        text = "RECENT SAVED COLLECTIONS (TOP 7)",
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Black,
                         letterSpacing = 1.2.sp,
@@ -184,7 +189,7 @@ fun ColorScreen(
                     }
                 }
             } else {
-                items(uiState.savedSuggestions) { analysis ->
+                items(uiState.savedSuggestions.take(7)) { analysis ->
                     ColorHistoryCard(
                         uiState = ColorHistoryCardUiState(analysis),
                         onEvent = { event ->
@@ -198,17 +203,30 @@ fun ColorScreen(
                         navTo = navTo
                     )
                 }
+
+                if (uiState.savedSuggestions.size > 7) {
+                    item {
+                        OutlinedButton(
+                            onClick = { navTo(KoColorRoute.CollectionHub()) },
+                            modifier = Modifier.fillMaxWidth().height(48.dp),
+                            shape = RoundedCornerShape(14.dp)
+                        ) {
+                            Text("View All (${uiState.savedSuggestions.size}) Collections", fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-private fun AiFashionAdvisorSummaryCard(onClick: () -> Unit) {
+private fun AiFashionAdvisorSummaryCard(
+    onPrimaryClick: () -> Unit,
+    onListClick: () -> Unit
+) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
+        modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(28.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -241,22 +259,44 @@ private fun AiFashionAdvisorSummaryCard(onClick: () -> Unit) {
                     modifier = Modifier.size(32.dp)
                 )
             }
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(12.dp))
             Text(
                 text = "Generate a personalized outfit and cosmetic coordination from your vault based on daily mood and constraints.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.DarkGray
             )
+            Spacer(Modifier.height(20.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Button(
+                    onClick = onPrimaryClick,
+                    modifier = Modifier.weight(1f).height(48.dp),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6750A4))
+                ) {
+                    Text("Define Intent", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                }
+                OutlinedButton(
+                    onClick = onListClick,
+                    modifier = Modifier.weight(1f).height(48.dp),
+                    shape = RoundedCornerShape(14.dp)
+                ) {
+                    Text("Saved Looks", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                }
+            }
         }
     }
 }
 
 @Composable
-private fun TravelCapsuleSummaryCard(onClick: () -> Unit) {
+private fun TravelCapsuleSummaryCard(
+    onPrimaryClick: () -> Unit,
+    onListClick: () -> Unit
+) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
+        modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(28.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -289,12 +329,33 @@ private fun TravelCapsuleSummaryCard(onClick: () -> Unit) {
                     modifier = Modifier.size(32.dp)
                 )
             }
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(12.dp))
             Text(
                 text = "Generate a curated wardrobe and cosmetic plan for your next international trip.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.DarkGray
             )
+            Spacer(Modifier.height(20.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Button(
+                    onClick = onPrimaryClick,
+                    modifier = Modifier.weight(1f).height(48.dp),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E88E5))
+                ) {
+                    Text("Plan Trip", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                }
+                OutlinedButton(
+                    onClick = onListClick,
+                    modifier = Modifier.weight(1f).height(48.dp),
+                    shape = RoundedCornerShape(14.dp)
+                ) {
+                    Text("Saved Trips", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                }
+            }
         }
     }
 }
@@ -302,24 +363,17 @@ private fun TravelCapsuleSummaryCard(onClick: () -> Unit) {
 @Composable
 private fun StylePlaylistSummaryCard(
     playlist: PlaylistWithDays?,
-    isActive: Boolean = false, // 1. Add the state parameter
-    onClick: () -> Unit
+    isActive: Boolean = false,
+    onPrimaryClick: () -> Unit,
+    onListClick: () -> Unit
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            // 2. Fade the entire card to the standard M3 disabled opacity
-            .alpha(if (isActive) 1f else 0.47f)
-            // 3. Disable the click interaction and ripple effect
-            .clickable(
-                enabled = isActive,
-                onClick = { onClick() }
-            ),
+            .alpha(if (isActive) 1f else 0.7f),
         shape = RoundedCornerShape(28.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = if (isActive) 2.dp else 0.dp // Drop shadow removed when inactive
-        )
+        elevation = CardDefaults.cardElevation(defaultElevation = if (isActive) 2.dp else 0.dp)
     ) {
         Column(modifier = Modifier.padding(24.dp)) {
             Row(
@@ -350,55 +404,31 @@ private fun StylePlaylistSummaryCard(
                 )
             }
 
-            Spacer(Modifier.height(16.dp))
-
-            if (playlist != null) {
-                val today = LocalDate.now()
-                // Assuming targetDate and status exist on your daily plan object
-                val todayPlan = playlist.dailyPlans.find { it.targetDate == today }
-                val completedCount = playlist.dailyPlans.count { it.status == DailyPlanStatus.COMMITTED }
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = "$completedCount/7 DAYS COMPLETED",
-                        style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Gray
-                    )
-                }
-
-                Spacer(Modifier.height(8.dp))
-
-                Text(
-                    text = todayPlan?.rationale?.rotationReason ?: "Open to see your daily style recommendations.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    color = Color.DarkGray
-                )
-            } else {
-                Text(
-                    "No active playlist found. Generate your weekly plan to optimize your wardrobe rotation.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Gray
-                )
-            }
-
+            Spacer(Modifier.height(12.dp))
+            Text(
+                text = "Automated 7-day wardrobe and cosmetic rotation based on weather forecasts.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.DarkGray
+            )
             Spacer(Modifier.height(20.dp))
-
-            Surface(
-                color = Color(0xFFF5F5F5),
-                shape = RoundedCornerShape(16.dp),
-                modifier = Modifier.fillMaxWidth()
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Box(modifier = Modifier.padding(12.dp), contentAlignment = Alignment.Center) {
-                    Text(
-                        //text = if (playlist != null) "VIEW FULL WEEK" else "START PLAN",
-                        text = "COMING SOON",
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black
-                    )
+                Button(
+                    onClick = onPrimaryClick,
+                    modifier = Modifier.weight(1f).height(48.dp),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6750A4))
+                ) {
+                    Text("Build Forecast", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                }
+                OutlinedButton(
+                    onClick = onListClick,
+                    modifier = Modifier.weight(1f).height(48.dp),
+                    shape = RoundedCornerShape(14.dp)
+                ) {
+                    Text("View Playlists", fontWeight = FontWeight.Bold, fontSize = 13.sp)
                 }
             }
         }
