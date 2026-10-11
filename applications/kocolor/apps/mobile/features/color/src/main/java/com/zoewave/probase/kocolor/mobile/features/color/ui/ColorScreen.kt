@@ -1,5 +1,6 @@
 package com.zoewave.probase.kocolor.mobile.features.color.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -30,6 +31,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Edit
@@ -227,65 +229,154 @@ private fun AiFashionAdvisorSummaryCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(28.dp),
+        shape = RoundedCornerShape(32.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.padding(24.dp)) {
+            // Top Badge & Icon Header
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column {
-                    Text(
-                        "AI FASHION ADVISOR",
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Black,
-                        letterSpacing = 1.2.sp,
-                        color = Color(0xFF6750A4)
-                    )
-                    Text(
-                        "Define Your Intent",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontFamily = FontFamily.Serif,
-                        fontWeight = FontWeight.Bold
-                    )
+                Surface(
+                    shape = CircleShape,
+                    color = Color(0xFFF3EDF7)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            "✦  AI FASHION ADVISOR",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF6750A4),
+                            letterSpacing = 0.8.sp
+                        )
+                    }
                 }
-                Icon(
-                    imageVector = Icons.Default.AutoAwesome,
-                    contentDescription = null,
-                    tint = Color(0xFF6750A4),
-                    modifier = Modifier.size(32.dp)
-                )
+
+                Surface(
+                    shape = CircleShape,
+                    color = Color(0xFFF3EDF7),
+                    shadowElevation = 2.dp,
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = Icons.Default.AutoAwesome,
+                            contentDescription = null,
+                            tint = Color(0xFF6750A4),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
             }
-            Spacer(Modifier.height(12.dp))
+
+            Spacer(Modifier.height(16.dp))
+
+            // Headline
+            Text(
+                "Define Your Intent",
+                style = MaterialTheme.typography.headlineMedium,
+                fontFamily = FontFamily.Serif,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF1F1B24)
+            )
+
+            Spacer(Modifier.height(8.dp))
+
+            // Body
             Text(
                 text = "Generate a personalized outfit and cosmetic coordination from your vault based on daily mood and constraints.",
                 style = MaterialTheme.typography.bodyMedium,
-                color = Color.DarkGray
+                color = Color(0xFF5A5760),
+                lineHeight = 22.sp
             )
-            Spacer(Modifier.height(20.dp))
+
+            Spacer(Modifier.height(24.dp))
+
+            // Two Buttons Row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Button(
-                    onClick = onPrimaryClick,
-                    modifier = Modifier.weight(1f).height(48.dp),
-                    shape = RoundedCornerShape(14.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6750A4))
+                // Primary Gradient Button
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(52.dp)
+                        .shadow(elevation = 6.dp, shape = CircleShape)
+                        .background(
+                            brush = Brush.horizontalGradient(
+                                colors = listOf(Color(0xFF4A347F), Color(0xFF6246A3))
+                            ),
+                            shape = CircleShape
+                        )
+                        .clip(CircleShape)
+                        .clickable { onPrimaryClick() },
+                    contentAlignment = Alignment.Center
                 ) {
-                    Text("Define Intent", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            "Define Intent",
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            "↗",
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp
+                        )
+                    }
                 }
-                OutlinedButton(
-                    onClick = onListClick,
-                    modifier = Modifier.weight(1f).height(48.dp),
-                    shape = RoundedCornerShape(14.dp)
+
+                // Secondary Outlined Pill Button
+                Surface(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(52.dp)
+                        .clickable { onListClick() },
+                    shape = CircleShape,
+                    color = Color.White,
+                    border = BorderStroke(1.dp, Color(0xFFE6E0EC))
                 ) {
-                    Text("Saved Looks", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                    Row(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Bookmark,
+                            contentDescription = null,
+                            tint = Color(0xFF4A347F),
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            "Saved Looks",
+                            color = Color(0xFF1C1B1F),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp
+                        )
+                    }
                 }
             }
+
+            Spacer(Modifier.height(16.dp))
+
+            // Subtext Footer
+            Text(
+                "• Color Formula DNA • Micro-Features Synced",
+                style = MaterialTheme.typography.labelSmall,
+                color = Color(0xFF8F8A98),
+                fontSize = 11.sp
+            )
         }
     }
 }
@@ -297,65 +388,154 @@ private fun TravelCapsuleSummaryCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(28.dp),
+        shape = RoundedCornerShape(32.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.padding(24.dp)) {
+            // Top Badge & Icon Header
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column {
-                    Text(
-                        "DESTINATION CAPSULE",
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Black,
-                        letterSpacing = 1.2.sp,
-                        color = Color(0xFF1E88E5)
-                    )
-                    Text(
-                        "Travel Packing AI",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontFamily = FontFamily.Serif,
-                        fontWeight = FontWeight.Bold
-                    )
+                Surface(
+                    shape = CircleShape,
+                    color = Color(0xFFE8F1FF)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            "✦  DESTINATION CAPSULE",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF1E88E5),
+                            letterSpacing = 0.8.sp
+                        )
+                    }
                 }
-                Icon(
-                    imageVector = Icons.Default.Flight,
-                    contentDescription = null,
-                    tint = Color(0xFF1E88E5),
-                    modifier = Modifier.size(32.dp)
-                )
+
+                Surface(
+                    shape = CircleShape,
+                    color = Color(0xFFE8F1FF),
+                    shadowElevation = 2.dp,
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = Icons.Default.Flight,
+                            contentDescription = null,
+                            tint = Color(0xFF1E88E5),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
             }
-            Spacer(Modifier.height(12.dp))
+
+            Spacer(Modifier.height(16.dp))
+
+            // Headline
             Text(
-                text = "Generate a curated wardrobe and cosmetic plan for your next international trip.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.DarkGray
+                "Travel Packing AI",
+                style = MaterialTheme.typography.headlineMedium,
+                fontFamily = FontFamily.Serif,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF1F1B24)
             )
-            Spacer(Modifier.height(20.dp))
+
+            Spacer(Modifier.height(8.dp))
+
+            // Body
+            Text(
+                text = "Generate a curated wardrobe and cosmetic plan for your next international voyage.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color(0xFF5A5760),
+                lineHeight = 22.sp
+            )
+
+            Spacer(Modifier.height(24.dp))
+
+            // Two Buttons Row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Button(
-                    onClick = onPrimaryClick,
-                    modifier = Modifier.weight(1f).height(48.dp),
-                    shape = RoundedCornerShape(14.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E88E5))
+                // Primary Gradient Button
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(52.dp)
+                        .shadow(elevation = 6.dp, shape = CircleShape)
+                        .background(
+                            brush = Brush.horizontalGradient(
+                                colors = listOf(Color(0xFF1E88E5), Color(0xFF1565C0))
+                            ),
+                            shape = CircleShape
+                        )
+                        .clip(CircleShape)
+                        .clickable { onPrimaryClick() },
+                    contentAlignment = Alignment.Center
                 ) {
-                    Text("Plan Trip", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            "Plan Trip",
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            "↗",
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp
+                        )
+                    }
                 }
-                OutlinedButton(
-                    onClick = onListClick,
-                    modifier = Modifier.weight(1f).height(48.dp),
-                    shape = RoundedCornerShape(14.dp)
+
+                // Secondary Outlined Pill Button
+                Surface(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(52.dp)
+                        .clickable { onListClick() },
+                    shape = CircleShape,
+                    color = Color.White,
+                    border = BorderStroke(1.dp, Color(0xFFD6E4FF))
                 ) {
-                    Text("Saved Trips", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                    Row(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Bookmark,
+                            contentDescription = null,
+                            tint = Color(0xFF1E88E5),
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            "Saved Trips",
+                            color = Color(0xFF1C1B1F),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp
+                        )
+                    }
                 }
             }
+
+            Spacer(Modifier.height(16.dp))
+
+            // Subtext Footer
+            Text(
+                "• Weather & UV Synced • Destination Temperature Matching",
+                style = MaterialTheme.typography.labelSmall,
+                color = Color(0xFF8F8A98),
+                fontSize = 11.sp
+            )
         }
     }
 }
