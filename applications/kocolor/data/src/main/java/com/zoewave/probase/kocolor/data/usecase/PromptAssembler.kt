@@ -72,13 +72,6 @@ class PromptAssembler @Inject constructor() {
         }
 
         val prompt = """
-            You are the KoColor Style Architect AI. Generate a "Style Blueprint" that is stylistically harmonic and appropriate to the supplied environmental context.
-            
-            STRICT GROUNDING RULES & CONSTRAINTS:
-            1. DESCRIPTIVE ACCURACY: Do not invent stylistic adjectives (e.g., do not call nylon 'structural'). Describe items strictly using the physical materials and attributes listed in the manifest.
-            2. CATEGORY ISOLATION: You may ONLY select cosmetics from the requested roles (Eye, Cheek, Lip, Nail). You are STRICTLY FORBIDDEN from selecting or referencing items categorized as PREP, HAIR, or COMPLEXION, regardless of the environmental context. You must only select clothing items from the TOPS, BOTTOMS, SHOES, or OUTERWEAR categories.
-            3. RATIONALE FORMATTING: Write the rationale as fluid prose. Do not invent qualitative weather adjectives (like "mild" or "breezy"). Use ONLY the provided THERMAL_CONTEXT and UV_CONTEXT. Do not use decimals.
-            
             APPEARANCE TELEMETRY:
             - Temperature: ${profile.undertone}
             - Depth: ${profile.depth}
@@ -126,14 +119,6 @@ class PromptAssembler @Inject constructor() {
             $clothingGoal
             $cosmeticGoal
             3. HARMONIC SYNTHESIS: Construct a harmonic style where all colors work together, including a rationale referencing ONLY selected item IDs.
-            
-            Respond ONLY with a valid JSON object matching this schema:
-            {
-              "rationale": "string",
-              "selectedClothingIds": ["w_id", "w_id", "w_id"],
-              "selectedCosmeticIds": ["c_id", "c_id", "c_id", "c_id"],
-              "recommendedPalette": ["#HEX", "#HEX", "#HEX", "#HEX"]
-            }
         """.trimIndent()
 
         val tempOverride = if (context.intent.equals("Surprise Me", ignoreCase = true) || (context.intentProfile?.colorfulness ?: 0.5f) >= 0.85f) {

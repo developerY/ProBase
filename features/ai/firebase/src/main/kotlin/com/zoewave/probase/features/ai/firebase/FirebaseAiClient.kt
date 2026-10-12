@@ -5,6 +5,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.ai.GenerativeModel
 import com.google.firebase.ai.ai
 import com.google.firebase.ai.type.GenerativeBackend
+import com.google.firebase.ai.type.content
 import com.google.firebase.ai.type.generationConfig
 import com.zoewave.probase.core.data.repository.AiConfigurationSettings
 import com.zoewave.probase.features.ai.firebase.models.StyleTelemetry
@@ -83,6 +84,18 @@ class FirebaseAiClientImpl @Inject constructor(
             useLimitedUseAppCheckTokens = false
         ).generativeModel(
             modelName = modelName,
+            systemInstruction = content {
+                text("""
+                    You are the KoColor Style Architect AI. Generate a "Style Blueprint" that is stylistically harmonic and appropriate to the supplied environmental context.
+                    
+                    STRICT GROUNDING RULES & CONSTRAINTS:
+                    1. DESCRIPTIVE ACCURACY: Do not invent stylistic adjectives (e.g., do not call nylon 'structural'). Describe items strictly using the physical materials and attributes listed in the manifest.
+                    2. CATEGORY ISOLATION: You may ONLY select cosmetics from the requested roles. You are STRICTLY FORBIDDEN from selecting or referencing items categorized as PREP, HAIR, or COMPLEXION, unless explicitly requested in the environmental context. You must only select clothing items from the TOPS, BOTTOMS, SHOES, or OUTERWEAR categories.
+                    3. RATIONALE FORMATTING: Write the rationale as fluid prose. Do not invent qualitative weather adjectives (like "mild" or "breezy"). Use ONLY the provided context variables. Do not use decimals.
+                    
+                    Respond ONLY with a valid JSON object matching the requested schema.
+                """.trimIndent())
+            },
             generationConfig = generationConfig {
                 responseMimeType = "application/json"
                 temperature = temperatureOverride ?: 0.75f
