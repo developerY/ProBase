@@ -1,5 +1,7 @@
 package com.zoewave.probase.kocolor.mobile.features.color.ui
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
@@ -9,6 +11,10 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -48,6 +54,7 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Flight
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -68,11 +75,14 @@ import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -82,6 +92,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -329,7 +340,7 @@ private fun AnimatedActionBadge(
 
     val auraScale by infiniteTransition.animateFloat(
         initialValue = 1.0f,
-        targetValue = 1.25f,
+        targetValue = 1.15f,
         animationSpec = infiniteRepeatable(
             animation = tween(durationMillis = 2000, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
@@ -338,8 +349,8 @@ private fun AnimatedActionBadge(
     )
 
     val auraAlpha by infiniteTransition.animateFloat(
-        initialValue = 0.30f,
-        targetValue = 0.70f,
+        initialValue = 0.10f,
+        targetValue = 0.35f,
         animationSpec = infiniteRepeatable(
             animation = tween(durationMillis = 2000, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
@@ -435,8 +446,17 @@ private fun AiFashionAdvisorSummaryCard(
     onPrimaryClick: () -> Unit,
     onListClick: () -> Unit
 ) {
+    var isExpanded by remember { mutableStateOf(false) }
+
+    val chevronRotation by animateFloatAsState(
+        targetValue = if (isExpanded) 180f else 0f,
+        label = "ChevronRotation"
+    )
+
     Surface(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .animateContentSize(),
         shape = RoundedCornerShape(32.dp),
         color = Color(0xFFF6EEF8),
         border = BorderStroke(1.dp, Color.White.copy(alpha = 0.6f)),
@@ -453,61 +473,43 @@ private fun AiFashionAdvisorSummaryCard(
                 )
                 .padding(20.dp)
         ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                // Top Header & Frosted Glass Pill
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // TOP HALF: Main Glassmorphic Pill & Floating Badge
                 Box(
                     modifier = Modifier.fillMaxWidth(),
                     contentAlignment = Alignment.TopStart
                 ) {
-                    // Frosted Glass Pill
+                    // Translucent Frosted Glass Pill
                     Surface(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 8.dp, end = 12.dp),
+                            .padding(top = 6.dp, end = 12.dp)
+                            .clickable { isExpanded = !isExpanded },
                         shape = RoundedCornerShape(24.dp),
                         color = Color.White.copy(alpha = 0.55f),
                         border = BorderStroke(1.dp, Color.White.copy(alpha = 0.8f))
                     ) {
-                        Column(modifier = Modifier.padding(20.dp)) {
-                            // Badge Pill
-                            Surface(
-                                shape = CircleShape,
-                                color = Color(0xFFEADBEE)
-                            ) {
-                                Text(
-                                    "✦  AI FASHION ADVISOR",
-                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF6750A4),
-                                    letterSpacing = 0.8.sp
-                                )
-                            }
-
-                            Spacer(Modifier.height(14.dp))
-
-                            // Headline
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 18.dp, horizontal = 20.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
                             Text(
-                                "Define Your Intent",
-                                style = MaterialTheme.typography.headlineMedium,
+                                text = "Define Your Intent",
+                                style = MaterialTheme.typography.displayMedium.copy(fontSize = 28.sp),
                                 fontFamily = FontFamily.Serif,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFF1F1B24)
-                            )
-
-                            Spacer(Modifier.height(6.dp))
-
-                            // Body
-                            Text(
-                                text = "Generate a personalized outfit and cosmetic coordination from your vault based on daily mood and constraints.",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = Color(0xFF5A5760),
-                                lineHeight = 20.sp
+                                color = Color(0xFF1F1B24),
+                                textAlign = TextAlign.Center
                             )
                         }
                     }
 
-                    // Floating Animated Badge Overlapping Top Right of Glass Pill
+                    // Floating 3D Animated Action Badge (Intersecting Top Right)
                     Box(
                         modifier = Modifier
                             .align(Alignment.TopEnd)
@@ -525,78 +527,129 @@ private fun AiFashionAdvisorSummaryCard(
                     }
                 }
 
-                Spacer(Modifier.height(16.dp))
+                // BOTTOM HALF: Subtitle / Chevron Toggle Row
+                val looksText = when (savedCount) {
+                    0 -> "None Saved"
+                    1 -> "1 Saved Look"
+                    else -> "$savedCount Saved Looks"
+                }
 
-                // Translucent Divider Line
-                HorizontalDivider(
-                    color = Color.White.copy(alpha = 0.7f),
-                    thickness = 1.dp
-                )
-
-                Spacer(Modifier.height(14.dp))
-
-                // Bottom Section: Left Metadata, Right Glassy Button
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { isExpanded = !isExpanded }
+                        .padding(top = 10.dp, bottom = 4.dp),
+                    horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // LEFT: Info
-                    Column(horizontalAlignment = Alignment.Start) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = "DNA: ",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = Color(0xFF7A7382),
-                                fontSize = 11.sp
-                            )
-                            Text(
-                                text = "Soft Autumn",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = Color(0xFF1C1B1F),
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 11.sp
-                            )
-                        }
-                        val looksText = when (savedCount) {
-                            0 -> "None Saved"
-                            1 -> "1 Saved Look"
-                            else -> "$savedCount Saved Looks"
-                        }
-                        Text(
-                            text = looksText,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = if (savedCount > 0) Color(0xFF6750A4) else Color(0xFF7A7382),
-                            fontWeight = if (savedCount > 0) FontWeight.Bold else FontWeight.Normal,
-                            fontSize = 11.sp
-                        )
-                    }
+                    Text(
+                        text = looksText,
+                        style = MaterialTheme.typography.headlineMedium.copy(fontSize = 18.sp),
+                        fontFamily = FontFamily.Serif,
+                        fontWeight = FontWeight.Medium,
+                        color = if (savedCount > 0) Color(0xFF6750A4) else Color(0xFF1F2937),
+                        letterSpacing = (-0.2).sp
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Icon(
+                        imageVector = Icons.Default.KeyboardArrowDown,
+                        contentDescription = if (isExpanded) "Collapse" else "Expand",
+                        tint = Color(0xFF6750A4),
+                        modifier = Modifier
+                            .size(20.dp)
+                            .rotate(chevronRotation)
+                    )
+                }
 
-                    // RIGHT: Glassy Button
-                    Surface(
-                        onClick = onListClick,
-                        shape = CircleShape,
-                        color = Color.White.copy(alpha = 0.75f),
-                        border = BorderStroke(1.dp, Color.White),
-                        shadowElevation = 2.dp
+                // COLLAPSIBLE CONTENT
+                AnimatedVisibility(
+                    visible = isExpanded,
+                    enter = fadeIn() + expandVertically(),
+                    exit = fadeOut() + shrinkVertically()
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 12.dp)
                     ) {
+                        Text(
+                            text = "Generate a personalized outfit and cosmetic coordination from your vault based on daily mood and constraints.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color(0xFF5A5760),
+                            lineHeight = 20.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)
+                        )
+
+                        Spacer(Modifier.height(16.dp))
+
+                        // Translucent Divider Line
+                        HorizontalDivider(
+                            color = Color.White.copy(alpha = 0.7f),
+                            thickness = 1.dp
+                        )
+
+                        Spacer(Modifier.height(14.dp))
+
+                        // Bottom Section: Left Metadata, Right Glassy Button
                         Row(
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 9.dp),
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Bookmark,
-                                contentDescription = null,
-                                tint = Color(0xFF6750A4),
-                                modifier = Modifier.size(15.dp)
-                            )
-                            Spacer(Modifier.width(6.dp))
-                            Text(
-                                text = "Saved Looks",
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 13.sp,
-                                color = Color(0xFF1C1B1F)
-                            )
+                            // LEFT: Info
+                            Column(horizontalAlignment = Alignment.Start) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(
+                                        text = "DNA: ",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = Color(0xFF7A7382),
+                                        fontSize = 11.sp
+                                    )
+                                    Text(
+                                        text = "Soft Autumn",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = Color(0xFF1C1B1F),
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 11.sp
+                                    )
+                                }
+                                Text(
+                                    text = looksText,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = if (savedCount > 0) Color(0xFF6750A4) else Color(0xFF7A7382),
+                                    fontWeight = if (savedCount > 0) FontWeight.Bold else FontWeight.Normal,
+                                    fontSize = 11.sp
+                                )
+                            }
+
+                            // RIGHT: Glassy Button
+                            Surface(
+                                onClick = onListClick,
+                                shape = CircleShape,
+                                color = Color.White.copy(alpha = 0.75f),
+                                border = BorderStroke(1.dp, Color.White),
+                                shadowElevation = 2.dp
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 9.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Bookmark,
+                                        contentDescription = null,
+                                        tint = Color(0xFF6750A4),
+                                        modifier = Modifier.size(15.dp)
+                                    )
+                                    Spacer(Modifier.width(6.dp))
+                                    Text(
+                                        text = "Saved Looks",
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 13.sp,
+                                        color = Color(0xFF1C1B1F)
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -611,8 +664,17 @@ private fun TravelCapsuleSummaryCard(
     onPrimaryClick: () -> Unit,
     onListClick: () -> Unit
 ) {
+    var isExpanded by remember { mutableStateOf(false) }
+
+    val chevronRotation by animateFloatAsState(
+        targetValue = if (isExpanded) 180f else 0f,
+        label = "ChevronRotation"
+    )
+
     Surface(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .animateContentSize(),
         shape = RoundedCornerShape(32.dp),
         color = Color(0xFFEEF5FF),
         border = BorderStroke(1.dp, Color.White.copy(alpha = 0.6f)),
@@ -629,61 +691,43 @@ private fun TravelCapsuleSummaryCard(
                 )
                 .padding(20.dp)
         ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                // Top Header & Frosted Glass Pill
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // TOP HALF: Main Glassmorphic Pill & Floating Badge
                 Box(
                     modifier = Modifier.fillMaxWidth(),
                     contentAlignment = Alignment.TopStart
                 ) {
-                    // Frosted Glass Pill
+                    // Translucent Frosted Glass Pill
                     Surface(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 8.dp, end = 12.dp),
+                            .padding(top = 6.dp, end = 12.dp)
+                            .clickable { isExpanded = !isExpanded },
                         shape = RoundedCornerShape(24.dp),
                         color = Color.White.copy(alpha = 0.55f),
                         border = BorderStroke(1.dp, Color.White.copy(alpha = 0.8f))
                     ) {
-                        Column(modifier = Modifier.padding(20.dp)) {
-                            // Badge Pill
-                            Surface(
-                                shape = CircleShape,
-                                color = Color(0xFFD9E8FF)
-                            ) {
-                                Text(
-                                    "✦  DESTINATION CAPSULE",
-                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF1E88E5),
-                                    letterSpacing = 0.8.sp
-                                )
-                            }
-
-                            Spacer(Modifier.height(14.dp))
-
-                            // Headline
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 18.dp, horizontal = 20.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
                             Text(
-                                "Travel Packing AI",
-                                style = MaterialTheme.typography.headlineMedium,
+                                text = "Travel Packing AI",
+                                style = MaterialTheme.typography.displayMedium.copy(fontSize = 28.sp),
                                 fontFamily = FontFamily.Serif,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFF1F1B24)
-                            )
-
-                            Spacer(Modifier.height(6.dp))
-
-                            // Body
-                            Text(
-                                text = "Generate a curated wardrobe and cosmetic plan for your next international voyage.",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = Color(0xFF5A5760),
-                                lineHeight = 20.sp
+                                color = Color(0xFF1F1B24),
+                                textAlign = TextAlign.Center
                             )
                         }
                     }
 
-                    // Floating Animated Badge Overlapping Top Right of Glass Pill
+                    // Floating 3D Animated Action Badge (Intersecting Top Right)
                     Box(
                         modifier = Modifier
                             .align(Alignment.TopEnd)
@@ -701,70 +745,121 @@ private fun TravelCapsuleSummaryCard(
                     }
                 }
 
-                Spacer(Modifier.height(16.dp))
+                // BOTTOM HALF: Subtitle / Chevron Toggle Row
+                val tripsText = when (savedCount) {
+                    0 -> "None Saved"
+                    1 -> "1 Saved Trip"
+                    else -> "$savedCount Saved Trips"
+                }
 
-                // Translucent Divider Line
-                HorizontalDivider(
-                    color = Color.White.copy(alpha = 0.7f),
-                    thickness = 1.dp
-                )
-
-                Spacer(Modifier.height(14.dp))
-
-                // Bottom Section: Left Metadata, Right Glassy Button
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { isExpanded = !isExpanded }
+                        .padding(top = 10.dp, bottom = 4.dp),
+                    horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // LEFT: Info
-                    Column(horizontalAlignment = Alignment.Start) {
-                        Text(
-                            text = "Weather & UV Synced",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = Color(0xFF1C1B1F),
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 11.sp
-                        )
-                        val tripsText = when (savedCount) {
-                            0 -> "None Saved"
-                            1 -> "1 Saved Trip"
-                            else -> "$savedCount Saved Trips"
-                        }
-                        Text(
-                            text = tripsText,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = if (savedCount > 0) Color(0xFF1E88E5) else Color(0xFF7A7382),
-                            fontWeight = if (savedCount > 0) FontWeight.Bold else FontWeight.Normal,
-                            fontSize = 11.sp
-                        )
-                    }
+                    Text(
+                        text = tripsText,
+                        style = MaterialTheme.typography.headlineMedium.copy(fontSize = 18.sp),
+                        fontFamily = FontFamily.Serif,
+                        fontWeight = FontWeight.Medium,
+                        color = if (savedCount > 0) Color(0xFF1E88E5) else Color(0xFF1F2937),
+                        letterSpacing = (-0.2).sp
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Icon(
+                        imageVector = Icons.Default.KeyboardArrowDown,
+                        contentDescription = if (isExpanded) "Collapse" else "Expand",
+                        tint = Color(0xFF1E88E5),
+                        modifier = Modifier
+                            .size(20.dp)
+                            .rotate(chevronRotation)
+                    )
+                }
 
-                    // RIGHT: Glassy Button
-                    Surface(
-                        onClick = onListClick,
-                        shape = CircleShape,
-                        color = Color.White.copy(alpha = 0.75f),
-                        border = BorderStroke(1.dp, Color.White),
-                        shadowElevation = 2.dp
+                // COLLAPSIBLE CONTENT
+                AnimatedVisibility(
+                    visible = isExpanded,
+                    enter = fadeIn() + expandVertically(),
+                    exit = fadeOut() + shrinkVertically()
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 12.dp)
                     ) {
+                        Text(
+                            text = "Generate a curated wardrobe and cosmetic plan for your next international voyage.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color(0xFF5A5760),
+                            lineHeight = 20.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)
+                        )
+
+                        Spacer(Modifier.height(16.dp))
+
+                        // Translucent Divider Line
+                        HorizontalDivider(
+                            color = Color.White.copy(alpha = 0.7f),
+                            thickness = 1.dp
+                        )
+
+                        Spacer(Modifier.height(14.dp))
+
+                        // Bottom Section: Left Metadata, Right Glassy Button
                         Row(
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 9.dp),
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Bookmark,
-                                contentDescription = null,
-                                tint = Color(0xFF1E88E5),
-                                modifier = Modifier.size(15.dp)
-                            )
-                            Spacer(Modifier.width(6.dp))
-                            Text(
-                                text = "Saved Trips",
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 13.sp,
-                                color = Color(0xFF1C1B1F)
-                            )
+                            // LEFT: Info
+                            Column(horizontalAlignment = Alignment.Start) {
+                                Text(
+                                    text = "Weather & UV Synced",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = Color(0xFF1C1B1F),
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 11.sp
+                                )
+                                Text(
+                                    text = tripsText,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = if (savedCount > 0) Color(0xFF1E88E5) else Color(0xFF7A7382),
+                                    fontWeight = if (savedCount > 0) FontWeight.Bold else FontWeight.Normal,
+                                    fontSize = 11.sp
+                                )
+                            }
+
+                            // RIGHT: Glassy Button
+                            Surface(
+                                onClick = onListClick,
+                                shape = CircleShape,
+                                color = Color.White.copy(alpha = 0.75f),
+                                border = BorderStroke(1.dp, Color.White),
+                                shadowElevation = 2.dp
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 9.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Bookmark,
+                                        contentDescription = null,
+                                        tint = Color(0xFF1E88E5),
+                                        modifier = Modifier.size(15.dp)
+                                    )
+                                    Spacer(Modifier.width(6.dp))
+                                    Text(
+                                        text = "Saved Trips",
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 13.sp,
+                                        color = Color(0xFF1C1B1F)
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -780,68 +875,200 @@ private fun StylePlaylistSummaryCard(
     onPrimaryClick: () -> Unit,
     onListClick: () -> Unit
 ) {
-    Card(
+    var isExpanded by remember { mutableStateOf(false) }
+
+    val chevronRotation by animateFloatAsState(
+        targetValue = if (isExpanded) 180f else 0f,
+        label = "ChevronRotation"
+    )
+
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .alpha(if (isActive) 1f else 0.7f),
-        shape = RoundedCornerShape(28.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = if (isActive) 2.dp else 0.dp)
+            .animateContentSize(),
+        shape = RoundedCornerShape(32.dp),
+        color = Color(0xFFF3ECEF),
+        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.6f)),
+        shadowElevation = 2.dp
     ) {
-        Column(modifier = Modifier.padding(24.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column {
-                    Text(
-                        "STYLE PLAYLIST",
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Black,
-                        letterSpacing = 1.2.sp,
-                        color = Color(0xFF6750A4)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    brush = Brush.radialGradient(
+                        colors = listOf(Color.White.copy(alpha = 0.65f), Color(0xFFEFE8EB)),
+                        radius = 800f
                     )
-                    Text(
-                        "7-Day Forecast",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontFamily = FontFamily.Serif,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-                Icon(
-                    imageVector = Icons.Default.AutoAwesome,
-                    contentDescription = null,
-                    tint = Color(0xFF6750A4),
-                    modifier = Modifier.size(32.dp)
                 )
-            }
-
-            Spacer(Modifier.height(12.dp))
-            Text(
-                text = "Automated 7-day wardrobe and cosmetic rotation based on weather forecasts.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.DarkGray
-            )
-            Spacer(Modifier.height(20.dp))
-            Row(
+                .padding(20.dp)
+        ) {
+            Column(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Button(
-                    onClick = onPrimaryClick,
-                    modifier = Modifier.weight(1f).height(48.dp),
-                    shape = RoundedCornerShape(14.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6750A4))
+                // TOP HALF: Main Glassmorphic Pill & Floating Badge
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.TopStart
                 ) {
-                    Text("Build Forecast", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                    // Translucent Frosted Glass Pill
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 6.dp, end = 12.dp)
+                            .clickable { isExpanded = !isExpanded },
+                        shape = RoundedCornerShape(24.dp),
+                        color = Color.White.copy(alpha = 0.55f),
+                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.8f))
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 18.dp, horizontal = 20.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = "7-Day Forecast",
+                                style = MaterialTheme.typography.displayMedium.copy(fontSize = 28.sp),
+                                fontFamily = FontFamily.Serif,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF1F1B24),
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+
+                    // Floating 3D Animated Action Badge (Intersecting Top Right)
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .offset(x = (4).dp, y = (-2).dp)
+                    ) {
+                        AnimatedActionBadge(
+                            icon = Icons.Default.AutoAwesome,
+                            badgeGradient = Brush.horizontalGradient(
+                                colors = listOf(Color(0xFF6750A4), Color(0xFF8E24AA))
+                            ),
+                            iconTint = Color.White,
+                            auraColors = listOf(Color(0xFFD4AF37), Color(0xFF8E24AA), Color(0xFF6750A4), Color(0xFFD4AF37)),
+                            onClick = onPrimaryClick
+                        )
+                    }
                 }
-                OutlinedButton(
-                    onClick = onListClick,
-                    modifier = Modifier.weight(1f).height(48.dp),
-                    shape = RoundedCornerShape(14.dp)
+
+                // BOTTOM HALF: Subtitle / Chevron Toggle Row
+                val playlistText = if (playlist != null) "1 Active Playlist" else "None Saved"
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { isExpanded = !isExpanded }
+                        .padding(top = 10.dp, bottom = 4.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("View Playlists", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                    Text(
+                        text = playlistText,
+                        style = MaterialTheme.typography.headlineMedium.copy(fontSize = 18.sp),
+                        fontFamily = FontFamily.Serif,
+                        fontWeight = FontWeight.Medium,
+                        color = if (playlist != null) Color(0xFF6750A4) else Color(0xFF1F2937),
+                        letterSpacing = (-0.2).sp
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Icon(
+                        imageVector = Icons.Default.KeyboardArrowDown,
+                        contentDescription = if (isExpanded) "Collapse" else "Expand",
+                        tint = Color(0xFF6750A4),
+                        modifier = Modifier
+                            .size(20.dp)
+                            .rotate(chevronRotation)
+                    )
+                }
+
+                // COLLAPSIBLE CONTENT
+                AnimatedVisibility(
+                    visible = isExpanded,
+                    enter = fadeIn() + expandVertically(),
+                    exit = fadeOut() + shrinkVertically()
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 12.dp)
+                    ) {
+                        Text(
+                            text = "Automated 7-day wardrobe and cosmetic rotation based on weather forecasts.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color(0xFF5A5760),
+                            lineHeight = 20.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)
+                        )
+
+                        Spacer(Modifier.height(16.dp))
+
+                        // Translucent Divider Line
+                        HorizontalDivider(
+                            color = Color.White.copy(alpha = 0.7f),
+                            thickness = 1.dp
+                        )
+
+                        Spacer(Modifier.height(14.dp))
+
+                        // Bottom Section: Left Metadata, Right Glassy Button
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // LEFT: Info
+                            Column(horizontalAlignment = Alignment.Start) {
+                                Text(
+                                    text = "7-Day Rotation Plan",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = Color(0xFF1C1B1F),
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 11.sp
+                                )
+                                Text(
+                                    text = playlistText,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = if (playlist != null) Color(0xFF6750A4) else Color(0xFF7A7382),
+                                    fontWeight = if (playlist != null) FontWeight.Bold else FontWeight.Normal,
+                                    fontSize = 11.sp
+                                )
+                            }
+
+                            // RIGHT: Glassy Button
+                            Surface(
+                                onClick = onListClick,
+                                shape = CircleShape,
+                                color = Color.White.copy(alpha = 0.75f),
+                                border = BorderStroke(1.dp, Color.White),
+                                shadowElevation = 2.dp
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 9.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Bookmark,
+                                        contentDescription = null,
+                                        tint = Color(0xFF6750A4),
+                                        modifier = Modifier.size(15.dp)
+                                    )
+                                    Spacer(Modifier.width(6.dp))
+                                    Text(
+                                        text = "View Playlists",
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 13.sp,
+                                        color = Color(0xFF1C1B1F)
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
