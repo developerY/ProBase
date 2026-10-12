@@ -2,12 +2,13 @@ package com.zoewave.probase.features.ai.firebase
 
 import android.util.Log
 import com.google.firebase.Firebase
+import com.google.firebase.ai.GenerativeModel
 import com.google.firebase.ai.ai
 import com.google.firebase.ai.type.GenerativeBackend
 import com.google.firebase.ai.type.generationConfig
+import com.zoewave.probase.core.data.repository.AiConfigurationSettings
 import com.zoewave.probase.features.ai.firebase.models.StyleTelemetry
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
+import kotlinx.coroutines.flow.firstOrNull
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -32,9 +33,13 @@ interface FirebaseAiClient {
     suspend fun estimateTokens(telemetry: StyleTelemetry): Int
 
     /**
-     * Executes a raw prompt.
+     * Executes a raw prompt with optional temperature and model name overrides.
      */
-    suspend fun generateContent(prompt: String, temperatureOverride: Float? = null): AiResponse
+    suspend fun generateContent(
+        prompt: String,
+        temperatureOverride: Float? = null,
+        modelNameOverride: String? = null
+    ): AiResponse
 
     /**
      * Estimates tokens for a raw prompt.
@@ -43,20 +48,47 @@ interface FirebaseAiClient {
 }
 
 @Singleton
-class FirebaseAiClientImpl @Inject constructor() : FirebaseAiClient {
+class FirebaseAiClientImpl @Inject constructor(
+    private val aiSettings: AiConfigurationSettings
+) : FirebaseAiClient {
 
-    private val MODEL_NAME = "gemini-3.5-flash-lite"
-    
-    private fun getModel(temperatureOverride: Float? = null) = Firebase.ai(
-        backend = GenerativeBackend.googleAI(),
-        useLimitedUseAppCheckTokens = false
-    ).generativeModel(
-        modelName = MODEL_NAME,
-        generationConfig = generationConfig {
-            responseMimeType = "application/json"
-            temperature = temperatureOverride ?: 0.75f
+    private suspend fun resolveModelName(override: String?): String {
+        if (!override.isNullOrBlank()) {
+            Log.d("FirebaseAiClient", "Model Name Resolved from local override: $override")
+            return override
         }
-    )
+        return try {
+            val flowModel = aiSettings.aiModelFlow.firstOrNull()?.ifBlank { null }
+            if (flowModel != null) {
+                Log.d("FirebaseAiClient", "Model Name Resolved from Settings Flow: $flowModel")
+                flowModel
+            } else {
+                Log.d("FirebaseAiClient", "Model Name Missing from Settings. Using safe fallback: gemini-1.5-flash")
+                "gemini-1.5-flash"
+            }
+        } catch (e: Exception) {
+            Log.e("FirebaseAiClient", "Error resolving AI Model from flow, forcing fallback gemini-1.5-flash", e)
+            "gemini-1.5-flash"
+        }
+    }
+
+    private suspend fun getModel(
+        temperatureOverride: Float? = null,
+        modelNameOverride: String? = null
+    ): GenerativeModel {
+        val modelName = resolveModelName(modelNameOverride)
+        Log.d("FirebaseAiClient", "Initializing GenerativeModel with dynamic modelName: $modelName")
+        return Firebase.ai(
+            backend = GenerativeBackend.googleAI(),
+            useLimitedUseAppCheckTokens = false
+        ).generativeModel(
+            modelName = modelName,
+            generationConfig = generationConfig {
+                responseMimeType = "application/json"
+                temperature = temperatureOverride ?: 0.75f
+            }
+        )
+    }
 
     private fun buildPrompt(telemetry: StyleTelemetry): String {
         return """
@@ -109,28 +141,37 @@ class FirebaseAiClientImpl @Inject constructor() : FirebaseAiClient {
         return getModel().countTokens(prompt).totalTokens
     }
 
-    override suspend fun generateContent(prompt: String, temperatureOverride: Float?): AiResponse {
-        // 4. Execute Cloud Request with Logging
-        Log.d("KoColorAI_IO", ">>> REQUEST TO GEMINI (RAW):\n$prompt")
+    override suspend fun generateContent(
+        prompt: String,
+        temperatureOverride: Float?,
+        modelNameOverride: String?
+    ): AiResponse {
+        val modelName = resolveModelName(modelNameOverride)
+        Log.d("KoColorAI_IO", ">>> REQUEST TO GEMINI (RAW, Model=$modelName):\n$prompt")
         
-        val response = getModel(temperatureOverride).generateContent(prompt)
-        
-        Log.d("KoColorAI_IO", "^^^ RESPONSE FROM GEMINI (RAW):\n${response.text ?: "EMPTY_RESPONSE"}")
-        
-        val metadata = response.usageMetadata
-        if (metadata != null) {
-            Log.d("KoColorAI_IO", "TOKEN USAGE: Prompt=${metadata.promptTokenCount}, Candidates=${metadata.candidatesTokenCount}, Total=${metadata.totalTokenCount}")
+        return try {
+            val model = getModel(temperatureOverride, modelNameOverride)
+            val response = model.generateContent(prompt)
+            
+            Log.d("KoColorAI_IO", "^^^ RESPONSE FROM GEMINI (RAW):\n${response.text ?: "EMPTY_RESPONSE"}")
+            
+            val metadata = response.usageMetadata
+            if (metadata != null) {
+                Log.d("KoColorAI_IO", "TOKEN USAGE: Prompt=${metadata.promptTokenCount}, Candidates=${metadata.candidatesTokenCount}, Total=${metadata.totalTokenCount}")
+            }
+            
+            val text = response.text ?: throw IllegalStateException("Empty response from Firebase AI Logic")
+            
+            AiResponse(
+                text = text,
+                promptTokens = metadata?.promptTokenCount ?: 0,
+                completionTokens = metadata?.candidatesTokenCount ?: 0,
+                totalTokens = metadata?.totalTokenCount ?: 0,
+                modelName = modelName
+            )
+        } catch (e: Exception) {
+            Log.e("KoColorAI_IO", "FATAL EXCEPTION DURING CLOUD GENERATION CALL!", e)
+            throw e
         }
-        
-        val text = response.text ?: throw IllegalStateException("Empty response from Firebase AI Logic")
-        
-        return AiResponse(
-            text = text,
-            promptTokens = metadata?.promptTokenCount ?: 0,
-            completionTokens = metadata?.candidatesTokenCount ?: 0,
-            totalTokens = metadata?.totalTokenCount ?: 0,
-            modelName = MODEL_NAME
-        )
     }
 }
-

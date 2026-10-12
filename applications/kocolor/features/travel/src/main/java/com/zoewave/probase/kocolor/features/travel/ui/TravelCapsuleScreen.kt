@@ -34,6 +34,7 @@ import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
@@ -207,6 +208,10 @@ private fun ChecklistScreen(
     onEvent: (TravelEvent) -> Unit,
     padding: PaddingValues
 ) {
+    val totalChecklist = uiState.checklist
+    val checkedCount = totalChecklist.count { it.isChecked }
+    val progress = if (totalChecklist.isNotEmpty()) checkedCount.toFloat() / totalChecklist.size.toFloat() else 0f
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -221,6 +226,47 @@ private fun ChecklistScreen(
                 fontFamily = FontFamily.Serif
             )
             Text("Weather expected: ${uiState.weatherForecast}", color = Color.Gray)
+        }
+
+        item {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            "PACKING PROGRESS",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.sp,
+                            color = Color(0xFF1E88E5)
+                        )
+                        Text(
+                            "$checkedCount / ${totalChecklist.size} Packed (${(progress * 100).toInt()}%)",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.DarkGray
+                        )
+                    }
+                    Spacer(Modifier.height(10.dp))
+                    LinearProgressIndicator(
+                        progress = { progress },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(8.dp)
+                            .clip(RoundedCornerShape(4.dp)),
+                        color = Color(0xFF22C55E),
+                        trackColor = Color(0xFFE5E7EB)
+                    )
+                }
+            }
         }
 
         if (uiState.passportReminder) {

@@ -1,7 +1,7 @@
 package com.zoewave.probase.features.ai.firebase
 
 import android.content.Context
-import android.os.Build
+import android.util.Log
 import com.google.firebase.Firebase
 import com.google.firebase.appcheck.appCheck
 import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory
@@ -11,28 +11,25 @@ object AppCheckInitializer {
     fun initialize(context: Context) {
         // 1. Lifecycle Safety: Always use application context so Firebase does not retain an Activity context
         val appContext = context.applicationContext
-        // val testing = true
 
-        // 2. Identify if the current device is an Android Emulator
-        val isEmulator = Build.FINGERPRINT.contains("generic") ||
-                Build.FINGERPRINT.startsWith("unknown") ||
-                Build.MODEL.contains("google_sdk") ||
-                Build.MODEL.contains("Emulator") ||
-                Build.MODEL.contains("Android SDK built for x86")
-
-        // 3. DEBUG -> Debug App Check Provider, RELEASE -> Play Integrity App Check Provider
-        val providerFactory = if (BuildConfig.DEBUG && isEmulator) {
+        // 2. DEBUG -> Debug App Check Provider for local testing on emulators and physical debug hardware
+        //    RELEASE -> Play Integrity App Check Provider for Play Store production distribution
+        val providerFactory = if (BuildConfig.DEBUG) {
+            Log.d("AppCheckInitializer", "Initializing DEBUG App Check Provider")
             DebugAppCheckProviderFactory.getInstance()
         } else {
-            // Note: For physical debug builds to work, ensure your local debug.keystore
-            // SHA-256 is added to your Firebase Project Settings.
+            Log.d("AppCheckInitializer", "Initializing RELEASE Play Integrity App Check Provider")
             PlayIntegrityAppCheckProviderFactory.getInstance()
         }
 
         try {
+            Log.d("AppCheckInitializer", "Installing AppCheckProviderFactory...")
             Firebase.appCheck.installAppCheckProviderFactory(providerFactory)
+            Log.d("AppCheckInitializer", "AppCheckProviderFactory installed successfully.")
         } catch (e: IllegalStateException) {
-            // Prevents crashes if initialize() is accidentally called twice
+            Log.w("AppCheckInitializer", "AppCheckProviderFactory already installed. Skipping.")
+        } catch (e: Exception) {
+            Log.e("AppCheckInitializer", "Failed to install AppCheckProviderFactory", e)
         }
     }
 }
