@@ -19,4 +19,5 @@ dependencies {
     implementation(libs.firebase.appcheck.debug)
     implementation(libs.kotlinx.serialization.json)
     implementation(project(":features:ai:core"))
+    implementation(project(":core:data"))
 }
