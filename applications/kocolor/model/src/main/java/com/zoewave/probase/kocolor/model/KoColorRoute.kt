@@ -130,6 +130,9 @@ sealed class KoColorRoute {
     data class Settings(val section: String? = null) : KoColorRoute()
 
     @Serializable
+    data object AiDebugTelemetry : KoColorRoute()
+
+    @Serializable
     data object Health : KoColorRoute()
 
     @Serializable

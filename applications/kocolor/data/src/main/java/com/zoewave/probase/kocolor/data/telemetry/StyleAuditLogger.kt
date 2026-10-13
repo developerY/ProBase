@@ -6,6 +6,9 @@ import com.zoewave.probase.kocolor.data.color.CandidateProvenance
 import com.zoewave.probase.kocolor.data.usecase.IntentFulfillment
 import com.zoewave.probase.kocolor.data.usecase.StyleBlueprint
 import com.zoewave.probase.kocolor.fashionista.domain.FashionistaScore
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -14,6 +17,17 @@ import javax.inject.Singleton
 class StyleAuditLogger @Inject constructor() {
 
     private val trails = ConcurrentHashMap<String, StyleAuditTrail>()
+    
+    private val _recentLogs = MutableStateFlow<List<String>>(emptyList())
+    val recentLogs: StateFlow<List<String>> = _recentLogs.asStateFlow()
+
+    private val _recentTrails = MutableStateFlow<List<StyleAuditTrail>>(emptyList())
+    val recentTrails: StateFlow<List<StyleAuditTrail>> = _recentTrails.asStateFlow()
+
+    fun clearLogs() {
+        _recentLogs.value = emptyList()
+        _recentTrails.value = emptyList()
+    }
 
     fun startRequest(requestId: String) {
         trails[requestId] = StyleAuditTrail(requestId)
@@ -166,6 +180,12 @@ class StyleAuditLogger @Inject constructor() {
 
         Log.d("KoColor_Audit", output)
         
+        // Retain in recent logs for UI Debug Telemetry
+        trail.let {
+            _recentTrails.value = (listOf(it) + _recentTrails.value).take(20)
+            _recentLogs.value = (listOf(output) + _recentLogs.value).take(20)
+        }
+
         trails.remove(requestId)
     }
 }

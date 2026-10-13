@@ -626,6 +626,11 @@ fun koColorNavEntryProvider(
                 navTo = onNavigateTo
             )
         }
+        is KoColorRoute.AiDebugTelemetry -> NavEntry(route) {
+            com.zoewave.probase.kocolor.mobile.features.settings.ui.components.AiDebugTelemetryScreen(
+                onBack = onBack
+            )
+        }
         is KoColorRoute.StarterPack -> NavEntry(route) {
             val viewModel: com.zoewave.probase.kocolor.features.starterpack.ui.StarterPackViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()
