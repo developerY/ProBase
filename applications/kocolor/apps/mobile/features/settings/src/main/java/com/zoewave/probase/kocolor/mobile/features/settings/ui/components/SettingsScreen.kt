@@ -136,6 +136,34 @@ fun SettingsScreen(
                 description = stringResource(R.string.applications_kocolor_apps_mobile_core_settings_ai_config_desc)
             )
 
+            // AI Debug Telemetry Entry Point
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("AI Diagnostics & Telemetry", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                            Text(
+                                "View real-time engine metrics, provider routing decisions, and execution logs for Local Nano, Firebase Cloud, and BYOK AI.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.Gray,
+                                modifier = Modifier.padding(top = 4.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Button(
+                            onClick = { navTo(KoColorRoute.AiDebugTelemetry) },
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
+                        ) {
+                            Text("Debug AI")
+                        }
+                    }
+                }
+            }
+
             AppSettingsCard(
                 uiState = uiState,
                 onEvent = onEvent
