@@ -24,21 +24,15 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
-    //implementation(libs.androidx.lifecycle.viewmodel.android)
 
     // --- 3. UI & Compose ---
-    // Note: 'library.compose' plugin handles the BOM and basic tooling.
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.coil.compose)
 
-    // Legacy Material (Only keep if you use Theme.MaterialComponents or XML)
-    // implementation(libs.material.legacy)
-
     // --- 4. Hilt ---
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
-    // Compiler (ksp) is handled automatically by the Hilt Convention Plugin
 
     // --- 5. Health Connect ---
     implementation(libs.androidx.health.connect.client)
@@ -46,6 +40,7 @@ dependencies {
     // --- 6. Testing ---
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
+    testImplementation(libs.truth)
     testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

@@ -26,4 +26,9 @@ dependencies {
 
     // For date picker / flow
     implementation(libs.kotlinx.collections.immutable)
+
+    testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.truth)
+    testImplementation(libs.kotlinx.coroutines.test)
 }
