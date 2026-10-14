@@ -232,7 +232,7 @@ fun BioMarkersCard(
                             color = Color(0xFFEFE8E1).copy(alpha = 0.95f),
                             border = BorderStroke(1.dp, Color.White),
                             shadowElevation = 4.dp,
-                            onClick = onHydrationClick
+                            onClick = { if (uiState.isPermissionGranted) onHydrationClick() else onGrantPermissionsClick() }
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Box(
