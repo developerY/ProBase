@@ -9,9 +9,11 @@ import com.google.firebase.ai.type.content
 import com.google.firebase.ai.type.generationConfig
 import com.zoewave.probase.core.data.repository.AiConfigurationSettings
 import com.zoewave.probase.features.ai.firebase.models.StyleTelemetry
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.firstOrNull
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.random.Random
 
 data class AiResponse(
     val text: String,
@@ -54,23 +56,32 @@ class FirebaseAiClientImpl @Inject constructor(
 ) : FirebaseAiClient {
 
     private suspend fun resolveModelName(override: String?): String {
-        if (!override.isNullOrBlank()) {
+        var resolved = if (!override.isNullOrBlank()) {
             Log.d("FirebaseAiClient", "Model Name Resolved from local override: $override")
-            return override
-        }
-        return try {
-            val flowModel = aiSettings.aiModelFlow.firstOrNull()?.ifBlank { null }
-            if (flowModel != null) {
-                Log.d("FirebaseAiClient", "Model Name Resolved from Settings Flow: $flowModel")
-                flowModel
-            } else {
-                Log.d("FirebaseAiClient", "Model Name Missing from Settings. Using safe fallback: gemini-1.5-flash")
-                "gemini-1.5-flash"
+            override
+        } else {
+            try {
+                val flowModel = aiSettings.aiModelFlow.firstOrNull()?.ifBlank { null }
+                if (flowModel != null) {
+                    Log.d("FirebaseAiClient", "Model Name Resolved from Settings Flow: $flowModel")
+                    flowModel
+                } else {
+                    Log.d("FirebaseAiClient", "Model Name Missing from Settings. Using safe fallback: gemini-3.8-flash")
+                    "gemini-3.8-flash"
+                }
+            } catch (e: Exception) {
+                Log.e("FirebaseAiClient", "Error resolving AI Model from flow, forcing fallback gemini-3.8-flash", e)
+                "gemini-3.8-flash"
             }
-        } catch (e: Exception) {
-            Log.e("FirebaseAiClient", "Error resolving AI Model from flow, forcing fallback gemini-1.5-flash", e)
-            "gemini-1.5-flash"
         }
+
+        // Sanitizer / Migration Check for deprecated models
+        if (resolved.startsWith("gemini-1.") || resolved.startsWith("gemini-2.")) {
+            Log.w("FirebaseAiClient", "Deprecated model '$resolved' detected in Settings Flow. Auto-migrating to 'gemini-3.8-flash'")
+            resolved = "gemini-3.8-flash"
+        }
+
+        return resolved
     }
 
     private suspend fun getModel(
@@ -142,7 +153,7 @@ class FirebaseAiClientImpl @Inject constructor(
 
     override suspend fun estimateTokens(telemetry: StyleTelemetry): Int {
         val prompt = buildPrompt(telemetry)
-        return getModel().countTokens(prompt).totalTokens
+        return countTokens(prompt)
     }
 
     override suspend fun getStyleAdvice(telemetry: StyleTelemetry): AiResponse {
@@ -150,8 +161,98 @@ class FirebaseAiClientImpl @Inject constructor(
         return generateContent(prompt)
     }
 
+    private fun isTemporaryOverloadError(e: Throwable): Boolean {
+        val msg = e.message ?: ""
+        return msg.contains("high demand", ignoreCase = true) ||
+               msg.contains("503", ignoreCase = true) ||
+               msg.contains("unavailable", ignoreCase = true) ||
+               msg.contains("Resource exhausted", ignoreCase = true) ||
+               msg.contains("RESOURCE_EXHAUSTED", ignoreCase = true) ||
+               msg.contains("429", ignoreCase = true) ||
+               msg.contains("rate limit", ignoreCase = true) ||
+               msg.contains("overloaded", ignoreCase = true) ||
+               e is java.net.SocketTimeoutException ||
+               e is java.io.IOException
+    }
+
+    private fun isDeprecatedModelError(e: Throwable): Boolean {
+        val msg = e.message ?: ""
+        return msg.contains("is no longer available", ignoreCase = true) ||
+               msg.contains("discontinued", ignoreCase = true)
+    }
+
+    private suspend fun <T> executeWithRetry(
+        actionName: String,
+        initialModelName: String,
+        block: suspend (modelName: String) -> T
+    ): T {
+        val fallbackModels = listOf(initialModelName, "gemini-3.8-flash", "gemini-2.5-flash", "gemini-1.5-flash").distinct()
+        var lastException: Throwable? = null
+
+        for (model in fallbackModels) {
+            var baseDelayMs = 1000L
+            val maxAttemptsPerModel = 3
+
+            for (attempt in 1..maxAttemptsPerModel) {
+                try {
+                    return block(model)
+                } catch (e: Exception) {
+                    lastException = e
+                    val msg = e.message ?: ""
+
+                    // 1. Deprecated Model Error -> Immediately switch to next fallback model
+                    if (isDeprecatedModelError(e)) {
+                        Log.w("FirebaseAiClient", "[$actionName] Model '$model' is retired/unavailable ($msg). Immediately falling over to next model.")
+                        break
+                    }
+
+                    // 2. Temporary Server Overload / Rate Limit -> Exponential Backoff + Jitter
+                    if (isTemporaryOverloadError(e) && attempt < maxAttemptsPerModel) {
+                        val jitter = Random.nextLong(100, 500)
+                        val totalDelay = baseDelayMs + jitter
+                        Log.w(
+                            "FirebaseAiClient",
+                            "[$actionName] High demand / capacity error on model '$model' (Attempt $attempt/$maxAttemptsPerModel): $msg. Retrying in ${totalDelay}ms..."
+                        )
+                        delay(totalDelay)
+                        baseDelayMs *= 2 // Exponential backoff: 1s -> 2s -> 4s
+                        continue
+                    }
+
+                    // Non-retryable error or exhausted attempts for this model
+                    Log.w("FirebaseAiClient", "[$actionName] Attempt $attempt/$maxAttemptsPerModel on model '$model' failed: $msg")
+                    break
+                }
+            }
+        }
+
+        val finalException = lastException ?: IllegalStateException("AI execution failed across all models and retries.")
+        val msg = finalException.message ?: ""
+
+        if (msg.contains("App Check", ignoreCase = true) || msg.contains("invalid", ignoreCase = true) || msg.contains("403")) {
+            Log.e(
+                "FirebaseAiClient",
+                "CRITICAL: Firebase App Check token is invalid or unverified ($msg). " +
+                "ACTION REQUIRED: Copy the 'DebugAppCheckProvider' token from Logcat and add it to the Firebase Console under App Check -> Apps -> Manage Debug Tokens.",
+                finalException
+            )
+        } else {
+            Log.e("FirebaseAiClient", "FATAL: AI execution exhausted all retries and model fallbacks for $actionName", finalException)
+        }
+
+        throw finalException
+    }
+
     override suspend fun countTokens(prompt: String): Int {
-        return getModel().countTokens(prompt).totalTokens
+        val initialModel = resolveModelName(null)
+        return try {
+            executeWithRetry("countTokens", initialModel) { model ->
+                getModel(modelNameOverride = model).countTokens(prompt).totalTokens
+            }
+        } catch (e: Exception) {
+            Log.w("FirebaseAiClient", "countTokens failed across retries/models. Using heuristic fallback estimate.")
+            (prompt.length / 4).coerceAtLeast(100)
+        }
     }
 
     override suspend fun generateContent(
@@ -159,32 +260,29 @@ class FirebaseAiClientImpl @Inject constructor(
         temperatureOverride: Float?,
         modelNameOverride: String?
     ): AiResponse {
-        val modelName = resolveModelName(modelNameOverride)
-        Log.d("KoColorAI_IO", ">>> REQUEST TO GEMINI (RAW, Model=$modelName):\n$prompt")
-        
-        return try {
-            val model = getModel(temperatureOverride, modelNameOverride)
+        val initialModelName = resolveModelName(modelNameOverride)
+        Log.d("KoColorAI_IO", ">>> REQUEST TO GEMINI (RAW, Target Model=$initialModelName):\n$prompt")
+
+        return executeWithRetry("generateContent", initialModelName) { currentModel ->
+            val model = getModel(temperatureOverride, currentModel)
             val response = model.generateContent(prompt)
-            
-            Log.d("KoColorAI_IO", "^^^ RESPONSE FROM GEMINI (RAW):\n${response.text ?: "EMPTY_RESPONSE"}")
-            
+
+            Log.d("KoColorAI_IO", "^^^ RESPONSE FROM GEMINI (RAW, Model=$currentModel):\n${response.text ?: "EMPTY_RESPONSE"}")
+
             val metadata = response.usageMetadata
             if (metadata != null) {
                 Log.d("KoColorAI_IO", "TOKEN USAGE: Prompt=${metadata.promptTokenCount}, Candidates=${metadata.candidatesTokenCount}, Total=${metadata.totalTokenCount}")
             }
-            
+
             val text = response.text ?: throw IllegalStateException("Empty response from Firebase AI Logic")
-            
+
             AiResponse(
                 text = text,
                 promptTokens = metadata?.promptTokenCount ?: 0,
                 completionTokens = metadata?.candidatesTokenCount ?: 0,
                 totalTokens = metadata?.totalTokenCount ?: 0,
-                modelName = modelName
+                modelName = currentModel
             )
-        } catch (e: Exception) {
-            Log.e("KoColorAI_IO", "FATAL EXCEPTION DURING CLOUD GENERATION CALL!", e)
-            throw e
         }
     }
 }

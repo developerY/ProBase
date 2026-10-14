@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -184,6 +185,9 @@ class VisionViewModel @Inject constructor(
             repository.updateAnalyzing(true)
             try {
                 val apiKey = settings.getGeminiApiKey()
+                val flowModel = settings.aiModelFlow.firstOrNull()
+                val modelName = flowModel?.ifBlank { null } ?: "gemini-2.0-flash"
+
                 if (apiKey.isNullOrBlank()) {
                     cameraManager.addLog("Error: Gemini API Key missing!")
                     _error.value = "Gemini API Key missing. Check Settings."
@@ -191,9 +195,9 @@ class VisionViewModel @Inject constructor(
                     return@launch
                 }
 
-                cameraManager.addLog("API Key validated. Model: gemini-1.5-flash")
+                cameraManager.addLog("API Key validated. Model: $modelName")
                 val generativeModel = GenerativeModel(
-                    modelName = "gemini-1.5-flash",
+                    modelName = modelName,
                     apiKey = apiKey
                 )
 

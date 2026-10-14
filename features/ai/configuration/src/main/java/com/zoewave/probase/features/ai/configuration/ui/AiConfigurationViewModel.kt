@@ -149,7 +149,7 @@ class AiConfigurationViewModel @Inject constructor(
     private fun testModel() {
         viewModelScope.launch {
             val key = settings.getGeminiApiKey()
-            val model = settings.aiModelFlow.firstOrNull() ?: "gemini-1.5-flash"
+            val model = settings.aiModelFlow.firstOrNull() ?: "gemini-2.0-flash"
 
             if (key.isNullOrBlank()) {
                 _keyTestResult.value = "Error: No API key saved."

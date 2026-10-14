@@ -23,7 +23,7 @@ import javax.inject.Inject
 
 data class AiDebugUiState(
     val activeProviderName: String = "Loading...",
-    val currentModelName: String = "gemini-1.5-flash",
+    val currentModelName: String = "gemini-2.0-flash",
     val isByokEnabled: Boolean = false,
     val isByokKeySet: Boolean = false,
     val isLocalAiEnabled: Boolean = false,

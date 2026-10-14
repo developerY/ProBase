@@ -37,7 +37,7 @@ class IngredientIntelligence @Inject constructor(
     private suspend fun getGeminiModel(): GenerativeModel? {
         val apiKey = aiSettings.getGeminiApiKey() ?: return null
         return GenerativeModel(
-            modelName = "gemini-1.5-flash",
+            modelName = "gemini-2.0-flash",
             apiKey = apiKey
         )
     }

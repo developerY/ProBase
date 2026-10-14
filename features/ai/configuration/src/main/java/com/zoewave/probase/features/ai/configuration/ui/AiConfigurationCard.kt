@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Key
@@ -87,6 +88,7 @@ private fun PipelineStageIndicator(
 fun AiConfigurationCard(
     expanded: Boolean,
     onExpandToggle: () -> Unit,
+    onDebugClick: () -> Unit = {},
     modifier: Modifier = Modifier,
     title: String = stringResource(R.string.features_ai_configuration_title),
     description: String = stringResource(R.string.features_ai_configuration_desc),
@@ -97,6 +99,7 @@ fun AiConfigurationCard(
     AiConfigurationCardContent(
         expanded = expanded,
         onExpandToggle = onExpandToggle,
+        onDebugClick = onDebugClick,
         uiState = uiState,
         onEvent = viewModel::onEvent,
         title = title,
@@ -118,6 +121,7 @@ fun AiConfigurationCardContent(
     onEvent: (AiConfigurationEvent) -> Unit,
     title: String,
     description: String,
+    onDebugClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var editingKey by remember { mutableStateOf("") }
@@ -471,6 +475,20 @@ fun AiConfigurationCardContent(
                             )
                         }
                     )
+                    
+                    // Debug AI entry point
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        IconButton(onClick = onDebugClick) {
+                            Icon(
+                                imageVector = Icons.Default.BugReport, 
+                                contentDescription = "AI Diagnostics",
+                                tint = Color.Gray
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -490,7 +508,7 @@ private fun AiConfigurationCardExpandedPreview() {
                 useByokKey = false,
                 isLocalAiAvailable = true,
                 useFirebaseVertexAi = true,
-                availableModels = listOf("gemini-1.5-flash", "gemini-1.5-pro")
+                availableModels = listOf("gemini-3.8-flash", "gemini-2.5-flash")
             ),
             onEvent = {},
             title = "AI Configuration",

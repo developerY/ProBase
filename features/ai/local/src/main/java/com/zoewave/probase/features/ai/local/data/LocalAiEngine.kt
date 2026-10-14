@@ -98,11 +98,16 @@ class LocalAiEngine @Inject constructor() {
             }
         } catch (e: Exception) {
             val msg = e.message ?: ""
-            if (msg.contains("606") || msg.contains("FEATURE_NOT_FOUND")) {
-                Log.d("KoColor_Audit", "\nLOCAL AI\nStatus: UNAVAILABLE\nReason: AICore FEATURE_NOT_FOUND (606)")
+            val isUnavailabilityError = msg.contains("606") || 
+                                        msg.contains("FEATURE_NOT_FOUND") || 
+                                        msg.contains("PREPARATION_ERROR") || 
+                                        e.javaClass.simpleName.contains("GenAiException")
+            
+            if (isUnavailabilityError) {
+                Log.i("LocalAiEngine", "On-Device Gemini Nano unavailable on current device/emulator ($msg). Smoothly falling back to Cloud AI.")
                 return@withContext NanoState.Unsupported
             }
-            Log.e("LocalAiEngine", "ML Kit Status Check Failed: $msg")
+            Log.i("LocalAiEngine", "ML Kit Status Check: $msg")
             NanoState.Unsupported
         }
     }

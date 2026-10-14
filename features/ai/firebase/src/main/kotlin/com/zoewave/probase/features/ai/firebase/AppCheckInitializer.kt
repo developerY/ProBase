@@ -1,7 +1,7 @@
 package com.zoewave.probase.features.ai.firebase
 
 import android.content.Context
-import android.os.Build
+import android.content.pm.ApplicationInfo
 import android.util.Log
 import com.google.firebase.Firebase
 import com.google.firebase.appcheck.appCheck
@@ -13,20 +13,16 @@ object AppCheckInitializer {
         // 1. Lifecycle Safety: Always use application context so Firebase does not retain an Activity context
         val appContext = context.applicationContext
 
-        // 2. Identify if the current device is an Android Emulator
-        val isEmulator = Build.FINGERPRINT.contains("generic") ||
-                Build.FINGERPRINT.startsWith("unknown") ||
-                Build.MODEL.contains("google_sdk") ||
-                Build.MODEL.contains("Emulator") ||
-                Build.MODEL.contains("Android SDK built for x86")
+        // 2. Base App Check provider selection strictly on whether the app is a debug build:
+        //    When debuggable -> ALWAYS install DebugAppCheckProviderFactory (physical devices & emulators)
+        //    When !debuggable -> Install PlayIntegrityAppCheckProviderFactory (release builds)
+        val isDebuggable = BuildConfig.DEBUG || (appContext.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
 
-        // 3. DEBUG on Emulators -> Debug App Check Provider
-        //    ALL PHYSICAL DEVICES -> Play Integrity App Check Provider
-        val providerFactory = if (BuildConfig.DEBUG && isEmulator) {
-            Log.d("AppCheckInitializer", "Emulator detected. Initializing DEBUG App Check Provider")
+        val providerFactory = if (isDebuggable) {
+            Log.i("AppCheckInitializer", "Debug build detected. Installing DebugAppCheckProviderFactory.")
             DebugAppCheckProviderFactory.getInstance()
         } else {
-            Log.d("AppCheckInitializer", "Physical device (or Release) detected. Initializing Play Integrity App Check Provider")
+            Log.i("AppCheckInitializer", "Release build detected. Installing PlayIntegrityAppCheckProviderFactory.")
             PlayIntegrityAppCheckProviderFactory.getInstance()
         }
 

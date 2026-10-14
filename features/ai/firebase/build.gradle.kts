@@ -20,4 +20,9 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(project(":features:ai:core"))
     implementation(project(":core:data"))
+
+    testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.truth)
+    testImplementation(libs.kotlinx.coroutines.test)
 }

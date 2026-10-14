@@ -255,7 +255,7 @@ class ClothingCaptureViewModel @Inject constructor(
     fun analyzePhotos() {
         viewModelScope.launch {
             val apiKey = aiSettings.getGeminiApiKey()
-            val modelName = aiSettings.aiModelFlow.firstOrNull() ?: "gemini-1.5-flash"
+            val modelName = aiSettings.aiModelFlow.firstOrNull() ?: "gemini-2.0-flash"
             
             val currentReview = (uiState.value as? ClothingCaptureUiState.Review)
             val manualColor = currentReview?.manualColorHex
