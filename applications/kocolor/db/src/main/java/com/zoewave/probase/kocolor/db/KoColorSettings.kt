@@ -89,14 +89,24 @@ class KoColorSettings @Inject constructor(
     }
 
     override val aiModelFlow: Flow<String> = context.dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.AI_MODEL] ?: "gemini-1.5-flash"
+        val rawModel = preferences[PreferencesKeys.AI_MODEL]
+        if (rawModel == null || rawModel.startsWith("gemini-1.") || rawModel.startsWith("gemini-2.")) {
+            "gemini-3.8-flash"
+        } else {
+            rawModel
+        }
     }
 
     override val userAiModelFlow: Flow<String> = aiModelFlow
 
     override suspend fun saveAiModel(model: String) {
+        val sanitizedModel = if (model.startsWith("gemini-1.") || model.startsWith("gemini-2.")) {
+            "gemini-3.8-flash"
+        } else {
+            model
+        }
         context.dataStore.edit { preferences ->
-            preferences[PreferencesKeys.AI_MODEL] = model
+            preferences[PreferencesKeys.AI_MODEL] = sanitizedModel
         }
     }
 

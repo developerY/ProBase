@@ -23,7 +23,7 @@ class AnalyzerEngine @Inject constructor() {
         occasion: String,
         location: String?,
         apiKey: String,
-        modelName: String = "gemini-1.5-flash"
+        modelName: String = "gemini-2.0-flash"
     ): FashionAdvice {
         val generativeModel = GenerativeModel(
             modelName = modelName,
@@ -108,7 +108,7 @@ class AnalyzerEngine @Inject constructor() {
     suspend fun analyzeCosmeticProduct(
         image: Bitmap,
         apiKey: String,
-        modelName: String = "gemini-1.5-flash"
+        modelName: String = "gemini-2.0-flash"
     ): CosmeticItem? {
         val generativeModel = GenerativeModel(
             modelName = modelName,

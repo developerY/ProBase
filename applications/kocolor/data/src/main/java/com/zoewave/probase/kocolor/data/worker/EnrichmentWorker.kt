@@ -49,7 +49,7 @@ class EnrichmentWorker @AssistedInject constructor(
 
         try {
             val apiKey = aiSettings.getGeminiApiKey() ?: return ListenableWorker.Result.failure()
-            val modelName = aiSettings.aiModelFlow.firstOrNull() ?: "gemini-1.5-flash"
+            val modelName = aiSettings.aiModelFlow.firstOrNull() ?: "gemini-2.0-flash"
             
             val model = GenerativeModel(modelName = modelName, apiKey = apiKey)
             

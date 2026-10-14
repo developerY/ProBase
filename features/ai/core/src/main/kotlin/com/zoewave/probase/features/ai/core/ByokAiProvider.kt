@@ -19,7 +19,7 @@ import javax.inject.Singleton
 class ByokAiProvider @Inject constructor() : AiProvider {
 
     private var currentApiKey: String? = null
-    private var currentModelName: String = "gemini-1.5-flash"
+    private var currentModelName: String = "gemini-2.0-flash"
     private val httpClient = OkHttpClient()
 
     fun setApiKey(key: String?) {

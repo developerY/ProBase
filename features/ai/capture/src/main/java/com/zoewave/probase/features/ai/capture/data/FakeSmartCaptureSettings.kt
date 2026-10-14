@@ -11,5 +11,5 @@ import javax.inject.Inject
  */
 class FakeSmartCaptureSettings @Inject constructor() : SmartCaptureSettings {
     override val userApiKeyFlow: Flow<String?> = flowOf(null) // BYOK: Default to null to trigger local fallback
-    override val userAiModelFlow: Flow<String> = flowOf("gemini-1.5-flash")
+    override val userAiModelFlow: Flow<String> = flowOf("gemini-2.0-flash")
 }

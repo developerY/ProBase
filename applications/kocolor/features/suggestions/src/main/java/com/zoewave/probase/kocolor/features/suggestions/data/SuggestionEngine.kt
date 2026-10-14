@@ -21,7 +21,7 @@ class SuggestionEngine @Inject constructor() {
         profile: FashionProfile,
         query: String?,
         apiKey: String,
-        modelName: String = "gemini-1.5-flash"
+        modelName: String = "gemini-2.0-flash"
     ): FashionAdvice {
         val generativeModel = GenerativeModel(
             modelName = modelName,

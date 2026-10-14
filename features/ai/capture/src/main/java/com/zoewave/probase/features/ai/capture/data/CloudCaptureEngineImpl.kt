@@ -119,7 +119,7 @@ class CloudCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
             return DiagnosticResult(SmartTaskDraft(), logs, error = "No content to analyze", engineUsed = "Cloud AI")
         }
 
-        val finalModelName = modelName ?: "gemini-1.5-flash"
+        val finalModelName = modelName ?: "gemini-2.0-flash"
         logs.add("API Key found (length: ${apiKey.length})")
         logs.add("Model: $finalModelName")
         if (!userContext.isNullOrBlank()) {
