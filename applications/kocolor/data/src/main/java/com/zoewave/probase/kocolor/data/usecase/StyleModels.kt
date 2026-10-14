@@ -95,10 +95,10 @@ data class StyleSelectionState(
 
 @Serializable
 data class StyleBlueprint(
-    val rationale: String,
-    val selectedClothingIds: List<String>,
-    val selectedCosmeticIds: List<String>,
-    val recommendedPalette: List<String>
+    val rationale: String = "",
+    val selectedClothingIds: List<String> = emptyList(),
+    val selectedCosmeticIds: List<String> = emptyList(),
+    val recommendedPalette: List<String> = emptyList()
 )
 
 data class RecommendationComposition(

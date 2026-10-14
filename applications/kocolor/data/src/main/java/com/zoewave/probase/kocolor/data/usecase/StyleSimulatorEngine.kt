@@ -11,6 +11,13 @@ import com.zoewave.probase.kocolor.data.color.CandidateProvenance
 import com.zoewave.probase.kocolor.data.telemetry.StyleAuditLogger
 import com.zoewave.probase.kocolor.fashionista.domain.FashionistaEvaluator
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -36,7 +43,9 @@ class StyleSimulatorEngine @Inject constructor(
 
     private val json = Json { 
         ignoreUnknownKeys = true 
+        isLenient = true
         coerceInputValues = true
+        explicitNulls = false
     }
 
     /**
@@ -457,9 +466,78 @@ class StyleSimulatorEngine @Inject constructor(
         """.trimIndent())
     }
 
+    private fun extractStringValuesFromElement(element: JsonElement?): List<String> {
+        if (element == null) return emptyList()
+        return when (element) {
+            is JsonArray -> {
+                element.mapNotNull { item ->
+                    when (item) {
+                        is JsonPrimitive -> item.contentOrNull
+                        is JsonObject -> item.values.firstOrNull { it is JsonPrimitive }?.jsonPrimitive?.contentOrNull
+                        else -> null
+                    }
+                }
+            }
+            is JsonObject -> {
+                element.values.flatMap { valEl ->
+                    when (valEl) {
+                        is JsonPrimitive -> listOfNotNull(valEl.contentOrNull)
+                        is JsonArray -> valEl.mapNotNull { (it as? JsonPrimitive)?.contentOrNull }
+                        else -> emptyList()
+                    }
+                }
+            }
+            is JsonPrimitive -> listOfNotNull(element.contentOrNull)
+            else -> emptyList()
+        }
+    }
+
     private fun decodeBlueprint(jsonText: String): StyleBlueprint {
         val cleanedJson = jsonText.substringAfter("{").substringBeforeLast("}")
         val finalJson = "{$cleanedJson}"
-        return json.decodeFromString<StyleBlueprint>(finalJson)
+
+        return try {
+            val rootElement = json.parseToJsonElement(finalJson).jsonObject
+
+            // 1. Extract rationale or fallback to alternate keys
+            val rationaleText = rootElement["rationale"]?.jsonPrimitive?.contentOrNull
+                ?: rootElement["summary"]?.jsonPrimitive?.contentOrNull
+                ?: rootElement["explanation"]?.jsonPrimitive?.contentOrNull
+                ?: rootElement["reason"]?.jsonPrimitive?.contentOrNull
+                ?: ""
+
+            // 2. Extract selectedClothingIds or fallback to clothing_composition / clothing / clothingIds
+            val clothingElement = rootElement["selectedClothingIds"]
+                ?: rootElement["clothing_composition"]
+                ?: rootElement["clothingComposition"]
+                ?: rootElement["clothing_ids"]
+                ?: rootElement["clothing"]
+            val clothingIds = extractStringValuesFromElement(clothingElement)
+
+            // 3. Extract selectedCosmeticIds or fallback to cosmetic_composition / cosmetics / cosmeticIds
+            val cosmeticElement = rootElement["selectedCosmeticIds"]
+                ?: rootElement["cosmetic_composition"]
+                ?: rootElement["cosmeticComposition"]
+                ?: rootElement["cosmetic_ids"]
+                ?: rootElement["cosmetics"]
+            val cosmeticIds = extractStringValuesFromElement(cosmeticElement)
+
+            // 4. Extract recommendedPalette or fallback to palette
+            val paletteElement = rootElement["recommendedPalette"]
+                ?: rootElement["palette"]
+                ?: rootElement["recommended_palette"]
+            val palette = extractStringValuesFromElement(paletteElement)
+
+            // Construct normalized blueprint
+            StyleBlueprint(
+                rationale = rationaleText,
+                selectedClothingIds = clothingIds,
+                selectedCosmeticIds = cosmeticIds,
+                recommendedPalette = palette
+            )
+        } catch (e: Exception) {
+            Log.w("StyleSimulatorEngine", "Schema-agnostic JSON normalization failed. Trying direct decode.", e)
+            json.decodeFromString<StyleBlueprint>(finalJson)
+        }
     }
 }
