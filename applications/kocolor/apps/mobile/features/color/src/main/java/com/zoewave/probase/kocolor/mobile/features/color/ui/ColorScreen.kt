@@ -56,7 +56,6 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Flight
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -683,16 +682,37 @@ private fun TravelCapsuleSummaryCard(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(
-                    brush = Brush.radialGradient(
-                        colors = listOf(Color.White.copy(alpha = 0.65f), Color(0xFFE1EDFF)),
-                        radius = 800f
-                    )
-                )
-                .padding(20.dp)
+                .wrapContentHeight()
         ) {
+            // Android Best Practice for Card Background Image:
+            // 1. Hardware Accelerated & Async-loaded via Coil (AsyncImage)
+            // 2. Translucent Alpha Scrim (0.28f) to ensure background texture does not clash with foreground text
+            // 3. ContentScale.Crop for edge-to-edge coverage within the card bounds
+            AsyncImage(
+                model = com.zoewave.probase.kocolor.features.travel.R.drawable.kocolorplane,
+                contentDescription = null,
+                modifier = Modifier
+                    .matchParentSize()
+                    .alpha(0.92f),
+                contentScale = ContentScale.Crop
+            )
+
+            // Radial Tint Overlay for contrast & luxury aesthetic
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(
+                        brush = Brush.radialGradient(
+                            colors = listOf(Color.White.copy(alpha = 0.55f), Color(0xFFE1EDFF).copy(alpha = 0.75f)),
+                            radius = 800f
+                        )
+                    )
+            )
+
             Column(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 // TOP HALF: Main Glassmorphic Pill & Floating Badge
