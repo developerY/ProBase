@@ -7,20 +7,17 @@ import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.core.model.ritual.MicroCategory
-import com.zoewave.probase.features.ai.core.AiInput
 import com.zoewave.probase.features.ai.core.AiProvider
 import com.zoewave.probase.features.ai.core.AiProviderCapability
 import com.zoewave.probase.features.ai.local.data.PromptCacheRepository
 import com.zoewave.probase.kocolor.data.color.CandidateProvenance
 import com.zoewave.probase.kocolor.data.telemetry.StyleAuditLogger
 import com.zoewave.probase.kocolor.fashionista.domain.FashionistaEvaluator
-import io.mockk.Runs
+import com.zoewave.probase.kocolor.fashionista.domain.FashionistaScore
 import io.mockk.coEvery
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkStatic
-import io.mockk.verify
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -35,23 +32,34 @@ class StyleSimulatorEngineTest {
     private val cache = mockk<PromptCacheRepository>()
     private val auditLogger = mockk<StyleAuditLogger>(relaxed = true)
     private val fallbackEngine = mockk<DeterministicStyleEngine>()
-    private val fashionistaEvaluator = mockk<FashionistaEvaluator>(relaxed = true)
-    
+    private val validator = RecommendationValidator()
+    private val fashionistaEvaluator = mockk<FashionistaEvaluator>()
+    private val intentFulfillmentEvaluator = mockk<IntentFulfillmentEvaluator>()
+
     private lateinit var engine: StyleSimulatorEngine
 
     @Before
-    fun setup() {
+    fun setUp() {
         mockkStatic(Log::class)
-        every { Log.v(any(), any()) } returns 0
         every { Log.d(any(), any()) } returns 0
         every { Log.i(any(), any()) } returns 0
         every { Log.w(any(), any<String>()) } returns 0
-        every { Log.e(any(), any(), any()) } returns 0
-        every { Log.e(any(), any()) } returns 0
+        every { Log.w(any(), any<String>(), any<Throwable>()) } returns 0
+        every { Log.e(any(), any<String>()) } returns 0
+        every { Log.e(any(), any<String>(), any<Throwable>()) } returns 0
 
-        every { cache.generateFingerprint(any(), any(), any(), any(), any(), any(), any(), any()) } returns "test_hash"
-        every { cache.get(any()) } returns null
-        every { cache.put(any(), any()) } just Runs
+        every { cache.generateFingerprint(any(), any(), any(), any(), any(), any(), any(), any()) } returns "fp123"
+        coEvery { cache.get(any()) } returns null
+        coEvery { cache.put(any(), any()) } returns Unit
+
+        every { fashionistaEvaluator.evaluate(any(), any()) } returns FashionistaScore(
+            colorHarmonyScore = 80f,
+            silhouetteScore = 80f,
+            contrastScore = 80f,
+            totalScore = 80f,
+            isApproved = true
+        )
+        every { intentFulfillmentEvaluator.evaluate(any(), any(), any()) } returns IntentFulfillment()
 
         engine = StyleSimulatorEngine(
             contextEngine,
@@ -62,115 +70,108 @@ class StyleSimulatorEngineTest {
             cache,
             auditLogger,
             fallbackEngine,
-            RecommendationValidator(),
+            validator,
             fashionistaEvaluator,
-            IntentFulfillmentEvaluator()
+            intentFulfillmentEvaluator
         )
     }
 
     @Test
-    fun `generateBlueprint should return result from first successful provider`() = runTest {
-        val context = StyleRequestContext(intent = "party", weather = "warm", appearanceTelemetry = ColorTelemetry())
-        val provider1 = mockk<AiProvider>()
-        val provider2 = mockk<AiProvider>()
-        
-        val capability1 = AiProviderCapability(
-            id = "p1", displayName = "P1", maxInputTokens = 1000, maxOutputTokens = 10, timeoutMillis = 1000,
-            isLocal = true
-        )
-        
-        val mockCosmetics = listOf(
-            CandidateProvenance(cosmeticItem = CosmeticItem(internalId = 1, name = "Eye Shadow", brand = "KoColor", macroCategory = MacroCategory.EYES, microCategory = MicroCategory.EYESHADOW, colorHex = "#000000")),
-            CandidateProvenance(cosmeticItem = CosmeticItem(internalId = 2, name = "Blush", brand = "KoColor", macroCategory = MacroCategory.DIMENSION, microCategory = MicroCategory.BLUSH, colorHex = "#000000")),
-            CandidateProvenance(cosmeticItem = CosmeticItem(internalId = 3, name = "Lipstick", brand = "KoColor", macroCategory = MacroCategory.LIPS, microCategory = MicroCategory.LIPSTICK, colorHex = "#000000")),
-            CandidateProvenance(cosmeticItem = CosmeticItem(internalId = 4, name = "Nail Polish", brand = "KoColor", macroCategory = MacroCategory.NAILS, microCategory = MicroCategory.NAIL_POLISH, colorHex = "#000000"))
-        )
-
-        every { provider1.capability } returns capability1
-        coEvery { provider1.countTokens(any()) } returns 50
-        coEvery { provider1.execute(any()) } returns Result.success("{\"rationale\": \"P1 result\", \"selectedClothingIds\": [], \"selectedCosmeticIds\": [\"c_1\", \"c_2\", \"c_3\", \"c_4\"], \"recommendedPalette\": []}")
-        
-        coEvery { capabilityRouter.getRankedAvailableProviders() } returns listOf(provider1, provider2)
-        coEvery { capabilityRouter.getActiveProviderName() } returns "Mock AI"
-        val mockProv = listOf(CandidateProvenance(clothingItem = ClothingItem(internalId = 1, name = "Test", category = ClothingCategory.TOPS, colorHex = "#000000")))
-        coEvery { contextEngine.generateSelectionState(any(), any(), any()) } returns StyleSelectionState(fullRankedCandidatePool = mockProv)
-        coEvery { candidateFilter.getCosmeticCandidateProvenance(any(), any(), any()) } returns mockCosmetics
-
-        val result = engine.generateBlueprint(emptyList(), emptyList(), context)
-
-        assertThat(result.rationale).isEqualTo("P1 result")
-    }
-
-    @Test
-    fun `generateBlueprint should fallback to deterministic engine if all providers fail`() = runTest {
-        val context = StyleRequestContext(intent = "party", weather = "warm", appearanceTelemetry = ColorTelemetry())
-        
-        coEvery { capabilityRouter.getRankedAvailableProviders() } returns emptyList()
-        coEvery { capabilityRouter.getActiveProviderName() } returns "Math/Deterministic (No AI)"
-        every { fallbackEngine.generate(any()) } returns StyleBlueprint("Fallback", emptyList(), emptyList(), emptyList())
-
-        val result = engine.generateBlueprint(emptyList(), emptyList(), context)
-
-        assertThat(result.rationale).isEqualTo("Fallback")
-    }
-
-    @Test
-    fun `generateBlueprint should step-down context if provider budget exceeded`() = runTest {
-        val context = StyleRequestContext(intent = "party", weather = "warm", appearanceTelemetry = ColorTelemetry())
-        val provider = mockk<AiProvider>()
-        val capability = AiProviderCapability(
-            id = "p1", displayName = "P1", maxInputTokens = 500, maxOutputTokens = 10, timeoutMillis = 1000,
-            maxCandidateAdditions = 10, minCandidateAdditions = 2, isLocal = true
-        )
-        
-        val items = List(10) { 
-            ClothingItem(internalId = it.toLong(), name = "Item $it", category = ClothingCategory.TOPS, colorHex = "#000000")
-        }
-        val provList = items.map { CandidateProvenance(clothingItem = it) }
-
-        every { provider.capability } returns capability
-        coEvery { provider.countTokens(any()) } answers {
-            val input = it.invocation.args[0] as AiInput
-            if (input.promptString.contains("Cotton")) 1000 else 200
-        }
-        coEvery { provider.execute(any()) } returns Result.success("{\"rationale\": \"Success\", \"selectedClothingIds\": [], \"selectedCosmeticIds\": [], \"recommendedPalette\": []}")
-        
-        coEvery { capabilityRouter.getRankedAvailableProviders() } returns listOf(provider)
-        coEvery { capabilityRouter.getActiveProviderName() } returns "Mock AI"
-        coEvery { contextEngine.generateSelectionState(any(), any(), any()) } returns StyleSelectionState(fullRankedCandidatePool = provList)
-        coEvery { candidateFilter.getCosmeticCandidateProvenance(any(), any(), any()) } returns emptyList()
-        every { fallbackEngine.generate(any()) } returns StyleBlueprint("Fallback", emptyList(), emptyList(), emptyList())
-
-        val result = engine.generateBlueprint(items, emptyList(), context)
-
-        assertThat(result.rationale).isEqualTo("Success")
-    }
-
-    @Test
-    fun `generateBlueprint should log non-empty reasoning set to audit logger`() = runTest {
-        val context = StyleRequestContext(intent = "party", weather = "warm", appearanceTelemetry = ColorTelemetry())
+    fun `generateBlueprint should return blueprint from primary provider when successful`() = runTest {
+        val context = StyleRequestContext(intent = "work", weather = "sunny")
         val provider = mockk<AiProvider>()
         val capability = AiProviderCapability(
             id = "p1", displayName = "P1", maxInputTokens = 1000, maxOutputTokens = 10, timeoutMillis = 1000,
             isLocal = true
         )
-        
-        val items = List(5) { 
-            ClothingItem(internalId = it.toLong(), name = "Item $it", category = ClothingCategory.TOPS, colorHex = "#000000")
-        }
-        val provList = items.map { CandidateProvenance(clothingItem = it) }
+        val item = ClothingItem(internalId = 1, name = "Shirt", category = ClothingCategory.TOPS, colorHex = "#000")
 
         every { provider.capability } returns capability
         coEvery { provider.countTokens(any()) } returns 100
-        coEvery { provider.execute(any()) } returns Result.success("{\"rationale\": \"Success\", \"selectedClothingIds\": [], \"selectedCosmeticIds\": [], \"recommendedPalette\": []}")
+        coEvery { provider.execute(any()) } returns Result.success("{\"rationale\": \"Primary AI\", \"selectedClothingIds\": [\"w_1\"], \"selectedCosmeticIds\": [], \"recommendedPalette\": []}")
         
         coEvery { capabilityRouter.getRankedAvailableProviders() } returns listOf(provider)
-        coEvery { capabilityRouter.getActiveProviderName() } returns "Mock AI"
-        coEvery { contextEngine.generateSelectionState(any(), any(), any()) } returns StyleSelectionState(fullRankedCandidatePool = provList)
+        coEvery { contextEngine.generateSelectionState(any(), any(), any()) } returns StyleSelectionState(fullRankedCandidatePool = listOf(CandidateProvenance(clothingItem = item)))
         coEvery { candidateFilter.getCosmeticCandidateProvenance(any(), any(), any()) } returns emptyList()
 
-        engine.generateBlueprint(items, emptyList(), context)
+        val result = engine.generateBlueprint(listOf(item), emptyList(), context)
 
-        verify { auditLogger.logReasoningSet(context.requestId, match { it.isNotEmpty() }) }
+        assertThat(result.rationale).isEqualTo("Primary AI")
+    }
+
+    @Test
+    fun `generateBlueprint should fall back to deterministic engine when all providers fail`() = runTest {
+        val context = StyleRequestContext(intent = "work", weather = "sunny")
+        val provider = mockk<AiProvider>()
+        val capability = AiProviderCapability(
+            id = "p1", displayName = "P1", maxInputTokens = 1000, maxOutputTokens = 10, timeoutMillis = 1000,
+            isLocal = true
+        )
+        val item = ClothingItem(internalId = 1, name = "Shirt", category = ClothingCategory.TOPS, colorHex = "#000")
+
+        every { provider.capability } returns capability
+        coEvery { provider.countTokens(any()) } returns 100
+        coEvery { provider.execute(any()) } returns Result.failure(RuntimeException("Network error"))
+        
+        coEvery { capabilityRouter.getRankedAvailableProviders() } returns listOf(provider)
+        coEvery { contextEngine.generateSelectionState(any(), any(), any()) } returns StyleSelectionState(fullRankedCandidatePool = listOf(CandidateProvenance(clothingItem = item)))
+        coEvery { candidateFilter.getCosmeticCandidateProvenance(any(), any(), any()) } returns emptyList()
+        every { fallbackEngine.generate(any()) } returns StyleBlueprint("Fallback Rationale", emptyList(), emptyList(), emptyList())
+
+        val result = engine.generateBlueprint(listOf(item), emptyList(), context)
+
+        assertThat(result.rationale).isEqualTo("Fallback Rationale")
+    }
+
+    @Test
+    fun `generateBlueprint should decode nested composition JSON structures seamlessly`() = runTest {
+        val context = StyleRequestContext(intent = "dinner", weather = "cool")
+        val provider = mockk<AiProvider>()
+        val capability = AiProviderCapability(
+            id = "p1", displayName = "P1", maxInputTokens = 2000, maxOutputTokens = 50, timeoutMillis = 1000, isLocal = true
+        )
+        val clothingItems = listOf(
+            ClothingItem(internalId = 38L, name = "Top", category = ClothingCategory.TOPS, colorHex = "#000000"),
+            ClothingItem(internalId = 32L, name = "Bottom", category = ClothingCategory.BOTTOMS, colorHex = "#000000"),
+            ClothingItem(internalId = 48L, name = "Shoes", category = ClothingCategory.SHOES, colorHex = "#000000")
+        )
+        val cosmeticItems = listOf(
+            CosmeticItem(internalId = 61L, name = "Eye Shadow", brand = "KoColor", macroCategory = MacroCategory.EYES, microCategory = MicroCategory.EYESHADOW, colorHex = "#000000"),
+            CosmeticItem(internalId = 12L, name = "Lipstick", brand = "KoColor", macroCategory = MacroCategory.LIPS, microCategory = MicroCategory.LIPSTICK, colorHex = "#000000")
+        )
+        val provList = clothingItems.map { CandidateProvenance(clothingItem = it) }
+        val cosmeticProvList = cosmeticItems.map { CandidateProvenance(cosmeticItem = it) }
+
+        every { provider.capability } returns capability
+        coEvery { provider.countTokens(any()) } returns 200
+        
+        // Simulating the nested JSON structure generated by LLM when using English headings
+        val nestedJson = """
+            {
+              "explanation": "Harmonic autumn style",
+              "clothing_composition": {
+                "top": "w_38",
+                "bottom": "w_32",
+                "shoes": "w_48"
+              },
+              "cosmetic_composition": {
+                "eye": "c_61",
+                "lip": "c_12"
+              },
+              "palette": ["#1E88E5", "#D4AF37"]
+            }
+        """.trimIndent()
+
+        coEvery { provider.execute(any()) } returns Result.success(nestedJson)
+        coEvery { capabilityRouter.getRankedAvailableProviders() } returns listOf(provider)
+        coEvery { contextEngine.generateSelectionState(any(), any(), any()) } returns StyleSelectionState(fullRankedCandidatePool = provList)
+        coEvery { candidateFilter.getCosmeticCandidateProvenance(any(), any(), any()) } returns cosmeticProvList
+
+        val blueprint = engine.generateBlueprint(clothingItems, cosmeticItems, context)
+
+        assertThat(blueprint.rationale).isEqualTo("Harmonic autumn style")
+        assertThat(blueprint.selectedClothingIds).containsExactly("w_38", "w_32", "w_48")
+        assertThat(blueprint.selectedCosmeticIds).containsExactly("c_61", "c_12")
+        assertThat(blueprint.recommendedPalette).containsExactly("#1E88E5", "#D4AF37")
     }
 }

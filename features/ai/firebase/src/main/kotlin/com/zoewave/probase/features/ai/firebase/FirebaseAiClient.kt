@@ -5,6 +5,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.ai.GenerativeModel
 import com.google.firebase.ai.ai
 import com.google.firebase.ai.type.GenerativeBackend
+import com.google.firebase.ai.type.Schema
 import com.google.firebase.ai.type.content
 import com.google.firebase.ai.type.generationConfig
 import com.zoewave.probase.core.data.repository.AiConfigurationSettings
@@ -109,6 +110,21 @@ class FirebaseAiClientImpl @Inject constructor(
             },
             generationConfig = generationConfig {
                 responseMimeType = "application/json"
+                responseSchema = Schema.obj(
+                    properties = mapOf(
+                        "selectedClothingIds" to Schema.array(
+                            Schema.string("Selected wardrobe item IDs, e.g., w_38")
+                        ),
+                        "selectedCosmeticIds" to Schema.array(
+                            Schema.string("Selected cosmetic item IDs, e.g., c_61")
+                        ),
+                        "rationale" to Schema.string("Harmonic synthesis rationale referencing ONLY selected item IDs"),
+                        "recommendedPalette" to Schema.array(
+                            Schema.string("Hex color codes for recommended palette, e.g., #1E88E5")
+                        )
+                    ),
+                    optionalProperties = listOf("recommendedPalette")
+                )
                 temperature = temperatureOverride ?: 0.75f
             }
         )
