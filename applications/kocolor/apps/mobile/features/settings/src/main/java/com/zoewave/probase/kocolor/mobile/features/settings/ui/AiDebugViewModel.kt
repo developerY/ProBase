@@ -3,6 +3,7 @@ package com.zoewave.probase.kocolor.mobile.features.settings.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.core.data.repository.AiConfigurationSettings
+import com.zoewave.probase.features.ai.capture.data.SmartCaptureOrchestrator
 import com.zoewave.probase.features.ai.core.AiInput
 import com.zoewave.probase.features.ai.core.AiProvider
 import com.zoewave.probase.features.ai.core.ByokAiProvider
@@ -55,8 +56,8 @@ data class DiagnosticStep(
 
 data class AiDebugUiState(
     val activeProviderName: String = "Loading...",
-    val currentModelName: String = "gemini-3.8-flash",
-    val availableByokModels: List<String> = listOf("gemini-3.8-flash", "gemini-2.5-flash", "gemini-1.5-flash", "gemini-1.5-pro"),
+    val currentModelName: String = "gemini-2.5-flash",
+    val availableByokModels: List<String> = listOf("gemini-2.5-flash", "gemini-2.5-pro", "gemini-1.5-flash", "gemini-1.5-pro"),
     val selectedTarget: TestTargetProvider = TestTargetProvider.AUTO,
     val isByokEnabled: Boolean = false,
     val isByokKeySet: Boolean = false,
@@ -83,13 +84,37 @@ class AiDebugViewModel @Inject constructor(
     private val promptAssembler: PromptAssembler,
     private val manifestSerializer: CompactManifestSerializer,
     private val validator: RecommendationValidator,
-    private val fashionistaEvaluator: FashionistaEvaluator
+    private val fashionistaEvaluator: FashionistaEvaluator,
+    private val orchestrator: SmartCaptureOrchestrator
 ) : ViewModel() {
 
     private val _selectedTarget = MutableStateFlow(TestTargetProvider.AUTO)
     private val _isTesting = MutableStateFlow(false)
     private val _testOutput = MutableStateFlow<String?>(null)
     private val _diagnosticSteps = MutableStateFlow(initialSteps())
+    private val _fetchedLiveModels = MutableStateFlow<List<String>?>(null)
+
+    init {
+        fetchLiveModels()
+    }
+
+    fun fetchLiveModels() {
+        viewModelScope.launch {
+            val key = aiSettings.getGeminiApiKey()
+            if (!key.isNullOrBlank()) {
+                val validationResult = orchestrator.validateApiKey(key)
+                val liveModels = validationResult.second
+                if (liveModels.isNotEmpty()) {
+                    val activeModels = liveModels.filter { model ->
+                        !model.contains("1.0") && model != "gemini-2.0-flash"
+                    }
+                    if (activeModels.isNotEmpty()) {
+                        _fetchedLiveModels.value = activeModels
+                    }
+                }
+            }
+        }
+    }
 
     private fun initialSteps(): List<DiagnosticStep> = listOf(
         DiagnosticStep(1, "Connection & Handshake", "1. Checking provider availability, API keys & AppCheck"),
@@ -110,7 +135,8 @@ class AiDebugViewModel @Inject constructor(
         _selectedTarget,
         _isTesting,
         _testOutput,
-        _diagnosticSteps
+        _diagnosticSteps,
+        _fetchedLiveModels
     ) { array ->
         val modelName = array[0] as String
         val useByok = array[1] as Boolean
@@ -126,10 +152,16 @@ class AiDebugViewModel @Inject constructor(
         val testOutput = array[9] as String?
         @Suppress("UNCHECKED_CAST")
         val steps = array[10] as List<DiagnosticStep>
+        @Suppress("UNCHECKED_CAST")
+        val liveModels = array[11] as List<String>?
+
+        val fallbackList = listOf("gemini-2.5-flash", "gemini-2.5-pro", "gemini-1.5-flash", "gemini-1.5-pro")
+        val modelList = (liveModels ?: fallbackList).distinct()
 
         AiDebugUiState(
             activeProviderName = capabilityRouter.getActiveProviderName(),
             currentModelName = modelName,
+            availableByokModels = modelList,
             selectedTarget = selectedTarget,
             isByokEnabled = useByok,
             isByokKeySet = isKeySet,
@@ -187,7 +219,7 @@ class AiDebugViewModel @Inject constructor(
                     TestTargetProvider.BYOK -> {
                         val key = aiSettings.getGeminiApiKey()
                         byokProvider.setApiKey(key)
-                        byokProvider.setModelName(aiSettings.aiModelFlow.firstOrNull() ?: "gemini-3.8-flash")
+                        byokProvider.setModelName(aiSettings.aiModelFlow.firstOrNull() ?: "gemini-2.5-flash")
                         if (byokProvider.isAvailable()) byokProvider else null
                     }
                     TestTargetProvider.LOCAL_NANO -> {

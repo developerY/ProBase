@@ -3,6 +3,7 @@ package com.zoewave.probase.kocolor.mobile.features.settings.ui
 import android.util.Log
 import com.google.common.truth.Truth.assertThat
 import com.zoewave.probase.core.data.repository.AiConfigurationSettings
+import com.zoewave.probase.features.ai.capture.data.SmartCaptureOrchestrator
 import com.zoewave.probase.features.ai.core.ByokAiProvider
 import com.zoewave.probase.features.ai.firebase.FirebaseAiProvider
 import com.zoewave.probase.features.ai.local.data.LocalNanoAiProvider
@@ -53,6 +54,7 @@ class AiDebugViewModelTest {
     private val manifestSerializer: CompactManifestSerializer = mockk(relaxed = true)
     private val validator: RecommendationValidator = mockk(relaxed = true)
     private val fashionistaEvaluator: FashionistaEvaluator = mockk(relaxed = true)
+    private val orchestrator: SmartCaptureOrchestrator = mockk(relaxed = true)
 
     private lateinit var viewModel: AiDebugViewModel
 
@@ -65,7 +67,7 @@ class AiDebugViewModelTest {
         every { Log.w(any(), any<String>()) } returns 0
         every { Log.e(any(), any<String>()) } returns 0
 
-        coEvery { aiSettings.aiModelFlow } returns flowOf("gemini-3.8-flash")
+        coEvery { aiSettings.aiModelFlow } returns flowOf("gemini-2.5-flash")
         coEvery { aiSettings.useByokKey } returns flowOf(true)
         coEvery { aiSettings.isGeminiApiKeySetFlow } returns flowOf(true)
         coEvery { aiSettings.useLocalAi } returns flowOf(false)
@@ -73,6 +75,7 @@ class AiDebugViewModelTest {
         every { auditLogger.recentLogs } returns MutableStateFlow(listOf("Log 1", "Log 2"))
         every { auditLogger.recentTrails } returns MutableStateFlow(emptyList())
         coEvery { capabilityRouter.getActiveProviderName() } returns "Firebase AI Logic (Cloud)"
+        coEvery { orchestrator.validateApiKey(any()) } returns ("Key Valid!" to listOf("gemini-2.5-flash", "gemini-2.5-pro"))
 
         viewModel = AiDebugViewModel(
             aiSettings,
@@ -87,7 +90,8 @@ class AiDebugViewModelTest {
             promptAssembler,
             manifestSerializer,
             validator,
-            fashionistaEvaluator
+            fashionistaEvaluator,
+            orchestrator
         )
     }
 
@@ -105,7 +109,7 @@ class AiDebugViewModelTest {
         testScheduler.advanceUntilIdle()
 
         val state = states.last()
-        assertThat(state.currentModelName).isEqualTo("gemini-3.8-flash")
+        assertThat(state.currentModelName).isEqualTo("gemini-2.5-flash")
         assertThat(state.isByokEnabled).isTrue()
         assertThat(state.isFirebaseEnabled).isTrue()
         assertThat(state.recentAuditLogs).containsExactly("Log 1", "Log 2")
