@@ -54,3 +54,6 @@ google-services-zoewave.json
 
 # Security & Keys
 **/.env
+
+# No Python Scripts
+*.py

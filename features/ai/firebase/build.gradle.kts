@@ -17,6 +17,7 @@ dependencies {
     implementation(libs.firebase.auth)
     implementation(libs.firebase.appcheck.playintegrity)
     implementation(libs.firebase.appcheck.debug)
+    implementation(libs.squareup.okhttp)
     implementation(libs.kotlinx.serialization.json)
     implementation(project(":features:ai:core"))
     implementation(project(":core:data"))

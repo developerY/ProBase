@@ -44,13 +44,18 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -189,32 +194,65 @@ fun AiDebugTelemetryScreen(
                 }
             }
 
-            // Section 2b: BYOK Model Choice Selector
-            if (uiState.selectedTarget == TestTargetProvider.BYOK || uiState.selectedTarget == TestTargetProvider.AUTO) {
+            // Section 2b: Model Dropdown Selector (Active for BYOK, Firebase AI, or Auto Router)
+            if (uiState.selectedTarget == TestTargetProvider.BYOK ||
+                uiState.selectedTarget == TestTargetProvider.FIREBASE_AI ||
+                uiState.selectedTarget == TestTargetProvider.AUTO) {
                 item {
+                    var isExpanded by remember { mutableStateOf(false) }
+
+                    val sectionTitle = when (uiState.selectedTarget) {
+                        TestTargetProvider.BYOK -> "CHOOSE BYOK LLM MODEL"
+                        TestTargetProvider.FIREBASE_AI -> "CHOOSE FIREBASE AI LLM MODEL"
+                        else -> "CHOOSE MODEL FOR CLOUD AI"
+                    }
+
                     Column {
                         Text(
-                            "CHOOSE BYOK LLM MODEL",
+                            sectionTitle,
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Black,
                             letterSpacing = 1.2.sp,
                             color = MaterialTheme.colorScheme.secondary
                         )
                         Spacer(Modifier.height(8.dp))
-                        LazyRow(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+
+                        ExposedDropdownMenuBox(
+                            expanded = isExpanded,
+                            onExpandedChange = { isExpanded = it },
+                            modifier = Modifier.fillMaxWidth()
                         ) {
-                            items(uiState.availableByokModels) { modelName ->
-                                val isSelected = uiState.currentModelName == modelName
-                                FilterChip(
-                                    selected = isSelected,
-                                    onClick = { viewModel.selectByokModel(modelName) },
-                                    label = { Text(modelName, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal) },
-                                    colors = FilterChipDefaults.filterChipColors(
-                                        selectedContainerColor = MaterialTheme.colorScheme.secondary,
-                                        selectedLabelColor = MaterialTheme.colorScheme.onSecondary
+                            OutlinedTextField(
+                                value = uiState.currentModelName,
+                                onValueChange = {},
+                                readOnly = true,
+                                label = { Text("Active Cloud Model") },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, true),
+                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded) },
+                                colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+                                shape = RoundedCornerShape(14.dp)
+                            )
+
+                            ExposedDropdownMenu(
+                                expanded = isExpanded,
+                                onDismissRequest = { isExpanded = false }
+                            ) {
+                                uiState.availableByokModels.forEach { modelName ->
+                                    DropdownMenuItem(
+                                        text = {
+                                            Text(
+                                                text = modelName,
+                                                fontWeight = if (modelName == uiState.currentModelName) FontWeight.Bold else FontWeight.Normal
+                                            )
+                                        },
+                                        onClick = {
+                                            viewModel.selectByokModel(modelName)
+                                            isExpanded = false
+                                        }
                                     )
-                                )
+                                }
                             }
                         }
                     }
