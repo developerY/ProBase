@@ -194,14 +194,22 @@ fun AiDebugTelemetryScreen(
                 }
             }
 
-            // Section 2b: BYOK Model Dropdown Selector
-            if (uiState.selectedTarget == TestTargetProvider.BYOK || uiState.selectedTarget == TestTargetProvider.AUTO) {
+            // Section 2b: Model Dropdown Selector (Active for BYOK, Firebase AI, or Auto Router)
+            if (uiState.selectedTarget == TestTargetProvider.BYOK ||
+                uiState.selectedTarget == TestTargetProvider.FIREBASE_AI ||
+                uiState.selectedTarget == TestTargetProvider.AUTO) {
                 item {
                     var isExpanded by remember { mutableStateOf(false) }
 
+                    val sectionTitle = when (uiState.selectedTarget) {
+                        TestTargetProvider.BYOK -> "CHOOSE BYOK LLM MODEL"
+                        TestTargetProvider.FIREBASE_AI -> "CHOOSE FIREBASE AI LLM MODEL"
+                        else -> "CHOOSE MODEL FOR CLOUD AI"
+                    }
+
                     Column {
                         Text(
-                            "CHOOSE BYOK LLM MODEL",
+                            sectionTitle,
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Black,
                             letterSpacing = 1.2.sp,
@@ -218,7 +226,7 @@ fun AiDebugTelemetryScreen(
                                 value = uiState.currentModelName,
                                 onValueChange = {},
                                 readOnly = true,
-                                label = { Text("Active BYOK Model") },
+                                label = { Text("Active Cloud Model") },
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, true),
