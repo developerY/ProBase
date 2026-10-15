@@ -24,7 +24,12 @@ dependencies {
     implementation(project(":features:readers:ocr"))
     implementation(project(":features:graphics"))
 
-    implementation(libs.google.generative.ai)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.ai)
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.appcheck.playintegrity)
+    implementation(libs.firebase.appcheck.debug)
+
     implementation(libs.google.play.services.maps)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.activity.compose)
@@ -42,10 +47,6 @@ dependencies {
 
     // ML Kit Face Detection
     implementation(libs.mlkit.face.detection)
-
-    // ML Kit - Moved to :features:readers:ocr
-    // implementation(libs.mlkit.text.recognition)
-    // implementation(libs.kotlinx.coroutines.play.services)
 
     testImplementation(libs.junit)
     testImplementation(libs.mockk)

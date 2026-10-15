@@ -1,7 +1,10 @@
 package com.zoewave.probase.kocolor.features.seasonal_trends.domain
 
-import com.google.ai.client.generativeai.GenerativeModel
-import com.google.ai.client.generativeai.type.content
+import com.google.firebase.Firebase
+import com.google.firebase.ai.GenerativeModel
+import com.google.firebase.ai.ai
+import com.google.firebase.ai.type.GenerativeBackend
+import com.google.firebase.ai.type.content
 import com.zoewave.probase.core.data.repository.AiConfigurationSettings
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
@@ -21,9 +24,11 @@ class GeminiService @Inject constructor(
         }
 
         val modelName = aiSettings.aiModelFlow.first()
-        val generativeModel = GenerativeModel(
-            modelName = modelName,
-            apiKey = apiKey
+        val generativeModel = Firebase.ai(
+            backend = GenerativeBackend.googleAI(),
+            useLimitedUseAppCheckTokens = false
+        ).generativeModel(
+            modelName = modelName
         )
 
         val response = generativeModel.generateContent(content { text(prompt) })

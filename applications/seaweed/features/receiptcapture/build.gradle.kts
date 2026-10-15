@@ -25,7 +25,6 @@ dependencies {
 
     // --- ML & AI ---
     implementation(libs.mlkit.text.recognition)
-    implementation(libs.google.generative.ai)
 
     implementation(libs.androidx.activity.compose)
 

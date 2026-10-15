@@ -33,5 +33,4 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     
     // AI SDK (Gemini)
-    implementation(libs.google.generative.ai)
 }

@@ -1,10 +1,11 @@
 package com.zoewave.probase.features.ai.capture.data
 
 import android.graphics.Bitmap
-import android.util.Log
-import com.google.ai.client.generativeai.GenerativeModel
-import com.google.ai.client.generativeai.type.content
-import com.google.ai.client.generativeai.type.generationConfig
+import com.google.firebase.Firebase
+import com.google.firebase.ai.ai
+import com.google.firebase.ai.type.GenerativeBackend
+import com.google.firebase.ai.type.content
+import com.google.firebase.ai.type.generationConfig
 import com.zoewave.probase.core.model.tasks.SmartTaskDraft
 import com.zoewave.probase.features.ai.capture.domain.DiagnosticResult
 import com.zoewave.probase.features.ai.capture.domain.SmartCaptureEngine
@@ -12,10 +13,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
 import javax.inject.Inject
 
 @Serializable
@@ -25,79 +24,15 @@ private data class GeminiModelsResponse(val models: List<GeminiModelDto>)
 private data class GeminiModelDto(val name: String, val supportedGenerationMethods: List<String>)
 
 /**
- * Tier 1: Pro Engine using Gemini 3.1 Flash Lite Cloud SDK.
- * Uses multimodal parsing to extract high-fidelity JSON.
+ * Cloud Capture Engine implementation using Firebase AI.
  */
 class CloudCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
 
     private val httpClient = OkHttpClient()
-    private val json = Json { 
-        ignoreUnknownKeys = true 
+
+    private val json = Json {
+        ignoreUnknownKeys = true
         coerceInputValues = true
-    }
-
-    override suspend fun getAvailableModels(apiKey: String?): List<String> = withContext(Dispatchers.IO) {
-        if (apiKey.isNullOrBlank()) return@withContext emptyList()
-        
-        val url = "https://generativelanguage.googleapis.com/v1beta/models?key=$apiKey"
-        val request = Request.Builder().url(url).build()
-        
-        try {
-            httpClient.newCall(request).execute().use { response ->
-                if (!response.isSuccessful) return@withContext emptyList()
-                val body = response.body?.string() ?: return@withContext emptyList()
-                val data = json.decodeFromString<GeminiModelsResponse>(body)
-                
-                val modelNames = data.models
-                    .filter { it.supportedGenerationMethods.contains("generateContent") }
-                    .map { it.name }
-                    .filter { it.contains("gemini") }
-                    .sorted()
-                
-                modelNames
-            }
-        } catch (e: Exception) {
-            emptyList<String>()
-        }
-    }
-
-    override suspend fun testModel(apiKey: String, modelName: String): String = withContext(Dispatchers.IO) {
-        // Models fetched from the API usually start with "models/" (e.g. "models/gemini-1.5-flash")
-        // If we naively append it to "/v1beta/models/", it becomes "/v1beta/models/models/..." and returns a 404.
-        val normalizedModelName = modelName.removePrefix("models/")
-        val url = "https://generativelanguage.googleapis.com/v1beta/models/$normalizedModelName:generateContent?key=$apiKey"
-        Log.d("CloudCaptureEngine", "testModel URL: $url")
-        
-        val jsonBody = """
-            {
-                "contents": [{
-                    "parts": [{"text": "What is your name and version?"}]
-                }]
-            }
-        """.trimIndent()
-        Log.d("CloudCaptureEngine", "testModel Request body: $jsonBody")
-        
-        val requestBody = jsonBody.toRequestBody("application/json".toMediaTypeOrNull())
-        val request = Request.Builder()
-            .url(url)
-            .post(requestBody)
-            .build()
-            
-        try {
-            httpClient.newCall(request).execute().use { response ->
-                if (!response.isSuccessful) {
-                    val err = response.body?.string() ?: ""
-                    Log.e("CloudCaptureEngine", "testModel HTTP Error ${response.code}: $err")
-                    return@withContext "Error: ${response.code} $err"
-                }
-                val body = response.body?.string() ?: return@withContext "Error: Empty response"
-                Log.d("CloudCaptureEngine", "testModel Success response: $body")
-                if (body.contains("candidates")) "Valid Response Received" else "Unknown Response"
-            }
-        } catch (e: Exception) {
-            Log.e("CloudCaptureEngine", "testModel Exception", e)
-            e.localizedMessage ?: "Connection Error"
-        }
     }
 
     override suspend fun processImage(
@@ -105,31 +40,28 @@ class CloudCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
         apiKey: String?,
         modelName: String?,
         userContext: String?,
-        onLog: (String) -> Unit,
-    ): DiagnosticResult<SmartTaskDraft> {
+        onLog: (String) -> Unit
+    ): DiagnosticResult<SmartTaskDraft> = withContext(Dispatchers.IO) {
         val logs = mutableListOf("Cloud AI Engine initialized")
         onLog("Cloud Engine: Warming up...")
-        if (apiKey.isNullOrBlank()) {
-            logs.add("Error: API Key is null or blank")
-            throw IllegalArgumentException("Missing Gemini API Key for Pro Engine")
-        }
 
         if (bitmap == null && userContext.isNullOrBlank()) {
             logs.add("Error: No image or text provided")
-            return DiagnosticResult(SmartTaskDraft(), logs, error = "No content to analyze", engineUsed = "Cloud AI")
+            return@withContext DiagnosticResult(SmartTaskDraft(), logs, error = "No content to analyze", engineUsed = "Cloud AI")
         }
 
-        val finalModelName = modelName ?: "gemini-2.0-flash"
-        logs.add("API Key found (length: ${apiKey.length})")
+        val finalModelName = modelName ?: "gemini-3.8-flash"
         logs.add("Model: $finalModelName")
         if (!userContext.isNullOrBlank()) {
             logs.add("User Context provided: ${userContext.take(20)}...")
         }
 
         onLog("Preparing prompt for $finalModelName...")
-        val generativeModel = GenerativeModel(
+        val generativeModel = Firebase.ai(
+            backend = GenerativeBackend.googleAI(),
+            useLimitedUseAppCheckTokens = false
+        ).generativeModel(
             modelName = finalModelName,
-            apiKey = apiKey,
             generationConfig = generationConfig {
                 responseMimeType = "application/json"
             }
@@ -147,53 +79,74 @@ class CloudCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
                 ${if (bitmap != null) "If the image is a broken object, a sketch, or a note, guess the average project requirements for this task." else ""}
                 Extract the task information into a structured JSON format to autofill a ToDo app.
                 
-                Fields to find: 
-                - category: A broad classification (e.g., "Home", "Work", "Health").
-                - projectName: The overarching project this belongs to, if applicable.
-                - taskName: The main actionable title.
-                - duration: Estimated time required (e.g., "30m", "2h").
-                - dueDate: Any visible deadlines. Format as MM/DD/YYYY if possible.
-                - budget: Any estimated costs. Return strictly as a primitive number without currency symbols (e.g., 15.50). Use null if none.
-                - subTasks: A list of 3 to 5 logical smaller steps to complete the task.
+                Fields to find:
+                - title: Actionable task name.
+                - description: Summary.
+                - category: HOME, WORK, HEALTH, FINANCE, PERSONAL.
+                - priority: LOW, MEDIUM, HIGH, URGENT.
+                - estimatedMinutes: Integer estimate.
+                - tags: String list.
                 
-                Respond ONLY with a valid JSON object matching this exact schema:
-                {
-                  "category": string or null,
-                  "projectName": string or null,
-                  "taskName": string or null,
-                  "duration": string or null,
-                  "dueDate": string or null,
-                  "budget": number or null,
-                  "subTasks": [string]
-                }
+                Respond ONLY with a valid JSON object matching this schema.
             """.trimIndent())
         }
 
-        return try {
-            logs.add("Sending multimodal request to Gemini...")
-            onLog("Sending multimodal request to Gemini...")
+        try {
+            onLog("Executing model request...")
             val response = generativeModel.generateContent(prompt)
-            onLog("Response received. Parsing JSON...")
-            val jsonText = response.text ?: run {
-                logs.add("Gemini returned empty response")
-                return DiagnosticResult(SmartTaskDraft(), logs, engineUsed = "Cloud AI")
+            val jsonText = response.text?.replace("```json", "")?.replace("```", "")?.trim()
+            if (jsonText != null) {
+                val draft = json.decodeFromString<SmartTaskDraft>(jsonText)
+                logs.add("Successfully parsed TaskDraft")
+                DiagnosticResult(draft, logs, engineUsed = "Cloud AI ($finalModelName)")
+            } else {
+                DiagnosticResult(SmartTaskDraft(), logs, error = "Empty LLM output", engineUsed = "Cloud AI")
             }
-            
-            logs.add("Response received (${jsonText.length} chars)")
-            
-            // Clean JSON string in case of LLM artifacts
-            val cleanedJson = jsonText.substringAfter("{").substringBeforeLast("}")
-            val finalJson = "{$cleanedJson}"
-            
-            val draft = json.decodeFromString<SmartTaskDraft>(finalJson)
-            logs.add("JSON decoding successful")
-            onLog("Task extraction successful!")
-            DiagnosticResult(draft, logs, engineUsed = "Cloud AI")
         } catch (e: Exception) {
-            logs.add("Gemini API call failed: ${e.message}")
-            onLog("Cloud API error: ${e.message}")
-            // Return instead of throwing to preserve logs in orchestrator
-            DiagnosticResult(SmartTaskDraft(), logs, error = e.message, engineUsed = "Cloud AI")
+            logs.add("Error during generation: ${e.localizedMessage}")
+            DiagnosticResult(SmartTaskDraft(), logs, error = e.localizedMessage, engineUsed = "Cloud AI")
+        }
+    }
+
+    override suspend fun getAvailableModels(apiKey: String?): List<String> = withContext(Dispatchers.IO) {
+        if (apiKey.isNullOrBlank()) return@withContext emptyList()
+
+        try {
+            val url = "https://generativelanguage.googleapis.com/v1beta/models?key=$apiKey"
+            val request = Request.Builder().url(url).build()
+
+            httpClient.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) return@withContext emptyList()
+
+                val bodyStr = response.body?.string() ?: return@withContext emptyList()
+                val dto = json.decodeFromString<GeminiModelsResponse>(bodyStr)
+
+                dto.models
+                    .filter { it.supportedGenerationMethods.contains("generateContent") }
+                    .map { it.name.replace("models/", "") }
+            }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    override suspend fun testModel(apiKey: String, modelName: String): String = withContext(Dispatchers.IO) {
+        try {
+            val model = Firebase.ai(
+                backend = GenerativeBackend.googleAI(),
+                useLimitedUseAppCheckTokens = false
+            ).generativeModel(
+                modelName = modelName
+            )
+
+            val response = model.generateContent("Ping! Respond with 'OK'.")
+            if (response.text?.contains("OK", ignoreCase = true) == true || !response.text.isNullOrBlank()) {
+                "Model '$modelName' is active and responsive!"
+            } else {
+                "Pinging model '$modelName' returned empty output."
+            }
+        } catch (e: Exception) {
+            "Model test failed: ${e.localizedMessage}"
         }
     }
 }

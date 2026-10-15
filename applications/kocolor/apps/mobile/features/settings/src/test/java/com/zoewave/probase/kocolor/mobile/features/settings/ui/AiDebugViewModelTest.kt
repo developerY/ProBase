@@ -3,15 +3,24 @@ package com.zoewave.probase.kocolor.mobile.features.settings.ui
 import android.util.Log
 import com.google.common.truth.Truth.assertThat
 import com.zoewave.probase.core.data.repository.AiConfigurationSettings
+import com.zoewave.probase.features.ai.core.ByokAiProvider
+import com.zoewave.probase.features.ai.firebase.FirebaseAiProvider
+import com.zoewave.probase.features.ai.local.data.LocalNanoAiProvider
 import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
 import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
 import com.zoewave.probase.kocolor.data.telemetry.StyleAuditLogger
 import com.zoewave.probase.kocolor.data.usecase.CapabilityRouter
+import com.zoewave.probase.kocolor.data.usecase.CompactManifestSerializer
+import com.zoewave.probase.kocolor.data.usecase.PromptAssembler
+import com.zoewave.probase.kocolor.data.usecase.RecommendationValidator
 import com.zoewave.probase.kocolor.data.usecase.StyleSimulatorEngine
+import com.zoewave.probase.kocolor.fashionista.domain.FashionistaEvaluator
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
+import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,6 +46,13 @@ class AiDebugViewModelTest {
     private val simulatorEngine: StyleSimulatorEngine = mockk(relaxed = true)
     private val wardrobeRepository: WardrobeRepository = mockk(relaxed = true)
     private val cosmeticRepository: CosmeticInventoryRepository = mockk(relaxed = true)
+    private val byokProvider: ByokAiProvider = mockk(relaxed = true)
+    private val localProvider: LocalNanoAiProvider = mockk(relaxed = true)
+    private val firebaseProvider: FirebaseAiProvider = mockk(relaxed = true)
+    private val promptAssembler: PromptAssembler = mockk(relaxed = true)
+    private val manifestSerializer: CompactManifestSerializer = mockk(relaxed = true)
+    private val validator: RecommendationValidator = mockk(relaxed = true)
+    private val fashionistaEvaluator: FashionistaEvaluator = mockk(relaxed = true)
 
     private lateinit var viewModel: AiDebugViewModel
 
@@ -64,7 +80,14 @@ class AiDebugViewModelTest {
             capabilityRouter,
             simulatorEngine,
             wardrobeRepository,
-            cosmeticRepository
+            cosmeticRepository,
+            byokProvider,
+            localProvider,
+            firebaseProvider,
+            promptAssembler,
+            manifestSerializer,
+            validator,
+            fashionistaEvaluator
         )
     }
 
@@ -88,6 +111,31 @@ class AiDebugViewModelTest {
         assertThat(state.recentAuditLogs).containsExactly("Log 1", "Log 2")
 
         job.cancel()
+    }
+
+    @Test
+    fun testSelectTargetProvider() = runTest {
+        val states = mutableListOf<AiDebugUiState>()
+        val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            viewModel.uiState.collect { states.add(it) }
+        }
+        testScheduler.advanceUntilIdle()
+
+        viewModel.selectTargetProvider(TestTargetProvider.LOCAL_NANO)
+        testScheduler.advanceUntilIdle()
+
+        assertThat(states.last().selectedTarget).isEqualTo(TestTargetProvider.LOCAL_NANO)
+
+        job.cancel()
+    }
+
+    @Test
+    fun testSelectByokModel() = runTest {
+        viewModel.selectByokModel("gemini-2.5-flash")
+        testScheduler.advanceUntilIdle()
+
+        coVerify { aiSettings.saveAiModel("gemini-2.5-flash") }
+        verify { byokProvider.setModelName("gemini-2.5-flash") }
     }
 
     @Test

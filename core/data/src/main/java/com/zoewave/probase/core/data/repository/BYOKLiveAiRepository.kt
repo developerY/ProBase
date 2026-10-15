@@ -1,6 +1,9 @@
 package com.zoewave.probase.core.data.repository
 
-import com.google.ai.client.generativeai.GenerativeModel
+import com.google.firebase.Firebase
+import com.google.firebase.ai.GenerativeModel
+import com.google.firebase.ai.ai
+import com.google.firebase.ai.type.GenerativeBackend
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -34,9 +37,11 @@ class BYOKLiveAiRepository @Inject constructor(
 
         scope.launch {
             try {
-                val model = GenerativeModel(
-                    modelName = "gemini-1.5-flash",
-                    apiKey = apiKey
+                val model = Firebase.ai(
+                    backend = GenerativeBackend.googleAI(),
+                    useLimitedUseAppCheckTokens = false
+                ).generativeModel(
+                    modelName = "gemini-3.8-flash"
                 )
                 model.startChat()
                 _isSessionActive.value = true

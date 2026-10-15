@@ -32,10 +32,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="com.zoewave.probase.kocolor" />
-                  <option name="mobileSdkAppId" value="1:20197827893:android:e821983b8267c31015987c" />
-                  <option name="projectId" value="buildwithai-453716" />
-                  <option name="projectNumber" value="20197827893" />
+                  <option name="appId" value="com.zoewave.probase.ashbike" />
+                  <option name="mobileSdkAppId" value="1:786488326984:android:f2f08312fbdcdbf395517d" />
+                  <option name="projectId" value="android-zoewave" />
+                  <option name="projectNumber" value="786488326984" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

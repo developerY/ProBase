@@ -20,11 +20,14 @@ dependencies {
     implementation(project(":features:ai:firebase"))
     implementation(project(":features:ai:core"))
 
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.ai)
+    implementation(libs.firebase.auth)
+
     implementation(libs.room.runtime)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)
-    implementation(libs.google.generative.ai)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.work.runtime.ktx)
     implementation("androidx.palette:palette-ktx:1.0.0")
