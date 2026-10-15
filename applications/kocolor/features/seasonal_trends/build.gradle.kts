@@ -17,7 +17,12 @@ dependencies {
     implementation(project(":applications:kocolor:features:colors"))
     implementation(project(":features:ai:configuration"))
 
-    implementation(libs.google.generative.ai)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.ai)
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.appcheck.playintegrity)
+    implementation(libs.firebase.appcheck.debug)
+
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.lifecycle.viewmodel.compose)

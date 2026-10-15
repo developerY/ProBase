@@ -5,8 +5,9 @@ import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.ListenableWorker
 import androidx.work.WorkerParameters
-import com.google.ai.client.generativeai.GenerativeModel
-import com.google.ai.client.generativeai.type.content
+import com.google.firebase.Firebase
+import com.google.firebase.ai.ai
+import com.google.firebase.ai.type.GenerativeBackend
 import com.zoewave.probase.core.data.repository.AiConfigurationSettings
 import com.zoewave.probase.kocolor.db.dao.ProductDao
 import com.zoewave.probase.kocolor.db.entity.EnrichmentStatus
@@ -48,10 +49,14 @@ class EnrichmentWorker @AssistedInject constructor(
         productDao.updateProduct(product.copy(enrichmentStatus = EnrichmentStatus.ENRICHING))
 
         try {
-            val apiKey = aiSettings.getGeminiApiKey() ?: return ListenableWorker.Result.failure()
-            val modelName = aiSettings.aiModelFlow.firstOrNull() ?: "gemini-2.0-flash"
+            val modelName = aiSettings.aiModelFlow.firstOrNull() ?: "gemini-3.8-flash"
             
-            val model = GenerativeModel(modelName = modelName, apiKey = apiKey)
+            val model = Firebase.ai(
+                backend = GenerativeBackend.googleAI(),
+                useLimitedUseAppCheckTokens = false
+            ).generativeModel(
+                modelName = modelName
+            )
             
             val prompt = """
                 You are a cosmetic chemistry assistant. Enrich this product data.
@@ -67,31 +72,30 @@ class EnrichmentWorker @AssistedInject constructor(
             val response = withTimeout(8000) {
                 model.generateContent(prompt)
             }
-            
-            val jsonText = response.text ?: return ListenableWorker.Result.failure()
-            
-            // Safe JSON Extraction
-            val jsonRegex = Regex("""\{[\s\S]*\}""")
-            val match = jsonRegex.find(jsonText) ?: return ListenableWorker.Result.failure()
-            val enrichedData = json.decodeFromString<EnrichmentResponse>(match.value)
-            
-            // Final Database Entity Update
-            productDao.updateProduct(product.copy(
-                skinConcerns = enrichedData.skinConcerns,
-                benefits = enrichedData.benefits,
-                ingredientDescriptions = enrichedData.ingredientDescriptions,
-                enrichmentStatus = EnrichmentStatus.COMPLETED
-            ))
 
-            return ListenableWorker.Result.success()
+            val jsonText = response.text?.replace("```json", "")?.replace("```", "")?.trim()
+            if (jsonText != null) {
+                val enrichment = json.decodeFromString<EnrichmentResponse>(jsonText)
+
+                val updatedProduct = product.copy(
+                    skinConcerns = enrichment.skinConcerns,
+                    benefits = enrichment.benefits,
+                    enrichmentStatus = EnrichmentStatus.COMPLETED
+                )
+                productDao.updateProduct(updatedProduct)
+                return ListenableWorker.Result.success()
+            } else {
+                productDao.updateProduct(product.copy(enrichmentStatus = EnrichmentStatus.FAILED))
+                return ListenableWorker.Result.failure()
+            }
         } catch (e: Exception) {
             when (e) {
-                is UnknownHostException, is SocketTimeoutException -> {
-                    android.util.Log.w("EnrichmentWorker", "Network failure, retrying with backoff: ${e.message}")
+                is SocketTimeoutException, is UnknownHostException -> {
+                    // Retriable network error
+                    productDao.updateProduct(product.copy(enrichmentStatus = EnrichmentStatus.PENDING))
                     return ListenableWorker.Result.retry()
                 }
                 else -> {
-                    android.util.Log.e("EnrichmentWorker", "Critical enrichment failure: ${e.message}")
                     productDao.updateProduct(product.copy(enrichmentStatus = EnrichmentStatus.FAILED))
                     return ListenableWorker.Result.failure()
                 }

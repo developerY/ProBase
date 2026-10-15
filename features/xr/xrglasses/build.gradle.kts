@@ -22,7 +22,11 @@ dependencies {
     implementation(libs.androidx.glimmer.google.fonts)
     implementation(libs.androidx.projected)
 
-    implementation(libs.google.generative.ai)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.ai)
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.appcheck.playintegrity)
+    implementation(libs.firebase.appcheck.debug)
     implementation(libs.google.accompanist.permissions)
 
     implementation(libs.androidx.compose.material.icons.extended)

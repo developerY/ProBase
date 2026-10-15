@@ -1,6 +1,9 @@
 package com.zoewave.probase.kocolor.features.analyzer.data
 
-import com.google.ai.client.generativeai.GenerativeModel
+import com.google.firebase.Firebase
+import com.google.firebase.ai.GenerativeModel
+import com.google.firebase.ai.ai
+import com.google.firebase.ai.type.GenerativeBackend
 import com.zoewave.probase.core.data.repository.AiConfigurationSettings
 import kotlinx.serialization.Serializable
 import javax.inject.Inject
@@ -34,11 +37,12 @@ class IngredientIntelligence @Inject constructor(
     private val aiSettings: AiConfigurationSettings
 ) {
 
-    private suspend fun getGeminiModel(): GenerativeModel? {
-        val apiKey = aiSettings.getGeminiApiKey() ?: return null
-        return GenerativeModel(
-            modelName = "gemini-2.0-flash",
-            apiKey = apiKey
+    private suspend fun getGeminiModel(): GenerativeModel {
+        return Firebase.ai(
+            backend = GenerativeBackend.googleAI(),
+            useLimitedUseAppCheckTokens = false
+        ).generativeModel(
+            modelName = "gemini-3.8-flash"
         )
     }
 
@@ -46,7 +50,7 @@ class IngredientIntelligence @Inject constructor(
      * Analyzes an ingredient list string (INCI) and returns structured analysis.
      */
     suspend fun analyzeIngredients(inciText: String): IngredientAnalysis? {
-        val model = getGeminiModel() ?: return null
+        val model = getGeminiModel()
         
         val prompt = """
             Analyze the following cosmetic ingredient list (INCI):

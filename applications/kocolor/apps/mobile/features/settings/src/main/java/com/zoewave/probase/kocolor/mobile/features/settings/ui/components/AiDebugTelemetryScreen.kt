@@ -1,6 +1,7 @@
 package com.zoewave.probase.kocolor.mobile.features.settings.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -17,34 +18,39 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ClearAll
 import androidx.compose.material.icons.filled.Cloud
+import androidx.compose.material.icons.filled.CloudSync
+import androidx.compose.material.icons.filled.Code
+import androidx.compose.material.icons.filled.DataObject
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Power
 import androidx.compose.material.icons.filled.Terminal
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -59,15 +65,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.zoewave.probase.kocolor.data.telemetry.StyleAuditTrail
-import com.zoewave.probase.kocolor.mobile.features.settings.ui.AiDebugUiState
 import com.zoewave.probase.kocolor.mobile.features.settings.ui.AiDebugViewModel
+import com.zoewave.probase.kocolor.mobile.features.settings.ui.DiagnosticStep
+import com.zoewave.probase.kocolor.mobile.features.settings.ui.DiagnosticStepState
+import com.zoewave.probase.kocolor.mobile.features.settings.ui.TestTargetProvider
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -125,7 +133,6 @@ fun AiDebugTelemetryScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    // BYOK Card
                     ProviderStatusCard(
                         title = "1. BYOK AI",
                         icon = Icons.Default.Key,
@@ -134,7 +141,6 @@ fun AiDebugTelemetryScreen(
                         modifier = Modifier.weight(1f)
                     )
 
-                    // Local Nano Card
                     ProviderStatusCard(
                         title = "2. Local Nano",
                         icon = Icons.Default.Memory,
@@ -143,7 +149,6 @@ fun AiDebugTelemetryScreen(
                         modifier = Modifier.weight(1f)
                     )
 
-                    // Firebase Cloud Card
                     ProviderStatusCard(
                         title = "3. Firebase AI",
                         icon = Icons.Default.Cloud,
@@ -154,7 +159,69 @@ fun AiDebugTelemetryScreen(
                 }
             }
 
-            // Section 2: Live Diagnostic Action Test
+            // Section 2: Target Provider Selector Chip Row
+            item {
+                Column {
+                    Text(
+                        "SELECT TARGET LLM TO TEST",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 1.2.sp,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(TestTargetProvider.entries) { target ->
+                            val isSelected = uiState.selectedTarget == target
+                            FilterChip(
+                                selected = isSelected,
+                                onClick = { viewModel.selectTargetProvider(target) },
+                                label = { Text(target.label, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal) },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = MaterialTheme.colorScheme.primary,
+                                    selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Section 2b: BYOK Model Choice Selector
+            if (uiState.selectedTarget == TestTargetProvider.BYOK || uiState.selectedTarget == TestTargetProvider.AUTO) {
+                item {
+                    Column {
+                        Text(
+                            "CHOOSE BYOK LLM MODEL",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 1.2.sp,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(uiState.availableByokModels) { modelName ->
+                                val isSelected = uiState.currentModelName == modelName
+                                FilterChip(
+                                    selected = isSelected,
+                                    onClick = { viewModel.selectByokModel(modelName) },
+                                    label = { Text(modelName, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal) },
+                                    colors = FilterChipDefaults.filterChipColors(
+                                        selectedContainerColor = MaterialTheme.colorScheme.secondary,
+                                        selectedLabelColor = MaterialTheme.colorScheme.onSecondary
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Section 3: Live 5-Step Diagnostic Pipeline
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -167,28 +234,38 @@ fun AiDebugTelemetryScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Column {
-                                Text("Live Diagnostic Test", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
-                                Text("Test AI provider routing and inspect raw response", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text("Live Pipeline Diagnostic", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+                                Text("Testing Target: ${uiState.selectedTarget.label}", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                             }
-
+                            Spacer(Modifier.width(12.dp))
                             Button(
                                 onClick = { viewModel.runTestInference() },
                                 enabled = !uiState.isRunningTest,
-                                shape = CircleShape
+                                shape = CircleShape,
+                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp)
                             ) {
                                 if (uiState.isRunningTest) {
                                     CircularProgressIndicator(modifier = Modifier.size(16.dp), color = Color.White, strokeWidth = 2.dp)
                                 } else {
                                     Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(16.dp))
                                     Spacer(Modifier.width(4.dp))
-                                    Text("Run Test")
+                                    Text("Run Test", maxLines = 1)
                                 }
                             }
                         }
 
+                        Spacer(Modifier.height(16.dp))
+
+                        // 5-Step Pipeline Progress List
+                        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                            uiState.diagnosticSteps.forEach { step ->
+                                StepRowItem(step = step)
+                            }
+                        }
+
                         if (uiState.testRunOutput != null) {
-                            Spacer(Modifier.height(12.dp))
+                            Spacer(Modifier.height(16.dp))
                             Surface(
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(12.dp),
@@ -207,7 +284,7 @@ fun AiDebugTelemetryScreen(
                 }
             }
 
-            // Section 3: Audit Trail Execution Console
+            // Section 4: Audit Trail Execution Console
             item {
                 Text(
                     "RECENT EXECUTION AUDIT LOGS (${uiState.recentAuditLogs.size})",
@@ -250,9 +327,80 @@ fun AiDebugTelemetryScreen(
 }
 
 @Composable
+private fun StepRowItem(step: DiagnosticStep) {
+    val stepIcon: ImageVector = when (step.id) {
+        1 -> Icons.Default.Power       // 1. Connection
+        2 -> Icons.Default.Code        // 2. Command
+        3 -> Icons.Default.CloudSync   // 3. Response
+        4 -> Icons.Default.DataObject  // 4. Answer
+        5 -> Icons.Default.AutoAwesome // 5. Useful Answer
+        else -> Icons.Default.Bolt
+    }
+
+    val (cardColor, borderColor, textColor) = when (step.state) {
+        DiagnosticStepState.PENDING -> Triple(Color.White.copy(alpha = 0.5f), Color.LightGray.copy(alpha = 0.5f), Color.Gray)
+        DiagnosticStepState.RUNNING -> Triple(Color(0xFFEFF6FF), Color(0xFFBFDBFE), Color(0xFF1D4ED8))
+        DiagnosticStepState.SUCCESS -> Triple(Color(0xFFF0FDF4), Color(0xFFBBF7D0), Color(0xFF15803D))
+        DiagnosticStepState.FAILED -> Triple(Color(0xFFFEF2F2), Color(0xFFFECACA), Color(0xFFB91C1C))
+    }
+
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(14.dp),
+        color = cardColor,
+        border = BorderStroke(1.dp, borderColor)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .clip(CircleShape)
+                    .background(borderColor.copy(alpha = 0.3f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(imageVector = stepIcon, contentDescription = null, tint = textColor, modifier = Modifier.size(20.dp))
+            }
+
+            Spacer(Modifier.width(12.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(step.title, fontWeight = FontWeight.Bold, fontSize = 13.sp, color = Color.Black)
+                Text(step.detailMessage ?: step.description, fontSize = 11.sp, color = textColor)
+            }
+
+            Spacer(Modifier.width(8.dp))
+
+            when (step.state) {
+                DiagnosticStepState.PENDING -> {
+                    Box(
+                        modifier = Modifier
+                            .size(16.dp)
+                            .border(1.5.dp, Color.Gray, CircleShape)
+                    )
+                }
+                DiagnosticStepState.RUNNING -> {
+                    CircularProgressIndicator(modifier = Modifier.size(18.dp), color = Color(0xFF1D4ED8), strokeWidth = 2.dp)
+                }
+                DiagnosticStepState.SUCCESS -> {
+                    Icon(Icons.Default.CheckCircle, contentDescription = "Success", tint = Color(0xFF16A34A), modifier = Modifier.size(20.dp))
+                }
+                DiagnosticStepState.FAILED -> {
+                    Icon(Icons.Default.Error, contentDescription = "Failed", tint = Color(0xFFDC2626), modifier = Modifier.size(20.dp))
+                }
+            }
+        }
+    }
+}
+
+@Composable
 private fun ProviderStatusCard(
     title: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     isActive: Boolean,
     statusText: String,
     modifier: Modifier = Modifier
@@ -263,7 +411,7 @@ private fun ProviderStatusCard(
         colors = CardDefaults.cardColors(
             containerColor = if (isActive) Color(0xFFF0FDF4) else Color(0xFFFEF2F2)
         ),
-        border = androidx.compose.foundation.BorderStroke(
+        border = BorderStroke(
             1.dp,
             if (isActive) Color(0xFFBBF7D0) else Color(0xFFFECACA)
         )

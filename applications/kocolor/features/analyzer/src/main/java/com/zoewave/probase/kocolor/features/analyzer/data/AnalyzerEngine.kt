@@ -1,9 +1,11 @@
 package com.zoewave.probase.kocolor.features.analyzer.data
 
 import android.graphics.Bitmap
-import com.google.ai.client.generativeai.GenerativeModel
-import com.google.ai.client.generativeai.type.content
-import com.google.ai.client.generativeai.type.generationConfig
+import com.google.firebase.Firebase
+import com.google.firebase.ai.ai
+import com.google.firebase.ai.type.GenerativeBackend
+import com.google.firebase.ai.type.content
+import com.google.firebase.ai.type.generationConfig
 import com.zoewave.probase.core.model.ritual.*
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
@@ -23,11 +25,13 @@ class AnalyzerEngine @Inject constructor() {
         occasion: String,
         location: String?,
         apiKey: String,
-        modelName: String = "gemini-2.0-flash"
+        modelName: String = "gemini-3.8-flash"
     ): FashionAdvice {
-        val generativeModel = GenerativeModel(
+        val generativeModel = Firebase.ai(
+            backend = GenerativeBackend.googleAI(),
+            useLimitedUseAppCheckTokens = false
+        ).generativeModel(
             modelName = modelName,
-            apiKey = apiKey,
             generationConfig = generationConfig {
                 responseMimeType = "application/json"
             }
@@ -108,11 +112,13 @@ class AnalyzerEngine @Inject constructor() {
     suspend fun analyzeCosmeticProduct(
         image: Bitmap,
         apiKey: String,
-        modelName: String = "gemini-2.0-flash"
+        modelName: String = "gemini-3.8-flash"
     ): CosmeticItem? {
-        val generativeModel = GenerativeModel(
+        val generativeModel = Firebase.ai(
+            backend = GenerativeBackend.googleAI(),
+            useLimitedUseAppCheckTokens = false
+        ).generativeModel(
             modelName = modelName,
-            apiKey = apiKey,
             generationConfig = generationConfig {
                 responseMimeType = "application/json"
             }

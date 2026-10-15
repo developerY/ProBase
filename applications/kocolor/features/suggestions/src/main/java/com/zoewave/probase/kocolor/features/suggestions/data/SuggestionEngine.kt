@@ -1,8 +1,10 @@
 package com.zoewave.probase.kocolor.features.suggestions.data
 
-import com.google.ai.client.generativeai.GenerativeModel
-import com.google.ai.client.generativeai.type.content
-import com.google.ai.client.generativeai.type.generationConfig
+import com.google.firebase.Firebase
+import com.google.firebase.ai.ai
+import com.google.firebase.ai.type.GenerativeBackend
+import com.google.firebase.ai.type.content
+import com.google.firebase.ai.type.generationConfig
 import com.zoewave.probase.core.model.ritual.FashionAdvice
 import com.zoewave.probase.core.model.ritual.FashionProfile
 import com.zoewave.probase.core.model.ritual.SeasonalType
@@ -21,47 +23,49 @@ class SuggestionEngine @Inject constructor() {
         profile: FashionProfile,
         query: String?,
         apiKey: String,
-        modelName: String = "gemini-2.0-flash"
+        modelName: String = "gemini-3.8-flash"
     ): FashionAdvice {
-        val generativeModel = GenerativeModel(
-            modelName = modelName,
-            apiKey = apiKey,
-            generationConfig = generationConfig {
-                responseMimeType = "application/json"
-            }
-        )
-
-        val prompt = content {
-            text("""
-                You are a professional personal fashion consultant. 
-                Based on the user's profile, provide personalized fashion and makeup advice.
-                
-                USER PROFILE:
-                - Seasonal Type: ${profile.seasonalType}
-                - Undertone: ${profile.undertone}
-                - Skin Tone: ${profile.skinToneHex ?: "Not specified"}
-                - Eye Color: ${profile.eyeColor ?: "Not specified"}
-                - Hair Color: ${profile.hairColor ?: "Not specified"}
-                
-                ${if (!query.isNullOrBlank()) "USER REQUEST: $query" else "GOAL: Provide a comprehensive update on makeup and clothing suggestions."}
-                
-                Respond ONLY with a valid JSON object matching this exact schema:
-                {
-                  "summary": "string",
-                  "seasonalType": "SPRING" | "SUMMER" | "AUTUMN" | "WINTER",
-                  "undertone": "WARM" | "COOL" | "NEUTRAL",
-                  "makeupSuggestions": [
-                    { "category": "string", "advice": "string", "recommendedColors": ["string"] }
-                  ],
-                  "outfitSuggestions": [
-                    { "occasion": "string", "advice": "string", "keyPieces": ["string"], "colorCombinations": ["string"] }
-                  ],
-                  "recommendedPalette": ["#HEX", "#HEX", ...]
-                }
-            """.trimIndent())
-        }
-
         return try {
+            val generativeModel = Firebase.ai(
+                backend = GenerativeBackend.googleAI(),
+                useLimitedUseAppCheckTokens = false
+            ).generativeModel(
+                modelName = modelName,
+                generationConfig = generationConfig {
+                    responseMimeType = "application/json"
+                }
+            )
+
+            val prompt = content {
+                text("""
+                    You are a professional personal fashion consultant. 
+                    Based on the user's profile, provide personalized fashion and makeup advice.
+                    
+                    USER PROFILE:
+                    - Seasonal Type: ${profile.seasonalType}
+                    - Undertone: ${profile.undertone}
+                    - Skin Tone: ${profile.skinToneHex ?: "Not specified"}
+                    - Eye Color: ${profile.eyeColor ?: "Not specified"}
+                    - Hair Color: ${profile.hairColor ?: "Not specified"}
+                    
+                    ${if (!query.isNullOrBlank()) "USER REQUEST: $query" else "GOAL: Provide a comprehensive update on makeup and clothing suggestions."}
+                    
+                    Respond ONLY with a valid JSON object matching this exact schema:
+                    {
+                      "summary": "string",
+                      "seasonalType": "SPRING" | "SUMMER" | "AUTUMN" | "WINTER",
+                      "undertone": "WARM" | "COOL" | "NEUTRAL",
+                      "makeupSuggestions": [
+                        { "category": "string", "advice": "string", "recommendedColors": ["string"] }
+                      ],
+                      "outfitSuggestions": [
+                        { "occasion": "string", "advice": "string", "keyPieces": ["string"], "colorCombinations": ["string"] }
+                      ],
+                      "recommendedPalette": ["#HEX", "#HEX", ...]
+                    }
+                """.trimIndent())
+            }
+
             val response = generativeModel.generateContent(prompt)
             val jsonText = response.text ?: throw IllegalStateException("Empty response from AI")
             

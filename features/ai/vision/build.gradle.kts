@@ -21,7 +21,13 @@ dependencies {
     // ML
     implementation(project(":features:readers:ocr"))
     implementation(libs.google.ai.edge.aicore)
-    implementation(libs.google.generative.ai)
+
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.ai)
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.appcheck.playintegrity)
+    implementation(libs.firebase.appcheck.debug)
+
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.coroutines.play.services)
 

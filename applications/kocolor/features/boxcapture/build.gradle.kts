@@ -29,7 +29,6 @@ dependencies {
     implementation(project(":features:graphics"))
     implementation(project(":applications:kocolor:features:chemicals"))
 
-    implementation(libs.google.generative.ai)
 
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.extended)

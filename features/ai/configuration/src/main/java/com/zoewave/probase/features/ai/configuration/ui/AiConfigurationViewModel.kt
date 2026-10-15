@@ -69,7 +69,7 @@ class AiConfigurationViewModel @Inject constructor(
             keyTestResult = args[7] as String?,
             isTestingModel = args[8] as Boolean,
             modelTestResult = args[9] as String?,
-            availableModels = (args[10] as List<String>?) ?: emptyList()
+            availableModels = (args[10] as List<String>?) ?: if (args[0] as Boolean) listOf("gemini-3.8-flash", "gemini-2.5-flash", "gemini-1.5-flash", "gemini-1.5-pro") else emptyList()
         )
     }.stateIn(
         scope = viewModelScope,

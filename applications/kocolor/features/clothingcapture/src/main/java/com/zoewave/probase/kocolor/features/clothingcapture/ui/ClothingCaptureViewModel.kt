@@ -7,9 +7,12 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.ai.client.generativeai.GenerativeModel
-import com.google.ai.client.generativeai.type.content
-import com.google.ai.client.generativeai.type.generationConfig
+import com.google.firebase.Firebase
+import com.google.firebase.ai.GenerativeModel
+import com.google.firebase.ai.ai
+import com.google.firebase.ai.type.GenerativeBackend
+import com.google.firebase.ai.type.content
+import com.google.firebase.ai.type.generationConfig
 import com.zoewave.probase.core.data.repository.AiConfigurationSettings
 import com.zoewave.probase.core.model.network.DiscoveryStatus
 import com.zoewave.probase.core.model.network.ServiceStatus
@@ -272,12 +275,11 @@ class ClothingCaptureViewModel @Inject constructor(
             try {
                 val bitmaps = loadBitmaps()
                 
-                val model = GenerativeModel(
-                    modelName = modelName,
-                    apiKey = apiKey,
-                    generationConfig = generationConfig {
-                        responseMimeType = "application/json"
-                    }
+                val model = Firebase.ai(
+                    backend = GenerativeBackend.googleAI(),
+                    useLimitedUseAppCheckTokens = false
+                ).generativeModel(
+                    modelName = modelName
                 )
 
                 val prompt = content {

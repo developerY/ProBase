@@ -21,7 +21,6 @@ dependencies {
     implementation(project(":features:ai:configuration"))
 
     // --- ML & AI ---
-    implementation(libs.google.generative.ai)
 
     // --- Third Party ---
     implementation(libs.compose.markdown)

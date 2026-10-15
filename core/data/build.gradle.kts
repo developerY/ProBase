@@ -48,7 +48,9 @@ dependencies {
     implementation(libs.androidx.datastore.core)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.security.crypto)
-    implementation(libs.google.generative.ai)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.ai)
+    implementation(libs.firebase.auth)
     implementation(libs.work.runtime.ktx)
 
     // --- External Utilities (Optional, based on your Repos) ---

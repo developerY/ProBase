@@ -17,7 +17,11 @@ dependencies {
 
     // --- ML & AI ---
     implementation(project(":features:readers:ocr"))
-    implementation(libs.google.generative.ai)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.ai)
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.appcheck.playintegrity)
+    implementation(libs.firebase.appcheck.debug)
 
     // --- Feature Dependencies ---
     implementation(project(":features:camera"))

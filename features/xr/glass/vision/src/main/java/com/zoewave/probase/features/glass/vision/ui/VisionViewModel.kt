@@ -1,4 +1,4 @@
-package com.zoewave.probase.features.glass.vision.ui
+package com.zoewave.probase.features.xr.glass.vision.ui
 
 import android.graphics.Bitmap
 import android.util.Log
@@ -7,8 +7,10 @@ import androidx.camera.camera2.interop.ExperimentalCamera2Interop
 import androidx.camera.core.ExperimentalLensFacing
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.ai.client.generativeai.GenerativeModel
-import com.google.ai.client.generativeai.type.content
+import com.google.firebase.Firebase
+import com.google.firebase.ai.ai
+import com.google.firebase.ai.type.GenerativeBackend
+import com.google.firebase.ai.type.content
 import com.zoewave.probase.core.data.repository.AiConfigurationSettings
 import com.zoewave.probase.core.data.repository.GlassBridgeRepository
 import com.zoewave.probase.features.glass.vision.data.VisionRepository
@@ -29,63 +31,37 @@ data class VisionUiState(
     val isCapturing: Boolean = false,
     val isAnalyzing: Boolean = false,
     val isApiKeySet: Boolean = false,
-    val cameraSource: String = "Phone",
-    val isPermissionGranted: Boolean = false,
-    val capturedImage: Bitmap? = null,
-    val discoveredCameras: List<Pair<String, String>> = emptyList(),
-    val logs: List<String> = emptyList(),
     val error: String? = null
 )
 
-sealed interface VisionUiEvent {
-    data class CheckPermissions(val context: android.content.Context) : VisionUiEvent
-    data object TriggerCapture : VisionUiEvent
-    data class UpdatePermissionStatus(val granted: Boolean) : VisionUiEvent
-    data class RunDiagnostic(val activity: ComponentActivity) : VisionUiEvent
-    data class RunOfficialTest(val activity: ComponentActivity) : VisionUiEvent
-}
-
-@ExperimentalLensFacing
-@ExperimentalCamera2Interop
-@androidx.xr.projected.experimental.ExperimentalProjectedApi
+@OptIn(ExperimentalLensFacing::class, ExperimentalCamera2Interop::class, androidx.xr.projected.experimental.ExperimentalProjectedApi::class)
 @HiltViewModel
 class VisionViewModel @Inject constructor(
-    private val settings: AiConfigurationSettings,
     private val repository: VisionRepository,
     private val bridgeRepository: GlassBridgeRepository,
+    private val settings: AiConfigurationSettings,
     val cameraManager: SimpleGlassesCameraManager
 ) : ViewModel() {
 
-    private val instanceId = java.util.UUID.randomUUID().toString().take(4)
-    private val _isApiKeySet = MutableStateFlow(false)
-    private val _isPermissionGranted = MutableStateFlow(false)
-    private val _error = MutableStateFlow<String?>(null)
+    private val instanceId = System.identityHashCode(this)
 
-    private var isCommanderInitialized = false
+    private val _isPermissionGranted = MutableStateFlow(false)
+    private val _isApiKeySet = MutableStateFlow(false)
+    private val _error = MutableStateFlow<String?>(null)
 
     val uiState: StateFlow<VisionUiState> = combine(
         repository.imageDescription,
         repository.isCapturing,
         repository.isAnalyzing,
         _isApiKeySet,
-        cameraManager.cameraSource,
-        _isPermissionGranted,
-        repository.capturedImage,
-        cameraManager.discoveredCameras,
-        cameraManager.logs,
         _error
-    ) { args: Array<Any?> ->
+    ) { description, isCapturing, isAnalyzing, isApiKeySet, error ->
         VisionUiState(
-            imageDescription = args[0] as String,
-            isCapturing = args[1] as Boolean,
-            isAnalyzing = args[2] as Boolean,
-            isApiKeySet = args[3] as Boolean,
-            cameraSource = args[4] as String,
-            isPermissionGranted = args[5] as Boolean,
-            capturedImage = args[6] as Bitmap?,
-            discoveredCameras = @Suppress("UNCHECKED_CAST") (args[7] as List<Pair<String, String>>),
-            logs = @Suppress("UNCHECKED_CAST") (args[8] as List<String>),
-            error = args[9] as String?
+            imageDescription = description,
+            isCapturing = isCapturing,
+            isAnalyzing = isAnalyzing,
+            isApiKeySet = isApiKeySet,
+            error = error
         )
     }.stateIn(
         scope = viewModelScope,
@@ -94,74 +70,9 @@ class VisionViewModel @Inject constructor(
     )
 
     init {
+        Log.d("VisionVM", "[$instanceId] VisionViewModel initialized")
         checkStatus()
-    }
-
-    /**
-     * Initializes the ViewModel as the primary commander for bridge events.
-     * This should ONLY be called by the host Phone UI to avoid duplicate event listeners.
-     */
-    fun initializeAsHostCommander() {
-        if (isCommanderInitialized) {
-            Log.d("VisionVM", "[$instanceId] Host Commander already initialized. Skipping.")
-            return
-        }
-        
-        Log.d("VisionVM", "[$instanceId] Initializing as Host Commander (Listening to bridge)...")
-        isCommanderInitialized = true
-        observeBridgeCommands()
-        observeCapturedImages()
-    }
-
-    private fun checkInitialPermissions(context: android.content.Context) {
-        val contextName = context::class.java.simpleName
-        val phoneGranted = androidx.core.content.ContextCompat.checkSelfPermission(
-            context, android.Manifest.permission.CAMERA
-        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
-        _isPermissionGranted.value = phoneGranted
-        val msg = "Camera Permission Status: ${if (phoneGranted) "GRANTED" else "DENIED"} (Checked from $contextName)"
-        Log.d("VisionVM", "[$instanceId] $msg")
-        cameraManager.addLog("[$instanceId] $msg")
-    }
-
-    fun onEvent(event: VisionUiEvent) {
-        Log.d("VisionVM", "[$instanceId] onEvent: ${event::class.java.simpleName}")
-        when (event) {
-            is VisionUiEvent.CheckPermissions -> checkInitialPermissions(event.context)
-            is VisionUiEvent.TriggerCapture -> triggerGlassesCapture()
-            is VisionUiEvent.UpdatePermissionStatus -> {
-                Log.d("VisionVM", "[$instanceId] Permission updated: ${event.granted}")
-                _isPermissionGranted.value = event.granted
-            }
-            is VisionUiEvent.RunDiagnostic -> {
-                cameraManager.runHardwareDiagnostic(event.activity)
-            }
-            is VisionUiEvent.RunOfficialTest -> {
-                runOfficialCameraTest(event.activity)
-            }
-        }
-    }
-
-    private fun observeBridgeCommands() {
-        viewModelScope.launch {
-            bridgeRepository.glassCommands.collect { cmd ->
-                Log.d("VisionVM", "[$instanceId] Command received from bridge: $cmd")
-                if (cmd == "CAPTURE_IMAGE") {
-                    Log.d("VisionVM", "[$instanceId] Dispatching takePicture to cameraManager")
-                    cameraManager.takePicture()
-                }
-            }
-        }
-    }
-
-    private fun observeCapturedImages() {
-        viewModelScope.launch {
-            repository.capturedImage.collect { bitmap ->
-                if (bitmap != null) {
-                    analyzeImage(bitmap)
-                }
-            }
-        }
+        observeIncomingGlassPhotos()
     }
 
     private fun checkStatus() {
@@ -184,21 +95,15 @@ class VisionViewModel @Inject constructor(
         viewModelScope.launch {
             repository.updateAnalyzing(true)
             try {
-                val apiKey = settings.getGeminiApiKey()
                 val flowModel = settings.aiModelFlow.firstOrNull()
-                val modelName = flowModel?.ifBlank { null } ?: "gemini-2.0-flash"
+                val modelName = flowModel?.ifBlank { null } ?: "gemini-3.8-flash"
 
-                if (apiKey.isNullOrBlank()) {
-                    cameraManager.addLog("Error: Gemini API Key missing!")
-                    _error.value = "Gemini API Key missing. Check Settings."
-                    repository.updateAnalyzing(false)
-                    return@launch
-                }
-
-                cameraManager.addLog("API Key validated. Model: $modelName")
-                val generativeModel = GenerativeModel(
-                    modelName = modelName,
-                    apiKey = apiKey
+                cameraManager.addLog("Analyzing image. Model: $modelName")
+                val generativeModel = Firebase.ai(
+                    backend = GenerativeBackend.googleAI(),
+                    useLimitedUseAppCheckTokens = false
+                ).generativeModel(
+                    modelName = modelName
                 )
 
                 val prompt = "Describe this image in a few words for someone wearing AI glasses. Be concise."
@@ -208,10 +113,10 @@ class VisionViewModel @Inject constructor(
                 }
 
                 val response = generativeModel.generateContent(inputContent)
-                val textResponse = response.text ?: "Could not describe image"
-                cameraManager.addLog("Gemini Response: $textResponse")
-                
-                repository.updateImageDescription(textResponse)
+
+                val text = response.text ?: "No description generated"
+                cameraManager.addLog("AI Response received: $text")
+                repository.updateImageDescription(text)
                 repository.updateAnalyzing(false)
             } catch (e: Exception) {
                 cameraManager.addLog("AI Error: ${e.message}")
@@ -219,5 +124,40 @@ class VisionViewModel @Inject constructor(
                 repository.updateAnalyzing(false)
             }
         }
+    }
+
+    fun startCamera(activity: ComponentActivity) {
+        Log.d("VisionVM", "[$instanceId] Starting camera via SimpleGlassesCameraManager")
+        cameraManager.initialize(activity)
+    }
+
+    private fun observeIncomingGlassPhotos() {
+        viewModelScope.launch {
+            Log.d("VisionVM", "[$instanceId] Subscribing to bridgeRepository.latestGlassPhoto")
+            repository.capturedImage.collect { bitmap ->
+                if (bitmap != null) {
+                    Log.d("VisionVM", "[$instanceId] INCOMING GLASS PHOTO RECEIVED! Auto-analyzing...")
+                    cameraManager.addLog("[$instanceId] GLASS PHOTO RECEIVED FROM BRIDGE! Analyzing...")
+                    repository.updateCapturing(false)
+                    analyzeImage(bitmap)
+                }
+            }
+        }
+    }
+
+    fun capturePhoto() {
+        Log.d("VisionVM", "[$instanceId] capturePhoto() called. Triggering local + remote capture")
+        _error.value = null
+        repository.updateCapturing(true)
+
+        // 1. Trigger remote Glass
+        triggerGlassesCapture()
+
+        // 2. Take local Phone photo
+        cameraManager.takePicture()
+    }
+
+    fun runCameraDiagnosticTest(activity: ComponentActivity) {
+        runOfficialCameraTest(activity)
     }
 }
