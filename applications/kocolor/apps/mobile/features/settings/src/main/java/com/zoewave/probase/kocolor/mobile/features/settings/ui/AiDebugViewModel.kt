@@ -8,6 +8,7 @@ import com.zoewave.probase.features.ai.core.AiInput
 import com.zoewave.probase.features.ai.core.AiProvider
 import com.zoewave.probase.features.ai.core.ByokAiProvider
 import com.zoewave.probase.features.ai.firebase.FirebaseAiProvider
+import com.zoewave.probase.features.ai.firebase.GemmaRestFallbackProvider
 import com.zoewave.probase.features.ai.local.data.LocalNanoAiProvider
 import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
 import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
@@ -33,9 +34,10 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 enum class TestTargetProvider(val label: String) {
-    BYOK("1. BYOK Cloud"),
-    LOCAL_NANO("2. Local Nano"),
+    LOCAL_NANO("1. Local Nano"),
+    BYOK("2. BYOK Cloud"),
     FIREBASE_AI("3. Firebase AI"),
+    GEMMA_4("4. Gemma 4 Cloud"),
     AUTO("Auto Router")
 }
 
@@ -57,7 +59,7 @@ data class DiagnosticStep(
 data class AiDebugUiState(
     val activeProviderName: String = "Loading...",
     val currentModelName: String = "gemini-2.5-flash",
-    val availableByokModels: List<String> = listOf("gemini-2.5-flash", "gemini-2.5-pro", "gemini-1.5-flash", "gemini-1.5-pro"),
+    val availableByokModels: List<String> = listOf("gemini-2.5-flash", "gemini-2.5-pro", "gemma-4-26b-a4b-it", "gemma-4-31b-it", "gemini-1.5-flash", "gemini-1.5-pro"),
     val selectedTarget: TestTargetProvider = TestTargetProvider.AUTO,
     val isByokEnabled: Boolean = false,
     val isByokKeySet: Boolean = false,
@@ -81,6 +83,7 @@ class AiDebugViewModel @Inject constructor(
     private val byokProvider: ByokAiProvider,
     private val localProvider: LocalNanoAiProvider,
     private val firebaseProvider: FirebaseAiProvider,
+    private val gemmaProvider: GemmaRestFallbackProvider,
     private val promptAssembler: PromptAssembler,
     private val manifestSerializer: CompactManifestSerializer,
     private val validator: RecommendationValidator,
@@ -109,7 +112,7 @@ class AiDebugViewModel @Inject constructor(
                         !model.contains("1.0") && model != "gemini-2.0-flash"
                     }
                     if (activeModels.isNotEmpty()) {
-                        _fetchedLiveModels.value = activeModels
+                        _fetchedLiveModels.value = (activeModels + listOf("gemma-4-26b-a4b-it", "gemma-4-31b-it")).distinct()
                     }
                 }
             }
@@ -155,7 +158,7 @@ class AiDebugViewModel @Inject constructor(
         @Suppress("UNCHECKED_CAST")
         val liveModels = array[11] as List<String>?
 
-        val fallbackList = listOf("gemini-2.5-flash", "gemini-2.5-pro", "gemini-1.5-flash", "gemini-1.5-pro")
+        val fallbackList = listOf("gemini-2.5-flash", "gemini-2.5-pro", "gemma-4-26b-a4b-it", "gemma-4-31b-it", "gemini-1.5-flash", "gemini-1.5-pro")
         val modelList = (liveModels ?: fallbackList).distinct()
 
         AiDebugUiState(
@@ -187,6 +190,7 @@ class AiDebugViewModel @Inject constructor(
         viewModelScope.launch {
             aiSettings.saveAiModel(modelName)
             byokProvider.setModelName(modelName)
+            gemmaProvider.setModelName(modelName)
         }
     }
 
@@ -216,17 +220,20 @@ class AiDebugViewModel @Inject constructor(
                 updateStep(1, DiagnosticStepState.RUNNING, "Verifying $targetName availability...")
 
                 val providerToUse: AiProvider? = when (target) {
+                    TestTargetProvider.LOCAL_NANO -> {
+                        if (localProvider.isAvailable()) localProvider else null
+                    }
                     TestTargetProvider.BYOK -> {
                         val key = aiSettings.getGeminiApiKey()
                         byokProvider.setApiKey(key)
                         byokProvider.setModelName(aiSettings.aiModelFlow.firstOrNull() ?: "gemini-2.5-flash")
                         if (byokProvider.isAvailable()) byokProvider else null
                     }
-                    TestTargetProvider.LOCAL_NANO -> {
-                        if (localProvider.isAvailable()) localProvider else null
-                    }
                     TestTargetProvider.FIREBASE_AI -> {
                         if (firebaseProvider.isAvailable()) firebaseProvider else null
+                    }
+                    TestTargetProvider.GEMMA_4 -> {
+                        if (gemmaProvider.isAvailable()) gemmaProvider else null
                     }
                     TestTargetProvider.AUTO -> {
                         capabilityRouter.getRankedAvailableProviders().firstOrNull()

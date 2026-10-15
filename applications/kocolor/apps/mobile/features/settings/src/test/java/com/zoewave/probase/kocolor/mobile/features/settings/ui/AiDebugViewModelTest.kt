@@ -6,6 +6,7 @@ import com.zoewave.probase.core.data.repository.AiConfigurationSettings
 import com.zoewave.probase.features.ai.capture.data.SmartCaptureOrchestrator
 import com.zoewave.probase.features.ai.core.ByokAiProvider
 import com.zoewave.probase.features.ai.firebase.FirebaseAiProvider
+import com.zoewave.probase.features.ai.firebase.GemmaRestFallbackProvider
 import com.zoewave.probase.features.ai.local.data.LocalNanoAiProvider
 import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
 import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
@@ -50,6 +51,7 @@ class AiDebugViewModelTest {
     private val byokProvider: ByokAiProvider = mockk(relaxed = true)
     private val localProvider: LocalNanoAiProvider = mockk(relaxed = true)
     private val firebaseProvider: FirebaseAiProvider = mockk(relaxed = true)
+    private val gemmaProvider: GemmaRestFallbackProvider = mockk(relaxed = true)
     private val promptAssembler: PromptAssembler = mockk(relaxed = true)
     private val manifestSerializer: CompactManifestSerializer = mockk(relaxed = true)
     private val validator: RecommendationValidator = mockk(relaxed = true)
@@ -87,6 +89,7 @@ class AiDebugViewModelTest {
             byokProvider,
             localProvider,
             firebaseProvider,
+            gemmaProvider,
             promptAssembler,
             manifestSerializer,
             validator,
