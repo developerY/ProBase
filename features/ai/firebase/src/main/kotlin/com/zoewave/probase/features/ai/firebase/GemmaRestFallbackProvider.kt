@@ -21,6 +21,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -29,7 +30,12 @@ class GemmaRestFallbackProvider @Inject constructor(
     private val aiSettings: AiConfigurationSettings
 ) : AiProvider {
 
-    private val httpClient = OkHttpClient()
+    private val httpClient = OkHttpClient.Builder()
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(60, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
+        .build()
+
     private val json = Json { ignoreUnknownKeys = true }
 
     private var activeModel: String = "gemma-4-26b-a4b-it"
@@ -39,7 +45,7 @@ class GemmaRestFallbackProvider @Inject constructor(
         displayName = "Gemma 4 Cloud (Free Tier)",
         maxInputTokens = 8192,
         maxOutputTokens = 2048,
-        timeoutMillis = 15000L,
+        timeoutMillis = 60000L,
         maxCandidateAdditions = 25,
         minCandidateAdditions = 6,
         isLocal = false
@@ -129,7 +135,7 @@ class GemmaRestFallbackProvider @Inject constructor(
                 Result.success(cleanedText)
             }
         } catch (e: Exception) {
-            Log.e("Gemma4Rest", "Exception executing Gemma 4 REST request", e)
+            Log.e("Gemma4Rest", "Exception executing Gemma 4 REST request: ${e.message}", e)
             Result.failure(e)
         }
     }

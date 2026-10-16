@@ -122,7 +122,7 @@ fun AiDebugTelemetryScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Section 1: Active Provider Status Overview
+            // Section 1: Active Provider Status Overview (2x2 Grid)
             item {
                 Text(
                     "AI ENGINE ROUTING TIER STATUS",
@@ -134,33 +134,48 @@ fun AiDebugTelemetryScreen(
             }
 
             item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    ProviderStatusCard(
-                        title = "1. BYOK AI",
-                        icon = Icons.Default.Key,
-                        isActive = uiState.isByokEnabled && uiState.isByokKeySet,
-                        statusText = if (uiState.isByokEnabled && uiState.isByokKeySet) "Key Active" else if (uiState.isByokKeySet) "Disabled" else "No Key",
-                        modifier = Modifier.weight(1f)
-                    )
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        ProviderStatusCard(
+                            title = "1. Local Nano",
+                            icon = Icons.Default.Memory,
+                            isActive = uiState.isLocalAiEnabled,
+                            statusText = if (uiState.isLocalAiEnabled) "On-Device" else "Unavailable",
+                            modifier = Modifier.weight(1f)
+                        )
 
-                    ProviderStatusCard(
-                        title = "2. Local Nano",
-                        icon = Icons.Default.Memory,
-                        isActive = uiState.isLocalAiEnabled,
-                        statusText = if (uiState.isLocalAiEnabled) "On-Device" else "Unavailable",
-                        modifier = Modifier.weight(1f)
-                    )
+                        ProviderStatusCard(
+                            title = "2. BYOK AI",
+                            icon = Icons.Default.Key,
+                            isActive = uiState.isByokEnabled && uiState.isByokKeySet,
+                            statusText = if (uiState.isByokEnabled && uiState.isByokKeySet) "Key Active" else if (uiState.isByokKeySet) "Disabled" else "No Key",
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
 
-                    ProviderStatusCard(
-                        title = "3. Firebase AI",
-                        icon = Icons.Default.Cloud,
-                        isActive = uiState.isFirebaseEnabled,
-                        statusText = if (uiState.isFirebaseEnabled) uiState.currentModelName else "Disabled",
-                        modifier = Modifier.weight(1f)
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        ProviderStatusCard(
+                            title = "3. Firebase AI",
+                            icon = Icons.Default.Cloud,
+                            isActive = uiState.isFirebaseEnabled,
+                            statusText = if (uiState.isFirebaseEnabled) uiState.currentModelName else "Disabled",
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        ProviderStatusCard(
+                            title = "4. Gemma 4",
+                            icon = Icons.Default.AutoAwesome,
+                            isActive = uiState.isGemmaEnabled,
+                            statusText = if (uiState.isGemmaEnabled) "gemma-4-26b" else "No Key",
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
                 }
             }
 
@@ -194,9 +209,10 @@ fun AiDebugTelemetryScreen(
                 }
             }
 
-            // Section 2b: Model Dropdown Selector (Active for BYOK, Firebase AI, or Auto Router)
+            // Section 2b: Model Dropdown Selector (Active for BYOK, Firebase AI, Gemma 4, or Auto Router)
             if (uiState.selectedTarget == TestTargetProvider.BYOK ||
                 uiState.selectedTarget == TestTargetProvider.FIREBASE_AI ||
+                uiState.selectedTarget == TestTargetProvider.GEMMA_4 ||
                 uiState.selectedTarget == TestTargetProvider.AUTO) {
                 item {
                     var isExpanded by remember { mutableStateOf(false) }
@@ -204,6 +220,7 @@ fun AiDebugTelemetryScreen(
                     val sectionTitle = when (uiState.selectedTarget) {
                         TestTargetProvider.BYOK -> "CHOOSE BYOK LLM MODEL"
                         TestTargetProvider.FIREBASE_AI -> "CHOOSE FIREBASE AI LLM MODEL"
+                        TestTargetProvider.GEMMA_4 -> "CHOOSE GEMMA 4 LLM MODEL"
                         else -> "CHOOSE MODEL FOR CLOUD AI"
                     }
 
