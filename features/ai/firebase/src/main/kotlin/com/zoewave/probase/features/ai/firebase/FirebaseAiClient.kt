@@ -125,7 +125,7 @@ class FirebaseAiClientImpl @Inject constructor(
                     ),
                     optionalProperties = listOf("recommendedPalette")
                 )
-                temperature = temperatureOverride ?: 0.75f
+                temperature = temperatureOverride ?: 0.2f
             }
         )
     }

@@ -66,11 +66,15 @@ class LocalAiEngine @Inject constructor() {
 
     private val json = Json { ignoreUnknownKeys = true }
 
+    private var cachedCapabilityStatus: NanoState? = null
+
     /**
      * Checks if the device hardware supports Gemini Nano and if the model is ready.
-     * Uses the ML Kit FeatureStatus API.
+     * Uses the ML Kit FeatureStatus API. Caches the result to avoid spamming the log with 606 exceptions.
      */
     suspend fun checkCapability(): NanoState = withContext(Dispatchers.Default) {
+        cachedCapabilityStatus?.let { return@withContext it }
+
         try {
             val status = localModel.checkStatus()
             val statusString = when (status) {
@@ -81,7 +85,7 @@ class LocalAiEngine @Inject constructor() {
                 else -> "UNKNOWN ($status)"
             }
             
-            when (status) {
+            val finalState = when (status) {
                 3 -> { // MODEL_AVAILABLE
                     // Heuristic for multimodal check on 2026 flagships
                     val isFlagship = android.os.Build.MODEL.contains("Pro", ignoreCase = true) || 
@@ -96,18 +100,24 @@ class LocalAiEngine @Inject constructor() {
                 }
                 else -> NanoState.Unsupported
             }
+
+            // Only cache if it's definitely unsupported to prevent repeated checks
+            if (finalState is NanoState.Unsupported) {
+                cachedCapabilityStatus = finalState
+            }
+
+            finalState
+        } catch (e: com.google.mlkit.genai.common.GenAiException) {
+            if (e.errorCode == 606) {
+                Log.i("LocalAiEngine", "On-Device Gemini Nano unavailable on current device/emulator. Smoothly falling back to Cloud AI.")
+                cachedCapabilityStatus = NanoState.Unsupported
+            } else {
+                Log.w("LocalAiEngine", "AICore capability check failed: ${e.message}")
+            }
+            NanoState.Unsupported
         } catch (e: Exception) {
             val msg = e.message ?: ""
-            val isUnavailabilityError = msg.contains("606") || 
-                                        msg.contains("FEATURE_NOT_FOUND") || 
-                                        msg.contains("PREPARATION_ERROR") || 
-                                        e.javaClass.simpleName.contains("GenAiException")
-            
-            if (isUnavailabilityError) {
-                Log.i("LocalAiEngine", "On-Device Gemini Nano unavailable on current device/emulator ($msg). Smoothly falling back to Cloud AI.")
-                return@withContext NanoState.Unsupported
-            }
-            Log.i("LocalAiEngine", "ML Kit Status Check: $msg")
+            Log.w("LocalAiEngine", "Status check failed: $msg")
             NanoState.Unsupported
         }
     }
