@@ -5,12 +5,15 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
 import com.google.firebase.FirebaseApp
+import com.google.firebase.appcheck.FirebaseAppCheck
+import com.google.firebase.auth.FirebaseAuth
 import com.zoewave.probase.core.data.repository.AiConfigurationSettings
 import com.zoewave.probase.features.ai.core.AiInput
 import com.zoewave.probase.features.ai.core.AiProvider
 import com.zoewave.probase.features.ai.core.AiProviderCapability
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.addJsonObject
@@ -36,6 +39,10 @@ class GemmaRestFallbackProvider @Inject constructor(
     @ApplicationContext private val context: Context,
     private val aiSettings: AiConfigurationSettings
 ) : AiProvider {
+
+    companion object {
+        private const val DEFAULT_PROXY_URL = "https://us-central1-buildwithai-453716.cloudfunctions.net/gemma4Proxy"
+    }
 
     private val httpClient = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)
@@ -64,42 +71,8 @@ class GemmaRestFallbackProvider @Inject constructor(
         }
     }
 
-    private fun resolveApiKey(): String {
-        val userKey = aiSettings.getGeminiApiKey()
-        if (!userKey.isNullOrBlank()) return userKey
-        return runCatching {
-            FirebaseApp.getInstance().options.apiKey
-        }.getOrNull().orEmpty()
-    }
-
-    private fun getSignatureSha1(): String {
-        return try {
-            val pm = context.packageManager
-            val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                PackageManager.GET_SIGNING_CERTIFICATES
-            } else {
-                @Suppress("DEPRECATION")
-                PackageManager.GET_SIGNATURES
-            }
-            val info = pm.getPackageInfo(context.packageName, flags)
-            val signatures = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                info.signingInfo?.apkContentsSigners
-            } else {
-                @Suppress("DEPRECATION")
-                info.signatures
-            }
-            val cert = signatures?.firstOrNull()?.toByteArray() ?: return ""
-            val md = MessageDigest.getInstance("SHA-1")
-            val digest = md.digest(cert)
-            digest.joinToString("") { "%02X".format(it) }
-        } catch (e: Exception) {
-            Log.w("Gemma4Rest", "Failed to calculate SHA-1 cert fingerprint", e)
-            ""
-        }
-    }
-
     override suspend fun isAvailable(): Boolean {
-        return resolveApiKey().isNotBlank()
+        return true
     }
 
     override suspend fun countTokens(input: AiInput): Int {
@@ -111,10 +84,8 @@ class GemmaRestFallbackProvider @Inject constructor(
     }
 
     override suspend fun execute(input: AiInput): Result<String> = withContext(Dispatchers.IO) {
-        val apiKey = resolveApiKey()
-        if (apiKey.isBlank()) {
-            return@withContext Result.failure(IllegalStateException("No valid API Key found for Gemma 4 REST Provider"))
-        }
+        val userKey = aiSettings.getGeminiApiKey()
+        val targetModel = activeModel.ifBlank { "gemma-4-26b-a4b-it" }
 
         val basePromptStr = when (input) {
             is AiInput.TextOnly -> input.promptString
@@ -134,8 +105,95 @@ class GemmaRestFallbackProvider @Inject constructor(
             }
         """.trimIndent()
 
-        val targetModel = activeModel.ifBlank { "gemma-4-26b-a4b-it" }
-        Log.d("Gemma4Rest", ">>> REQUEST TO HOSTED GEMMA 4 (Model=$targetModel):\n$promptStr")
+        // If user configured a custom BYOK key, execute direct REST
+        if (!userKey.isNullOrBlank()) {
+            return@withContext executeDirectApi(userKey, targetModel, promptStr, input.temperatureOverride)
+        }
+
+        // Default to Zero-Key App Check Proxy
+        executeProxyApi(targetModel, promptStr, input.temperatureOverride)
+    }
+
+    private suspend fun executeProxyApi(
+        modelName: String,
+        promptStr: String,
+        temperatureOverride: Float?
+    ): Result<String> {
+        return try {
+            val appCheckToken = try {
+                FirebaseAppCheck.getInstance().getAppCheckToken(false).await().token
+            } catch (e: Exception) {
+                Log.w("Gemma4Rest", "Failed to acquire AppCheck token", e)
+                ""
+            }
+
+            val auth = FirebaseAuth.getInstance()
+            if (auth.currentUser == null) {
+                try {
+                    auth.signInAnonymously().await()
+                } catch (e: Exception) {
+                    Log.w("Gemma4Rest", "Failed anonymous sign in", e)
+                }
+            }
+
+            val idToken = try {
+                auth.currentUser?.getIdToken(false)?.await()?.token ?: ""
+            } catch (e: Exception) {
+                Log.w("Gemma4Rest", "Failed to acquire Auth ID token", e)
+                ""
+            }
+
+            val requestJson = buildJsonObject {
+                put("model", modelName)
+                put("prompt", promptStr)
+            }.toString()
+
+            val requestBuilder = Request.Builder()
+                .url(DEFAULT_PROXY_URL)
+                .addHeader("Content-Type", "application/json")
+
+            if (appCheckToken.isNotBlank()) {
+                requestBuilder.addHeader("X-Firebase-AppCheck", appCheckToken)
+            }
+            if (idToken.isNotBlank()) {
+                requestBuilder.addHeader("Authorization", "Bearer $idToken")
+            }
+
+            val request = requestBuilder
+                .post(requestJson.toRequestBody("application/json".toMediaType()))
+                .build()
+
+            httpClient.newCall(request).execute().use { response ->
+                val body = response.body?.string().orEmpty()
+                if (!response.isSuccessful) {
+                    Log.w("Gemma4Rest", "Proxy unavailable (${response.code}). Falling back to Direct REST API with project key.")
+                    val firebaseKey = runCatching { FirebaseApp.getInstance().options.apiKey }.getOrNull().orEmpty()
+                    if (firebaseKey.isNotBlank()) {
+                        return executeDirectApi(firebaseKey, modelName, promptStr, temperatureOverride)
+                    }
+                    return Result.failure(IllegalStateException("Proxy Failed (${response.code}): $body"))
+                }
+
+                parseGemmaResponse(body)
+            }
+        } catch (e: Exception) {
+            Log.w("Gemma4Rest", "Proxy Exception, attempting direct REST fallback: ${e.message}")
+            val firebaseKey = runCatching { FirebaseApp.getInstance().options.apiKey }.getOrNull().orEmpty()
+            if (firebaseKey.isNotBlank()) {
+                executeDirectApi(firebaseKey, modelName, promptStr, temperatureOverride)
+            } else {
+                Result.failure(e)
+            }
+        }
+    }
+
+    private fun executeDirectApi(
+        apiKey: String,
+        targetModel: String,
+        promptStr: String,
+        temperatureOverride: Float?
+    ): Result<String> {
+        Log.d("Gemma4Rest", ">>> DIRECT REQUEST TO HOSTED GEMMA 4 (Model=$targetModel):\n$promptStr")
 
         val url = "https://generativelanguage.googleapis.com/v1beta/models/$targetModel:generateContent?key=$apiKey"
 
@@ -149,7 +207,7 @@ class GemmaRestFallbackProvider @Inject constructor(
                 }
             }
             putJsonObject("generationConfig") {
-                put("temperature", input.temperatureOverride ?: 0.2f)
+                put("temperature", temperatureOverride ?: 0.2f)
                 putJsonObject("thinkingConfig") {
                     put("thinkingLevel", "MINIMAL")
                 }
@@ -175,35 +233,65 @@ class GemmaRestFallbackProvider @Inject constructor(
             .post(requestJson.toRequestBody("application/json".toMediaType()))
             .build()
 
-        try {
+        return try {
             httpClient.newCall(request).execute().use { response ->
                 val body = response.body?.string().orEmpty()
                 if (!response.isSuccessful) {
-                    Log.e("Gemma4Rest", "Gemma 4 REST Call Failed (${response.code}): $body")
-                    return@withContext Result.failure(IllegalStateException("Gemma 4 REST API Failed (${response.code}): $body"))
+                    Log.e("Gemma4Rest", "Gemma 4 REST Direct Call Failed (${response.code}): $body")
+                    return Result.failure(IllegalStateException("Gemma 4 REST API Failed (${response.code}): $body"))
                 }
 
-                val root = json.parseToJsonElement(body).jsonObject
-                val candidates = root["candidates"]?.jsonArray
-                val parts = candidates?.firstOrNull()?.jsonObject
-                    ?.get("content")?.jsonObject
-                    ?.get("parts")?.jsonArray
-
-                val rawText = parts?.lastOrNull()?.jsonObject?.get("text")?.jsonPrimitive?.contentOrNull
-                    ?: throw IllegalStateException("Empty response from Gemma 4 REST API")
-
-                val cleanedText = rawText
-                    .substringAfter("```json")
-                    .substringAfter("```")
-                    .substringBeforeLast("```")
-                    .trim()
-
-                Log.d("Gemma4Rest", "^^^ RESPONSE FROM GEMMA 4:\n$cleanedText")
-                Result.success(cleanedText)
+                parseGemmaResponse(body)
             }
         } catch (e: Exception) {
-            Log.e("Gemma4Rest", "Exception executing Gemma 4 REST request: ${e.message}", e)
+            Log.e("Gemma4Rest", "Exception executing Gemma 4 REST direct request: ${e.message}", e)
             Result.failure(e)
+        }
+    }
+
+    private fun parseGemmaResponse(body: String): Result<String> {
+        val root = json.parseToJsonElement(body).jsonObject
+        val candidates = root["candidates"]?.jsonArray
+        val parts = candidates?.firstOrNull()?.jsonObject
+            ?.get("content")?.jsonObject
+            ?.get("parts")?.jsonArray
+
+        val rawText = parts?.lastOrNull()?.jsonObject?.get("text")?.jsonPrimitive?.contentOrNull
+            ?: throw IllegalStateException("Empty response from Gemma 4 REST API")
+
+        val cleanedText = rawText
+            .substringAfter("```json")
+            .substringAfter("```")
+            .substringBeforeLast("```")
+            .trim()
+
+        Log.d("Gemma4Rest", "^^^ RESPONSE FROM GEMMA 4:\n$cleanedText")
+        return Result.success(cleanedText)
+    }
+
+    private fun getSignatureSha1(): String {
+        return try {
+            val pm = context.packageManager
+            val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                PackageManager.GET_SIGNING_CERTIFICATES
+            } else {
+                @Suppress("DEPRECATION")
+                PackageManager.GET_SIGNATURES
+            }
+            val info = pm.getPackageInfo(context.packageName, flags)
+            val signatures = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                info.signingInfo?.apkContentsSigners
+            } else {
+                @Suppress("DEPRECATION")
+                info.signatures
+            }
+            val cert = signatures?.firstOrNull()?.toByteArray() ?: return ""
+            val md = MessageDigest.getInstance("SHA-1")
+            val digest = md.digest(cert)
+            digest.joinToString("") { "%02X".format(it) }
+        } catch (e: Exception) {
+            Log.w("Gemma4Rest", "Failed to calculate SHA-1 cert fingerprint", e)
+            ""
         }
     }
 }
