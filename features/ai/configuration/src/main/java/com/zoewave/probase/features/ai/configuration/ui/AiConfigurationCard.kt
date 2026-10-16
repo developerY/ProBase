@@ -488,7 +488,7 @@ fun AiConfigurationCardContent(
                     ListItem(
                         colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = Color(0xFFFBF8F5)),
                         headlineContent = { Text("Stage 4: Gemma 4 Cloud (Free Tier)", fontWeight = FontWeight.SemiBold) },
-                        supportingContent = { Text("Hosted MoE model via REST API (gemma-4-26b-a4b-it). Authenticated automatically via Firebase project key.") },
+                        supportingContent = { Text("Hosted MoE model (gemma-4-26b-a4b-it) via keyless App Check proxy. Zero client-side key exposure.") },
                         trailingContent = {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
@@ -503,7 +503,7 @@ fun AiConfigurationCardContent(
                                         )
                                 )
                                 Text(
-                                    text = "Active",
+                                    text = "Ready (Keyless)",
                                     style = MaterialTheme.typography.labelSmall,
                                     fontWeight = FontWeight.Bold,
                                     color = Color(0xFF4CAF50)
