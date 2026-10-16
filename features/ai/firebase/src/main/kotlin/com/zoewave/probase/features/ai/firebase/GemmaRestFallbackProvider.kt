@@ -92,18 +92,22 @@ class GemmaRestFallbackProvider @Inject constructor(
             is AiInput.Multimodal -> input.promptString
         }
 
-        val promptStr = """
-            $basePromptStr
-            
-            CRITICAL OUTPUT FORMAT:
-            Do NOT use Markdown headings or bullet points. Respond ONLY with a single raw, valid JSON object matching this exact structure:
-            {
-              "selectedClothingIds": ["w_1", "w_2", "w_3"],
-              "selectedCosmeticIds": ["c_1", "c_2", "c_3", "c_4"],
-              "rationale": "Single paragraph referencing only the selected item IDs.",
-              "recommendedPalette": ["#HEX1", "#HEX2", "#HEX3"]
-            }
-        """.trimIndent()
+        val promptStr = if (!basePromptStr.contains("CRITICAL OUTPUT FORMAT:")) {
+            """
+                $basePromptStr
+                
+                CRITICAL OUTPUT FORMAT:
+                Do NOT use Markdown headings or bullet points. Respond ONLY with a single raw, valid JSON object matching this exact structure:
+                {
+                  "selectedClothingIds": ["w_1", "w_2", "w_3"],
+                  "selectedCosmeticIds": ["c_1", "c_2", "c_3", "c_4"],
+                  "rationale": "Single paragraph referencing only the selected item IDs.",
+                  "recommendedPalette": ["#HEX1", "#HEX2", "#HEX3"]
+                }
+            """.trimIndent()
+        } else {
+            basePromptStr
+        }
 
         // If user configured a custom BYOK key, execute direct REST
         if (!userKey.isNullOrBlank()) {
@@ -237,6 +241,13 @@ class GemmaRestFallbackProvider @Inject constructor(
             httpClient.newCall(request).execute().use { response ->
                 val body = response.body?.string().orEmpty()
                 if (!response.isSuccessful) {
+                    if (response.code == 403 && body.contains("API_KEY_SERVICE_BLOCKED")) {
+                        val warnMsg = "Gemma 4 REST Direct Call blocked (403 API_KEY_SERVICE_BLOCKED). " +
+                                "The Firebase Android API Key is restricted in Google Cloud Console. " +
+                                "To resolve: Either deploy the 'gemma4Proxy' Cloud Function OR enable 'Generative Language API' on the key in Google Cloud Console."
+                        Log.w("Gemma4Rest", warnMsg)
+                        return Result.failure(IllegalStateException(warnMsg))
+                    }
                     Log.e("Gemma4Rest", "Gemma 4 REST Direct Call Failed (${response.code}): $body")
                     return Result.failure(IllegalStateException("Gemma 4 REST API Failed (${response.code}): $body"))
                 }
