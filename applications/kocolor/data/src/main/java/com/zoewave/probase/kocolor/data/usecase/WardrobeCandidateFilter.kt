@@ -225,7 +225,7 @@ class WardrobeCandidateFilter @Inject constructor(
 
         for (category in targetCategories) {
             val categoryMatches = rankedRemainingProv.filter { it.cosmeticItem?.macroCategory == category }
-            diverseSet.addAll(categoryMatches.take(2))
+            diverseSet.addAll(categoryMatches.take(3)) // Give Gemma a bit more room to synthesize
         }
 
         for (prov in rankedRemainingProv) {
@@ -235,7 +235,7 @@ class WardrobeCandidateFilter @Inject constructor(
             }
         }
 
-        diverseSet.take(limit)
+        diverseSet.distinctBy { it.cosmeticItem?.internalId }.take(limit)
     }
 
     suspend fun getCosmeticCandidates(

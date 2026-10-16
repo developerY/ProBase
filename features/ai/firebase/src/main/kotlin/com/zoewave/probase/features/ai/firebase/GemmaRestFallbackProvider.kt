@@ -21,6 +21,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -29,7 +30,12 @@ class GemmaRestFallbackProvider @Inject constructor(
     private val aiSettings: AiConfigurationSettings
 ) : AiProvider {
 
-    private val httpClient = OkHttpClient()
+    private val httpClient = OkHttpClient.Builder()
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(180, TimeUnit.SECONDS) // Greatly increased timeout for dense Gemma models
+        .writeTimeout(30, TimeUnit.SECONDS)
+        .build()
+
     private val json = Json { ignoreUnknownKeys = true }
 
     private var activeModel: String = "gemma-4-26b-a4b-it"
@@ -39,7 +45,7 @@ class GemmaRestFallbackProvider @Inject constructor(
         displayName = "Gemma 4 Cloud (Free Tier)",
         maxInputTokens = 8192,
         maxOutputTokens = 2048,
-        timeoutMillis = 15000L,
+        timeoutMillis = 60000L,
         maxCandidateAdditions = 25,
         minCandidateAdditions = 6,
         isLocal = false
@@ -70,10 +76,23 @@ class GemmaRestFallbackProvider @Inject constructor(
             return@withContext Result.failure(IllegalStateException("API Key missing for Gemma 4 REST Provider"))
         }
 
-        val promptStr = when (input) {
+        val basePromptStr = when (input) {
             is AiInput.TextOnly -> input.promptString
             is AiInput.Multimodal -> input.promptString
         }
+
+        val promptStr = """
+            $basePromptStr
+            
+            CRITICAL OUTPUT FORMAT:
+            Do NOT use Markdown headings or bullet points. Respond ONLY with a single raw, valid JSON object matching this exact structure:
+            {
+              "selectedClothingIds": ["w_1", "w_2", "w_3"],
+              "selectedCosmeticIds": ["c_1", "c_2", "c_3", "c_4"],
+              "rationale": "Single paragraph referencing only the selected item IDs.",
+              "recommendedPalette": ["#HEX1", "#HEX2", "#HEX3"]
+            }
+        """.trimIndent()
 
         val targetModel = activeModel.ifBlank { "gemma-4-26b-a4b-it" }
         Log.d("Gemma4Rest", ">>> REQUEST TO HOSTED GEMMA 4 (Model=$targetModel):\n$promptStr")
@@ -91,7 +110,9 @@ class GemmaRestFallbackProvider @Inject constructor(
             }
             putJsonObject("generationConfig") {
                 put("temperature", input.temperatureOverride ?: 0.2f)
-                put("responseMimeType", "application/json")
+                putJsonObject("thinkingConfig") {
+                    put("thinkingLevel", "MINIMAL")
+                }
             }
         }.toString()
 
@@ -129,7 +150,7 @@ class GemmaRestFallbackProvider @Inject constructor(
                 Result.success(cleanedText)
             }
         } catch (e: Exception) {
-            Log.e("Gemma4Rest", "Exception executing Gemma 4 REST request", e)
+            Log.e("Gemma4Rest", "Exception executing Gemma 4 REST request: ${e.message}", e)
             Result.failure(e)
         }
     }

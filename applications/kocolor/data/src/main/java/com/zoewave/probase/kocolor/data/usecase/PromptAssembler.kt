@@ -119,6 +119,15 @@ class PromptAssembler @Inject constructor() {
             $clothingGoal
             $cosmeticGoal
             3. HARMONIC SYNTHESIS: Construct a harmonic style where all colors work together, including a rationale referencing ONLY selected item IDs.
+            
+            CRITICAL OUTPUT FORMAT:
+            Do NOT use Markdown headings or bullet points. Respond ONLY with a single raw, valid JSON object matching this exact structure:
+            {
+              "selectedClothingIds": ["w_1", "w_2", "w_3"],
+              "selectedCosmeticIds": ["c_1", "c_2", "c_3", "c_4"],
+              "rationale": "Single paragraph referencing only the selected item IDs.",
+              "recommendedPalette": ["#HEX1", "#HEX2", "#HEX3"]
+            }
         """.trimIndent()
 
         val tempOverride = if (context.intent.equals("Surprise Me", ignoreCase = true) || (context.intentProfile?.colorfulness ?: 0.5f) >= 0.85f) {
