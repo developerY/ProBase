@@ -150,6 +150,7 @@ fun AiConfigurationCardContent(
                     val isStage1Active = uiState.isApiKeySet && uiState.useByokKey
                     val isStage2Active = uiState.isLocalAiAvailable
                     val isStage3Active = uiState.useFirebaseVertexAi
+                    val isStage4Active = uiState.isApiKeySet
 
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -168,6 +169,11 @@ fun AiConfigurationCardContent(
 
                         // Stage 3: Firebase
                         PipelineStageIndicator(isActive = isStage3Active, label = "Firebase")
+
+                        Text("→", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+
+                        // Stage 4: Gemma
+                        PipelineStageIndicator(isActive = isStage4Active, label = "Gemma")
                     }
                 }
                 Icon(
@@ -473,6 +479,36 @@ fun AiConfigurationCardContent(
                                     checkedTrackColor = Color(0xFFD4AF37) // Gold
                                 )
                             )
+                        }
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // STAGE 4: Gemma 4 Cloud (Free Tier REST)
+                    ListItem(
+                        colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = Color(0xFFFBF8F5)),
+                        headlineContent = { Text("Stage 4: Gemma 4 Cloud (Free Tier)", fontWeight = FontWeight.SemiBold) },
+                        supportingContent = { Text("Hosted MoE model via REST API. Active when Gemini API key is configured.") },
+                        trailingContent = {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(10.dp)
+                                        .background(
+                                            color = if (uiState.isApiKeySet) Color(0xFF4CAF50) else Color(0xFFE53935),
+                                            shape = CircleShape
+                                        )
+                                )
+                                Text(
+                                    text = if (uiState.isApiKeySet) "Active" else "No Key",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (uiState.isApiKeySet) Color(0xFF4CAF50) else Color(0xFFE53935)
+                                )
+                            }
                         }
                     )
                     

@@ -162,9 +162,15 @@ class AiDebugViewModel @Inject constructor(
         val fallbackList = listOf("gemini-2.5-flash", "gemini-2.5-pro", "gemma-4-26b-a4b-it", "gemma-4-31b-it", "gemini-1.5-flash", "gemini-1.5-pro")
         val modelList = (liveModels ?: fallbackList).distinct()
 
+        val displayedModel = if (selectedTarget == TestTargetProvider.GEMMA_4 && !modelName.startsWith("gemma-")) {
+            "gemma-4-26b-a4b-it"
+        } else {
+            modelName
+        }
+
         AiDebugUiState(
             activeProviderName = capabilityRouter.getActiveProviderName(),
-            currentModelName = modelName,
+            currentModelName = displayedModel,
             availableByokModels = modelList,
             selectedTarget = selectedTarget,
             isByokEnabled = useByok,
@@ -186,6 +192,9 @@ class AiDebugViewModel @Inject constructor(
 
     fun selectTargetProvider(target: TestTargetProvider) {
         _selectedTarget.value = target
+        if (target == TestTargetProvider.GEMMA_4) {
+            gemmaProvider.setModelName("gemma-4-26b-a4b-it")
+        }
     }
 
     fun selectByokModel(modelName: String) {
@@ -243,8 +252,20 @@ class AiDebugViewModel @Inject constructor(
                 }
 
                 if (providerToUse == null) {
-                    updateStep(1, DiagnosticStepState.FAILED, "Target provider '$targetName' is NOT available or missing configuration!")
-                    _testOutput.value = "Diagnostic Aborted: $targetName is not available."
+                    val isKeySet = aiSettings.isGeminiApiKeySetFlow.firstOrNull() ?: false
+                    val errorDetail = when {
+                        (target == TestTargetProvider.GEMMA_4 || target == TestTargetProvider.BYOK) && !isKeySet -> {
+                            "API Key is missing! Go to Settings -> 'Configure AI' and enter your Gemini API Key."
+                        }
+                        target == TestTargetProvider.LOCAL_NANO -> {
+                            "On-Device Gemini Nano is not available on this device hardware."
+                        }
+                        else -> {
+                            "Target provider '$targetName' is disabled or missing configuration."
+                        }
+                    }
+                    updateStep(1, DiagnosticStepState.FAILED, errorDetail)
+                    _testOutput.value = "Diagnostic Aborted: $errorDetail"
                     return@launch
                 }
                 updateStep(1, DiagnosticStepState.SUCCESS, "Connected to ${providerToUse.capability.displayName}!")
