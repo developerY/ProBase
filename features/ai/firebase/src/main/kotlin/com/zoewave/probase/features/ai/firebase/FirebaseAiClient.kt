@@ -76,8 +76,8 @@ class FirebaseAiClientImpl @Inject constructor(
             }
         }
 
-        // Sanitizer / Migration Check for deprecated models
-        if (resolved.startsWith("gemini-1.") || resolved.startsWith("gemini-2.")) {
+        // Sanitizer / Migration Check for deprecated 1.x models only
+        if (resolved.startsWith("gemini-1.")) {
             Log.w("FirebaseAiClient", "Deprecated model '$resolved' detected in Settings Flow. Auto-migrating to 'gemini-3.8-flash'")
             resolved = "gemini-3.8-flash"
         }
@@ -177,6 +177,14 @@ class FirebaseAiClientImpl @Inject constructor(
         return generateContent(prompt)
     }
 
+    private fun isAppCheckOrRateLimitError(e: Throwable): Boolean {
+        val msg = e.message ?: ""
+        return msg.contains("App Check", ignoreCase = true) ||
+               msg.contains("invalid", ignoreCase = true) ||
+               msg.contains("Too many attempts", ignoreCase = true) ||
+               msg.contains("TOO_MANY_ATTEMPTS", ignoreCase = true)
+    }
+
     private fun isTemporaryOverloadError(e: Throwable): Boolean {
         val msg = e.message ?: ""
         return msg.contains("high demand", ignoreCase = true) ||
@@ -202,7 +210,7 @@ class FirebaseAiClientImpl @Inject constructor(
         initialModelName: String,
         block: suspend (modelName: String) -> T
     ): T {
-        val fallbackModels = listOf(initialModelName, "gemini-3.8-flash", "gemini-2.5-flash", "gemini-1.5-flash").distinct()
+        val fallbackModels = listOf(initialModelName, "gemini-3.8-flash", "gemini-flash-lite-latest").distinct()
         var lastException: Throwable? = null
 
         for (model in fallbackModels) {
@@ -215,6 +223,12 @@ class FirebaseAiClientImpl @Inject constructor(
                 } catch (e: Exception) {
                     lastException = e
                     val msg = e.message ?: ""
+
+                    // 0. App Check / Rate Limit -> Immediately Abort Retries
+                    if (isAppCheckOrRateLimitError(e)) {
+                        Log.e("FirebaseAiClient", "[$actionName] App Check validation or rate limit error on '$model': $msg. Aborting fallbacks to prevent lockout.")
+                        throw e
+                    }
 
                     // 1. Deprecated Model Error -> Immediately switch to next fallback model
                     if (isDeprecatedModelError(e)) {
