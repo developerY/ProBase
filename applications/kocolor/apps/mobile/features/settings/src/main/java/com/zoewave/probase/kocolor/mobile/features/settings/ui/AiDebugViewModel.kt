@@ -306,9 +306,19 @@ class AiDebugViewModel @Inject constructor(
                 val latency = System.currentTimeMillis() - startTime
 
                 if (result.isFailure) {
-                    val err = result.exceptionOrNull()?.localizedMessage ?: "Execution failed"
-                    updateStep(3, DiagnosticStepState.FAILED, "LLM Call Failed (${latency}ms): $err")
-                    _testOutput.value = "Raw Error Response (${latency}ms):\n$err"
+                    val err = result.exceptionOrNull()
+                    val causeMsg = err?.cause?.localizedMessage ?: err?.cause?.message
+                    val errDetail = when {
+                        !causeMsg.isNullOrBlank() && causeMsg != err?.localizedMessage -> {
+                            "${err?.localizedMessage} -> $causeMsg"
+                        }
+                        err != null -> {
+                            err.localizedMessage ?: err.message ?: err.javaClass.simpleName
+                        }
+                        else -> "Execution failed"
+                    }
+                    updateStep(3, DiagnosticStepState.FAILED, "LLM Call Failed (${latency}ms): $errDetail")
+                    _testOutput.value = "Raw Error Response (${latency}ms):\n$errDetail\n\nStack Trace:\n${err?.stackTraceToString() ?: "N/A"}"
                     return@launch
                 }
 
