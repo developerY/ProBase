@@ -177,7 +177,7 @@ class AiDebugViewModel @Inject constructor(
             isByokKeySet = isKeySet,
             isLocalAiEnabled = useLocal,
             isFirebaseEnabled = useFirebase,
-            isGemmaEnabled = isKeySet,
+            isGemmaEnabled = true, // Authenticated automatically via Firebase project key
             isRunningTest = isTesting,
             diagnosticSteps = steps,
             recentAuditLogs = logs,

@@ -1,10 +1,15 @@
 package com.zoewave.probase.features.ai.firebase
 
+import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
 import android.util.Log
+import com.google.firebase.FirebaseApp
 import com.zoewave.probase.core.data.repository.AiConfigurationSettings
 import com.zoewave.probase.features.ai.core.AiInput
 import com.zoewave.probase.features.ai.core.AiProvider
 import com.zoewave.probase.features.ai.core.AiProviderCapability
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
@@ -21,18 +26,20 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import java.security.MessageDigest
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class GemmaRestFallbackProvider @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val aiSettings: AiConfigurationSettings
 ) : AiProvider {
 
     private val httpClient = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)
-        .readTimeout(180, TimeUnit.SECONDS) // Greatly increased timeout for dense Gemma models
+        .readTimeout(180, TimeUnit.SECONDS)
         .writeTimeout(30, TimeUnit.SECONDS)
         .build()
 
@@ -57,9 +64,42 @@ class GemmaRestFallbackProvider @Inject constructor(
         }
     }
 
+    private fun resolveApiKey(): String {
+        val userKey = aiSettings.getGeminiApiKey()
+        if (!userKey.isNullOrBlank()) return userKey
+        return runCatching {
+            FirebaseApp.getInstance().options.apiKey
+        }.getOrNull().orEmpty()
+    }
+
+    private fun getSignatureSha1(): String {
+        return try {
+            val pm = context.packageManager
+            val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                PackageManager.GET_SIGNING_CERTIFICATES
+            } else {
+                @Suppress("DEPRECATION")
+                PackageManager.GET_SIGNATURES
+            }
+            val info = pm.getPackageInfo(context.packageName, flags)
+            val signatures = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                info.signingInfo?.apkContentsSigners
+            } else {
+                @Suppress("DEPRECATION")
+                info.signatures
+            }
+            val cert = signatures?.firstOrNull()?.toByteArray() ?: return ""
+            val md = MessageDigest.getInstance("SHA-1")
+            val digest = md.digest(cert)
+            digest.joinToString("") { "%02X".format(it) }
+        } catch (e: Exception) {
+            Log.w("Gemma4Rest", "Failed to calculate SHA-1 cert fingerprint", e)
+            ""
+        }
+    }
+
     override suspend fun isAvailable(): Boolean {
-        val apiKey = aiSettings.getGeminiApiKey()
-        return !apiKey.isNullOrBlank()
+        return resolveApiKey().isNotBlank()
     }
 
     override suspend fun countTokens(input: AiInput): Int {
@@ -71,9 +111,9 @@ class GemmaRestFallbackProvider @Inject constructor(
     }
 
     override suspend fun execute(input: AiInput): Result<String> = withContext(Dispatchers.IO) {
-        val apiKey = aiSettings.getGeminiApiKey()
-        if (apiKey.isNullOrBlank()) {
-            return@withContext Result.failure(IllegalStateException("API Key missing for Gemma 4 REST Provider"))
+        val apiKey = resolveApiKey()
+        if (apiKey.isBlank()) {
+            return@withContext Result.failure(IllegalStateException("No valid API Key found for Gemma 4 REST Provider"))
         }
 
         val basePromptStr = when (input) {
@@ -116,10 +156,22 @@ class GemmaRestFallbackProvider @Inject constructor(
             }
         }.toString()
 
-        val request = Request.Builder()
+        val pkgName = context.packageName
+        val sha1Cert = getSignatureSha1()
+
+        val requestBuilder = Request.Builder()
             .url(url)
             .addHeader("Content-Type", "application/json")
             .addHeader("x-goog-api-key", apiKey)
+
+        if (pkgName.isNotBlank()) {
+            requestBuilder.addHeader("X-Android-Package", pkgName)
+        }
+        if (sha1Cert.isNotBlank()) {
+            requestBuilder.addHeader("X-Android-Cert", sha1Cert)
+        }
+
+        val request = requestBuilder
             .post(requestJson.toRequestBody("application/json".toMediaType()))
             .build()
 
