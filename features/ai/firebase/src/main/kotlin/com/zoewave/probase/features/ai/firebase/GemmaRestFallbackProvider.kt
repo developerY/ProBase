@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
+import com.google.firebase.FirebaseApp
 import com.zoewave.probase.core.data.repository.AiConfigurationSettings
 import com.zoewave.probase.features.ai.core.AiInput
 import com.zoewave.probase.features.ai.core.AiProvider
@@ -36,11 +37,6 @@ class GemmaRestFallbackProvider @Inject constructor(
     private val aiSettings: AiConfigurationSettings
 ) : AiProvider {
 
-    companion object {
-        // Dedicated Gemma Firebase/Google Cloud Service API Key (kocolor-ai project: 960844692488)
-        private const val GEMMA_SERVICE_API_KEY = "AIzaSyBD2cjO74XXoZWfiG27gsVKhwDvadD4Txg"
-    }
-
     private val httpClient = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)
         .readTimeout(180, TimeUnit.SECONDS)
@@ -71,11 +67,13 @@ class GemmaRestFallbackProvider @Inject constructor(
     private fun resolveGemmaApiKey(): String {
         val userKey = aiSettings.getGeminiApiKey()
         if (!userKey.isNullOrBlank()) return userKey
-        return GEMMA_SERVICE_API_KEY
+        return runCatching {
+            FirebaseApp.getInstance().options.apiKey
+        }.getOrNull().orEmpty()
     }
 
     override suspend fun isAvailable(): Boolean {
-        return true
+        return resolveGemmaApiKey().isNotBlank()
     }
 
     override suspend fun countTokens(input: AiInput): Int {
@@ -88,6 +86,10 @@ class GemmaRestFallbackProvider @Inject constructor(
 
     override suspend fun execute(input: AiInput): Result<String> = withContext(Dispatchers.IO) {
         val gemmaApiKey = resolveGemmaApiKey()
+        if (gemmaApiKey.isBlank()) {
+            return@withContext Result.failure(IllegalStateException("No valid API Key found for Gemma 4 REST Provider"))
+        }
+
         val targetModel = activeModel.ifBlank { "gemma-4-26b-a4b-it" }
 
         val basePromptStr = when (input) {
@@ -112,7 +114,7 @@ class GemmaRestFallbackProvider @Inject constructor(
             basePromptStr
         }
 
-        Log.d("Gemma4Rest", "Executing Gemma 4 REST request via dedicated 'kocolor-ai' service...")
+        Log.d("Gemma4Rest", "Executing Gemma 4 REST request...")
         executeDirectApi(gemmaApiKey, targetModel, promptStr, input.temperatureOverride)
     }
 
@@ -169,7 +171,7 @@ class GemmaRestFallbackProvider @Inject constructor(
                     if (response.code == 403 && body.contains("API_KEY_SERVICE_BLOCKED")) {
                         val warnMsg = "Gemma 4 REST Direct Call blocked (403 API_KEY_SERVICE_BLOCKED). " +
                                 "The API Key is restricted in Google Cloud Console. " +
-                                "To resolve: Enable 'Generative Language API' on key '$apiKey' in Google Cloud Console."
+                                "To resolve: Enable 'Generative Language API' on key in Google Cloud Console."
                         Log.w("Gemma4Rest", warnMsg)
                         return Result.failure(IllegalStateException(warnMsg))
                     }
