@@ -71,6 +71,14 @@ class GemmaRestFallbackProvider @Inject constructor(
         }
     }
 
+    private fun resolveGemmaApiKey(): String {
+        val userKey = aiSettings.getGeminiApiKey()
+        if (!userKey.isNullOrBlank()) return userKey
+        return runCatching {
+            FirebaseApp.getInstance().options.apiKey
+        }.getOrNull().orEmpty()
+    }
+
     override suspend fun isAvailable(): Boolean {
         return true
     }
@@ -109,12 +117,10 @@ class GemmaRestFallbackProvider @Inject constructor(
             basePromptStr
         }
 
-        // If user configured a custom BYOK key, execute direct REST
         if (!userKey.isNullOrBlank()) {
             return@withContext executeDirectApi(userKey, targetModel, promptStr, input.temperatureOverride)
         }
 
-        // Default to Zero-Key App Check Proxy
         executeProxyApi(targetModel, promptStr, input.temperatureOverride)
     }
 
@@ -171,7 +177,7 @@ class GemmaRestFallbackProvider @Inject constructor(
                 val body = response.body?.string().orEmpty()
                 if (!response.isSuccessful) {
                     Log.w("Gemma4Rest", "Proxy unavailable (${response.code}). Falling back to Direct REST API with project key.")
-                    val firebaseKey = runCatching { FirebaseApp.getInstance().options.apiKey }.getOrNull().orEmpty()
+                    val firebaseKey = resolveGemmaApiKey()
                     if (firebaseKey.isNotBlank()) {
                         return executeDirectApi(firebaseKey, modelName, promptStr, temperatureOverride)
                     }
@@ -182,7 +188,7 @@ class GemmaRestFallbackProvider @Inject constructor(
             }
         } catch (e: Exception) {
             Log.w("Gemma4Rest", "Proxy Exception, attempting direct REST fallback: ${e.message}")
-            val firebaseKey = runCatching { FirebaseApp.getInstance().options.apiKey }.getOrNull().orEmpty()
+            val firebaseKey = resolveGemmaApiKey()
             if (firebaseKey.isNotBlank()) {
                 executeDirectApi(firebaseKey, modelName, promptStr, temperatureOverride)
             } else {
@@ -243,8 +249,8 @@ class GemmaRestFallbackProvider @Inject constructor(
                 if (!response.isSuccessful) {
                     if (response.code == 403 && body.contains("API_KEY_SERVICE_BLOCKED")) {
                         val warnMsg = "Gemma 4 REST Direct Call blocked (403 API_KEY_SERVICE_BLOCKED). " +
-                                "The Firebase Android API Key is restricted in Google Cloud Console. " +
-                                "To resolve: Either deploy the 'gemma4Proxy' Cloud Function OR enable 'Generative Language API' on the key in Google Cloud Console."
+                                "The API Key is restricted in Google Cloud Console. " +
+                                "To resolve: Enable 'Generative Language API' on key in Google Cloud Console."
                         Log.w("Gemma4Rest", warnMsg)
                         return Result.failure(IllegalStateException(warnMsg))
                     }
