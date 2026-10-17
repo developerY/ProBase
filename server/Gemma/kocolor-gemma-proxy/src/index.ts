@@ -105,50 +105,48 @@ export default {
     }
 
     const model = payload.model || "gemma-4-26b-a4b-it";
-    const temperature = payload.temperature ?? 0.2;
-    const maxOutputTokens = payload.maxOutputTokens ?? 4096; // Give Gemma room for thought blocks
-    const isGeminiModel = model.toLowerCase().startsWith("gemini");
-    const isGemmaModel = model.toLowerCase().includes("gemma");
+    const temperature = payload.temperature ?? 0.1;
+    // Give plenty of headroom so thinking tokens never truncate the JSON response
+    const maxOutputTokens = Math.max(payload.maxOutputTokens ?? 8192, 8192);
 
-    // 5. Construct the upstream Google Generative Language API request
     const upstreamUrl = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
       model
     )}:generateContent`;
 
-    // Force strict JSON output and prevent Gemma from writing 40-second Markdown monologues
-    const finalPrompt = isGemmaModel
-      ? `${prompt}\n\nCRITICAL INSTRUCTION: Do NOT write any analysis, bullet points, markdown, or reasoning. Output ONLY the raw, valid JSON object starting immediately with '{' and ending with '}'.`
-      : prompt;
+    const finalPrompt = `${prompt}\n\nCRITICAL: Do NOT overthink or write long explanations. Immediately output ONLY the valid JSON object matching the requested schema.`;
 
-    // 5 & 6. Call Google's API with JSON mode (and automatic fallback if model rejects responseMimeType)
-    const callGoogleApi = async (useJsonMimeType: boolean) => {
-      const genConfig: Record<string, unknown> = {
+    // 5 & 6. Helper to call upstream Google API with minimal thinking + JSON mode
+    const callUpstream = async (
+      useJsonMime: boolean,
+      thinkingMode: "MINIMAL" | "ZERO_BUDGET" | "NONE"
+    ) => {
+      const generationConfig: Record<string, unknown> = {
         temperature,
         maxOutputTokens,
       };
-      if (useJsonMimeType) {
-        genConfig.responseMimeType = "application/json";
+
+      if (useJsonMime) {
+        generationConfig.responseMimeType = "application/json";
       }
 
-      // Only attach thinkingConfig on Gemini models (Gemma models may reject it with HTTP 400)
-      if (isGeminiModel) {
-        genConfig.thinkingConfig = {
-          thinkingLevel: "MINIMAL",
-        };
+      if (thinkingMode === "MINIMAL") {
+        generationConfig.thinkingConfig = { thinkingLevel: "MINIMAL" };
+      } else if (thinkingMode === "ZERO_BUDGET") {
+        generationConfig.thinkingConfig = { thinkingBudget: 0 };
       }
 
-      const bodyObj: Record<string, unknown> = {
+      const googleRequestBody: Record<string, unknown> = {
         contents: [
           {
             role: "user",
             parts: [{ text: finalPrompt }],
           },
         ],
-        generationConfig: genConfig,
+        generationConfig,
       };
 
-      if (payload.systemInstruction && !isGemmaModel) {
-        bodyObj.systemInstruction = {
+      if (payload.systemInstruction) {
+        googleRequestBody.systemInstruction = {
           parts: [{ text: payload.systemInstruction }],
         };
       }
@@ -159,14 +157,23 @@ export default {
           "Content-Type": "application/json",
           "x-goog-api-key": env.GEMINI_API_KEY,
         },
-        body: JSON.stringify(bodyObj),
+        body: JSON.stringify(googleRequestBody),
       });
     };
 
-    let upstreamResponse = await callGoogleApi(true);
+    // Attempt 1: JSON mimeType + thinkingLevel: "MINIMAL" (supported by Gemma 4 & Gemini 3+)
+    let upstreamResponse = await callUpstream(true, "MINIMAL");
+
+    // Attempt 2: Fallback if model prefers thinkingBudget: 0
     if (upstreamResponse.status === 400) {
-      console.warn(`[Proxy] Model ${model} rejected responseMimeType; retrying without it...`);
-      upstreamResponse = await callGoogleApi(false);
+      console.warn(`[Proxy] 400 with MINIMAL; retrying with thinkingBudget: 0...`);
+      upstreamResponse = await callUpstream(true, "ZERO_BUDGET");
+    }
+
+    // Attempt 3: Fallback if model rejects responseMimeType or thinkingConfig entirely
+    if (upstreamResponse.status === 400) {
+      console.warn(`[Proxy] 400 with ZERO_BUDGET; retrying bare config...`);
+      upstreamResponse = await callUpstream(false, "NONE");
     }
 
     const responseText = await upstreamResponse.text();
