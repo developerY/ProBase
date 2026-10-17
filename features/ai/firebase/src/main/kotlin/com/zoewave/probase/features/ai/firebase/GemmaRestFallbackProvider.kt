@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
-import com.google.firebase.FirebaseApp
+import com.google.firebase.FirebaseOptions
 import com.google.firebase.appcheck.FirebaseAppCheck
 import com.google.firebase.auth.FirebaseAuth
 import com.zoewave.probase.core.data.repository.AiConfigurationSettings
@@ -41,7 +41,7 @@ class GemmaRestFallbackProvider @Inject constructor(
 ) : AiProvider {
 
     companion object {
-        private const val DEFAULT_PROXY_URL = "https://us-central1-buildwithai-453716.cloudfunctions.net/gemma4Proxy"
+        private const val DEFAULT_PROXY_URL = "https://kocolor-gemma-proxy.zoewavestudios.workers.dev"
     }
 
     private val httpClient = OkHttpClient.Builder()
@@ -72,15 +72,11 @@ class GemmaRestFallbackProvider @Inject constructor(
     }
 
     private fun resolveGemmaApiKey(): String {
-        val userKey = aiSettings.getGeminiApiKey()
-        if (!userKey.isNullOrBlank()) return userKey
-        return runCatching {
-            FirebaseApp.getInstance().options.apiKey
-        }.getOrNull().orEmpty()
+        return aiSettings.getGeminiApiKey() ?: ""
     }
 
     override suspend fun isAvailable(): Boolean {
-        return true
+        return resolveGemmaApiKey().isNotBlank()
     }
 
     override suspend fun countTokens(input: AiInput): Int {
@@ -176,24 +172,15 @@ class GemmaRestFallbackProvider @Inject constructor(
             httpClient.newCall(request).execute().use { response ->
                 val body = response.body?.string().orEmpty()
                 if (!response.isSuccessful) {
-                    Log.w("Gemma4Rest", "Proxy unavailable (${response.code}). Falling back to Direct REST API with project key.")
-                    val firebaseKey = resolveGemmaApiKey()
-                    if (firebaseKey.isNotBlank()) {
-                        return executeDirectApi(firebaseKey, modelName, promptStr, temperatureOverride)
-                    }
+                    Log.w("Gemma4Rest", "Proxy unavailable (${response.code}).")
                     return Result.failure(IllegalStateException("Proxy Failed (${response.code}): $body"))
                 }
 
                 parseGemmaResponse(body)
             }
         } catch (e: Exception) {
-            Log.w("Gemma4Rest", "Proxy Exception, attempting direct REST fallback: ${e.message}")
-            val firebaseKey = resolveGemmaApiKey()
-            if (firebaseKey.isNotBlank()) {
-                executeDirectApi(firebaseKey, modelName, promptStr, temperatureOverride)
-            } else {
-                Result.failure(e)
-            }
+            Log.w("Gemma4Rest", "Proxy Exception: ${e.message}")
+            Result.failure(e)
         }
     }
 
@@ -203,7 +190,7 @@ class GemmaRestFallbackProvider @Inject constructor(
         promptStr: String,
         temperatureOverride: Float?
     ): Result<String> {
-        Log.d("Gemma4Rest", ">>> DIRECT REQUEST TO HOSTED GEMMA 4 (Model=$targetModel):\n$promptStr")
+        Log.d("Gemma4Rest", ">>> DIRECT REQUEST TO HOSTED GEMMA 4 (Model=$targetModel, Project=kocolor-dev):\n$promptStr")
 
         val url = "https://generativelanguage.googleapis.com/v1beta/models/$targetModel:generateContent?key=$apiKey"
 
@@ -250,7 +237,7 @@ class GemmaRestFallbackProvider @Inject constructor(
                     if (response.code == 403 && body.contains("API_KEY_SERVICE_BLOCKED")) {
                         val warnMsg = "Gemma 4 REST Direct Call blocked (403 API_KEY_SERVICE_BLOCKED). " +
                                 "The API Key is restricted in Google Cloud Console. " +
-                                "To resolve: Enable 'Generative Language API' on key in Google Cloud Console."
+                                "To resolve: Enable 'Generative Language API' on key in Google Cloud Console for project kocolor-dev."
                         Log.w("Gemma4Rest", warnMsg)
                         return Result.failure(IllegalStateException(warnMsg))
                     }

@@ -31,26 +31,27 @@ google-services-zoewave.json
 # /applications/seaweed/docs/BlockChain
 
 # Rust Backend Isolation
-/server/package/kc-distributor/target/
-/server/package/kc-optimizer/target
-/server/gen/Key/target
+/server/Inventory/package/kc-distributor/target/
+/server/Inventory/package/kc-optimizer/target
+/server/Inventory/gen/Key/target
 
 # Pipeline Artifacts (Raw source assets should NEVER be committed)
-/server/package/input/KoColor/**/*.png
-/server/package/input/KoColor/**/*.jpg
-/server/package/input/KoColor/**/*.jpeg
-/server/package/input/KoColor/**/*.webp
+/server/Inventory/package/input/KoColor/**/*.png
+/server/Inventory/package/input/KoColor/**/*.jpg
+/server/Inventory/package/input/KoColor/**/*.jpeg
+/server/Inventory/package/input/KoColor/**/*.webp
 
 # Distribution Input & Output
-/server/package/dist/
+/server/Inventory/package/dist/
 
 # Image Maker
-/server/utils/ImageSplit/input_images/
-/server/utils/ImageSplit/output_slices/
-/server/utils/ImageSplit/target/
-/server/utils/ImageSplit/Holder/
+/server/Inventory/utils/ImageSplit/input_images/
+/server/Inventory/utils/ImageSplit/output_slices/
+/server/Inventory/utils/ImageSplit/target/
+/server/Inventory/utils/ImageSplit/Holder/
 
-
+# Node
+/server/Gemma/kocolor-gemma-proxy/node_modules
 
 # Security & Keys
 **/.env
