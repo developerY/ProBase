@@ -106,51 +106,68 @@ export default {
 
     const model = payload.model || "gemma-4-26b-a4b-it";
     const temperature = payload.temperature ?? 0.2;
-    const maxOutputTokens = payload.maxOutputTokens ?? 2048;
+    const maxOutputTokens = payload.maxOutputTokens ?? 4096; // Give Gemma room for thought blocks
     const isGeminiModel = model.toLowerCase().startsWith("gemini");
+    const isGemmaModel = model.toLowerCase().includes("gemma");
 
     // 5. Construct the upstream Google Generative Language API request
     const upstreamUrl = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
       model
     )}:generateContent`;
 
-    const generationConfig: Record<string, unknown> = {
-      temperature,
-      maxOutputTokens,
-    };
+    // Force strict JSON output and prevent Gemma from writing 40-second Markdown monologues
+    const finalPrompt = isGemmaModel
+      ? `${prompt}\n\nCRITICAL INSTRUCTION: Do NOT write any analysis, bullet points, markdown, or reasoning. Output ONLY the raw, valid JSON object starting immediately with '{' and ending with '}'.`
+      : prompt;
 
-    // Only attach thinkingConfig on Gemini models (Gemma models may reject it with HTTP 400)
-    if (isGeminiModel) {
-      generationConfig.thinkingConfig = {
-        thinkingLevel: "MINIMAL",
+    // 5 & 6. Call Google's API with JSON mode (and automatic fallback if model rejects responseMimeType)
+    const callGoogleApi = async (useJsonMimeType: boolean) => {
+      const genConfig: Record<string, unknown> = {
+        temperature,
+        maxOutputTokens,
       };
-    }
+      if (useJsonMimeType) {
+        genConfig.responseMimeType = "application/json";
+      }
 
-    const googleRequestBody: Record<string, unknown> = {
-      contents: [
-        {
-          role: "user",
-          parts: [{ text: prompt }],
+      // Only attach thinkingConfig on Gemini models (Gemma models may reject it with HTTP 400)
+      if (isGeminiModel) {
+        genConfig.thinkingConfig = {
+          thinkingLevel: "MINIMAL",
+        };
+      }
+
+      const bodyObj: Record<string, unknown> = {
+        contents: [
+          {
+            role: "user",
+            parts: [{ text: finalPrompt }],
+          },
+        ],
+        generationConfig: genConfig,
+      };
+
+      if (payload.systemInstruction && !isGemmaModel) {
+        bodyObj.systemInstruction = {
+          parts: [{ text: payload.systemInstruction }],
+        };
+      }
+
+      return fetch(upstreamUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-goog-api-key": env.GEMINI_API_KEY,
         },
-      ],
-      generationConfig,
+        body: JSON.stringify(bodyObj),
+      });
     };
 
-    if (payload.systemInstruction) {
-      googleRequestBody.systemInstruction = {
-        parts: [{ text: payload.systemInstruction }],
-      };
+    let upstreamResponse = await callGoogleApi(true);
+    if (upstreamResponse.status === 400) {
+      console.warn(`[Proxy] Model ${model} rejected responseMimeType; retrying without it...`);
+      upstreamResponse = await callGoogleApi(false);
     }
-
-    // 6. Call Google's API injecting the encrypted server-side GEMINI_API_KEY
-    const upstreamResponse = await fetch(upstreamUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-goog-api-key": env.GEMINI_API_KEY,
-      },
-      body: JSON.stringify(googleRequestBody),
-    });
 
     const responseText = await upstreamResponse.text();
     const duration = Date.now() - startTime;
