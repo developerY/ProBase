@@ -267,17 +267,39 @@ class GemmaRestFallbackProvider @Inject constructor(
             ?.get("content")?.jsonObject
             ?.get("parts")?.jsonArray
 
-        val rawText = parts?.lastOrNull()?.jsonObject?.get("text")?.jsonPrimitive?.contentOrNull
-            ?: throw IllegalStateException("Empty response from Gemma 4 REST API")
+        if (parts == null || parts.isEmpty()) {
+            return Result.failure(IllegalStateException("Empty response from Gemma 4 REST API"))
+        }
 
-        val cleanedText = rawText
-            .substringAfter("```json")
-            .substringAfter("```")
-            .substringBeforeLast("```")
+        // 1. Collect ONLY non-thought parts (skip internal reasoning if sent back)
+        val nonThoughtText = buildString {
+            for (i in 0 until parts.size) {
+                val partObj = parts[i].jsonObject
+                val isThought = partObj["thought"]?.jsonPrimitive?.contentOrNull?.toBoolean() ?: false
+                if (!isThought) {
+                    append(partObj["text"]?.jsonPrimitive?.contentOrNull ?: "")
+                }
+            }
+        }.trim()
+
+        // 2. Strip ```json ... ``` markdown fences if present and isolate the JSON object '{ ... }'
+        val cleaned = nonThoughtText
+            .removePrefix("```json")
+            .removePrefix("```")
+            .removeSuffix("```")
             .trim()
 
-        Log.d("Gemma4Rest", "^^^ RESPONSE FROM GEMMA 4:\n$cleanedText")
-        return Result.success(cleanedText)
+        val firstBrace = cleaned.indexOf('{')
+        val lastBrace = cleaned.lastIndexOf('}')
+        
+        val finalJson = if (firstBrace != -1 && lastBrace > firstBrace) {
+            cleaned.substring(firstBrace, lastBrace + 1)
+        } else {
+            cleaned
+        }
+
+        Log.d("Gemma4Rest", "^^^ RESPONSE FROM GEMMA 4:\n$finalJson")
+        return Result.success(finalJson)
     }
 
     private fun getSignatureSha1(): String {
