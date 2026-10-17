@@ -1,4 +1,4 @@
-import { createRemoteJWKSet, jwtVerify } from "jose";
+import { createRemoteJWKSet, jwtVerify, decodeJwt } from "jose";
 
 export interface Env {
   GEMINI_API_KEY: string;
@@ -20,8 +20,12 @@ interface ProxyRequestPayload {
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
+    const startTime = Date.now();
+    console.log(`[Proxy] Incoming ${request.method} request to ${request.url}`);
+
     // 1. Only allow POST requests
     if (request.method !== "POST") {
+      console.warn(`[Proxy] Rejected non-POST method: ${request.method}`);
       return Response.json(
         { error: "Method Not Allowed. Use POST." },
         { status: 405 }
@@ -31,6 +35,7 @@ export default {
     // 2. Require the X-Firebase-AppCheck header from the Android app
     const appCheckToken = request.headers.get("X-Firebase-AppCheck");
     if (!appCheckToken) {
+      console.warn(`[Proxy] Rejected: Missing X-Firebase-AppCheck header`);
       return Response.json(
         { error: "Unauthorized: Missing X-Firebase-AppCheck header" },
         { status: 401 }
@@ -38,14 +43,29 @@ export default {
     }
 
     // 3. Cryptographically verify the App Check JWT against Google's public JWKS
-    const projectNumber = env.FIREBASE_PROJECT_NUMBER;
+    const allowedProjectNumbers = [
+      env.FIREBASE_PROJECT_NUMBER,
+      "20197827893", // buildwithai-453716
+      "10328426049", // kocolor-dev
+      "315098361468", // kocolor-app
+      "960844692488"  // kocolor-ai
+    ].filter(Boolean);
+
     try {
+      const unverified = decodeJwt(appCheckToken);
+      const iss = (unverified.iss as string) || "";
+      const matchedNumber = allowedProjectNumbers.find((num) => iss.endsWith(`/${num}`)) || env.FIREBASE_PROJECT_NUMBER;
+
+      console.log(`[AppCheck] Token issuer: ${iss} | Matching project: ${matchedNumber}`);
+
       await jwtVerify(appCheckToken, FIREBASE_APP_CHECK_JWKS, {
-        issuer: `https://firebaseappcheck.googleapis.com/${projectNumber}`,
-        audience: `projects/${projectNumber}`,
+        issuer: `https://firebaseappcheck.googleapis.com/${matchedNumber}`,
+        audience: `projects/${matchedNumber}`,
         algorithms: ["RS256"],
       });
+      console.log(`[AppCheck] Verification SUCCESS for project ${matchedNumber}!`);
     } catch (err: any) {
+      console.error(`[AppCheck] Verification FAILED: ${err?.message}`);
       return Response.json(
         {
           error: "Unauthorized: Invalid or expired App Check token",
@@ -60,11 +80,13 @@ export default {
     try {
       payload = (await request.json()) as ProxyRequestPayload;
     } catch {
+      console.error(`[Proxy] Failed to parse JSON request body`);
       return Response.json({ error: "Invalid JSON body" }, { status: 400 });
     }
 
     const prompt = payload.prompt?.trim();
     if (!prompt) {
+      console.error(`[Proxy] Missing 'prompt' field in payload`);
       return Response.json(
         { error: "Missing 'prompt' field in request body" },
         { status: 400 }
@@ -75,6 +97,8 @@ export default {
     const model = payload.model || "gemma-4-26b-a4b-it";
     const temperature = payload.temperature ?? 0.2;
     const maxOutputTokens = payload.maxOutputTokens ?? 2048;
+
+    console.log(`[Proxy] Forwarding to Gemma 4 (Model: ${model}, Prompt Length: ${prompt.length} chars)`);
 
     // 5. Construct the upstream Google Generative Language API request
     const upstreamUrl = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
@@ -91,6 +115,9 @@ export default {
       generationConfig: {
         temperature,
         maxOutputTokens,
+        thinkingConfig: {
+          thinkingLevel: "MINIMAL"
+        }
       },
     };
 
@@ -111,6 +138,9 @@ export default {
     });
 
     const responseText = await upstreamResponse.text();
+    const duration = Date.now() - startTime;
+
+    console.log(`[Proxy] Upstream responded with HTTP ${upstreamResponse.status} in ${duration}ms (Response Length: ${responseText.length} chars)`);
 
     return new Response(responseText, {
       status: upstreamResponse.status,

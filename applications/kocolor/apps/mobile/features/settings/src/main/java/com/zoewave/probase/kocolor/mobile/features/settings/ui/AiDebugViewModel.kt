@@ -254,7 +254,7 @@ class AiDebugViewModel @Inject constructor(
                 if (providerToUse == null) {
                     val isKeySet = aiSettings.isGeminiApiKeySetFlow.firstOrNull() ?: false
                     val errorDetail = when {
-                        (target == TestTargetProvider.GEMMA_4 || target == TestTargetProvider.BYOK) && !isKeySet -> {
+                        target == TestTargetProvider.BYOK && !isKeySet -> {
                             "API Key is missing! Go to Settings -> 'Configure AI' and enter your Gemini API Key."
                         }
                         target == TestTargetProvider.LOCAL_NANO -> {
