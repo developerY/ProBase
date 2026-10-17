@@ -1,4 +1,4 @@
-import { createRemoteJWKSet, jwtVerify } from "jose";
+import { createRemoteJWKSet, jwtVerify, decodeJwt } from "jose";
 
 export interface Env {
   GEMINI_API_KEY: string;
@@ -20,6 +20,9 @@ interface ProxyRequestPayload {
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
+    const startTime = Date.now();
+    console.log(`[Proxy] Incoming ${request.method} request to ${request.url}`);
+
     // 1. Only allow POST requests
     if (request.method !== "POST") {
       return Response.json(
@@ -38,18 +41,48 @@ export default {
     }
 
     // 3. Cryptographically verify the App Check JWT against Google's public JWKS
-    const projectNumber = env.FIREBASE_PROJECT_NUMBER;
+    const rawDecoded = decodeJwt(appCheckToken);
+    const actualIssuer = (rawDecoded.iss as string) || "unknown";
+    const actualProjectNumber = actualIssuer.split("/").pop() || "";
+
+    // Extract project numbers from env (supports comma-separated list) plus your known projects
+    const envNumbers = (env.FIREBASE_PROJECT_NUMBER || "")
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    const allowedProjectNumbers = Array.from(
+      new Set([
+        ...envNumbers,
+        "20197827893",  // buildwithai-453716
+        "10328426049",  // kocolor-dev (11-digit check)
+        "315098361468", // kocolor-app
+        "960844692488", // kocolor-ai
+      ])
+    );
+
+    const allowedIssuers = allowedProjectNumbers.map(
+      (num) => `https://firebaseappcheck.googleapis.com/${num}`
+    );
+
     try {
       await jwtVerify(appCheckToken, FIREBASE_APP_CHECK_JWKS, {
-        issuer: `https://firebaseappcheck.googleapis.com/${projectNumber}`,
-        audience: `projects/${projectNumber}`,
+        issuer: allowedIssuers,
+        audience: allowedProjectNumbers.map((num) => `projects/${num}`),
         algorithms: ["RS256"],
       });
+      console.log(`[AppCheck] Verification SUCCESS for project ${actualProjectNumber}!`);
     } catch (err: any) {
+      console.error(
+        `[AppCheck] Verification FAILED for issuer ${actualIssuer}: ${err?.message}`
+      );
       return Response.json(
         {
           error: "Unauthorized: Invalid or expired App Check token",
           details: err?.message ?? "JWT verification failed",
+          tokenIssuer: actualIssuer,
+          tokenProjectNumber: actualProjectNumber,
+          allowedProjects: allowedProjectNumbers,
         },
         { status: 401 }
       );
@@ -71,15 +104,27 @@ export default {
       );
     }
 
-    // Allow only Gemma / Gemini models
     const model = payload.model || "gemma-4-26b-a4b-it";
     const temperature = payload.temperature ?? 0.2;
     const maxOutputTokens = payload.maxOutputTokens ?? 2048;
+    const isGeminiModel = model.toLowerCase().startsWith("gemini");
 
     // 5. Construct the upstream Google Generative Language API request
     const upstreamUrl = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
       model
     )}:generateContent`;
+
+    const generationConfig: Record<string, unknown> = {
+      temperature,
+      maxOutputTokens,
+    };
+
+    // Only attach thinkingConfig on Gemini models (Gemma models may reject it with HTTP 400)
+    if (isGeminiModel) {
+      generationConfig.thinkingConfig = {
+        thinkingLevel: "MINIMAL",
+      };
+    }
 
     const googleRequestBody: Record<string, unknown> = {
       contents: [
@@ -88,10 +133,7 @@ export default {
           parts: [{ text: prompt }],
         },
       ],
-      generationConfig: {
-        temperature,
-        maxOutputTokens,
-      },
+      generationConfig,
     };
 
     if (payload.systemInstruction) {
@@ -111,6 +153,11 @@ export default {
     });
 
     const responseText = await upstreamResponse.text();
+    const duration = Date.now() - startTime;
+
+    console.log(
+      `[Proxy] Upstream responded with HTTP ${upstreamResponse.status} in ${duration}ms (Response Length: ${responseText.length} chars)`
+    );
 
     return new Response(responseText, {
       status: upstreamResponse.status,

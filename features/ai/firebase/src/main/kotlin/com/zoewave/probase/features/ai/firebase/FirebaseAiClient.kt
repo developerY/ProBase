@@ -205,6 +205,21 @@ class FirebaseAiClientImpl @Inject constructor(
                msg.contains("discontinued", ignoreCase = true)
     }
 
+    private fun extractDetailedMessage(e: Throwable): String {
+        val rootCause = e.cause ?: e
+        val rawMsg = rootCause.message ?: e.message ?: e.javaClass.simpleName
+        return if (rawMsg.contains("Something unexpected happened", ignoreCase = true)) {
+            val causeMsg = e.cause?.localizedMessage ?: e.cause?.toString()
+            if (!causeMsg.isNullOrBlank()) {
+                "Firebase AI Error (${e.javaClass.simpleName}): $causeMsg"
+            } else {
+                "Firebase AI Network/Quota Error (${e.javaClass.simpleName}). Check App Check debug token or quota limits."
+            }
+        } else {
+            "${e.javaClass.simpleName}: $rawMsg"
+        }
+    }
+
     private suspend fun <T> executeWithRetry(
         actionName: String,
         initialModelName: String,
@@ -222,17 +237,17 @@ class FirebaseAiClientImpl @Inject constructor(
                     return block(model)
                 } catch (e: Exception) {
                     lastException = e
-                    val msg = e.message ?: ""
+                    val detailedMsg = extractDetailedMessage(e)
 
                     // 0. App Check / Rate Limit -> Immediately Abort Retries
                     if (isAppCheckOrRateLimitError(e)) {
-                        Log.e("FirebaseAiClient", "[$actionName] App Check validation or rate limit error on '$model': $msg. Aborting fallbacks to prevent lockout.")
-                        throw e
+                        Log.e("FirebaseAiClient", "[$actionName] App Check validation or rate limit error on '$model': $detailedMsg. Aborting fallbacks to prevent lockout.")
+                        throw IllegalStateException(detailedMsg, e)
                     }
 
                     // 1. Deprecated Model Error -> Immediately switch to next fallback model
                     if (isDeprecatedModelError(e)) {
-                        Log.w("FirebaseAiClient", "[$actionName] Model '$model' is retired/unavailable ($msg). Immediately falling over to next model.")
+                        Log.w("FirebaseAiClient", "[$actionName] Model '$model' is retired/unavailable ($detailedMsg). Immediately falling over to next model.")
                         break
                     }
 
@@ -242,7 +257,7 @@ class FirebaseAiClientImpl @Inject constructor(
                         val totalDelay = baseDelayMs + jitter
                         Log.w(
                             "FirebaseAiClient",
-                            "[$actionName] High demand / capacity error on model '$model' (Attempt $attempt/$maxAttemptsPerModel): $msg. Retrying in ${totalDelay}ms..."
+                            "[$actionName] High demand / capacity error on model '$model' (Attempt $attempt/$maxAttemptsPerModel): $detailedMsg. Retrying in ${totalDelay}ms..."
                         )
                         delay(totalDelay)
                         baseDelayMs *= 2 // Exponential backoff: 1s -> 2s -> 4s
@@ -250,27 +265,18 @@ class FirebaseAiClientImpl @Inject constructor(
                     }
 
                     // Non-retryable error or exhausted attempts for this model
-                    Log.w("FirebaseAiClient", "[$actionName] Attempt $attempt/$maxAttemptsPerModel on model '$model' failed: $msg")
+                    Log.w("FirebaseAiClient", "[$actionName] Attempt $attempt/$maxAttemptsPerModel on model '$model' failed: $detailedMsg")
                     break
                 }
             }
         }
 
-        val finalException = lastException ?: IllegalStateException("AI execution failed across all models and retries.")
-        val msg = finalException.message ?: ""
+        val rawException = lastException ?: IllegalStateException("AI execution failed across all models and retries.")
+        val detailedStr = extractDetailedMessage(rawException)
 
-        if (msg.contains("App Check", ignoreCase = true) || msg.contains("invalid", ignoreCase = true) || msg.contains("403")) {
-            Log.e(
-                "FirebaseAiClient",
-                "CRITICAL: Firebase App Check token is invalid or unverified ($msg). " +
-                "ACTION REQUIRED: Copy the 'DebugAppCheckProvider' token from Logcat and add it to the Firebase Console under App Check -> Apps -> Manage Debug Tokens.",
-                finalException
-            )
-        } else {
-            Log.e("FirebaseAiClient", "FATAL: AI execution exhausted all retries and model fallbacks for $actionName", finalException)
-        }
+        Log.e("FirebaseAiClient", "FATAL: AI execution exhausted all retries and model fallbacks for $actionName: $detailedStr", rawException)
 
-        throw finalException
+        throw IllegalStateException(detailedStr, rawException)
     }
 
     override suspend fun countTokens(prompt: String): Int {
