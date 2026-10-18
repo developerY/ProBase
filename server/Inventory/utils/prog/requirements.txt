@@ -1,0 +1,5 @@
+google-genai==0.3.0
+pydantic==2.9.2
+colormath==3.0.0
+zstandard==0.23.0
+ed25519==1.5
