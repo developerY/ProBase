@@ -68,8 +68,8 @@ graph TD
 
 ### Phase 6 & 7: Deterministic Recompilation & Signature (.kpkg generation)
 **Goal:** Prepare reproducible, secure data for atomic CDN deployment.
-1. **Deterministic Serialization:** Read all approved `.meta.json` records, sort them deterministically by stable `itemId`, and serialize them using a documented encoding policy (e.g., minified UTF-8, canonical key ordering).
-2. **Zstandard Compression:** Execute `zstd -19 --ultra` (benchmarked for compatibility) to compress the serialized array into a `.kpkg` binary payload.
+1. **Deterministic Serialization:** Read all approved `.meta.json` records, sort them deterministically by stable `itemId`, and serialize them using a documented encoding policy (e.g., RFC 8785 JSON Canonicalization Scheme).
+2. **Zstandard Compression:** Execute `zstd -19 --ultra` (benchmarked for compatibility, ensuring the resulting payload works with the Android client's decompression library, especially verifying ELF alignment and 16 KB page-size compatibility for prebuilt native libraries) to compress the serialized array into a `.kpkg` binary payload.
 3. **Hashing & Signing Contract:**
    * Compute the SHA-256 digest of the *exact compressed bytes*.
    * Sign the package digest and associated version metadata using Ed25519 (separating development keys like `atelier-dev-01` from securely held production keys).
@@ -84,6 +84,7 @@ The canonical format separates shared metadata from domain-specific fields, expl
 
 ```json
 {
+  "domain": "WARDROBE",
   "CommonMetadata": {
     "itemId": "kc-active-805",
     "name": "Arcadia Blue Track Jacket",
@@ -109,7 +110,8 @@ The canonical format separates shared metadata from domain-specific fields, expl
       "bStar": -27.62,
       "cStar": 29.94,
       "hDeg": 292.7,
-      "colorAlgorithmVersion": "1.0.0"
+      "colorAlgorithmVersion": "1.0.0",
+      "colorClassificationRuleVersion": "1.0.0"
     },
     "material": {
       "composition": [
@@ -149,7 +151,7 @@ The canonical format separates shared metadata from domain-specific fields, expl
         "provenance": "RULE_DERIVED"
       },
       "breathability": {
-        "value": "MEDIUM",
+        "value": null,
         "provenance": "UNKNOWN"
       },
       "insulation": {
@@ -157,7 +159,8 @@ The canonical format separates shared metadata from domain-specific fields, expl
         "provenance": "RULE_DERIVED"
       },
       "features": ["RIBBED_CUFFS", "ZIP_POCKETS", "FULL_ZIP"],
-      "derivationMethod": "GARMENT_CONSTRUCTION"
+      "derivationMethod": "GARMENT_CONSTRUCTION",
+      "ruleVersion": "thermal-rules-1"
     },
     "layeringRole": {
       "primary": "OUTER_LAYER",
@@ -174,6 +177,34 @@ The canonical format separates shared metadata from domain-specific fields, expl
     },
     "activities": {
       "values": ["EXERCISE", "WALKING", "CYCLING", "LOUNGE"],
+      "provenance": "LLM_SUGGESTED"
+    }
+  }
+}
+
+// Example for the alternative domain
+{
+  "domain": "COSMETICS",
+  "CommonMetadata": {
+    "itemId": "kc-primer-901",
+    "name": "Optical Blur Pore Primer",
+    "source": "INTERNAL",
+    "commercial": { ... },
+    "color": { ... },
+    "material": { ... },
+    "metadataVersion": 1,
+    "ruleVersion": "1.0.0"
+  },
+  "CosmeticsMetadata": {
+    "cosmeticCategory": "PREP",
+    "applicationRole": "PRIMER",
+    "shade": "Translucent Cloud",
+    "finish": {
+      "value": "MATTE",
+      "provenance": "LLM_SUGGESTED"
+    },
+    "formulationAttributes": {
+      "values": ["SILICONE_FREE", "BLURRING"],
       "provenance": "LLM_SUGGESTED"
     }
   }
