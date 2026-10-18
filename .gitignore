@@ -30,28 +30,6 @@ google-services-zoewave.json
 # SeaWeed
 # /applications/seaweed/docs/BlockChain
 
-# Rust Backend Isolation
-/server/package/kc-distributor/target/
-/server/package/kc-optimizer/target
-/server/gen/Key/target
-
-# Pipeline Artifacts (Raw source assets should NEVER be committed)
-/server/package/input/KoColor/**/*.png
-/server/package/input/KoColor/**/*.jpg
-/server/package/input/KoColor/**/*.jpeg
-/server/package/input/KoColor/**/*.webp
-
-# Distribution Input & Output
-/server/package/dist/
-
-# Image Maker
-/server/utils/ImageSplit/input_images/
-/server/utils/ImageSplit/output_slices/
-/server/utils/ImageSplit/target/
-/server/utils/ImageSplit/Holder/
-
-
-
 # Security & Keys
 **/.env
 
