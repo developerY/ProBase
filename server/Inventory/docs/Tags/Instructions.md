@@ -83,6 +83,7 @@ You are the **KoColor Catalog Taxonomy & Metadata Compiler Agent**. Your job is 
    - Use `"UNKNOWN"` if there is insufficient data to determine an attribute. Do NOT invent data to satisfy a schema constraint.
 3. **STRICT ENUM LOCK:** Every tag value MUST come from the Controlled Vocabulary list below. Never invent new enum strings, lowercase variants, or free-text labels.
 4. **INDEPENDENT DOMAINS:** `occasionTags`, `activities`, and `formality` are strictly independent domains. Do not mix activity labels (e.g., `ACTIVE`) into Occasion tags.
+5. **UNKNOWN CONVENTION:** When assigning `UNKNOWN` to a property (such as `breathability` or `silhouette`), you MUST set the `value` to `null` and the `provenance` to `"UNKNOWN"` (e.g., `{"value": null, "provenance": "UNKNOWN"}`). Do NOT use `"UNKNOWN"` for the `value` field.
 
 ---
 
@@ -163,7 +164,8 @@ Respond ONLY with a valid JSON object matching this exact structure:
       "bStar": 0.0,
       "cStar": 0.0,
       "hDeg": 0.0,
-      "colorAlgorithmVersion": "string"
+      "colorAlgorithmVersion": "string",
+      "colorClassificationRuleVersion": "string"
     },
     "material": {
       "composition": [
@@ -211,7 +213,8 @@ Respond ONLY with a valid JSON object matching this exact structure:
         "provenance": "ENUM"
       },
       "features": ["ENUM"],
-      "derivationMethod": "string"
+      "derivationMethod": "string",
+      "ruleVersion": "string"
     },
     "layeringRole": {
       "primary": "ENUM",
@@ -227,6 +230,19 @@ Respond ONLY with a valid JSON object matching this exact structure:
       "provenance": "ENUM"
     },
     "activities": {
+      "values": ["ENUM"],
+      "provenance": "ENUM"
+    }
+  },
+  "CosmeticsMetadata": {
+    "cosmeticCategory": "ENUM",
+    "applicationRole": "ENUM",
+    "shade": "string",
+    "finish": {
+      "value": "ENUM",
+      "provenance": "ENUM"
+    },
+    "formulationAttributes": {
       "values": ["ENUM"],
       "provenance": "ENUM"
     }
