@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
-import com.google.firebase.FirebaseApp
 import com.google.firebase.appcheck.FirebaseAppCheck
 import com.google.firebase.auth.FirebaseAuth
 import com.zoewave.probase.core.data.repository.AiConfigurationSettings
@@ -41,7 +40,7 @@ class GemmaRestFallbackProvider @Inject constructor(
 ) : AiProvider {
 
     companion object {
-        private const val DEFAULT_PROXY_URL = "https://us-central1-buildwithai-453716.cloudfunctions.net/gemma4Proxy"
+        private const val DEFAULT_PROXY_URL = "https://kocolor-gemma-proxy.biologica.workers.dev/"
     }
 
     private val httpClient = OkHttpClient.Builder()
@@ -72,15 +71,11 @@ class GemmaRestFallbackProvider @Inject constructor(
     }
 
     private fun resolveGemmaApiKey(): String {
-        val userKey = aiSettings.getGeminiApiKey()
-        if (!userKey.isNullOrBlank()) return userKey
-        return runCatching {
-            FirebaseApp.getInstance().options.apiKey
-        }.getOrNull().orEmpty()
+        return aiSettings.getGeminiApiKey() ?: "PROXY_ACTIVE_NO_LOCAL_KEY"
     }
 
     override suspend fun isAvailable(): Boolean {
-        return true
+        return resolveGemmaApiKey().isNotBlank()
     }
 
     override suspend fun countTokens(input: AiInput): Int {
@@ -169,31 +164,30 @@ class GemmaRestFallbackProvider @Inject constructor(
                 requestBuilder.addHeader("Authorization", "Bearer $idToken")
             }
 
+            Log.d("Gemma4Rest", "Executing Keyless Proxy Request to $DEFAULT_PROXY_URL (Model=$modelName)")
+            Log.d("Gemma4Rest", "Security Headers: AppCheck=${appCheckToken.isNotBlank()} (${appCheckToken.take(12)}...), AuthToken=${idToken.isNotBlank()}")
+
             val request = requestBuilder
                 .post(requestJson.toRequestBody("application/json".toMediaType()))
                 .build()
 
+            val startTime = System.currentTimeMillis()
             httpClient.newCall(request).execute().use { response ->
+                val duration = System.currentTimeMillis() - startTime
                 val body = response.body?.string().orEmpty()
+
+                Log.d("Gemma4Rest", "Proxy Response HTTP ${response.code} in ${duration}ms (Length: ${body.length} chars)")
+
                 if (!response.isSuccessful) {
-                    Log.w("Gemma4Rest", "Proxy unavailable (${response.code}). Falling back to Direct REST API with project key.")
-                    val firebaseKey = resolveGemmaApiKey()
-                    if (firebaseKey.isNotBlank()) {
-                        return executeDirectApi(firebaseKey, modelName, promptStr, temperatureOverride)
-                    }
+                    Log.e("Gemma4Rest", "Proxy Request Failed (${response.code}): $body")
                     return Result.failure(IllegalStateException("Proxy Failed (${response.code}): $body"))
                 }
 
                 parseGemmaResponse(body)
             }
         } catch (e: Exception) {
-            Log.w("Gemma4Rest", "Proxy Exception, attempting direct REST fallback: ${e.message}")
-            val firebaseKey = resolveGemmaApiKey()
-            if (firebaseKey.isNotBlank()) {
-                executeDirectApi(firebaseKey, modelName, promptStr, temperatureOverride)
-            } else {
-                Result.failure(e)
-            }
+            Log.e("Gemma4Rest", "Proxy Exception: ${e.message}", e)
+            Result.failure(e)
         }
     }
 
@@ -273,17 +267,39 @@ class GemmaRestFallbackProvider @Inject constructor(
             ?.get("content")?.jsonObject
             ?.get("parts")?.jsonArray
 
-        val rawText = parts?.lastOrNull()?.jsonObject?.get("text")?.jsonPrimitive?.contentOrNull
-            ?: throw IllegalStateException("Empty response from Gemma 4 REST API")
+        if (parts == null || parts.isEmpty()) {
+            return Result.failure(IllegalStateException("Empty response from Gemma 4 REST API"))
+        }
 
-        val cleanedText = rawText
-            .substringAfter("```json")
-            .substringAfter("```")
-            .substringBeforeLast("```")
+        // 1. Collect ONLY non-thought parts (skip internal reasoning if sent back)
+        val nonThoughtText = buildString {
+            for (i in 0 until parts.size) {
+                val partObj = parts[i].jsonObject
+                val isThought = partObj["thought"]?.jsonPrimitive?.contentOrNull?.toBoolean() ?: false
+                if (!isThought) {
+                    append(partObj["text"]?.jsonPrimitive?.contentOrNull ?: "")
+                }
+            }
+        }.trim()
+
+        // 2. Strip ```json ... ``` markdown fences if present and isolate the JSON object '{ ... }'
+        val cleaned = nonThoughtText
+            .removePrefix("```json")
+            .removePrefix("```")
+            .removeSuffix("```")
             .trim()
 
-        Log.d("Gemma4Rest", "^^^ RESPONSE FROM GEMMA 4:\n$cleanedText")
-        return Result.success(cleanedText)
+        val firstBrace = cleaned.indexOf('{')
+        val lastBrace = cleaned.lastIndexOf('}')
+        
+        val finalJson = if (firstBrace != -1 && lastBrace > firstBrace) {
+            cleaned.substring(firstBrace, lastBrace + 1)
+        } else {
+            cleaned
+        }
+
+        Log.d("Gemma4Rest", "^^^ RESPONSE FROM GEMMA 4:\n$finalJson")
+        return Result.success(finalJson)
     }
 
     private fun getSignatureSha1(): String {
