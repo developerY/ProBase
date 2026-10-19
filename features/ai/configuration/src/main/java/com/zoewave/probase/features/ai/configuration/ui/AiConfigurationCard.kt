@@ -126,10 +126,11 @@ fun AiConfigurationCardContent(
 ) {
     var editingKey by remember { mutableStateOf("") }
     var showKey by remember { mutableStateOf(false) }
-    var isModelDropdownExpanded by remember { mutableStateOf(false) }
     var isPrimaryEngineDropdownExpanded by remember { mutableStateOf(false) }
+    var isModelDropdownExpanded by remember { mutableStateOf(false) }
 
     val selectedPrimaryAi = when {
+        uiState.useLocalAi -> "On-Device Local AI (Gemini Nano)"
         uiState.useByokKey -> "Bring Your Own Key (BYOK)"
         uiState.useFirebaseVertexAi -> "Firebase AI Logic (Cloud)"
         else -> "Gemma 4 Cloud (Free Tier) - Default"
@@ -138,7 +139,8 @@ fun AiConfigurationCardContent(
     val primaryAiOptions = listOf(
         "Gemma 4 Cloud (Free Tier) - Default",
         "Firebase AI Logic (Cloud)",
-        "Bring Your Own Key (BYOK)"
+        "Bring Your Own Key (BYOK)",
+        "On-Device Local AI (Gemini Nano)"
     )
 
     Card(
@@ -161,7 +163,7 @@ fun AiConfigurationCardContent(
                 Column(modifier = Modifier.weight(1f)) {
                     Text(text = title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Color.Black)
                     val isStage1Active = uiState.isApiKeySet && uiState.useByokKey
-                    val isStage2Active = uiState.isLocalAiAvailable
+                    val isStage2Active = uiState.useLocalAi && uiState.isLocalAiAvailable
                     val isStage3Active = uiState.useFirebaseVertexAi
                     val isStage4Active = true // Authenticated automatically via Firebase project key
 
@@ -224,16 +226,19 @@ fun AiConfigurationCardContent(
                             onDismissRequest = { isPrimaryEngineDropdownExpanded = false }
                         ) {
                             primaryAiOptions.forEach { option ->
+                                val isUnavailableLocalAi = option == "On-Device Local AI (Gemini Nano)" && !uiState.isLocalAiAvailable
                                 DropdownMenuItem(
                                     text = {
                                         Text(
                                             text = option,
-                                            fontWeight = if (option == selectedPrimaryAi) FontWeight.Bold else FontWeight.Normal
+                                            fontWeight = if (option == selectedPrimaryAi) FontWeight.Bold else FontWeight.Normal,
+                                            color = if (isUnavailableLocalAi) Color.Gray else Color.Unspecified
                                         )
                                     },
                                     onClick = {
                                         when (option) {
                                             "Gemma 4 Cloud (Free Tier) - Default" -> {
+                                                onEvent(AiConfigurationEvent.OnUseLocalAiToggled(false))
                                                 onEvent(AiConfigurationEvent.OnUseByokKeyToggled(false))
                                                 onEvent(AiConfigurationEvent.OnUseFirebaseVertexAiToggled(false))
                                             }
@@ -243,6 +248,9 @@ fun AiConfigurationCardContent(
                                             "Bring Your Own Key (BYOK)" -> {
                                                 onEvent(AiConfigurationEvent.OnUseByokKeyToggled(true))
                                             }
+                                            "On-Device Local AI (Gemini Nano)" -> {
+                                                onEvent(AiConfigurationEvent.OnUseLocalAiToggled(true))
+                                            }
                                         }
                                         isPrimaryEngineDropdownExpanded = false
                                     }
@@ -251,11 +259,64 @@ fun AiConfigurationCardContent(
                         }
                     }
 
-                    Text(
-                        text = "Select your preferred cloud AI provider. (Fallback routing rules remain unchanged).",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(top = 4.dp, bottom = 16.dp)
+                    val infoBoxText = when (selectedPrimaryAi) {
+                        "Bring Your Own Key (BYOK)" -> "Execute using your personal Gemini API key."
+                        "Firebase AI Logic (Cloud)" -> "Route requests through a secure Firebase proxy. Protects your quota and ensures data privacy via App Check."
+                        "On-Device Local AI (Gemini Nano)" -> {
+                            if (uiState.isLocalAiAvailable) {
+                                "Gemini Nano executes deterministically before reaching out to cloud providers if hardware is available."
+                            } else {
+                                "Hardware unsupported. No AI will be used; fallback mathematical deterministic engine will be used for predictions."
+                            }
+                        }
+                        else -> "Hosted MoE model (gemma-4-26b-a4b-it) via keyless App Check proxy. Zero client-side key exposure."
+                    }
+
+                    val badgeStatus = when (selectedPrimaryAi) {
+                        "On-Device Local AI (Gemini Nano)" -> {
+                            if (uiState.isLocalAiAvailable) Pair("NPU Active", Color(0xFF4CAF50)) else Pair("Unsupported", Color.Gray)
+                        }
+                        "Gemma 4 Cloud (Free Tier) - Default" -> Pair("Ready (Keyless)", Color(0xFF4CAF50))
+                        else -> null
+                    }
+
+                    ListItem(
+                        colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = Color(0xFFFBF8F5)),
+                        modifier = Modifier.padding(top = 4.dp, bottom = 16.dp),
+                        headlineContent = {
+                            Text(
+                                text = selectedPrimaryAi,
+                                fontWeight = FontWeight.SemiBold,
+                                color = if (selectedPrimaryAi == "On-Device Local AI (Gemini Nano)" && !uiState.isLocalAiAvailable) Color.Gray else Color.Black
+                            )
+                        },
+                        supportingContent = {
+                            Text(
+                                text = infoBoxText,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = if (selectedPrimaryAi == "On-Device Local AI (Gemini Nano)" && !uiState.isLocalAiAvailable) Color.Gray else MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        },
+                        trailingContent = {
+                            if (badgeStatus != null) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(10.dp)
+                                            .background(color = badgeStatus.second, shape = CircleShape)
+                                    )
+                                    Text(
+                                        text = badgeStatus.first,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = FontWeight.Bold,
+                                        color = badgeStatus.second
+                                    )
+                                }
+                            }
+                        }
                     )
 
                     AnimatedVisibility(visible = uiState.useByokKey) {
@@ -470,45 +531,6 @@ fun AiConfigurationCardContent(
                             Spacer(modifier = Modifier.height(16.dp))
                         }
                     }
-
-                    // On-Device Local AI (Hardware Capability Badge)
-                    ListItem(
-                        colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = Color(0xFFFBF8F5)),
-                        headlineContent = { 
-                            Text(
-                                stringResource(R.string.features_ai_configuration_stage_2_title), 
-                                fontWeight = FontWeight.SemiBold,
-                                color = if (uiState.isLocalAiAvailable) Color.Black else Color.Gray
-                            ) 
-                        },
-                        supportingContent = { 
-                            Text(
-                                "Gemini Nano executes deterministically before reaching out to cloud providers if hardware is available.",
-                                color = if (uiState.isLocalAiAvailable) MaterialTheme.colorScheme.onSurfaceVariant else Color.Gray
-                            ) 
-                        },
-                        trailingContent = {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(10.dp)
-                                        .background(
-                                            color = if (uiState.isLocalAiAvailable) Color(0xFF4CAF50) else Color.LightGray,
-                                            shape = CircleShape
-                                        )
-                                )
-                                Text(
-                                    text = if (uiState.isLocalAiAvailable) stringResource(R.string.features_ai_configuration_npu_active) else stringResource(R.string.features_ai_configuration_npu_unsupported),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    fontWeight = FontWeight.Bold,
-                                    color = if (uiState.isLocalAiAvailable) Color(0xFF4CAF50) else Color.Gray
-                                )
-                            }
-                        }
-                    )
 
                     // Debug AI entry point
                     Row(
