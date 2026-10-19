@@ -261,7 +261,7 @@ fun AiConfigurationCardContent(
 
                     val infoBoxText = when (selectedPrimaryAi) {
                         "Bring Your Own Key (BYOK)" -> "Execute using your personal Gemini API key."
-                        "Firebase AI Logic (Cloud)" -> "Route requests through a secure Firebase proxy. Protects your quota and ensures data privacy via App Check."
+                        "Firebase AI Logic (Cloud)" -> "Route requests through a secure Firebase proxy. Protects your quota and ensures data privacy via App Check.\n\nActive Firebase Models:\n• gemini-3.8-flash (Primary)\n• gemini-2.5-flash (Secondary)\n• gemini-flash-lite-latest (Fast Fallback)"
                         "On-Device Local AI (Gemini Nano)" -> {
                             if (uiState.isLocalAiAvailable) {
                                 "Gemini Nano executes deterministically before reaching out to cloud providers if hardware is available."
@@ -276,6 +276,7 @@ fun AiConfigurationCardContent(
                         "On-Device Local AI (Gemini Nano)" -> {
                             if (uiState.isLocalAiAvailable) Pair("NPU Active", Color(0xFF4CAF50)) else Pair("Unsupported", Color.Gray)
                         }
+                        "Firebase AI Logic (Cloud)" -> Pair("Active (Cloud)", Color(0xFF4CAF50))
                         "Gemma 4 Cloud (Free Tier) - Default" -> Pair("Ready (Keyless)", Color(0xFF4CAF50))
                         else -> null
                     }
