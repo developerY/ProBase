@@ -90,6 +90,7 @@ sealed class HomeEvent {
     data class LogHydration(val volumeLiters: Double) : HomeEvent()
     data object RefreshWeather : HomeEvent()
     data object ToggleStoreExpansion : HomeEvent()
+    data class DeleteSuggestion(val id: Long) : HomeEvent()
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -397,6 +398,11 @@ class HomeViewModel @Inject constructor(
             }
             HomeEvent.ToggleStoreExpansion -> {
                 _isStoreExpanded.value = !_isStoreExpanded.value
+            }
+            is HomeEvent.DeleteSuggestion -> {
+                viewModelScope.launch {
+                    fashionRepository.deleteSuggestion(event.id)
+                }
             }
         }
     }
