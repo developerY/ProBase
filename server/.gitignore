@@ -40,3 +40,4 @@ Inventory/utils/ImageSplit/Holder/
 # Node & Proxy Modules
 # ==========================================
 Gemma/kocolor-gemma-proxy/node_modules/
+/Inventory/utils/prog_rs/.wrangler/

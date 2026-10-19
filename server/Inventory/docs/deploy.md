@@ -1,94 +1,78 @@
-# KoColor CDN Atomic Deployment Runbook
+# KoColor Free-Forever CDN Deployment Runbook (Cloudflare Pages)
 
-This runbook outlines the atomic deployment process for pushing compiled `.kpkg` distribution bundles and signed `manifest.json` envelopes to Cloudflare R2 / Custom Domain CDN (`cdn.kocolor.com`).
-
----
-
-## Critical Requirement: Atomic Deployment Order
-
-To prevent Android clients from experiencing SHA-256 / Ed25519 signature verification crashes:
-1. **`.kpkg` Packages MUST be uploaded first.**
-2. **Edge Cache for `.kpkg` files MUST be invalidated.**
-3. **`manifest.json` MUST be uploaded last.**
-
-If `manifest.json` is updated before the new `.kpkg` binaries are live on the CDN edge, mobile clients will fetch new hashes from the manifest but download stale `.kpkg` binaries from the CDN, causing a security checksum mismatch.
+This runbook documents the Cloudflare Pages Direct Upload workflow for publishing `.kpkg` distribution bundles and signed `manifest.json` envelopes to Cloudflare's global edge network (`kocolor-cdn.pages.dev` or custom domain `cdn.kocolor.com`).
 
 ---
 
-## Step-by-Step Deployment Execution
+## Why Cloudflare Pages?
 
-### Step 1: Upload `.kpkg` Binary Packages First
+* **100% Free Forever:** Static hosting on Cloudflare Pages provides unmetered bandwidth and requests without R2 billing or credit card requirements.
+* **Native Atomic Deployments:** `wrangler pages deploy` uploads all files into an immutable snapshot and flips the live production pointer atomically once all files are verified.
+* **ETag Revalidation via `_headers`:** Both `manifest.json` and `*.kpkg` files use `Cache-Control: public, max-age=0, must-revalidate` so OkHttp on Android revalidates ETags and never serves cached old binary files after a re-deployment.
 
-Upload all compiled `.kpkg` binary bundles from `server/Inventory/package/dist/` to your Cloudflare R2 bucket:
+---
+
+## Step 1: One-Time Project Creation
+
+Run this once in your terminal to create your free Cloudflare Pages project:
 
 ```bash
-# Upload fashion complete bundle
-npx wrangler r2 object put kocolor-cdn/v1/com.kocolor.pack.fashion.complete.kpkg \
-  --file server/Inventory/package/dist/com.kocolor.pack.fashion.complete.kpkg \
-  --content-type "application/octet-stream"
-
-# Upload cosmetics complete bundle
-npx wrangler r2 object put kocolor-cdn/v1/com.kocolor.pack.cosmetics.complete.kpkg \
-  --file server/Inventory/package/dist/com.kocolor.pack.cosmetics.complete.kpkg \
-  --content-type "application/octet-stream"
+npx wrangler pages project create kocolor-cdn --production-branch main
 ```
 
 ---
 
-### Step 2: Purge CDN Edge Cache for `.kpkg` Files
+## Step 2: Atomic Deployment Execution
 
-Invalidate any cached edge responses to ensure clients fetch the newly uploaded binaries immediately:
+To deploy your catalog from your terminal:
 
 ```bash
-# Using Cloudflare API to purge specific URLs
-curl -X POST "https://api.cloudflare.com/client/v4/zones/${CLOUDFLARE_ZONE_ID}/purge_cache" \
-  -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
-  -H "Content-Type: application/json" \
-  --data '{
-    "files": [
-      "https://cdn.kocolor.com/v1/com.kocolor.pack.fashion.complete.kpkg",
-      "https://cdn.kocolor.com/v1/com.kocolor.pack.cosmetics.complete.kpkg"
-    ]
-  }'
+cd server/Inventory/utils/prog_rs
+./deploy_cdn.sh
 ```
+
+*(Note: The script defaults to your account ID `8e54bb926df3927e951a97c58ae19a04` so it executes seamlessly without prompting).*
 
 ---
 
-### Step 3: Upload Signed `manifest.json` Last
+## What `deploy_cdn.sh` Does Automatically:
 
-Once the binary packages are live and purged at the edge, upload the signed master manifest envelope:
+1. **Creates Isolated Staging (`mktemp -d`)**:
+   Constructs a clean, isolated directory matching the `/v1/*` URL structure.
+2. **Generates ETag-Safe `_headers` Rules**:
+   ```http
+   /v1/manifest.json
+     Content-Type: application/json
+     Cache-Control: public, max-age=0, must-revalidate
 
-```bash
-npx wrangler r2 object put kocolor-cdn/v1/manifest.json \
-  --file server/Inventory/package/dist/manifest.json \
-  --content-type "application/json"
-```
-
-And purge the edge cache for `manifest.json`:
-
-```bash
-curl -X POST "https://api.cloudflare.com/client/v4/zones/${CLOUDFLARE_ZONE_ID}/purge_cache" \
-  -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
-  -H "Content-Type: application/json" \
-  --data '{"files": ["https://cdn.kocolor.com/v1/manifest.json"]}'
-```
+   /v1/*.kpkg
+     Content-Type: application/octet-stream
+     Cache-Control: public, max-age=0, must-revalidate
+   ```
+3. **Deploys Atomically**:
+   Pushes the staged snapshot to Cloudflare Pages production:
+   ```bash
+   npx -y wrangler pages deploy "${STAGE_DIR}" \
+     --project-name "kocolor-cdn" \
+     --branch main \
+     --commit-dirty=true
+   ```
 
 ---
 
 ## Verification & Sanity Checks
 
-1. **Verify Manifest Payload & Signature:**
+1. **Test Live Manifest Endpoint**:
    ```bash
-   curl -s https://cdn.kocolor.com/v1/manifest.json | jq .
+   curl -s https://kocolor-cdn.pages.dev/v1/manifest.json | jq .
    ```
-   Confirm that `signature`, `key_id`, and `packs` array contain the updated SHA-256 hashes and compressed byte counts.
+   Confirm `manifest_version: 1`, `signature`, and valid pack hashes.
 
-2. **Verify `.kpkg` Download Headers:**
+2. **Verify Headers & ETag Revalidation**:
    ```bash
-   curl -I https://cdn.kocolor.com/v1/com.kocolor.pack.fashion.complete.kpkg
+   curl -I https://kocolor-cdn.pages.dev/v1/com.kocolor.pack.fashion.complete.kpkg
    ```
-   Confirm `HTTP/2 200` and `Content-Type: application/octet-stream`.
+   Confirm `cache-control: public, max-age=0, must-revalidate`.
 
-3. **Android Client Cold-Start Verification:**
-   - Launch the Android app (`KoColor`) on a test device or emulator.
-   - Verify in Logcat that `fetchVerifiedPackage()` successfully validates the `ed25519` signature against `key_id: "atelier-dev-01"`, decompresses `zstd`, and imports catalog items into Room DB without error.
+3. **Android Client Integration**:
+   Your Android app fetches `https://kocolor-cdn.pages.dev/v1/manifest.json`, validates the `ed25519` signature against `key_id: "atelier-dev-01"`, decompresses `zstd`, and imports items into Room DB seamlessly.
