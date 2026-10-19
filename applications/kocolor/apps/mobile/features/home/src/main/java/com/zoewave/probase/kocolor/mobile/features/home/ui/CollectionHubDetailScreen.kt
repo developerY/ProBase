@@ -41,6 +41,9 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Checkroom
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.DeleteOutline
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Palette
@@ -272,10 +275,11 @@ fun CollectionHubOrig(
                         )
                     }
 
-                    items(uiState.savedSuggestions) { analysis ->
+                    items(uiState.savedSuggestions, key = { it.id }) { analysis ->
                         CuratedCollectionCard(
                             uiState = CuratedCollectionUiState(analysis),
                             onEvent = { navTo(KoColorRoute.CollectionDetail(analysis.id)) },
+                            onDeleteClick = { onEvent(HomeEvent.DeleteSuggestion(analysis.id)) },
                             navTo = navTo
                         )
                     }
@@ -351,6 +355,7 @@ private fun CuratedCollectionCard(
     uiState: CuratedCollectionUiState,
     modifier: Modifier = Modifier,
     onEvent: () -> Unit,
+    onDeleteClick: (() -> Unit)? = null,
     navTo: (KoColorRoute) -> Unit
 ) {
     val analysis = uiState.analysis
@@ -372,25 +377,65 @@ private fun CuratedCollectionCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = dateStr,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = Color.Gray.copy(alpha = 0.6f)
-                )
-
-                // Seasonal Badge
-                Surface(
-                    color = Color(0xFFF3E5F5), // Light Lavender
-                    shape = RoundedCornerShape(4.dp)
-                ) {
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = analysis.advice.seasonalType.name.uppercase(),
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Black,
-                        color = Color(0xFF745E7A),
-                        letterSpacing = 1.sp
+                        text = dateStr,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = Color.Gray.copy(alpha = 0.6f)
                     )
+                    Spacer(Modifier.height(4.dp))
+                    Surface(
+                        color = Color(0xFFF3E5F5), // Light Lavender
+                        shape = RoundedCornerShape(4.dp)
+                    ) {
+                        Text(
+                            text = analysis.advice.seasonalType.name.uppercase(),
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Black,
+                            color = Color(0xFF745E7A),
+                            letterSpacing = 1.sp
+                        )
+                    }
+                }
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    androidx.compose.material3.IconButton(
+                        onClick = { /* Duplicate no-op */ },
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        androidx.compose.material3.Icon(
+                            imageVector = androidx.compose.material.icons.Icons.Default.ContentCopy,
+                            contentDescription = "Duplicate",
+                            tint = Color.Gray,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                    androidx.compose.material3.IconButton(
+                        onClick = onEvent,
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        androidx.compose.material3.Icon(
+                            imageVector = androidx.compose.material.icons.Icons.Default.Edit,
+                            contentDescription = "Edit",
+                            tint = Color.Gray,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                    androidx.compose.material3.IconButton(
+                        onClick = { onDeleteClick?.invoke() },
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        androidx.compose.material3.Icon(
+                            imageVector = androidx.compose.material.icons.Icons.Default.DeleteOutline,
+                            contentDescription = "Delete",
+                            tint = Color.Gray,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
             }
 

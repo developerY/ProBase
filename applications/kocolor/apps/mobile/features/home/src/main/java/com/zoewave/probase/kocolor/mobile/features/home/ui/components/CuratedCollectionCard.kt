@@ -45,6 +45,7 @@ fun CuratedCollectionCard(
     uiState: CuratedCollectionUiState,
     modifier: Modifier = Modifier,
     onEvent: () -> Unit,
+    onDeleteClick: (() -> Unit)? = null,
     navTo: (KoColorRoute) -> Unit
 ) {
     val analysis = uiState.analysis
@@ -115,7 +116,7 @@ fun CuratedCollectionCard(
                         )
                     }
                     androidx.compose.material3.IconButton(
-                        onClick = { /* No-op in production until deletion implemented */ },
+                        onClick = { onDeleteClick?.invoke() },
                         modifier = Modifier.size(24.dp)
                     ) {
                         androidx.compose.material3.Icon(

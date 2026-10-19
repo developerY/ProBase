@@ -263,10 +263,11 @@ fun CollectionHubScreen(
                         )
                     }
 
-                    items(filteredSuggestions) { analysis ->
+                    items(filteredSuggestions, key = { it.id }) { analysis ->
                         CuratedCollectionCard(
                             uiState = CuratedCollectionUiState(analysis),
                             onEvent = { navTo(KoColorRoute.CollectionDetail(analysis.id)) },
+                            onDeleteClick = { onEvent(HomeEvent.DeleteSuggestion(analysis.id)) },
                             navTo = navTo
                         )
                     }
