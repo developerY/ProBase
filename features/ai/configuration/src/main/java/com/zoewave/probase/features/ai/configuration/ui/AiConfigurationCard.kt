@@ -474,8 +474,19 @@ fun AiConfigurationCardContent(
                     // On-Device Local AI (Hardware Capability Badge)
                     ListItem(
                         colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = Color(0xFFFBF8F5)),
-                        headlineContent = { Text(stringResource(R.string.features_ai_configuration_stage_2_title), fontWeight = FontWeight.SemiBold) },
-                        supportingContent = { Text("Gemini Nano executes deterministically before reaching out to cloud providers if hardware is available.") },
+                        headlineContent = { 
+                            Text(
+                                stringResource(R.string.features_ai_configuration_stage_2_title), 
+                                fontWeight = FontWeight.SemiBold,
+                                color = if (uiState.isLocalAiAvailable) Color.Black else Color.Gray
+                            ) 
+                        },
+                        supportingContent = { 
+                            Text(
+                                "Gemini Nano executes deterministically before reaching out to cloud providers if hardware is available.",
+                                color = if (uiState.isLocalAiAvailable) MaterialTheme.colorScheme.onSurfaceVariant else Color.Gray
+                            ) 
+                        },
                         trailingContent = {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
@@ -485,7 +496,7 @@ fun AiConfigurationCardContent(
                                     modifier = Modifier
                                         .size(10.dp)
                                         .background(
-                                            color = if (uiState.isLocalAiAvailable) Color(0xFF4CAF50) else Color(0xFFE53935),
+                                            color = if (uiState.isLocalAiAvailable) Color(0xFF4CAF50) else Color.LightGray,
                                             shape = CircleShape
                                         )
                                 )
@@ -493,7 +504,7 @@ fun AiConfigurationCardContent(
                                     text = if (uiState.isLocalAiAvailable) stringResource(R.string.features_ai_configuration_npu_active) else stringResource(R.string.features_ai_configuration_npu_unsupported),
                                     style = MaterialTheme.typography.labelSmall,
                                     fontWeight = FontWeight.Bold,
-                                    color = if (uiState.isLocalAiAvailable) Color(0xFF4CAF50) else Color(0xFFE53935)
+                                    color = if (uiState.isLocalAiAvailable) Color(0xFF4CAF50) else Color.Gray
                                 )
                             }
                         }
