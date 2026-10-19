@@ -9,7 +9,7 @@ set -euo pipefail
 
 DIST_DIR="${1:-"../../package/dist"}"
 PAGES_PROJECT="${CLOUDFLARE_PAGES_PROJECT:-"kocolor-cdn"}"
-PATH_PREFIX="${CLOUDFLARE_PATH_PREFIX:-"v1"}"
+PATH_PREFIX="${CLOUDFLARE_PATH_PREFIX:-"inventory/dist"}"
 
 # Set default Cloudflare Account ID (Biologica@gmail.com's Account) if not exported
 export CLOUDFLARE_ACCOUNT_ID="${CLOUDFLARE_ACCOUNT_ID:-"8e54bb926df3927e951a97c58ae19a04"}"
@@ -32,7 +32,7 @@ if ! compgen -G "${DIST_DIR}/*.kpkg" > /dev/null; then
   exit 1
 fi
 
-# 1. Prepare clean staging directory matching /v1/* URL structure
+# 1. Prepare clean staging directory matching /inventory/dist/* URL structure
 STAGE_DIR="$(mktemp -d)"
 trap 'rm -rf "${STAGE_DIR}"' EXIT
 mkdir -p "${STAGE_DIR}/${PATH_PREFIX}"

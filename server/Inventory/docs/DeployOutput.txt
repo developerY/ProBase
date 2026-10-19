@@ -1,0 +1,23 @@
+developer@Developers-MacBook-Pro-4 prog_rs % ./deploy_cdn.sh
+============================================================
+KoColor Free-Forever CDN Deployment (Cloudflare Pages)
+Dist Directory : ../../package/dist
+Pages Project  : kocolor-cdn
+URL Prefix     : /v1/
+Account ID     : 8e54bb926df3927e951a97c58ae19a04
+============================================================
+
+[Deploying] Uploading bundle snapshot to Cloudflare Pages...
+
+ ⛅️ wrangler 4.151.1
+────────────────────
+✨ Success! Uploaded 3 files (1.48 sec)
+
+✨ Uploading _headers
+🌎 Deploying...
+✨ Deployment complete! Take a peek over at https://8264923f.kocolor-cdn.pages.dev
+
+============================================================
+Deployment Complete! Live at:
+https://kocolor-cdn.pages.dev/v1/manifest.json
+============================================================
