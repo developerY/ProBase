@@ -41,6 +41,7 @@ class AiConfigurationViewModelTest {
         coEvery { settings.isAiEnabledFlow } returns flowOf(true)
         coEvery { settings.aiModelFlow } returns flowOf("gemini-3.8-flash")
         coEvery { settings.useFirebaseVertexAi } returns flowOf(false)
+        coEvery { settings.useLocalAi } returns flowOf(false)
         coEvery { localAiEngine.checkCapability() } returns NanoState.Available
 
         viewModel = AiConfigurationViewModel(settings, orchestrator, localAiEngine)

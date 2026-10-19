@@ -56,7 +56,8 @@ class AiConfigurationViewModel @Inject constructor(
         _keyTestResult,
         _isTestingModel,
         _modelTestResult,
-        _fetchedModels
+        _fetchedModels,
+        settings.useLocalAi
     ) { args: Array<Any?> ->
         AiConfigurationUiState(
             isApiKeySet = args[0] as Boolean,
@@ -69,7 +70,8 @@ class AiConfigurationViewModel @Inject constructor(
             keyTestResult = args[7] as String?,
             isTestingModel = args[8] as Boolean,
             modelTestResult = args[9] as String?,
-            availableModels = (args[10] as List<String>?) ?: if (args[0] as Boolean) listOf("gemini-2.5-flash", "gemini-2.5-pro", "gemma-4-26b-a4b-it", "gemma-4-31b-it", "gemini-1.5-flash", "gemini-1.5-pro") else emptyList()
+            availableModels = (args[10] as List<String>?) ?: if (args[0] as Boolean) listOf("gemini-2.5-flash", "gemini-2.5-pro", "gemma-4-26b-a4b-it", "gemma-4-31b-it", "gemini-1.5-flash", "gemini-1.5-pro") else emptyList(),
+            useLocalAi = args[11] as Boolean
         )
     }.stateIn(
         scope = viewModelScope,

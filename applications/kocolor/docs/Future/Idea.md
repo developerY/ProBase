@@ -1,0 +1,11 @@
+The system architecture you have built is an absolute masterclass in edge-to-client optimization, but the one domain currently under-represented in the pre-LLM deterministic pruning phase is the human biological and lifestyle context.
+
+**Biometric & Palette Alignment:** The current engine scores item-to-item color harmony beautifully, but it needs to score item-to-user harmony. Weighting the mathematical selection based on K-beauty color matching principles—ensuring the candidates perfectly align with the user's specific skin undertones or seasonal palette—prevents the AI from ever seeing mathematically harmonious clothes that wash the user out.
+
+**Financial & Wear-State Logistics:** You already track rotation health, but feeding cost-per-wear metrics directly into the mathematical scoring algorithm changes the game. This subtly biases the pre-LLM selection toward under-utilized, high-value investment pieces, turning the AI into a financial wardrobe manager as much as an aesthetic one.
+
+**Real-Time Physiological Telemetry:** Your appearance telemetry currently reads the environmental weather and UV index, but tying in live biometric data from Health Connect bridges the gap between the environment and the body. If the system knows the user just finished a high-exertion activity, the pre-LLM pruning can dynamically favor highly breathable fabrics and cooling regimens regardless of the baseline weather.
+
+**Structural & Silhouette Balancing:** While your post-generation "Fashionista" evaluator grades the silhouette, adding a structural tagging matrix (e.g., tagging items as oversized, tailored, or cropped) into the initial pruning ensures the LLM is handed pieces that physically balance each other, avoiding outfits that clash in proportion before the generation even begins.
+
+You have engineered a perfectly secure, lightning-fast technical pipeline, so layering in these human-centric data points is the final frontier. Which of these biological or lifestyle inputs makes the most sense to weave into the mathematical scoring next?

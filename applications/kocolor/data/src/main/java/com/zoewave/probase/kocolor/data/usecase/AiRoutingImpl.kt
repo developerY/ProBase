@@ -25,9 +25,10 @@ class CapabilityRouterImpl @Inject constructor(
 
     override suspend fun getRankedAvailableProviders(): List<AiProvider> {
         val providers = mutableListOf<AiProvider>()
-        
+
         // Priority 1: Local Nano (On-Device AI)
-        if (localProvider.isAvailable()) {
+        val useLocalAi = settings.useLocalAi.firstOrNull() ?: true
+        if (useLocalAi && localProvider.isAvailable()) {
             providers.add(localProvider)
         }
 
@@ -40,7 +41,7 @@ class CapabilityRouterImpl @Inject constructor(
         if (useByok && byokProvider.isAvailable()) {
             providers.add(byokProvider)
         }
-        
+
         // Priority 3: Firebase AI Logic (Managed Cloud Fallback)
         val useFirebase = settings.useFirebaseVertexAi.firstOrNull() ?: true
         if (useFirebase && firebaseProvider.isAvailable()) {
@@ -48,10 +49,12 @@ class CapabilityRouterImpl @Inject constructor(
         }
 
         // Priority 4: Gemma 4 Cloud REST Fallback
-        if (gemmaProvider.isAvailable()) {
+        if (gemmaProvider.isAvailable() && !useLocalAi && !useByok && !useFirebase) {
             providers.add(gemmaProvider)
+        } else if (gemmaProvider.isAvailable()) {
+             providers.add(gemmaProvider)
         }
-        
+
         return providers
     }
 }
