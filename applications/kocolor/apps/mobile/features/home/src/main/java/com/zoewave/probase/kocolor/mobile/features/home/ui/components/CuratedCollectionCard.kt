@@ -1,14 +1,7 @@
 package com.zoewave.probase.kocolor.mobile.features.home.ui.components
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.DeleteOutline
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Image
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,10 +13,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.DeleteOutline
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
-
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,7 +29,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -249,30 +245,31 @@ private fun parseColor(hex: String): Color {
         Color.Gray
     }
 }
+@Composable
+
 
 @androidx.compose.ui.tooling.preview.Preview(showBackground = true, name = "Curated Collection Card Preview")
-@Composable
-private fun CuratedCollectionCardPreview() {
+fun CuratedCollectionCardPreview() {
     MaterialTheme {
-        androidx.compose.foundation.layout.Box(modifier = Modifier.padding(16.dp)) {
-            val dummyAnalysis = com.zoewave.probase.core.model.ritual.SavedAnalysis(
-                id = 1L,
-                timestamp = System.currentTimeMillis(),
-                advice = com.zoewave.probase.core.model.ritual.FashionAdvice(
-                    title = "The Autumnal Neutral Capsule",
-                    summary = "Combines warm earthy tones with structured silhouettes for daytime elegance.",
-                    seasonalType = com.zoewave.probase.core.model.ritual.SeasonalType.AUTUMN,
-                    undertone = com.zoewave.probase.core.model.ritual.Undertone.WARM,
-                    makeupSuggestions = emptyList(),
-                    outfitSuggestions = emptyList(),
-                    recommendedPalette = listOf("#D4C4B7", "#2C2A29", "#7A8B76", "#C18C5D")
+        CuratedCollectionCard(
+            uiState = CuratedCollectionUiState(
+                analysis = com.zoewave.probase.core.model.ritual.SavedAnalysis(
+                    id = 1,
+                    timestamp = System.currentTimeMillis(),
+                    advice = com.zoewave.probase.core.model.ritual.FashionAdvice(
+                        title = "Sample Collection",
+                        summary = "A great look for summer.",
+                        seasonalType = com.zoewave.probase.core.model.ritual.SeasonalType.SUMMER,
+                        recommendedPalette = listOf("#FF0000", "#00FF00", "#0000FF"),
+                        outfitSuggestions = emptyList(),
+                        makeupSuggestions = emptyList(),
+                        undertone = com.zoewave.probase.core.model.ritual.Undertone.NEUTRAL
+                    ),
+                    isSavedToCollection = true
                 )
-            )
-            CuratedCollectionCard(
-                uiState = com.zoewave.probase.kocolor.mobile.features.home.ui.CuratedCollectionUiState(dummyAnalysis),
-                onEvent = {},
-                navTo = {}
-            )
-        }
+            ),
+            onEvent = {},
+            navTo = {}
+        )
     }
 }
