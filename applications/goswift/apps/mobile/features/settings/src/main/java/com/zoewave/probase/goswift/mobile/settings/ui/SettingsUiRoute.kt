@@ -6,22 +6,51 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Sensors
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Watch
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,7 +60,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.PermissionController
 import androidx.health.connect.client.permission.HealthPermission
@@ -40,6 +68,8 @@ import androidx.health.connect.client.records.HeartRateVariabilityRmssdRecord
 import androidx.health.connect.client.records.NutritionRecord
 import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.health.connect.client.records.StepsRecord
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun SettingsUiRoute(
@@ -48,6 +78,7 @@ fun SettingsUiRoute(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
 
     val healthConnectPermissions = remember {
         setOf(
@@ -55,9 +86,26 @@ fun SettingsUiRoute(
             HealthPermission.getReadPermission(HeartRateVariabilityRmssdRecord::class),
             HealthPermission.getReadPermission(HeartRateRecord::class),
             HealthPermission.getReadPermission(StepsRecord::class),
-            HealthPermission.getWritePermission(NutritionRecord::class),
-            HealthPermission.getReadPermission(NutritionRecord::class)
+            HealthPermission.getReadPermission(NutritionRecord::class),
+            HealthPermission.getWritePermission(NutritionRecord::class)
         )
+    }
+
+    fun checkHealthPermissions() {
+        if (HealthConnectClient.getSdkStatus(context) == HealthConnectClient.SDK_AVAILABLE) {
+            coroutineScope.launch {
+                try {
+                    val client = HealthConnectClient.getOrCreate(context)
+                    val granted = client.permissionController.getGrantedPermissions()
+                    val isGranted = granted.containsAll(healthConnectPermissions)
+                    viewModel.updateHealthConnectStatus(isGranted)
+                } catch (_: Exception) {
+                    viewModel.updateHealthConnectStatus(false)
+                }
+            }
+        } else {
+            viewModel.updateHealthConnectStatus(false)
+        }
     }
 
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -65,8 +113,10 @@ fun SettingsUiRoute(
     ) { grantedPermissions ->
         if (grantedPermissions.containsAll(healthConnectPermissions)) {
             Toast.makeText(context, "Health Connect Permissions Granted", Toast.LENGTH_SHORT).show()
+            viewModel.updateHealthConnectStatus(true)
         } else {
             Toast.makeText(context, "Health Connect Permissions Updated", Toast.LENGTH_SHORT).show()
+            viewModel.updateHealthConnectStatus(grantedPermissions.isNotEmpty())
         }
     }
 
@@ -85,18 +135,31 @@ fun SettingsUiRoute(
                 }
             }
             HealthConnectClient.SDK_AVAILABLE -> {
-                try {
-                    permissionLauncher.launch(healthConnectPermissions)
-                } catch (_: Exception) {
-                    val intent = Intent(HealthConnectClient.ACTION_HEALTH_CONNECT_SETTINGS)
+                coroutineScope.launch {
                     try {
-                        context.startActivity(intent)
+                        val client = HealthConnectClient.getOrCreate(context)
+                        val granted = client.permissionController.getGrantedPermissions()
+                        if (granted.containsAll(healthConnectPermissions)) {
+                            // Permissions already granted -> Open Health Connect app settings page for this app so user can manage/change permissions
+                            val intent = Intent(HealthConnectClient.ACTION_HEALTH_CONNECT_SETTINGS)
+                            try {
+                                context.startActivity(intent)
+                            } catch (_: Exception) {
+                                permissionLauncher.launch(healthConnectPermissions)
+                            }
+                        } else {
+                            permissionLauncher.launch(healthConnectPermissions)
+                        }
                     } catch (_: Exception) {
-                        Toast.makeText(context, "Unable to open Health Connect settings", Toast.LENGTH_SHORT).show()
+                        permissionLauncher.launch(healthConnectPermissions)
                     }
                 }
             }
         }
+    }
+
+    LaunchedEffect(Unit) {
+        checkHealthPermissions()
     }
 
     LaunchedEffect(uiState.toastMessage) {
@@ -427,6 +490,93 @@ fun SettingsUiScreen(
 
         // Section 3: HARDWARE & HEALTH CONNECT
         SectionHeader("HARDWARE & HEALTH CONNECT", "3 Streams Active")
+
+        // Google Health Connect Status & Permissions Card (Matching KoColor App)
+        Surface(
+            color = Color(0xFF1C2228),
+            shape = RoundedCornerShape(20.dp),
+            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF242C34)),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.padding(20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Surface(
+                            color = Color(0xFF2D2238),
+                            shape = CircleShape,
+                            modifier = Modifier.size(40.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(Icons.Default.Favorite, contentDescription = null, tint = Color(0xFFA78BFA), modifier = Modifier.size(20.dp))
+                            }
+                        }
+                        Column {
+                            Text("Google Health Connect", style = MaterialTheme.typography.titleMedium, color = Color(0xFFE1E2E9), fontWeight = FontWeight.Bold)
+                            Text("Sync sleep, HRV & metabolic data", style = MaterialTheme.typography.bodySmall, color = Color(0xFF8B9198))
+                        }
+                    }
+                }
+
+                HorizontalDivider(color = Color(0xFF242C34))
+
+                if (uiState.isHealthConnectConnected) {
+                    Surface(
+                        color = Color(0xFF1C3829),
+                        shape = RoundedCornerShape(20.dp),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF2D5A3F))
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color(0xFF4ADE80), modifier = Modifier.size(18.dp))
+                            Text("Access Granted", style = MaterialTheme.typography.labelLarge, color = Color(0xFF4ADE80), fontWeight = FontWeight.Bold)
+                        }
+                    }
+                } else {
+                    Surface(
+                        color = Color(0xFF3B2D1B),
+                        shape = RoundedCornerShape(20.dp),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF5A452D))
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(Icons.Default.Lock, contentDescription = null, tint = Color(0xFFFDBA74), modifier = Modifier.size(18.dp))
+                            Text("Permissions Required", style = MaterialTheme.typography.labelLarge, color = Color(0xFFFDBA74), fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+
+                OutlinedButton(
+                    onClick = onRequestHealthPermissions,
+                    modifier = Modifier.fillMaxWidth().height(48.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        containerColor = Color(0xFF242C34),
+                        contentColor = Color(0xFFE1E2E9)
+                    ),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF41474D)),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Text("Manage Permissions", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+                }
+            }
+        }
+
         Surface(
             color = Color(0xFF1C2228),
             shape = RoundedCornerShape(20.dp),
@@ -434,20 +584,7 @@ fun SettingsUiScreen(
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text("Connected Telemetry Nodes", style = MaterialTheme.typography.bodyMedium, color = Color(0xFFE1E2E9), fontWeight = FontWeight.Bold)
-                    Text(
-                        "Manage Permissions",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Color(0xFFFF6F61),
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.clickable { onRequestHealthPermissions() }
-                    )
-                }
+                Text("Connected Telemetry Nodes", style = MaterialTheme.typography.bodyMedium, color = Color(0xFFE1E2E9), fontWeight = FontWeight.Bold)
 
                 NodeItem(Icons.Default.Watch, "Pixel Watch 2", "Continuous x84 & PPG • 100Hz", "Live", Color(0xFFFEF08A))
                 NodeItem(Icons.Default.Sensors, "Dexcom G7 CGM", "Interstitial Glucose • Every 5m", "94 mg/dL", Color(0xFFFDBA74))

@@ -56,7 +56,7 @@ data class SettingsUiState(
     val hapticPattern: HapticPattern = HapticPattern.CRISP,
     val bioPromptsEnabled: Boolean = true,
     val slumpInterventionsEnabled: Boolean = true,
-    val isHealthConnectConnected: Boolean = true,
+    val isHealthConnectConnected: Boolean = false,
     val cacheSizeMb: Double = 52.8,
     val toastMessage: String? = null
 )
@@ -66,6 +66,10 @@ class SettingsViewModel @Inject constructor() : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
+
+    fun updateHealthConnectStatus(connected: Boolean) {
+        _uiState.update { it.copy(isHealthConnectConnected = connected) }
+    }
 
     fun updateMicrodoseQuantum(quantum: MicrodoseQuantum) {
         _uiState.update { it.copy(microdoseQuantum = quantum) }
