@@ -16,9 +16,11 @@ android {
 dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:util"))
+    implementation(project(":applications:goswift:data"))
     implementation(project(":applications:goswift:features:main"))
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.androidx.health.connect.client)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
 }
