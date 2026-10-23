@@ -11,21 +11,8 @@ import com.zoewave.probase.goswift.features.main.navigation.GoSwiftDestination
 import com.zoewave.probase.goswift.mobile.home.ui.HomeUiRoute
 import com.zoewave.probase.goswift.mobile.settings.ui.SettingsUiRoute
 import com.zoewave.probase.goswift.mobile.shots.ui.ShotsUiRoute
-
-// Stubbed directly here since I haven't wired Gradle for healthsync/insights yet
-@Composable
-fun HealthSyncUiRoute() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("Health Sync Route")
-    }
-}
-
-@Composable
-fun InsightsUiRoute() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("Insights Route")
-    }
-}
+import com.zoewave.probase.goswift.mobile.ui.routes.HealthSyncUiRoute
+import com.zoewave.probase.goswift.mobile.ui.routes.InsightsUiRoute
 
 @Suppress("UnusedParameter")
 fun goSwiftNavEntryProvider(
