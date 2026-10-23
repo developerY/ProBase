@@ -1,38 +1,44 @@
 package com.zoewave.probase.goswift.data.di
 
-import com.zoewave.probase.goswift.data.HealthRepository
-import com.zoewave.probase.goswift.data.HealthRepositoryImpl
-import com.zoewave.probase.goswift.data.HydrationRepository
-import com.zoewave.probase.goswift.data.HydrationRepositoryImpl
-import com.zoewave.probase.goswift.data.NutritionRepository
-import com.zoewave.probase.goswift.data.NutritionRepositoryImpl
-import com.zoewave.probase.goswift.data.ShotRepository
-import com.zoewave.probase.goswift.data.ShotRepositoryImpl
+import com.zoewave.probase.goswift.data.caffeine.CaffeineDecayEngine
+import com.zoewave.probase.goswift.data.caffeine.DeterministicCaffeineDecayEngine
+import com.zoewave.probase.goswift.data.*
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-interface DataModule {
+abstract class DataModule {
     @Binds
-    fun bindShotRepository(
-        shotRepositoryImpl: ShotRepositoryImpl
+    @Singleton
+    abstract fun bindCaffeineDecayEngine(
+        engine: DeterministicCaffeineDecayEngine
+    ): CaffeineDecayEngine
+
+    @Binds
+    @Singleton
+    abstract fun bindShotRepository(
+        impl: ShotRepositoryImpl
     ): ShotRepository
 
     @Binds
-    fun bindHealthRepository(
-        healthRepositoryImpl: HealthRepositoryImpl
+    @Singleton
+    abstract fun bindHealthRepository(
+        impl: HealthRepositoryImpl
     ): HealthRepository
 
     @Binds
-    fun bindHydrationRepository(
-        hydrationRepositoryImpl: HydrationRepositoryImpl
+    @Singleton
+    abstract fun bindHydrationRepository(
+        impl: HydrationRepositoryImpl
     ): HydrationRepository
 
     @Binds
-    fun bindNutritionRepository(
-        nutritionRepositoryImpl: NutritionRepositoryImpl
+    @Singleton
+    abstract fun bindNutritionRepository(
+        impl: NutritionRepositoryImpl
     ): NutritionRepository
 }

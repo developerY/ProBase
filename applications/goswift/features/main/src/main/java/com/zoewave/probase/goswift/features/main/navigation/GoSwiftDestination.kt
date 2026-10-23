@@ -6,14 +6,19 @@ import kotlinx.serialization.Serializable
 sealed class GoSwiftDestination {
     @Serializable
     data object Home : GoSwiftDestination()
+
     @Serializable
     data object Log : GoSwiftDestination()
-    @Serializable
-    data object Shots : GoSwiftDestination()
-    @Serializable
-    data object AddShot : GoSwiftDestination()
+
     @Serializable
     data object Settings : GoSwiftDestination()
+
     @Serializable
-    data object Hydration : GoSwiftDestination()
+    data object Schedule : GoSwiftDestination()
+
+    @Serializable
+    data object Insights : GoSwiftDestination()
+
+    @Serializable
+    data object HealthSync : GoSwiftDestination()
 }
