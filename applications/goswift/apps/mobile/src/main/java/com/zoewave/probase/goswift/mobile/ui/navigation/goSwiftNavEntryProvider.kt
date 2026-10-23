@@ -1,61 +1,63 @@
 package com.zoewave.probase.goswift.mobile.ui.navigation
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.NavEntry
 import com.zoewave.probase.goswift.features.main.navigation.GoSwiftDestination
 import com.zoewave.probase.goswift.mobile.home.ui.HomeUiRoute
-import com.zoewave.probase.features.health.hydration.ui.HydrationUiRoute
-import com.zoewave.probase.goswift.mobile.input.ui.InputUiRoute
 import com.zoewave.probase.goswift.mobile.settings.ui.SettingsUiRoute
-import com.zoewave.probase.goswift.mobile.shots.ui.AddShotUiRoute
 import com.zoewave.probase.goswift.mobile.shots.ui.ShotsUiRoute
 
+// Stubbed directly here since I haven't wired Gradle for healthsync/insights yet
+@Composable
+fun HealthSyncUiRoute() {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text("Health Sync Route")
+    }
+}
+
+@Composable
+fun InsightsUiRoute() {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text("Insights Route")
+    }
+}
+
+@Suppress("UnusedParameter")
 fun goSwiftNavEntryProvider(
     key: GoSwiftDestination,
     navigateTo: (GoSwiftDestination) -> Unit,
     onBack: () -> Unit
 ): NavEntry<GoSwiftDestination> {
-    return NavEntry(key) {
-        when (key) {
-            GoSwiftDestination.Home -> {
-                HomeUiRoute(
-                    modifier = Modifier.fillMaxSize(),
-                    navTo = navigateTo
-                )
-            }
-            GoSwiftDestination.Log -> {
-                InputUiRoute(
-                    modifier = Modifier.fillMaxSize(),
-                    onBack = onBack,
-                    navTo = navigateTo
-                )
-            }
-            GoSwiftDestination.Shots -> {
-                ShotsUiRoute(
-                    modifier = Modifier.fillMaxSize(),
-                    navTo = navigateTo
-                )
-            }
-            GoSwiftDestination.AddShot -> {
-                AddShotUiRoute(
-                    modifier = Modifier.fillMaxSize(),
-                    onBack = onBack
-                )
-            }
-            GoSwiftDestination.Settings -> {
-                SettingsUiRoute(
-                    modifier = Modifier.fillMaxSize(),
-                    navTo = navigateTo
-                )
-            }
-            GoSwiftDestination.Hydration -> {
-                HydrationUiRoute(
-                    modifier = Modifier.fillMaxSize(),
-                    onNavigateToSettings = { navigateTo(GoSwiftDestination.Settings) },
-                    onBack = onBack
-                )
-            }
+    return when (key) {
+        GoSwiftDestination.Home -> NavEntry(key) {
+            HomeUiRoute()
         }
+        GoSwiftDestination.Schedule -> NavEntry(key) {
+            ShotsUiRoute()
+        }
+        GoSwiftDestination.Insights -> NavEntry(key) {
+            InsightsUiRoute()
+        }
+        GoSwiftDestination.HealthSync -> NavEntry(key) {
+            HealthSyncUiRoute()
+        }
+        GoSwiftDestination.Settings -> NavEntry(key) {
+            SettingsUiRoute(onNavigateBack = onBack)
+        }
+        GoSwiftDestination.Log -> NavEntry(key) {
+            StubRoute("Log")
+        }
+    }
+}
+
+@Composable
+fun StubRoute(name: String) {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text(text = "Stub: $name")
     }
 }

@@ -1,93 +1,64 @@
 package com.zoewave.probase.goswift.mobile.shots.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.zoewave.probase.goswift.features.main.navigation.GoSwiftDestination
-import com.zoewave.probase.goswift.mobile.shots.ui.components.CaffeineClock
-import com.zoewave.probase.goswift.mobile.shots.ui.components.ShotItem
 
 @Composable
-fun ShotsUiRoute(
-    modifier: Modifier = Modifier,
-    viewModel: ShotsViewModel = hiltViewModel(),
-    navTo: (GoSwiftDestination) -> Unit
-) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+fun ShotsUiRoute() {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Text("SCHEDULE & TIMELINE", style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.primary)
 
-    ShotsScreen(
-        modifier = modifier,
-        uiState = uiState,
-        onEvent = viewModel::onEvent,
-        navTo = navTo
-    )
+        Card(
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+            shape = RoundedCornerShape(16.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text("AI Advisory", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("You are within your daily limit. Clearance to sleep threshold in approx 4.2 hours.", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
+                Spacer(modifier = Modifier.height(8.dp))
+                Badge(containerColor = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.onSecondaryContainer) {
+                    Text("Fallback Deterministic")
+                }
+            }
+        }
+
+        Text("Today's Timeline", style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.align(Alignment.Start))
+
+        // Placeholder for horizontal swipe cards
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+            TimelineCard("08:00 AM", "Espresso", "63 mg")
+            TimelineCard("10:30 AM", "Green Tea", "35 mg")
+        }
+    }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ShotsScreen(
-    modifier: Modifier = Modifier,
-    uiState: ShotsUiState,
-    onEvent: (ShotsUiEvent) -> Unit,
-    navTo: (GoSwiftDestination) -> Unit
-) {
-    Scaffold(
-        topBar = {
-            TopAppBar(title = { Text("Caffeine Shots") })
-        },
-        floatingActionButton = {
-            FloatingActionButton(onClick = { navTo(GoSwiftDestination.AddShot) }) {
-                Icon(Icons.Default.Add, contentDescription = "Add Shot")
-            }
-        },
-        modifier = modifier
-    ) { padding ->
-        when (uiState) {
-            ShotsUiState.Loading -> {
-                Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
-            }
-            is ShotsUiState.Success -> {
-                Column(modifier = Modifier.fillMaxSize().padding(padding)) {
-                    CaffeineClock(
-                        shots = uiState.shots,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(24.dp)
-                            .height(250.dp)
-                    )
-                    
-                    if (uiState.shots.isEmpty()) {
-                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text("No shots recorded today.")
-                        }
-                    } else {
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            items(uiState.shots, key = { it.id }) { shot ->
-                                ShotItem(
-                                    shot = shot,
-                                    onDelete = { onEvent(ShotsUiEvent.DeleteShot(shot.id)) }
-                                )
-                            }
-                        }
-                    }
-                }
-            }
+fun TimelineCard(time: String, name: String, amount: String) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+        shape = RoundedCornerShape(12.dp),
+        modifier = Modifier.width(120.dp)
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Text(time, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(name, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
+            Text(amount, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
         }
     }
 }

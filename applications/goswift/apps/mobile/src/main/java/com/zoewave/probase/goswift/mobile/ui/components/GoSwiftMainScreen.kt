@@ -1,13 +1,19 @@
 package com.zoewave.probase.goswift.mobile.ui.components
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Sync
+import androidx.compose.material.icons.filled.Timeline
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
@@ -24,7 +30,14 @@ fun GoSwiftMainScreen() {
     val currentDestination = backStack.lastOrNull() ?: GoSwiftDestination.Home
 
     fun navigateTo(destination: GoSwiftDestination) {
-        if (destination == GoSwiftDestination.Home || destination == GoSwiftDestination.Log || destination == GoSwiftDestination.Settings) {
+        val rootDestinations = listOf(
+            GoSwiftDestination.Home,
+            GoSwiftDestination.Schedule,
+            GoSwiftDestination.Insights,
+            GoSwiftDestination.HealthSync,
+            GoSwiftDestination.Settings
+        )
+        if (rootDestinations.contains(destination)) {
             backStack.clear()
             backStack.add(destination)
         } else {
@@ -42,17 +55,43 @@ fun GoSwiftMainScreen() {
         navigateBack()
     }
 
-    Scaffold(
-        bottomBar = {
-            GoSwiftBottomBar(
-                currentDestination = currentDestination,
-                onNavigate = { navigateTo(it) }
+    NavigationSuiteScaffold(
+        navigationSuiteItems = {
+            item(
+                selected = currentDestination == GoSwiftDestination.Home,
+                onClick = { navigateTo(GoSwiftDestination.Home) },
+                icon = { Icon(imageVector = Icons.Default.Home, contentDescription = "Live Fuel") },
+                label = { Text("Home") }
             )
-        }
-    ) { padding ->
+            item(
+                selected = currentDestination == GoSwiftDestination.Schedule,
+                onClick = { navigateTo(GoSwiftDestination.Schedule) },
+                icon = { Icon(imageVector = Icons.Default.List, contentDescription = "Schedule") },
+                label = { Text("Schedule") }
+            )
+            item(
+                selected = currentDestination == GoSwiftDestination.Insights,
+                onClick = { navigateTo(GoSwiftDestination.Insights) },
+                icon = { Icon(imageVector = Icons.Default.Timeline, contentDescription = "Insights") },
+                label = { Text("Insights") }
+            )
+            item(
+                selected = currentDestination == GoSwiftDestination.HealthSync,
+                onClick = { navigateTo(GoSwiftDestination.HealthSync) },
+                icon = { Icon(imageVector = Icons.Default.Sync, contentDescription = "Sync") },
+                label = { Text("Sync") }
+            )
+            item(
+                selected = currentDestination == GoSwiftDestination.Settings,
+                onClick = { navigateTo(GoSwiftDestination.Settings) },
+                icon = { Icon(imageVector = Icons.Default.Settings, contentDescription = "Settings") },
+                label = { Text("Settings") }
+            )
+        },
+        modifier = Modifier.fillMaxSize()
+    ) {
         NavDisplay(
             backStack = backStack,
-            modifier = Modifier.padding(padding),
             onBack = { navigateBack() },
             entryDecorators = listOf(
                 rememberSaveableStateHolderNavEntryDecorator(),
@@ -60,38 +99,11 @@ fun GoSwiftMainScreen() {
             ),
             entryProvider = { key ->
                 goSwiftNavEntryProvider(
-                    key = key,
+                    key = key as GoSwiftDestination,
                     navigateTo = { dest -> navigateTo(dest) },
                     onBack = { navigateBack() }
                 )
             }
-        )
-    }
-}
-
-@Composable
-fun GoSwiftBottomBar(
-    currentDestination: GoSwiftDestination,
-    onNavigate: (GoSwiftDestination) -> Unit
-) {
-    NavigationBar {
-        NavigationBarItem(
-            selected = currentDestination == GoSwiftDestination.Home,
-            onClick = { onNavigate(GoSwiftDestination.Home) },
-            icon = { Icon(Icons.Default.Bolt, contentDescription = "Home") },
-            label = { Text("Home") }
-        )
-        NavigationBarItem(
-            selected = currentDestination == GoSwiftDestination.Log,
-            onClick = { onNavigate(GoSwiftDestination.Log) },
-            icon = { Icon(Icons.Default.Add, contentDescription = "Log") },
-            label = { Text("Log") }
-        )
-        NavigationBarItem(
-            selected = currentDestination == GoSwiftDestination.Settings,
-            onClick = { onNavigate(GoSwiftDestination.Settings) },
-            icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
-            label = { Text("Settings") }
         )
     }
 }

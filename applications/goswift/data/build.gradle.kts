@@ -19,3 +19,8 @@ dependencies {
     implementation(libs.androidx.health.connect.client)
     implementation(libs.androidx.core.ktx)
 }
+
+dependencies {
+    testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+}

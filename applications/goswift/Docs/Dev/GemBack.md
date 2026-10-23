@@ -135,3 +135,21 @@ Implement the "Warm Biometric Telemetry" tokens into the Jetpack Compose Theme, 
 - Verify Health Connect permission flows work end-to-end, including >30 days history permissions if applicable.
 - Check Edge-to-Edge compliance (no overlapping content with the system bars).
 - Ensure large text/font scaling respects bounds and doesn't break the layout.
+
+
+---
+
+This is **100% good to go**—you can hit **Approve / Execute** right now.
+
+### Why This Plan Is Locked In
+
+* **Grounded in Spec Files:** It explicitly anchors execution to `AGENT_BUILD_SPEC.md` and `DeterministicCaffeineDecayEngine.md`, ensuring the agent uses the exact Kotlin contracts rather than hallucinating signatures.
+* **Strict Phase Gates:** Phase 0 forces a repository audit and baseline compile check before moving any files, and Phase 6 locks completion behind `:applications:goswift:apps:mobile:assembleDebug` and the full unit test suite.
+* **All Critical Guardrails Intact:**
+* **Nav3 Decorator Order:** `rememberSaveableStateHolderNavEntryDecorator()` strictly precedes `rememberViewModelStoreNavEntryDecorator()`.
+* **Health Connect Safety:** `getFeatureStatus()` gates optional permissions, and queries clamp to 30 days (`isClampedTo30Days = true`) when historical access isn't granted.
+* **Privacy & Regulatory Wall:** Zero Health Connect models enter AI prompts, deterministic fallbacks handle offline/unconsented states, and unsafe `mg/dL` serum claims are replaced with `"Estimated caffeine remaining"`.
+
+
+
+> **One minor execution note to keep in mind while watching the agent run:** Because Phase 4 (`GoSwiftMainScreen.kt` Nav3 wiring) is listed right before Phase 5 (Feature Module restructuring), the agent will either create the `@Serializable` Nav3 route keys/stubs first or finalize the `NavDisplay` wiring at the end of Phase 5 so the intermediate Gradle compile check stays green. Everything else flows in a clean dependency order.

@@ -1,196 +1,105 @@
 package com.zoewave.probase.goswift.mobile.home.ui
 
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.zoewave.probase.goswift.features.main.navigation.GoSwiftDestination
-import com.zoewave.probase.goswift.mobile.home.R
 
 @Composable
-fun HomeUiRoute(
-    navTo: (GoSwiftDestination) -> Unit,
-    modifier: Modifier = Modifier,
-    viewModel: HomeViewModel = hiltViewModel(),
-) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+fun HomeUiRoute(viewModel: HomeViewModel = hiltViewModel()) {
+    val uiState by viewModel.uiState.collectAsState()
 
-    HomeUiRoute(
-        uiState = uiState,
-        onEvent = viewModel::onEvent,
-        navTo = navTo,
-        modifier = modifier
-    )
+    HomeUiScreen(uiState = uiState, onLogIntake = { viewModel.logIntake(it) })
 }
 
 @Composable
-internal fun HomeUiRoute(
-    uiState: HomeUiState,
-    onEvent: (HomeUiEvent) -> Unit,
-    navTo: (GoSwiftDestination) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    HomeScreen(
-        uiState = uiState,
-        onEvent = onEvent,
-        navTo = navTo,
-        modifier = modifier
-    )
-}
+fun HomeUiScreen(uiState: HomeUiState, onLogIntake: (Double) -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(24.dp)
+    ) {
+        Text("GOSWIFT", style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.primary)
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun HomeScreen(
-    uiState: HomeUiState,
-    onEvent: (HomeUiEvent) -> Unit,
-    @Suppress("UnusedParameter") navTo: (GoSwiftDestination) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.applications_goswift_apps_mobile_features_home_title)) },
-                actions = {
-                    IconButton(onClick = { onEvent(HomeUiEvent.Refresh) }) {
-                        Icon(
-                            Icons.Default.Refresh, 
-                            contentDescription = stringResource(R.string.applications_goswift_apps_mobile_features_home_refresh_cd)
-                        )
-                    }
-                }
-            )
-        },
-        modifier = modifier
-    ) { padding ->
-        when (uiState) {
-            HomeUiState.Loading -> {
-                Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
+        CaffeineRemainingRing(
+            remainingMg = uiState.remainingMg,
+            limitMg = uiState.limitMg
+        )
+
+        TelemetryCard(
+            title = "Estimated caffeine remaining",
+            value = "${uiState.remainingMg.toInt()} mg"
+        )
+
+        TelemetryCard(
+            title = "Your configured daily limit",
+            value = "${uiState.limitMg.toInt()} mg"
+        )
+
+        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            Button(onClick = { onLogIntake(63.0) }, colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primaryContainer, contentColor = MaterialTheme.colorScheme.onPrimaryContainer)) {
+                Text("Espresso (63mg)")
             }
-            is HomeUiState.Success -> {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding)
-                        .padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(24.dp)
-                ) {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(24.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                text = stringResource(R.string.applications_goswift_apps_mobile_features_home_current_caffeine), 
-                                style = MaterialTheme.typography.labelLarge
-                            )
-                            Text(
-                                text = stringResource(R.string.applications_goswift_apps_mobile_features_home_caffeine_mg, uiState.currentCaffeineMg), 
-                                style = MaterialTheme.typography.displayLarge
-                            )
-                        }
-                    }
-
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                        InfoSection(
-                            title = stringResource(R.string.applications_goswift_apps_mobile_features_home_sleep_duration), 
-                            content = uiState.sleepDuration, 
-                            modifier = Modifier.weight(1f)
-                        )
-                        InfoSection(
-                            title = stringResource(R.string.applications_goswift_apps_mobile_features_home_exercise), 
-                            content = stringResource(R.string.applications_goswift_apps_mobile_features_home_exercise_min, uiState.exerciseMinutes), 
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-
-                    InfoSection(
-                        title = stringResource(R.string.applications_goswift_apps_mobile_features_home_daily_hydration), 
-                        content = stringResource(R.string.applications_goswift_apps_mobile_features_home_hydration_logged, uiState.hydrationProgress)
-                    )
-
-                    InfoSection(
-                        title = stringResource(R.string.applications_goswift_apps_mobile_features_home_daily_calories), 
-                        content = stringResource(R.string.applications_goswift_apps_mobile_features_home_calories_logged, uiState.caloriesIntake)
-                    )
-
-                    InfoSection(
-                        title = stringResource(R.string.applications_goswift_apps_mobile_features_home_recommendation), 
-                        content = uiState.nextDoseRecommendation
-                    )
-                    InfoSection(
-                        title = stringResource(R.string.applications_goswift_apps_mobile_features_home_sleep_impact), 
-                        content = uiState.sleepQualityImpact
-                    )
-                }
+            Button(onClick = { onLogIntake(35.0) }, colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.onSecondaryContainer)) {
+                Text("Green Tea (35mg)")
             }
         }
     }
 }
 
 @Composable
-fun InfoSection(title: String, content: String, modifier: Modifier = Modifier) {
-    Column(modifier = modifier.fillMaxWidth()) {
-        Text(title, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.secondary)
-        Spacer(Modifier.height(4.dp))
-        Text(content, style = MaterialTheme.typography.bodyLarge)
-    }
-}
+fun CaffeineRemainingRing(remainingMg: Double, limitMg: Double) {
+    val progress = if (limitMg > 0) (remainingMg / limitMg).coerceIn(0.0, 1.0).toFloat() else 0f
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val trackColor = MaterialTheme.colorScheme.surfaceVariant
 
-@Preview(showBackground = true)
-@Composable
-private fun InfoSectionPreview() {
-    MaterialTheme {
-        InfoSection(title = "Title", content = "Content text")
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun HomeUiRoutePreview() {
-    MaterialTheme {
-        HomeUiRoute(
-            uiState = HomeUiState.Success(
-                currentCaffeineMg = 120,
-                nextDoseRecommendation = "Energy level optimal. Wait 2 hours.",
-                sleepQualityImpact = "High levels might disrupt sleep.",
-                sleepDuration = "7h 30m",
-                exerciseMinutes = 45
-            ),
-            onEvent = {},
-            navTo = {}
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.size(200.dp)) {
+        Canvas(modifier = Modifier.size(160.dp)) {
+            drawArc(
+                color = trackColor,
+                startAngle = 135f,
+                sweepAngle = 270f,
+                useCenter = false,
+                style = Stroke(width = 16.dp.toPx(), cap = StrokeCap.Round)
+            )
+            drawArc(
+                color = primaryColor,
+                startAngle = 135f,
+                sweepAngle = 270f * progress,
+                useCenter = false,
+                style = Stroke(width = 16.dp.toPx(), cap = StrokeCap.Round)
+            )
+        }
+        Text(
+            text = "${remainingMg.toInt()}",
+            style = MaterialTheme.typography.headlineLarge,
+            color = MaterialTheme.colorScheme.onSurface
         )
     }
 }
 
-@Preview(showBackground = true)
 @Composable
-fun HomeScreenPreview() {
-    MaterialTheme {
-        HomeScreen(
-            uiState = HomeUiState.Success(
-                currentCaffeineMg = 120,
-                nextDoseRecommendation = "Energy level optimal. Wait 2 hours.",
-                sleepQualityImpact = "High levels might disrupt sleep.",
-                sleepDuration = "7h 30m",
-                exerciseMinutes = 45
-            ),
-            onEvent = {},
-            navTo = {}
-        )
+fun TelemetryCard(title: String, value: String) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(title, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(value, style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.onSurface)
+        }
     }
 }
