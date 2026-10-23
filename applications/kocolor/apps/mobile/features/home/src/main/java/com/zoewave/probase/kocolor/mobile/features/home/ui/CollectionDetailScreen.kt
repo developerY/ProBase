@@ -147,25 +147,14 @@ fun CollectionDetailScreen(
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text("Atelier", style = MaterialTheme.typography.titleLarge, fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold) },
+
+
                 navigationIcon = {
                     IconButton(onClick = { navTo(KoColorRoute.Back) }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
-                actions = {
-                    IconButton(onClick = { /* Menu */ }) {
-                        Icon(Icons.Default.Menu, null)
-                    }
-                    Box(modifier = Modifier.padding(end = 12.dp)) {
-                        Surface(
-                            shape = CircleShape,
-                            modifier = Modifier.size(32.dp),
-                            color = MaterialTheme.colorScheme.surfaceVariant
-                        ) {
-                            // Profile pic placeholder
-                        }
-                    }
-                },
+
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         }
