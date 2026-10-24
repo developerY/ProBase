@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -617,7 +618,9 @@ fun DoseCard(dose: DoseCardItem) {
             )
 
             Column(
-                modifier = Modifier.padding(14.dp).weight(1f),
+                modifier = Modifier
+                    .padding(14.dp)
+                    .weight(1f),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Row(
@@ -626,6 +629,9 @@ fun DoseCard(dose: DoseCardItem) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Row(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(end = 8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
@@ -638,27 +644,75 @@ fun DoseCard(dose: DoseCardItem) {
                                 Icon(iconVector, contentDescription = null, tint = accentColor, modifier = Modifier.size(16.dp))
                             }
                         }
-                        Column {
-                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                Text("Microdose #${dose.doseNumber}", style = MaterialTheme.typography.titleMedium, color = Color(0xFFE1E2E9), fontWeight = FontWeight.Bold)
-                                Text("• ${dose.time}", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198))
+                        Column(modifier = Modifier.weight(1f, fill = false)) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Text(
+                                    text = "Microdose #${dose.doseNumber}",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = Color(0xFFE1E2E9),
+                                    fontWeight = FontWeight.Bold,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Text(
+                                    text = "• ${dose.time}",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = Color(0xFF8B9198),
+                                    maxLines = 1
+                                )
                                 Surface(
                                     color = Color(0xFF242C34),
                                     shape = RoundedCornerShape(6.dp)
                                 ) {
-                                    Text(dose.doseType, style = MaterialTheme.typography.labelSmall, color = accentColor, fontSize = 10.sp, modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp))
+                                    Text(
+                                        text = dose.doseType,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = accentColor,
+                                        fontSize = 10.sp,
+                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
                                 }
                             }
                         }
                     }
                     Column(horizontalAlignment = Alignment.End) {
-                        Text("${dose.amountMg}mg", style = MaterialTheme.typography.headlineMedium, color = Color(0xFFFFB4AA), fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
-                        Text(dose.doseCategory, style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198), fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+                        Text(
+                            text = "${dose.amountMg}mg",
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = Color(0xFFFFB4AA),
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = FontFamily.Monospace,
+                            maxLines = 1,
+                            softWrap = false
+                        )
+                        Text(
+                            text = dose.doseCategory,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color(0xFF8B9198),
+                            fontSize = 9.sp,
+                            fontFamily = FontFamily.Monospace,
+                            maxLines = 1,
+                            softWrap = false
+                        )
                     }
                 }
 
-                Text(dose.title, style = MaterialTheme.typography.bodyMedium, color = Color(0xFFE1E2E9), fontWeight = FontWeight.SemiBold)
-                Text(dose.description, style = MaterialTheme.typography.bodySmall, color = Color(0xFF8B9198))
+                Text(
+                    text = dose.title,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color(0xFFE1E2E9),
+                    fontWeight = FontWeight.SemiBold
+                )
+                Text(
+                    text = dose.description,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color(0xFF8B9198)
+                )
 
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -670,7 +724,14 @@ fun DoseCard(dose: DoseCardItem) {
                             shape = RoundedCornerShape(8.dp),
                             border = BorderStroke(1.dp, Color(0xFF242C34))
                         ) {
-                            Text(tag, style = MaterialTheme.typography.labelSmall, color = Color(0xFFE1E2E9), fontSize = 10.sp, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
+                            Text(
+                                text = tag,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Color(0xFFE1E2E9),
+                                fontSize = 10.sp,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                maxLines = 1
+                            )
                         }
                     }
                 }
