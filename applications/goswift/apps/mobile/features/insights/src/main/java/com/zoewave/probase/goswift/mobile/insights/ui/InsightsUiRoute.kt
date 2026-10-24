@@ -1,5 +1,6 @@
 package com.zoewave.probase.goswift.mobile.insights.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -7,12 +8,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Bedtime
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Science
 import androidx.compose.material.icons.filled.SelfImprovement
-import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -34,7 +33,7 @@ fun InsightsUiScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF101418))
+            .background(MaterialTheme.colorScheme.background)
             .verticalScroll(rememberScrollState())
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -49,20 +48,20 @@ fun InsightsUiScreen() {
                 Text(
                     text = "GOSWIFT",
                     style = MaterialTheme.typography.labelSmall,
-                    color = Color(0xFFFFB4AA),
+                    color = MaterialTheme.colorScheme.primary,
                     letterSpacing = 2.sp
                 )
                 Text(
                     text = "Insights",
                     style = MaterialTheme.typography.headlineLarge,
-                    color = Color(0xFFE1E2E9),
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold
                 )
             }
             Surface(
-                color = Color(0xFF1C2228),
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
                 shape = RoundedCornerShape(20.dp),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF41474D))
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
@@ -77,7 +76,7 @@ fun InsightsUiScreen() {
                     Text(
                         text = "CYP1A2 Fast",
                         style = MaterialTheme.typography.labelMedium,
-                        color = Color(0xFFE1E2E9)
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
@@ -106,7 +105,7 @@ fun InsightsUiScreen() {
             )
             InsightCard(
                 icon = Icons.Default.Bedtime,
-                iconTint = Color(0xFFFEF08A),
+                iconTint = MaterialTheme.colorScheme.secondary,
                 title = "Sleep Arch. Score",
                 value = "91%",
                 badgeText = "+14% REM density",
@@ -117,7 +116,7 @@ fun InsightsUiScreen() {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
             InsightCard(
                 icon = Icons.Default.Science,
-                iconTint = Color(0xFFFDBA74),
+                iconTint = MaterialTheme.colorScheme.secondary,
                 title = "Avg Daily Dose",
                 value = "72 mg",
                 badgeText = "-71% vs 250mg cans",
@@ -125,7 +124,7 @@ fun InsightsUiScreen() {
             )
             InsightCard(
                 icon = Icons.Default.SelfImprovement,
-                iconTint = Color(0xFFFFB4AA),
+                iconTint = MaterialTheme.colorScheme.primary,
                 title = "Optimal Flow Zone",
                 value = "4.8 hrs",
                 badgeText = "Peak Performance",
@@ -135,9 +134,9 @@ fun InsightsUiScreen() {
 
         // 7-Day Trend Overview
         Surface(
-            color = Color(0xFF1C2228),
+            color = MaterialTheme.colorScheme.surfaceContainer,
             shape = RoundedCornerShape(16.dp),
-            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF242C34)),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(
@@ -147,13 +146,13 @@ fun InsightsUiScreen() {
                 Text(
                     text = "METABOLIC STABILITY (7-DAY TREND)",
                     style = MaterialTheme.typography.labelSmall,
-                    color = Color(0xFF8B9198),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontFamily = FontFamily.Monospace
                 )
                 Text(
                     text = "Clearance velocity is 18% higher when intake occurs before 1:00 PM. No evening sleep disruption detected.",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color(0xFFE1E2E9)
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
         }
@@ -163,14 +162,14 @@ fun InsightsUiScreen() {
 @Composable
 fun TimeFilterChip(label: String, selected: Boolean) {
     Surface(
-        color = if (selected) Color(0xFFFF6F61) else Color(0xFF1C2228),
+        color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainer,
         shape = RoundedCornerShape(12.dp),
-        border = if (!selected) androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF242C34)) else null
+        border = if (!selected) BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant) else null
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
-            color = if (selected) Color(0xFF101418) else Color(0xFFE1E2E9),
+            color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
             fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
         )
@@ -187,9 +186,9 @@ fun InsightCard(
     modifier: Modifier = Modifier
 ) {
     Surface(
-        color = Color(0xFF1C2228),
+        color = MaterialTheme.colorScheme.surfaceContainer,
         shape = RoundedCornerShape(16.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF242C34)),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         modifier = modifier
     ) {
         Column(
@@ -203,9 +202,9 @@ fun InsightCard(
             ) {
                 Icon(icon, contentDescription = null, tint = iconTint, modifier = Modifier.size(20.dp))
             }
-            Text(title, style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198))
-            Text(value, style = MaterialTheme.typography.headlineLarge, color = Color(0xFFE1E2E9), fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
-            Text(badgeText, style = MaterialTheme.typography.labelSmall, color = Color(0xFFFDBA74))
+            Text(title, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(value, style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+            Text(badgeText, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary)
         }
     }
 }

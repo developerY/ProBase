@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.UUID
@@ -22,12 +23,19 @@ class ShotsViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val timeFormatter = DateTimeFormatter.ofPattern("hh:mm a").withZone(ZoneId.systemDefault())
+    private val monthDayFormatter = DateTimeFormatter.ofPattern("MMM dd")
 
     val uiState: StateFlow<ShotsUiState> = repository.getAllShots()
         .map { shots ->
-            val mappedItems = if (shots.isNotEmpty()) {
-                shots.mapIndexed { index, shot ->
-                    val doseNum = shots.size - index
+            val zoneId = ZoneId.systemDefault()
+            val today = LocalDate.now(zoneId)
+            val todayShots = shots.filter { shot ->
+                Instant.ofEpochMilli(shot.timestamp).atZone(zoneId).toLocalDate() == today
+            }
+
+            val mappedItems = if (todayShots.isNotEmpty()) {
+                todayShots.mapIndexed { index, shot ->
+                    val doseNum = todayShots.size - index
                     DoseCardItem(
                         id = shot.id,
                         doseNumber = doseNum,
@@ -44,9 +52,11 @@ class ShotsViewModel @Inject constructor(
                 }
             } else null
 
+            val dateLabel = "Today, ${today.format(monthDayFormatter)}"
+
             val todayGroup = if (mappedItems != null) {
                 DayDoseGroup(
-                    dateLabel = "Today, Oct 24",
+                    dateLabel = dateLabel,
                     doseCount = mappedItems.size,
                     totalMg = mappedItems.sumOf { it.amountMg },
                     rangeStatus = "Optimal Range",
@@ -54,7 +64,7 @@ class ShotsViewModel @Inject constructor(
                 )
             } else {
                 DayDoseGroup(
-                    dateLabel = "Today, Oct 24",
+                    dateLabel = dateLabel,
                     doseCount = 3,
                     totalMg = 100,
                     rangeStatus = "Optimal Range",
@@ -102,13 +112,43 @@ class ShotsViewModel @Inject constructor(
                 )
             }
 
+            val yesterday = today.minusDays(1)
+            val yesterdayShots = shots.filter { shot ->
+                Instant.ofEpochMilli(shot.timestamp).atZone(zoneId).toLocalDate() == yesterday
+            }
+
+            val mappedYesterdayItems = yesterdayShots.mapIndexed { index, shot ->
+                val doseNum = yesterdayShots.size - index
+                DoseCardItem(
+                    id = shot.id,
+                    doseNumber = doseNum,
+                    time = timeFormatter.format(Instant.ofEpochMilli(shot.timestamp)),
+                    doseType = if (shot.mg <= 25) "Focus Sprint" else "Post-Lunch Rescue",
+                    doseCategory = if (shot.mg <= 25) "MICRO-DROP" else "BOLUS DOSE",
+                    amountMg = shot.mg,
+                    title = "${shot.mg}mg Fuel Ingestion",
+                    description = if (shot.mg <= 25) "Sublingual drops (Yuzu Citrus)" else "AeroPress Single Origin • Light Roast",
+                    tags = if (shot.mg <= 25) listOf("💚 HRV +4%", "💧 +180ml H2O", "✓ Cleared In-System") else listOf("⚡ Glycemic Stable", "✓ On-Device Logged"),
+                    accentColorHex = if (shot.mg <= 25) 0xFFFF6F61 else 0xFFFDBA74,
+                    iconType = if (shot.mg <= 25) "bolt" else "coffee"
+                )
+            }
+
             val totalDoses = 10482 + shots.size
+
+            val yesterdaySummary = if (mappedYesterdayItems.isNotEmpty()) {
+                "#${mappedYesterdayItems.first().doseNumber} - #${mappedYesterdayItems.last().doseNumber} (${mappedYesterdayItems.joinToString(", ") { "${it.amountMg}mg" }})"
+            } else "No doses recorded"
 
             ShotsUiState.Success(
                 shots = shots,
                 totalTelemetryDoses = totalDoses,
-                todayGroup = todayGroup
-            ) as ShotsUiState
+                todayGroup = todayGroup,
+                yesterdayCount = mappedYesterdayItems.size,
+                yesterdayTotalMg = mappedYesterdayItems.sumOf { it.amountMg },
+                yesterdaySummaryText = yesterdaySummary,
+                yesterdayItems = mappedYesterdayItems
+            )
         }
         .stateIn(
             scope = viewModelScope,
@@ -137,3 +177,4 @@ class ShotsViewModel @Inject constructor(
         }
     }
 }
+

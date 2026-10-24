@@ -54,4 +54,22 @@ abstract class DataModule {
     abstract fun bindNutritionRepository(
         impl: NutritionRepositoryImpl
     ): NutritionRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindThemeRepository(
+        impl: ThemeRepositoryImpl
+    ): ThemeRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindAiConfigurationSettings(
+        impl: GoSwiftAiSettings
+    ): com.zoewave.probase.core.data.repository.AiConfigurationSettings
+
+    @Binds
+    @Singleton
+    abstract fun bindSmartCaptureSettings(
+        impl: GoSwiftAiSettings
+    ): com.zoewave.probase.features.ai.capture.domain.SmartCaptureSettings
 }

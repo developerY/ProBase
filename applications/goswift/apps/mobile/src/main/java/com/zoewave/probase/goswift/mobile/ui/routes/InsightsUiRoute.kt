@@ -46,7 +46,7 @@ fun InsightsUiScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF101418))
+            .background(MaterialTheme.colorScheme.background)
             .verticalScroll(rememberScrollState())
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -61,20 +61,20 @@ fun InsightsUiScreen(
                 Text(
                     text = "GOSWIFT",
                     style = MaterialTheme.typography.labelSmall,
-                    color = Color(0xFFFFB4AA),
+                    color = MaterialTheme.colorScheme.primary,
                     letterSpacing = 2.sp
                 )
                 Text(
                     text = "Insights",
                     style = MaterialTheme.typography.headlineLarge,
-                    color = Color(0xFFE1E2E9),
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold
                 )
             }
             Surface(
-                color = Color(0xFF1C2228),
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
                 shape = RoundedCornerShape(20.dp),
-                border = BorderStroke(1.dp, Color(0xFF41474D))
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
@@ -89,7 +89,7 @@ fun InsightsUiScreen(
                     Text(
                         text = "CYP1A2 Fast",
                         style = MaterialTheme.typography.labelMedium,
-                        color = Color(0xFFE1E2E9)
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
@@ -118,7 +118,7 @@ fun InsightsUiScreen(
             )
             InsightCard(
                 icon = Icons.Default.Bedtime,
-                iconTint = Color(0xFFFEF08A),
+                iconTint = MaterialTheme.colorScheme.secondary,
                 title = "Sleep Arch. Score",
                 value = "91%",
                 badgeText = "+14% REM density",
@@ -129,7 +129,7 @@ fun InsightsUiScreen(
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
             InsightCard(
                 icon = Icons.Default.Science,
-                iconTint = Color(0xFFFDBA74),
+                iconTint = MaterialTheme.colorScheme.secondary,
                 title = "Avg Daily Dose",
                 value = "72 mg",
                 badgeText = "-71% vs 250mg cans",
@@ -137,7 +137,7 @@ fun InsightsUiScreen(
             )
             InsightCard(
                 icon = Icons.Default.SelfImprovement,
-                iconTint = Color(0xFFFFB4AA),
+                iconTint = MaterialTheme.colorScheme.primary,
                 title = "Optimal Flow Zone",
                 value = "4.8 hrs",
                 badgeText = "Peak Performance",
@@ -147,9 +147,9 @@ fun InsightsUiScreen(
 
         // Microdosing vs Commercial Drinks Comparison Section
         Surface(
-            color = Color(0xFF1C2228),
+            color = MaterialTheme.colorScheme.surfaceContainer,
             shape = RoundedCornerShape(16.dp),
-            border = BorderStroke(1.dp, Color(0xFF242C34)),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(
@@ -159,29 +159,29 @@ fun InsightsUiScreen(
                 Text(
                     text = "MICRODOSING VS COMMERCIAL DRINKS",
                     style = MaterialTheme.typography.labelSmall,
-                    color = Color(0xFF8B9198),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontFamily = FontFamily.Monospace
                 )
                 Text(
                     text = "Smooth microdose curve (coral) avoids 200mg spike and rapid 2:00 PM crash (dashed yellow).",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color(0xFFE1E2E9)
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text("Flow Target: 35-50mg", style = MaterialTheme.typography.labelSmall, color = Color(0xFFFDBA74))
-                    Text("Commercial Spike: 200mg", style = MaterialTheme.typography.labelSmall, color = Color(0xFFFEF08A))
+                    Text("Flow Target: 35-50mg", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary)
+                    Text("Commercial Spike: 200mg", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary)
                 }
             }
         }
 
         // Dose-Sleep Correlation Card
         Surface(
-            color = Color(0xFF1C2228),
+            color = MaterialTheme.colorScheme.surfaceContainer,
             shape = RoundedCornerShape(16.dp),
-            border = BorderStroke(1.dp, Color(0xFF242C34)),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(
@@ -193,21 +193,21 @@ fun InsightsUiScreen(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Icon(Icons.Default.ShowChart, contentDescription = null, tint = Color(0xFFFF6F61), modifier = Modifier.size(20.dp))
-                    Text("Outlier Correlation", style = MaterialTheme.typography.labelMedium, color = Color(0xFFFFB4AA), fontWeight = FontWeight.Bold)
+                    Text("Outlier Correlation", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                 }
                 Text(
                     text = "Late dose at 5:15 PM shifted REM onset by 22 min. Recommended curfew remains 7:00 PM.",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color(0xFFE1E2E9)
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
         }
 
         // Weekly Intake & Hydration Bar Chart
         Surface(
-            color = Color(0xFF1C2228),
+            color = MaterialTheme.colorScheme.surfaceContainer,
             shape = RoundedCornerShape(16.dp),
-            border = BorderStroke(1.dp, Color(0xFF242C34)),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(
@@ -218,8 +218,8 @@ fun InsightsUiScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Icon(Icons.Default.WaterDrop, contentDescription = null, tint = Color(0xFFFEF08A), modifier = Modifier.size(20.dp))
-                    Text("WEEKLY INTAKE & HYDRATION", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198), fontFamily = FontFamily.Monospace)
+                    Icon(Icons.Default.WaterDrop, contentDescription = null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(20.dp))
+                    Text("WEEKLY INTAKE & HYDRATION", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, fontFamily = FontFamily.Monospace)
                 }
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -239,9 +239,9 @@ fun InsightsUiScreen(
 
         // Physician & Coach Export Card
         Surface(
-            color = Color(0xFF161B20),
+            color = MaterialTheme.colorScheme.surfaceContainerLow,
             shape = RoundedCornerShape(16.dp),
-            border = BorderStroke(1.dp, Color(0xFF242C34)),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(
@@ -252,13 +252,13 @@ fun InsightsUiScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Icon(Icons.Default.Psychology, contentDescription = null, tint = Color(0xFFFEF08A), modifier = Modifier.size(20.dp))
-                    Text("Hummingbird ML Personalization", style = MaterialTheme.typography.labelMedium, color = Color(0xFFFEF08A), fontWeight = FontWeight.Bold)
+                    Icon(Icons.Default.Psychology, contentDescription = null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(20.dp))
+                    Text("Hummingbird ML Personalization", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Bold)
                 }
                 Text(
                     text = "You maintained 100% flow in 18d without a crash. Fast CYP1A2 gene expression verified.",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color(0xFFE1E2E9)
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Button(
                     onClick = onExportReport,
@@ -282,14 +282,14 @@ fun InsightsUiScreen(
 @Composable
 fun TimeFilterChip(label: String, selected: Boolean) {
     Surface(
-        color = if (selected) Color(0xFFFF6F61) else Color(0xFF1C2228),
+        color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainer,
         shape = RoundedCornerShape(12.dp),
-        border = if (!selected) BorderStroke(1.dp, Color(0xFF242C34)) else null
+        border = if (!selected) BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant) else null
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
-            color = if (selected) Color(0xFF101418) else Color(0xFFE1E2E9),
+            color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
             fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
         )
@@ -306,9 +306,9 @@ fun InsightCard(
     modifier: Modifier = Modifier
 ) {
     Surface(
-        color = Color(0xFF1C2228),
+        color = MaterialTheme.colorScheme.surfaceContainer,
         shape = RoundedCornerShape(16.dp),
-        border = BorderStroke(1.dp, Color(0xFF242C34)),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         modifier = modifier
     ) {
         Column(
@@ -322,9 +322,9 @@ fun InsightCard(
             ) {
                 Icon(icon, contentDescription = null, tint = iconTint, modifier = Modifier.size(20.dp))
             }
-            Text(title, style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198))
-            Text(value, style = MaterialTheme.typography.headlineLarge, color = Color(0xFFE1E2E9), fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
-            Text(badgeText, style = MaterialTheme.typography.labelSmall, color = Color(0xFFFDBA74))
+            Text(title, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(value, style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+            Text(badgeText, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary)
         }
     }
 }
@@ -339,7 +339,7 @@ fun WeeklyBar(day: String, heightFraction: Float) {
             modifier = Modifier
                 .width(16.dp)
                 .height(60.dp)
-                .background(Color(0xFF242C34), RoundedCornerShape(4.dp)),
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh, RoundedCornerShape(4.dp)),
             contentAlignment = Alignment.BottomCenter
         ) {
             Box(
@@ -349,6 +349,6 @@ fun WeeklyBar(day: String, heightFraction: Float) {
                     .background(Color(0xFFFF6F61), RoundedCornerShape(4.dp))
             )
         }
-        Text(day, style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198))
+        Text(day, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }

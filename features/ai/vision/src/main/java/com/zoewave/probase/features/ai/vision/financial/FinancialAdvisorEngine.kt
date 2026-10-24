@@ -1,8 +1,10 @@
 package com.zoewave.probase.features.ai.vision.financial
 
 import android.graphics.Bitmap
-import com.google.ai.client.generativeai.GenerativeModel
-import com.google.ai.client.generativeai.type.content
+import com.google.firebase.Firebase
+import com.google.firebase.ai.ai
+import com.google.firebase.ai.type.GenerativeBackend
+import com.google.firebase.ai.type.content
 import com.zoewave.probase.features.readers.ocr.data.LocalOcrEngine
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -22,9 +24,10 @@ class FinancialAdvisorEngine @Inject constructor(
         userContext: String? = null,
         deviceBranding: String = "phone"
     ): String = withContext(Dispatchers.Default) {
-        val model = GenerativeModel(
-            modelName = modelName,
-            apiKey = apiKey
+        val model = Firebase.ai(
+            backend = GenerativeBackend.googleAI()
+        ).generativeModel(
+            modelName = modelName.ifBlank { "gemini-1.5-flash" }
         )
 
         val visionText = ocrEngine.extractText(bitmap)

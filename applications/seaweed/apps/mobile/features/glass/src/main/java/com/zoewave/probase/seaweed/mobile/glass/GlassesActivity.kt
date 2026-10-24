@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.camera.core.CameraSelector
@@ -29,8 +30,6 @@ import androidx.xr.glimmer.GlimmerTheme
 import androidx.xr.glimmer.googlefonts.createGoogleSansFlexTypography
 import androidx.xr.projected.ProjectedContext
 import androidx.xr.projected.experimental.ExperimentalProjectedApi
-import androidx.xr.projected.permissions.ProjectedPermissionsRequestParams
-import androidx.xr.projected.permissions.ProjectedPermissionsResultContract
 import com.zoewave.probase.core.data.repository.LiveAiRepository
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -44,10 +43,9 @@ class GlassesActivity : ComponentActivity() {
     private val viewModel: SeaweedGlassViewModel by viewModels()
     private lateinit var audioInterface: SeaweedAudioInterface
 
-    @OptIn(ExperimentalProjectedApi::class)
     private val requestPermissionLauncher =
-        registerForActivityResult(ProjectedPermissionsResultContract()) { results ->
-            if (results[Manifest.permission.CAMERA] == true) {
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            if (isGranted) {
                 Log.d("GlassesActivity", "Camera permission granted on glasses")
             } else {
                 audioInterface.speak("Camera permission is required to analyze items.")
@@ -128,15 +126,10 @@ class GlassesActivity : ComponentActivity() {
         }
     }
 
-    @OptIn(ExperimentalProjectedApi::class)
     private fun checkAndRequestCameraPermission() {
         val permission = Manifest.permission.CAMERA
         if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
-            val params = ProjectedPermissionsRequestParams(
-                permissions = listOf(permission),
-                rationale = "Seaweed needs camera access to analyze products from your glasses."
-            )
-            requestPermissionLauncher.launch(listOf(params))
+            requestPermissionLauncher.launch(permission)
         }
     }
 

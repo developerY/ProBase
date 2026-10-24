@@ -2,8 +2,10 @@ package com.zoewave.probase.features.ai.vision.receipt
 
 import android.graphics.Bitmap
 import android.util.Log
-import com.google.ai.client.generativeai.GenerativeModel
-import com.google.ai.client.generativeai.type.content
+import com.google.firebase.Firebase
+import com.google.firebase.ai.ai
+import com.google.firebase.ai.type.GenerativeBackend
+import com.google.firebase.ai.type.content
 import com.zoewave.probase.features.readers.ocr.data.LocalOcrEngine
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -12,12 +14,6 @@ import kotlinx.serialization.json.Json
 class SmartReceiptScanner(
     private val ocrEngine: LocalOcrEngine
 ) {
-
-    // We use a separate model for Nano as requested, though API might vary by SDK version
-    private val generativeModel = GenerativeModel(
-        modelName = "gemini-nano",
-        apiKey = "" // On-device Nano doesn't always need a key if managed by AICore
-    )
 
     private val json = Json { ignoreUnknownKeys = true }
 
@@ -28,10 +24,12 @@ class SmartReceiptScanner(
 
         if (visionText.isBlank() && userContext == null) return@withContext ReceiptResult()
 
-        // 2. Try Gemini Nano
+        // 2. Try Gemini Nano / Local AI via Firebase
         try {
-            // In a real production app, you'd check availability via AICore first.
-            // For this implementation, we attempt and catch availability/unsupported errors as a fallback mechanism.
+            val generativeModel = Firebase.ai(
+                backend = GenerativeBackend.googleAI()
+            ).generativeModel(modelName = "gemini-1.5-flash")
+
             val contextPrompt = userContext?.let { "\nUser provided context: $it" } ?: ""
             val prompt = """
                 what is this a picture of?
@@ -57,8 +55,6 @@ class SmartReceiptScanner(
             val cleanedJson = jsonText.substringAfter("{").substringBeforeLast("}")
             val fullJson = "{$cleanedJson}"
             
-            // Note: We'd normally map specific AI keys to our ReceiptResult
-            // For brevity, we assume the AI follows the requested keys
             val result = json.decodeFromString<ReceiptResult>(fullJson)
             result
         } catch (_: Exception) {

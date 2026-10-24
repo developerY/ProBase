@@ -3,6 +3,8 @@ package com.zoewave.probase.goswift.mobile.settings.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.goswift.data.ShotRepository
+import com.zoewave.probase.goswift.data.ThemeMode
+import com.zoewave.probase.goswift.data.ThemeRepository
 import com.zoewave.probase.goswift.model.CaffeineShot
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -52,6 +54,7 @@ enum class HapticPattern(val label: String) {
 }
 
 data class SettingsUiState(
+    val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val microdoseQuantum: MicrodoseQuantum = MicrodoseQuantum.STANDARD_15MG,
     val caffeineCeilingMg: Float = 120f,
     val curfewEnabled: Boolean = true,
@@ -69,11 +72,24 @@ data class SettingsUiState(
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val shotRepository: ShotRepository
+    private val shotRepository: ShotRepository,
+    private val themeRepository: ThemeRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            themeRepository.themeMode.collect { mode ->
+                _uiState.update { it.copy(themeMode = mode) }
+            }
+        }
+    }
+
+    fun updateThemeMode(themeMode: ThemeMode) {
+        themeRepository.setThemeMode(themeMode)
+    }
 
     fun updateHealthConnectStatus(connected: Boolean) {
         _uiState.update { it.copy(isHealthConnectConnected = connected) }

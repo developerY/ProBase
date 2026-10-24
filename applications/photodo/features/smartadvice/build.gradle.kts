@@ -21,6 +21,9 @@ dependencies {
     implementation(project(":features:ai:configuration"))
 
     // --- ML & AI ---
+    implementation(project(":features:ai:firebase"))
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.ai)
 
     // --- Third Party ---
     implementation(libs.compose.markdown)
