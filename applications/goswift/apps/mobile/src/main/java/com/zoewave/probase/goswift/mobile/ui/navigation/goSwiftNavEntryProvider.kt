@@ -11,7 +11,7 @@ import com.zoewave.probase.goswift.features.main.navigation.GoSwiftDestination
 import com.zoewave.probase.goswift.mobile.home.ui.HomeUiRoute
 import com.zoewave.probase.goswift.mobile.settings.ui.SettingsUiRoute
 import com.zoewave.probase.goswift.mobile.shots.ui.ShotsUiRoute
-import com.zoewave.probase.goswift.mobile.ui.routes.HealthSyncUiRoute
+import com.zoewave.probase.goswift.mobile.healthsync.ui.HealthSyncUiRoute
 import com.zoewave.probase.goswift.mobile.ui.routes.InsightsUiRoute
 
 @Suppress("UnusedParameter")
