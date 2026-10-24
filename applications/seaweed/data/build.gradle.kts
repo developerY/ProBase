@@ -20,4 +20,8 @@ dependencies {
     implementation(project(":core:data"))
     implementation(project(":core:util"))
     implementation(libs.androidx.core.ktx)
+    
+    implementation(libs.tinkAndroid)
+    implementation("net.zetetic:android-database-sqlcipher:4.5.4")
+    implementation("androidx.sqlite:sqlite-ktx:2.4.0")
 }
