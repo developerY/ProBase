@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -57,7 +58,19 @@ fun ShotsUiScreen(
     uiState: ShotsUiState = ShotsUiState.Loading,
     onLogMicrodose: () -> Unit = {}
 ) {
-    val success = uiState as? ShotsUiState.Success ?: ShotsUiState.Success()
+    if (uiState is ShotsUiState.Loading) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0xFF101418)),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(color = Color(0xFFFF6F61))
+        }
+        return
+    }
+
+    val success = uiState as ShotsUiState.Success
     var searchQuery by remember { mutableStateOf("") }
     var selectedTimeFilter by remember { mutableStateOf("Day") }
 
@@ -223,10 +236,22 @@ fun ShotsUiScreen(
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     Icon(Icons.Default.Search, contentDescription = null, tint = Color(0xFF8B9198), modifier = Modifier.size(18.dp))
-                    Text(
-                        text = if (searchQuery.isEmpty()) "Search 10,482 logs by dose, tag, or trig..." else searchQuery,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color(0xFF8B9198)
+                    BasicTextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        singleLine = true,
+                        textStyle = MaterialTheme.typography.bodyMedium.copy(color = Color(0xFFE1E2E9)),
+                        modifier = Modifier.weight(1f),
+                        decorationBox = { innerTextField ->
+                            if (searchQuery.isEmpty()) {
+                                Text(
+                                    text = "Search logs by dose, tag, or title...",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = Color(0xFF8B9198)
+                                )
+                            }
+                            innerTextField()
+                        }
                     )
                 }
             }
@@ -326,6 +351,17 @@ fun ShotsUiScreen(
             }
 
             // 6. Today's Dose Group
+            val filteredItems = remember(success.todayGroup.items, searchQuery, selectedTimeFilter) {
+                success.todayGroup.items.filter { dose ->
+                    searchQuery.isEmpty() ||
+                        dose.title.contains(searchQuery, ignoreCase = true) ||
+                        dose.description.contains(searchQuery, ignoreCase = true) ||
+                        dose.doseType.contains(searchQuery, ignoreCase = true) ||
+                        dose.doseCategory.contains(searchQuery, ignoreCase = true) ||
+                        dose.tags.any { it.contains(searchQuery, ignoreCase = true) }
+                }
+            }
+
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 // Today Group Header
                 Row(
@@ -341,7 +377,7 @@ fun ShotsUiScreen(
                             shape = RoundedCornerShape(12.dp)
                         ) {
                             Text(
-                                text = "${success.todayGroup.doseCount} Doses • ${success.todayGroup.totalMg}mg",
+                                text = "${filteredItems.size} Doses • ${filteredItems.sumOf { it.amountMg }}mg",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = Color(0xFFFFDCBE),
                                 fontWeight = FontWeight.Bold,
@@ -353,8 +389,17 @@ fun ShotsUiScreen(
                 }
 
                 // Dose Cards for Today
-                success.todayGroup.items.forEach { dose ->
-                    DoseCard(dose = dose)
+                if (filteredItems.isEmpty()) {
+                    Text(
+                        text = "No microdoses found matching filter",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color(0xFF8B9198),
+                        modifier = Modifier.padding(vertical = 12.dp)
+                    )
+                } else {
+                    filteredItems.forEach { dose ->
+                        DoseCard(dose = dose)
+                    }
                 }
             }
 
@@ -562,7 +607,7 @@ fun DoseCard(dose: DoseCardItem) {
         border = BorderStroke(1.dp, Color(0xFF242C34)),
         modifier = Modifier.fillMaxWidth()
     ) {
-        Row(modifier = Modifier.fillMaxWidth()) {
+        Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Max)) {
             // Left vertical accent stripe
             Box(
                 modifier = Modifier

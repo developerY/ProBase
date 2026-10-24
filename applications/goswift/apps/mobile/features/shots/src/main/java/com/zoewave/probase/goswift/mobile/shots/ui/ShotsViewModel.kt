@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.UUID
@@ -22,12 +23,19 @@ class ShotsViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val timeFormatter = DateTimeFormatter.ofPattern("hh:mm a").withZone(ZoneId.systemDefault())
+    private val monthDayFormatter = DateTimeFormatter.ofPattern("MMM dd")
 
     val uiState: StateFlow<ShotsUiState> = repository.getAllShots()
         .map { shots ->
-            val mappedItems = if (shots.isNotEmpty()) {
-                shots.mapIndexed { index, shot ->
-                    val doseNum = shots.size - index
+            val zoneId = ZoneId.systemDefault()
+            val today = LocalDate.now(zoneId)
+            val todayShots = shots.filter { shot ->
+                Instant.ofEpochMilli(shot.timestamp).atZone(zoneId).toLocalDate() == today
+            }
+
+            val mappedItems = if (todayShots.isNotEmpty()) {
+                todayShots.mapIndexed { index, shot ->
+                    val doseNum = todayShots.size - index
                     DoseCardItem(
                         id = shot.id,
                         doseNumber = doseNum,
@@ -44,9 +52,11 @@ class ShotsViewModel @Inject constructor(
                 }
             } else null
 
+            val dateLabel = "Today, ${today.format(monthDayFormatter)}"
+
             val todayGroup = if (mappedItems != null) {
                 DayDoseGroup(
-                    dateLabel = "Today, Oct 24",
+                    dateLabel = dateLabel,
                     doseCount = mappedItems.size,
                     totalMg = mappedItems.sumOf { it.amountMg },
                     rangeStatus = "Optimal Range",
@@ -54,7 +64,7 @@ class ShotsViewModel @Inject constructor(
                 )
             } else {
                 DayDoseGroup(
-                    dateLabel = "Today, Oct 24",
+                    dateLabel = dateLabel,
                     doseCount = 3,
                     totalMg = 100,
                     rangeStatus = "Optimal Range",
@@ -137,3 +147,4 @@ class ShotsViewModel @Inject constructor(
         }
     }
 }
+
