@@ -1,5 +1,6 @@
 package com.zoewave.probase.goswift.mobile.ui.routes
 
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -22,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -29,11 +31,18 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun InsightsUiRoute() {
-    InsightsUiScreen()
+    val context = LocalContext.current
+    InsightsUiScreen(
+        onExportReport = {
+            Toast.makeText(context, "Exporting Physician & Coach Report (PDF)...", Toast.LENGTH_SHORT).show()
+        }
+    )
 }
 
 @Composable
-fun InsightsUiScreen() {
+fun InsightsUiScreen(
+    onExportReport: () -> Unit = {}
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -252,7 +261,7 @@ fun InsightsUiScreen() {
                     color = Color(0xFFE1E2E9)
                 )
                 Button(
-                    onClick = { /* Export PDF */ },
+                    onClick = onExportReport,
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF6F61), contentColor = Color(0xFF101418)),
                     shape = RoundedCornerShape(12.dp)
@@ -336,7 +345,7 @@ fun WeeklyBar(day: String, heightFraction: Float) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .fillMaxHeight(heightFraction)
+                    .fillMaxHeight(heightFraction.coerceIn(0f, 1f))
                     .background(Color(0xFFFF6F61), RoundedCornerShape(4.dp))
             )
         }

@@ -124,8 +124,14 @@ fun HealthSyncUiRoute(
         latestHeartRateBpm = uiState.latestHeartRateBpm,
         latestHrvMs = uiState.latestHrvMs,
         totalSleepMinutes = uiState.totalSleepMinutes,
+        deepSleepMinutes = uiState.deepSleepMinutes,
+        remSleepMinutes = uiState.remSleepMinutes,
+        activeCalories = uiState.activeCalories,
+        stepCount = uiState.stepCount,
+        backgroundPollingEnabled = uiState.backgroundPollingEnabled,
         isLoading = uiState.isLoading,
         onActionClick = { handleSyncOrPermissions() },
+        onToggleBackgroundPolling = { viewModel.toggleBackgroundPolling(it) },
         onNavigateBack = onNavigateBack
     )
 }
@@ -137,11 +143,16 @@ fun HealthSyncUiScreen(
     latestHeartRateBpm: Long?,
     latestHrvMs: Double?,
     totalSleepMinutes: Long?,
-    isLoading: Boolean,
-    onActionClick: () -> Unit,
+    deepSleepMinutes: Long? = null,
+    remSleepMinutes: Long? = null,
+    activeCalories: Long? = null,
+    stepCount: Long? = null,
+    backgroundPollingEnabled: Boolean = true,
+    isLoading: Boolean = false,
+    onActionClick: () -> Unit = {},
+    onToggleBackgroundPolling: (Boolean) -> Unit = {},
     onNavigateBack: () -> Unit = {}
 ) {
-    var backgroundPollingEnabled by remember { mutableStateOf(true) }
 
     Column(
         modifier = Modifier
@@ -453,9 +464,8 @@ fun HealthSyncUiScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text("Deep: 1h 24m", style = MaterialTheme.typography.labelSmall, color = Color(0xFFFF6F61))
-                        Text("REM: 1h 52m", style = MaterialTheme.typography.labelSmall, color = Color(0xFFFDBA74))
-                        Text("Adenosine: 96%", style = MaterialTheme.typography.labelSmall, color = Color(0xFFFEF08A))
+                        Text(if (deepSleepMinutes != null) "Deep: ${deepSleepMinutes / 60}h ${deepSleepMinutes % 60}m" else "Deep: --", style = MaterialTheme.typography.labelSmall, color = Color(0xFFFF6F61))
+                        Text(if (remSleepMinutes != null) "REM: ${remSleepMinutes / 60}h ${remSleepMinutes % 60}m" else "REM: --", style = MaterialTheme.typography.labelSmall, color = Color(0xFFFDBA74))
                     }
                 }
             }
@@ -466,7 +476,9 @@ fun HealthSyncUiScreen(
             color = Color(0xFF1C2228),
             shape = RoundedCornerShape(16.dp),
             border = BorderStroke(1.dp, Color(0xFF242C34)),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .alpha(if (activeCalories != null || stepCount != null) 1.0f else 0.4f)
         ) {
             Row(
                 modifier = Modifier.padding(16.dp),
@@ -484,8 +496,8 @@ fun HealthSyncUiScreen(
                     }
                 }
                 Column(horizontalAlignment = Alignment.End) {
-                    Text("1,850 kcal", style = MaterialTheme.typography.bodyLarge, color = Color(0xFFE1E2E9), fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
-                    Text("8,420 steps", style = MaterialTheme.typography.labelSmall, color = Color(0xFFFDBA74))
+                    Text(if (activeCalories != null) "$activeCalories kcal" else "-- kcal", style = MaterialTheme.typography.bodyLarge, color = Color(0xFFE1E2E9), fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                    Text(if (stepCount != null) "$stepCount steps" else "-- steps", style = MaterialTheme.typography.labelSmall, color = Color(0xFFFDBA74))
                 }
             }
         }
@@ -519,7 +531,7 @@ fun HealthSyncUiScreen(
                     }
                     Switch(
                         checked = backgroundPollingEnabled,
-                        onCheckedChange = { backgroundPollingEnabled = it },
+                        onCheckedChange = onToggleBackgroundPolling,
                         colors = SwitchDefaults.colors(checkedThumbColor = Color(0xFFFF6F61), checkedTrackColor = Color(0xFF242C34))
                     )
                 }

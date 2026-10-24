@@ -11,10 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bedtime
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Science
-import androidx.compose.material.icons.filled.Schedule
-import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -25,14 +22,26 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 
 @Composable
-fun ShotsUiRoute() {
-    ShotsUiScreen()
+fun ShotsUiRoute(
+    viewModel: ShotsViewModel = hiltViewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
+    ShotsUiScreen(uiState = uiState)
 }
 
 @Composable
-fun ShotsUiScreen() {
+fun ShotsUiScreen(
+    uiState: ShotsUiState = ShotsUiState.Loading
+) {
+    val successState = uiState as? ShotsUiState.Success
+    val intendedMg = successState?.intendedActiveDosingMg ?: 73
+    val loggedMg = successState?.loggedMg ?: 35
+    val safeCeilingMg = successState?.safeCeilingMg ?: 120
+    val timelineItems = successState?.timelineItems ?: emptyList()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -130,7 +139,7 @@ fun ShotsUiScreen() {
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = "73",
+                        text = "$intendedMg",
                         style = MaterialTheme.typography.headlineLarge,
                         color = Color(0xFFFFB4AA),
                         fontSize = 48.sp,
@@ -138,7 +147,7 @@ fun ShotsUiScreen() {
                         fontFamily = FontFamily.Monospace
                     )
                     Text(
-                        text = "mg / 120mg Safe Ceiling",
+                        text = "mg / ${safeCeilingMg}mg Safe Ceiling",
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color(0xFF8B9198),
                         modifier = Modifier.padding(bottom = 8.dp)
@@ -146,7 +155,7 @@ fun ShotsUiScreen() {
                 }
 
                 LinearProgressIndicator(
-                    progress = 73f / 120f,
+                    progress = (loggedMg.toFloat() / safeCeilingMg.toFloat()).coerceIn(0f, 1f),
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(8.dp),
@@ -158,7 +167,8 @@ fun ShotsUiScreen() {
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text("Logged: 35mg (48%)", style = MaterialTheme.typography.bodySmall, color = Color(0xFF8B9198))
+                    val percent = if (intendedMg > 0) (loggedMg * 100 / intendedMg) else 0
+                    Text("Logged: ${loggedMg}mg ($percent%)", style = MaterialTheme.typography.bodySmall, color = Color(0xFF8B9198))
                     Text("REM Buffer: Optimal", style = MaterialTheme.typography.bodySmall, color = Color(0xFFFDBA74))
                 }
             }
@@ -253,52 +263,18 @@ fun ShotsUiScreen() {
         }
 
         // Timeline Items
-        TimelineItem(
-            time = "08:30 AM",
-            title = "Morning Activation",
-            subtitle = "Espresso • Focus Booster 100% sustained through 11 AM",
-            amount = "35mg",
-            status = "Logged",
-            isCompleted = true
-        )
-
-        TimelineItem(
-            time = "11:15 AM",
-            title = "Deep Work Sprint",
-            subtitle = "Green Tea • Pre-empts high cognitive demand crash",
-            amount = "20mg",
-            status = "Logged",
-            isCompleted = true
-        )
-
-        TimelineItem(
-            time = "02:15 PM",
-            title = "Afternoon Focus Window",
-            subtitle = "AI Recommended • Paired with 250ml water for C3 peak",
-            amount = "18mg",
-            status = "In 38m",
-            isCompleted = false,
-            isNextWindow = true
-        )
-
-        TimelineItem(
-            time = "04:30 PM",
-            title = "Pre-Workout Primer",
-            subtitle = "Citrus Surge • 15mg Microdose for cardio sprint",
-            amount = "15mg",
-            status = "Scheduled",
-            isCompleted = false
-        )
-
-        TimelineItem(
-            time = "07:00 PM",
-            title = "Caffeine Cutoff",
-            subtitle = "Strict curfew • Zero active caffeine remaining by 10:30 PM bedtime",
-            amount = "0mg",
-            status = "Curfew",
-            isCompleted = false,
-            isCurfew = true
-        )
+        timelineItems.forEach { item ->
+            TimelineItem(
+                time = item.time,
+                title = item.title,
+                subtitle = item.subtitle,
+                amount = "${item.amountMg}mg",
+                status = item.status,
+                isCompleted = item.isCompleted,
+                isNextWindow = item.isNextWindow,
+                isCurfew = item.isCurfew
+            )
+        }
 
         // CYP1A2 Gene Profile Footer Card
         Surface(

@@ -17,6 +17,7 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:util"))
     implementation(project(":applications:goswift:data"))
+    implementation(project(":applications:goswift:model"))
     implementation(project(":applications:goswift:features:main"))
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.extended)

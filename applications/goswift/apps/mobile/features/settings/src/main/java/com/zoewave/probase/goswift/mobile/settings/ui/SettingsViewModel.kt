@@ -1,11 +1,17 @@
 package com.zoewave.probase.goswift.mobile.settings.ui
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.zoewave.probase.goswift.data.ShotRepository
+import com.zoewave.probase.goswift.model.CaffeineShot
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import java.util.Random
+import java.util.UUID
 import javax.inject.Inject
 
 enum class MicrodoseQuantum(val label: String, val mgText: String) {
@@ -62,7 +68,9 @@ data class SettingsUiState(
 )
 
 @HiltViewModel
-class SettingsViewModel @Inject constructor() : ViewModel() {
+class SettingsViewModel @Inject constructor(
+    private val shotRepository: ShotRepository
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
@@ -113,6 +121,33 @@ class SettingsViewModel @Inject constructor() : ViewModel() {
 
     fun purgeCache() {
         _uiState.update { it.copy(cacheSizeMb = 0.0, toastMessage = "Local inference cache purged") }
+    }
+
+    fun generateDebugData() {
+        viewModelScope.launch {
+            val now = System.currentTimeMillis()
+            val random = Random()
+            val mgOptions = intArrayOf(15, 20, 25, 35, 50, 65)
+
+            // Generate ~2 to 4 shots per day for the last 21 days (3 weeks)
+            for (day in 0 until 21) {
+                val dayStart = now - (day * 24 * 60 * 60 * 1000L)
+                val shotsCount = 2 + random.nextInt(3)
+                repeat(shotsCount) {
+                    val randomOffset = kotlin.math.abs(random.nextLong()) % (14 * 60 * 60 * 1000L)
+                    val shotTimestamp = dayStart - randomOffset
+                    val mg = mgOptions[random.nextInt(mgOptions.size)]
+                    shotRepository.addShot(
+                        CaffeineShot(
+                            id = UUID.randomUUID().toString(),
+                            mg = mg,
+                            timestamp = shotTimestamp
+                        )
+                    )
+                }
+            }
+            _uiState.update { it.copy(toastMessage = "Seeded 3 weeks of random telemetry & shots!") }
+        }
     }
 
     fun clearToast() {

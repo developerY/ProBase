@@ -6,6 +6,8 @@ import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.HeartRateRecord
 import androidx.health.connect.client.records.HeartRateVariabilityRmssdRecord
 import androidx.health.connect.client.records.SleepSessionRecord
+import androidx.health.connect.client.records.StepsRecord
+import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
 import androidx.health.connect.client.request.ReadRecordsRequest
 import androidx.health.connect.client.time.TimeRangeFilter
 import androidx.lifecycle.ViewModel
@@ -29,6 +31,11 @@ data class HealthSyncUiState(
     val latestHeartRateBpm: Long? = null,
     val latestHrvMs: Double? = null,
     val totalSleepMinutes: Long? = null,
+    val deepSleepMinutes: Long? = null,
+    val remSleepMinutes: Long? = null,
+    val activeCalories: Long? = null,
+    val stepCount: Long? = null,
+    val backgroundPollingEnabled: Boolean = true,
     val isLoading: Boolean = true
 )
 
@@ -41,8 +48,14 @@ class HealthSyncViewModel @Inject constructor() : ViewModel() {
     val requiredPermissions = setOf(
         HealthPermission.getReadPermission(SleepSessionRecord::class),
         HealthPermission.getReadPermission(HeartRateVariabilityRmssdRecord::class),
-        HealthPermission.getReadPermission(HeartRateRecord::class)
+        HealthPermission.getReadPermission(HeartRateRecord::class),
+        HealthPermission.getReadPermission(StepsRecord::class),
+        HealthPermission.getReadPermission(ActiveCaloriesBurnedRecord::class)
     )
+
+    fun toggleBackgroundPolling(enabled: Boolean) {
+        _uiState.update { it.copy(backgroundPollingEnabled = enabled) }
+    }
 
     fun loadRealHealthData(context: Context) {
         val status = HealthConnectClient.getSdkStatus(context)
@@ -97,12 +110,36 @@ class HealthSyncViewModel @Inject constructor() : ViewModel() {
                         sleepRecords.sumOf { Duration.between(it.startTime, it.endTime).toMinutes() }
                     } else null
 
+                    // Real Steps
+                    val stepRecords = client.readRecords(
+                        ReadRecordsRequest(
+                            recordType = StepsRecord::class,
+                            timeRangeFilter = TimeRangeFilter.between(startOf24h, now)
+                        )
+                    ).records
+                    val stepCount = if (stepRecords.isNotEmpty()) {
+                        stepRecords.sumOf { it.count }
+                    } else null
+
+                    // Real Calories
+                    val calorieRecords = client.readRecords(
+                        ReadRecordsRequest(
+                            recordType = ActiveCaloriesBurnedRecord::class,
+                            timeRangeFilter = TimeRangeFilter.between(startOf24h, now)
+                        )
+                    ).records
+                    val activeCalories = if (calorieRecords.isNotEmpty()) {
+                        calorieRecords.sumOf { it.energy.inKilocalories.toLong() }
+                    } else null
+
                     _uiState.update {
                         it.copy(
                             isGranted = true,
                             latestHeartRateBpm = latestHeartRateBpm,
                             latestHrvMs = latestHrvMs,
                             totalSleepMinutes = totalSleepMinutes,
+                            activeCalories = activeCalories,
+                            stepCount = stepCount,
                             isLoading = false
                         )
                     }
@@ -113,6 +150,8 @@ class HealthSyncViewModel @Inject constructor() : ViewModel() {
                             latestHeartRateBpm = null,
                             latestHrvMs = null,
                             totalSleepMinutes = null,
+                            activeCalories = null,
+                            stepCount = null,
                             isLoading = false
                         )
                     }
@@ -125,6 +164,8 @@ class HealthSyncViewModel @Inject constructor() : ViewModel() {
                         latestHeartRateBpm = null,
                         latestHrvMs = null,
                         totalSleepMinutes = null,
+                        activeCalories = null,
+                        stepCount = null,
                         isLoading = false
                     )
                 }

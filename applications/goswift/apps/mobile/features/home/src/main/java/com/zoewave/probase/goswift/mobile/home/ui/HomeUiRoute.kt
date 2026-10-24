@@ -44,6 +44,7 @@ fun HomeUiRoute(
     HomeUiScreen(
         uiState = uiState,
         onLogIntake = { viewModel.logIntake(it) },
+        onLogWaterIntake = { viewModel.logWaterIntake(it) },
         onNavigateToSync = onNavigateToSync
     )
 }
@@ -52,6 +53,7 @@ fun HomeUiRoute(
 fun HomeUiScreen(
     uiState: HomeUiState,
     onLogIntake: (Double) -> Unit,
+    onLogWaterIntake: (Double) -> Unit = {},
     onNavigateToSync: () -> Unit = {}
 ) {
     Column(
@@ -408,7 +410,7 @@ fun HomeUiScreen(
                 }
             }
             Button(
-                onClick = { /* Water hydration logging */ },
+                onClick = { onLogWaterIntake(300.0) },
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1C2228), contentColor = Color(0xFFE1E2E9)),
                 shape = RoundedCornerShape(12.dp),
@@ -443,7 +445,7 @@ fun HomeUiScreen(
                 border = BorderStroke(1.dp, Color(0xFF242C34)),
                 modifier = Modifier
                     .weight(1f)
-                    .alpha(1.0f)
+                    .alpha(if (uiState.heartRateBpm != null) 1.0f else 0.4f)
             ) {
                 Column(
                     modifier = Modifier.padding(12.dp),
@@ -458,10 +460,10 @@ fun HomeUiScreen(
                         Icon(Icons.Default.Favorite, contentDescription = null, tint = Color(0xFFFF6F61), modifier = Modifier.size(16.dp))
                     }
                     Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text("68", style = MaterialTheme.typography.headlineLarge, color = Color(0xFFE1E2E9), fontWeight = FontWeight.Bold)
+                        Text(uiState.heartRateBpm?.toString() ?: "--", style = MaterialTheme.typography.headlineLarge, color = Color(0xFFE1E2E9), fontWeight = FontWeight.Bold)
                         Text("BPM", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198), modifier = Modifier.padding(bottom = 4.dp))
                     }
-                    Text("HRV 62ms • Stable Baseline", style = MaterialTheme.typography.labelSmall, color = Color(0xFFFFB4AA))
+                    Text(if (uiState.hrvMs != null) "HRV ${uiState.hrvMs.toInt()}ms • Stable Baseline" else "HRV -- • No Stream", style = MaterialTheme.typography.labelSmall, color = Color(0xFFFFB4AA))
                 }
             }
 
@@ -472,7 +474,7 @@ fun HomeUiScreen(
                 border = BorderStroke(1.dp, Color(0xFF242C34)),
                 modifier = Modifier
                     .weight(1f)
-                    .alpha(0.5f) // Grayed out if continuous CGM stream is not active
+                    .alpha(if (uiState.glucoseMgDl != null) 1.0f else 0.4f)
             ) {
                 Column(
                     modifier = Modifier.padding(12.dp),
@@ -487,7 +489,7 @@ fun HomeUiScreen(
                         Icon(Icons.Default.ShowChart, contentDescription = null, tint = Color(0xFFFDBA74), modifier = Modifier.size(16.dp))
                     }
                     Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text("94", style = MaterialTheme.typography.headlineLarge, color = Color(0xFF8B9198), fontWeight = FontWeight.Bold)
+                        Text(uiState.glucoseMgDl?.toInt()?.toString() ?: "--", style = MaterialTheme.typography.headlineLarge, color = Color(0xFF8B9198), fontWeight = FontWeight.Bold)
                         Text("mg/dL", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198), modifier = Modifier.padding(bottom = 4.dp))
                     }
                     Text("Steady • No Spike Detected", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198))
@@ -518,10 +520,10 @@ fun HomeUiScreen(
                         Icon(Icons.Default.Opacity, contentDescription = null, tint = Color(0xFFFDBA74), modifier = Modifier.size(16.dp))
                     }
                     Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text("1,850", style = MaterialTheme.typography.headlineLarge, color = Color(0xFFE1E2E9), fontWeight = FontWeight.Bold)
+                        Text("${uiState.hydrationMl.toInt()}", style = MaterialTheme.typography.headlineLarge, color = Color(0xFFE1E2E9), fontWeight = FontWeight.Bold)
                         Text("/ 2.4k ml", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198), modifier = Modifier.padding(bottom = 4.dp))
                     }
-                    Text("82% of optimal hydration", style = MaterialTheme.typography.labelSmall, color = Color(0xFFFEF08A))
+                    Text("${(uiState.hydrationMl / 2400.0 * 100).toInt()}% of optimal hydration", style = MaterialTheme.typography.labelSmall, color = Color(0xFFFEF08A))
                 }
             }
 
@@ -547,7 +549,7 @@ fun HomeUiScreen(
                         Icon(Icons.Default.SolarPower, contentDescription = null, tint = Color(0xFFFF6F61), modifier = Modifier.size(16.dp))
                     }
                     Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text("88", style = MaterialTheme.typography.headlineLarge, color = Color(0xFFFFB4AA), fontWeight = FontWeight.Bold)
+                        Text("${uiState.circadianIndex}", style = MaterialTheme.typography.headlineLarge, color = Color(0xFFFFB4AA), fontWeight = FontWeight.Bold)
                         Text("/ 100", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198), modifier = Modifier.padding(bottom = 4.dp))
                     }
                     Text("Cognitive Zenith Active", style = MaterialTheme.typography.labelSmall, color = Color(0xFFFFB4AA))
