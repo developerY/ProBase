@@ -112,13 +112,43 @@ class ShotsViewModel @Inject constructor(
                 )
             }
 
+            val yesterday = today.minusDays(1)
+            val yesterdayShots = shots.filter { shot ->
+                Instant.ofEpochMilli(shot.timestamp).atZone(zoneId).toLocalDate() == yesterday
+            }
+
+            val mappedYesterdayItems = yesterdayShots.mapIndexed { index, shot ->
+                val doseNum = yesterdayShots.size - index
+                DoseCardItem(
+                    id = shot.id,
+                    doseNumber = doseNum,
+                    time = timeFormatter.format(Instant.ofEpochMilli(shot.timestamp)),
+                    doseType = if (shot.mg <= 25) "Focus Sprint" else "Post-Lunch Rescue",
+                    doseCategory = if (shot.mg <= 25) "MICRO-DROP" else "BOLUS DOSE",
+                    amountMg = shot.mg,
+                    title = "${shot.mg}mg Fuel Ingestion",
+                    description = if (shot.mg <= 25) "Sublingual drops (Yuzu Citrus)" else "AeroPress Single Origin • Light Roast",
+                    tags = if (shot.mg <= 25) listOf("💚 HRV +4%", "💧 +180ml H2O", "✓ Cleared In-System") else listOf("⚡ Glycemic Stable", "✓ On-Device Logged"),
+                    accentColorHex = if (shot.mg <= 25) 0xFFFF6F61 else 0xFFFDBA74,
+                    iconType = if (shot.mg <= 25) "bolt" else "coffee"
+                )
+            }
+
             val totalDoses = 10482 + shots.size
+
+            val yesterdaySummary = if (mappedYesterdayItems.isNotEmpty()) {
+                "#${mappedYesterdayItems.first().doseNumber} - #${mappedYesterdayItems.last().doseNumber} (${mappedYesterdayItems.joinToString(", ") { "${it.amountMg}mg" }})"
+            } else "No doses recorded"
 
             ShotsUiState.Success(
                 shots = shots,
                 totalTelemetryDoses = totalDoses,
-                todayGroup = todayGroup
-            ) as ShotsUiState
+                todayGroup = todayGroup,
+                yesterdayCount = mappedYesterdayItems.size,
+                yesterdayTotalMg = mappedYesterdayItems.sumOf { it.amountMg },
+                yesterdaySummaryText = yesterdaySummary,
+                yesterdayItems = mappedYesterdayItems
+            )
         }
         .stateIn(
             scope = viewModelScope,

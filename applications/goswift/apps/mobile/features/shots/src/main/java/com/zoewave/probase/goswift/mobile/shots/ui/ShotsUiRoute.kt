@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.HourglassTop
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.LocalCafe
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Science
@@ -74,6 +75,8 @@ fun ShotsUiScreen(
     val success = uiState as ShotsUiState.Success
     var searchQuery by remember { mutableStateOf("") }
     var selectedTimeFilter by remember { mutableStateOf("Day") }
+    var isTodayExpanded by remember { mutableStateOf(true) }
+    var isYesterdayExpanded by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxSize().background(Color(0xFF101418))) {
         Column(
@@ -352,7 +355,7 @@ fun ShotsUiScreen(
             }
 
             // 6. Today's Dose Group
-            val filteredItems = remember(success.todayGroup.items, searchQuery, selectedTimeFilter) {
+            val filteredTodayItems = remember(success.todayGroup.items, searchQuery, selectedTimeFilter) {
                 success.todayGroup.items.filter { dose ->
                     searchQuery.isEmpty() ||
                         dose.title.contains(searchQuery, ignoreCase = true) ||
@@ -363,10 +366,25 @@ fun ShotsUiScreen(
                 }
             }
 
+            val filteredYesterdayItems = remember(success.yesterdayItems, searchQuery, selectedTimeFilter) {
+                success.yesterdayItems.filter { dose ->
+                    searchQuery.isEmpty() ||
+                        dose.title.contains(searchQuery, ignoreCase = true) ||
+                        dose.description.contains(searchQuery, ignoreCase = true) ||
+                        dose.doseType.contains(searchQuery, ignoreCase = true) ||
+                        dose.doseCategory.contains(searchQuery, ignoreCase = true) ||
+                        dose.tags.any { it.contains(searchQuery, ignoreCase = true) }
+                }
+            }
+
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                // Today Group Header
+                // Today Group Header (Expandable / Collapsible)
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable { isTodayExpanded = !isTodayExpanded }
+                        .padding(vertical = 4.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -378,7 +396,7 @@ fun ShotsUiScreen(
                             shape = RoundedCornerShape(12.dp)
                         ) {
                             Text(
-                                text = "${filteredItems.size} Doses • ${filteredItems.sumOf { it.amountMg }}mg",
+                                text = "${filteredTodayItems.size} Doses • ${filteredTodayItems.sumOf { it.amountMg }}mg",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = Color(0xFFFFDCBE),
                                 fontWeight = FontWeight.Bold,
@@ -386,52 +404,90 @@ fun ShotsUiScreen(
                             )
                         }
                     }
-                    Text(success.todayGroup.rangeStatus, style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198))
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Text(success.todayGroup.rangeStatus, style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198))
+                        Icon(
+                            imageVector = if (isTodayExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                            contentDescription = if (isTodayExpanded) "Collapse Today" else "Expand Today",
+                            tint = Color(0xFF8B9198),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
 
                 // Dose Cards for Today
-                if (filteredItems.isEmpty()) {
-                    Text(
-                        text = "No microdoses found matching filter",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color(0xFF8B9198),
-                        modifier = Modifier.padding(vertical = 12.dp)
-                    )
-                } else {
-                    filteredItems.forEach { dose ->
-                        DoseCard(dose = dose)
+                if (isTodayExpanded) {
+                    if (filteredTodayItems.isEmpty()) {
+                        Text(
+                            text = "No microdoses found matching filter",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color(0xFF8B9198),
+                            modifier = Modifier.padding(vertical = 12.dp)
+                        )
+                    } else {
+                        filteredTodayItems.forEach { dose ->
+                            DoseCard(dose = dose)
+                        }
                     }
                 }
             }
 
-            // 7. Yesterday Summary Card
+            // 7. Yesterday Summary Card (Expandable / Collapsible)
             Surface(
                 color = Color(0xFF1C2228),
                 shape = RoundedCornerShape(16.dp),
                 border = BorderStroke(1.dp, Color(0xFF242C34)),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Icon(Icons.Default.CalendarMonth, contentDescription = null, tint = Color(0xFF8B9198), modifier = Modifier.size(20.dp))
-                        Column {
-                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Text("Yesterday, Oct 23", style = MaterialTheme.typography.bodyMedium, color = Color(0xFFE1E2E9), fontWeight = FontWeight.Bold)
-                                Surface(
-                                    color = Color(0xFF242C34),
-                                    shape = RoundedCornerShape(10.dp)
-                                ) {
-                                    Text("${success.yesterdayCount} Doses • ${success.yesterdayTotalMg}mg", style = MaterialTheme.typography.labelSmall, color = Color(0xFFFEF08A), modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp))
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable { isYesterdayExpanded = !isYesterdayExpanded },
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            Icon(Icons.Default.CalendarMonth, contentDescription = null, tint = Color(0xFF8B9198), modifier = Modifier.size(20.dp))
+                            Column {
+                                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    Text("Yesterday", style = MaterialTheme.typography.bodyMedium, color = Color(0xFFE1E2E9), fontWeight = FontWeight.Bold)
+                                    Surface(
+                                        color = Color(0xFF242C34),
+                                        shape = RoundedCornerShape(10.dp)
+                                    ) {
+                                        Text("${filteredYesterdayItems.size} Doses • ${filteredYesterdayItems.sumOf { it.amountMg }}mg", style = MaterialTheme.typography.labelSmall, color = Color(0xFFFEF08A), modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp))
+                                    }
+                                }
+                                Text(success.yesterdaySummaryText, style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198))
+                            }
+                        }
+                        Icon(
+                            imageVector = if (isYesterdayExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                            contentDescription = if (isYesterdayExpanded) "Collapse Yesterday" else "Expand Yesterday",
+                            tint = Color(0xFF8B9198),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
+                    if (isYesterdayExpanded) {
+                        Spacer(modifier = Modifier.height(14.dp))
+                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            if (filteredYesterdayItems.isEmpty()) {
+                                Text(
+                                    text = "No microdoses found matching filter",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = Color(0xFF8B9198),
+                                    modifier = Modifier.padding(vertical = 4.dp)
+                                )
+                            } else {
+                                filteredYesterdayItems.forEach { dose ->
+                                    DoseCard(dose = dose)
                                 }
                             }
-                            Text(success.yesterdaySummaryText, style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198))
                         }
                     }
-                    Icon(Icons.Default.KeyboardArrowDown, contentDescription = null, tint = Color(0xFF8B9198))
                 }
             }
 
