@@ -24,4 +24,7 @@ dependencies {
     implementation(libs.tinkAndroid)
     implementation("net.zetetic:android-database-sqlcipher:4.5.4")
     implementation("androidx.sqlite:sqlite-ktx:2.4.0")
+    
+    implementation(libs.work.runtime.ktx)
+    implementation(libs.hilt.work)
 }
