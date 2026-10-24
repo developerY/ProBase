@@ -241,28 +241,28 @@ fun SettingsUiScreen(
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Navigate back",
-                        tint = Color(0xFFE1E2E9)
+                        tint = MaterialTheme.colorScheme.onSurface
                     )
                 }
                 Column {
                     Text(
                         text = "HUMMINGBIRD FUEL",
                         style = MaterialTheme.typography.labelSmall,
-                        color = Color(0xFFFFB4AA),
+                        color = MaterialTheme.colorScheme.primary,
                         letterSpacing = 2.sp
                     )
                     Text(
                         text = "Settings",
                         style = MaterialTheme.typography.headlineLarge,
-                        color = Color(0xFFE1E2E9),
+                        color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.Bold
                     )
                 }
             }
             Surface(
-                color = Color(0xFF1C2228),
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
                 shape = RoundedCornerShape(20.dp),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF41474D))
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
@@ -277,7 +277,7 @@ fun SettingsUiScreen(
                     Text(
                         text = if (uiState.onDeviceInferenceEnabled) "AI Active" else "AI Standby",
                         style = MaterialTheme.typography.labelMedium,
-                        color = Color(0xFFE1E2E9)
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
@@ -285,9 +285,9 @@ fun SettingsUiScreen(
 
         // Profile Section
         Surface(
-            color = Color(0xFF1C2228),
+            color = MaterialTheme.colorScheme.surfaceContainer,
             shape = RoundedCornerShape(24.dp),
-            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF242C34)),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(
@@ -313,54 +313,54 @@ fun SettingsUiScreen(
                             }
                         }
                         Column {
-                            Text("Alex Rivera", style = MaterialTheme.typography.titleMedium, color = Color(0xFFE1E2E9), fontWeight = FontWeight.Bold)
-                            Text("MD-PhD Candidate • Pro Endur...", style = MaterialTheme.typography.bodySmall, color = Color(0xFF8B9198))
+                            Text("Alex Rivera", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
+                            Text("MD-PhD Candidate • Pro Endur...", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
                     IconButton(onClick = { }) {
-                        Icon(Icons.Default.Edit, contentDescription = "Edit Profile", tint = Color(0xFF8B9198))
+                        Icon(Icons.Default.Edit, contentDescription = "Edit Profile", tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
 
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Surface(
-                        color = Color(0xFF693C00),
+                        color = MaterialTheme.colorScheme.secondaryContainer,
                         shape = RoundedCornerShape(8.dp)
                     ) {
                         Text(
                             "PRO METABOLIC TIER • ACTIVE",
                             style = MaterialTheme.typography.labelSmall,
-                            color = Color(0xFFFFDCBE),
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                         )
                     }
                     Surface(
-                        color = Color(0xFF242C34),
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
                         shape = RoundedCornerShape(8.dp)
                     ) {
                         Text(
                             "99.4% Adherence",
                             style = MaterialTheme.typography.labelSmall,
-                            color = Color(0xFFFEF08A),
+                            color = MaterialTheme.colorScheme.secondary,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                         )
                     }
                 }
 
-                HorizontalDivider(color = Color(0xFF242C34))
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Column {
-                        Text("Daily Ceiling", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198))
-                        Text("${uiState.caffeineCeilingMg.toInt()} mg/day limit", style = MaterialTheme.typography.bodyMedium, color = Color(0xFFE1E2E9), fontWeight = FontWeight.Bold)
+                        Text("Daily Ceiling", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("${uiState.caffeineCeilingMg.toInt()} mg/day limit", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
                     }
                     Column(horizontalAlignment = Alignment.End) {
-                        Text("Receptor Sensitivity", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198))
-                        Text("High (Adaptive)", style = MaterialTheme.typography.bodyMedium, color = Color(0xFFFDBA74), fontWeight = FontWeight.Bold)
+                        Text("Receptor Sensitivity", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("High (Adaptive)", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -431,31 +431,31 @@ fun SettingsUiScreen(
         // Section 1: DOSING & PHARMACOKINETICS
         SectionHeader("DOSING & PHARMACOKINETICS", "PK Model v3.2")
         Surface(
-            color = Color(0xFF1C2228),
+            color = MaterialTheme.colorScheme.surfaceContainer,
             shape = RoundedCornerShape(20.dp),
-            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF242C34)),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text("Metabolic Profile (Clearance Rate)", style = MaterialTheme.typography.labelMedium, color = Color(0xFF8B9198))
+                    Text("Metabolic Profile (Clearance Rate)", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Surface(
-                        color = Color(0xFF161B20),
+                        color = MaterialTheme.colorScheme.surfaceContainerLow,
                         shape = RoundedCornerShape(12.dp),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF242C34)),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(modifier = Modifier.padding(12.dp)) {
-                            Text("Fast Metabolizer (A/A Allele)", style = MaterialTheme.typography.bodyMedium, color = Color(0xFFE1E2E9), fontWeight = FontWeight.Bold)
-                            Text("4.8h Elimination Half-Life • Rapid Hepatic Flow", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198))
+                            Text("Fast Metabolizer (A/A Allele)", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
+                            Text("4.8h Elimination Half-Life • Rapid Hepatic Flow", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
                 }
 
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text("Default Microdose Quantum", style = MaterialTheme.typography.labelMedium, color = Color(0xFF8B9198))
-                        Text("${uiState.microdoseQuantum.mgText} Target Dose", style = MaterialTheme.typography.labelSmall, color = Color(0xFFFF6F61), fontWeight = FontWeight.Bold)
+                        Text("Default Microdose Quantum", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("${uiState.microdoseQuantum.mgText} Target Dose", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                     }
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         MicrodoseQuantum.entries.forEach { quantum ->
@@ -468,17 +468,17 @@ fun SettingsUiScreen(
 
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text("Daily Caffeine Ceiling", style = MaterialTheme.typography.labelMedium, color = Color(0xFF8B9198))
-                        Text("${uiState.caffeineCeilingMg.toInt()} mg / 150 Safe Max", style = MaterialTheme.typography.labelSmall, color = Color(0xFFFDBA74), fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                        Text("Daily Caffeine Ceiling", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("${uiState.caffeineCeilingMg.toInt()} mg / 150 Safe Max", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
                     }
                     Slider(
                         value = uiState.caffeineCeilingMg,
                         onValueChange = { onUpdateCaffeineCeiling(it) },
                         valueRange = 40f..250f,
                         colors = SliderDefaults.colors(
-                            thumbColor = Color(0xFFFF6F61),
-                            activeTrackColor = Color(0xFFFF6F61),
-                            inactiveTrackColor = Color(0xFF242C34)
+                            thumbColor = MaterialTheme.colorScheme.primary,
+                            activeTrackColor = MaterialTheme.colorScheme.primary,
+                            inactiveTrackColor = MaterialTheme.colorScheme.surfaceContainerHigh
                         )
                     )
                 }
@@ -489,15 +489,15 @@ fun SettingsUiScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("Smart Curfew Buffer", style = MaterialTheme.typography.bodyMedium, color = Color(0xFFE1E2E9), fontWeight = FontWeight.Bold)
-                        Text("Lockout at 7:00 PM • 4.5h pre-bed adenosine shield", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198))
+                        Text("Smart Curfew Buffer", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
+                        Text("Lockout at 7:00 PM • 4.5h pre-bed adenosine shield", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     Switch(
                         checked = uiState.curfewEnabled,
                         onCheckedChange = { onToggleCurfew(it) },
                         colors = SwitchDefaults.colors(
-                            checkedThumbColor = Color(0xFF101418),
-                            checkedTrackColor = Color(0xFFFF6F61)
+                            checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
+                            checkedTrackColor = MaterialTheme.colorScheme.primary
                         )
                     )
                 }
@@ -507,9 +507,9 @@ fun SettingsUiScreen(
         // Section 2: ADAPTIVE NEURAL ENGINE
         SectionHeader("ADAPTIVE NEURAL ENGINE", "Edge TF-Lite 2.4")
         Surface(
-            color = Color(0xFF1C2228),
+            color = MaterialTheme.colorScheme.surfaceContainer,
             shape = RoundedCornerShape(20.dp),
-            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF242C34)),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -520,20 +520,20 @@ fun SettingsUiScreen(
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                            Text("On-Device Inference", style = MaterialTheme.typography.bodyMedium, color = Color(0xFFE1E2E9), fontWeight = FontWeight.Bold)
-                            Icon(Icons.Default.Lock, contentDescription = null, tint = Color(0xFFFEF08A), modifier = Modifier.size(14.dp))
+                            Text("On-Device Inference", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
+                            Icon(Icons.Default.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(14.dp))
                         }
-                        Text("Zero telemetry leaves phone. Sub-8ms latency.", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198))
+                        Text("Zero telemetry leaves phone. Sub-8ms latency.", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     Switch(
                         checked = uiState.onDeviceInferenceEnabled,
                         onCheckedChange = { onToggleOnDeviceInference(it) },
-                        colors = SwitchDefaults.colors(checkedThumbColor = Color(0xFF101418), checkedTrackColor = Color(0xFFFF6F61))
+                        colors = SwitchDefaults.colors(checkedThumbColor = MaterialTheme.colorScheme.onPrimary, checkedTrackColor = MaterialTheme.colorScheme.primary)
                     )
                 }
 
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("HRV Dip Sensitivity", style = MaterialTheme.typography.labelMedium, color = Color(0xFF8B9198))
+                    Text("HRV Dip Sensitivity", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         HrvSensitivity.entries.forEach { sensitivity ->
                             SensitivityChip(sensitivity.label, uiState.hrvSensitivity == sensitivity) {
@@ -549,13 +549,13 @@ fun SettingsUiScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("Post-Prandial Response", style = MaterialTheme.typography.bodyMedium, color = Color(0xFFE1E2E9), fontWeight = FontWeight.Bold)
-                        Text("Prompts hydration + microdose during glucose dips", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198))
+                        Text("Post-Prandial Response", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
+                        Text("Prompts hydration + microdose during glucose dips", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     Switch(
                         checked = uiState.postPrandialResponseEnabled,
                         onCheckedChange = { onTogglePostPrandial(it) },
-                        colors = SwitchDefaults.colors(checkedThumbColor = Color(0xFF101418), checkedTrackColor = Color(0xFFFF6F61))
+                        colors = SwitchDefaults.colors(checkedThumbColor = MaterialTheme.colorScheme.onPrimary, checkedTrackColor = MaterialTheme.colorScheme.primary)
                     )
                 }
             }
@@ -564,11 +564,10 @@ fun SettingsUiScreen(
         // Section 3: HARDWARE & HEALTH CONNECT
         SectionHeader("HARDWARE & HEALTH CONNECT", "3 Streams Active")
 
-        // Google Health Connect Status & Permissions Card (Matching KoColor App)
         Surface(
-            color = Color(0xFF1C2228),
+            color = MaterialTheme.colorScheme.surfaceContainer,
             shape = RoundedCornerShape(20.dp),
-            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF242C34)),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(
@@ -586,28 +585,28 @@ fun SettingsUiScreen(
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         Surface(
-                            color = Color(0xFF2D2238),
+                            color = MaterialTheme.colorScheme.primaryContainer,
                             shape = CircleShape,
                             modifier = Modifier.size(40.dp)
                         ) {
                             Box(contentAlignment = Alignment.Center) {
-                                Icon(Icons.Default.Favorite, contentDescription = null, tint = Color(0xFFA78BFA), modifier = Modifier.size(20.dp))
+                                Icon(Icons.Default.Favorite, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
                             }
                         }
                         Column {
-                            Text("Google Health Connect", style = MaterialTheme.typography.titleMedium, color = Color(0xFFE1E2E9), fontWeight = FontWeight.Bold)
-                            Text("Sync sleep, HRV & metabolic data", style = MaterialTheme.typography.bodySmall, color = Color(0xFF8B9198))
+                            Text("Google Health Connect", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
+                            Text("Sync sleep, HRV & metabolic data", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
                 }
 
-                HorizontalDivider(color = Color(0xFF242C34))
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
                 if (uiState.isHealthConnectConnected) {
                     Surface(
                         color = Color(0xFF1C3829),
                         shape = RoundedCornerShape(20.dp),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF2D5A3F))
+                        border = BorderStroke(1.dp, Color(0xFF2D5A3F))
                     ) {
                         Row(
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
@@ -620,17 +619,17 @@ fun SettingsUiScreen(
                     }
                 } else {
                     Surface(
-                        color = Color(0xFF3B2D1B),
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
                         shape = RoundedCornerShape(20.dp),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF5A452D))
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
                     ) {
                         Row(
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Icon(Icons.Default.Lock, contentDescription = null, tint = Color(0xFFFDBA74), modifier = Modifier.size(18.dp))
-                            Text("Permissions Required", style = MaterialTheme.typography.labelLarge, color = Color(0xFFFDBA74), fontWeight = FontWeight.Bold)
+                            Icon(Icons.Default.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(18.dp))
+                            Text("Permissions Required", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -639,10 +638,10 @@ fun SettingsUiScreen(
                     onClick = onRequestHealthPermissions,
                     modifier = Modifier.fillMaxWidth().height(48.dp),
                     colors = ButtonDefaults.outlinedButtonColors(
-                        containerColor = Color(0xFF242C34),
-                        contentColor = Color(0xFFE1E2E9)
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        contentColor = MaterialTheme.colorScheme.onSurface
                     ),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF41474D)),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Text("Manage Permissions", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
@@ -651,17 +650,17 @@ fun SettingsUiScreen(
         }
 
         Surface(
-            color = Color(0xFF1C2228),
+            color = MaterialTheme.colorScheme.surfaceContainer,
             shape = RoundedCornerShape(20.dp),
-            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF242C34)),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                Text("Connected Telemetry Nodes", style = MaterialTheme.typography.bodyMedium, color = Color(0xFFE1E2E9), fontWeight = FontWeight.Bold)
+                Text("Connected Telemetry Nodes", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
 
-                NodeItem(Icons.Default.Watch, "Pixel Watch 2", "Continuous x84 & PPG • 100Hz", "Live", Color(0xFFFEF08A))
-                NodeItem(Icons.Default.Sensors, "Dexcom G7 CGM", "Interstitial Glucose • Every 5m", "94 mg/dL", Color(0xFFFDBA74))
-                NodeItem(Icons.Default.Watch, "Whoop 4.0", "Recovery Index 88% • Strain Sync", "Optimal", Color(0xFFFFB4AA))
+                NodeItem(Icons.Default.Watch, "Pixel Watch 2", "Continuous x84 & PPG • 100Hz", "Live", MaterialTheme.colorScheme.secondary)
+                NodeItem(Icons.Default.Sensors, "Dexcom G7 CGM", "Interstitial Glucose • Every 5m", "94 mg/dL", MaterialTheme.colorScheme.secondary)
+                NodeItem(Icons.Default.Watch, "Whoop 4.0", "Recovery Index 88% • Strain Sync", "Optimal", MaterialTheme.colorScheme.primary)
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -669,20 +668,20 @@ fun SettingsUiScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("Calendar Strain Anticipation", style = MaterialTheme.typography.bodyMedium, color = Color(0xFFE1E2E9), fontWeight = FontWeight.Bold)
-                        Text("Schedules focus primes 20m before deep-work blocks", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198))
+                        Text("Calendar Strain Anticipation", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
+                        Text("Schedules focus primes 20m before deep-work blocks", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     Switch(
                         checked = uiState.calendarAnticipationEnabled,
                         onCheckedChange = { onToggleCalendarAnticipation(it) },
-                        colors = SwitchDefaults.colors(checkedThumbColor = Color(0xFF101418), checkedTrackColor = Color(0xFFFF6F61))
+                        colors = SwitchDefaults.colors(checkedThumbColor = MaterialTheme.colorScheme.onPrimary, checkedTrackColor = MaterialTheme.colorScheme.primary)
                     )
                 }
 
                 Surface(
-                    color = Color(0xFF161B20),
+                    color = MaterialTheme.colorScheme.surfaceContainerLow,
                     shape = RoundedCornerShape(12.dp),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF242C34)),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Row(
@@ -690,10 +689,10 @@ fun SettingsUiScreen(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        Icon(Icons.Default.Shield, contentDescription = null, tint = Color(0xFFFEF08A), modifier = Modifier.size(20.dp))
+                        Icon(Icons.Default.Shield, contentDescription = null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(20.dp))
                         Column {
-                            Text("Zero Biometric Egress", style = MaterialTheme.typography.bodyMedium, color = Color(0xFFE1E2E9), fontWeight = FontWeight.Bold)
-                            Text("Hardware Keystore AES-256 GCM encrypted", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198))
+                            Text("Zero Biometric Egress", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
+                            Text("Hardware Keystore AES-256 GCM encrypted", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
                 }
@@ -703,14 +702,14 @@ fun SettingsUiScreen(
         // Section 4: TACTILE & BIO-PROMPTS
         SectionHeader("TACTILE & BIO-PROMPTS", "Haptics Engine")
         Surface(
-            color = Color(0xFF1C2228),
+            color = MaterialTheme.colorScheme.surfaceContainer,
             shape = RoundedCornerShape(20.dp),
-            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF242C34)),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Wrist Haptic Pattern (Double Tap)", style = MaterialTheme.typography.labelMedium, color = Color(0xFF8B9198))
+                    Text("Wrist Haptic Pattern (Double Tap)", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         HapticPattern.entries.forEach { pattern ->
                             HapticChip(pattern.label, uiState.hapticPattern == pattern) {
@@ -726,13 +725,13 @@ fun SettingsUiScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("Ambient Always-On Bio-Prompts", style = MaterialTheme.typography.bodyMedium, color = Color(0xFFE1E2E9), fontWeight = FontWeight.Bold)
-                        Text("Glanceable fuel status on Android lock screen", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198))
+                        Text("Ambient Always-On Bio-Prompts", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
+                        Text("Glanceable fuel status on Android lock screen", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     Switch(
                         checked = uiState.bioPromptsEnabled,
                         onCheckedChange = { onToggleBioPrompts(it) },
-                        colors = SwitchDefaults.colors(checkedThumbColor = Color(0xFF101418), checkedTrackColor = Color(0xFFFF6F61))
+                        colors = SwitchDefaults.colors(checkedThumbColor = MaterialTheme.colorScheme.onPrimary, checkedTrackColor = MaterialTheme.colorScheme.primary)
                     )
                 }
 
@@ -742,13 +741,13 @@ fun SettingsUiScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("Critical Slump Interventions", style = MaterialTheme.typography.bodyMedium, color = Color(0xFFE1E2E9), fontWeight = FontWeight.Bold)
-                        Text("Bypasses Do Not Disturb for critical tasks", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198))
+                        Text("Critical Slump Interventions", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
+                        Text("Bypasses Do Not Disturb for critical tasks", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     Switch(
                         checked = uiState.slumpInterventionsEnabled,
                         onCheckedChange = { onToggleSlumpInterventions(it) },
-                        colors = SwitchDefaults.colors(checkedThumbColor = Color(0xFF101418), checkedTrackColor = Color(0xFFFF6F61))
+                        colors = SwitchDefaults.colors(checkedThumbColor = MaterialTheme.colorScheme.onPrimary, checkedTrackColor = MaterialTheme.colorScheme.primary)
                     )
                 }
             }
@@ -757,16 +756,16 @@ fun SettingsUiScreen(
         // Section 5: DIAGNOSTICS & DATA
         SectionHeader("DIAGNOSTICS & DATA", "")
         Surface(
-            color = Color(0xFF1C2228),
+            color = MaterialTheme.colorScheme.surfaceContainer,
             shape = RoundedCornerShape(20.dp),
-            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF242C34)),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Button(
                     onClick = { onExportLog() },
                     modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF242C34), contentColor = Color(0xFFFF6F61)),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh, contentColor = MaterialTheme.colorScheme.primary),
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -778,7 +777,7 @@ fun SettingsUiScreen(
                 Button(
                     onClick = { onGenerateDebugData() },
                     modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF242C34), contentColor = Color(0xFFFEF08A)),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh, contentColor = MaterialTheme.colorScheme.secondary),
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -788,14 +787,14 @@ fun SettingsUiScreen(
                 }
 
                 DiagnosticRow("Calibrate Sensor Latency", "Zero-drift clock sync with Bluetooth nodes") { onCalibrateSensor() }
-                HorizontalDivider(color = Color(0xFF242C34))
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 DiagnosticRow("Purge Local Inference-Cache", "${"%.1f".format(uiState.cacheSizeMb)}MB stored on-device") { onPurgeCache() }
 
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     "Hummingbird OS v2.4.1 (Build 8904 - Edge AI Core)\nValidated with Clinical Chrono-metabolic Standards",
                     style = MaterialTheme.typography.labelSmall,
-                    color = Color(0xFF8B9198),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontFamily = FontFamily.Monospace,
                     fontSize = 10.sp
                 )
@@ -814,7 +813,7 @@ fun SectionHeader(title: String, subtitle: String) {
         Text(
             text = title,
             style = MaterialTheme.typography.labelSmall,
-            color = Color(0xFFFFB4AA),
+            color = MaterialTheme.colorScheme.primary,
             fontFamily = FontFamily.Monospace,
             fontWeight = FontWeight.Bold
         )
@@ -822,7 +821,7 @@ fun SectionHeader(title: String, subtitle: String) {
             Text(
                 text = subtitle,
                 style = MaterialTheme.typography.labelSmall,
-                color = Color(0xFF8B9198),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontFamily = FontFamily.Monospace
             )
         }
@@ -832,16 +831,16 @@ fun SectionHeader(title: String, subtitle: String) {
 @Composable
 fun RowScope.QuantumChip(label: String, selected: Boolean, onClick: () -> Unit) {
     Surface(
-        color = if (selected) Color(0xFFFF6F61) else Color(0xFF161B20),
+        color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerLow,
         shape = RoundedCornerShape(12.dp),
-        border = if (!selected) androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF242C34)) else null,
+        border = if (!selected) BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant) else null,
         modifier = Modifier.weight(1f).clickable { onClick() }
     ) {
         Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(vertical = 10.dp)) {
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelSmall,
-                color = if (selected) Color(0xFF101418) else Color(0xFFE1E2E9),
+                color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
                 fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
@@ -852,16 +851,16 @@ fun RowScope.QuantumChip(label: String, selected: Boolean, onClick: () -> Unit) 
 @Composable
 fun RowScope.SensitivityChip(label: String, selected: Boolean, onClick: () -> Unit) {
     Surface(
-        color = if (selected) Color(0xFF693C00) else Color(0xFF161B20),
+        color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerLow,
         shape = RoundedCornerShape(10.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, if (selected) Color(0xFFFDBA74) else Color(0xFF242C34)),
+        border = BorderStroke(1.dp, if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant),
         modifier = Modifier.weight(1f).clickable { onClick() }
     ) {
         Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(vertical = 8.dp)) {
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelSmall,
-                color = if (selected) Color(0xFFFDBA74) else Color(0xFF8B9198),
+                color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
                 fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
             )
         }
@@ -871,16 +870,16 @@ fun RowScope.SensitivityChip(label: String, selected: Boolean, onClick: () -> Un
 @Composable
 fun RowScope.HapticChip(label: String, selected: Boolean, onClick: () -> Unit) {
     Surface(
-        color = if (selected) Color(0xFFFF6F61) else Color(0xFF161B20),
+        color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerLow,
         shape = RoundedCornerShape(10.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, if (selected) Color(0xFFFF6F61) else Color(0xFF242C34)),
+        border = BorderStroke(1.dp, if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant),
         modifier = Modifier.weight(1f).clickable { onClick() }
     ) {
         Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(vertical = 8.dp)) {
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelSmall,
-                color = if (selected) Color(0xFF101418) else Color(0xFF8B9198),
+                color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
                 fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
             )
         }
@@ -895,10 +894,10 @@ fun NodeItem(icon: ImageVector, title: String, subtitle: String, status: String,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Icon(icon, contentDescription = null, tint = Color(0xFFE1E2E9), modifier = Modifier.size(20.dp))
+            Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(20.dp))
             Column {
-                Text(title, style = MaterialTheme.typography.bodyMedium, color = Color(0xFFE1E2E9), fontWeight = FontWeight.Bold)
-                Text(subtitle, style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198))
+                Text(title, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
+                Text(subtitle, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
         Text(status, style = MaterialTheme.typography.labelSmall, color = statusColor, fontWeight = FontWeight.Bold)
@@ -913,9 +912,9 @@ fun DiagnosticRow(title: String, subtitle: String, onClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.weight(1f)) {
-            Text(title, style = MaterialTheme.typography.bodyMedium, color = Color(0xFFE1E2E9), fontWeight = FontWeight.Bold)
-            Text(subtitle, style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198))
+            Text(title, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
+            Text(subtitle, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-        Icon(Icons.Default.ChevronRight, contentDescription = null, tint = Color(0xFF8B9198))
+        Icon(Icons.Default.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }

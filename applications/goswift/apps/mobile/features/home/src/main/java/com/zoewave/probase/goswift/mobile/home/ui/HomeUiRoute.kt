@@ -74,20 +74,20 @@ fun HomeUiScreen(
                 Text(
                     text = "GOSWIFT",
                     style = MaterialTheme.typography.labelSmall,
-                    color = Color(0xFFFFB4AA),
+                    color = MaterialTheme.colorScheme.primary,
                     letterSpacing = 2.sp
                 )
                 Text(
                     text = "Live Fuel",
                     style = MaterialTheme.typography.headlineLarge,
-                    color = Color(0xFFE1E2E9),
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold
                 )
             }
             Surface(
-                color = Color(0xFF1C2228),
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
                 shape = RoundedCornerShape(20.dp),
-                border = BorderStroke(1.dp, Color(0xFF41474D))
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
@@ -102,7 +102,7 @@ fun HomeUiScreen(
                     Text(
                         text = "AI Active",
                         style = MaterialTheme.typography.labelMedium,
-                        color = Color(0xFFE1E2E9)
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
@@ -111,9 +111,9 @@ fun HomeUiScreen(
         // Status Banner Card (Health Sync)
         Surface(
             onClick = onNavigateToSync,
-            color = Color(0xFF1C2228),
+            color = MaterialTheme.colorScheme.surfaceContainer,
             shape = RoundedCornerShape(16.dp),
-            border = BorderStroke(1.dp, Color(0xFF242C34)),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
             modifier = Modifier.fillMaxWidth()
         ) {
             Row(
@@ -128,31 +128,31 @@ fun HomeUiScreen(
                     Icon(
                         imageVector = Icons.Default.Sync,
                         contentDescription = null,
-                        tint = Color(0xFFFDBA74),
+                        tint = MaterialTheme.colorScheme.secondary,
                         modifier = Modifier.size(20.dp)
                     )
                     Column {
                         Text(
                             text = "Metabolic Sync",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = Color(0xFFE1E2E9),
+                            color = MaterialTheme.colorScheme.onSurface,
                             fontWeight = FontWeight.SemiBold
                         )
                         Text(
                             text = "Google Health Active • 0m ago",
                             style = MaterialTheme.typography.labelSmall,
-                            color = Color(0xFF8B9198)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
                 Surface(
-                    color = Color(0xFF242C34),
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Text(
                         text = "99.4% Fidelity",
                         style = MaterialTheme.typography.labelSmall,
-                        color = Color(0xFFFEF08A),
+                        color = MaterialTheme.colorScheme.secondary,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                     )
                 }
@@ -161,9 +161,9 @@ fun HomeUiScreen(
 
         // Hero Metric - Caffeine Remaining Ring
         Surface(
-            color = Color(0xFF1C2228),
+            color = MaterialTheme.colorScheme.surfaceContainer,
             shape = RoundedCornerShape(24.dp),
-            border = BorderStroke(1.dp, Color(0xFF242C34)),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(
@@ -179,13 +179,13 @@ fun HomeUiScreen(
                     Text(
                         text = "ESTIMATED CAFFEINE REMAINING",
                         style = MaterialTheme.typography.labelSmall,
-                        color = Color(0xFF8B9198),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontFamily = FontFamily.Monospace
                     )
                     Text(
                         text = "OPTIMAL FLOW",
                         style = MaterialTheme.typography.labelSmall,
-                        color = Color(0xFFFDBA74),
+                        color = MaterialTheme.colorScheme.secondary,
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -195,9 +195,10 @@ fun HomeUiScreen(
                     modifier = Modifier.size(180.dp)
                 ) {
                     val progress = (uiState.remainingMg / uiState.limitMg).coerceIn(0.0, 1.0).toFloat()
+                    val trackColor = MaterialTheme.colorScheme.surfaceContainerHigh
                     Canvas(modifier = Modifier.size(160.dp)) {
                         drawArc(
-                            color = Color(0xFF242C34),
+                            color = trackColor,
                             startAngle = 135f,
                             sweepAngle = 270f,
                             useCenter = false,
@@ -215,7 +216,7 @@ fun HomeUiScreen(
                         Text(
                             text = "%.1f".format(uiState.remainingMg),
                             style = MaterialTheme.typography.headlineLarge,
-                            color = Color(0xFFE1E2E9),
+                            color = MaterialTheme.colorScheme.onSurface,
                             fontSize = 36.sp,
                             fontWeight = FontWeight.Bold,
                             fontFamily = FontFamily.Monospace
@@ -223,7 +224,7 @@ fun HomeUiScreen(
                         Text(
                             text = "mg remaining",
                             style = MaterialTheme.typography.labelSmall,
-                            color = Color(0xFF8B9198)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -236,12 +237,12 @@ fun HomeUiScreen(
                         Text(
                             text = "Target Corridor",
                             style = MaterialTheme.typography.labelSmall,
-                            color = Color(0xFF8B9198)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
                             text = "35 — 50 mg",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = Color(0xFFE1E2E9),
+                            color = MaterialTheme.colorScheme.onSurface,
                             fontWeight = FontWeight.SemiBold
                         )
                     }
@@ -249,12 +250,12 @@ fun HomeUiScreen(
                         Text(
                             text = "Half-life",
                             style = MaterialTheme.typography.labelSmall,
-                            color = Color(0xFF8B9198)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
                             text = "4.8h",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = Color(0xFFE1E2E9),
+                            color = MaterialTheme.colorScheme.onSurface,
                             fontWeight = FontWeight.SemiBold
                         )
                     }
@@ -264,9 +265,9 @@ fun HomeUiScreen(
 
         // Recommendation Card
         Surface(
-            color = Color(0xFF1C2228),
+            color = MaterialTheme.colorScheme.surfaceContainer,
             shape = RoundedCornerShape(16.dp),
-            border = BorderStroke(1.dp, Color(0xFF242C34)),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
             modifier = Modifier.fillMaxWidth()
         ) {
             Row(
@@ -277,20 +278,20 @@ fun HomeUiScreen(
                 Icon(
                     imageVector = Icons.Default.Timer,
                     contentDescription = null,
-                    tint = Color(0xFFFF6F61),
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(24.dp)
                 )
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = "Next Window: in 38m (2:15 PM)",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Color(0xFFE1E2E9),
+                        color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
                         text = "Recommended: 18mg microdose • Prevents 3:15 PM lull",
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color(0xFF8B9198)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 Button(
@@ -309,9 +310,9 @@ fun HomeUiScreen(
 
         // ML Adaptive Insight
         Surface(
-            color = Color(0xFF161B20),
+            color = MaterialTheme.colorScheme.surfaceContainerLow,
             shape = RoundedCornerShape(16.dp),
-            border = BorderStroke(1.dp, Color(0xFF242C34)),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(
@@ -325,20 +326,20 @@ fun HomeUiScreen(
                     Icon(
                         imageVector = Icons.Default.Psychology,
                         contentDescription = null,
-                        tint = Color(0xFFFEF08A),
+                        tint = MaterialTheme.colorScheme.secondary,
                         modifier = Modifier.size(20.dp)
                     )
                     Text(
                         text = "Hummingbird ML Adaptive Insight",
                         style = MaterialTheme.typography.labelMedium,
-                        color = Color(0xFFFEF08A),
+                        color = MaterialTheme.colorScheme.secondary,
                         fontWeight = FontWeight.Bold
                     )
                 }
                 Text(
                     text = "Cortisol naturally dipping post-lunch. A targeted 15–18mg microdose at 2:15 PM maintains steady state.",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color(0xFFE1E2E9)
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -348,15 +349,15 @@ fun HomeUiScreen(
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color(0xFFFFB4AA), modifier = Modifier.size(12.dp))
-                        Text("Zero Jitter Risk", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198))
+                        Icon(Icons.Default.CheckCircle, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(12.dp))
+                        Text("Zero Jitter Risk", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color(0xFFFEF08A), modifier = Modifier.size(12.dp))
-                        Text("Bedtime Cleared (10:30 PM)", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198))
+                        Icon(Icons.Default.CheckCircle, contentDescription = null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(12.dp))
+                        Text("Bedtime Cleared (10:30 PM)", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             }
@@ -366,7 +367,7 @@ fun HomeUiScreen(
         Text(
             text = "ONE-TAP PRECISION INGESTION",
             style = MaterialTheme.typography.labelSmall,
-            color = Color(0xFF8B9198),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontFamily = FontFamily.Monospace
         )
         Row(
@@ -376,9 +377,9 @@ fun HomeUiScreen(
             Button(
                 onClick = { onLogIntake(15.0) },
                 modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1C2228), contentColor = Color(0xFFE1E2E9)),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceContainer, contentColor = MaterialTheme.colorScheme.onSurface),
                 shape = RoundedCornerShape(12.dp),
-                border = BorderStroke(1.dp, Color(0xFF242C34)),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                 contentPadding = PaddingValues(10.dp)
             ) {
                 Column(horizontalAlignment = Alignment.Start) {
@@ -387,44 +388,44 @@ fun HomeUiScreen(
                         Text("+15mg", style = MaterialTheme.typography.labelMedium, color = Color(0xFFFF6F61), fontWeight = FontWeight.Bold)
                     }
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text("Citrus Surge", style = MaterialTheme.typography.bodySmall, color = Color(0xFFE1E2E9), fontWeight = FontWeight.SemiBold)
-                    Text("Focus Pill", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198))
+                    Text("Citrus Surge", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.SemiBold)
+                    Text("Focus Pill", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
             Button(
                 onClick = { onLogIntake(25.0) },
                 modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1C2228), contentColor = Color(0xFFE1E2E9)),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceContainer, contentColor = MaterialTheme.colorScheme.onSurface),
                 shape = RoundedCornerShape(12.dp),
-                border = BorderStroke(1.dp, Color(0xFF242C34)),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                 contentPadding = PaddingValues(10.dp)
             ) {
                 Column(horizontalAlignment = Alignment.Start) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Icon(Icons.Default.FlashOn, contentDescription = null, tint = Color(0xFFFDBA74), modifier = Modifier.size(16.dp))
-                        Text("+25mg", style = MaterialTheme.typography.labelMedium, color = Color(0xFFFDBA74), fontWeight = FontWeight.Bold)
+                        Icon(Icons.Default.FlashOn, contentDescription = null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(16.dp))
+                        Text("+25mg", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Bold)
                     }
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text("Wild Berry", style = MaterialTheme.typography.bodySmall, color = Color(0xFFE1E2E9), fontWeight = FontWeight.SemiBold)
-                    Text("Cognitive Peak", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198))
+                    Text("Wild Berry", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.SemiBold)
+                    Text("Cognitive Peak", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
             Button(
                 onClick = { onLogWaterIntake(300.0) },
                 modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1C2228), contentColor = Color(0xFFE1E2E9)),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceContainer, contentColor = MaterialTheme.colorScheme.onSurface),
                 shape = RoundedCornerShape(12.dp),
-                border = BorderStroke(1.dp, Color(0xFF242C34)),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                 contentPadding = PaddingValues(10.dp)
             ) {
                 Column(horizontalAlignment = Alignment.Start) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Icon(Icons.Default.WaterDrop, contentDescription = null, tint = Color(0xFFFEF08A), modifier = Modifier.size(16.dp))
-                        Text("+300ml", style = MaterialTheme.typography.labelMedium, color = Color(0xFFFEF08A), fontWeight = FontWeight.Bold)
+                        Icon(Icons.Default.WaterDrop, contentDescription = null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(16.dp))
+                        Text("+300ml", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Bold)
                     }
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text("H₂O Hydrate", style = MaterialTheme.typography.bodySmall, color = Color(0xFFE1E2E9), fontWeight = FontWeight.SemiBold)
-                    Text("Clear Toxins", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198))
+                    Text("H₂O Hydrate", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.SemiBold)
+                    Text("Clear Toxins", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         }
@@ -433,16 +434,16 @@ fun HomeUiScreen(
         Text(
             text = "LIVE GOOGLE HEALTH TELEMETRY",
             style = MaterialTheme.typography.labelSmall,
-            color = Color(0xFF8B9198),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontFamily = FontFamily.Monospace
         )
 
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
             // Cardiovascular Card
             Surface(
-                color = Color(0xFF1C2228),
+                color = MaterialTheme.colorScheme.surfaceContainer,
                 shape = RoundedCornerShape(16.dp),
-                border = BorderStroke(1.dp, Color(0xFF242C34)),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                 modifier = Modifier
                     .weight(1f)
                     .alpha(if (uiState.heartRateBpm != null) 1.0f else 0.4f)
@@ -456,22 +457,22 @@ fun HomeUiScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("Cardiovascular", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198))
+                        Text("Cardiovascular", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Icon(Icons.Default.Favorite, contentDescription = null, tint = Color(0xFFFF6F61), modifier = Modifier.size(16.dp))
                     }
                     Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text(uiState.heartRateBpm?.toString() ?: "--", style = MaterialTheme.typography.headlineLarge, color = Color(0xFFE1E2E9), fontWeight = FontWeight.Bold)
-                        Text("BPM", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198), modifier = Modifier.padding(bottom = 4.dp))
+                        Text(uiState.heartRateBpm?.toString() ?: "--", style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
+                        Text("BPM", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(bottom = 4.dp))
                     }
-                    Text(if (uiState.hrvMs != null) "HRV ${uiState.hrvMs.toInt()}ms • Stable Baseline" else "HRV -- • No Stream", style = MaterialTheme.typography.labelSmall, color = Color(0xFFFFB4AA))
+                    Text(if (uiState.hrvMs != null) "HRV ${uiState.hrvMs.toInt()}ms • Stable Baseline" else "HRV -- • No Stream", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
                 }
             }
 
             // Serum Glucose Card
             Surface(
-                color = Color(0xFF1C2228),
+                color = MaterialTheme.colorScheme.surfaceContainer,
                 shape = RoundedCornerShape(16.dp),
-                border = BorderStroke(1.dp, Color(0xFF242C34)),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                 modifier = Modifier
                     .weight(1f)
                     .alpha(if (uiState.glucoseMgDl != null) 1.0f else 0.4f)
@@ -485,14 +486,14 @@ fun HomeUiScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("Serum Glucose", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198))
-                        Icon(Icons.Default.ShowChart, contentDescription = null, tint = Color(0xFFFDBA74), modifier = Modifier.size(16.dp))
+                        Text("Serum Glucose", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Icon(Icons.Default.ShowChart, contentDescription = null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(16.dp))
                     }
                     Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text(uiState.glucoseMgDl?.toInt()?.toString() ?: "--", style = MaterialTheme.typography.headlineLarge, color = Color(0xFF8B9198), fontWeight = FontWeight.Bold)
-                        Text("mg/dL", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198), modifier = Modifier.padding(bottom = 4.dp))
+                        Text(uiState.glucoseMgDl?.toInt()?.toString() ?: "--", style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
+                        Text("mg/dL", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(bottom = 4.dp))
                     }
-                    Text("Steady • No Spike Detected", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198))
+                    Text("Steady • No Spike Detected", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         }
@@ -500,9 +501,9 @@ fun HomeUiScreen(
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
             // Hydration Metric Card
             Surface(
-                color = Color(0xFF1C2228),
+                color = MaterialTheme.colorScheme.surfaceContainer,
                 shape = RoundedCornerShape(16.dp),
-                border = BorderStroke(1.dp, Color(0xFF242C34)),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                 modifier = Modifier
                     .weight(1f)
                     .alpha(1.0f)
@@ -516,22 +517,22 @@ fun HomeUiScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("Hydration Metric", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198))
-                        Icon(Icons.Default.Opacity, contentDescription = null, tint = Color(0xFFFDBA74), modifier = Modifier.size(16.dp))
+                        Text("Hydration Metric", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Icon(Icons.Default.Opacity, contentDescription = null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(16.dp))
                     }
                     Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text("${uiState.hydrationMl.toInt()}", style = MaterialTheme.typography.headlineLarge, color = Color(0xFFE1E2E9), fontWeight = FontWeight.Bold)
-                        Text("/ 2.4k ml", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198), modifier = Modifier.padding(bottom = 4.dp))
+                        Text("${uiState.hydrationMl.toInt()}", style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
+                        Text("/ 2.4k ml", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(bottom = 4.dp))
                     }
-                    Text("${(uiState.hydrationMl / 2400.0 * 100).toInt()}% of optimal hydration", style = MaterialTheme.typography.labelSmall, color = Color(0xFFFEF08A))
+                    Text("${(uiState.hydrationMl / 2400.0 * 100).toInt()}% of optimal hydration", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary)
                 }
             }
 
             // Circadian Energy Index Card
             Surface(
-                color = Color(0xFF1C2228),
+                color = MaterialTheme.colorScheme.surfaceContainer,
                 shape = RoundedCornerShape(16.dp),
-                border = BorderStroke(1.dp, Color(0xFF242C34)),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                 modifier = Modifier
                     .weight(1f)
                     .alpha(1.0f)
@@ -545,14 +546,14 @@ fun HomeUiScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("Circadian Index", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198))
+                        Text("Circadian Index", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Icon(Icons.Default.SolarPower, contentDescription = null, tint = Color(0xFFFF6F61), modifier = Modifier.size(16.dp))
                     }
                     Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text("${uiState.circadianIndex}", style = MaterialTheme.typography.headlineLarge, color = Color(0xFFFFB4AA), fontWeight = FontWeight.Bold)
-                        Text("/ 100", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198), modifier = Modifier.padding(bottom = 4.dp))
+                        Text("${uiState.circadianIndex}", style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                        Text("/ 100", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(bottom = 4.dp))
                     }
-                    Text("Cognitive Zenith Active", style = MaterialTheme.typography.labelSmall, color = Color(0xFFFFB4AA))
+                    Text("Cognitive Zenith Active", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
                 }
             }
         }

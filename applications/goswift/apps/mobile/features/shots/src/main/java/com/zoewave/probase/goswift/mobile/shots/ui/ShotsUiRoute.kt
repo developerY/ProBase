@@ -96,7 +96,7 @@ fun ShotsUiScreen(
                     Text(
                         text = "Hummingbird Fuel",
                         style = MaterialTheme.typography.titleLarge,
-                        color = Color(0xFFE1E2E9),
+                        color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.Bold
                     )
                     Surface(
@@ -118,30 +118,30 @@ fun ShotsUiScreen(
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                             Box(modifier = Modifier.size(6.dp).background(Color(0xFFFF6F61), CircleShape))
-                            Text("On-Device AI Active • Health Connect Synced", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198), fontSize = 11.sp)
+                            Text("On-Device AI Active • Health Connect Synced", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 11.sp)
                         }
-                        Text("⚡ 0m ago", style = MaterialTheme.typography.labelSmall, color = Color(0xFFFEF08A), fontSize = 11.sp)
+                        Text("⚡ 0m ago", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary, fontSize = 11.sp)
                     }
                 }
                 Box(contentAlignment = Alignment.TopEnd) {
                     Surface(
-                        color = Color(0xFF242C34),
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
                         shape = CircleShape,
                         modifier = Modifier.size(40.dp)
                     ) {
                         Box(contentAlignment = Alignment.Center) {
-                            Icon(Icons.Default.Person, contentDescription = "Profile", tint = Color(0xFFE1E2E9))
+                            Icon(Icons.Default.Person, contentDescription = "Profile", tint = MaterialTheme.colorScheme.onSurface)
                         }
                     }
-                    Box(modifier = Modifier.size(10.dp).background(Color(0xFFFF6F61), CircleShape).border(1.dp, Color(0xFF101418), CircleShape))
+                    Box(modifier = Modifier.size(10.dp).background(Color(0xFFFF6F61), CircleShape).border(1.dp, MaterialTheme.colorScheme.background, CircleShape))
                 }
             }
 
             // 2. Pharmacokinetics Engine Card
             Surface(
-                color = Color(0xFF1C2228),
+                color = MaterialTheme.colorScheme.surfaceContainer,
                 shape = RoundedCornerShape(20.dp),
-                border = BorderStroke(1.dp, Color(0xFF242C34)),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(
@@ -154,14 +154,14 @@ fun ShotsUiScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                            Icon(Icons.Default.HourglassTop, contentDescription = null, tint = Color(0xFFFDBA74), modifier = Modifier.size(16.dp))
-                            Text("PHARMACOKINETICS ENGINE", style = MaterialTheme.typography.labelSmall, color = Color(0xFFFDBA74), fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                            Icon(Icons.Default.HourglassTop, contentDescription = null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(16.dp))
+                            Text("PHARMACOKINETICS ENGINE", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                         }
                         Surface(
-                            color = Color(0xFF242C34),
+                            color = MaterialTheme.colorScheme.surfaceContainerHigh,
                             shape = RoundedCornerShape(12.dp)
                         ) {
-                            Text("Active Microdose #${success.activeMicrodoseNumber}", style = MaterialTheme.typography.labelSmall, color = Color(0xFFFFB4AA), modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
+                            Text("Active Microdose #${success.activeMicrodoseNumber}", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
                         }
                     }
 
@@ -170,7 +170,7 @@ fun ShotsUiScreen(
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
-                            Text("TOTAL TELEMETRY", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198), fontFamily = FontFamily.Monospace)
+                            Text("TOTAL TELEMETRY", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, fontFamily = FontFamily.Monospace)
                             Row(
                                 verticalAlignment = Alignment.Bottom,
                                 horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -178,7 +178,7 @@ fun ShotsUiScreen(
                                 Text(
                                     text = "%,d".format(success.totalTelemetryDoses),
                                     style = MaterialTheme.typography.headlineMedium,
-                                    color = Color(0xFFE1E2E9),
+                                    color = MaterialTheme.colorScheme.onSurface,
                                     fontWeight = FontWeight.Bold,
                                     fontFamily = FontFamily.Monospace,
                                     maxLines = 1
@@ -186,19 +186,19 @@ fun ShotsUiScreen(
                                 Text(
                                     text = "doses",
                                     style = MaterialTheme.typography.titleSmall,
-                                    color = Color(0xFF8B9198),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     fontFamily = FontFamily.Monospace,
                                     modifier = Modifier.padding(bottom = 3.dp),
                                     maxLines = 1
                                 )
                             }
-                            Text("✓ ${success.fidelityPercent}% zero-jitter fidelity", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198), maxLines = 1)
+                            Text("✓ ${success.fidelityPercent}% zero-jitter fidelity", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
                         }
                         Column(
                             modifier = Modifier.weight(1f),
                             horizontalAlignment = Alignment.End
                         ) {
-                            Text("DAILY VELOCITY", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198), fontFamily = FontFamily.Monospace)
+                            Text("DAILY VELOCITY", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, fontFamily = FontFamily.Monospace)
                             Row(
                                 verticalAlignment = Alignment.Bottom,
                                 horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -206,7 +206,7 @@ fun ShotsUiScreen(
                                 Text(
                                     text = success.dailyVelocityMg.toString(),
                                     style = MaterialTheme.typography.headlineMedium,
-                                    color = Color(0xFFE1E2E9),
+                                    color = MaterialTheme.colorScheme.onSurface,
                                     fontWeight = FontWeight.Bold,
                                     fontFamily = FontFamily.Monospace,
                                     maxLines = 1
@@ -214,13 +214,13 @@ fun ShotsUiScreen(
                                 Text(
                                     text = "mg/day",
                                     style = MaterialTheme.typography.titleSmall,
-                                    color = Color(0xFF8B9198),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     fontFamily = FontFamily.Monospace,
                                     modifier = Modifier.padding(bottom = 3.dp),
                                     maxLines = 1
                                 )
                             }
-                            Text("${success.avgPulses} fuel pulses avg", style = MaterialTheme.typography.labelSmall, color = Color(0xFFFDBA74), maxLines = 1)
+                            Text("${success.avgPulses} fuel pulses avg", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary, maxLines = 1)
                         }
                     }
 
@@ -272,9 +272,9 @@ fun ShotsUiScreen(
 
             // 3. Search Bar
             Surface(
-                color = Color(0xFF1C2228),
+                color = MaterialTheme.colorScheme.surfaceContainer,
                 shape = RoundedCornerShape(16.dp),
-                border = BorderStroke(1.dp, Color(0xFF242C34)),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Row(
@@ -282,19 +282,19 @@ fun ShotsUiScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    Icon(Icons.Default.Search, contentDescription = null, tint = Color(0xFF8B9198), modifier = Modifier.size(18.dp))
+                    Icon(Icons.Default.Search, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
                     BasicTextField(
                         value = searchQuery,
                         onValueChange = { searchQuery = it },
                         singleLine = true,
-                        textStyle = MaterialTheme.typography.bodyMedium.copy(color = Color(0xFFE1E2E9)),
+                        textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
                         modifier = Modifier.weight(1f),
                         decorationBox = { innerTextField ->
                             if (searchQuery.isEmpty()) {
                                 Text(
                                     text = "Search logs by dose, tag, or title...",
                                     style = MaterialTheme.typography.bodyMedium,
-                                    color = Color(0xFF8B9198)
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                             innerTextField()
@@ -311,9 +311,9 @@ fun ShotsUiScreen(
                 listOf("Day", "Week", "Month", "All Time").forEach { timeRange ->
                     val isSelected = timeRange == selectedTimeFilter
                     Surface(
-                        color = if (isSelected) Color(0xFFFF6F61) else Color(0xFF1C2228),
+                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainer,
                         shape = RoundedCornerShape(12.dp),
-                        border = if (!isSelected) BorderStroke(1.dp, Color(0xFF242C34)) else null,
+                        border = if (!isSelected) BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant) else null,
                         modifier = Modifier.weight(1f).clickable { selectedTimeFilter = timeRange }
                     ) {
                         Row(
@@ -324,16 +324,16 @@ fun ShotsUiScreen(
                             Text(
                                 text = timeRange,
                                 style = MaterialTheme.typography.labelSmall,
-                                color = if (isSelected) Color(0xFF101418) else Color(0xFFE1E2E9),
+                                color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
                             )
                             if (timeRange == "All Time") {
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Surface(
-                                    color = Color(0xFF242C34),
+                                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
                                     shape = RoundedCornerShape(6.dp)
                                 ) {
-                                    Text("10.4k", style = MaterialTheme.typography.labelSmall, color = Color(0xFFFEF08A), fontSize = 9.sp, modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp))
+                                    Text("10.4k", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary, fontSize = 9.sp, modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp))
                                 }
                             }
                         }
@@ -347,26 +347,26 @@ fun ShotsUiScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Surface(
-                    color = Color(0xFF1C2228),
+                    color = MaterialTheme.colorScheme.surfaceContainer,
                     shape = RoundedCornerShape(20.dp),
-                    border = BorderStroke(1.dp, Color(0xFFFF6F61))
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
                 ) {
-                    Text("• All Doses", style = MaterialTheme.typography.labelSmall, color = Color(0xFFFF6F61), fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp))
+                    Text("• All Doses", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp))
                 }
                 Surface(
-                    color = Color(0xFF1C2228),
+                    color = MaterialTheme.colorScheme.surfaceContainer,
                     shape = RoundedCornerShape(20.dp),
-                    border = BorderStroke(1.dp, Color(0xFF242C34))
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
                 ) {
-                    Text("Fuel Drops (15-25mg)", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198), modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp))
+                    Text("Fuel Drops (15-25mg)", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp))
                 }
             }
 
             // 5. Pharmacokinetic Bloodstream Status Strip
             Surface(
-                color = Color(0xFF161B20),
+                color = MaterialTheme.colorScheme.surfaceContainerLow,
                 shape = RoundedCornerShape(16.dp),
-                border = BorderStroke(1.dp, Color(0xFF242C34)),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Row(
@@ -375,14 +375,14 @@ fun ShotsUiScreen(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Icon(Icons.Default.Science, contentDescription = null, tint = Color(0xFFFFB4AA), modifier = Modifier.size(20.dp))
+                        Icon(Icons.Default.Science, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
                         Column {
-                            Text("Pharmacokinetic Bloodstream", style = MaterialTheme.typography.labelSmall, color = Color(0xFFFFB4AA), fontWeight = FontWeight.Bold)
-                            Text("Remaining in bloodstream: ${success.remainingInBloodstreamMg}mg", style = MaterialTheme.typography.bodySmall, color = Color(0xFFC1C7CE))
+                            Text("Pharmacokinetic Bloodstream", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                            Text("Remaining in bloodstream: ${success.remainingInBloodstreamMg}mg", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
                     Surface(
-                        color = Color(0xFF242C34),
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
                         shape = RoundedCornerShape(8.dp)
                     ) {
                         Row(
@@ -390,8 +390,8 @@ fun ShotsUiScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
-                            Icon(Icons.Default.Download, contentDescription = null, tint = Color(0xFFE1E2E9), modifier = Modifier.size(12.dp))
-                            Text("Export", style = MaterialTheme.typography.labelSmall, color = Color(0xFFE1E2E9))
+                            Icon(Icons.Default.Download, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(12.dp))
+                            Text("Export", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
                         }
                     }
                 }
@@ -433,26 +433,26 @@ fun ShotsUiScreen(
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Box(modifier = Modifier.size(8.dp).background(Color(0xFFFF6F61), CircleShape))
-                        Text(success.todayGroup.dateLabel, style = MaterialTheme.typography.titleMedium, color = Color(0xFFE1E2E9), fontWeight = FontWeight.Bold)
+                        Text(success.todayGroup.dateLabel, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
                         Surface(
-                            color = Color(0xFF693C00),
+                            color = MaterialTheme.colorScheme.secondaryContainer,
                             shape = RoundedCornerShape(12.dp)
                         ) {
                             Text(
                                 text = "${filteredTodayItems.size} Doses • ${filteredTodayItems.sumOf { it.amountMg }}mg",
                                 style = MaterialTheme.typography.labelSmall,
-                                color = Color(0xFFFFDCBE),
+                                color = MaterialTheme.colorScheme.onSecondaryContainer,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
                             )
                         }
                     }
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Text(success.todayGroup.rangeStatus, style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198))
+                        Text(success.todayGroup.rangeStatus, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Icon(
                             imageVector = if (isTodayExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
                             contentDescription = if (isTodayExpanded) "Collapse Today" else "Expand Today",
-                            tint = Color(0xFF8B9198),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -464,7 +464,7 @@ fun ShotsUiScreen(
                         Text(
                             text = "No microdoses found matching filter",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = Color(0xFF8B9198),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(vertical = 12.dp)
                         )
                     } else {
@@ -477,9 +477,9 @@ fun ShotsUiScreen(
 
             // 7. Yesterday Summary Card (Expandable / Collapsible)
             Surface(
-                color = Color(0xFF1C2228),
+                color = MaterialTheme.colorScheme.surfaceContainer,
                 shape = RoundedCornerShape(16.dp),
-                border = BorderStroke(1.dp, Color(0xFF242C34)),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
@@ -492,24 +492,24 @@ fun ShotsUiScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                            Icon(Icons.Default.CalendarMonth, contentDescription = null, tint = Color(0xFF8B9198), modifier = Modifier.size(20.dp))
+                            Icon(Icons.Default.CalendarMonth, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
                             Column {
                                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    Text("Yesterday", style = MaterialTheme.typography.bodyMedium, color = Color(0xFFE1E2E9), fontWeight = FontWeight.Bold)
+                                    Text("Yesterday", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
                                     Surface(
-                                        color = Color(0xFF242C34),
+                                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
                                         shape = RoundedCornerShape(10.dp)
                                     ) {
-                                        Text("${filteredYesterdayItems.size} Doses • ${filteredYesterdayItems.sumOf { it.amountMg }}mg", style = MaterialTheme.typography.labelSmall, color = Color(0xFFFEF08A), modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp))
+                                        Text("${filteredYesterdayItems.size} Doses • ${filteredYesterdayItems.sumOf { it.amountMg }}mg", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary, modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp))
                                     }
                                 }
-                                Text(success.yesterdaySummaryText, style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198))
+                                Text(success.yesterdaySummaryText, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
                         Icon(
                             imageVector = if (isYesterdayExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
                             contentDescription = if (isYesterdayExpanded) "Collapse Yesterday" else "Expand Yesterday",
-                            tint = Color(0xFF8B9198),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -521,7 +521,7 @@ fun ShotsUiScreen(
                                 Text(
                                     text = "No microdoses found matching filter",
                                     style = MaterialTheme.typography.bodyMedium,
-                                    color = Color(0xFF8B9198),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.padding(vertical = 4.dp)
                                 )
                             } else {
@@ -536,9 +536,9 @@ fun ShotsUiScreen(
 
             // 8. Monthly Ingestion Summary Card
             Surface(
-                color = Color(0xFF1C2228),
+                color = MaterialTheme.colorScheme.surfaceContainer,
                 shape = RoundedCornerShape(20.dp),
-                border = BorderStroke(1.dp, Color(0xFF242C34)),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(
@@ -551,10 +551,10 @@ fun ShotsUiScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Icon(Icons.Default.CalendarMonth, contentDescription = null, tint = Color(0xFFFDBA74), modifier = Modifier.size(18.dp))
-                            Text("October 2024 (M-T-D)", style = MaterialTheme.typography.bodyMedium, color = Color(0xFFE1E2E9), fontWeight = FontWeight.Bold)
+                            Icon(Icons.Default.CalendarMonth, contentDescription = null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(18.dp))
+                            Text("October 2024 (M-T-D)", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
                         }
-                        Text("${success.monthlyTotalDoses} Total Doses", style = MaterialTheme.typography.labelMedium, color = Color(0xFFFDBA74), fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                        Text("${success.monthlyTotalDoses} Total Doses", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
                     }
 
                     Row(
@@ -562,23 +562,23 @@ fun ShotsUiScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Column {
-                            Text("Total Mass", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198))
-                            Text("${success.monthlyTotalMassGrams}g", style = MaterialTheme.typography.titleMedium, color = Color(0xFFE1E2E9), fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                            Text("Total Mass", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("${success.monthlyTotalMassGrams}g", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
                         }
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("Curfew Score", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198))
-                            Text("${success.monthlyCurfewScorePercent}%", style = MaterialTheme.typography.titleMedium, color = Color(0xFFFEF08A), fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                            Text("Curfew Score", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("${success.monthlyCurfewScorePercent}%", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
                         }
                         Column(horizontalAlignment = Alignment.End) {
-                            Text("Avg Interval", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198))
-                            Text("${success.monthlyAvgIntervalHours}h", style = MaterialTheme.typography.titleMedium, color = Color(0xFFFFB4AA), fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                            Text("Avg Interval", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("${success.monthlyAvgIntervalHours}h", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
                         }
                     }
 
                     Button(
                         onClick = { },
                         modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF242C34), contentColor = Color(0xFFE1E2E9)),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh, contentColor = MaterialTheme.colorScheme.onSurface),
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -591,9 +591,9 @@ fun ShotsUiScreen(
 
             // 9. Historical Multi-Year Archives Card
             Surface(
-                color = Color(0xFF1C2228),
+                color = MaterialTheme.colorScheme.surfaceContainer,
                 shape = RoundedCornerShape(20.dp),
-                border = BorderStroke(1.dp, Color(0xFF242C34)),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(
@@ -605,10 +605,10 @@ fun ShotsUiScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("HISTORICAL MULTI-YEAR ARCHIVES", style = MaterialTheme.typography.labelSmall, color = Color(0xFFFDBA74), fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-                        Icon(Icons.Default.Download, contentDescription = null, tint = Color(0xFF8B9198), modifier = Modifier.size(16.dp))
+                        Text("HISTORICAL MULTI-YEAR ARCHIVES", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                        Icon(Icons.Default.Download, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp))
                     }
-                    Text("Scrub 10,340 indexed entries across 2023 - 2024", style = MaterialTheme.typography.bodySmall, color = Color(0xFF8B9198))
+                    Text("Scrub 10,340 indexed entries across 2023 - 2024", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -616,15 +616,15 @@ fun ShotsUiScreen(
                     ) {
                         listOf("SEP '24\n312 doses", "AUG '24\n298 doses", "JUL '24\n340 doses").forEach { monthLabel ->
                             Surface(
-                                color = Color(0xFF242C34),
+                                color = MaterialTheme.colorScheme.surfaceContainerHigh,
                                 shape = RoundedCornerShape(10.dp),
                                 modifier = Modifier.weight(1f)
                             ) {
-                                Text(monthLabel, style = MaterialTheme.typography.labelSmall, color = Color(0xFFE1E2E9), fontSize = 10.sp, modifier = Modifier.padding(vertical = 8.dp, horizontal = 4.dp))
+                                Text(monthLabel, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface, fontSize = 10.sp, modifier = Modifier.padding(vertical = 8.dp, horizontal = 4.dp))
                             }
                         }
                         Surface(
-                            color = Color(0xFF242C34),
+                            color = MaterialTheme.colorScheme.surfaceContainerHigh,
                             shape = RoundedCornerShape(10.dp),
                             modifier = Modifier.weight(1f)
                         ) {
@@ -633,9 +633,9 @@ fun ShotsUiScreen(
                                 horizontalArrangement = Arrangement.Center,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Icon(Icons.Default.CalendarMonth, contentDescription = null, tint = Color(0xFFFEF08A), modifier = Modifier.size(12.dp))
+                                Icon(Icons.Default.CalendarMonth, contentDescription = null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(12.dp))
                                 Spacer(modifier = Modifier.width(2.dp))
-                                Text("Jump Date", style = MaterialTheme.typography.labelSmall, color = Color(0xFFFEF08A), fontSize = 10.sp)
+                                Text("Jump Date", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary, fontSize = 10.sp)
                             }
                         }
                     }
@@ -644,9 +644,9 @@ fun ShotsUiScreen(
 
             // 10. Dispenser Telemetry Synced Card
             Surface(
-                color = Color(0xFF161B20),
+                color = MaterialTheme.colorScheme.surfaceContainerLow,
                 shape = RoundedCornerShape(16.dp),
-                border = BorderStroke(1.dp, Color(0xFF242C34)),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Row(
@@ -657,8 +657,8 @@ fun ShotsUiScreen(
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         Icon(Icons.Default.Science, contentDescription = null, tint = Color(0xFF4ADE80), modifier = Modifier.size(22.dp))
                         Column {
-                            Text("Dispenser Telemetry Synced", style = MaterialTheme.typography.bodyMedium, color = Color(0xFFE1E2E9), fontWeight = FontWeight.Bold)
-                            Text("Smart Flask #HF-9402 • Bluetooth LE 5.3", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198))
+                            Text("Dispenser Telemetry Synced", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
+                            Text("Smart Flask #HF-9402 • Bluetooth LE 5.3", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -702,9 +702,9 @@ fun DoseCard(dose: DoseCardItem) {
     }
 
     Surface(
-        color = Color(0xFF1C2228),
+        color = MaterialTheme.colorScheme.surfaceContainer,
         shape = RoundedCornerShape(16.dp),
-        border = BorderStroke(1.dp, Color(0xFF242C34)),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Max)) {
@@ -735,7 +735,7 @@ fun DoseCard(dose: DoseCardItem) {
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         Surface(
-                            color = Color(0xFF242C34),
+                            color = MaterialTheme.colorScheme.surfaceContainerHigh,
                             shape = CircleShape,
                             modifier = Modifier.size(32.dp)
                         ) {
@@ -751,7 +751,7 @@ fun DoseCard(dose: DoseCardItem) {
                                 Text(
                                     text = "Microdose #${dose.doseNumber}",
                                     style = MaterialTheme.typography.titleMedium,
-                                    color = Color(0xFFE1E2E9),
+                                    color = MaterialTheme.colorScheme.onSurface,
                                     fontWeight = FontWeight.Bold,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
@@ -759,11 +759,11 @@ fun DoseCard(dose: DoseCardItem) {
                                 Text(
                                     text = "• ${dose.time}",
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = Color(0xFF8B9198),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     maxLines = 1
                                 )
                                 Surface(
-                                    color = Color(0xFF242C34),
+                                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
                                     shape = RoundedCornerShape(6.dp)
                                 ) {
                                     Text(
@@ -783,7 +783,7 @@ fun DoseCard(dose: DoseCardItem) {
                         Text(
                             text = "${dose.amountMg}mg",
                             style = MaterialTheme.typography.headlineMedium,
-                            color = Color(0xFFFFB4AA),
+                            color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.Bold,
                             fontFamily = FontFamily.Monospace,
                             maxLines = 1,
@@ -792,7 +792,7 @@ fun DoseCard(dose: DoseCardItem) {
                         Text(
                             text = dose.doseCategory,
                             style = MaterialTheme.typography.labelSmall,
-                            color = Color(0xFF8B9198),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 9.sp,
                             fontFamily = FontFamily.Monospace,
                             maxLines = 1,
@@ -804,13 +804,13 @@ fun DoseCard(dose: DoseCardItem) {
                 Text(
                     text = dose.title,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color(0xFFE1E2E9),
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.SemiBold
                 )
                 Text(
                     text = dose.description,
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color(0xFF8B9198)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 Row(
@@ -819,14 +819,14 @@ fun DoseCard(dose: DoseCardItem) {
                 ) {
                     dose.tags.forEach { tag ->
                         Surface(
-                            color = Color(0xFF161B20),
+                            color = MaterialTheme.colorScheme.surfaceContainerLow,
                             shape = RoundedCornerShape(8.dp),
-                            border = BorderStroke(1.dp, Color(0xFF242C34))
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
                         ) {
                             Text(
                                 text = tag,
                                 style = MaterialTheme.typography.labelSmall,
-                                color = Color(0xFFE1E2E9),
+                                color = MaterialTheme.colorScheme.onSurface,
                                 fontSize = 10.sp,
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                                 maxLines = 1
