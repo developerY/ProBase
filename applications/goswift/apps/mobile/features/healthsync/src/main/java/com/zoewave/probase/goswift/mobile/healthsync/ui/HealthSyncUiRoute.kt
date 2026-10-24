@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,6 +20,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FitnessCenter
@@ -30,6 +32,7 @@ import androidx.compose.material.icons.filled.Watch
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -56,6 +59,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
 fun HealthSyncUiRoute(
+    onNavigateBack: () -> Unit = {},
     viewModel: HealthSyncViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -110,7 +114,8 @@ fun HealthSyncUiRoute(
         latestHrvMs = uiState.latestHrvMs,
         totalSleepMinutes = uiState.totalSleepMinutes,
         isLoading = uiState.isLoading,
-        onActionClick = { handleSyncOrPermissions() }
+        onActionClick = { handleSyncOrPermissions() },
+        onNavigateBack = onNavigateBack
     )
 }
 
@@ -122,7 +127,8 @@ fun HealthSyncUiScreen(
     latestHrvMs: Double?,
     totalSleepMinutes: Long?,
     isLoading: Boolean,
-    onActionClick: () -> Unit
+    onActionClick: () -> Unit,
+    onNavigateBack: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -138,24 +144,37 @@ fun HealthSyncUiScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column {
-                Text(
-                    text = "GOSWIFT",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = Color(0xFFFFB4AA),
-                    letterSpacing = 2.sp
-                )
-                Text(
-                    text = "Health Sync",
-                    style = MaterialTheme.typography.headlineLarge,
-                    color = Color(0xFFE1E2E9),
-                    fontWeight = FontWeight.Bold
-                )
+            Row(
+                modifier = Modifier.weight(1f, fill = false),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                IconButton(onClick = onNavigateBack) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Navigate back",
+                        tint = Color(0xFFE1E2E9)
+                    )
+                }
+                Column {
+                    Text(
+                        text = "GOSWIFT",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color(0xFFFFB4AA),
+                        letterSpacing = 2.sp
+                    )
+                    Text(
+                        text = "Health Sync",
+                        style = MaterialTheme.typography.headlineLarge,
+                        color = Color(0xFFE1E2E9),
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
             Surface(
                 color = Color(0xFF1C2228),
                 shape = RoundedCornerShape(20.dp),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF41474D))
+                border = BorderStroke(1.dp, Color(0xFF41474D))
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
@@ -180,7 +199,7 @@ fun HealthSyncUiScreen(
         Surface(
             color = Color(0xFF1C2228),
             shape = RoundedCornerShape(16.dp),
-            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF242C34)),
+            border = BorderStroke(1.dp, Color(0xFF242C34)),
             modifier = Modifier
                 .fillMaxWidth()
                 .alpha(if (isGranted) 1.0f else 0.5f)
@@ -244,7 +263,7 @@ fun HealthSyncUiScreen(
         Surface(
             color = Color(0xFF161B20),
             shape = RoundedCornerShape(16.dp),
-            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF242C34)),
+            border = BorderStroke(1.dp, Color(0xFF242C34)),
             modifier = Modifier.fillMaxWidth()
         ) {
             Row(
@@ -304,7 +323,7 @@ fun HealthSyncUiScreen(
         Surface(
             color = Color(0xFF1C2228),
             shape = RoundedCornerShape(16.dp),
-            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF242C34)),
+            border = BorderStroke(1.dp, Color(0xFF242C34)),
             modifier = Modifier
                 .fillMaxWidth()
                 .alpha(if (latestHeartRateBpm != null) 1.0f else 0.4f)
@@ -355,7 +374,7 @@ fun PeripheralCard(
     Surface(
         color = Color(0xFF1C2228),
         shape = RoundedCornerShape(16.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF242C34)),
+        border = BorderStroke(1.dp, Color(0xFF242C34)),
         modifier = Modifier
             .fillMaxWidth()
             .alpha(if (hasRealData) 1.0f else 0.4f)

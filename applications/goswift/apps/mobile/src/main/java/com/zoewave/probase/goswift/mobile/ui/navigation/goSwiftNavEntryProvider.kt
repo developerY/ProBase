@@ -22,7 +22,7 @@ fun goSwiftNavEntryProvider(
 ): NavEntry<GoSwiftDestination> {
     return when (key) {
         GoSwiftDestination.Home -> NavEntry(key) {
-            HomeUiRoute()
+            HomeUiRoute(onNavigateToSync = { navigateTo(GoSwiftDestination.HealthSync) })
         }
         GoSwiftDestination.Schedule -> NavEntry(key) {
             ShotsUiRoute()
@@ -31,7 +31,7 @@ fun goSwiftNavEntryProvider(
             InsightsUiRoute()
         }
         GoSwiftDestination.HealthSync -> NavEntry(key) {
-            HealthSyncUiRoute()
+            HealthSyncUiRoute(onNavigateBack = onBack)
         }
         GoSwiftDestination.Settings -> NavEntry(key) {
             SettingsUiRoute(onNavigateBack = onBack)

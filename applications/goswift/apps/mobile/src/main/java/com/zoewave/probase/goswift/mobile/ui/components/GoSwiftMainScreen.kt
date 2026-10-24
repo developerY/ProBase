@@ -6,7 +6,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.filled.Timeline
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -30,11 +29,11 @@ fun GoSwiftMainScreen() {
     val currentDestination = backStack.lastOrNull() ?: GoSwiftDestination.Home
 
     fun navigateTo(destination: GoSwiftDestination) {
+        if (backStack.lastOrNull() == destination) return
         val rootDestinations = listOf(
             GoSwiftDestination.Home,
             GoSwiftDestination.Schedule,
             GoSwiftDestination.Insights,
-            GoSwiftDestination.HealthSync,
             GoSwiftDestination.Settings
         )
         if (rootDestinations.contains(destination)) {
@@ -74,12 +73,6 @@ fun GoSwiftMainScreen() {
                 onClick = { navigateTo(GoSwiftDestination.Insights) },
                 icon = { Icon(imageVector = Icons.Default.Timeline, contentDescription = "Insights") },
                 label = { Text("Insights") }
-            )
-            item(
-                selected = currentDestination == GoSwiftDestination.HealthSync,
-                onClick = { navigateTo(GoSwiftDestination.HealthSync) },
-                icon = { Icon(imageVector = Icons.Default.Sync, contentDescription = "Sync") },
-                label = { Text("Sync") }
             )
             item(
                 selected = currentDestination == GoSwiftDestination.Settings,

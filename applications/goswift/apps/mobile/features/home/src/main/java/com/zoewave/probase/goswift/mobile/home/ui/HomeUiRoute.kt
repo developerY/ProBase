@@ -1,8 +1,8 @@
 package com.zoewave.probase.goswift.mobile.home.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -29,19 +29,24 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 
 @Composable
-fun HomeUiRoute(viewModel: HomeViewModel = hiltViewModel()) {
+fun HomeUiRoute(
+    onNavigateToSync: () -> Unit = {},
+    viewModel: HomeViewModel = hiltViewModel()
+) {
     val uiState by viewModel.uiState.collectAsState()
 
     HomeUiScreen(
         uiState = uiState,
-        onLogIntake = { viewModel.logIntake(it) }
+        onLogIntake = { viewModel.logIntake(it) },
+        onNavigateToSync = onNavigateToSync
     )
 }
 
 @Composable
 fun HomeUiScreen(
     uiState: HomeUiState,
-    onLogIntake: (Double) -> Unit
+    onLogIntake: (Double) -> Unit,
+    onNavigateToSync: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -74,7 +79,7 @@ fun HomeUiScreen(
             Surface(
                 color = Color(0xFF1C2228),
                 shape = RoundedCornerShape(20.dp),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF41474D))
+                border = BorderStroke(1.dp, Color(0xFF41474D))
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
@@ -95,11 +100,12 @@ fun HomeUiScreen(
             }
         }
 
-        // Status Banner Card
+        // Status Banner Card (Health Sync)
         Surface(
+            onClick = onNavigateToSync,
             color = Color(0xFF1C2228),
             shape = RoundedCornerShape(16.dp),
-            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF242C34)),
+            border = BorderStroke(1.dp, Color(0xFF242C34)),
             modifier = Modifier.fillMaxWidth()
         ) {
             Row(
@@ -149,7 +155,7 @@ fun HomeUiScreen(
         Surface(
             color = Color(0xFF1C2228),
             shape = RoundedCornerShape(24.dp),
-            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF242C34)),
+            border = BorderStroke(1.dp, Color(0xFF242C34)),
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(
@@ -252,7 +258,7 @@ fun HomeUiScreen(
         Surface(
             color = Color(0xFF1C2228),
             shape = RoundedCornerShape(16.dp),
-            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF242C34)),
+            border = BorderStroke(1.dp, Color(0xFF242C34)),
             modifier = Modifier.fillMaxWidth()
         ) {
             Row(
@@ -297,7 +303,7 @@ fun HomeUiScreen(
         Surface(
             color = Color(0xFF161B20),
             shape = RoundedCornerShape(16.dp),
-            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF242C34)),
+            border = BorderStroke(1.dp, Color(0xFF242C34)),
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(
