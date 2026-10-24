@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -34,9 +35,9 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -79,7 +80,7 @@ private fun PipelineStageIndicator(
             text = label,
             style = MaterialTheme.typography.bodySmall,
             fontWeight = if (isActive) FontWeight.SemiBold else FontWeight.Normal,
-            color = if (isActive) Color.Black else Color.Gray
+            color = if (isActive) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
@@ -145,7 +146,7 @@ fun AiConfigurationCardContent(
 
     Card(
         modifier = modifier.fillMaxWidth(),
-        colors = androidx.compose.material3.CardDefaults.cardColors(containerColor = Color(0xFFE8E0FD)) // Soft lavender
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
     ) {
         Column {
             Row(
@@ -157,11 +158,11 @@ fun AiConfigurationCardContent(
                 Icon(
                     imageVector = Icons.Default.AutoAwesome,
                     contentDescription = null,
-                    tint = Color(0xFFD4AF37) // Gold
+                    tint = MaterialTheme.colorScheme.primary
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(text = title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Color.Black)
+                    Text(text = title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                     val isStage1Active = uiState.isApiKeySet && uiState.useByokKey
                     val isStage2Active = uiState.useLocalAi && uiState.isLocalAiAvailable
                     val isStage3Active = uiState.useFirebaseVertexAi
@@ -175,17 +176,17 @@ fun AiConfigurationCardContent(
                         // Stage 1: BYOK
                         PipelineStageIndicator(isActive = isStage1Active, label = "BYOK")
 
-                        Text("→", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                        Text("→", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
 
                         // Stage 2: Local AI
                         PipelineStageIndicator(isActive = isStage2Active, label = "Local AI")
 
-                        Text("→", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                        Text("→", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
 
                         // Stage 3: Firebase
                         PipelineStageIndicator(isActive = isStage3Active, label = "Firebase")
 
-                        Text("→", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                        Text("→", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
 
                         // Stage 4: Gemma
                         PipelineStageIndicator(isActive = isStage4Active, label = "Gemma")
@@ -193,7 +194,8 @@ fun AiConfigurationCardContent(
                 }
                 Icon(
                     imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                    contentDescription = null
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
@@ -232,7 +234,7 @@ fun AiConfigurationCardContent(
                                         Text(
                                             text = option,
                                             fontWeight = if (option == selectedPrimaryAi) FontWeight.Bold else FontWeight.Normal,
-                                            color = if (isUnavailableLocalAi) Color.Gray else Color.Unspecified
+                                            color = if (isUnavailableLocalAi) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface
                                         )
                                     },
                                     onClick = {
@@ -274,7 +276,7 @@ fun AiConfigurationCardContent(
 
                     val badgeStatus = when (selectedPrimaryAi) {
                         "On-Device Local AI (Gemini Nano)" -> {
-                            if (uiState.isLocalAiAvailable) Pair("NPU Active", Color(0xFF4CAF50)) else Pair("Unsupported", Color.Gray)
+                            if (uiState.isLocalAiAvailable) Pair("NPU Active", Color(0xFF4CAF50)) else Pair("Unsupported", MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                         "Firebase AI Logic (Cloud)" -> Pair("Active (Cloud)", Color(0xFF4CAF50))
                         "Gemma 4 Cloud (Free Tier) - Default" -> Pair("Ready (Keyless)", Color(0xFF4CAF50))
@@ -282,20 +284,20 @@ fun AiConfigurationCardContent(
                     }
 
                     ListItem(
-                        colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = Color(0xFFFBF8F5)),
+                        colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
                         modifier = Modifier.padding(top = 4.dp, bottom = 16.dp),
                         headlineContent = {
                             Text(
                                 text = selectedPrimaryAi,
                                 fontWeight = FontWeight.SemiBold,
-                                color = if (selectedPrimaryAi == "On-Device Local AI (Gemini Nano)" && !uiState.isLocalAiAvailable) Color.Gray else Color.Black
+                                color = if (selectedPrimaryAi == "On-Device Local AI (Gemini Nano)" && !uiState.isLocalAiAvailable) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface
                             )
                         },
                         supportingContent = {
                             Text(
                                 text = infoBoxText,
                                 style = MaterialTheme.typography.bodySmall,
-                                color = if (selectedPrimaryAi == "On-Device Local AI (Gemini Nano)" && !uiState.isLocalAiAvailable) Color.Gray else MaterialTheme.colorScheme.onSurfaceVariant
+                                color = if (selectedPrimaryAi == "On-Device Local AI (Gemini Nano)" && !uiState.isLocalAiAvailable) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         },
                         trailingContent = {
@@ -542,7 +544,7 @@ fun AiConfigurationCardContent(
                             Icon(
                                 imageVector = Icons.Default.BugReport,
                                 contentDescription = "AI Diagnostics",
-                                tint = Color.Gray
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }

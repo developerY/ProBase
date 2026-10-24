@@ -38,6 +38,7 @@ import androidx.compose.material.icons.filled.Sensors
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Watch
 import androidx.compose.material.icons.filled.WbSunny
+import com.zoewave.probase.features.ai.configuration.ui.AiConfigurationCard
 import com.zoewave.probase.goswift.data.ThemeMode
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -56,7 +57,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -506,6 +509,13 @@ fun SettingsUiScreen(
 
         // Section 2: ADAPTIVE NEURAL ENGINE
         SectionHeader("ADAPTIVE NEURAL ENGINE", "Edge TF-Lite 2.4")
+        var isAiExpanded by remember { mutableStateOf(false) }
+        AiConfigurationCard(
+            expanded = isAiExpanded,
+            onExpandToggle = { isAiExpanded = !isAiExpanded },
+            title = "GoSwift AI Engine",
+            description = "Configure On-Device Local AI (Gemini Nano) and Cloud fallback models for Caffeine Telemetry."
+        )
         Surface(
             color = MaterialTheme.colorScheme.surfaceContainer,
             shape = RoundedCornerShape(20.dp),

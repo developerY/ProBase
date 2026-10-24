@@ -1,8 +1,10 @@
 package com.zoewave.probase.photodo.features.smartadvice.data
 
-import com.google.ai.client.generativeai.GenerativeModel
-import com.google.ai.client.generativeai.type.content
-import com.google.ai.client.generativeai.type.generationConfig
+import com.google.firebase.Firebase
+import com.google.firebase.ai.ai
+import com.google.firebase.ai.type.GenerativeBackend
+import com.google.firebase.ai.type.content
+import com.google.firebase.ai.type.generationConfig
 import com.zoewave.probase.applications.photodo.db.entity.ProjectDetails
 import com.zoewave.probase.photodo.features.smartadvice.domain.ProjectAdvice
 import kotlinx.serialization.json.Json
@@ -21,9 +23,10 @@ class SmartAdviceEngine @Inject constructor() {
         apiKey: String,
         modelName: String = "gemini-1.5-flash"
     ): ProjectAdvice {
-        val generativeModel = GenerativeModel(
-            modelName = modelName,
-            apiKey = apiKey,
+        val generativeModel = Firebase.ai(
+            backend = GenerativeBackend.googleAI()
+        ).generativeModel(
+            modelName = modelName.ifBlank { "gemini-1.5-flash" },
             generationConfig = generationConfig {
                 responseMimeType = "application/json"
             }
@@ -77,9 +80,10 @@ class SmartAdviceEngine @Inject constructor() {
         apiKey: String,
         modelName: String = "gemini-1.5-flash"
     ): String {
-        val generativeModel = GenerativeModel(
-            modelName = modelName,
-            apiKey = apiKey
+        val generativeModel = Firebase.ai(
+            backend = GenerativeBackend.googleAI()
+        ).generativeModel(
+            modelName = modelName.ifBlank { "gemini-1.5-flash" }
         )
 
         val taskList = project.tasks.joinToString("\n") { "- ${it.text} (${if (it.isChecked) "Completed" else "Pending"})" }

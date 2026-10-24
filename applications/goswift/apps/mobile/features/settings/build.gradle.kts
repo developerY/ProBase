@@ -19,6 +19,7 @@ dependencies {
     implementation(project(":applications:goswift:data"))
     implementation(project(":applications:goswift:model"))
     implementation(project(":applications:goswift:features:main"))
+    implementation(project(":features:ai:configuration"))
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.health.connect.client)

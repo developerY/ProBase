@@ -50,14 +50,14 @@ fun SeaweedGlassApp(
                 Icon(
                     imageVector = Icons.Rounded.AccountBalanceWallet,
                     contentDescription = null,
-                    tint = GlimmerTheme.colors.outline,
+                    tint = Color.White.copy(alpha = 0.7f),
                     modifier = Modifier.size(16.dp)
                 )
                 Spacer(Modifier.width(4.dp))
                 Text(
                     text = "LIVE",
                     style = GlimmerTheme.typography.caption,
-                    color = GlimmerTheme.colors.outline
+                    color = Color.White.copy(alpha = 0.7f)
                 )
             }
         }
@@ -83,7 +83,7 @@ fun SeaweedGlassApp(
                         Text(
                             text = "FLEXIBLE MONEY",
                             style = GlimmerTheme.typography.caption,
-                            color = GlimmerTheme.colors.outline
+                            color = Color.White.copy(alpha = 0.7f)
                         )
                         val balance = profile?.let { CurrencyUtils.formatCents(it.flexibleMoneyRemainingCents) } ?: "---"
                         Text(

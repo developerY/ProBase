@@ -1,9 +1,11 @@
 package com.zoewave.probase.features.ai.vision.receipt.data
 
 import android.graphics.Bitmap
-import com.google.ai.client.generativeai.GenerativeModel
-import com.google.ai.client.generativeai.type.content
-import com.google.ai.client.generativeai.type.generationConfig
+import com.google.firebase.Firebase
+import com.google.firebase.ai.ai
+import com.google.firebase.ai.type.GenerativeBackend
+import com.google.firebase.ai.type.content
+import com.google.firebase.ai.type.generationConfig
 import com.zoewave.probase.features.ai.vision.receipt.ReceiptDiagnosticResult
 import com.zoewave.probase.features.ai.vision.receipt.ReceiptEngine
 import kotlinx.serialization.Serializable
@@ -35,16 +37,14 @@ class CloudReceiptEngine @Inject constructor() : ReceiptEngine {
         userContext: String?
     ): ReceiptDiagnosticResult {
         val logs = mutableListOf("Cloud Receipt AI initialized")
-        if (apiKey.isNullOrBlank()) {
-            throw IllegalArgumentException("Missing Gemini API Key")
-        }
 
-        val finalModelName = modelName ?: "gemini-1.5-flash"
+        val finalModelName = if (!modelName.isNullOrBlank()) modelName else "gemini-1.5-flash"
         logs.add("Model: $finalModelName")
 
-        val generativeModel = GenerativeModel(
+        val generativeModel = Firebase.ai(
+            backend = GenerativeBackend.googleAI()
+        ).generativeModel(
             modelName = finalModelName,
-            apiKey = apiKey,
             generationConfig = generationConfig {
                 responseMimeType = "application/json"
             }
