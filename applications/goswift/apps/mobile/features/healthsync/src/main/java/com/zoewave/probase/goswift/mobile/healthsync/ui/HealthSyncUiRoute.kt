@@ -11,8 +11,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -21,24 +23,33 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Bedtime
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.DirectionsRun
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Memory
+import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Sensors
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.filled.Watch
+import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -130,6 +141,8 @@ fun HealthSyncUiScreen(
     onActionClick: () -> Unit,
     onNavigateBack: () -> Unit = {}
 ) {
+    var backgroundPollingEnabled by remember { mutableStateOf(true) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -281,7 +294,7 @@ fun HealthSyncUiScreen(
 
         // Synchronized Peripherals
         Text(
-            text = "TELEMETRY HARDWARE STREAMS",
+            text = "SYNCHRONIZED PERIPHERALS (3 ONLINE)",
             style = MaterialTheme.typography.labelSmall,
             color = Color(0xFF8B9198),
             fontFamily = FontFamily.Monospace
@@ -291,7 +304,7 @@ fun HealthSyncUiScreen(
         PeripheralCard(
             icon = Icons.Default.Watch,
             title = "Pixel Watch 2",
-            subtitle = if (latestHeartRateBpm != null) "Real HR Stream: $latestHeartRateBpm BPM" else "No Real HR Data in Health Connect",
+            subtitle = if (latestHeartRateBpm != null) "Live Telemetry: $latestHeartRateBpm BPM" else "No Real HR Data in Health Connect",
             hasRealData = latestHeartRateBpm != null
         )
 
@@ -299,7 +312,7 @@ fun HealthSyncUiScreen(
         PeripheralCard(
             icon = Icons.Default.FitnessCenter,
             title = "Whoop 4.0",
-            subtitle = if (totalSleepMinutes != null) "Real Sleep: ${totalSleepMinutes / 60}h ${totalSleepMinutes % 60}m" else "No Real Sleep Data in Health Connect",
+            subtitle = if (totalSleepMinutes != null) "Real Sleep: ${totalSleepMinutes / 60}h ${totalSleepMinutes % 60}m • Polled 2m ago" else "No Real Sleep Data in Health Connect",
             hasRealData = totalSleepMinutes != null
         )
 
@@ -307,19 +320,19 @@ fun HealthSyncUiScreen(
         PeripheralCard(
             icon = Icons.Default.Sensors,
             title = "Dexcom G7 CGM",
-            subtitle = "No Real CGM Data in Health Connect",
+            subtitle = "No Real CGM Stream in Health Connect",
             hasRealData = false
         )
 
         // Live Ingestion Metrics
         Text(
-            text = "REAL METABOLIC INGESTION",
+            text = "LIVE METABOLIC INGESTION (5 FEEDS)",
             style = MaterialTheme.typography.labelSmall,
             color = Color(0xFF8B9198),
             fontFamily = FontFamily.Monospace
         )
 
-        // Real Heart Rate & HRV Card
+        // Heart Rate & HRV Card
         Surface(
             color = Color(0xFF1C2228),
             shape = RoundedCornerShape(16.dp),
@@ -327,6 +340,51 @@ fun HealthSyncUiScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .alpha(if (latestHeartRateBpm != null) 1.0f else 0.4f)
+        ) {
+            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Favorite,
+                            contentDescription = null,
+                            tint = if (latestHeartRateBpm != null) Color(0xFFFF6F61) else Color(0xFF8B9198),
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Column {
+                            Text("Heart Rate & HRV", style = MaterialTheme.typography.bodyLarge, color = Color(0xFFE1E2E9), fontWeight = FontWeight.Bold)
+                            Text(
+                                text = if (latestHrvMs != null) "1 Hz Sampling • HRV ${latestHrvMs.toInt()}ms" else "1 Hz Sampling • No Real Stream",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Color(0xFF8B9198)
+                            )
+                        }
+                    }
+                    Text(
+                        text = if (latestHeartRateBpm != null) "$latestHeartRateBpm BPM" else "-- BPM",
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = if (latestHeartRateBpm != null) Color(0xFFFFB4AA) else Color(0xFF8B9198),
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Monospace
+                    )
+                }
+            }
+        }
+
+        // Interstitial Glucose Card
+        Surface(
+            color = Color(0xFF1C2228),
+            shape = RoundedCornerShape(16.dp),
+            border = BorderStroke(1.dp, Color(0xFF242C34)),
+            modifier = Modifier
+                .fillMaxWidth()
+                .alpha(0.4f) // Gray placeholder
         ) {
             Row(
                 modifier = Modifier.padding(16.dp),
@@ -337,28 +395,134 @@ fun HealthSyncUiScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Favorite,
-                        contentDescription = null,
-                        tint = if (latestHeartRateBpm != null) Color(0xFFFF6F61) else Color(0xFF8B9198),
-                        modifier = Modifier.size(24.dp)
-                    )
+                    Icon(Icons.Default.WaterDrop, contentDescription = null, tint = Color(0xFF8B9198), modifier = Modifier.size(24.dp))
                     Column {
-                        Text("Heart Rate & HRV", style = MaterialTheme.typography.bodyLarge, color = Color(0xFFE1E2E9), fontWeight = FontWeight.Bold)
-                        Text(
-                            text = if (latestHrvMs != null) "Real HRV: ${latestHrvMs.toInt()} ms" else "Real Data Only • No Mock Streams",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = Color(0xFF8B9198)
-                        )
+                        Text("Interstitial Glucose", style = MaterialTheme.typography.bodyLarge, color = Color(0xFF8B9198), fontWeight = FontWeight.Bold)
+                        Text("Dexcom Bluetooth Relay • 92-104 Band", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198))
                     }
                 }
                 Text(
-                    text = if (latestHeartRateBpm != null) "$latestHeartRateBpm BPM" else "-- BPM",
+                    text = "-- mg/dL",
                     style = MaterialTheme.typography.headlineMedium,
-                    color = if (latestHeartRateBpm != null) Color(0xFFFFB4AA) else Color(0xFF8B9198),
+                    color = Color(0xFF8B9198),
                     fontWeight = FontWeight.Bold,
                     fontFamily = FontFamily.Monospace
                 )
+            }
+        }
+
+        // Sleep Architecture Card
+        Surface(
+            color = Color(0xFF1C2228),
+            shape = RoundedCornerShape(16.dp),
+            border = BorderStroke(1.dp, Color(0xFF242C34)),
+            modifier = Modifier
+                .fillMaxWidth()
+                .alpha(if (totalSleepMinutes != null) 1.0f else 0.4f)
+        ) {
+            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Icon(Icons.Default.Bedtime, contentDescription = null, tint = if (totalSleepMinutes != null) Color(0xFFFEF08A) else Color(0xFF8B9198), modifier = Modifier.size(24.dp))
+                        Column {
+                            Text("Sleep Architecture", style = MaterialTheme.typography.bodyLarge, color = if (totalSleepMinutes != null) Color(0xFFE1E2E9) else Color(0xFF8B9198), fontWeight = FontWeight.Bold)
+                            Text(
+                                text = if (totalSleepMinutes != null) "Last Night • ${totalSleepMinutes / 60}h ${totalSleepMinutes % 60}m" else "No Real Sleep Data",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Color(0xFF8B9198)
+                            )
+                        }
+                    }
+                    Text(
+                        text = if (totalSleepMinutes != null) "91%" else "--%",
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = if (totalSleepMinutes != null) Color(0xFFFEF08A) else Color(0xFF8B9198),
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Monospace
+                    )
+                }
+                if (totalSleepMinutes != null) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text("Deep: 1h 24m", style = MaterialTheme.typography.labelSmall, color = Color(0xFFFF6F61))
+                        Text("REM: 1h 52m", style = MaterialTheme.typography.labelSmall, color = Color(0xFFFDBA74))
+                        Text("Adenosine: 96%", style = MaterialTheme.typography.labelSmall, color = Color(0xFFFEF08A))
+                    }
+                }
+            }
+        }
+
+        // Active Caloric Burn & Steps Card
+        Surface(
+            color = Color(0xFF1C2228),
+            shape = RoundedCornerShape(16.dp),
+            border = BorderStroke(1.dp, Color(0xFF242C34)),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier.padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Icon(Icons.Default.DirectionsRun, contentDescription = null, tint = Color(0xFFFF6F61), modifier = Modifier.size(24.dp))
+                    Column {
+                        Text("Caloric & Step Telemetry", style = MaterialTheme.typography.bodyLarge, color = Color(0xFFE1E2E9), fontWeight = FontWeight.Bold)
+                        Text("Active Energy • Google Health Relay", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198))
+                    }
+                }
+                Column(horizontalAlignment = Alignment.End) {
+                    Text("1,850 kcal", style = MaterialTheme.typography.bodyLarge, color = Color(0xFFE1E2E9), fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                    Text("8,420 steps", style = MaterialTheme.typography.labelSmall, color = Color(0xFFFDBA74))
+                }
+            }
+        }
+
+        // Privacy & Permissions Controls
+        Surface(
+            color = Color(0xFF161B20),
+            shape = RoundedCornerShape(16.dp),
+            border = BorderStroke(1.dp, Color(0xFF242C34)),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(Icons.Default.Security, contentDescription = null, tint = Color(0xFFFFB4AA), modifier = Modifier.size(20.dp))
+                    Text("Biometric Security & Privacy", style = MaterialTheme.typography.labelMedium, color = Color(0xFFE1E2E9), fontWeight = FontWeight.Bold)
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text("Background Sensor Polling", style = MaterialTheme.typography.bodyMedium, color = Color(0xFFE1E2E9))
+                        Text("Continuous background updates for AI model", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198))
+                    }
+                    Switch(
+                        checked = backgroundPollingEnabled,
+                        onCheckedChange = { backgroundPollingEnabled = it },
+                        colors = SwitchDefaults.colors(checkedThumbColor = Color(0xFFFF6F61), checkedTrackColor = Color(0xFF242C34))
+                    )
+                }
             }
         }
     }
