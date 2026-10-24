@@ -14,7 +14,10 @@ data class UserSettingsEntity(
     val themeConfig: SeaweedThemeConfig,
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val isAiEnabled: Boolean = false,
-    val aiModel: String = "gemini-1.5-flash"
+    val aiModel: String = "gemini-1.5-flash",
+    val useFirebaseVertexAi: Boolean = true,
+    val useByokKey: Boolean = false,
+    val useLocalAi: Boolean = false
 )
 
 fun UserSettingsEntity.toDomain() = UserSettings(
@@ -23,7 +26,10 @@ fun UserSettingsEntity.toDomain() = UserSettings(
     themeConfig = themeConfig,
     themeMode = themeMode,
     isAiEnabled = isAiEnabled,
-    aiModel = aiModel
+    aiModel = aiModel,
+    useFirebaseVertexAi = useFirebaseVertexAi,
+    useByokKey = useByokKey,
+    useLocalAi = useLocalAi
 )
 
 fun UserSettings.toEntity() = UserSettingsEntity(
@@ -32,5 +38,8 @@ fun UserSettings.toEntity() = UserSettingsEntity(
     themeConfig = themeConfig,
     themeMode = themeMode,
     isAiEnabled = isAiEnabled,
-    aiModel = aiModel
+    aiModel = aiModel,
+    useFirebaseVertexAi = useFirebaseVertexAi,
+    useByokKey = useByokKey,
+    useLocalAi = useLocalAi
 )

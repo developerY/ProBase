@@ -23,5 +23,7 @@ data class UserSettings(
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val isAiEnabled: Boolean = false,
     val aiModel: String = "gemini-1.5-flash",
-    val useFirebaseVertexAi: Boolean = true
+    val useFirebaseVertexAi: Boolean = true,
+    val useByokKey: Boolean = false,
+    val useLocalAi: Boolean = false
 )
