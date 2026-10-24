@@ -70,7 +70,9 @@ sealed class SeaweedDestination(
     )
 
     @Serializable
-    data object AddTransaction : SeaweedDestination(
+    data class AddTransaction(
+        val initialReceiptUri: String? = null
+    ) : SeaweedDestination(
         titleRes = R.string.applications_seaweed_model_route_add_transaction,
         icon = Icons.Default.Add
     )

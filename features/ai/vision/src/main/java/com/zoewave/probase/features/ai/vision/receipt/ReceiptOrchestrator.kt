@@ -23,45 +23,31 @@ class ReceiptOrchestrator @Inject constructor(
         bitmap: Bitmap,
         apiKey: String?,
         modelName: String? = null,
-        userContext: String? = null
+        userContext: String? = null,
+        forceLocalAi: Boolean = false
     ): ReceiptDiagnosticResult {
         val totalLogs = mutableListOf<String>()
+        Log.d("SeaweedAI", "==================================================")
+        Log.d("SeaweedAI", ">>> RECEIPT ORCHESTRATOR INITIATED <<<")
+        Log.d("SeaweedAI", "Has BYOK API Key: ${!apiKey.isNullOrBlank()}")
+        Log.d("SeaweedAI", "Force Local AI: $forceLocalAi")
+        Log.d("SeaweedAI", "Model Preference: ${modelName ?: "Default (gemini-1.5-flash)"}")
+        Log.d("SeaweedAI", "==================================================")
+
         return try {
-            if (!apiKey.isNullOrBlank()) {
-                /*
-                Log.d(tag, "Performing Compliance Handshake...")
-                totalLogs.add("Orchestrator: Compliance check...")
-                
-                val ageSignalResult = ageSignalsManager.getAgeSignal()
-                val isAllowed = ageSignalResult.fold(
-                    onSuccess = { signal ->
-                        signal.isAuthorizedForCloudAI
-                    },
-                    onFailure = { error ->
-                        Log.e(tag, "Compliance error: ${error.message}")
-                        false
-                    }
-                )
-
-                if (!isAllowed) {
-                    totalLogs.add("Orchestrator: Compliance restricted. Using Local AI.")
-                    val result = localEngine.processReceipt(bitmap, null, userContext = userContext)
-                    return result.copy(
-                        logs = totalLogs + result.logs,
-                        warnings = listOf("Cloud analysis restricted for compliance. Using local extraction.")
-                    )
-                }
-                */
-
-                totalLogs.add("Orchestrator: Attempting Cloud Receipt AI")
+            if (!forceLocalAi) {
+                totalLogs.add("Orchestrator: Attempting Cloud Receipt AI (Firebase Vertex AI)")
+                Log.d("SeaweedAI", "Orchestrator routing to Cloud Receipt Engine...")
                 val result = cloudEngine.processReceipt(bitmap, apiKey, modelName, userContext)
                 result.copy(logs = totalLogs + result.logs)
             } else {
-                totalLogs.add("Orchestrator: No API key, using Local AI")
+                totalLogs.add("Orchestrator: Local AI selected, using Local Engine")
+                Log.d("SeaweedAI", "Orchestrator routing to Local Receipt Engine...")
                 val result = localEngine.processReceipt(bitmap, null, userContext = userContext)
                 result.copy(logs = totalLogs + result.logs)
             }
         } catch (e: Exception) {
+            Log.w("SeaweedAI", "Cloud engine failed (${e.localizedMessage}), falling back to Local AI")
             val fallbackLogs = listOf("Orchestrator: Cloud failed (${e.localizedMessage})", "Triggering Local AI Fallback")
             val result = localEngine.processReceipt(bitmap, null, userContext = userContext)
             result.copy(

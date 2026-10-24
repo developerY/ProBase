@@ -90,12 +90,19 @@ import com.zoewave.probase.core.ui.R as CoreUiR
 
 @Composable
 fun AddTransactionUiRoute(
+    initialReceiptUri: String? = null,
     navTo: (SeaweedDestination) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: AddTransactionViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(initialReceiptUri) {
+        if (!initialReceiptUri.isNullOrBlank()) {
+            viewModel.onEvent(AddTransactionUiEvent.ReceiptAttached(initialReceiptUri))
+        }
+    }
 
     LaunchedEffect(uiState.isSuccess) {
         if (uiState.isSuccess) {

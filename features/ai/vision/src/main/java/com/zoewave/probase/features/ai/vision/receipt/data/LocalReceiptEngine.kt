@@ -1,6 +1,7 @@
 package com.zoewave.probase.features.ai.vision.receipt.data
 
 import android.graphics.Bitmap
+import android.util.Log
 import com.zoewave.probase.features.ai.vision.receipt.ReceiptDiagnosticResult
 import com.zoewave.probase.features.ai.vision.receipt.ReceiptEngine
 import com.zoewave.probase.features.readers.ocr.data.LocalOcrEngine
@@ -17,21 +18,33 @@ class LocalReceiptEngine @Inject constructor(
         userContext: String?
     ): ReceiptDiagnosticResult {
         val logs = mutableListOf("Local Receipt AI initialized")
+
+        Log.d("SeaweedAI", "==================================================")
+        Log.d("SeaweedAI", "=== STARTING LOCAL ON-DEVICE OCR ANALYSIS ===")
+        Log.d("SeaweedAI", "Image Dimensions: ${bitmap.width} x ${bitmap.height}")
         
         val visionText = try {
             val result = ocrEngine.extractText(bitmap)
             logs.add("ML Kit OCR successful")
+            Log.d("SeaweedAI", "ML Kit OCR Extracted Text:\n$result")
             result
         } catch (e: Exception) {
+            Log.e("SeaweedAI", "ML Kit OCR Extraction Failed", e)
             logs.add("ML Kit OCR failed: ${e.message}")
             ""
         }
 
-        if (visionText.isBlank()) return ReceiptDiagnosticResult(logs = logs, engineUsed = "Local AI")
+        if (visionText.isBlank()) {
+            Log.d("SeaweedAI", "No OCR text detected on image.")
+            return ReceiptDiagnosticResult(logs = logs, engineUsed = "Local AI")
+        }
 
         // 🚀 Minimalistic local extraction (Regex)
         val total = extractTotal(visionText)
         logs.add("Regex extraction complete")
+
+        Log.d("SeaweedAI", "Regex Extracted Total: $total")
+        Log.d("SeaweedAI", "==================================================")
 
         return ReceiptDiagnosticResult(
             total = total,
