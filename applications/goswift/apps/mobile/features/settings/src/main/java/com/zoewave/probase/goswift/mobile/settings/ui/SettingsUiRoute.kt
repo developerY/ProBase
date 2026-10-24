@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -30,9 +32,13 @@ import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.NightsStay
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Sensors
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Watch
+import androidx.compose.material.icons.filled.WbSunny
+import com.zoewave.probase.goswift.data.ThemeMode
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -174,6 +180,7 @@ fun SettingsUiRoute(
         uiState = uiState,
         onNavigateBack = onNavigateBack,
         onRequestHealthPermissions = { requestHealthPermissions() },
+        onUpdateThemeMode = { viewModel.updateThemeMode(it) },
         onUpdateMicrodoseQuantum = { viewModel.updateMicrodoseQuantum(it) },
         onUpdateCaffeineCeiling = { viewModel.updateCaffeineCeiling(it) },
         onToggleCurfew = { viewModel.toggleCurfew(it) },
@@ -196,6 +203,7 @@ fun SettingsUiScreen(
     uiState: SettingsUiState,
     onNavigateBack: () -> Unit,
     onRequestHealthPermissions: () -> Unit,
+    onUpdateThemeMode: (ThemeMode) -> Unit = {},
     onUpdateMicrodoseQuantum: (MicrodoseQuantum) -> Unit,
     onUpdateCaffeineCeiling: (Float) -> Unit,
     onToggleCurfew: (Boolean) -> Unit,
@@ -214,7 +222,7 @@ fun SettingsUiScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF101418))
+            .background(MaterialTheme.colorScheme.background)
             .verticalScroll(rememberScrollState())
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp)
@@ -353,6 +361,68 @@ fun SettingsUiScreen(
                     Column(horizontalAlignment = Alignment.End) {
                         Text("Receptor Sensitivity", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198))
                         Text("High (Adaptive)", style = MaterialTheme.typography.bodyMedium, color = Color(0xFFFDBA74), fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+        }
+
+        // Section: APPEARANCE & THEME
+        SectionHeader("APPEARANCE & THEME", "Display Mode")
+        Surface(
+            color = MaterialTheme.colorScheme.surfaceContainer,
+            shape = RoundedCornerShape(20.dp),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Theme Mode", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.outline)
+                    Text(uiState.themeMode.label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    ThemeMode.entries.forEach { mode ->
+                        val isSelected = uiState.themeMode == mode
+                        Surface(
+                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerLow,
+                            shape = RoundedCornerShape(12.dp),
+                            border = if (!isSelected) BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant) else null,
+                            modifier = Modifier
+                                .weight(1f)
+                                .clickable { onUpdateThemeMode(mode) }
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(vertical = 10.dp, horizontal = 8.dp),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                val icon = when (mode) {
+                                    ThemeMode.SYSTEM -> Icons.Default.Palette
+                                    ThemeMode.LIGHT -> Icons.Default.WbSunny
+                                    ThemeMode.DARK -> Icons.Default.NightsStay
+                                }
+                                Icon(
+                                    imageVector = icon,
+                                    contentDescription = mode.label,
+                                    tint = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = mode.label,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                    fontSize = 11.sp
+                                )
+                            }
+                        }
                     }
                 }
             }

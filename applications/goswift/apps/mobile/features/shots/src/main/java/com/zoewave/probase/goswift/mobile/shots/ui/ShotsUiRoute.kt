@@ -64,7 +64,7 @@ fun ShotsUiScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFF101418)),
+                .background(MaterialTheme.colorScheme.background),
             contentAlignment = Alignment.Center
         ) {
             CircularProgressIndicator(color = Color(0xFFFF6F61))
@@ -78,7 +78,7 @@ fun ShotsUiScreen(
     var isTodayExpanded by remember { mutableStateOf(true) }
     var isYesterdayExpanded by remember { mutableStateOf(false) }
 
-    Box(modifier = Modifier.fillMaxSize().background(Color(0xFF101418))) {
+    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -167,17 +167,60 @@ fun ShotsUiScreen(
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        Column {
+                        Column(modifier = Modifier.weight(1f)) {
                             Text("TOTAL TELEMETRY", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198), fontFamily = FontFamily.Monospace)
-                            Text("%,d doses".format(success.totalTelemetryDoses), style = MaterialTheme.typography.headlineLarge, color = Color(0xFFE1E2E9), fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
-                            Text("✓ ${success.fidelityPercent}% zero-jitter fidelity", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198))
+                            Row(
+                                verticalAlignment = Alignment.Bottom,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Text(
+                                    text = "%,d".format(success.totalTelemetryDoses),
+                                    style = MaterialTheme.typography.headlineMedium,
+                                    color = Color(0xFFE1E2E9),
+                                    fontWeight = FontWeight.Bold,
+                                    fontFamily = FontFamily.Monospace,
+                                    maxLines = 1
+                                )
+                                Text(
+                                    text = "doses",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    color = Color(0xFF8B9198),
+                                    fontFamily = FontFamily.Monospace,
+                                    modifier = Modifier.padding(bottom = 3.dp),
+                                    maxLines = 1
+                                )
+                            }
+                            Text("✓ ${success.fidelityPercent}% zero-jitter fidelity", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198), maxLines = 1)
                         }
-                        Column(horizontalAlignment = Alignment.End) {
+                        Column(
+                            modifier = Modifier.weight(1f),
+                            horizontalAlignment = Alignment.End
+                        ) {
                             Text("DAILY VELOCITY", style = MaterialTheme.typography.labelSmall, color = Color(0xFF8B9198), fontFamily = FontFamily.Monospace)
-                            Text("${success.dailyVelocityMg} mg / day", style = MaterialTheme.typography.headlineLarge, color = Color(0xFFE1E2E9), fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
-                            Text("${success.avgPulses} fuel pulses avg", style = MaterialTheme.typography.labelSmall, color = Color(0xFFFDBA74))
+                            Row(
+                                verticalAlignment = Alignment.Bottom,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Text(
+                                    text = success.dailyVelocityMg.toString(),
+                                    style = MaterialTheme.typography.headlineMedium,
+                                    color = Color(0xFFE1E2E9),
+                                    fontWeight = FontWeight.Bold,
+                                    fontFamily = FontFamily.Monospace,
+                                    maxLines = 1
+                                )
+                                Text(
+                                    text = "mg/day",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    color = Color(0xFF8B9198),
+                                    fontFamily = FontFamily.Monospace,
+                                    modifier = Modifier.padding(bottom = 3.dp),
+                                    maxLines = 1
+                                )
+                            }
+                            Text("${success.avgPulses} fuel pulses avg", style = MaterialTheme.typography.labelSmall, color = Color(0xFFFDBA74), maxLines = 1)
                         }
                     }
 

@@ -32,6 +32,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":applications:goswift:data"))
     implementation(project(":applications:goswift:features:main"))
     implementation(project(":applications:goswift:apps:mobile:features:home"))
     implementation(project(":applications:goswift:apps:mobile:features:settings"))

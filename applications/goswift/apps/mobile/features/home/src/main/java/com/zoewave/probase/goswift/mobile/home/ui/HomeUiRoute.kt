@@ -59,7 +59,7 @@ fun HomeUiScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF101418))
+            .background(MaterialTheme.colorScheme.background)
             .verticalScroll(rememberScrollState())
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)

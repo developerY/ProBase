@@ -54,4 +54,10 @@ abstract class DataModule {
     abstract fun bindNutritionRepository(
         impl: NutritionRepositoryImpl
     ): NutritionRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindThemeRepository(
+        impl: ThemeRepositoryImpl
+    ): ThemeRepository
 }
