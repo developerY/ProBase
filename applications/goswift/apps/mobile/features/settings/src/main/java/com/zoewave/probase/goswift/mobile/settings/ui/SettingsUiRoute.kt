@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Download
@@ -184,6 +185,7 @@ fun SettingsUiRoute(
         onToggleBioPrompts = { viewModel.toggleBioPrompts(it) },
         onToggleSlumpInterventions = { viewModel.toggleSlumpInterventions(it) },
         onPurgeCache = { viewModel.purgeCache() },
+        onGenerateDebugData = { viewModel.generateDebugData() },
         onExportLog = { Toast.makeText(context, "Exporting Clinical PK Log (PDF)...", Toast.LENGTH_SHORT).show() },
         onCalibrateSensor = { Toast.makeText(context, "Sensor Latency Calibrated (Zero-drift)", Toast.LENGTH_SHORT).show() }
     )
@@ -205,6 +207,7 @@ fun SettingsUiScreen(
     onToggleBioPrompts: (Boolean) -> Unit,
     onToggleSlumpInterventions: (Boolean) -> Unit,
     onPurgeCache: () -> Unit,
+    onGenerateDebugData: () -> Unit = {},
     onExportLog: () -> Unit,
     onCalibrateSensor: () -> Unit
 ) {
@@ -699,6 +702,18 @@ fun SettingsUiScreen(
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Icon(Icons.Default.Download, contentDescription = null, modifier = Modifier.size(18.dp))
                         Text("EXPORT CLINICAL PK LOG (JSON / PDF)", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                    }
+                }
+
+                Button(
+                    onClick = { onGenerateDebugData() },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF242C34), contentColor = Color(0xFFFEF08A)),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Icon(Icons.Default.BugReport, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Text("DEBUG DATA: SEED 3 WEEKS RANDOM DATA", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
                     }
                 }
 

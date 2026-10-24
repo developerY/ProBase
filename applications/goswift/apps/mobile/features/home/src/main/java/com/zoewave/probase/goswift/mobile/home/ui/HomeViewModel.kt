@@ -40,6 +40,12 @@ class HomeViewModel @Inject constructor(
         updateState()
     }
 
+    fun logWaterIntake(amountMl: Double) {
+        _uiState.update {
+            it.copy(hydrationMl = (it.hydrationMl + amountMl).coerceAtMost(3000.0))
+        }
+    }
+
     private fun updateState() {
         viewModelScope.launch {
             val remaining = decayEngine.calculateRemainingMg(

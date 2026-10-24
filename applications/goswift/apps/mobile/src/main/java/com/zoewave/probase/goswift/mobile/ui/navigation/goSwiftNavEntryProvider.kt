@@ -11,7 +11,7 @@ import com.zoewave.probase.goswift.features.main.navigation.GoSwiftDestination
 import com.zoewave.probase.goswift.mobile.home.ui.HomeUiRoute
 import com.zoewave.probase.goswift.mobile.settings.ui.SettingsUiRoute
 import com.zoewave.probase.goswift.mobile.shots.ui.ShotsUiRoute
-import com.zoewave.probase.goswift.mobile.ui.routes.HealthSyncUiRoute
+import com.zoewave.probase.goswift.mobile.healthsync.ui.HealthSyncUiRoute
 import com.zoewave.probase.goswift.mobile.ui.routes.InsightsUiRoute
 
 @Suppress("UnusedParameter")
@@ -22,7 +22,7 @@ fun goSwiftNavEntryProvider(
 ): NavEntry<GoSwiftDestination> {
     return when (key) {
         GoSwiftDestination.Home -> NavEntry(key) {
-            HomeUiRoute()
+            HomeUiRoute(onNavigateToSync = { navigateTo(GoSwiftDestination.HealthSync) })
         }
         GoSwiftDestination.Schedule -> NavEntry(key) {
             ShotsUiRoute()
@@ -31,7 +31,7 @@ fun goSwiftNavEntryProvider(
             InsightsUiRoute()
         }
         GoSwiftDestination.HealthSync -> NavEntry(key) {
-            HealthSyncUiRoute()
+            HealthSyncUiRoute(onNavigateBack = onBack)
         }
         GoSwiftDestination.Settings -> NavEntry(key) {
             SettingsUiRoute(onNavigateBack = onBack)

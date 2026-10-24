@@ -37,6 +37,7 @@ dependencies {
     implementation(project(":applications:goswift:apps:mobile:features:settings"))
     implementation(project(":applications:goswift:apps:mobile:features:shots"))
     implementation(project(":applications:goswift:apps:mobile:features:nutrition"))
+    implementation(project(":applications:goswift:apps:mobile:features:healthsync"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
