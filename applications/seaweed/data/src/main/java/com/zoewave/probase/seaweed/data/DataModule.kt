@@ -60,4 +60,10 @@ abstract class DataModule {
     abstract fun bindLiveAiRepository(
         impl: BYOKLiveAiRepository
     ): LiveAiRepository
+    
+    @Binds
+    @Singleton
+    abstract fun bindAiInterpretationRouter(
+        impl: com.zoewave.probase.seaweed.data.finance.pipeline.PlaceholderRouter
+    ): com.zoewave.probase.seaweed.model.finance.ai.AiInterpretationRouter
 }

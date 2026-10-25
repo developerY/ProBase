@@ -10,7 +10,7 @@ android {
 dependencies {
     implementation(project(":core:util"))
     
-    // ML Kit Text Recognition
     implementation(libs.mlkit.text.recognition)
     implementation(libs.kotlinx.coroutines.play.services)
+    implementation(project(":applications:seaweed:model"))
 }

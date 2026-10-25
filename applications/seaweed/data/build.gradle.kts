@@ -27,4 +27,8 @@ dependencies {
     
     implementation(libs.work.runtime.ktx)
     implementation(libs.hilt.work)
+    implementation(project(":features:readers:ocr"))
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.ai)
+    implementation(libs.kotlinx.serialization.json)
 }

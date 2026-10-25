@@ -38,7 +38,7 @@ class CloudReceiptEngine @Inject constructor() : ReceiptEngine {
         userContext: String?
     ): ReceiptDiagnosticResult {
         val logs = mutableListOf("Cloud Receipt AI initialized")
-        val finalModelName = if (!modelName.isNullOrBlank()) modelName else "gemini-1.5-flash"
+        val finalModelName = if (!modelName.isNullOrBlank()) modelName else "gemini-3.8-flash"
 
         Log.d("SeaweedAI", "==================================================")
         Log.d("SeaweedAI", "=== STARTING CLOUD RECEIPT ANALYSIS ===")

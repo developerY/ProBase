@@ -40,20 +40,41 @@ object SpatialLayoutEngine {
             for (line in lines) {
                 val anchor = line.last()
 
+                // Clamp rotation angle: if |theta| < 2.5, treat as 0; clamp to +-10.0
+                val rawAngle = anchor.rotationDegrees
+                val clampedAngle = when {
+                    abs(rawAngle) < 2.5f -> 0f
+                    rawAngle > 10.0f -> 10.0f
+                    rawAngle < -10.0f -> -10.0f
+                    else -> rawAngle
+                }
+
                 // Convert anchor rotation to radians
-                val thetaAnchorRad = Math.toRadians(anchor.rotationDegrees.toDouble())
+                val thetaAnchorRad = Math.toRadians(clampedAngle.toDouble())
 
                 // Project baseline ray from anchor to candidate's X coordinate
                 val projectedY = anchor.centerY + (element.centerX - anchor.centerX) * tan(thetaAnchorRad)
 
                 // Compare Y drift
                 val yDiff = abs(projectedY - element.centerY)
-                val maxAllowedDrift = 0.45f * max(anchor.height, element.height)
+                val maxAllowedDrift = 0.75f * max(anchor.height, element.height)
+
+                // Calculate vertical bounding-box overlap
+                val topA = anchor.boxNormalizedOcr.y
+                val botA = anchor.boxNormalizedOcr.y + anchor.boxNormalizedOcr.height
+                val topB = element.boxNormalizedOcr.y
+                val botB = element.boxNormalizedOcr.y + element.boxNormalizedOcr.height
+
+                val overlapTop = maxOf(topA, topB)
+                val overlapBot = minOf(botA, botB)
+                val overlapHeight = (overlapBot - overlapTop).coerceAtLeast(0f)
+                val minHeight = minOf(anchor.height, element.height).coerceAtLeast(0.001f)
+                val overlapRatio = overlapHeight / minHeight
 
                 // Compare rotation angle drift
                 val angleDiff = abs(anchor.rotationDegrees - element.rotationDegrees)
 
-                if (yDiff <= maxAllowedDrift && angleDiff <= 8.0f) {
+                if ((yDiff <= maxAllowedDrift || overlapRatio >= 0.40f) && angleDiff <= 12.0f) {
                     line.add(element)
                     addedToLine = true
                     break
