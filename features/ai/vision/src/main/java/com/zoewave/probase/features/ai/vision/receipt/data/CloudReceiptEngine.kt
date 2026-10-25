@@ -50,7 +50,8 @@ class CloudReceiptEngine @Inject constructor() : ReceiptEngine {
         logs.add("Model: $finalModelName")
 
         val generativeModel = Firebase.ai(
-            backend = GenerativeBackend.googleAI()
+            backend = GenerativeBackend.googleAI(),
+            useLimitedUseAppCheckTokens = false
         ).generativeModel(
             modelName = finalModelName,
             generationConfig = generationConfig {
