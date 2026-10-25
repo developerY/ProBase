@@ -210,4 +210,137 @@ class LocalOcrEngine @Inject constructor() {
             .awaitAll()
             .joinToString("\n")
     }
+
+    suspend fun extractOcrElements(
+        documentId: String,
+        pageNumber: Int,
+        cleanedOcrBitmap: Bitmap,
+        homographyNorm: FloatArray = floatArrayOf(1f, 0f, 0f, 0f, 1f, 0f, 0f, 0f, 1f)
+    ): com.zoewave.probase.features.readers.ocr.data.model.OcrExtractionResult {
+        val widthPx = cleanedOcrBitmap.width.coerceAtLeast(1)
+        val heightPx = cleanedOcrBitmap.height.coerceAtLeast(1)
+
+        val visionText: com.google.mlkit.vision.text.Text = kotlinx.coroutines.suspendCancellableCoroutine { cont ->
+            val inputImage = InputImage.fromBitmap(cleanedOcrBitmap, 0)
+            recognizer.process(inputImage)
+                .addOnSuccessListener { result ->
+                    if (cont.isActive) cont.resumeWith(Result.success(result))
+                }
+                .addOnFailureListener { e ->
+                    if (cont.isActive) cont.resumeWith(Result.failure(e))
+                }
+        }
+
+        val extractedElements = mutableListOf<com.zoewave.probase.seaweed.model.finance.validation.OcrElement>()
+        var elementCounter = 1
+        var lineCounter = 1
+        var singularFailures = 0
+
+        for (block in visionText.textBlocks) {
+            for (line in block.lines) {
+                val lineId = String.format("P%02d_L%04d", pageNumber, lineCounter++)
+                val lineAngleDeg = computeRotationDegrees(line.angle, line.cornerPoints)
+
+                // Emit line-level or element-level tokens with full spatial geometry
+                val lineElements = if (line.elements.isNotEmpty()) line.elements else emptyList()
+                if (lineElements.isEmpty()) continue
+
+                for (element in lineElements) {
+                    val rect = element.boundingBox ?: continue
+                    val rawText = element.text.trim()
+                    if (rawText.isEmpty()) continue
+
+                    val elementId = String.format("P%02d_T%04d", pageNumber, elementCounter++)
+                    val normX = (rect.left.toFloat() / widthPx).coerceIn(0f, 1f)
+                    val normY = (rect.top.toFloat() / heightPx).coerceIn(0f, 1f)
+                    val normW = (rect.width().toFloat() / widthPx).coerceIn(0.001f, 1f - normX)
+                    val normH = (rect.height().toFloat() / heightPx).coerceIn(0.001f, 1f - normY)
+
+                    val normRect = com.zoewave.probase.seaweed.model.finance.vision.NormalizedRect(
+                        x = normX,
+                        y = normY,
+                        width = normW,
+                        height = normH
+                    )
+
+                    val projectedQuad = when (
+                        val proj = com.zoewave.probase.seaweed.model.finance.vision.CoordinateTransformMapper.projectOcrRectToRawQuad(normRect, homographyNorm, documentId)
+                    ) {
+                        is com.zoewave.probase.seaweed.model.finance.vision.ProjectionResult.Success -> proj.quad
+                        is com.zoewave.probase.seaweed.model.finance.vision.ProjectionResult.SingularOrInvalidTransform -> {
+                            singularFailures++
+                            null
+                        }
+                    }
+
+                    val elemAngleDeg = computeRotationDegrees(element.angle, element.cornerPoints)
+                        .takeIf { it != 0f } ?: lineAngleDeg
+
+                    val region = when {
+                        normY < 0.22f -> "HEADER"
+                        normY > 0.82f -> "FOOTER"
+                        else -> "BODY"
+                    }
+
+                    extractedElements += com.zoewave.probase.seaweed.model.finance.validation.OcrElement(
+                        id = elementId,
+                        pageNumber = pageNumber,
+                        rawText = rawText,
+                        normalizedText = rawText.uppercase(),
+                        provenance = com.zoewave.probase.seaweed.model.finance.validation.ExtractionProvenance.MLKIT_OCR_V2,
+                        boxNormalizedOcr = normRect,
+                        boxNormalizedRawQuad = projectedQuad,
+                        ocrConfidence = element.confidence ?: 0.99f,
+                        rotationDegrees = elemAngleDeg,
+                        lineId = lineId,
+                        region = region
+                    )
+                }
+            }
+        }
+
+        com.zoewave.probase.seaweed.model.finance.common.PipelineGearLogger.d(com.zoewave.probase.seaweed.model.finance.common.PipelineGear.GEAR_2_VISION_HOMOGRAPHY, documentId) {
+            "Page $pageNumber homography projection completed: mapped=${extractedElements.size - singularFailures}, singularFailures=$singularFailures"
+        }
+
+        val minTextY = extractedElements.minOfOrNull { it.boxNormalizedOcr.y } ?: 0f
+        val maxTextY = extractedElements.maxOfOrNull { it.boxNormalizedOcr.y + it.boxNormalizedOcr.height } ?: 1f
+        val textHeightSpan = (maxTextY - minTextY).coerceAtLeast(0.05f)
+
+        val finalElements = extractedElements.map { el ->
+            val relY = (el.boxNormalizedOcr.y - minTextY) / textHeightSpan
+            val relativeRegion = when {
+                relY <= 0.25f -> "HEADER"
+                relY >= 0.80f -> "FOOTER"
+                else -> "BODY"
+            }
+            el.copy(region = relativeRegion)
+        }
+
+        com.zoewave.probase.seaweed.model.finance.common.PipelineGearLogger.d(com.zoewave.probase.seaweed.model.finance.common.PipelineGear.GEAR_3_LAYOUT_OCR, documentId) {
+            val firstId = finalElements.firstOrNull()?.id ?: "NONE"
+            val lastId = finalElements.lastOrNull()?.id ?: "NONE"
+            "ML Kit OCR extracted ${finalElements.size} elements ($firstId..$lastId) from ${widthPx}x${heightPx} bitmap"
+        }
+
+        return com.zoewave.probase.features.readers.ocr.data.model.OcrExtractionResult(
+            pageNumber = pageNumber,
+            imageWidthPx = widthPx,
+            imageHeightPx = heightPx,
+            elements = finalElements,
+            singularTransformCount = singularFailures
+        )
+    }
+
+    private fun computeRotationDegrees(mlKitAngle: Float, corners: Array<android.graphics.Point>?): Float {
+        if (mlKitAngle.isFinite() && mlKitAngle != 0f) return mlKitAngle
+        if (corners != null && corners.size >= 2) {
+            val dx = (corners[1].x - corners[0].x).toDouble()
+            val dy = (corners[1].y - corners[0].y).toDouble()
+            if (dx != 0.0 || dy != 0.0) {
+                return Math.toDegrees(kotlin.math.atan2(dy, dx)).toFloat()
+            }
+        }
+        return 0f
+    }
 }

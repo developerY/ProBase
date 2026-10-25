@@ -68,14 +68,10 @@ object CoordinateTransformMapper {
         val points = listOf(tl, tr, br, bl)
         val outOfBounds = points.any { it.x < 0f || it.x > 1f || it.y < 0f || it.y > 1f }
 
-        val success = ProjectionResult.Success(
+        return ProjectionResult.Success(
             quad = NormalizedQuad(tl, tr, br, bl),
             requiresViewportClipping = outOfBounds
         )
-        PipelineGearLogger.d(PipelineGear.GEAR_2_VISION_HOMOGRAPHY, docId) {
-            "det(H_norm)=$det -> ProjectionResult.Success(clipping=$outOfBounds)"
-        }
-        return success
     }
 
     private fun mapPoint(x: Float, y: Float, h: FloatArray): NormalizedPoint? {

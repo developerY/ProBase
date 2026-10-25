@@ -118,6 +118,9 @@ fun CameraScreen(
         onDispose {
             orientationEventListener.disable()
             lifecycleOwner.lifecycle.removeObserver(observer)
+            try {
+                previewUseCase.surfaceProvider = null
+            } catch (_: Exception) {}
         }
     }
 
