@@ -1,5 +1,7 @@
 package com.zoewave.probase.seaweed.model.finance.validation
 
+import com.zoewave.probase.seaweed.model.finance.common.PipelineGear
+import com.zoewave.probase.seaweed.model.finance.common.PipelineGearLogger
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -51,8 +53,11 @@ object BundleTrimmer {
         )
 
     fun prepareChunks(fullBundle: LlmAnalysisBundle): BundleTrimResult {
+        val docId = fullBundle.documentId
         val redactedLocked = redactLockedFields(fullBundle.lockedDeterministicFields)
         val redactedArithmetic = redactArithmeticSummary(fullBundle.arithmeticValidation)
+
+        val initialPiiCount = fullBundle.textCandidates.count { it.role in EXCLUDED_PII_ROLES }
 
         val stratifiedText = fullBundle.textCandidates
             .filter { it.role !in EXCLUDED_PII_ROLES }
@@ -101,7 +106,15 @@ object BundleTrimmer {
                 arithmeticValidation = redactedArithmetic
             )
             val fitted = fitSingleChunkToBudget(single)
-                ?: return BundleTrimResult.BundleCannotFit("Header candidates exceed $MAX_UTF8_BYTES bytes", null)
+                ?: run {
+                    val err = BundleTrimResult.BundleCannotFit("Header candidates exceed $MAX_UTF8_BYTES bytes", null)
+                    PipelineGearLogger.d(PipelineGear.GEAR_6_REDACT_TRIM, docId) { "Trim failed: ${err.reason}" }
+                    return err
+                }
+            val bytes = measureUtf8Bytes(fitted)
+            PipelineGearLogger.d(PipelineGear.GEAR_6_REDACT_TRIM, docId) {
+                "Stripped PII roles ($initialPiiCount). Emitted 1 chunk ($bytes / $MAX_UTF8_BYTES bytes)"
+            }
             return BundleTrimResult.Success(listOf(fitted))
         }
 
@@ -129,10 +142,12 @@ object BundleTrimmer {
             }
 
             if (fittedChunk == null) {
-                return BundleTrimResult.BundleCannotFit(
+                val err = BundleTrimResult.BundleCannotFit(
                     reason = "Single table row exceeds $MAX_UTF8_BYTES bytes even after context stripping",
                     offendingRowId = redactedRows[cursor].rowId
                 )
+                PipelineGearLogger.d(PipelineGear.GEAR_6_REDACT_TRIM, docId) { "Trim failed: ${err.reason}" }
+                return err
             }
 
             builtChunks += fittedChunk
@@ -140,11 +155,14 @@ object BundleTrimmer {
         }
 
         val total = builtChunks.size
-        return BundleTrimResult.Success(
-            builtChunks.mapIndexed { idx, chunk ->
-                chunk.copy(chunkIndex = idx, totalChunks = total)
-            }
-        )
+        val finalChunks = builtChunks.mapIndexed { idx, chunk ->
+            chunk.copy(chunkIndex = idx, totalChunks = total)
+        }
+        val totalBytes = finalChunks.sumOf { measureUtf8Bytes(it) }
+        PipelineGearLogger.d(PipelineGear.GEAR_6_REDACT_TRIM, docId) {
+            "Stripped PII roles ($initialPiiCount). Emitted $total chunks (total $totalBytes bytes, max chunk <= $MAX_UTF8_BYTES)"
+        }
+        return BundleTrimResult.Success(finalChunks)
     }
 
     private fun fitSingleChunkToBudget(bundle: LlmAnalysisBundle): LlmAnalysisBundle? {

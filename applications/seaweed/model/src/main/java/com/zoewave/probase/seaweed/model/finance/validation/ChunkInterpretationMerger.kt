@@ -1,6 +1,8 @@
 package com.zoewave.probase.seaweed.model.finance.validation
 
 import com.zoewave.probase.seaweed.model.finance.CurrencyAmount
+import com.zoewave.probase.seaweed.model.finance.common.PipelineGear
+import com.zoewave.probase.seaweed.model.finance.common.PipelineGearLogger
 
 object ChunkInterpretationMerger {
 
@@ -16,7 +18,8 @@ object ChunkInterpretationMerger {
 
     fun mergeValidatedChunks(
         validatedChunks: List<DocumentInterpretation>,
-        lockedFields: LockedDeterministicFields
+        lockedFields: LockedDeterministicFields,
+        docId: String = "GLOBAL"
     ): DocumentInterpretation {
         require(validatedChunks.isNotEmpty()) { "validatedChunks must not be empty" }
         if (validatedChunks.size == 1) return validatedChunks.first()
@@ -37,6 +40,7 @@ object ChunkInterpretationMerger {
                 else -> {
                     conflictDetected = true
                     unresolved += "conflict:$fieldName"
+                    PipelineGearLogger.d(PipelineGear.GEAR_7_AI_VALIDATOR, docId) { "Conflict detected on field: $fieldName" }
                     null
                 }
             }
@@ -77,6 +81,7 @@ object ChunkInterpretationMerger {
             ResolvedStatementSummary(mergedOpening, mergedClosing, mergedMinPay, mergedPeriodStart, mergedPeriodEnd)
         } else null
 
+        val rawEventCount = validatedChunks.sumOf { it.financialEvents.size }
         val mergedEvents = validatedChunks
             .flatMap { it.financialEvents }
             .distinctBy { ev ->
@@ -98,6 +103,10 @@ object ChunkInterpretationMerger {
             validatedChunks.any { it.reviewRequired } ||
             mergedEvents.any { it.persistenceState == EventPersistenceState.NEEDS_USER_REVIEW_DRAFT } ||
             unresolved.isNotEmpty()
+
+        PipelineGearLogger.d(PipelineGear.GEAR_7_AI_VALIDATOR, docId) {
+            "Merged ${validatedChunks.size} chunks. Events: $rawEventCount -> ${mergedEvents.size} (deduped). Conflicts=${if (conflictDetected) unresolved.filter { it.startsWith("conflict:") } else "none"}"
+        }
 
         return DocumentInterpretation(
             documentFamily = mergedFamily,
