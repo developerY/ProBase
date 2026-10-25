@@ -42,6 +42,7 @@ dependencies {
     implementation(project(":features:payment:stripe"))
     implementation(project(":features:ai:capture"))
     implementation(project(":features:ai:configuration"))
+    implementation(project(":features:ai:firebase"))
 
     implementation(project(":applications:seaweed:apps:mobile:core"))
     implementation(project(":applications:seaweed:apps:mobile:features:home"))

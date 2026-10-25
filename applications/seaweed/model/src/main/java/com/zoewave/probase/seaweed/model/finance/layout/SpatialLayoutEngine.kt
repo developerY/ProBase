@@ -1,5 +1,7 @@
 package com.zoewave.probase.seaweed.model.finance.layout
 
+import com.zoewave.probase.seaweed.model.finance.common.PipelineGear
+import com.zoewave.probase.seaweed.model.finance.common.PipelineGearLogger
 import com.zoewave.probase.seaweed.model.finance.vision.NormalizedRect
 import kotlin.math.abs
 import kotlin.math.max
@@ -27,7 +29,7 @@ object SpatialLayoutEngine {
      * Reconstructs physical receipt lines taking into account curved thermal paper rotation.
      * Uses radian-converted vector projection to test if elements fall on the same baseline ray.
      */
-    fun groupIntoLines(elements: List<OcrLayoutElement>): List<ReconstructedLine> {
+    fun groupIntoLines(elements: List<OcrLayoutElement>, docId: String = "GLOBAL"): List<ReconstructedLine> {
         if (elements.isEmpty()) return emptyList()
 
         val sortedElements = elements.sortedBy { it.centerY }
@@ -63,12 +65,17 @@ object SpatialLayoutEngine {
             }
         }
 
-        // Sort elements horizontally within each line
-        return lines.mapIndexed { index, line ->
+        val reconstructed = lines.mapIndexed { index, line ->
             ReconstructedLine(
                 lineId = "L${index + 1}",
                 elements = line.sortedBy { it.centerX }
             )
         }
+
+        PipelineGearLogger.d(PipelineGear.GEAR_3_LAYOUT_OCR, docId) {
+            "Extracted ${elements.size} OcrElements, radian vector grouped into ${reconstructed.size} lines"
+        }
+
+        return reconstructed
     }
 }

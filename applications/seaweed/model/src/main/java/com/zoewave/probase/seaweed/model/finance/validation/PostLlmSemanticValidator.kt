@@ -1,6 +1,8 @@
 package com.zoewave.probase.seaweed.model.finance.validation
 
 import com.zoewave.probase.seaweed.model.finance.CurrencyAmount
+import com.zoewave.probase.seaweed.model.finance.common.PipelineGear
+import com.zoewave.probase.seaweed.model.finance.common.PipelineGearLogger
 import kotlinx.serialization.json.Json
 
 object PostLlmSemanticValidator {
@@ -119,6 +121,10 @@ object PostLlmSemanticValidator {
             cleanPrimaryDate == null ||
             cleanEvents.any { it.persistenceState == EventPersistenceState.NEEDS_USER_REVIEW_DRAFT } ||
             unresolved.isNotEmpty()
+
+        PipelineGearLogger.d(PipelineGear.GEAR_7_AI_VALIDATOR, bundle.documentId) {
+            "Validated family=$validFamily eventsCount=${cleanEvents.size} reviewRequired=$needsReview unresolved=$unresolved"
+        }
 
         return raw.copy(
             documentFamily = validFamily,
@@ -266,14 +272,26 @@ object PostLlmSemanticValidator {
         unresolved: MutableList<String>
     ): ResolvedFinancialEvent? {
         if (event.eventKind == FinancialEventKind.STATEMENT_BALANCE_IGNORE) return null
-        if (!allIdsOwnedBy(event.amountEvidenceIds, validOcrIds)) return null
-        if (!allIdsOwnedBy(event.descriptionEvidenceIds, validOcrIds)) return null
-        if (event.description.isBlank()) return null
+        if (!allIdsOwnedBy(event.amountEvidenceIds, validOcrIds)) {
+            unresolved += "event.invalid_amount_evidence_ids"
+            return null
+        }
+        if (!allIdsOwnedBy(event.descriptionEvidenceIds, validOcrIds)) {
+            unresolved += "event.invalid_description_evidence_ids"
+            return null
+        }
+        if (event.description.isBlank()) {
+            unresolved += "event.blank_description"
+            return null
+        }
 
         val matchedRow = event.sourceRowId?.let { rowId ->
             bundle.tableRows.find { it.rowId == rowId }
         }
-        if (event.sourceRowId != null && matchedRow == null) return null
+        if (event.sourceRowId != null && matchedRow == null) {
+            unresolved += "event.invalid_source_row_id"
+            return null
+        }
 
         // 1. Validate description provenance against candidate or matched row cell
         val descriptionRoles = setOf(SemanticRole.LINE_ITEM_DESCRIPTION, SemanticRole.MERCHANT_NAME)

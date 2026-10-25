@@ -1,5 +1,7 @@
 package com.zoewave.probase.seaweed.model.finance.vision
 
+import com.zoewave.probase.seaweed.model.finance.common.PipelineGear
+import com.zoewave.probase.seaweed.model.finance.common.PipelineGearLogger
 import kotlinx.serialization.Serializable
 import kotlin.math.abs
 
@@ -34,10 +36,13 @@ sealed class ProjectionResult {
 object CoordinateTransformMapper {
     fun projectOcrRectToRawQuad(
         ocrRect: NormalizedRect,
-        hNorm: FloatArray // 9 elements, row-major
+        hNorm: FloatArray, // 9 elements, row-major
+        docId: String = "GLOBAL"
     ): ProjectionResult {
         if (hNorm.size != 9 || hNorm.any { !it.isFinite() }) {
-            return ProjectionResult.SingularOrInvalidTransform("Invalid homography array")
+            val res = ProjectionResult.SingularOrInvalidTransform("Invalid homography array")
+            PipelineGearLogger.d(PipelineGear.GEAR_2_VISION_HOMOGRAPHY, docId) { "Transform failed: ${res.reason}" }
+            return res
         }
 
         // Calculate determinant of 3x3 matrix
@@ -46,7 +51,9 @@ object CoordinateTransformMapper {
                   hNorm[2] * (hNorm[3] * hNorm[7] - hNorm[4] * hNorm[6])
 
         if (!det.isFinite() || abs(det) < 1e-7f) {
-            return ProjectionResult.SingularOrInvalidTransform("Singular homography determinant: $det")
+            val res = ProjectionResult.SingularOrInvalidTransform("Singular homography determinant: $det")
+            PipelineGearLogger.d(PipelineGear.GEAR_2_VISION_HOMOGRAPHY, docId) { "Transform failed: ${res.reason}" }
+            return res
         }
 
         val tl = mapPoint(ocrRect.x, ocrRect.y, hNorm)
@@ -61,10 +68,14 @@ object CoordinateTransformMapper {
         val points = listOf(tl, tr, br, bl)
         val outOfBounds = points.any { it.x < 0f || it.x > 1f || it.y < 0f || it.y > 1f }
 
-        return ProjectionResult.Success(
+        val success = ProjectionResult.Success(
             quad = NormalizedQuad(tl, tr, br, bl),
             requiresViewportClipping = outOfBounds
         )
+        PipelineGearLogger.d(PipelineGear.GEAR_2_VISION_HOMOGRAPHY, docId) {
+            "det(H_norm)=$det -> ProjectionResult.Success(clipping=$outOfBounds)"
+        }
+        return success
     }
 
     private fun mapPoint(x: Float, y: Float, h: FloatArray): NormalizedPoint? {

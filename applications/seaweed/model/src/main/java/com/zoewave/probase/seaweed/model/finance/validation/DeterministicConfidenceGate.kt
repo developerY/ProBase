@@ -1,5 +1,8 @@
 package com.zoewave.probase.seaweed.model.finance.validation
 
+import com.zoewave.probase.seaweed.model.finance.common.PipelineGear
+import com.zoewave.probase.seaweed.model.finance.common.PipelineGearLogger
+
 data class GateDecision(
     val lockedFields: LockedDeterministicFields,
     val fullDocumentResolvedWithoutAi: Boolean,
@@ -15,7 +18,8 @@ object DeterministicConfidenceGate {
         dateCandidates: List<DateCandidate>,
         amountCandidates: List<AmountCandidate>,
         arithmetic: ArithmeticValidationSummary,
-        matchedCategoryRuleId: String?
+        matchedCategoryRuleId: String?,
+        docId: String = "GLOBAL"
     ): GateDecision {
         val lockedFamily = if (
             familyCandidate != DocumentFamily.UNKNOWN && familyConfidence >= 0.92f
@@ -48,7 +52,7 @@ object DeterministicConfidenceGate {
             .filter { it.role == SemanticRole.TOTAL_AMOUNT && it.amount != null }
             .maxByOrNull { it.confidence }
 
-        val lockedTotal = if (reconciled && totalCandidate != null && totalCandidate.confidence >= 0.96f) {
+        val lockedTotal = if (reconciled && totalCandidate != null && totalCandidate.amount != null && totalCandidate.confidence >= 0.96f) {
             ResolvedAmountField(totalCandidate.amount!!, totalCandidate.role, totalCandidate.evidenceIds)
         } else null
 
@@ -56,7 +60,7 @@ object DeterministicConfidenceGate {
             .filter { it.role == SemanticRole.TAX_AMOUNT && it.amount != null }
             .maxByOrNull { it.confidence }
 
-        val lockedTax = if (reconciled && taxCandidate != null && taxCandidate.confidence >= 0.96f) {
+        val lockedTax = if (reconciled && taxCandidate != null && taxCandidate.amount != null && taxCandidate.confidence >= 0.96f) {
             ResolvedAmountField(taxCandidate.amount!!, taxCandidate.role, taxCandidate.evidenceIds)
         } else null
 
@@ -78,7 +82,7 @@ object DeterministicConfidenceGate {
 
         val completeInterpretation = if (canBypassLlm) {
             DocumentInterpretation(
-                documentFamily = lockedFamily!!,
+                documentFamily = lockedFamily,
                 merchantOrIssuer = lockedMerchant,
                 issuerAddress = lockedAddress,
                 primaryDate = lockedPrimaryDate,
@@ -89,13 +93,13 @@ object DeterministicConfidenceGate {
                 financialEvents = listOf(
                     ResolvedFinancialEvent(
                         eventKind = FinancialEventKind.PURCHASE_EXPENSE,
-                        description = lockedMerchant!!.value,
+                        description = lockedMerchant.value,
                         descriptionEvidenceIds = lockedMerchant.evidenceIds,
-                        amount = lockedTotal!!.amount,
+                        amount = lockedTotal.amount,
                         amountEvidenceIds = lockedTotal.evidenceIds,
-                        isoDate = lockedPrimaryDate!!.isoDate,
+                        isoDate = lockedPrimaryDate.isoDate,
                         dateEvidenceIds = lockedPrimaryDate.evidenceIds,
-                        categoryId = matchedCategoryRuleId!!,
+                        categoryId = matchedCategoryRuleId,
                         persistenceState = EventPersistenceState.VERIFIED_FINAL
                     )
                 ),
@@ -103,6 +107,11 @@ object DeterministicConfidenceGate {
                 unresolvedFields = emptyList()
             )
         } else null
+
+        PipelineGearLogger.d(PipelineGear.GEAR_5_LEDGER_GATE, docId) {
+            "Rule=${arithmetic.reconciliationRuleUsed} reconciled=$reconciled discrepancy=${arithmetic.discrepancyMinorUnits}. " +
+            "Locked=[total=${lockedTotal?.amount?.amountMinor}, date=${lockedPrimaryDate?.isoDate}] fullBypass=$canBypassLlm"
+        }
 
         return GateDecision(
             lockedFields = locked,

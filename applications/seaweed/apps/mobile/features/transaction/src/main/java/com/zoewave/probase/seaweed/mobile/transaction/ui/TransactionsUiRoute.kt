@@ -187,7 +187,7 @@ private fun TransactionsListPane(
                     isExpanded = isFabMenuExpanded,
                     onToggle = { isFabMenuExpanded = !isFabMenuExpanded },
                     onAddBill = { showAddBillDialog = true; isFabMenuExpanded = false },
-                    onAddTransaction = { navTo(SeaweedDestination.AddTransaction); isFabMenuExpanded = false }
+                    onAddTransaction = { navTo(SeaweedDestination.AddTransaction()); isFabMenuExpanded = false }
                 )
             }
         }

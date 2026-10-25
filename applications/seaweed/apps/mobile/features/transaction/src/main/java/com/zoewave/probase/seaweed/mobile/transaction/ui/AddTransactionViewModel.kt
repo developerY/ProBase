@@ -222,9 +222,16 @@ class AddTransactionViewModel @Inject constructor(
             try {
                 val apiKey = aiSettings.getGeminiApiKey()
                 val modelName = aiSettings.aiModelFlow.firstOrNull()
+                val useLocalAi = aiSettings.useLocalAi.firstOrNull() ?: false
                 
                 Log.d("AddTransactionVM", "Sending to Orchestrator (multimodal)...")
-                val result = orchestrator.processReceipt(bitmap, apiKey, modelName, userComment)
+                val result = orchestrator.processReceipt(
+                    bitmap = bitmap,
+                    apiKey = apiKey,
+                    modelName = modelName,
+                    userContext = userComment,
+                    forceLocalAi = useLocalAi
+                )
                 
                 Log.d("AddTransactionVM", "AI Result: $result")
 

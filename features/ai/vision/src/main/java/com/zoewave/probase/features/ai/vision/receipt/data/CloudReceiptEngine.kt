@@ -1,6 +1,7 @@
 package com.zoewave.probase.features.ai.vision.receipt.data
 
 import android.graphics.Bitmap
+import android.util.Log
 import com.google.firebase.Firebase
 import com.google.firebase.ai.ai
 import com.google.firebase.ai.type.GenerativeBackend
@@ -37,12 +38,20 @@ class CloudReceiptEngine @Inject constructor() : ReceiptEngine {
         userContext: String?
     ): ReceiptDiagnosticResult {
         val logs = mutableListOf("Cloud Receipt AI initialized")
-
         val finalModelName = if (!modelName.isNullOrBlank()) modelName else "gemini-1.5-flash"
+
+        Log.d("SeaweedAI", "==================================================")
+        Log.d("SeaweedAI", "=== STARTING CLOUD RECEIPT ANALYSIS ===")
+        Log.d("SeaweedAI", "Model: $finalModelName")
+        Log.d("SeaweedAI", "User Context: ${userContext ?: "None"}")
+        Log.d("SeaweedAI", "Image Dimensions: ${bitmap.width} x ${bitmap.height}")
+        Log.d("SeaweedAI", "==================================================")
+
         logs.add("Model: $finalModelName")
 
         val generativeModel = Firebase.ai(
-            backend = GenerativeBackend.googleAI()
+            backend = GenerativeBackend.googleAI(),
+            useLimitedUseAppCheckTokens = false
         ).generativeModel(
             modelName = finalModelName,
             generationConfig = generationConfig {
@@ -80,12 +89,28 @@ class CloudReceiptEngine @Inject constructor() : ReceiptEngine {
 
         return try {
             logs.add("Sending multimodal request to Gemini...")
+            Log.d("SeaweedAI", "Dispatching multimodal request to Firebase Vertex AI ($finalModelName)...")
+
             val response = generativeModel.generateContent(prompt)
             val jsonText = response.text ?: throw IllegalStateException("Empty response")
-            
+
+            Log.d("SeaweedAI", "--------------------------------------------------")
+            Log.d("SeaweedAI", "RAW AI JSON RESPONSE:\n$jsonText")
+            Log.d("SeaweedAI", "--------------------------------------------------")
+
             val draft = json.decodeFromString<GeminiReceiptDraft>(jsonText)
             logs.add("JSON decoding successful")
-            
+
+            Log.d("SeaweedAI", "PARSED RESULT:")
+            Log.d("SeaweedAI", " -> Merchant: ${draft.merchant}")
+            Log.d("SeaweedAI", " -> Total: $${draft.total}")
+            Log.d("SeaweedAI", " -> Date: ${draft.date}")
+            Log.d("SeaweedAI", " -> Category: ${draft.category}")
+            Log.d("SeaweedAI", " -> Importance: ${draft.importance}")
+            Log.d("SeaweedAI", " -> Description: ${draft.whatIsThis}")
+            Log.d("SeaweedAI", " -> Impact: ${draft.financialImpact}")
+            Log.d("SeaweedAI", "==================================================")
+
             ReceiptDiagnosticResult(
                 merchant = draft.merchant,
                 total = draft.total,
@@ -99,6 +124,7 @@ class CloudReceiptEngine @Inject constructor() : ReceiptEngine {
                 financialImpact = draft.financialImpact
             )
         } catch (e: Exception) {
+            Log.e("SeaweedAI", "Cloud API Analysis Failed", e)
             logs.add("Cloud API failed: ${e.localizedMessage}")
             throw e
         }
