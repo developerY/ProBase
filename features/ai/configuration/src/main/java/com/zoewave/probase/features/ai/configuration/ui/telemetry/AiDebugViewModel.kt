@@ -3,7 +3,6 @@ package com.zoewave.probase.features.ai.configuration.ui.telemetry
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.core.data.repository.AiConfigurationSettings
-import com.zoewave.probase.features.ai.core.AiInput
 import com.zoewave.probase.features.ai.core.AiProvider
 import com.zoewave.probase.features.ai.core.ByokAiProvider
 import com.zoewave.probase.features.ai.firebase.FirebaseAiProvider
@@ -145,23 +144,75 @@ class AiDebugViewModel @Inject constructor(
 
             try {
                 // Step 1: Handshake & Provider Resolution (handled uniformly here)
-                updateStep(1, DiagnosticStepState.RUNNING, "Resolving target provider...")
+                updateStep(1, DiagnosticStepState.RUNNING, "Verifying Provider Readiness...")
                 val targetProvider = resolveTargetProvider(_selectedTarget.value)
                 val providerName = targetProvider.capability.displayName
-                updateStep(1, DiagnosticStepState.SUCCESS, "Selected: $providerName (ID=${targetProvider.capability.id})")
+                
+                // Actual Network/Handshake Verification
+                if (!targetProvider.isAvailable()) {
+                    updateStep(1, DiagnosticStepState.FAILED, "$providerName is not available/configured")
+                    return@launch
+                }
+                updateStep(1, DiagnosticStepState.SUCCESS, "Handshake ok: $providerName (ID=${targetProvider.capability.id})")
 
                 // Let the app-specific delegate run its domain diagnostic pipeline
-                val outputText = appDiagnosticDelegate.runDiagnostic(targetProvider) { id, state, msg ->
+                val report = appDiagnosticDelegate.runDiagnostic(targetProvider) { id, state, msg ->
                     updateStep(id, state, msg)
                 }
                 
-                _testOutput.value = outputText
+                _testOutput.value = report.rawResponseJson
 
             } catch (e: Exception) {
                 updateStep(3, DiagnosticStepState.FAILED, "Unexpected error: ${e.localizedMessage}")
             } finally {
                 _isTesting.value = false
             }
+        }
+    }
+
+    fun runFullProviderMatrixTest() {
+        if (_isTesting.value) return
+        viewModelScope.launch {
+            _isTesting.value = true
+            _testOutput.value = null
+            _diagnosticSteps.value = appDiagnosticDelegate.getInitialSteps()
+            
+            // Loop through all 4 providers
+            val targets = listOf(
+                TestTargetProvider.LOCAL_NANO,
+                TestTargetProvider.BYOK,
+                TestTargetProvider.FIREBASE_AI,
+                TestTargetProvider.GEMMA_4
+            )
+            
+            val reports = mutableListOf<DiagnosticRunReport>()
+            
+            for (target in targets) {
+                _selectedTarget.value = target
+                updateStep(1, DiagnosticStepState.RUNNING, "Verifying Provider Readiness: ${target.label}...")
+                
+                val provider = resolveTargetProvider(target)
+                if (!provider.isAvailable()) {
+                    updateStep(1, DiagnosticStepState.FAILED, "${target.label} is unavailable/unconfigured")
+                    reports.add(DiagnosticRunReport(false, provider.capability.displayName, 0L, null, "Unavailable"))
+                    continue
+                }
+                updateStep(1, DiagnosticStepState.SUCCESS, "Handshake ok: ${provider.capability.displayName}")
+                
+                val report = appDiagnosticDelegate.runDiagnostic(provider) { id, state, msg ->
+                    updateStep(id, state, msg)
+                }
+                reports.add(report)
+                
+                // Allow UI to breathe between tests
+                kotlinx.coroutines.delay(500)
+                if (report.passed) {
+                    _testOutput.value = report.rawResponseJson
+                    break // Stop testing on first success for the Matrix flow (or let it finish, depending on preferred UX)
+                }
+            }
+            
+            _isTesting.value = false
         }
     }
 

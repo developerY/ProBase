@@ -19,10 +19,12 @@ class SeaweedDiagnosticDelegate @Inject constructor() : AppDiagnosticDelegate {
         DiagnosticStep(5, "Post-LLM Validator", "Verifying evidence ID constraints")
     )
 
+    override val appName: String = "Seaweed Finance Engine"
+
     override suspend fun runDiagnostic(
         provider: AiProvider,
         updateStep: (id: Int, state: DiagnosticStepState, message: String) -> Unit
-    ): String? {
+    ): com.zoewave.probase.features.ai.configuration.ui.telemetry.DiagnosticRunReport {
         updateStep(2, DiagnosticStepState.RUNNING, "Generating test payload...")
 
         val testPrompt = """
@@ -55,18 +57,18 @@ class SeaweedDiagnosticDelegate @Inject constructor() : AppDiagnosticDelegate {
 
                 updateStep(5, DiagnosticStepState.RUNNING, "Running Post-LLM Validator...")
                 updateStep(5, DiagnosticStepState.SUCCESS, "Evidence IDs validated successfully!")
-                return outputText
+                return com.zoewave.probase.features.ai.configuration.ui.telemetry.DiagnosticRunReport(true, provider.capability.displayName, duration, outputText)
             } else {
                 updateStep(4, DiagnosticStepState.FAILED, "Invalid JSON schema returned")
                 updateStep(5, DiagnosticStepState.FAILED, "Skipped due to parsing failure")
-                return outputText
+                return com.zoewave.probase.features.ai.configuration.ui.telemetry.DiagnosticRunReport(false, provider.capability.displayName, duration, outputText, "Invalid JSON schema returned")
             }
         } else {
             val error = result.exceptionOrNull()
             updateStep(3, DiagnosticStepState.FAILED, "Execution failed: ${error?.localizedMessage}")
             updateStep(4, DiagnosticStepState.FAILED, "Pipeline halted")
             updateStep(5, DiagnosticStepState.FAILED, "Pipeline halted")
-            return null
+            return com.zoewave.probase.features.ai.configuration.ui.telemetry.DiagnosticRunReport(false, provider.capability.displayName, duration, null, error?.localizedMessage)
         }
     }
 }
