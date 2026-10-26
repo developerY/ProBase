@@ -27,6 +27,9 @@ interface AppDiagnosticDelegate {
         provider: AiProvider,
         updateStep: (id: Int, state: DiagnosticStepState, message: String) -> Unit
     ): DiagnosticRunReport
+
+    /** Optional: Provide a list of formatted audit log strings to display below the test output */
+    fun getAuditLogs(): List<String> = emptyList()
 }
 
 @Singleton

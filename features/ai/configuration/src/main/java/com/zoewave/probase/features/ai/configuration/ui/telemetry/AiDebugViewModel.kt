@@ -114,6 +114,7 @@ class AiDebugViewModel @Inject constructor(
             isGemmaEnabled = !useByok && !useLocal && !useFirebase,
             isRunningTest = isTesting,
             diagnosticSteps = steps,
+            recentAuditLogs = appDiagnosticDelegate.getAuditLogs(),
             testRunOutput = testOutput
         )
     }.stateIn(
@@ -208,11 +209,34 @@ class AiDebugViewModel @Inject constructor(
                 kotlinx.coroutines.delay(500)
                 if (report.passed) {
                     _testOutput.value = report.rawResponseJson
-                    break // Stop testing on first success for the Matrix flow (or let it finish, depending on preferred UX)
+                    break // Stop testing on first success for the Matrix flow
                 }
             }
             
             _isTesting.value = false
+            
+            // Format a nice final output for the Matrix Test
+            val finalOutputBuilder = StringBuilder()
+            finalOutputBuilder.appendLine("DIAGNOSTIC TEST COMPLETE!")
+            finalOutputBuilder.appendLine()
+            finalOutputBuilder.appendLine("• Target Tested: Auto Router")
+            
+            val successfulReport = reports.find { it.passed }
+            if (successfulReport != null) {
+                finalOutputBuilder.appendLine("• Provider Used: ${successfulReport.providerName}")
+                finalOutputBuilder.appendLine("• Model Name: ${aiSettings.aiModelFlow.firstOrNull() ?: "gemini-3.8-flash"}")
+                finalOutputBuilder.appendLine("• Latency: ${successfulReport.latencyMs}ms")
+                finalOutputBuilder.appendLine()
+                finalOutputBuilder.appendLine("=== RAW RESPONSE ===")
+                finalOutputBuilder.appendLine(successfulReport.rawResponseJson ?: "")
+            } else {
+                finalOutputBuilder.appendLine("• ALL PROVIDERS FAILED")
+                reports.forEach { report ->
+                    finalOutputBuilder.appendLine("  - ${report.providerName}: ${report.failureReason}")
+                }
+            }
+            
+            _testOutput.value = finalOutputBuilder.toString()
         }
     }
 
