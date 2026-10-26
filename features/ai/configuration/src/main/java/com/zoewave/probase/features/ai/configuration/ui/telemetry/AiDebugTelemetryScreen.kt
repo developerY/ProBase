@@ -204,7 +204,7 @@ fun AiDebugTelemetryScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Column {
+                            Column(modifier = Modifier.weight(1f)) {
                                 Text("Live Pipeline Diagnostic", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                                 Text("Testing Target: ${uiState.selectedTarget.label}", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
@@ -222,6 +222,14 @@ fun AiDebugTelemetryScreen(
                                     Spacer(modifier = Modifier.width(4.dp))
                                 }
                                 Text("Run Test")
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Button(
+                                onClick = { viewModel.runFullProviderMatrixTest() },
+                                enabled = !uiState.isRunningTest,
+                                shape = RoundedCornerShape(20.dp)
+                            ) {
+                                Text("Matrix Test")
                             }
                         }
 
@@ -247,6 +255,30 @@ fun AiDebugTelemetryScreen(
                                     fontSize = 11.sp,
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
+                            }
+                        }
+
+                        // App-Specific Audit Trail
+                        if (uiState.recentAuditLogs.isNotEmpty()) {
+                            HorizontalDivider()
+                            Text("RECENT EXECUTION AUDIT LOGS", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                            Surface(
+                                modifier = Modifier.fillMaxWidth(),
+                                color = Color(0xFF1E1E1E), // Dark terminal background
+                                shape = RoundedCornerShape(8.dp),
+                                border = BorderStroke(1.dp, Color.DarkGray)
+                            ) {
+                                Column(modifier = Modifier.padding(12.dp)) {
+                                    uiState.recentAuditLogs.forEach { log ->
+                                        Text(
+                                            text = log,
+                                            fontFamily = FontFamily.Monospace,
+                                            fontSize = 10.sp,
+                                            color = Color(0xFF4CAF50), // Hacker green text
+                                            modifier = Modifier.padding(bottom = 8.dp)
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
