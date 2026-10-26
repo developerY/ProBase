@@ -37,6 +37,12 @@ abstract class DataModule {
     @Singleton
     abstract fun bindPlaylistRepository(impl: PlaylistRepositoryImpl): PlaylistRepository
 
+    @Binds
+    @Singleton
+    abstract fun bindAppDiagnosticDelegate(
+        impl: com.zoewave.probase.kocolor.data.telemetry.KoColorDiagnosticDelegate
+    ): com.zoewave.probase.features.ai.configuration.ui.telemetry.AppDiagnosticDelegate
+
     companion object {
         @Provides
         @Singleton

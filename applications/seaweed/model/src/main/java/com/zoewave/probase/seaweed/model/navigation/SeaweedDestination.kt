@@ -113,6 +113,12 @@ sealed class SeaweedDestination(
     )
 
     @Serializable
+    data object AiDebugTelemetry : SeaweedDestination(
+        title = "AI Telemetry & Diagnostics",
+        icon = Icons.Default.Settings
+    )
+
+    @Serializable
     data object PrivacyPolicy : SeaweedDestination(
         title = "Privacy Policy",
         icon = Icons.Default.PrivacyTip

@@ -138,6 +138,12 @@ fun seaweedNavEntryProvider(
                     onBack = onBack
                 )
             }
+            SeaweedDestination.AiDebugTelemetry -> {
+                com.zoewave.probase.features.ai.configuration.ui.telemetry.AiDebugTelemetryScreen(
+                    onBack = onBack,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
             SeaweedDestination.PrivacyPolicy -> {
                 PrivacyPolicyScreen(
                     onBack = onBack

@@ -627,7 +627,7 @@ fun koColorNavEntryProvider(
             )
         }
         is KoColorRoute.AiDebugTelemetry -> NavEntry(route) {
-            com.zoewave.probase.kocolor.mobile.features.settings.ui.components.AiDebugTelemetryScreen(
+            com.zoewave.probase.features.ai.configuration.ui.telemetry.AiDebugTelemetryScreen(
                 onBack = onBack
             )
         }
