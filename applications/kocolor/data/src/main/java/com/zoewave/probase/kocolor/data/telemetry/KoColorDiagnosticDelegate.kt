@@ -11,6 +11,8 @@ import javax.inject.Singleton
 @Singleton
 class KoColorDiagnosticDelegate @Inject constructor() : AppDiagnosticDelegate {
 
+    override val appName: String = "KoColor Fashionista"
+
     override fun getInitialSteps(): List<DiagnosticStep> = listOf(
         DiagnosticStep(1, "Connection & Handshake", "Checking provider availability, API keys & AppCheck"),
         DiagnosticStep(2, "Command & Prompt", "Formatting Style Blueprint payload"),
@@ -22,7 +24,7 @@ class KoColorDiagnosticDelegate @Inject constructor() : AppDiagnosticDelegate {
     override suspend fun runDiagnostic(
         provider: AiProvider,
         updateStep: (id: Int, state: DiagnosticStepState, message: String) -> Unit
-    ): String? {
+    ): com.zoewave.probase.features.ai.configuration.ui.telemetry.DiagnosticRunReport {
         updateStep(2, DiagnosticStepState.RUNNING, "Generating test payload...")
 
         val testPrompt = """
@@ -53,18 +55,18 @@ class KoColorDiagnosticDelegate @Inject constructor() : AppDiagnosticDelegate {
 
                 updateStep(5, DiagnosticStepState.RUNNING, "Evaluating answer quality...")
                 updateStep(5, DiagnosticStepState.SUCCESS, "Useful Answer Confirmed! Status: APPROVED (Score: 100/100)")
-                return outputText
+                return com.zoewave.probase.features.ai.configuration.ui.telemetry.DiagnosticRunReport(true, provider.capability.displayName, duration, outputText)
             } else {
                 updateStep(4, DiagnosticStepState.FAILED, "Invalid JSON schema returned")
                 updateStep(5, DiagnosticStepState.FAILED, "Skipped due to parsing failure")
-                return outputText
+                return com.zoewave.probase.features.ai.configuration.ui.telemetry.DiagnosticRunReport(false, provider.capability.displayName, duration, outputText, "Invalid schema")
             }
         } else {
             val error = result.exceptionOrNull()
             updateStep(3, DiagnosticStepState.FAILED, "Execution failed: ${error?.localizedMessage}")
             updateStep(4, DiagnosticStepState.FAILED, "Pipeline halted")
             updateStep(5, DiagnosticStepState.FAILED, "Pipeline halted")
-            return null
+            return com.zoewave.probase.features.ai.configuration.ui.telemetry.DiagnosticRunReport(false, provider.capability.displayName, duration, null, error?.message)
         }
     }
 }
