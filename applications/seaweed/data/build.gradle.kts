@@ -31,4 +31,5 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.ai)
     implementation(libs.kotlinx.serialization.json)
+    implementation(project(":features:ai:core"))
 }

@@ -66,4 +66,10 @@ abstract class DataModule {
     abstract fun bindAiInterpretationRouter(
         impl: com.zoewave.probase.seaweed.data.finance.pipeline.PlaceholderRouter
     ): com.zoewave.probase.seaweed.model.finance.ai.AiInterpretationRouter
+
+    @Binds
+    @Singleton
+    abstract fun bindAppDiagnosticDelegate(
+        impl: com.zoewave.probase.seaweed.data.telemetry.SeaweedDiagnosticDelegate
+    ): com.zoewave.probase.features.ai.configuration.ui.telemetry.AppDiagnosticDelegate
 }

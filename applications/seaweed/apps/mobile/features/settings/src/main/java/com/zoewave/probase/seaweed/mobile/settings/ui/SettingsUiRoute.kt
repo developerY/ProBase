@@ -147,6 +147,7 @@ private fun SettingsContent(
             AiConfigurationCard(
                 expanded = isAiExpanded,
                 onExpandToggle = { isAiExpanded = !isAiExpanded },
+                onDebugClick = { onEvent(SettingsUiEvent.NavigateTo(SeaweedDestination.AiDebugTelemetry)) },
                 title = stringResource(R.string.applications_seaweed_apps_mobile_features_settings_receipt_ai_title),
                 description = stringResource(R.string.applications_seaweed_apps_mobile_features_settings_receipt_ai_desc)
             )

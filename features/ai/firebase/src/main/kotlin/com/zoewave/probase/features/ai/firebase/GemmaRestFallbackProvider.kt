@@ -90,26 +90,9 @@ class GemmaRestFallbackProvider @Inject constructor(
         val userKey = aiSettings.getGeminiApiKey()
         val targetModel = activeModel.ifBlank { "gemma-4-26b-a4b-it" }
 
-        val basePromptStr = when (input) {
+        val promptStr = when (input) {
             is AiInput.TextOnly -> input.promptString
             is AiInput.Multimodal -> input.promptString
-        }
-
-        val promptStr = if (!basePromptStr.contains("CRITICAL OUTPUT FORMAT:")) {
-            """
-                $basePromptStr
-                
-                CRITICAL OUTPUT FORMAT:
-                Do NOT use Markdown headings or bullet points. Respond ONLY with a single raw, valid JSON object matching this exact structure:
-                {
-                  "selectedClothingIds": ["w_1", "w_2", "w_3"],
-                  "selectedCosmeticIds": ["c_1", "c_2", "c_3", "c_4"],
-                  "rationale": "Single paragraph referencing only the selected item IDs.",
-                  "recommendedPalette": ["#HEX1", "#HEX2", "#HEX3"]
-                }
-            """.trimIndent()
-        } else {
-            basePromptStr
         }
 
         if (!userKey.isNullOrBlank()) {
