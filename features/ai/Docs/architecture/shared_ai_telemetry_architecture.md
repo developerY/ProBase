@@ -26,21 +26,34 @@ Located in `:features:ai:configuration`. This is the Jetpack Compose screen that
 Located in `:features:ai:configuration`. This ViewModel acts as the bridge.
 When the user taps **"Run Test"**, the ViewModel:
 1. Evaluates User Settings to determine the active `AiProvider`.
-2. Marks Step 1 ("Connection & Handshake") as Running/Success.
+2. Validates network and hardware readiness by checking `targetProvider.isAvailable()`, marking Step 1 ("Connection & Handshake") as Success, or failing immediately if offline/misconfigured.
 3. **Hands control over to the App-Specific Delegate** by calling `appDiagnosticDelegate.runDiagnostic(targetProvider, updateStep)`.
 
 ### Component 3: `AppDiagnosticDelegate` (The Interface)
 Located in `:features:ai:configuration`. 
 ```kotlin
+data class DiagnosticRunReport(
+    val passed: Boolean,
+    val providerName: String,
+    val latencyMs: Long,
+    val rawResponseJson: String?,
+    val failureReason: String? = null
+)
+
 interface AppDiagnosticDelegate {
+    val appName: String
+    
     // Allows the app to define custom UI steps (e.g. "Fashionista Score" vs "Evidence ID Check")
     fun getInitialSteps(): List<DiagnosticStep>
+
+    // Optional: Returns the formatted text for the Dark Terminal Audit Trail
+    fun getAuditLogs(): List<String> = emptyList()
 
     // Allows the app to execute its own prompt, hit the AiProvider, and validate the schema
     suspend fun runDiagnostic(
         provider: AiProvider,
         updateStep: (id: Int, state: DiagnosticStepState, message: String) -> Unit
-    ): String?
+    ): DiagnosticRunReport
 }
 ```
 
@@ -49,34 +62,59 @@ interface AppDiagnosticDelegate {
 If you are creating a new app (e.g., **PhotoDo**) and want to use the AI Debug screen, follow these 3 steps:
 
 ### Step A: Create the Delegate Implementation
-In your app's `:data` or `:domain` module, create a class that implements `AppDiagnosticDelegate`.
+In your app's `:data` or `:domain` module, create a class that implements `AppDiagnosticDelegate`. Use synthetic or live repository data for your prompt, and return a `DiagnosticRunReport`.
 
 ```kotlin
 @Singleton
 class PhotoDoDiagnosticDelegate @Inject constructor() : AppDiagnosticDelegate {
 
+    override val appName: String = "PhotoDo Lens"
+
     override fun getInitialSteps(): List<DiagnosticStep> = listOf(
         DiagnosticStep(1, "Connection & Handshake", "Checking provider availability"),
         DiagnosticStep(2, "Command & Prompt", "Requesting Image Analysis JSON"),
         DiagnosticStep(3, "Response & Latency", "Executing AI"),
-        DiagnosticStep(4, "Answer & Schema", "Validating SmartAdvice JSON")
+        DiagnosticStep(4, "Answer & Schema", "Validating SmartAdvice JSON"),
+        DiagnosticStep(5, "Useful Answer Quality", "Evaluating clarity and utility of response")
     )
 
     override suspend fun runDiagnostic(
         provider: AiProvider,
         updateStep: (Int, DiagnosticStepState, String) -> Unit
-    ): String? {
+    ): DiagnosticRunReport {
+        val startMs = System.currentTimeMillis()
         updateStep(2, DiagnosticStepState.RUNNING, "Generating payload...")
+        
         val prompt = "Respond ONLY in JSON: { \"photoAdvice\": \"Good lighting\" }"
-        // ... Call provider.execute(AiInput.TextOnly(prompt))
-        // ... Validate response and call updateStep(3, ...) and updateStep(4, ...)
-        return "{\"photoAdvice\": \"Good lighting\"}" 
+        val result = provider.execute(AiInput.TextOnly(prompt))
+        val duration = System.currentTimeMillis() - startMs
+        
+        if (result.isSuccess) {
+            val jsonStr = result.getOrNull() ?: ""
+            updateStep(3, DiagnosticStepState.SUCCESS, "Executed in ${duration}ms")
+            
+            return if (jsonStr.contains("photoAdvice")) {
+                updateStep(4, DiagnosticStepState.SUCCESS, "Valid Schema")
+                updateStep(5, DiagnosticStepState.SUCCESS, "Useful Answer Confirmed! Status: APPROVED (Score: 85/100)")
+                DiagnosticRunReport(true, provider.capability.displayName, duration, jsonStr)
+            } else {
+                updateStep(4, DiagnosticStepState.FAILED, "Invalid Schema")
+                updateStep(5, DiagnosticStepState.FAILED, "Skipped due to parsing failure")
+                DiagnosticRunReport(false, provider.capability.displayName, duration, jsonStr, "Missing photoAdvice")
+            }
+        }
+        
+        updateStep(3, DiagnosticStepState.FAILED, "Network error")
+        updateStep(4, DiagnosticStepState.FAILED, "Pipeline halted")
+        updateStep(5, DiagnosticStepState.FAILED, "Pipeline halted")
+        return DiagnosticRunReport(false, provider.capability.displayName, duration, null, "Network failure")
     }
 }
 ```
 
 ### Step B: Bind it in Hilt (DataModule)
 In your app's Hilt `DataModule.kt`, tell Dagger to provide your specific delegate whenever `:features:ai:configuration` asks for an `AppDiagnosticDelegate`.
+Because the feature uses `@BindsOptionalOf`, your app will not crash if you forget to do this (it will just run a basic ping test).
 
 ```kotlin
 @Module
