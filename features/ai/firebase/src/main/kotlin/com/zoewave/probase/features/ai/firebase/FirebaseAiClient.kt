@@ -12,6 +12,7 @@ import com.zoewave.probase.core.data.repository.AiConfigurationSettings
 import com.zoewave.probase.features.ai.firebase.models.StyleTelemetry
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.withTimeout
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.random.Random
@@ -96,35 +97,8 @@ class FirebaseAiClientImpl @Inject constructor(
             useLimitedUseAppCheckTokens = false
         ).generativeModel(
             modelName = modelName,
-            systemInstruction = content {
-                text("""
-                    You are the KoColor Style Architect AI. Generate a "Style Blueprint" that is stylistically harmonic and appropriate to the supplied environmental context.
-                    
-                    STRICT GROUNDING RULES & CONSTRAINTS:
-                    1. DESCRIPTIVE ACCURACY: Do not invent stylistic adjectives (e.g., do not call nylon 'structural'). Describe items strictly using the physical materials and attributes listed in the manifest.
-                    2. CATEGORY ISOLATION: You may ONLY select cosmetics from the requested roles. You are STRICTLY FORBIDDEN from selecting or referencing items categorized as PREP, HAIR, or COMPLEXION, unless explicitly requested in the environmental context. You must only select clothing items from the TOPS, BOTTOMS, SHOES, or OUTERWEAR categories.
-                    3. RATIONALE FORMATTING: Write the rationale as fluid prose. Do not invent qualitative weather adjectives (like "mild" or "breezy"). Use ONLY the provided context variables. Do not use decimals.
-                    
-                    Respond ONLY with a valid JSON object matching the requested schema.
-                """.trimIndent())
-            },
             generationConfig = generationConfig {
                 responseMimeType = "application/json"
-                responseSchema = Schema.obj(
-                    properties = mapOf(
-                        "selectedClothingIds" to Schema.array(
-                            Schema.string("Selected wardrobe item IDs, e.g., w_38")
-                        ),
-                        "selectedCosmeticIds" to Schema.array(
-                            Schema.string("Selected cosmetic item IDs, e.g., c_61")
-                        ),
-                        "rationale" to Schema.string("Harmonic synthesis rationale referencing ONLY selected item IDs"),
-                        "recommendedPalette" to Schema.array(
-                            Schema.string("Hex color codes for recommended palette, e.g., #1E88E5")
-                        )
-                    ),
-                    optionalProperties = listOf("recommendedPalette")
-                )
                 temperature = temperatureOverride ?: 0.2f
             }
         )
@@ -187,7 +161,10 @@ class FirebaseAiClientImpl @Inject constructor(
 
     private fun isTemporaryOverloadError(e: Throwable): Boolean {
         val msg = e.message ?: ""
-        return msg.contains("high demand", ignoreCase = true) ||
+        return e is kotlinx.coroutines.TimeoutCancellationException ||
+               msg.contains("deadline", ignoreCase = true) ||
+               msg.contains("timeout", ignoreCase = true) ||
+               msg.contains("high demand", ignoreCase = true) ||
                msg.contains("503", ignoreCase = true) ||
                msg.contains("unavailable", ignoreCase = true) ||
                msg.contains("Resource exhausted", ignoreCase = true) ||
@@ -223,6 +200,7 @@ class FirebaseAiClientImpl @Inject constructor(
     private suspend fun <T> executeWithRetry(
         actionName: String,
         initialModelName: String,
+        timeoutPerAttemptMs: Long = 25_000L,
         block: suspend (modelName: String) -> T
     ): T {
         val fallbackModels = listOf(initialModelName, "gemini-3.8-flash", "gemini-flash-lite-latest").distinct()
@@ -230,11 +208,19 @@ class FirebaseAiClientImpl @Inject constructor(
 
         for (model in fallbackModels) {
             var baseDelayMs = 1000L
-            val maxAttemptsPerModel = 3
+            val maxAttemptsPerModel = 2
 
             for (attempt in 1..maxAttemptsPerModel) {
                 try {
-                    return block(model)
+                    return withTimeout(timeoutPerAttemptMs) {
+                        block(model)
+                    }
+                } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
+                    lastException = e
+                    Log.w("FirebaseAiClient", "[$actionName] Model '$model' timed out after ${timeoutPerAttemptMs}ms. Immediately falling over to next model.")
+                    break
+                } catch (e: kotlinx.coroutines.CancellationException) {
+                    throw e
                 } catch (e: Exception) {
                     lastException = e
                     val detailedMsg = extractDetailedMessage(e)
