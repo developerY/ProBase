@@ -36,7 +36,21 @@
 
 ---
 
-## 🎬 Scene 3: Digitizing Your Life (Smart Camera & Color Science)
+## 🎬 Scene 3: Instant Wardrobe (The Sync Hub & Starter Packs)
+**Visual:**
+*   Screen shifts to the **Sync Hub** tab.
+*   Shows beautiful, curated cover art for various "Starter Packs" (e.g., "Complete Fashion Pack", "Minimalist Winter Capsule").
+*   User taps a pack to preview its high-res contents.
+
+**Voiceover (VO):**
+> "Want to jump right in without scanning your entire closet? Head to the Sync Hub. Download curated Starter Packs to instantly populate your Wardrobe and Vanity with foundational items tailored to your style."
+
+**On-Screen Action:**
+*   User taps "Install Pack". A swift progress bar fills, and the items seamlessly animate into their Collection Hub.
+
+---
+
+## 🎬 Scene 4: Digitizing Your Life (Smart Camera & Color Science)
 **Visual:**
 *   Split screen: Left side shows a user holding a physical sweater and a lipstick. Right side shows the KoColor Smart Camera UI.
 *   The camera scans the sweater. A scanning reticle locks onto the fabric.
@@ -51,7 +65,7 @@
 
 ---
 
-## 🎬 Scene 4: The AI Stylist (Daily Style Plan)
+## 🎬 Scene 5: The AI Stylist (Daily Style Plan)
 **Visual:**
 *   The user navigates to the **Collection Hub** and taps the **AI Stylist** button (sparkle icon).
 *   A prompt box appears: "What is your intent for today?"
@@ -67,7 +81,7 @@
 
 ---
 
-## 🎬 Scene 5: Analytics & Habit Building
+## 🎬 Scene 6: Analytics & Habit Building
 **Visual:**
 *   The user taps "Commit Outfit" for the day.
 *   Transition to the **Wardrobe Footprint** analytics screen.
@@ -83,7 +97,7 @@
 
 ---
 
-## 🎬 Scene 6: Outro & Call to Action
+## 🎬 Scene 7: Outro & Call to Action
 **Visual:**
 *   The user locks their phone and puts it in their pocket, stepping out the door looking confident in the outfit KoColor suggested.
 *   Fade to the KoColor logo.

@@ -52,6 +52,13 @@ KoColor includes an advanced, on-device **Color Science Engine** that understand
 2. Point the camera at a piece of clothing or a cosmetic product.
 3. Snap the photo.
 
+### Quick Start with Starter Packs (Sync Hub)
+If you don't want to manually scan every item in your closet or vanity, KoColor offers **Starter Packs** to instantly populate your inventory:
+1. Navigate to the **Sync Hub**.
+2. Browse curated catalogs, such as the "Complete Fashion" or "Complete Cosmetics" packs.
+3. Tap **Install Pack** to securely download and integrate these foundational items into your Wardrobe and Vanity immediately.
+4. You can also preview packs before installing them, and remove them later via the Sync Hub if they don't fit your aesthetic.
+
 ### What Happens Next?
 *   **Color Extraction:** The app extracts the dominant, vibrant, and muted hex codes from the item.
 *   **Standard Color Matching:** It mathematically matches the color to standardized color databases using perceptual Delta-E algorithms.
