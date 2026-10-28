@@ -78,7 +78,7 @@ fun ProfessionalColorSpecSheet(
 }
 
 @Composable
-private fun SpecRow(label: String, value: String) {
+fun SpecRow(label: String, value: String) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
@@ -88,10 +88,3 @@ private fun SpecRow(label: String, value: String) {
     }
 }
 
-private fun parseColor(hex: String): Color {
-    return try {
-        Color(android.graphics.Color.parseColor(if (hex.startsWith("#")) hex else "#$hex"))
-    } catch (e: Exception) {
-        Color.Gray
-    }
-}
