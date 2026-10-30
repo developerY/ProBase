@@ -1,29 +1,38 @@
-# FASHIONISTA Core Domain, Scoring, & Presentation Data Models
--keep class com.zoewave.probase.kocolor.fashionista.domain.** { *; }
--keep class com.zoewave.probase.kocolor.fashionista.scoring.** { *; }
--keep class com.zoewave.probase.kocolor.fashionista.presentation.** { *; }
-
-# Jetpack Compose Custom Canvas Graphics & Visual Blueprint Components
--keep class com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.** { *; }
--keep class com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.graphics.FashionistaMathBreakdown { *; }
-
-# KoColor Style & Color Models
--keep class com.zoewave.probase.kocolor.data.usecase.StyleBlueprint { *; }
--keep class com.zoewave.probase.kocolor.data.usecase.StyleRequestContext { *; }
--keep class com.zoewave.probase.kocolor.data.color.CandidateProvenance { *; }
--keep class com.zoewave.probase.kocolor.data.color.CompositeColorProfile { *; }
-
-# Google Generative AI SDK & Ktor Internal Client Rules
-
-# R8 Automatic Log Stripping for Release Builds
-# Strips all Log.v(), Log.d(), and Log.isLoggable(..., DEBUG) calls in production
--maximumremovedandroidloglevel 3
-
--assumenosideeffects class android.util.Log {
-    public static *** v(...);
-    public static *** d(...);
+# Kotlinx Serialization Rules
+-keepattributes RuntimeVisibleAnnotations,AnnotationDefault
+-keepclassmembers,allowshrinking,allowobfuscation interface * {
+    @kotlinx.serialization.* <methods>;
+}
+-keepclassmembers,allowshrinking,allowobfuscation class * {
+    @kotlinx.serialization.* <methods>;
+    @kotlinx.serialization.* <fields>;
 }
 
-# Preserve line numbers and source files for decipherable production crash stack traces
--keepattributes SourceFile,LineNumberTable
--renamesourcefileattribute SourceFile
+# Keep classes that are specifically serialized by name
+-keepnames @kotlinx.serialization.Serializable class com.zoewave.probase.seaweed.**
+-keepclassmembers class com.zoewave.probase.seaweed.** {
+    <fields>;
+    <init>(...);
+}
+
+-keepnames @kotlinx.serialization.Serializable class com.zoewave.probase.features.ai.**
+-keepclassmembers class com.zoewave.probase.features.ai.** {
+    <fields>;
+    <init>(...);
+}
+
+-keepnames @kotlinx.serialization.Serializable class com.zoewave.probase.kocolor.**
+-keepclassmembers class com.zoewave.probase.kocolor.** {
+    <fields>;
+    <init>(...);
+}
+
+# SQLCipher / SQLite JNI Rules
+-keep class net.sqlcipher.** { *; }
+-keep class net.sqlcipher.database.** { *; }
+-keep class androidx.sqlite.db.framework.** { *; }
+
+# Google Tink Rules
+-keep class com.google.crypto.tink.** { *; }
+-keep class * extends com.google.crypto.tink.KeyTypeManager { *; }
+-keep class * extends com.google.crypto.tink.PrimitiveWrapper { *; }

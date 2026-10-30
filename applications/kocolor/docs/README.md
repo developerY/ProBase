@@ -11,6 +11,7 @@ Welcome to the KoColor documentation directory. This folder contains the officia
     *   `Legal/`: Includes Privacy Policies, Data Deletion Instructions, and Play Store safety declarations.
 *   **`PlayStore/`**
     Contains all visual and textual assets required for the Google Play Store release, including the store listing description, app icons, feature graphics, and promotional videos.
+    *   `Release/`: Contains the **Google Play Deployment Guide**, detailing AAB generation, keystore management, Play Console policies, and staged rollout strategies.
 *   **`Website/`**
     Contains documentation and assets related to the KoColor web presence and marketing.
 *   **`Architecture/`**
