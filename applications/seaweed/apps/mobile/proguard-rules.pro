@@ -1,22 +1,38 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# Kotlinx Serialization Rules
+-keepattributes RuntimeVisibleAnnotations,AnnotationDefault
+-keepclassmembers,allowshrinking,allowobfuscation interface * {
+    @kotlinx.serialization.* <methods>;
+}
+-keepclassmembers,allowshrinking,allowobfuscation class * {
+    @kotlinx.serialization.* <methods>;
+    @kotlinx.serialization.* <fields>;
+}
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# Keep classes that are specifically serialized by name
+-keepnames @kotlinx.serialization.Serializable class com.zoewave.probase.seaweed.**
+-keepclassmembers class com.zoewave.probase.seaweed.** {
+    <fields>;
+    <init>(...);
+}
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+-keepnames @kotlinx.serialization.Serializable class com.zoewave.probase.features.ai.**
+-keepclassmembers class com.zoewave.probase.features.ai.** {
+    <fields>;
+    <init>(...);
+}
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+-keepnames @kotlinx.serialization.Serializable class com.zoewave.probase.kocolor.**
+-keepclassmembers class com.zoewave.probase.kocolor.** {
+    <fields>;
+    <init>(...);
+}
 
+# SQLCipher / SQLite JNI Rules
+-keep class net.sqlcipher.** { *; }
+-keep class net.sqlcipher.database.** { *; }
+-keep class androidx.sqlite.db.framework.** { *; }
+
+# Google Tink Rules
+-keep class com.google.crypto.tink.** { *; }
+-keep class * extends com.google.crypto.tink.KeyTypeManager { *; }
+-keep class * extends com.google.crypto.tink.PrimitiveWrapper { *; }
