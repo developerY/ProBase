@@ -29,4 +29,8 @@ interface AiConfigurationSettings {
     // Firebase Vertex AI
     val useFirebaseVertexAi: Flow<Boolean>
     suspend fun saveUseFirebaseVertexAi(enabled: Boolean)
+
+    // Download AI
+    val useDownloadAi: Flow<Boolean>
+    suspend fun saveUseDownloadAi(enabled: Boolean)
 }

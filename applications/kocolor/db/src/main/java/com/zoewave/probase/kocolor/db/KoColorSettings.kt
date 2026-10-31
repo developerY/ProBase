@@ -35,6 +35,7 @@ class KoColorSettings @Inject constructor(
         val USE_BYOK_KEY = booleanPreferencesKey("use_byok_key")
         val USE_LOCAL_AI = booleanPreferencesKey("use_local_ai")
         val USE_FIREBASE_VERTEX_AI = booleanPreferencesKey("use_firebase_vertex_ai")
+        val USE_DOWNLOAD_AI = booleanPreferencesKey("use_download_ai")
     }
 
     val appThemeFlow: Flow<String> = context.dataStore.data.map { preferences ->
@@ -152,6 +153,16 @@ class KoColorSettings @Inject constructor(
     override suspend fun saveUseFirebaseVertexAi(enabled: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.USE_FIREBASE_VERTEX_AI] = enabled
+        }
+    }
+
+    override val useDownloadAi: Flow<Boolean> = context.dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.USE_DOWNLOAD_AI] ?: false
+    }
+
+    override suspend fun saveUseDownloadAi(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.USE_DOWNLOAD_AI] = enabled
         }
     }
 }

@@ -12,6 +12,7 @@ android {
 dependencies {
     // --- Shared Core Projects ---
     api(project(":core:model"))
+    api(project(":core:data"))
     implementation(project(":core:ui"))
     implementation(project(":core:util"))
 

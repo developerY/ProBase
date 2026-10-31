@@ -8,6 +8,9 @@ plugins {
 
 android {
     namespace = "com.zoewave.probase.features.ai.local"
+    defaultConfig {
+        minSdk = 24
+    }
 }
 
 dependencies {
@@ -23,6 +26,10 @@ dependencies {
 
     // ML Kit GenAI Prompt (Required for existing LocalAiEngine.kt)
     implementation(libs.mlkit.genai.prompt)
+    
+    // LiteRT-LM & WorkManager for Download AI
+    implementation("com.google.ai.edge.litertlm:litertlm-android:0.18.0")
+    implementation(libs.work.runtime.ktx)
     
     // Coroutines & Additional Compose basics (UI, Material3, BOM are handled by plugin)
     implementation(libs.kotlinx.coroutines.android)

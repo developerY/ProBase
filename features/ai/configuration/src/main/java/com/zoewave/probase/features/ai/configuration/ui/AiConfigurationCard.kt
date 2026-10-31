@@ -40,6 +40,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -131,6 +132,7 @@ fun AiConfigurationCardContent(
     var isModelDropdownExpanded by remember { mutableStateOf(false) }
 
     val selectedPrimaryAi = when {
+        uiState.useDownloadAi -> "Download AI (Local Execution)"
         uiState.useLocalAi -> "On-Device Local AI (Gemini Nano)"
         uiState.useByokKey -> "Bring Your Own Key (BYOK)"
         uiState.useFirebaseVertexAi -> "Firebase AI Logic (Cloud)"
@@ -141,7 +143,8 @@ fun AiConfigurationCardContent(
         "Gemma 4 Cloud (Free Tier) - Default",
         "Firebase AI Logic (Cloud)",
         "Bring Your Own Key (BYOK)",
-        "On-Device Local AI (Gemini Nano)"
+        "On-Device Local AI (Gemini Nano)",
+        "Download AI (Local Execution)"
     )
 
     Card(
@@ -243,6 +246,7 @@ fun AiConfigurationCardContent(
                                                 onEvent(AiConfigurationEvent.OnUseLocalAiToggled(false))
                                                 onEvent(AiConfigurationEvent.OnUseByokKeyToggled(false))
                                                 onEvent(AiConfigurationEvent.OnUseFirebaseVertexAiToggled(false))
+                                                onEvent(AiConfigurationEvent.OnUseDownloadAiToggled(false))
                                             }
                                             "Firebase AI Logic (Cloud)" -> {
                                                 onEvent(AiConfigurationEvent.OnUseFirebaseVertexAiToggled(true))
@@ -253,6 +257,9 @@ fun AiConfigurationCardContent(
                                             "On-Device Local AI (Gemini Nano)" -> {
                                                 onEvent(AiConfigurationEvent.OnUseLocalAiToggled(true))
                                             }
+                                            "Download AI (Local Execution)" -> {
+                                                onEvent(AiConfigurationEvent.OnUseDownloadAiToggled(true))
+                                            }
                                         }
                                         isPrimaryEngineDropdownExpanded = false
                                     }
@@ -262,6 +269,7 @@ fun AiConfigurationCardContent(
                     }
 
                     val infoBoxText = when (selectedPrimaryAi) {
+                        "Download AI (Local Execution)" -> "Download and execute models locally on device."
                         "Bring Your Own Key (BYOK)" -> "Execute using your personal Gemini API key."
                         "Firebase AI Logic (Cloud)" -> "Route requests through a secure Firebase proxy. Protects your quota and ensures data privacy via App Check.\n\nActive Firebase Models:\n• gemini-3.8-flash (Primary)\n• gemini-2.5-flash (Secondary)\n• gemini-flash-lite-latest (Fast Fallback)"
                         "On-Device Local AI (Gemini Nano)" -> {
@@ -275,6 +283,13 @@ fun AiConfigurationCardContent(
                     }
 
                     val badgeStatus = when (selectedPrimaryAi) {
+                        "Download AI (Local Execution)" -> {
+                            when (uiState.localModelState) {
+                                is com.zoewave.probase.features.ai.local.data.LocalModelState.Ready -> Pair("Downloaded", Color(0xFF4CAF50))
+                                is com.zoewave.probase.features.ai.local.data.LocalModelState.Downloading -> Pair("Downloading", Color(0xFF2196F3))
+                                else -> Pair("Download Ready", Color(0xFF4CAF50))
+                            }
+                        }
                         "On-Device Local AI (Gemini Nano)" -> {
                             if (uiState.isLocalAiAvailable) Pair("NPU Active", Color(0xFF4CAF50)) else Pair("Unsupported", MaterialTheme.colorScheme.onSurfaceVariant)
                         }
@@ -321,6 +336,60 @@ fun AiConfigurationCardContent(
                             }
                         }
                     )
+
+                    AnimatedVisibility(visible = uiState.useDownloadAi) {
+                        Column(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
+                            when (val state = uiState.localModelState) {
+                                is com.zoewave.probase.features.ai.local.data.LocalModelState.NotDownloaded -> {
+                                    Button(onClick = { onEvent(AiConfigurationEvent.OnStartModelDownloadClicked) }) {
+                                        Text("Download AI Model (~1.5GB)")
+                                    }
+                                }
+                                is com.zoewave.probase.features.ai.local.data.LocalModelState.Downloading -> {
+                                    val downloadedMb = state.bytesDownloaded / 1_048_576
+                                    val totalMb = state.totalBytes / 1_048_576
+                                    Text("Downloading: $downloadedMb MB / $totalMb MB", style = MaterialTheme.typography.bodySmall)
+                                    LinearProgressIndicator(
+                                        progress = { state.progressPercent / 100f },
+                                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+                                    )
+                                    Row {
+                                        Button(onClick = { onEvent(AiConfigurationEvent.OnCancelModelDownloadClicked) }) {
+                                            Text("Cancel")
+                                        }
+                                    }
+                                }
+                                is com.zoewave.probase.features.ai.local.data.LocalModelState.VerifyingChecksum -> {
+                                    Text("Verifying Model Integrity...", style = MaterialTheme.typography.bodySmall)
+                                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp))
+                                }
+                                is com.zoewave.probase.features.ai.local.data.LocalModelState.Ready -> {
+                                    Text("Model is ready for local execution.", style = MaterialTheme.typography.bodySmall, color = Color(0xFF4CAF50))
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Button(
+                                        onClick = { onEvent(AiConfigurationEvent.OnDeleteModelClicked) },
+                                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                                    ) {
+                                        Text("Delete Downloaded Model")
+                                    }
+                                }
+                                is com.zoewave.probase.features.ai.local.data.LocalModelState.Error -> {
+                                    Text("Error: ${state.reason}", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        if (state.isRetryable) {
+                                            Button(onClick = { onEvent(AiConfigurationEvent.OnRetryModelDownloadClicked) }) {
+                                                Text("Retry")
+                                            }
+                                        }
+                                        Button(onClick = { onEvent(AiConfigurationEvent.OnCancelModelDownloadClicked) }) {
+                                            Text("Cancel")
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
 
                     AnimatedVisibility(visible = uiState.useByokKey) {
                         Column {

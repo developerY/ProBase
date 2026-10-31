@@ -12,12 +12,19 @@ import com.zoewave.probase.features.compliance.model.ComplianceError
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
+import com.zoewave.probase.core.data.repository.AiConfigurationSettings
+import kotlinx.coroutines.flow.firstOrNull
+import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
+import java.io.File
 
 @Singleton
 class SmartCaptureOrchestrator @Inject constructor(
     @param:Named("Cloud") private val cloudEngine: SmartCaptureEngine,
     @param:Named("Local") private val localEngine: SmartCaptureEngine,
-    private val ageSignalsManager: AgeSignalsManager
+    private val ageSignalsManager: AgeSignalsManager,
+    private val aiConfigurationSettings: AiConfigurationSettings,
+    @ApplicationContext private val context: Context
 ) {
     private val tag = "SmartCaptureOrchestrator"
 
@@ -121,11 +128,19 @@ class SmartCaptureOrchestrator @Inject constructor(
                 return result.copy(logs = totalLogs + result.logs)
             }
             } else {
-                Log.d(tag, "No API key provided. Skipping Tier 1.")
-                onLog("Using Tier 2 (Local) AI...")
-                totalLogs.add("Orchestrator: No Cloud Key, using Local AI")
-                val result = localEngine.processImage(bitmap!!, null, userContext = userContext, onLog = onLog)
-                return result.copy(logs = totalLogs + result.logs)
+                val useDownloadAi = aiConfigurationSettings.useDownloadAi.firstOrNull() ?: false
+                val downloadedModel = File(context.filesDir, "model.litertlm")
+                val isModelReady = useDownloadAi && downloadedModel.exists()
+                
+                if (isModelReady || bitmap != null) {
+                    Log.d(tag, "No API key provided. Skipping Tier 1.")
+                    onLog("Using Tier 2 (Local) AI...")
+                    totalLogs.add("Orchestrator: No Cloud Key, using Local AI")
+                    val result = localEngine.processImage(bitmap, null, userContext = userContext, onLog = onLog)
+                    return result.copy(logs = totalLogs + result.logs)
+                } else {
+                    return DiagnosticResult(SmartTaskDraft(), totalLogs, error = "Local AI Model is not downloaded and no Cloud AI Key provided.")
+                }
             }
     }
 }

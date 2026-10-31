@@ -73,4 +73,10 @@ class UserSettingsRepositoryImpl @Inject constructor(
         val current = getUserSettings().first()
         saveUserSettings(current.copy(useLocalAi = enabled))
     }
+
+    override val useDownloadAi: Flow<Boolean> = getUserSettings().map { it.useDownloadAi }
+    override suspend fun saveUseDownloadAi(enabled: Boolean) {
+        val current = getUserSettings().first()
+        saveUserSettings(current.copy(useDownloadAi = enabled))
+    }
 }
