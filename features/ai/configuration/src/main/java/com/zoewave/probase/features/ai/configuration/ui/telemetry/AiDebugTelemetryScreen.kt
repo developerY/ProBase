@@ -149,18 +149,32 @@ fun AiDebugTelemetryScreen(
                 ) {
                     StatusGridTile(
                         modifier = Modifier.weight(1f),
-                        icon = Icons.Default.Cloud,
-                        title = "3. Firebase AI",
-                        subtitle = if (uiState.isFirebaseEnabled) "Active" else "Disabled",
-                        isActive = uiState.isFirebaseEnabled
+                        icon = Icons.Default.CloudSync,
+                        title = "3. Download AI",
+                        subtitle = if (uiState.isDownloadAiEnabled) "Ready" else "Unavailable",
+                        isActive = uiState.isDownloadAiEnabled
                     )
                     StatusGridTile(
                         modifier = Modifier.weight(1f),
+                        icon = Icons.Default.Cloud,
+                        title = "4. Firebase AI",
+                        subtitle = if (uiState.isFirebaseEnabled) "Active" else "Disabled",
+                        isActive = uiState.isFirebaseEnabled
+                    )
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    StatusGridTile(
+                        modifier = Modifier.weight(1f),
                         icon = Icons.Default.AutoAwesome,
-                        title = "4. Gemma 4",
+                        title = "5. Gemma 4",
                         subtitle = uiState.currentModelName,
                         isActive = uiState.isGemmaEnabled
                     )
+                    Spacer(modifier = Modifier.weight(1f)) // Empty spacer to balance the grid
                 }
             }
 
