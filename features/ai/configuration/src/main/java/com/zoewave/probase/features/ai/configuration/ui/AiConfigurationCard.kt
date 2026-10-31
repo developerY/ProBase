@@ -131,6 +131,7 @@ fun AiConfigurationCardContent(
     var isModelDropdownExpanded by remember { mutableStateOf(false) }
 
     val selectedPrimaryAi = when {
+        uiState.useDownloadAi -> "Download AI (Local Execution)"
         uiState.useLocalAi -> "On-Device Local AI (Gemini Nano)"
         uiState.useByokKey -> "Bring Your Own Key (BYOK)"
         uiState.useFirebaseVertexAi -> "Firebase AI Logic (Cloud)"
@@ -141,7 +142,8 @@ fun AiConfigurationCardContent(
         "Gemma 4 Cloud (Free Tier) - Default",
         "Firebase AI Logic (Cloud)",
         "Bring Your Own Key (BYOK)",
-        "On-Device Local AI (Gemini Nano)"
+        "On-Device Local AI (Gemini Nano)",
+        "Download AI (Local Execution)"
     )
 
     Card(
@@ -243,6 +245,7 @@ fun AiConfigurationCardContent(
                                                 onEvent(AiConfigurationEvent.OnUseLocalAiToggled(false))
                                                 onEvent(AiConfigurationEvent.OnUseByokKeyToggled(false))
                                                 onEvent(AiConfigurationEvent.OnUseFirebaseVertexAiToggled(false))
+                                                onEvent(AiConfigurationEvent.OnUseDownloadAiToggled(false))
                                             }
                                             "Firebase AI Logic (Cloud)" -> {
                                                 onEvent(AiConfigurationEvent.OnUseFirebaseVertexAiToggled(true))
@@ -253,6 +256,9 @@ fun AiConfigurationCardContent(
                                             "On-Device Local AI (Gemini Nano)" -> {
                                                 onEvent(AiConfigurationEvent.OnUseLocalAiToggled(true))
                                             }
+                                            "Download AI (Local Execution)" -> {
+                                                onEvent(AiConfigurationEvent.OnUseDownloadAiToggled(true))
+                                            }
                                         }
                                         isPrimaryEngineDropdownExpanded = false
                                     }
@@ -262,6 +268,7 @@ fun AiConfigurationCardContent(
                     }
 
                     val infoBoxText = when (selectedPrimaryAi) {
+                        "Download AI (Local Execution)" -> "Download and execute models locally on device."
                         "Bring Your Own Key (BYOK)" -> "Execute using your personal Gemini API key."
                         "Firebase AI Logic (Cloud)" -> "Route requests through a secure Firebase proxy. Protects your quota and ensures data privacy via App Check.\n\nActive Firebase Models:\n• gemini-3.8-flash (Primary)\n• gemini-2.5-flash (Secondary)\n• gemini-flash-lite-latest (Fast Fallback)"
                         "On-Device Local AI (Gemini Nano)" -> {
@@ -275,6 +282,7 @@ fun AiConfigurationCardContent(
                     }
 
                     val badgeStatus = when (selectedPrimaryAi) {
+                        "Download AI (Local Execution)" -> Pair("Download Ready", Color(0xFF4CAF50))
                         "On-Device Local AI (Gemini Nano)" -> {
                             if (uiState.isLocalAiAvailable) Pair("NPU Active", Color(0xFF4CAF50)) else Pair("Unsupported", MaterialTheme.colorScheme.onSurfaceVariant)
                         }

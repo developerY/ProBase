@@ -105,6 +105,15 @@ class DataStoreAppSettingsRepository @Inject constructor(
         dataStore.edit { it[booleanPreferencesKey("use_firebase_vertex_ai")] = enabled }
     }
     
+    override val useDownloadAi: Flow<Boolean> = dataStore.data.map {
+        it[booleanPreferencesKey("use_download_ai")] ?: false
+    }
+
+    override suspend fun saveUseDownloadAi(enabled: Boolean) {
+        dataStore.edit { it[booleanPreferencesKey("use_download_ai")] = enabled }
+    }
+
+    
     override val useByokKey: Flow<Boolean> = kotlinx.coroutines.flow.flowOf(true)
     override suspend fun saveUseByokKey(enabled: Boolean) {}
 

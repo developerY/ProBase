@@ -51,4 +51,10 @@ class GoSwiftAiSettings @Inject constructor() : AiConfigurationSettings, SmartCa
     override suspend fun saveUseFirebaseVertexAi(enabled: Boolean) {
         _useFirebase.value = enabled
     }
+
+    private val _useDownloadAi = MutableStateFlow(false)
+    override val useDownloadAi: Flow<Boolean> = _useDownloadAi.asStateFlow()
+    override suspend fun saveUseDownloadAi(enabled: Boolean) {
+        _useDownloadAi.value = enabled
+    }
 }

@@ -57,7 +57,8 @@ class AiConfigurationViewModel @Inject constructor(
         _isTestingModel,
         _modelTestResult,
         _fetchedModels,
-        settings.useLocalAi
+        settings.useLocalAi,
+        settings.useDownloadAi
     ) { args: Array<Any?> ->
         AiConfigurationUiState(
             isApiKeySet = args[0] as Boolean,
@@ -71,7 +72,8 @@ class AiConfigurationViewModel @Inject constructor(
             isTestingModel = args[8] as Boolean,
             modelTestResult = args[9] as String?,
             availableModels = (args[10] as List<String>?) ?: if (args[0] as Boolean) listOf("gemini-2.5-flash", "gemini-2.5-pro", "gemma-4-26b-a4b-it", "gemma-4-31b-it", "gemini-1.5-flash", "gemini-1.5-pro") else emptyList(),
-            useLocalAi = args[11] as Boolean
+            useLocalAi = args[11] as Boolean,
+            useDownloadAi = args[12] as Boolean
         )
     }.stateIn(
         scope = viewModelScope,
@@ -96,6 +98,7 @@ class AiConfigurationViewModel @Inject constructor(
                     if (event.enabled) {
                         settings.saveUseLocalAi(false)
                         settings.saveUseFirebaseVertexAi(false)
+                        settings.saveUseDownloadAi(false)
                     }
                 }
             }
@@ -105,6 +108,7 @@ class AiConfigurationViewModel @Inject constructor(
                     if (event.enabled) {
                         settings.saveUseByokKey(false)
                         settings.saveUseFirebaseVertexAi(false)
+                        settings.saveUseDownloadAi(false)
                     }
                 }
             }
@@ -114,6 +118,17 @@ class AiConfigurationViewModel @Inject constructor(
                     if (event.enabled) {
                         settings.saveUseByokKey(false)
                         settings.saveUseLocalAi(false)
+                        settings.saveUseDownloadAi(false)
+                    }
+                }
+            }
+            is AiConfigurationEvent.OnUseDownloadAiToggled -> {
+                viewModelScope.launch {
+                    settings.saveUseDownloadAi(event.enabled)
+                    if (event.enabled) {
+                        settings.saveUseByokKey(false)
+                        settings.saveUseLocalAi(false)
+                        settings.saveUseFirebaseVertexAi(false)
                     }
                 }
             }

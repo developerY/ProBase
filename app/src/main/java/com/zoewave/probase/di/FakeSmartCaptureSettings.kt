@@ -24,4 +24,6 @@ class FakeSmartCaptureSettings @Inject constructor() : SmartCaptureSettings, AiC
 
     override val useFirebaseVertexAi: Flow<Boolean> = flowOf(true)
     override suspend fun saveUseFirebaseVertexAi(enabled: Boolean) {}
+    override val useDownloadAi: Flow<Boolean> = flowOf(false)
+    override suspend fun saveUseDownloadAi(enabled: Boolean) {}
 }

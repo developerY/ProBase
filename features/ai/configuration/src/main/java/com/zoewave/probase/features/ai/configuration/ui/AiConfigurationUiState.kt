@@ -12,5 +12,6 @@ data class AiConfigurationUiState(
     val useByokKey: Boolean = true,
     val useLocalAi: Boolean = true,
     val useFirebaseVertexAi: Boolean = true,
+    val useDownloadAi: Boolean = false,
     val isLocalAiAvailable: Boolean = true
 )

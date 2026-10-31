@@ -7,6 +7,7 @@ sealed interface AiConfigurationEvent {
     data class OnUseByokKeyToggled(val enabled: Boolean) : AiConfigurationEvent
     data class OnUseLocalAiToggled(val enabled: Boolean) : AiConfigurationEvent
     data class OnUseFirebaseVertexAiToggled(val enabled: Boolean) : AiConfigurationEvent
+    data class OnUseDownloadAiToggled(val enabled: Boolean) : AiConfigurationEvent
     data object OnTestApiKeyClicked : AiConfigurationEvent
     data object OnTestModelClicked : AiConfigurationEvent
 }

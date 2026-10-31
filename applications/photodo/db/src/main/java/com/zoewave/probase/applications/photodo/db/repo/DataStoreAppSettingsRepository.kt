@@ -133,4 +133,14 @@ class DataStoreAppSettingsRepository @Inject constructor(
             preferences[booleanPreferencesKey("use_local_ai")] = enabled
         }
     }
+
+    override val useDownloadAi: kotlinx.coroutines.flow.Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[booleanPreferencesKey("use_download_ai")] ?: false
+    }
+
+    override suspend fun saveUseDownloadAi(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[booleanPreferencesKey("use_download_ai")] = enabled
+        }
+    }
 }
