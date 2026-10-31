@@ -21,10 +21,11 @@ import kotlinx.coroutines.withContext
 import java.util.concurrent.Executors
 import javax.inject.Inject
 import javax.inject.Singleton
+import dagger.hilt.android.qualifiers.ApplicationContext
 
 @Singleton
 class LocalLiteRtLmEngineManager @Inject constructor(
-    private val context: Context
+    @ApplicationContext private val context: Context
 ) : ComponentCallbacks2 {
 
     private val engineDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()

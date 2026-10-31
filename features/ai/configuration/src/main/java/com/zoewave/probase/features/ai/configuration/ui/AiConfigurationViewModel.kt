@@ -29,11 +29,14 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
 
+import com.zoewave.probase.features.ai.local.data.LocalLiteRtLmEngineManager
+
 @HiltViewModel
 class AiConfigurationViewModel @Inject constructor(
     private val settings: AiConfigurationSettings,
     private val orchestrator: SmartCaptureOrchestrator,
     private val localAiEngine: LocalAiEngine,
+    private val liteRtLmEngineManager: LocalLiteRtLmEngineManager,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -214,6 +217,7 @@ class AiConfigurationViewModel @Inject constructor(
                 startModelDownload()
             }
             is AiConfigurationEvent.OnDeleteModelClicked -> {
+                liteRtLmEngineManager.closeEngine() // Clean up before deleting the file
                 val targetFile = File(context.filesDir, "model.litertlm")
                 if (targetFile.exists()) {
                     targetFile.delete()
