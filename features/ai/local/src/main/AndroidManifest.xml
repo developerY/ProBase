@@ -1,9 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+
+    <permission android:name="com.yoursuite.permission.READ_AI_MODEL" android:protectionLevel="signature" />
+    <uses-permission android:name="com.yoursuite.permission.READ_AI_MODEL" />
+
     <queries>
         <package android:name="com.google.android.aicore" />
         <package android:name="com.google.android.apps.aicore" />
     </queries>
+
+    <application>
+        <uses-native-library android:name="libOpenCL.so" android:required="false" />
+        <uses-native-library android:name="libOpenCL-pixel.so" android:required="false" />
+        <uses-native-library android:name="libGLESv2.so" android:required="false" />
+        <uses-native-library android:name="libEGL.so" android:required="false" />
+
+        <provider
+            android:name=".data.AiModelProvider"
+            android:authorities="${applicationId}.ai.model.provider"
+            android:exported="true"
+            android:grantUriPermissions="true"
+            android:readPermission="com.yoursuite.permission.READ_AI_MODEL" />
+    </application>
 
 </manifest>

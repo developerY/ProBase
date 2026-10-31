@@ -10,4 +10,10 @@ sealed interface AiConfigurationEvent {
     data class OnUseDownloadAiToggled(val enabled: Boolean) : AiConfigurationEvent
     data object OnTestApiKeyClicked : AiConfigurationEvent
     data object OnTestModelClicked : AiConfigurationEvent
+    
+    data object OnStartModelDownloadClicked : AiConfigurationEvent
+    data object OnCancelModelDownloadClicked : AiConfigurationEvent
+    data object OnRetryModelDownloadClicked : AiConfigurationEvent
+    data object OnDeleteModelClicked : AiConfigurationEvent
+    data object OnConfirmCellularDownloadClicked : AiConfigurationEvent
 }

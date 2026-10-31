@@ -1,5 +1,7 @@
 package com.zoewave.probase.features.ai.configuration.ui
 
+import com.zoewave.probase.features.ai.local.data.LocalModelState
+
 data class AiConfigurationUiState(
     val isApiKeySet: Boolean = false,
     val isAiEnabled: Boolean = true,
@@ -13,5 +15,6 @@ data class AiConfigurationUiState(
     val useLocalAi: Boolean = true,
     val useFirebaseVertexAi: Boolean = true,
     val useDownloadAi: Boolean = false,
-    val isLocalAiAvailable: Boolean = true
+    val isLocalAiAvailable: Boolean = true,
+    val localModelState: LocalModelState = LocalModelState.NotDownloaded
 )
