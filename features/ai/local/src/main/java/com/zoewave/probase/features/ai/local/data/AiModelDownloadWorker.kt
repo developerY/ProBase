@@ -26,7 +26,7 @@ class AiModelDownloadWorker(
 ) : CoroutineWorker(context, params) {
 
     companion object {
-        const val MODEL_URL = "https://storage.googleapis.com/ko_color_models/gemma_1b_int8.litertlm" // Example URL
+        const val MODEL_URL = "https://huggingface.co/google/gemma-2-2b-it-litert/resolve/main/gemma2-2b-it-gpu-int8.bin"
         const val EXPECTED_CHECKSUM = "YOUR_EXPECTED_SHA256_CHECKSUM_HERE" // Replace with real checksum
         const val EXPECTED_SIZE = 1_500_000_000L // Example size ~ 1.5GB
 
@@ -69,15 +69,40 @@ class AiModelDownloadWorker(
         var downloaded = if (partFile.exists()) partFile.length() else 0L
 
         try {
+            // Using Hugging Face's official LiteRT-LM hosted weights for Gemma 2B INT8 as a highly-available stable endpoint
             val url = URL(MODEL_URL)
-            val connection = url.openConnection() as HttpURLConnection
+            var connection = url.openConnection() as HttpURLConnection
+            
+            // Modern CDNs often require User-Agent to prevent 403 Forbidden / 404 Not Found blocks
+            connection.setRequestProperty("User-Agent", "ProbaseAiModelDownloader/1.0")
+            connection.connectTimeout = 15000
+            connection.readTimeout = 15000
+            connection.instanceFollowRedirects = true
+            
             if (downloaded > 0) {
                 connection.setRequestProperty("Range", "bytes=$downloaded-")
             }
 
             connection.connect()
 
-            val responseCode = connection.responseCode
+            var responseCode = connection.responseCode
+            
+            // Handle redirects manually if cross-origin (e.g. Hugging Face CDN resolving to S3)
+            if (responseCode == HttpURLConnection.HTTP_MOVED_PERM || responseCode == HttpURLConnection.HTTP_MOVED_TEMP || responseCode == HttpURLConnection.HTTP_SEE_OTHER || responseCode == 307 || responseCode == 308) {
+                val redirectUrl = connection.getHeaderField("Location")
+                if (redirectUrl != null) {
+                    connection.disconnect()
+                    connection = URL(redirectUrl).openConnection() as HttpURLConnection
+                    connection.setRequestProperty("User-Agent", "ProbaseAiModelDownloader/1.0")
+                    connection.connectTimeout = 15000
+                    connection.readTimeout = 15000
+                    if (downloaded > 0) {
+                        connection.setRequestProperty("Range", "bytes=$downloaded-")
+                    }
+                    connection.connect()
+                    responseCode = connection.responseCode
+                }
+            }
             val contentLength = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 connection.contentLengthLong
             } else {
