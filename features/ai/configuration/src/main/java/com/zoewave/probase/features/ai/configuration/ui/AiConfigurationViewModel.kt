@@ -85,6 +85,14 @@ class AiConfigurationViewModel @Inject constructor(
                                 "VERIFYING" -> {
                                     _localModelState.value = LocalModelState.VerifyingChecksum
                                 }
+                                "ERROR", "ERROR_STORAGE", "ERROR_CHECKSUM" -> {
+                                    val reason = info.progress.getString("reason") ?: "Unknown error"
+                                    _localModelState.value = LocalModelState.Error(reason, true)
+                                }
+                                else -> {
+                                    // If no specific state key is present yet, treat as starting
+                                    _localModelState.value = LocalModelState.Downloading(0L, 0L, 0)
+                                }
                             }
                         }
                         WorkInfo.State.SUCCEEDED -> {
@@ -96,7 +104,14 @@ class AiConfigurationViewModel @Inject constructor(
                             _localModelState.value = LocalModelState.Error(reason, true)
                         }
                         WorkInfo.State.ENQUEUED -> {
-                            // Can stay as downloading or not downloaded
+                            // If we were previously in an Error state due to a retry, we can surface that
+                            if (state == "ERROR" || state == "ERROR_STORAGE" || state == "ERROR_CHECKSUM") {
+                                val reason = info.progress.getString("reason") ?: "Enqueued for Retry"
+                                _localModelState.value = LocalModelState.Error(reason, true)
+                            } else {
+                                // Default to 0 progress while enqueued
+                                _localModelState.value = LocalModelState.Downloading(0L, 0L, 0)
+                            }
                         }
                         else -> {}
                     }

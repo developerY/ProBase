@@ -51,10 +51,11 @@ class AiModelDownloadWorker(
             }
         }
 
-        setForeground(createForegroundInfo(0, "Starting download..."))
-
         val targetFile = File(context.filesDir, "model.litertlm")
         val partFile = File(context.filesDir, "model.litertlm.part")
+        
+        setProgress(workDataOf(STATE_KEY to "DOWNLOADING", PROGRESS_KEY to 0, BYTES_DOWNLOADED_KEY to 0L, TOTAL_BYTES_KEY to EXPECTED_SIZE))
+        setForeground(createForegroundInfo(0, "Starting download..."))
 
         if (targetFile.exists()) {
             if (verifyChecksum(targetFile)) {
@@ -82,10 +83,14 @@ class AiModelDownloadWorker(
             } else {
                 connection.contentLength.toLong()
             }
+            
+            android.util.Log.d("AiModelDownloadWorker", "Starting download: URL=$url, responseCode=$responseCode, contentLength=$contentLength, downloaded=$downloaded")
 
             val totalBytes = if (responseCode == HttpURLConnection.HTTP_PARTIAL) downloaded + contentLength else contentLength
 
             if (responseCode != HttpURLConnection.HTTP_OK && responseCode != HttpURLConnection.HTTP_PARTIAL) {
+                // To help debug the retry state, emit the error state before returning Retry
+                setProgress(workDataOf(STATE_KEY to "ERROR", "reason" to "HTTP Response Code: $responseCode"))
                 return@withContext Result.retry()
             }
 
@@ -141,6 +146,8 @@ class AiModelDownloadWorker(
 
         } catch (e: Exception) {
             e.printStackTrace()
+            // To help debug the retry state, emit the error state before returning Retry
+            setProgress(workDataOf(STATE_KEY to "ERROR", "reason" to (e.message ?: "Unknown Exception")))
             Result.retry()
         }
     }
