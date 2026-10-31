@@ -299,9 +299,10 @@ fun AiConfigurationCardContent(
 
                     val badgeStatus = when (selectedPrimaryAi) {
                         "Download AI (Local Execution)" -> {
-                            when (uiState.localModelState) {
+                            when (val state = uiState.localModelState) {
                                 is com.zoewave.probase.features.ai.local.data.LocalModelState.Ready -> Pair("Downloaded", Color(0xFF4CAF50))
-                                is com.zoewave.probase.features.ai.local.data.LocalModelState.Downloading -> Pair("Downloading", Color(0xFF2196F3))
+                                is com.zoewave.probase.features.ai.local.data.LocalModelState.Downloading -> Pair("Downloading ${state.progressPercent}%", Color(0xFF2196F3))
+                                is com.zoewave.probase.features.ai.local.data.LocalModelState.VerifyingChecksum -> Pair("Verifying", Color(0xFF2196F3))
                                 else -> Pair("Not Downloaded", MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
@@ -332,21 +333,33 @@ fun AiConfigurationCardContent(
                         },
                         trailingContent = {
                             if (badgeStatus != null) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(10.dp)
-                                            .background(color = badgeStatus.second, shape = CircleShape)
-                                    )
-                                    Text(
-                                        text = badgeStatus.first,
-                                        style = MaterialTheme.typography.labelSmall,
-                                        fontWeight = FontWeight.Bold,
-                                        color = badgeStatus.second
-                                    )
+                                Column(horizontalAlignment = Alignment.End) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(10.dp)
+                                                .background(color = badgeStatus.second, shape = CircleShape)
+                                        )
+                                        Text(
+                                            text = badgeStatus.first,
+                                            style = MaterialTheme.typography.labelSmall,
+                                            fontWeight = FontWeight.Bold,
+                                            color = badgeStatus.second
+                                        )
+                                    }
+                                    if (selectedPrimaryAi == "Download AI (Local Execution)" && uiState.localModelState is com.zoewave.probase.features.ai.local.data.LocalModelState.Downloading) {
+                                        val state = uiState.localModelState
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        LinearProgressIndicator(
+                                            progress = { state.progressPercent / 100f },
+                                            modifier = Modifier.width(80.dp).height(4.dp),
+                                            color = badgeStatus.second,
+                                            trackColor = badgeStatus.second.copy(alpha = 0.2f)
+                                        )
+                                    }
                                 }
                             }
                         }

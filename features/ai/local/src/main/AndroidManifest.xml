@@ -25,6 +25,12 @@
             android:exported="true"
             android:grantUriPermissions="true"
             android:readPermission="com.yoursuite.permission.READ_AI_MODEL" />
+
+        <!-- WorkManager SystemForegroundService must declare the foreground service type to avoid Android 14 crashes -->
+        <service
+            android:name="androidx.work.impl.foreground.SystemForegroundService"
+            android:foregroundServiceType="dataSync"
+            android:exported="false" />
     </application>
 
 </manifest>
