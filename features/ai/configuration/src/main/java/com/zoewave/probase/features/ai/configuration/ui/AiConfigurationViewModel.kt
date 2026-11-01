@@ -100,7 +100,9 @@ class AiConfigurationViewModel @Inject constructor(
                             _localModelState.value = LocalModelState.Ready(path, "1.0")
                         }
                         WorkInfo.State.FAILED -> {
-                            val reason = info.outputData.getString("reason") ?: "Unknown error"
+                            val outputReason = info.outputData.getString("reason")
+                            val progressReason = info.progress.getString("reason")
+                            val reason = outputReason ?: progressReason ?: "Unknown error"
                             _localModelState.value = LocalModelState.Error(reason, true)
                         }
                         WorkInfo.State.ENQUEUED -> {

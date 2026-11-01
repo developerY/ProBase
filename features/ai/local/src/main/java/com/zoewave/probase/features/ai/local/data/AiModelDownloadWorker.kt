@@ -113,7 +113,7 @@ class AiModelDownloadWorker(
 
             val totalBytes = if (responseCode == HttpURLConnection.HTTP_PARTIAL) downloaded + contentLength else contentLength
 
-            if (responseCode == 403 || responseCode == 404) {
+            if (responseCode == 401 || responseCode == 403 || responseCode == 404) {
                 // Unrecoverable HTTP errors
                 setProgress(workDataOf(STATE_KEY to "ERROR", "reason" to "HTTP Error: $responseCode"))
                 return@withContext Result.failure(workDataOf("reason" to "HTTP Error: $responseCode"))
