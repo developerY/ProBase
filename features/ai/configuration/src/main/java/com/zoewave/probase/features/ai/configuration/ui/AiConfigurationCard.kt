@@ -303,6 +303,7 @@ fun AiConfigurationCardContent(
                                 is com.zoewave.probase.features.ai.local.data.LocalModelState.Ready -> Pair("Downloaded", Color(0xFF4CAF50))
                                 is com.zoewave.probase.features.ai.local.data.LocalModelState.Downloading -> Pair("Downloading ${state.progressPercent}%", Color(0xFF2196F3))
                                 is com.zoewave.probase.features.ai.local.data.LocalModelState.VerifyingChecksum -> Pair("Verifying", Color(0xFF2196F3))
+                                is com.zoewave.probase.features.ai.local.data.LocalModelState.Error -> Pair("Download Error", MaterialTheme.colorScheme.error)
                                 else -> Pair("Not Downloaded", MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }

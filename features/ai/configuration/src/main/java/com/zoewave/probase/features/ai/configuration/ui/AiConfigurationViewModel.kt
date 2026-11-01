@@ -108,8 +108,8 @@ class AiConfigurationViewModel @Inject constructor(
                             if (state == "ERROR" || state == "ERROR_STORAGE" || state == "ERROR_CHECKSUM") {
                                 val reason = info.progress.getString("reason") ?: "Enqueued for Retry"
                                 _localModelState.value = LocalModelState.Error(reason, true)
-                            } else {
-                                // Default to 0 progress while enqueued
+                            } else if (_localModelState.value !is LocalModelState.Error) {
+                                // Default to 0 progress while enqueued, unless we are already showing an error
                                 _localModelState.value = LocalModelState.Downloading(0L, 0L, 0)
                             }
                         }

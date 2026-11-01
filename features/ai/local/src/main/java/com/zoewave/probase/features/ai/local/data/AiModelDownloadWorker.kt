@@ -113,6 +113,12 @@ class AiModelDownloadWorker(
 
             val totalBytes = if (responseCode == HttpURLConnection.HTTP_PARTIAL) downloaded + contentLength else contentLength
 
+            if (responseCode == 403 || responseCode == 404) {
+                // Unrecoverable HTTP errors
+                setProgress(workDataOf(STATE_KEY to "ERROR", "reason" to "HTTP Error: $responseCode"))
+                return@withContext Result.failure(workDataOf("reason" to "HTTP Error: $responseCode"))
+            }
+
             if (responseCode != HttpURLConnection.HTTP_OK && responseCode != HttpURLConnection.HTTP_PARTIAL) {
                 // To help debug the retry state, emit the error state before returning Retry
                 setProgress(workDataOf(STATE_KEY to "ERROR", "reason" to "HTTP Response Code: $responseCode"))
@@ -171,9 +177,10 @@ class AiModelDownloadWorker(
 
         } catch (e: Exception) {
             e.printStackTrace()
-            // To help debug the retry state, emit the error state before returning Retry
-            setProgress(workDataOf(STATE_KEY to "ERROR", "reason" to (e.message ?: "Unknown Exception")))
-            Result.retry()
+            // Return failure instead of retry for immediate UI feedback. The user can manually click 'Retry'.
+            val errorMsg = e.message ?: "Unknown Exception"
+            setProgress(workDataOf(STATE_KEY to "ERROR", "reason" to errorMsg))
+            Result.failure(workDataOf("reason" to errorMsg))
         }
     }
 
