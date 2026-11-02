@@ -61,6 +61,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -147,20 +148,60 @@ fun AiDebugTelemetryScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
+                    val isDownloadReady = uiState.localModelState is com.zoewave.probase.features.ai.local.data.LocalModelState.Ready
+                    val isDownloading = uiState.localModelState is com.zoewave.probase.features.ai.local.data.LocalModelState.Downloading
+                    val isVerifying = uiState.localModelState is com.zoewave.probase.features.ai.local.data.LocalModelState.VerifyingChecksum
+                    val downloadProgress = (uiState.localModelState as? com.zoewave.probase.features.ai.local.data.LocalModelState.Downloading)?.progressPercent?.div(100f)
+                    
+                    val downloadSubtitle = when {
+                        isDownloadReady -> "Ready"
+                        isDownloading -> "Downloading... ${(downloadProgress?.times(100))?.toInt() ?: 0}%"
+                        isVerifying -> "Verifying Checksum..."
+                        uiState.localModelState is com.zoewave.probase.features.ai.local.data.LocalModelState.Error -> "Download Error"
+                        else -> "Unavailable"
+                    }
+                    val downloadBgColor = when {
+                        isDownloadReady -> Color(0xFFE8F5E9)
+                        isDownloading || isVerifying -> Color(0xFFE3F2FD) // Light Blue
+                        else -> Color(0xFFFFEBEE)
+                    }
+                    val downloadContentColor = when {
+                        isDownloadReady -> Color(0xFF2E7D32)
+                        isDownloading || isVerifying -> Color(0xFF1565C0) // Dark Blue
+                        else -> Color(0xFFC62828)
+                    }
+                    
+                    StatusGridTile(
+                        modifier = Modifier.weight(1f),
+                        icon = Icons.Default.CloudSync,
+                        title = "3. Download AI",
+                        subtitle = downloadSubtitle,
+                        isActive = isDownloadReady,
+                        progress = downloadProgress,
+                        customBgColor = downloadBgColor,
+                        customContentColor = downloadContentColor
+                    )
                     StatusGridTile(
                         modifier = Modifier.weight(1f),
                         icon = Icons.Default.Cloud,
-                        title = "3. Firebase AI",
+                        title = "4. Firebase AI",
                         subtitle = if (uiState.isFirebaseEnabled) "Active" else "Disabled",
                         isActive = uiState.isFirebaseEnabled
                     )
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
                     StatusGridTile(
                         modifier = Modifier.weight(1f),
                         icon = Icons.Default.AutoAwesome,
-                        title = "4. Gemma 4",
+                        title = "5. Gemma 4",
                         subtitle = uiState.currentModelName,
                         isActive = uiState.isGemmaEnabled
                     )
+                    Spacer(modifier = Modifier.weight(1f)) // Empty spacer to balance the grid
                 }
             }
 
@@ -305,10 +346,13 @@ private fun StatusGridTile(
     icon: ImageVector,
     title: String,
     subtitle: String,
-    isActive: Boolean
+    isActive: Boolean,
+    progress: Float? = null,
+    customBgColor: Color? = null,
+    customContentColor: Color? = null
 ) {
-    val bgColor = if (isActive) Color(0xFFE8F5E9) else Color(0xFFFFEBEE)
-    val contentColor = if (isActive) Color(0xFF2E7D32) else Color(0xFFC62828)
+    val bgColor = customBgColor ?: if (isActive) Color(0xFFE8F5E9) else Color(0xFFFFEBEE)
+    val contentColor = customContentColor ?: if (isActive) Color(0xFF2E7D32) else Color(0xFFC62828)
 
     Card(
         modifier = modifier,
@@ -316,7 +360,7 @@ private fun StatusGridTile(
         shape = RoundedCornerShape(12.dp)
     ) {
         Column(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier.padding(12.dp).fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -326,6 +370,15 @@ private fun StatusGridTile(
             }
             Text(title, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = Color.Black)
             Text(subtitle, style = MaterialTheme.typography.labelSmall, color = contentColor)
+            if (progress != null) {
+                Spacer(modifier = Modifier.height(4.dp))
+                LinearProgressIndicator(
+                    progress = { progress },
+                    modifier = Modifier.fillMaxWidth().height(4.dp),
+                    color = contentColor,
+                    trackColor = contentColor.copy(alpha = 0.2f)
+                )
+            }
         }
     }
 }

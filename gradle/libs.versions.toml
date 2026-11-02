@@ -54,6 +54,7 @@ tink = "1.23.0"
 
 # -- Background --
 work = "2.12.0"
+playAssetDelivery = "2.2.2"
 zstd-jni = "1.5.7-21"
 
 # -- Networking (Rest & GQL) --
@@ -207,10 +208,15 @@ androidx-security-crypto = { group = "androidx.security", name = "security-crypt
 
 # -- WorkManager --
 work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "work" }
+work-testing = { group = "androidx.work", name = "work-testing", version.ref = "work" }
+
+# -- Play Asset Delivery --
+play-asset-delivery-ktx = { group = "com.google.android.play", name = "asset-delivery-ktx", version.ref = "playAssetDelivery" }
 
 # -- Networking --
 squareup-okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 squareup-okhttp3-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
+squareup-mockwebserver = { group = "com.squareup.okhttp3", name = "mockwebserver", version.ref = "okhttp" }
 squareup-retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "squareupRetrofit" }
 squareup-retrofit-converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "squareupRetrofit" }
 apollo-graphql-runtime = { group = "com.apollographql.apollo", name = "apollo-runtime", version.ref = "apollo" }

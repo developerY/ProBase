@@ -29,11 +29,14 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
 
+import com.zoewave.probase.features.ai.local.data.LocalLiteRtLmEngineManager
+
 @HiltViewModel
 class AiConfigurationViewModel @Inject constructor(
     private val settings: AiConfigurationSettings,
     private val orchestrator: SmartCaptureOrchestrator,
     private val localAiEngine: LocalAiEngine,
+    private val liteRtLmEngineManager: LocalLiteRtLmEngineManager,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -82,6 +85,14 @@ class AiConfigurationViewModel @Inject constructor(
                                 "VERIFYING" -> {
                                     _localModelState.value = LocalModelState.VerifyingChecksum
                                 }
+                                "ERROR", "ERROR_STORAGE", "ERROR_CHECKSUM" -> {
+                                    val reason = info.progress.getString("reason") ?: "Unknown error"
+                                    _localModelState.value = LocalModelState.Error(reason, true)
+                                }
+                                else -> {
+                                    // If no specific state key is present yet, treat as starting
+                                    _localModelState.value = LocalModelState.Downloading(0L, 0L, 0)
+                                }
                             }
                         }
                         WorkInfo.State.SUCCEEDED -> {
@@ -89,11 +100,20 @@ class AiConfigurationViewModel @Inject constructor(
                             _localModelState.value = LocalModelState.Ready(path, "1.0")
                         }
                         WorkInfo.State.FAILED -> {
-                            val reason = info.outputData.getString("reason") ?: "Unknown error"
+                            val outputReason = info.outputData.getString("reason")
+                            val progressReason = info.progress.getString("reason")
+                            val reason = outputReason ?: progressReason ?: "Unknown error"
                             _localModelState.value = LocalModelState.Error(reason, true)
                         }
                         WorkInfo.State.ENQUEUED -> {
-                            // Can stay as downloading or not downloaded
+                            // If we were previously in an Error state due to a retry, we can surface that
+                            if (state == "ERROR" || state == "ERROR_STORAGE" || state == "ERROR_CHECKSUM") {
+                                val reason = info.progress.getString("reason") ?: "Enqueued for Retry"
+                                _localModelState.value = LocalModelState.Error(reason, true)
+                            } else if (_localModelState.value !is LocalModelState.Error) {
+                                // Default to 0 progress while enqueued, unless we are already showing an error
+                                _localModelState.value = LocalModelState.Downloading(0L, 0L, 0)
+                            }
                         }
                         else -> {}
                     }
@@ -214,6 +234,7 @@ class AiConfigurationViewModel @Inject constructor(
                 startModelDownload()
             }
             is AiConfigurationEvent.OnDeleteModelClicked -> {
+                liteRtLmEngineManager.closeEngine() // Clean up before deleting the file
                 val targetFile = File(context.filesDir, "model.litertlm")
                 if (targetFile.exists()) {
                     targetFile.delete()

@@ -23,6 +23,8 @@ android {
     buildFeatures {
         buildConfig = true
     }
+    
+    assetPacks += setOf(":features:ai:model_pack")
 }
 
 dependencies {

@@ -21,10 +21,11 @@ import kotlinx.coroutines.withContext
 import java.util.concurrent.Executors
 import javax.inject.Inject
 import javax.inject.Singleton
+import dagger.hilt.android.qualifiers.ApplicationContext
 
 @Singleton
 class LocalLiteRtLmEngineManager @Inject constructor(
-    private val context: Context
+    @ApplicationContext private val context: Context
 ) : ComponentCallbacks2 {
 
     private val engineDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
@@ -49,7 +50,11 @@ class LocalLiteRtLmEngineManager @Inject constructor(
             engine = newEngine
 
             val samplerConfig = SamplerConfig(topK = 10, topP = 0.95, temperature = 0.8)
-            val convConfig = ConversationConfig(samplerConfig = samplerConfig)
+            // Fix: litert-lm 0.18.0 requires a non-empty system message to prevent Jinja chat template rendering crashes
+            val convConfig = ConversationConfig(
+                samplerConfig = samplerConfig,
+                systemInstruction = com.google.ai.edge.litertlm.Contents.of("You are a helpful AI assistant.")
+            )
             conversation = newEngine.createConversation(convConfig)
         } catch (e: Exception) {
             e.printStackTrace()

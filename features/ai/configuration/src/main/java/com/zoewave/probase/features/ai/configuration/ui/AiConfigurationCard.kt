@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
@@ -168,31 +170,44 @@ fun AiConfigurationCardContent(
                     Text(text = title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                     val isStage1Active = uiState.isApiKeySet && uiState.useByokKey
                     val isStage2Active = uiState.useLocalAi && uiState.isLocalAiAvailable
-                    val isStage3Active = uiState.useFirebaseVertexAi
-                    val isStage4Active = true // Authenticated automatically via Firebase project key
+                    val isStage3Active = uiState.useDownloadAi && uiState.localModelState is com.zoewave.probase.features.ai.local.data.LocalModelState.Ready
+                    val isStage4Active = uiState.useFirebaseVertexAi
+                    val isStage5Active = true // Authenticated automatically via Firebase project key
 
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
+                    @Composable
+                    fun FlowRowItem(isActive: Boolean, label: String, isLast: Boolean = false) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            PipelineStageIndicator(isActive = isActive, label = label)
+                            if (!isLast) {
+                                Spacer(modifier = Modifier.width(2.dp))
+                                Text("→", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        }
+                    }
+
+                    @OptIn(ExperimentalLayoutApi::class)
+                    FlowRow(
+                        modifier = Modifier.padding(top = 4.dp),
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        modifier = Modifier.padding(top = 4.dp)
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         // Stage 1: BYOK
-                        PipelineStageIndicator(isActive = isStage1Active, label = "BYOK")
-
-                        Text("→", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        FlowRowItem(isActive = isStage1Active, label = "BYOK")
 
                         // Stage 2: Local AI
-                        PipelineStageIndicator(isActive = isStage2Active, label = "Local AI")
+                        FlowRowItem(isActive = isStage2Active, label = "Local AI")
 
-                        Text("→", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        // Stage 3: Download AI
+                        FlowRowItem(isActive = isStage3Active, label = "Download AI")
 
-                        // Stage 3: Firebase
-                        PipelineStageIndicator(isActive = isStage3Active, label = "Firebase")
+                        // Stage 4: Firebase
+                        FlowRowItem(isActive = isStage4Active, label = "Firebase")
 
-                        Text("→", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-
-                        // Stage 4: Gemma
-                        PipelineStageIndicator(isActive = isStage4Active, label = "Gemma")
+                        // Stage 5: Gemma
+                        FlowRowItem(isActive = isStage5Active, label = "Gemma", isLast = true)
                     }
                 }
                 Icon(
@@ -284,10 +299,12 @@ fun AiConfigurationCardContent(
 
                     val badgeStatus = when (selectedPrimaryAi) {
                         "Download AI (Local Execution)" -> {
-                            when (uiState.localModelState) {
+                            when (val state = uiState.localModelState) {
                                 is com.zoewave.probase.features.ai.local.data.LocalModelState.Ready -> Pair("Downloaded", Color(0xFF4CAF50))
-                                is com.zoewave.probase.features.ai.local.data.LocalModelState.Downloading -> Pair("Downloading", Color(0xFF2196F3))
-                                else -> Pair("Download Ready", Color(0xFF4CAF50))
+                                is com.zoewave.probase.features.ai.local.data.LocalModelState.Downloading -> Pair("Downloading ${state.progressPercent}%", Color(0xFF2196F3))
+                                is com.zoewave.probase.features.ai.local.data.LocalModelState.VerifyingChecksum -> Pair("Verifying", Color(0xFF2196F3))
+                                is com.zoewave.probase.features.ai.local.data.LocalModelState.Error -> Pair("Download Error", MaterialTheme.colorScheme.error)
+                                else -> Pair("Not Downloaded", MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
                         "On-Device Local AI (Gemini Nano)" -> {
@@ -317,21 +334,33 @@ fun AiConfigurationCardContent(
                         },
                         trailingContent = {
                             if (badgeStatus != null) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(10.dp)
-                                            .background(color = badgeStatus.second, shape = CircleShape)
-                                    )
-                                    Text(
-                                        text = badgeStatus.first,
-                                        style = MaterialTheme.typography.labelSmall,
-                                        fontWeight = FontWeight.Bold,
-                                        color = badgeStatus.second
-                                    )
+                                Column(horizontalAlignment = Alignment.End) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(10.dp)
+                                                .background(color = badgeStatus.second, shape = CircleShape)
+                                        )
+                                        Text(
+                                            text = badgeStatus.first,
+                                            style = MaterialTheme.typography.labelSmall,
+                                            fontWeight = FontWeight.Bold,
+                                            color = badgeStatus.second
+                                        )
+                                    }
+                                    if (selectedPrimaryAi == "Download AI (Local Execution)" && uiState.localModelState is com.zoewave.probase.features.ai.local.data.LocalModelState.Downloading) {
+                                        val state = uiState.localModelState
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        LinearProgressIndicator(
+                                            progress = { state.progressPercent / 100f },
+                                            modifier = Modifier.width(80.dp).height(4.dp),
+                                            color = badgeStatus.second,
+                                            trackColor = badgeStatus.second.copy(alpha = 0.2f)
+                                        )
+                                    }
                                 }
                             }
                         }

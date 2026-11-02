@@ -93,6 +93,7 @@ include(":features:ai:local")
 include(":features:ai:firebase")
 include(":features:ai:core")
 include(":features:ai:configuration")
+include(":features:ai:model_pack")
 
 
 include(":applications:ashbike:apps:wear:features:home")

@@ -84,6 +84,8 @@ android {
             }
         }
     }
+    
+    assetPacks += setOf(":features:ai:model_pack")
 }
 
 /* ✅ 7. Secrets Plugin Config

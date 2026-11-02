@@ -17,12 +17,21 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
+import androidx.work.WorkManager
+import androidx.work.WorkInfo
+import androidx.lifecycle.asFlow
+import java.io.File
+import com.zoewave.probase.features.ai.local.data.LocalModelState
+import com.zoewave.probase.features.ai.local.data.AiModelDownloadWorker
 
 enum class TestTargetProvider(val label: String) {
     LOCAL_NANO("1. Local Nano"),
     BYOK("2. BYOK Cloud"),
-    FIREBASE_AI("3. Firebase AI"),
-    GEMMA_4("4. Gemma 4 Cloud"),
+    DOWNLOAD_AI("3. Download AI"),
+    FIREBASE_AI("4. Firebase AI"),
+    GEMMA_4("5. Gemma 4 Cloud"),
     AUTO("Auto Router")
 }
 
@@ -49,12 +58,14 @@ data class AiDebugUiState(
     val isByokEnabled: Boolean = false,
     val isByokKeySet: Boolean = false,
     val isLocalAiEnabled: Boolean = false,
+    val isDownloadAiEnabled: Boolean = false,
     val isFirebaseEnabled: Boolean = true,
     val isGemmaEnabled: Boolean = false,
     val isRunningTest: Boolean = false,
     val diagnosticSteps: List<DiagnosticStep> = emptyList(),
     val recentAuditLogs: List<String> = emptyList(),
-    val testRunOutput: String? = null
+    val testRunOutput: String? = null,
+    val localModelState: LocalModelState = LocalModelState.NotDownloaded
 )
 
 @HiltViewModel
@@ -62,15 +73,67 @@ class AiDebugViewModel @Inject constructor(
     private val aiSettings: AiConfigurationSettings,
     private val byokProvider: ByokAiProvider,
     private val localProvider: LocalNanoAiProvider,
+    private val downloadProvider: com.zoewave.probase.features.ai.local.data.LocalDownloadAiProvider,
     private val firebaseProvider: FirebaseAiProvider,
     private val gemmaProvider: GemmaRestFallbackProvider,
-    private val appDiagnosticDelegate: AppDiagnosticDelegate
+    private val appDiagnosticDelegate: AppDiagnosticDelegate,
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
 
     private val _selectedTarget = MutableStateFlow(TestTargetProvider.AUTO)
     private val _isTesting = MutableStateFlow(false)
     private val _testOutput = MutableStateFlow<String?>(null)
     private val _diagnosticSteps = MutableStateFlow(appDiagnosticDelegate.getInitialSteps())
+    private val _localModelState = MutableStateFlow<LocalModelState>(LocalModelState.NotDownloaded)
+
+    init {
+        checkLocalModelExistenceOnStart()
+        observeDownloadWork()
+    }
+
+    private fun checkLocalModelExistenceOnStart() {
+        val file = File(context.filesDir, "model.litertlm")
+        if (file.exists()) {
+            _localModelState.value = LocalModelState.Ready(file.absolutePath, "1.0")
+        } else {
+            _localModelState.value = LocalModelState.NotDownloaded
+        }
+    }
+    
+    private fun observeDownloadWork() {
+        viewModelScope.launch {
+            WorkManager.getInstance(context).getWorkInfosForUniqueWorkLiveData("ai_model_download")
+                .asFlow()
+                .collect { workInfos ->
+                    val info = workInfos.firstOrNull() ?: return@collect
+                    val state = info.progress.getString(AiModelDownloadWorker.STATE_KEY)
+                    when (info.state) {
+                        WorkInfo.State.RUNNING -> {
+                            when (state) {
+                                "DOWNLOADING" -> {
+                                    val downloaded = info.progress.getLong(AiModelDownloadWorker.BYTES_DOWNLOADED_KEY, 0L)
+                                    val total = info.progress.getLong(AiModelDownloadWorker.TOTAL_BYTES_KEY, 0L)
+                                    val pct = info.progress.getInt(AiModelDownloadWorker.PROGRESS_KEY, 0)
+                                    _localModelState.value = LocalModelState.Downloading(downloaded, total, pct)
+                                }
+                                "VERIFYING" -> {
+                                    _localModelState.value = LocalModelState.VerifyingChecksum
+                                }
+                            }
+                        }
+                        WorkInfo.State.SUCCEEDED -> {
+                            val path = info.outputData.getString("path") ?: ""
+                            _localModelState.value = LocalModelState.Ready(path, "1.0")
+                        }
+                        WorkInfo.State.FAILED -> {
+                            val reason = info.outputData.getString("reason") ?: "Unknown error"
+                            _localModelState.value = LocalModelState.Error(reason, true)
+                        }
+                        else -> {}
+                    }
+                }
+        }
+    }
 
     val uiState: StateFlow<AiDebugUiState> = combine(
         aiSettings.isAiEnabledFlow,
@@ -79,10 +142,12 @@ class AiDebugViewModel @Inject constructor(
         aiSettings.useByokKey,
         aiSettings.useLocalAi,
         aiSettings.useFirebaseVertexAi,
+        aiSettings.useDownloadAi,
         _selectedTarget,
         _isTesting,
         _diagnosticSteps,
-        _testOutput
+        _testOutput,
+        _localModelState
     ) { args ->
         val isAiEnabled = args[0] as Boolean
         val aiModel = args[1] as String
@@ -90,14 +155,17 @@ class AiDebugViewModel @Inject constructor(
         val useByok = args[3] as Boolean
         val useLocal = args[4] as Boolean
         val useFirebase = args[5] as Boolean
-        val selectedTarget = args[6] as TestTargetProvider
-        val isTesting = args[7] as Boolean
+        val useDownloadAi = args[6] as Boolean
+        val selectedTarget = args[7] as TestTargetProvider
+        val isTesting = args[8] as Boolean
         @Suppress("UNCHECKED_CAST")
-        val steps = args[8] as List<DiagnosticStep>
-        val testOutput = args[9] as String?
+        val steps = args[9] as List<DiagnosticStep>
+        val testOutput = args[10] as String?
+        val localModelState = args[11] as LocalModelState
 
         val activeProviderLabel = when {
             useLocal -> "On-Device Local AI (Gemini Nano)"
+            useDownloadAi -> "Download AI (Local Execution)"
             useByok -> "BYOK Cloud AI ($aiModel)"
             useFirebase -> "Firebase AI Logic ($aiModel)"
             else -> "Gemma 4 Cloud (Free Tier)"
@@ -110,12 +178,14 @@ class AiDebugViewModel @Inject constructor(
             isByokEnabled = useByok,
             isByokKeySet = isKeySet,
             isLocalAiEnabled = useLocal,
+            isDownloadAiEnabled = useDownloadAi,
             isFirebaseEnabled = useFirebase,
-            isGemmaEnabled = !useByok && !useLocal && !useFirebase,
+            isGemmaEnabled = !useByok && !useLocal && !useDownloadAi && !useFirebase,
             isRunningTest = isTesting,
             diagnosticSteps = steps,
             recentAuditLogs = appDiagnosticDelegate.getAuditLogs(),
-            testRunOutput = testOutput
+            testRunOutput = testOutput,
+            localModelState = localModelState
         )
     }.stateIn(
         scope = viewModelScope,
@@ -178,10 +248,11 @@ class AiDebugViewModel @Inject constructor(
             _testOutput.value = null
             _diagnosticSteps.value = appDiagnosticDelegate.getInitialSteps()
             
-            // Loop through all 4 providers
+            // Loop through all 5 providers
             val targets = listOf(
                 TestTargetProvider.LOCAL_NANO,
                 TestTargetProvider.BYOK,
+                TestTargetProvider.DOWNLOAD_AI,
                 TestTargetProvider.FIREBASE_AI,
                 TestTargetProvider.GEMMA_4
             )
@@ -244,14 +315,17 @@ class AiDebugViewModel @Inject constructor(
         return when (target) {
             TestTargetProvider.LOCAL_NANO -> localProvider
             TestTargetProvider.BYOK -> byokProvider
+            TestTargetProvider.DOWNLOAD_AI -> downloadProvider
             TestTargetProvider.FIREBASE_AI -> firebaseProvider
             TestTargetProvider.GEMMA_4 -> gemmaProvider
             TestTargetProvider.AUTO -> {
                 val useLocal = aiSettings.useLocalAi.firstOrNull() ?: false
+                val useDownloadAi = aiSettings.useDownloadAi.firstOrNull() ?: false
                 val useByok = aiSettings.useByokKey.firstOrNull() ?: false
                 val useFirebase = aiSettings.useFirebaseVertexAi.firstOrNull() ?: false
                 when {
                     useLocal -> localProvider
+                    useDownloadAi -> downloadProvider
                     useByok -> byokProvider
                     useFirebase -> firebaseProvider
                     else -> gemmaProvider

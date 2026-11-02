@@ -38,6 +38,8 @@ android {
             }
         }
     }
+
+    assetPacks += setOf(":features:ai:model_pack")
 }
 
 dependencies {
