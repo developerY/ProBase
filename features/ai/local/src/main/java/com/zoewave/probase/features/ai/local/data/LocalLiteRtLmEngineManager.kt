@@ -50,7 +50,11 @@ class LocalLiteRtLmEngineManager @Inject constructor(
             engine = newEngine
 
             val samplerConfig = SamplerConfig(topK = 10, topP = 0.95, temperature = 0.8)
-            val convConfig = ConversationConfig(samplerConfig = samplerConfig)
+            // Fix: litert-lm 0.18.0 requires a non-empty system message to prevent Jinja chat template rendering crashes
+            val convConfig = ConversationConfig(
+                samplerConfig = samplerConfig,
+                systemInstruction = com.google.ai.edge.litertlm.Contents.of("You are a helpful AI assistant.")
+            )
             conversation = newEngine.createConversation(convConfig)
         } catch (e: Exception) {
             e.printStackTrace()
