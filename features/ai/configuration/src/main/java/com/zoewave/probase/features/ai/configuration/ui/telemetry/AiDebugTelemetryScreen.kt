@@ -289,12 +289,21 @@ fun AiDebugTelemetryScreen(
                                 shape = RoundedCornerShape(8.dp),
                                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
                             ) {
+                                val formattedJson = try {
+                                    val jsonElement = kotlinx.serialization.json.Json.parseToJsonElement(output)
+                                    val json = kotlinx.serialization.json.Json { prettyPrint = true }
+                                    json.encodeToString(kotlinx.serialization.json.JsonElement.serializer(), jsonElement)
+                                } catch (e: Exception) {
+                                    output // Fallback to raw string if it's not valid JSON
+                                }
+                                
                                 Text(
-                                    text = output,
+                                    text = formattedJson,
                                     modifier = Modifier.padding(12.dp),
                                     fontFamily = FontFamily.Monospace,
-                                    fontSize = 11.sp,
-                                    color = MaterialTheme.colorScheme.onSurface
+                                    fontSize = 12.sp,
+                                    lineHeight = 16.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                         }

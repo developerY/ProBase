@@ -218,13 +218,17 @@ class StyleSimulatorViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
+            // Set initial state
+            _activeAiProvider.value = capabilityRouter.getActiveProviderName()
+            
             // Re-evaluate active AI provider whenever relevant configuration settings change
             kotlinx.coroutines.flow.combine(
                 settings.isAiEnabledFlow,
+                settings.useLocalAi,
                 settings.useByokKey,
                 settings.isGeminiApiKeySetFlow,
                 settings.useFirebaseVertexAi
-            ) { _, _, _, _ -> true }.collect {
+            ) { _, _, _, _, _ -> true }.collect {
                 _activeAiProvider.value = capabilityRouter.getActiveProviderName()
             }
         }

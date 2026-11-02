@@ -18,13 +18,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import android.content.Context
-import dagger.hilt.android.qualifiers.ApplicationContext
-import androidx.work.WorkManager
-import androidx.work.WorkInfo
-import androidx.lifecycle.asFlow
-import java.io.File
+import com.zoewave.probase.features.ai.local.data.LocalModelAssetManager
 import com.zoewave.probase.features.ai.local.data.LocalModelState
-import com.zoewave.probase.features.ai.local.data.AiModelDownloadWorker
 
 enum class TestTargetProvider(val label: String) {
     LOCAL_NANO("1. Local Nano"),
@@ -77,63 +72,13 @@ class AiDebugViewModel @Inject constructor(
     private val firebaseProvider: FirebaseAiProvider,
     private val gemmaProvider: GemmaRestFallbackProvider,
     private val appDiagnosticDelegate: AppDiagnosticDelegate,
-    @ApplicationContext private val context: Context
+    private val localModelAssetManager: LocalModelAssetManager
 ) : ViewModel() {
 
     private val _selectedTarget = MutableStateFlow(TestTargetProvider.AUTO)
     private val _isTesting = MutableStateFlow(false)
     private val _testOutput = MutableStateFlow<String?>(null)
     private val _diagnosticSteps = MutableStateFlow(appDiagnosticDelegate.getInitialSteps())
-    private val _localModelState = MutableStateFlow<LocalModelState>(LocalModelState.NotDownloaded)
-
-    init {
-        checkLocalModelExistenceOnStart()
-        observeDownloadWork()
-    }
-
-    private fun checkLocalModelExistenceOnStart() {
-        val file = File(context.filesDir, "model.litertlm")
-        if (file.exists()) {
-            _localModelState.value = LocalModelState.Ready(file.absolutePath, "1.0")
-        } else {
-            _localModelState.value = LocalModelState.NotDownloaded
-        }
-    }
-    
-    private fun observeDownloadWork() {
-        viewModelScope.launch {
-            WorkManager.getInstance(context).getWorkInfosForUniqueWorkLiveData("ai_model_download")
-                .asFlow()
-                .collect { workInfos ->
-                    val info = workInfos.firstOrNull() ?: return@collect
-                    val state = info.progress.getString(AiModelDownloadWorker.STATE_KEY)
-                    when (info.state) {
-                        WorkInfo.State.RUNNING -> {
-                            when (state) {
-                                "DOWNLOADING" -> {
-                                    val downloaded = info.progress.getLong(AiModelDownloadWorker.BYTES_DOWNLOADED_KEY, 0L)
-                                    val total = info.progress.getLong(AiModelDownloadWorker.TOTAL_BYTES_KEY, 0L)
-                                    val pct = info.progress.getInt(AiModelDownloadWorker.PROGRESS_KEY, 0)
-                                    _localModelState.value = LocalModelState.Downloading(downloaded, total, pct)
-                                }
-                                "VERIFYING" -> {
-                                    _localModelState.value = LocalModelState.VerifyingChecksum
-                                }
-                            }
-                        }
-                        WorkInfo.State.SUCCEEDED -> {
-                            val path = info.outputData.getString("path") ?: ""
-                            _localModelState.value = LocalModelState.Ready(path, "1.0")
-                        }
-                        WorkInfo.State.FAILED -> {
-                            val reason = info.outputData.getString("reason") ?: "Unknown error"
-                            _localModelState.value = LocalModelState.Error(reason, true)
-                        }
-                        else -> {}
-                    }
-                }
-        }
-    }
 
     val uiState: StateFlow<AiDebugUiState> = combine(
         aiSettings.isAiEnabledFlow,
@@ -147,7 +92,7 @@ class AiDebugViewModel @Inject constructor(
         _isTesting,
         _diagnosticSteps,
         _testOutput,
-        _localModelState
+        localModelAssetManager.localModelState
     ) { args ->
         val isAiEnabled = args[0] as Boolean
         val aiModel = args[1] as String
