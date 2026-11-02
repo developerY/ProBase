@@ -54,6 +54,7 @@ tink = "1.23.0"
 
 # -- Background --
 work = "2.12.0"
+playAssetDelivery = "2.2.2"
 zstd-jni = "1.5.7-21"
 
 # -- Networking (Rest & GQL) --
@@ -208,6 +209,9 @@ androidx-security-crypto = { group = "androidx.security", name = "security-crypt
 # -- WorkManager --
 work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "work" }
 work-testing = { group = "androidx.work", name = "work-testing", version.ref = "work" }
+
+# -- Play Asset Delivery --
+play-asset-delivery-ktx = { group = "com.google.android.play", name = "asset-delivery-ktx", version.ref = "playAssetDelivery" }
 
 # -- Networking --
 squareup-okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }

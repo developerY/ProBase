@@ -11,6 +11,8 @@ android {
         versionCode = 1
         versionName = "1.0"
     }
+    
+    assetPacks += setOf(":features:ai:model_pack")
 }
 
 dependencies {

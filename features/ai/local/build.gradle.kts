@@ -32,9 +32,9 @@ dependencies {
     // ML Kit GenAI Prompt (Required for existing LocalAiEngine.kt)
     implementation(libs.mlkit.genai.prompt)
     
-    // LiteRT-LM & WorkManager for Download AI
+    // LiteRT-LM & Play Asset Delivery for Download AI
     implementation("com.google.ai.edge.litertlm:litertlm-android:0.18.0")
-    implementation(libs.work.runtime.ktx)
+    implementation(libs.play.asset.delivery.ktx)
     
     // Coroutines & Additional Compose basics (UI, Material3, BOM are handled by plugin)
     implementation(libs.kotlinx.coroutines.android)
@@ -47,7 +47,6 @@ dependencies {
     testImplementation(libs.mockk)
     testImplementation(libs.truth)
     testImplementation(libs.kotlinx.coroutines.test)
-    testImplementation(libs.work.testing)
     testImplementation(libs.squareup.mockwebserver)
     testImplementation("androidx.test:core:1.5.0")
     testImplementation("androidx.test.ext:junit:1.1.5")
