@@ -107,8 +107,10 @@ fun BlueprintDetailContent(
 
                 rationale?.let {
                     Spacer(Modifier.height(16.dp))
+                    // Clean up internal AI IDs like (w_32), (c_eye_01), w_37
+                    val cleanText = it.replace(Regex("\\s*\\(?[wc]_[a-zA-Z0-9_]+\\)?"), "")
                     Text(
-                        text = it,
+                        text = cleanText,
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.Black.copy(alpha = 0.7f),
                         lineHeight = 22.sp
