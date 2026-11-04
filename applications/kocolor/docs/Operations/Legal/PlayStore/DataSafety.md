@@ -105,7 +105,7 @@ KoColor integrates with **Google Health Connect** to synchronize local bio-marke
 
 | Play Console Health Feature Category | Selection Status | Data Types Read via Health Connect API | Reason / Justification |
 | :--- | :--- | :--- | :--- |
-| **Activity and fitness** | **CHECK THIS BOX** | Steps, distance, active calories, exercise sessions, heart rate | Calculates physical activity and vital bio-marker correlations for skin/style insights. |
+| **Activity and fitness** | **CHECK THIS BOX** | Steps, distance, active calories, exercise sessions | Calculates physical activity and vital bio-marker correlations for skin/style insights. |
 | **Nutrition and weight management** | **CHECK THIS BOX** | Hydration records, weight metrics, daily fluid intake goals | Calibrates daily hydration targets and skin moisture defense. |
 | **Period tracking** | **UNCHECK** | N/A | Not used / Stripped from manifest. |
 | **Sleep management** | **UNCHECK** | N/A | **Not used / Stripped from manifest.** |

@@ -47,7 +47,7 @@ Whether you are curating your daily outfit, building a 7-day style playlist, dig
 
 💧 WELLNESS & BIO-ELEMENT CORRELATION
 • Daily Hydration Goals: Set personalized water volume targets (e.g., 2.5L daily) with progress tracking.
-• Google Health Connect: Optionally sync steps, active calories, and heart rate bio-markers to correlate physical activity with skin moisture defense.
+• Google Health Connect: Optionally sync steps and active calories to correlate physical activity with skin moisture defense.
 
 ==================================================
 🔒 PRIVACY-FIRST & ON-DEVICE PRIVACY

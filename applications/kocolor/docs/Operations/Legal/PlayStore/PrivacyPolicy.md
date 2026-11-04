@@ -37,7 +37,7 @@ To provide core fashion, skin-defense, and wellness correlation features, KoColo
 ---
 
 ### 4. Analytics, Performance & Tracking
-* **Google Analytics & Advertising ID (`AD_ID`):** KoColor uses **Google Analytics for Firebase** and **Firebase Crashlytics** for anonymized usage metrics, performance monitoring, and app stability. Google Analytics utilizes the Advertising ID (`AD_ID`) and anonymous App Instance ID to measure install attribution, app usage trends, and crash diagnostics.
+* **Google Analytics & Crashlytics:** KoColor uses **Google Analytics for Firebase** and **Firebase Crashlytics** for anonymized usage metrics, performance monitoring, and app stability. Google Analytics utilizes an anonymous App Instance ID to measure install attribution, app usage trends, and crash diagnostics. **KoColor does not request or collect the Advertising ID (`AD_ID`).**
 * **No Third-Party Ads:** We do not display third-party advertisements or sell user data to data brokers.
 
 ---
