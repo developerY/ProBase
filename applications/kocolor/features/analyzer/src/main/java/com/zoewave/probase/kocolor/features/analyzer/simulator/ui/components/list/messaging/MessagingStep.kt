@@ -287,7 +287,6 @@ fun MessagingStep(
                     }
                     
                     Surface(
-                        onClick = { navTo(KoColorRoute.Settings(null)) },
                         shape = RoundedCornerShape(32.dp),
                         color = Color.White,
                         border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f)),
@@ -344,21 +343,7 @@ fun MessagingStep(
                                 }
                             }
 
-                            // Circular navigation icon container
-                            Surface(
-                                shape = CircleShape,
-                                color = Color.Black.copy(alpha = 0.04f),
-                                modifier = Modifier.size(28.dp)
-                            ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Icon(
-                                        imageVector = androidx.compose.material.icons.Icons.AutoMirrored.Filled.ArrowForwardIos,
-                                        contentDescription = "Settings",
-                                        modifier = Modifier.size(12.dp),
-                                        tint = Color.DarkGray
-                                    )
-                                }
-                            }
+
                         }
                     }
                     
@@ -381,7 +366,24 @@ fun MessagingStep(
                             horizontalArrangement = Arrangement.Center,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Spacer(modifier = Modifier.width(32.dp))
+                            // Interactive navigation icon moved to the left of the main call-to-action
+                            Surface(
+                                shape = CircleShape,
+                                color = Color.White.copy(alpha = 0.15f),
+                                modifier = Modifier.size(32.dp),
+                                onClick = { navTo(KoColorRoute.Settings(null)) }
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        imageVector = androidx.compose.material.icons.Icons.AutoMirrored.Filled.ArrowForwardIos,
+                                        contentDescription = "AI Configuration Settings",
+                                        modifier = Modifier.size(12.dp),
+                                        tint = Color.White
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.width(12.dp))
+                            
                             Text(
                                 text = stringResource(R.string.applications_kocolor_features_analyzer_simulator_begin_action), 
                                 style = MaterialTheme.typography.titleMedium, 
