@@ -16,7 +16,13 @@ pub fn build_canonical_index(raw_assets_dir: &str) -> HashMap<String, KpssSource
 
         // We only care about parsing the core JSON authoring files.
         // Ignore .notes.json files as they are handled by the distributor.
-        if path.is_file() && file_name.ends_with(".json") && !file_name.ends_with(".notes.json") {
+        // Ignore .meta.json files: they are enrichment artifacts written by the
+        // prog_rs tagging pipeline into this same input tree, not KPSS sources.
+        if path.is_file()
+            && file_name.ends_with(".json")
+            && !file_name.ends_with(".notes.json")
+            && !file_name.ends_with(".meta.json")
+        {
             let file_content = fs::read_to_string(path)
                 .unwrap_or_else(|err| panic!("❌ Failed to read file {:?}: {}", path, err));
 

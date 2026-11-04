@@ -2,7 +2,6 @@ use anyhow::{anyhow, Context, Result};
 use chrono::Utc;
 use clap::Parser;
 use ed25519_dalek::{Signer, SigningKey};
-use rand::rngs::OsRng;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Map, Value};
 use sha2::{Digest, Sha256};
@@ -1271,6 +1270,11 @@ async fn main() -> Result<()> {
     let api_key = env::var("GEMINI_API_KEY")
         .context("ERROR: GEMINI_API_KEY environment variable is required.")?;
 
+    // Root of Trust: the Ed25519 signing seed MUST come from the environment.
+    // Never hardcode or commit this value — whoever holds it can forge any catalog bundle.
+    // Generate once per environment (`openssl rand -hex 32`) and store it in a secret manager.
+    // Fail closed: an ephemeral fallback key would produce bundles the Android client
+    // rejects (it pins the root public key), so refuse to run instead of signing garbage.
     let signing_key = match env::var("KOCOLOR_SIGNING_SEED_HEX") {
         Ok(seed_hex) if !seed_hex.trim().is_empty() => {
             let bytes = hex::decode(seed_hex.trim())
@@ -1280,7 +1284,12 @@ async fn main() -> Result<()> {
                 .map_err(|_| anyhow!("KOCOLOR_SIGNING_SEED_HEX must be 32 bytes (64 hex chars)"))?;
             SigningKey::from_bytes(&seed)
         }
-        _ => SigningKey::generate(&mut OsRng),
+        _ => {
+            return Err(anyhow!(
+                "KOCOLOR_SIGNING_SEED_HEX is not set. Refusing to sign with a fallback key. \
+                 Export the 64-hex-char Ed25519 seed for this environment and retry."
+            ));
+        }
     };
 
     fs::create_dir_all(&args.output_dir)?;
@@ -1438,11 +1447,19 @@ async fn main() -> Result<()> {
         )?);
     }
 
+    // Key id is stamped into the manifest so clients and operators can see which
+    // root key signed a bundle. Production releases must set KOCOLOR_KEY_ID
+    // (e.g. "atelier-prod-01"); the dev default exists only for local iteration.
+    let key_id = env::var("KOCOLOR_KEY_ID").unwrap_or_else(|_| {
+        eprintln!("WARNING: KOCOLOR_KEY_ID not set; stamping manifest with dev key id \"atelier-dev-01\".");
+        "atelier-dev-01".to_string()
+    });
+
     let manifest_data = json!({
         "manifest_version": 1,
         "generated_at": Utc::now().to_rfc3339(),
         "compiler_version": "1.0.0",
-        "key_id": "atelier-dev-01",
+        "key_id": key_id,
         "packs": packs_meta
     });
 

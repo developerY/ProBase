@@ -4,6 +4,13 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Fail fast BEFORE wiping dist/: the optimizer signs every bundle and refuses to
+# run without a seed. Get the seed from your secret manager, never from the repo.
+# See docs/Guides/Deployment_Pipeline_Manual.md for the rotation procedure.
+export KOCOLOR_SIGNING_SEED_HEX="${KOCOLOR_SIGNING_SEED_HEX:?Please export KOCOLOR_SIGNING_SEED_HEX (64 hex chars)}"
+# Optional: stamps key_id into manifest.json. Production must set e.g. "atelier-prod-01".
+export KOCOLOR_KEY_ID="${KOCOLOR_KEY_ID:-atelier-dev-01}"
+
 echo "========================================"
 echo " KoColor Sovereign Distribution Pipeline"
 echo "========================================"

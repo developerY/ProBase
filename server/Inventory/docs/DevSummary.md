@@ -71,7 +71,7 @@
 | **Phase 4** | **Deterministic Rule Promotion** | Maps `ProductType` to an anatomical `GarmentSlot` (`TOP`, `BOTTOM`, `OUTERWEAR`, `ONE_PIECE`, `FOOTWEAR`, `ACCESSORY`) and promotes verified construction/occasion rules to `RULE_DERIVED`. |
 | **Phase 5** | **Quality Gate & Quarantine** | Verifies every record has valid IDs, color telemetry, and trusted hard-filter facets. Writes `quality_report.json` and routes invalid items to `quarantine/`. |
 | **Phase 6** | **Serialization & Compression** | Sorts records by `itemId`, formats canonical JSON (RFC 8785), and compresses via `zstd -19` (omitting `--ultra` to keep Android `libzstd-jni` RAM windows $\le 64\text{ KB}$). |
-| **Phase 7** | **Hashing & Ed25519 Signing** | Computes `sha256` on compressed `.kpkg` bytes, signs each pack with `atelier-dev-01` (`ed25519`), and signs the outer `manifest.json` envelope. |
+| **Phase 7** | **Hashing & Ed25519 Signing** | Computes `sha256` on compressed `.kpkg` bytes, signs each pack with the `KOCOLOR_SIGNING_SEED_HEX` root key (`ed25519`, `key_id` from `KOCOLOR_KEY_ID`), and signs the outer `manifest.json` envelope. Both pipelines exit without signing if the seed is missing — there is no fallback key. |
 
 ---
 
