@@ -282,6 +282,7 @@ fun MessagingStep(
                         providerName.contains("Nano", ignoreCase = true) -> Triple(Color(0xFF2E7D32), "Local AI", "Gemini Nano On-Device") // Forest Green
                         providerName.contains("Firebase", ignoreCase = true) -> Triple(Color(0xFF1976D2), "Secure Cloud", "Firebase Vault Encrypted") // Ocean Blue
                         providerName.contains("BYOK", ignoreCase = true) -> Triple(Color(0xFF7E57C2), "Custom Key", "BYOK Cloud Execution") // Deep Purple
+                        providerName.contains("Gemma", ignoreCase = true) -> Triple(Color(0xFF00B0FF), "Gemma Cloud", "Keyless Fallback Proxy") // Bright Blue
                         else -> Triple(Color(0xFF5C6BC0), "Determining...", "Initializing Engine") // Soft Indigo
                     }
                     

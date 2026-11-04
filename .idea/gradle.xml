@@ -194,6 +194,7 @@
             <option value="$PROJECT_DIR$/features/ai/core" />
             <option value="$PROJECT_DIR$/features/ai/firebase" />
             <option value="$PROJECT_DIR$/features/ai/local" />
+            <option value="$PROJECT_DIR$/features/ai/model_pack" />
             <option value="$PROJECT_DIR$/features/ai/vision" />
             <option value="$PROJECT_DIR$/features/ble" />
             <option value="$PROJECT_DIR$/features/calendar" />
