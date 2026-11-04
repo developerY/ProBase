@@ -6,6 +6,7 @@ mod packager;
 mod enrichment;
 
 use rayon::prelude::*;
+use std::env;
 use std::fs;
 use std::path::Path;
 use std::time::Instant;
@@ -15,11 +16,23 @@ fn main() {
     println!("🚀 Starting KoColor Asset Engineering Pipeline (v1.0)...");
     let start_time = Instant::now();
 
-    // Secure Ed25519 keypair for the distribution pipeline
-    // In production, this would be loaded from a secure ENV variable or vault.
-    let private_key_hex = "dc1d99af3fb46499dfb365d75631746dff779aafa0646cddab2c15767c40735f";
-    let private_key_bytes = hex::decode(private_key_hex).expect("❌ Invalid private key hex");
-    let signing_key = SigningKey::from_bytes(&private_key_bytes.try_into().expect("❌ Invalid key length"));
+    // Root of Trust: the Ed25519 signing seed MUST come from the environment.
+    // Never hardcode or commit this value — whoever holds it can forge any catalog bundle.
+    // Generate once per environment (`openssl rand -hex 32`) and store it in a secret manager.
+    // This matches the KOCOLOR_SIGNING_SEED_HEX convention already used by utils/prog_rs.
+    let seed_hex = env::var("KOCOLOR_SIGNING_SEED_HEX").unwrap_or_default();
+    if seed_hex.trim().is_empty() {
+        eprintln!("❌ FATAL: KOCOLOR_SIGNING_SEED_HEX is not set. Refusing to sign with a fallback key.");
+        eprintln!("   Export the 64-hex-char Ed25519 seed for this environment and retry.");
+        std::process::exit(1);
+    }
+    let private_key_bytes =
+        hex::decode(seed_hex.trim()).expect("❌ Invalid hex in KOCOLOR_SIGNING_SEED_HEX");
+    let signing_key = SigningKey::from_bytes(
+        &private_key_bytes
+            .try_into()
+            .expect("❌ KOCOLOR_SIGNING_SEED_HEX must be 32 bytes (64 hex chars)"),
+    );
 
     println!("🚀 Starting KoColor Asset Engineering Pipeline (v1.0)...");
     println!("🔑 Root of Trust Keypair:");
@@ -64,11 +77,19 @@ fn main() {
     // --- PASS 4: GENERATE MASTER MANIFEST ---
     println!("\n--- PASS 4: GENERATE MASTER MANIFEST ---");
 
+    // Key id is stamped into the manifest so clients and operators can see which
+    // root key signed a bundle. Production releases must set KOCOLOR_KEY_ID
+    // (e.g. "atelier-prod-01"); the dev default exists only for local iteration.
+    let key_id = env::var("KOCOLOR_KEY_ID").unwrap_or_else(|_| {
+        eprintln!("⚠️  KOCOLOR_KEY_ID not set; stamping manifest with dev key id \"atelier-dev-01\".");
+        "atelier-dev-01".to_string()
+    });
+
     let manifest_data = models::PackManifestOutput {
         manifest_version: 1,
         generated_at: chrono::Utc::now().to_rfc3339(),
         compiler_version: env!("CARGO_PKG_VERSION").to_string(),
-        key_id: "atelier-dev-01".to_string(),
+        key_id,
         packs: manifest_records,
     };
 
