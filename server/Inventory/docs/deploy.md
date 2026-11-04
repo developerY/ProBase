@@ -75,4 +75,4 @@ cd server/Inventory/utils/prog_rs
    Confirm `cache-control: public, max-age=0, must-revalidate`.
 
 3. **Android Client Integration**:
-   Your Android app fetches `https://kocolor-cdn.pages.dev/inventory/dist/manifest.json` (or `https://cdn.kocolor.com/inventory/dist/manifest.json`), validates the `ed25519` signature against `key_id: "atelier-dev-01"`, decompresses `zstd`, and imports items into Room DB seamlessly.
+   Your Android app fetches `https://kocolor-cdn.pages.dev/inventory/dist/manifest.json` (or `https://cdn.kocolor.com/inventory/dist/manifest.json`), validates the `ed25519` signature against the pinned root public key (`SecurityConstants.kt`) and confirms the production `key_id` stamped by `KOCOLOR_KEY_ID`, decompresses `zstd`, and imports items into Room DB seamlessly. (The `atelier-dev-01` seed is burned — it was once committed to git — and must never sign a production catalog; see `Guides/Deployment_Pipeline_Manual.md` for the rotation procedure.)

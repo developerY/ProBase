@@ -1,0 +1,66 @@
+KoColor release review: not ready — 3 must-fix blockers
+
+I audited applications/kocolor against your own release gates (applications/kocolor/docs/PlayStore/DeployCheck.md and the deployment skill). The Oct 28 applications/kocolor/docs/PlayStore/DeployReport.md
+already said FAIL, and the underlying issues are still present, plus a few more I found. Good news: the deterministic engine, App Check wiring, CDN crypto design, and store-policy docs are in solid shape.
+
+Must fix before release
+
+1. Private signing key committed to git (critical).
+   The Ed25519 private key that signs all .kpkg catalog bundles is hardcoded in a tracked file: server/Inventory/package/kc-optimizer/src/main.rs:20. Anyone with repo access can forge bundles your app will
+   trust. Rotate the key, move it to a vault/env var, re-sign the catalog, and ship a production key_id instead of atelier-dev-01.
+   STATUS 2026-11-04: code fix landed — both pipelines (kc-optimizer, prog_rs) now read KOCOLOR_SIGNING_SEED_HEX from the environment and exit without
+   signing if it is missing (no ephemeral fallback); KOCOLOR_KEY_ID stamps the manifest; run.sh/runMe.sh fail fast; Deployment_Pipeline_Manual.md rewritten.
+   STILL PENDING: generate + store the production seed, update SecurityConstants.kt, re-sign, redeploy. The old atelier-dev-01 seed is burned.
+
+2. API keys and AI prompts leak to Logcat in release builds.
+   Six HTTP clients hardcode Level.BODY, including the OpenWeatherMap client whose appid key goes in the URL query string:
+   core/network/src/main/java/com/zoewave/probase/core/network/repository/weather/OpenFetchWeatherData.kt:82, plus ProductsDataModule, MakeupModule, ChemicalModule, ObfModule, and ColorModule. Separately,
+   features/ai/firebase/src/main/kotlin/com/zoewave/probase/features/ai/firebase/FirebaseAiClient.kt:286 logs full Gemini prompts and responses unconditionally, and nothing strips Log.d in release (no
+   assumenosideeffects in applications/kocolor/apps/mobile/proguard-rules.pro). Gate all of this behind BuildConfig.DEBUG.
+
+3. Store listing contradicts the manifest (policy risk).
+   The listing claims the AD_ID permission is "explicitly removed," but applications/kocolor/apps/mobile/src/main/AndroidManifest.xml:9 declares it. It also advertises heart-rate sync, but READ_HEART_RATE is
+   stripped via tools:node="remove". And Data Safety claims "all traffic HTTPS" while network_security_config.xml allows cleartext to makeup-api.herokuapp.com. Fix the listing or the manifest before
+   submission — reviewers check this.
+
+Should fix / confirm
+
+• No signingConfigs in KoColor's release build. Sibling apps (AshBike, PhotoDo) read RELEASE_STORE_FILE/RELEASE_KEY_ALIAS; applications/kocolor/apps/mobile/build.gradle.kts:42 has no signing block, so a
+CI-built AAB won't be properly signed. The release/ folder also holds a stale Oct 18 AAB (81 MB) with a 167 MB mapping.txt — rebuild fresh.
+• 16 KB page-size fix looks regressed. COMMIT_MESSAGE.txt says DataStore was pinned to 1.1.1 and zstd-jni to 1.5.6-3, but libs.versions.toml now has 1.2.1 / 1.5.7-21. Re-verify 16 KB compatibility before
+upload.
+• minSdk = 34 (Android 14+) is global in libs.versions.toml and drastically limits reach; the build-logic README says 23. Confirm this is intentional.
+• Empty screenshots folder (PlayStore/Screen/ has no files) — required for the listing.
+• Version 0.5-tag / code 7 — bump to a release version.
+• One uncommitted UI change in MessagingStep.kt (settings navigation rework) — commit or revert so the release build matches a clean tree.
+
+What passed
+
+┌─────────────────────────────────────────────────────────────────────┬────────┬────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ Check                                                               │ Status │ Evidence                                                                                                                   │
+├─────────────────────────────────────────────────────────────────────┼────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ R8 + symbols + targetSdk 37                                         │ PASS   │ build.gradle.kts:42-54, libs.versions.toml                                                                                 │
+├─────────────────────────────────────────────────────────────────────┼────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ App Check (Play Integrity in release)                               │ PASS   │ features/ai/firebase/src/main/kotlin/com/zoewave/probase/features/ai/firebase/AppCheckInitializer.kt:19                    │
+├─────────────────────────────────────────────────────────────────────┼────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ CDN verify-before-decompress (sha256 + Ed25519, zstd-19, size caps) │ PASS   │ StarterPackRepository.kt:99-193, packager.rs:21, deploy_cdn.sh:44-52                                                       │
+├─────────────────────────────────────────────────────────────────────┼────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ Provenance gating + preflight abort + cosmetic isolation            │ PASS   │ DeterministicCatalogEngine.kt, KoColorTaxonomy.kt:93-94                                                                    │
+├─────────────────────────────────────────────────────────────────────┼────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ Post-LLM validation wired into pipeline                             │ PASS   │ RecommendationValidator called from StyleSimulatorEngine.kt:204 (note: docs call it BlueprintValidator.validateAiSelection │
+│                                                                     │        │ — names don't match, code is what matters)                                                                                 │
+├─────────────────────────────────────────────────────────────────────┼────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ Git hygiene (dist ignored, secrets untracked)                       │ PASS   │ server/.gitignore, git ls-files clean                                                                                      │
+├─────────────────────────────────────────────────────────────────────┼────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ Health Connect manifest + justification                             │ MANUAL │ Manifest declares 5 data types, all stripped transitively; needs Play Console declaration + demo video                     │
+└─────────────────────────────────────────────────────────────────────┴────────┴────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+Suggested next steps
+
+1. Rotate the signing key and re-sign the catalog.
+2. Gate logging levels / AI I/O logs on debug builds.
+3. Reconcile listing vs. manifest, add screenshots, bump version, add the signing block.
+4. Run ./gradlew :applications:kocolor:data:testDebugUnitTest and lintRelease, then build a fresh AAB. (I couldn't execute Gradle here — the sandbox blocks the wrapper — so tests are unverified this
+   session despite good coverage across modules.)
+
+Want me to implement the fixes (logging gates, signing config, listing corrections), or hand this checklist to the team as-is?

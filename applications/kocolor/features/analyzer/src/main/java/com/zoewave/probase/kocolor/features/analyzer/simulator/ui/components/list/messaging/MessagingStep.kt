@@ -344,7 +344,7 @@ fun MessagingStep(
                                 }
                             }
 
-                            // Circular navigation icon container
+                            // Circular navigation icon container restored to top status badge
                             Surface(
                                 shape = CircleShape,
                                 color = Color.Black.copy(alpha = 0.04f),
@@ -382,7 +382,7 @@ fun MessagingStep(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Spacer(modifier = Modifier.width(32.dp))
-                            Text(
+                                                        Text(
                                 text = stringResource(R.string.applications_kocolor_features_analyzer_simulator_begin_action), 
                                 style = MaterialTheme.typography.titleMedium, 
                                 fontWeight = FontWeight.Bold, 

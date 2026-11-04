@@ -29,7 +29,7 @@ abstract class ProductsDataModule {
         @Singleton
         fun provideOpenProductsFactsApi(): OpenProductsFactsApi {
             val logging = HttpLoggingInterceptor().apply {
-                level = HttpLoggingInterceptor.Level.BODY
+                level = if (com.zoewave.probase.core.model.BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
             }
 
             val client = OkHttpClient.Builder()
