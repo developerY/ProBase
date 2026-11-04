@@ -39,7 +39,7 @@ Paste the prompt below into Android Studio’s **Agent Mode** chat window or sav
 > * Inspect `StarterPackRepo` and `KOCOLOR_CDN_BASE_URL` to confirm the client points to the active Cloudflare CDN endpoint (`[https://kocolor-cdn.pages.dev/v1/manifest.json](https://kocolor-cdn.pages.dev/v1/manifest.json)` or `[https://cdn.kocolor.com/inventory/dist/manifest.json](https://cdn.kocolor.com/inventory/dist/manifest.json)`) and cannot fall back to a stale `2026-08-20` manifest.
 >
 >
-> * Confirm `fetchVerifiedPackage` requests the current bundle IDs (`com.kocolor.pack.cosmetics.complete` and `com.kocolor.pack.fashion.complete`) and verifies both the `sha256` digest and `ed25519` signature against `key_id: "atelier-dev-01"` before decompressing via `libzstd-jni`.
+> * Confirm `fetchVerifiedPackage` requests the current bundle IDs (`com.kocolor.pack.cosmetics.complete` and `com.kocolor.pack.fashion.complete`) and verifies both the `sha256` digest and `ed25519` signature (root public key pinned in `SecurityConstants.kt`, production `key_id` stamped via `KOCOLOR_KEY_ID` — never the burned `atelier-dev-01` seed) before decompressing via `libzstd-jni`.
 >
 >
 > * Inspect `deploy_cdn.sh` and the catalog compiler configuration to verify:

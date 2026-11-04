@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
-    <domain-config cleartextTrafficPermitted="true">
-        <domain includeSubdomains="true">makeup-api.herokuapp.com</domain>
-    </domain-config>
+    <!-- Removed cleartextTrafficPermitted to ensure all network traffic must be HTTPS as declared in Play Console -->
 </network-security-config>

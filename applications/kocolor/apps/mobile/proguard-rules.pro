@@ -36,3 +36,10 @@
 -keep class com.google.crypto.tink.** { *; }
 -keep class * extends com.google.crypto.tink.KeyTypeManager { *; }
 -keep class * extends com.google.crypto.tink.PrimitiveWrapper { *; }
+
+# Strip Log.d and Log.v calls in production builds
+-assumenosideeffects class android.util.Log {
+    public static boolean isLoggable(java.lang.String, int);
+    public static int v(...);
+    public static int d(...);
+}
