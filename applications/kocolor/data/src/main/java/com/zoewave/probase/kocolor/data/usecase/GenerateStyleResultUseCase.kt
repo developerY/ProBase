@@ -68,8 +68,8 @@ class GenerateStyleResultUseCase @Inject constructor(
         cosmetics: List<CosmeticItem>,
         context: StyleRequestContext
     ): StyleResult = withContext(Dispatchers.Default) {
-        val blueprint = simulatorEngine.generateBlueprint(wardrobe, cosmetics, context)
-        val fashionistaScore = fashionistaEvaluator.evaluate(blueprint, context)
+        val result = simulatorEngine.generateBlueprint(wardrobe, cosmetics, context)
+        val blueprint = result.blueprint
 
         val selectedClothing = wardrobe.filter { item ->
             "w_${item.internalId}" in blueprint.selectedClothingIds || item.remoteId in blueprint.selectedClothingIds
@@ -78,16 +78,10 @@ class GenerateStyleResultUseCase @Inject constructor(
             "c_${item.internalId}" in blueprint.selectedCosmeticIds || item.remoteId in blueprint.selectedCosmeticIds
         }
 
-        val intentFulfillment = intentFulfillmentEvaluator.evaluate(
-            intentProfile = context.intentProfile,
-            selectedClothing = selectedClothing,
-            selectedCosmetics = selectedCosmetics
-        )
-
         StyleResult(
             blueprint = blueprint,
-            fashionistaScore = fashionistaScore,
-            intentFulfillment = intentFulfillment,
+            fashionistaScore = result.fashionistaScore,
+            intentFulfillment = result.intentFulfillment,
             selectedClothing = selectedClothing,
             selectedCosmetics = selectedCosmetics
         )
@@ -128,8 +122,10 @@ class GenerateStyleResultUseCase @Inject constructor(
         onPhaseChanged?.invoke(CreationPhase.ANCHOR_ESTABLISHED)
         onPhaseChanged?.invoke(CreationPhase.AI_GENERATING)
 
-        val blueprint = simulatorEngine.generateBlueprint(wardrobe, cosmetics, context)
-        val fashionistaScore = fashionistaEvaluator.evaluate(blueprint, context)
+        val result = simulatorEngine.generateBlueprint(wardrobe, cosmetics, context)
+        val blueprint = result.blueprint
+        val fashionistaScore = result.fashionistaScore
+        val intentFulfillment = result.intentFulfillment
 
         val selectedClothing = wardrobe.filter { item ->
             "w_${item.internalId}" in blueprint.selectedClothingIds || item.remoteId in blueprint.selectedClothingIds
@@ -138,21 +134,17 @@ class GenerateStyleResultUseCase @Inject constructor(
             "c_${item.internalId}" in blueprint.selectedCosmeticIds || item.remoteId in blueprint.selectedCosmeticIds
         }
 
-        val intentFulfillment = intentFulfillmentEvaluator.evaluate(
-            intentProfile = context.intentProfile,
-            selectedClothing = selectedClothing,
-            selectedCosmetics = selectedCosmetics
-        )
-
+        // P1.3 Use real validation result from AI execution pipeline
+        val report = result.validation
         val validationResult = RecommendationValidationResult(
-            isValid = true,
+            isValid = report.isValid,
             validationItems = listOf(
-                ValidationItemModel("Mandatory anchor included", true),
-                ValidationItemModel("Top / Bottom / Shoes composition", true),
-                ValidationItemModel("Eye / Cheek / Lip / Nail roles", true),
-                ValidationItemModel("All selected IDs grounded", true),
-                ValidationItemModel("Forbidden PREP items excluded", true),
-                ValidationItemModel("Rationale references selected items only", true)
+                ValidationItemModel("Mandatory anchor included", report.isAnchorIncluded),
+                ValidationItemModel("Top / Bottom / Shoes composition", report.hasRequiredSlots),
+                ValidationItemModel("Eye / Cheek / Lip / Nail roles", report.hasRequiredRoles),
+                ValidationItemModel("All selected IDs grounded", report.areAllIdsGrounded),
+                ValidationItemModel("Forbidden PREP items excluded", report.noForbiddenItems),
+                ValidationItemModel("Rationale references selected items only", report.rationaleClean)
             )
         )
 

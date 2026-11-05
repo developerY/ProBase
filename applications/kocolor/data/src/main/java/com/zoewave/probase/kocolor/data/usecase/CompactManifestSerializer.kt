@@ -47,8 +47,8 @@ class CompactManifestSerializer @Inject constructor() {
             val name = item.name
             val hex = item.colorHex
             val temperature = if (item.temperature != Temperature.UNKNOWN) item.temperature.name else ColorQuantizer.determineTemperature(item.colorHex).name
-            val finish = if (item.finish != Finish.UNKNOWN) item.finish.name else "SATIN"
-            val brand = item.brand.ifBlank { "KoColor" }
+            val finish = if (item.finish != Finish.UNKNOWN) item.finish.name else "UNKNOWN"
+            val brand = item.brand.ifBlank { "UNKNOWN" }
 
             when (detailLevel) {
                 SerializationDetailLevel.MINIMAL -> "[$id|$category|$name|$hex]"

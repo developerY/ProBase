@@ -32,7 +32,7 @@ Whether you are curating your daily outfit, building a 7-day style playlist, dig
 
 📊 THE FASHIONISTA SCORE ENGINE
 • Standardized Aesthetic Evaluation: Get an instant, reference-calibrated 0–100 Fashionista Score for any outfit combination.
-• 6-Axis Aesthetic Radar: Inspect your outfit’s shape across Composition, Color Harmony, Silhouette, Texture, Visual Hierarchy, and Presentation Integration.
+• 3-Axis Style Radar: Inspect your outfit’s shape across Color Harmony, Silhouette, and Contrast — every axis scored live by the on-device engine.
 • Math Decomposition: View a transparent waterfall chart auditing base evidence, interaction synergies, and unresolved conflict penalties.
 
 👗 INTERACTIVE STYLE SIMULATOR & PLAYLISTS

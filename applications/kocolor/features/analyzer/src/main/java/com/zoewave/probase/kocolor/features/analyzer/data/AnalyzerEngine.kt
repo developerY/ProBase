@@ -1,20 +1,33 @@
 package com.zoewave.probase.kocolor.features.analyzer.data
 
 import android.graphics.Bitmap
-import com.google.firebase.Firebase
-import com.google.firebase.ai.ai
-import com.google.firebase.ai.type.GenerativeBackend
-import com.google.firebase.ai.type.content
-import com.google.firebase.ai.type.generationConfig
+import com.zoewave.probase.features.ai.core.AiProvider
+import com.zoewave.probase.features.ai.core.AiInput
+import com.zoewave.probase.kocolor.data.usecase.CapabilityRouter
+import com.zoewave.probase.kocolor.data.usecase.ColorTelemetry
+import com.zoewave.probase.kocolor.fashionista.math.ItaCalculator
 import com.zoewave.probase.core.model.ritual.*
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
-class AnalyzerEngine @Inject constructor() {
+class AnalyzerEngine @Inject constructor(
+    private val capabilityRouter: CapabilityRouter,
+    private val itaCalculator: ItaCalculator
+) {
 
     private val json = Json { 
         ignoreUnknownKeys = true 
         coerceInputValues = true
+    }
+
+    private fun downscale(bitmap: Bitmap?): Bitmap? {
+        if (bitmap == null) return null
+        val maxEdge = 1024
+        val width = bitmap.width
+        val height = bitmap.height
+        if (width <= maxEdge && height <= maxEdge) return bitmap
+        val ratio = maxEdge.toFloat() / maxOf(width, height)
+        return Bitmap.createScaledBitmap(bitmap, (width * ratio).toInt(), (height * ratio).toInt(), true)
     }
 
     suspend fun analyzeStyle(
@@ -23,27 +36,13 @@ class AnalyzerEngine @Inject constructor() {
         shoes: Bitmap?,
         clothes: Bitmap?,
         occasion: String,
-        location: String?,
-        apiKey: String,
-        modelName: String = "gemini-3.8-flash"
+        location: String?
     ): FashionAdvice {
-        val generativeModel = Firebase.ai(
-            backend = GenerativeBackend.googleAI(),
-            useLimitedUseAppCheckTokens = false
-        ).generativeModel(
-            modelName = modelName,
-            generationConfig = generationConfig {
-                responseMimeType = "application/json"
-            }
-        )
+        // P1.4 Privacy: Downscale vision inputs and extract local skin telemetry
+        val downscaledFace = downscale(face)
+        val faceTelemetry = downscaledFace?.let { itaCalculator.calculateIta(it) }
 
-        val prompt = content {
-            face?.let { image(it) }
-            hair?.let { image(it) }
-            shoes?.let { image(it) }
-            clothes?.let { image(it) }
-            
-            text("""
+        val textPrompt = """
                 You are a professional personal color analyst and style consultant. 
                 The user is preparing for a specific occasion: $occasion.
                 ${if (location != null) "Current Location Context: $location. Take local climate and fashion trends for this area into account." else ""}

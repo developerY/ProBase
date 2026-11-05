@@ -3,7 +3,7 @@ Copy and paste the prompt block below directly into your autonomous coding agent
 
 # AGENT MISSION: Execute `RoadMapToPro.md` (Phases 1–4) for KoColor
 
-You are tasked with executing the full engineering remediation plan in `applications/kocolor/docs/ProductFixes/RoadMapToPro.md` based on `applications/kocolor/docs/fashion_algorithms_assessment.md`.
+You are tasked with executing the full engineering remediation plan in `applications/kocolor/docs/ProductFixes/RoadMapToPro.md` based on `applications/kocolor/docs/ProductFixes/fashion_algorithms_assessment.md`.
 
 Work sequentially through **Phase 1 → Phase 2 → Phase 3 → Phase 4**. After completing each phase, run `./gradlew testDebugUnitTest` and verify zero compilation or test regressions before starting the next phase.
 

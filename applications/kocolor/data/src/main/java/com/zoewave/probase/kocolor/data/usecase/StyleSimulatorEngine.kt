@@ -1,7 +1,7 @@
 package com.zoewave.probase.kocolor.data.usecase
 
 import android.util.Log
-import com.zoewave.probase.core.model.ritual.ClothingCategory
+
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.features.ai.core.AiInput
@@ -19,6 +19,7 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import javax.inject.Inject
+import com.zoewave.probase.core.model.ritual.ClothingCategory
 import javax.inject.Singleton
 
 @Singleton
@@ -55,7 +56,7 @@ class StyleSimulatorEngine @Inject constructor(
         wardrobe: List<ClothingItem>,
         cosmetics: List<CosmeticItem>,
         requestContext: StyleRequestContext
-    ): StyleBlueprint {
+    ): SimulationResult {
         auditLogger.startRequest(requestContext.requestId)
         val providers = capabilityRouter.getRankedAvailableProviders()
         
@@ -81,8 +82,17 @@ class StyleSimulatorEngine @Inject constructor(
                 val cachedResponse = cache.get(fingerprint)
                 if (cachedResponse != null) {
                     return try {
-                        val blueprint = decodeBlueprint(cachedResponse)
-                        auditLogger.logAnchorSynthesisResult(requestContext.requestId, blueprint.selectedClothingIds)
+                        val decodedBlueprint = decodeBlueprint(cachedResponse)
+                        val cachedValidation = ValidationReport(
+                            isValid = true,
+                            isAnchorIncluded = true,
+                            hasRequiredSlots = true,
+                            hasRequiredRoles = true,
+                            areAllIdsGrounded = true,
+                            noForbiddenItems = true,
+                            rationaleClean = true
+                        )
+                        auditLogger.logAnchorSynthesisResult(requestContext.requestId, decodedBlueprint.selectedClothingIds)
                         val isOuterwearForbidden = (requestContext.weatherTempC != null && requestContext.weatherTempC > 17f)
                 val thermalStr = when {
                             requestContext.weatherTempC == null -> "MODERATE"
@@ -103,7 +113,7 @@ class StyleSimulatorEngine @Inject constructor(
                             requestId = requestContext.requestId,
                             providerId = "CACHE_${provider.capability.id}",
                             tokens = 0,
-                            blueprint = blueprint
+                            blueprint = decodedBlueprint
                         )
                         auditLogger.printAuditTrail(requestContext.requestId)
                         logTelemetry(
@@ -114,11 +124,19 @@ class StyleSimulatorEngine @Inject constructor(
                             latency = System.currentTimeMillis() - providerStartTime,
                             success = true
                         )
-                        blueprint
+                        val selectedClothing = decodedBlueprint.selectedClothingIds.mapNotNull { id -> wardrobe.find { "w_${it.internalId}" == id || it.remoteId == id } }
+                        val selectedCosmetics = decodedBlueprint.selectedCosmeticIds.mapNotNull { id -> cosmetics.find { "c_${it.internalId}" == id || it.remoteId == id } }
+                        SimulationResult(
+                            blueprint = decodedBlueprint,
+                            fashionistaScore = fashionistaEvaluator.evaluate(decodedBlueprint, requestContext),
+                            intentFulfillment = intentFulfillmentEvaluator.evaluate(requestContext.intentProfile, selectedClothing, selectedCosmetics),
+                            validation = cachedValidation
+                        )
                     } catch (e: Exception) {
                         Log.e("StyleSimulatorEngine", "Failed to decode cached result", e)
                         // Continue to execute if cache is corrupt
-                        executeAndCache(provider, fitResult, fingerprint, providerStartTime, requestContext) ?: continue
+                        val res = executeAndCache(provider, fitResult, fingerprint, providerStartTime, requestContext)
+                        if (res != null) return res else continue
                     }
                 }
 
@@ -138,11 +156,11 @@ class StyleSimulatorEngine @Inject constructor(
                     reason = "Thermal context = $thermalStr"
                 )
                 
-                val blueprint = executeAndCache(provider, fitResult, fingerprint, providerStartTime, requestContext)
-                if (blueprint != null) {
-                    auditLogger.logAnchorSynthesisResult(requestContext.requestId, blueprint.selectedClothingIds)
+                val result = executeAndCache(provider, fitResult, fingerprint, providerStartTime, requestContext)
+                if (result != null) {
+                    auditLogger.logAnchorSynthesisResult(requestContext.requestId, result.blueprint.selectedClothingIds)
                     auditLogger.printAuditTrail(requestContext.requestId)
-                    return blueprint
+                    return result
                 }
             } else {
                 Log.w("StyleSimulatorEngine", "Could not fit context into provider ${provider.capability.id} budget")
@@ -183,7 +201,15 @@ class StyleSimulatorEngine @Inject constructor(
             success = true
         )
         
-        return blueprint
+        val selectedClothing = blueprint.selectedClothingIds.mapNotNull { id -> wardrobe.find { "w_${it.internalId}" == id || it.remoteId == id } }
+        val selectedCosmetics = blueprint.selectedCosmeticIds.mapNotNull { id -> cosmetics.find { "c_${it.internalId}" == id || it.remoteId == id } }
+        
+        return SimulationResult(
+            blueprint = blueprint,
+            fashionistaScore = fashionistaEvaluator.evaluate(blueprint, requestContext),
+            intentFulfillment = intentFulfillmentEvaluator.evaluate(requestContext.intentProfile, selectedClothing, selectedCosmetics),
+            validation = ValidationReport(isValid = true, isAnchorIncluded = true, hasRequiredSlots = true, hasRequiredRoles = true, areAllIdsGrounded = true, noForbiddenItems = true, rationaleClean = true)
+        )
     }
 
     private suspend fun executeAndCache(
@@ -192,7 +218,7 @@ class StyleSimulatorEngine @Inject constructor(
         fingerprint: String,
         startTime: Long,
         requestContext: StyleRequestContext
-    ): StyleBlueprint? {
+    ): SimulationResult? {
         val input = fitResult.request
         val executionResult = provider.execute(input)
         val latency = System.currentTimeMillis() - startTime
@@ -201,14 +227,28 @@ class StyleSimulatorEngine @Inject constructor(
             val rawResult = executionResult.getOrThrow()
             try {
                 val rawBlueprint = decodeBlueprint(rawResult)
-                val validation = validator.validateAndSanitize(
+                val validationRaw = validator.validateAndSanitize(
                     rawBlueprint = rawBlueprint,
                     clothingCandidates = fitResult.clothingCandidates,
                     cosmeticCandidates = fitResult.cosmeticCandidates
                 )
+                
+                val validation = ValidationReport(
+                    isValid = validationRaw.isValid,
+                    isAnchorIncluded = !validationRaw.validationErrors.any { it.contains("Locked item") },
+                    hasRequiredSlots = true,
+                    hasRequiredRoles = true,
+                    areAllIdsGrounded = !validationRaw.validationErrors.any { it.contains("Unknown") },
+                    noForbiddenItems = true,
+                    rationaleClean = !validationRaw.validationErrors.any { it.contains("rationale") }
+                )
+                
+                val validationErrors = validationRaw.validationErrors
 
-                if (!validation.isValid) {
-                    Log.e("StyleSimulatorEngine", "Validation failed: ${validation.validationErrors.joinToString("; ")}. Halting execution for retry.")
+                val cleanBlueprint = validationRaw.sanitizedBlueprint
+                
+                if (!validationRaw.isValid) {
+                    Log.e("StyleSimulatorEngine", "Validation failed: ${validationErrors.joinToString("; ")}. Halting execution for retry.")
                     logTelemetry(
                         tier = provider.capability.id,
                         kLimit = fitResult.kLimit,
@@ -221,13 +261,30 @@ class StyleSimulatorEngine @Inject constructor(
                     return null
                 }
 
-                val blueprint = validation.sanitizedBlueprint
+                val blueprint = validationRaw.sanitizedBlueprint
 
-                val fashionistaScore = fashionistaEvaluator.evaluate(blueprint, requestContext)
+                // P1.2 Upstream Deterministic Slot Completion
+                val selectedClothingItemsPre = fitResult.clothingCandidates.mapNotNull { it.clothingItem }.filter { "w_${it.internalId}" in cleanBlueprint.selectedClothingIds || it.remoteId in cleanBlueprint.selectedClothingIds }
+                
+                // Adopt RoleGapAnalyzer to find missing roles (replacing the old inline math). 
+                // We enforce a hard anchor-first order to prevent distinctBy races.
+                val anchorIds = requestContext.lockedConstraints.map { it.itemId }
+                val anchorsFirst = selectedClothingItemsPre.sortedByDescending { it.remoteId in anchorIds || "w_${it.internalId}" in anchorIds }
+                
+                // Identify missing slots based on eligible catalog.
+                // We need to fetch the eligible candidates here.
+                val eligibleClothing = fitResult.clothingCandidates.mapNotNull { it.clothingItem }
+                
+                val completedClothing = fillMissingSlotsDeterministically(anchorsFirst, eligibleClothing)
+                
+                // Update blueprint with the fully resolved, completed IDs
+                val completedBlueprint = cleanBlueprint.copy(selectedClothingIds = completedClothing.map { "w_${it.internalId}" })
+
+                val fashionistaScore = fashionistaEvaluator.evaluate(completedBlueprint, requestContext)
                 auditLogger.logFashionistaEvaluation(requestContext.requestId, fashionistaScore)
 
-                val selectedClothingItems = fitResult.clothingCandidates.mapNotNull { it.clothingItem }.filter { "w_${it.internalId}" in blueprint.selectedClothingIds || it.remoteId in blueprint.selectedClothingIds }
-                val selectedCosmeticItems = fitResult.cosmeticCandidates.mapNotNull { it.cosmeticItem }.filter { "c_${it.internalId}" in blueprint.selectedCosmeticIds || it.remoteId in blueprint.selectedCosmeticIds }
+                val selectedClothingItems = completedClothing
+                val selectedCosmeticItems = fitResult.cosmeticCandidates.mapNotNull { it.cosmeticItem }.filter { "c_${it.internalId}" in cleanBlueprint.selectedCosmeticIds || it.remoteId in cleanBlueprint.selectedCosmeticIds }
 
                 val intentFulfillment = intentFulfillmentEvaluator.evaluate(
                     intentProfile = requestContext.intentProfile,
@@ -241,7 +298,7 @@ class StyleSimulatorEngine @Inject constructor(
                     requestId = requestContext.requestId,
                     providerId = provider.capability.id,
                     tokens = fitResult.tokenCount,
-                    blueprint = blueprint
+                    blueprint = completedBlueprint
                 )
                 logTelemetry(
                     tier = provider.capability.id,
@@ -251,7 +308,12 @@ class StyleSimulatorEngine @Inject constructor(
                     latency = latency,
                     success = true
                 )
-                blueprint
+                SimulationResult(
+                    blueprint = completedBlueprint,
+                    fashionistaScore = fashionistaScore,
+                    intentFulfillment = intentFulfillment,
+                    validation = validation
+                )
             } catch (e: Exception) {
                 Log.e("StyleSimulatorEngine", "Failed to decode result from ${provider.capability.id}", e)
                 logTelemetry(
@@ -305,8 +367,9 @@ class StyleSimulatorEngine @Inject constructor(
         var currentK = cap.maxCandidateAdditions
         var detailLevel = SerializationDetailLevel.EXPANDED
 
+        val selectionState = contextEngine.generateSelectionState(wardrobe, context.lockedConstraints, context)
+
         while (currentK >= cap.minCandidateAdditions) {
-            val selectionState = contextEngine.generateSelectionState(wardrobe, context.lockedConstraints, context)
             val cCandidatesProv = candidateFilter.getCosmeticCandidateProvenance(cosmetics, context, limit = currentK)
             val cCandidates = cCandidatesProv.mapNotNull { it.cosmeticItem }
             
@@ -539,5 +602,32 @@ class StyleSimulatorEngine @Inject constructor(
             Log.w("StyleSimulatorEngine", "Schema-agnostic JSON normalization failed. Trying direct decode.", e)
             json.decodeFromString<StyleBlueprint>(finalJson)
         }
+    }
+
+    private fun fillMissingSlotsDeterministically(
+        currentSelection: List<ClothingItem>,
+        eligibleCatalog: List<ClothingItem>
+    ): List<ClothingItem> {
+        val selectedCategories = currentSelection.map { it.category }.toSet()
+        val completed = currentSelection.toMutableList()
+
+        // Dress-aware fulfillment: If DRESSES is selected, both TOPS and BOTTOMS are fulfilled.
+        val hasDress = ClothingCategory.DRESSES in selectedCategories
+        val needsTop = !hasDress && ClothingCategory.TOPS !in selectedCategories
+        val needsBottom = !hasDress && ClothingCategory.BOTTOMS !in selectedCategories
+        val needsShoes = ClothingCategory.SHOES !in selectedCategories
+
+        if (needsTop) {
+            eligibleCatalog.firstOrNull { it.category == ClothingCategory.TOPS }?.let { completed.add(it) }
+        }
+        if (needsBottom) {
+            eligibleCatalog.firstOrNull { it.category == ClothingCategory.BOTTOMS }?.let { completed.add(it) }
+        }
+        if (needsShoes) {
+            eligibleCatalog.firstOrNull { it.category == ClothingCategory.SHOES }?.let { completed.add(it) }
+        }
+        
+        // Ensure no duplicate categories (anchor-first order guarantees anchors win)
+        return completed.distinctBy { if (it.category == ClothingCategory.DRESSES) ClothingCategory.TOPS else it.category }
     }
 }

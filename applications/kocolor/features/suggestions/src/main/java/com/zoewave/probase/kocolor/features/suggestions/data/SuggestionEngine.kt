@@ -1,10 +1,8 @@
 package com.zoewave.probase.kocolor.features.suggestions.data
 
-import com.google.firebase.Firebase
-import com.google.firebase.ai.ai
-import com.google.firebase.ai.type.GenerativeBackend
-import com.google.firebase.ai.type.content
-import com.google.firebase.ai.type.generationConfig
+import com.zoewave.probase.features.ai.core.AiProvider
+import com.zoewave.probase.features.ai.core.AiInput
+import com.zoewave.probase.kocolor.data.usecase.CapabilityRouter
 import com.zoewave.probase.core.model.ritual.FashionAdvice
 import com.zoewave.probase.core.model.ritual.FashionProfile
 import com.zoewave.probase.core.model.ritual.SeasonalType
@@ -12,7 +10,9 @@ import com.zoewave.probase.core.model.ritual.Undertone
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
-class SuggestionEngine @Inject constructor() {
+class SuggestionEngine @Inject constructor(
+    private val capabilityRouter: CapabilityRouter
+) {
 
     private val json = Json { 
         ignoreUnknownKeys = true 

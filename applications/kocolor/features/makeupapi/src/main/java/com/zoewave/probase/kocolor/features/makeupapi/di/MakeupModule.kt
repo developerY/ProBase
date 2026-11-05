@@ -29,7 +29,7 @@ object MakeupModule {
     @Singleton
     fun provideMakeupApiService(): MakeupApiService {
         val loggingInterceptor = HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY
+            level = if (com.zoewave.probase.core.network.BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
         }
 
         val httpClient = OkHttpClient.Builder()
