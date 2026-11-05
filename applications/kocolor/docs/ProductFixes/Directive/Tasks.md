@@ -3,7 +3,7 @@ Copy and paste the prompt block below directly into your autonomous coding agent
 
 # AGENT MISSION: Execute `RoadMapToPro.md` (Phases 1–4) for KoColor
 
-You are tasked with executing the full engineering remediation plan in `applications/kocolor/docs/ProductFixes/RoadMapToPro.md` based on `fashion_algorithms_assessment.md`.
+You are tasked with executing the full engineering remediation plan in `applications/kocolor/docs/ProductFixes/RoadMapToPro.md` based on `applications/kocolor/docs/fashion_algorithms_assessment.md`.
 
 Work sequentially through **Phase 1 → Phase 2 → Phase 3 → Phase 4**. After completing each phase, run `./gradlew testDebugUnitTest` and verify zero compilation or test regressions before starting the next phase.
 
@@ -13,9 +13,14 @@ Work sequentially through **Phase 1 → Phase 2 → Phase 3 → Phase 4**. After
 
 ### 1.0 Execute the "Kill" Decision on the Dead 6-Feature Scorer
 We are standardizing on the live 3-evaluator `FashionistaEngine`.
-1. Delete the unreachable 6-feature scorer classes and their dead extractors/engines:
-   - `FashionistaScorerImpl`, `DeterministicScorer`, `CalibrationCurve`, `ChromaticHarmonyEngine`, `GlcmTextureEngine`, `SilhouetteEngine`, `VisualMassEngine`, `CosmeticIntegrationEngine`, `VisualHierarchyEngine`, `CompositionEngine`, and `FashionistaScorerTest`.
-   - **CRITICAL EXCLUSION:** Do **NOT** delete `ItaCalculator` — keep it for on-device skin telemetry in Phase 1.2.
+1. Delete the unreachable 6-feature scorer classes, dead extractors/engines, and dead domain types:
+   - `FashionistaScorerImpl`, `DeterministicScorer`, `CalibrationCurve`, `InteractionModel`, `ChromaticHarmonyEngine`, `GlcmTextureEngine`, `TextureHarmonyEngine`, `SilhouetteEngine`, `VisualMassEngine`, `CosmeticIntegrationEngine`, `OutfitIntegrationEngine`, `VisualHierarchyEngine`, `CompositionEngine`.
+   - All five feature extractors (`Color/Composition/Hierarchy/Silhouette/TextureFeatureExtractor`).
+   - Dead domain types: `FashionistaScorer` (interface), `FashionistaFeatureVector`, `FeatureValue`, `FashionistaObservation`.
+   - Test: `FashionistaScorerTest`; then grep all test sources for references to any deleted type and update them.
+   - **DO NOT DELETE** the live path: `FashionistaEngine`, `ColorHarmonicsEvaluator`, `SilhouetteGrader`, `ContrastAnchorEvaluator`, `FashionistaEvaluator`, `FashionistaModule`, `FashionistaScore.kt` (reshaped in 1.2 item 4), and `ItaCalculator` (needed for on-device skin telemetry in Phase 1.4).
+   - **DEFER, do not delete:** `fashionista/math/*` and `fashionista/color/ColorSpace.kt` — shared color-math utils whose fate is decided in Phase 4.3 consolidation (`ItaCalculator` needs `LabColor`; Phase 1.4 needs Lab conversion).
+   - Expected transient breakage: `FashionistaScore.kt` will not compile until 1.2 item 4 lands — continue through it; the phase checkpoint is the atomic gate.
 2. Delete the unused and dimensionally broken `ColorHarmonyEngine.calculateDeltaE` (`data/color/ColorHarmonyEngine.kt:149`).
 
 ### 1.1 Finish `UNKNOWN` Manifest Defaults (`CompactManifestSerializer.kt`)
@@ -24,7 +29,8 @@ We are standardizing on the live 3-evaluator `FashionistaEngine`.
 
 ### 1.2 Reconcile Fashionista Scoring, Move Slot Completion Upstream & Strip `GreedyRehydrator`
 1. **Move Deterministic Slot Completion Into `StyleSimulatorEngine.generateBlueprint()`:**
-   - Before `FashionistaEngine` and `IntentFulfillmentEvaluator` run, complete any missing required slots (`TOP`, `BOTTOM`, `SHOES` — honoring `ONE_PIECE`/`DRESSES` satisfying `TOP`+`BOTTOM`) strictly from the **eligible candidate pool** (never from raw unfiltered inventory, respecting hidden, thermal, rotation, and anchor constraints).
+   - Before `FashionistaEngine` and `IntentFulfillmentEvaluator` run, complete any missing required slots strictly from the **eligible candidate pool** (never from raw unfiltered inventory, respecting hidden, thermal, rotation, and anchor constraints). Source the missing-slot requirements from `RoleGapAnalyzer.determineRoleRequirements()` (this is its adoption — Phase 4.3 deletes the old inline partitioning instead of re-deciding).
+   - Implement dress-aware satisfaction here: a selected `DRESSES`/`ONE_PIECE` item fills both `TOP` and `BOTTOM` (no redundant bottoms). Phase 4.1 extends only the heuristic fallback's own slot picking with the same rule.
    - **Anchor-First Ordering:** Place locked anchors into their slots *before* AI-resolved or backfilled items so anchors win category conflicts by construction without any `distinctBy` race.
 2. **Preload Silhouette Data:**
    - Refactor `SilhouetteGrader` to accept already-resolved domain models (`List<ClothingItem>`) rather than executing blocking DB queries on `Dispatchers.Default`.
@@ -32,24 +38,24 @@ We are standardizing on the live 3-evaluator `FashionistaEngine`.
    - Keep `StyleBlueprint` strictly as the AI JSON wire contract.
    - Return `FashionistaScore`, `IntentFulfillment`, and `ValidationReport` (see 1.3) on the result wrapper returned by `StyleSimulatorEngine.generateBlueprint()` so `GenerateStyleResultUseCase` reuses the single evaluation instead of re-running `FashionistaEngine` and `IntentFulfillmentEvaluator`.
 4. **Reshape `FashionistaScore`:**
-   - Remove the fake all-`0.85` default `breakdown` vector and unify `standardVersion`. Populate `breakdown` directly from the live 3-evaluator sub-scores (`colorHarmony`, `silhouette`, `contrastDepth`).
+   - Remove the fake all-`0.85` default `breakdown` vector and the 6-feature `FashionistaFeatureVector` breakdown type. Replace it with a 3-field breakdown snapshot populated from the evaluated sub-scores (`colorHarmonyScore/100`, `silhouetteScore/100`, `contrastScore/100`, each availability `1.0`). Unify on single constants `standardId="FASHIONISTA"`, `standardVersion="v1"` (deleting the `"v1.1"` default). This un-breaks `FashionistaScore.kt` after the Phase 1.0 deletions.
 5. **Turn `GreedyRehydrator` into a Pure ID-to-UI Mapper:**
    - Delete all 5 legacy fallback/rescoring steps from `GreedyRehydrator.kt`:
      1. Keyword recategorization (`applyClothingKeywordFallbacks` at line ~75, eliminating `"top" ⊂ "stop"`).
      2. Anchor fail-safe append + `distinctBy { it.category }` (line ~44).
      3. Inventory-wide slot backfill (`assignToSlots` `inventory.find` fallbacks).
      4. Name-based cosmetic fallbacks (lines ~129–136, eliminating `"lip" ⊂ "eclipse"`).
-     5. `ColorHarmonyEngine.calculateFashionistaScore` rescoring (use the single `FashionistaScore` from the result channel).
+     5. `ColorHarmonyEngine.calculateFashionistaScore` rescoring — change `mapToVisualBlueprintData` to accept the pre-computed `FashionistaScore` as a parameter (no internal scoring) and update its callers (`StyleSimulatorViewModel`, `BlueprintDetailContent`) to pass the result-channel score through to `koColorScore`.
 
 ### 1.3 Complete Validator Checklist Plumbing (`RecommendationValidator.kt`, `GenerateStyleResultUseCase.kt`)
 1. Update `RecommendationValidator` to produce a structured `ValidationReport` containing per-rule booleans (ID grounding, anchor retention, role firewall, rationale scrub).
 2. Carry `ValidationReport` on the simulator result channel alongside `StyleBlueprint`.
-3. In `GenerateStyleResultUseCase.executeCreationResult()` (`:147`), bind the creation-flow UI checklist items directly to `ValidationReport` instead of hardcoding `isValid = true`.
+3. In `GenerateStyleResultUseCase.executeCreationResult()` (block at `:150`), bind the creation-flow UI checklist items directly to `ValidationReport` instead of hardcoding `isValid = true`.
 
 ### 1.4 Govern Side-Path Engines & Enforce Multimodal Privacy (`SuggestionEngine.kt`, `AnalyzerEngine.kt`, Providers)
 1. Refactor `SuggestionEngine` and `AnalyzerEngine` to route requests through `CapabilityRouter` and `AiProvider` instead of calling `Firebase.ai` directly. Remove their unused `apiKey` parameters.
 2. In `AnalyzerEngine`, downscale any input `Bitmap` so its longest edge is `<= 1024px` (target 768–1024px) before processing.
-3. Extract skin/hair color telemetry on-device using `ItaCalculator` and `ColorQuantizer` so text-only cloud providers receive numeric telemetry rather than raw face selfies.
+3. Extract skin/hair color telemetry on-device: sample skin/hair regions from the (downscaled) bitmap, convert to CIELAB (`ColorUtils.colorToLAB` or the retained `ColorSpaceConverter`), and compute ITA via `ItaCalculator` (plus `ColorQuantizer` temperature) so text-only cloud providers receive numeric telemetry rather than raw face selfies.
 4. In `ByokAiProvider` and `GemmaRestFallbackProvider` (and/or `CapabilityRouter` via `supportsLocalImageIngestion`), explicitly reject `AiInput.Multimodal` with a clear failure result instead of silently dropping images.
 
 > **CHECKPOINT 1:** Run `./gradlew testDebugUnitTest` and fix any broken imports or test assertions before proceeding to Phase 2.
@@ -69,7 +75,7 @@ We are standardizing on the live 3-evaluator `FashionistaEngine`.
 
 ### 2.3 Enforce `maxOutputTokens` & Record Billed Telemetry (`FirebaseAiClient.kt`, `ByokAiProvider.kt`, `GemmaRestFallbackProvider.kt`, `StyleAuditLogger.kt`)
 1. Pass `capability.maxOutputTokens` into `FirebaseAiClient` `generationConfig`, `ByokAiProvider` JSON request bodies, and `GemmaRestFallbackProvider` payloads.
-2. Extend `AiResponse` to include `TokenUsage(promptTokens: Int, candidatesTokens: Int, totalTokens: Int)` populated from provider `usageMetadata` (when reported) and log both input and output tokens in `StyleAuditLogger`.
+2. Introduce a provider-common execution result carrying usage: `AiResponse` exists only on the Firebase path while BYOK/Gemma return `Result<String>`, so add a shared carrier (e.g. `AiExecutionResult(text, usage: TokenUsage)`) returned by `AiProvider.execute`, parse `usageMetadata` in the BYOK/Gemma REST responses (treat absent usage as zeros), update all `execute()` call sites (incl. `StyleSimulatorEngine`), and log both input and output tokens in `StyleAuditLogger`.
 
 ### 2.4 Validation Repair, Provider Timeouts & Cache Stabilization
 1. **Deterministic Validation Repair (`StyleSimulatorEngine.kt`):**
@@ -96,9 +102,9 @@ We are standardizing on the live 3-evaluator `FashionistaEngine`.
 
 ### 3.2 Complete Intent Fulfillment & Numeric Appearance Matching (`IntentFulfillmentEvaluator.kt`, `ContrastAnchorEvaluator.kt`)
 1. In `IntentFulfillmentEvaluator`, replace hardcoded `0.5` values:
-   - Compute `contrast` from normalized $\max(L^*) - \min(L^*)$.
-   - Compute `novelty` from `1.0 - mean(rotationPenalty)`.
-   - Compute `formality` from normalized mean `FormalityLevel` rank.
+   - Compute `contrast` from normalized $\max(L^*) - \min(L^*)$ over selected items.
+   - Compute `novelty` from `1.0 - mean(rotationPenalty)` — thread rotation data into `evaluate()` via a new parameter (it currently receives only profile + selected items).
+   - Compute `formality` from the normalized mean of core-model `ClothingItem.formality.rank` (`Formality` enum, NOT taxonomy `FormalityLevel`, which does not exist on these items); cosmetics without a formality field contribute neutrally.
 2. In `ContrastAnchorEvaluator` and cosmetic temperature scorers, replace fragile `String.contains("High")` / `contains("Light")` checks with typed `ColorTelemetry` numeric fields and enums.
 
 ### 3.3 Shared Word-Boundary Keyword Matcher
@@ -115,13 +121,13 @@ We are standardizing on the live 3-evaluator `FashionistaEngine`.
 
 ## PHASE 4: P2 — Orchestration Gears, Taxonomy Alignment & Tests
 
-### 4.1 Deterministic Heuristic Fallback & First-Class Dress Support (`HeuristicStyleEngine.kt`, `DeterministicContextEngine.kt`, `GreedyRehydrator.kt`)
+### 4.1 Deterministic Heuristic Fallback & Fallback Dress Support (`HeuristicStyleEngine.kt`, `DeterministicContextEngine.kt`)
 1. In `HeuristicStyleEngine.kt:39`, replace `.randomOrNull()` / `.random()` with deterministic selection (`maxByOrNull { it.compositeScore }` or stable ID tie-breaker), and build `recommendedPalette` strictly from the selected items' actual hex codes (no random neutral padding).
-2. Add first-class `ONE_PIECE` / `DRESSES` handling across `DeterministicContextEngine`, `StyleSimulatorEngine`, `HeuristicStyleEngine`, and `GreedyRehydrator` so an anchor or selected dress satisfies both `TOP` and `BOTTOM` requirements without adding redundant bottoms.
+2. Extend the heuristic fallback's own slot picking with the dress rule from Phase 1.2 (a selected dress satisfies both `TOP` and `BOTTOM`, no redundant bottoms) and align `DeterministicContextEngine` viability filtering with it. Do not touch `GreedyRehydrator` — it is a pure mapper since Phase 1.2 and inherits dress handling from upstream completion.
 
 ### 4.2 Centralize Thresholds, Fix Audit Funnel & Safely Normalize `totalScore`
 1. Consolidate all thermal bands, outerwear temperature cutoffs, rotation thresholds, and chroma gates into `KoColorTaxonomy`.
-2. In `DeterministicContextEngine.kt:58`, record distinct sequential counts for `afterWeather`, `afterRotation`, and `finalEligible` instead of assigning the final count to all three. In `StyleAuditLogger.kt:103`, log the real anchor priority value instead of the literal `"Priority 4.00 / 4.00"`.
+2. In `DeterministicContextEngine.kt:58`, record distinct sequential counts for `afterWeather`, `afterRotation`, and `finalEligible` instead of assigning the final count to all three. In `StyleAuditLogger.kt:103`, log the real anchor priority value instead of the literal `"Priority: 4.00 / 4.00"`.
 3. **Safely Normalize `ColorModels.totalScore` (`ColorModels.kt:27`):**
    - **Step A:** Add an explicit `isAnchor: Boolean` / `anchorPriority: Int` field to provenance models and update `sortedPartitionedPool` and `StyleAuditLogger` to sort and display anchors using that explicit field rather than relying on `totalScore > 2.0`.
    - **Step B:** Once anchor sorting and audit logging are decoupled, normalize both wardrobe and cosmetic `totalScore` values to `[0.0, 1.0]`.
@@ -130,7 +136,7 @@ We are standardizing on the live 3-evaluator `FashionistaEngine`.
 ### 4.3 Dead Code Cleanup, Utility Consolidation & Unit Test Suite
 1. **Preflight Gate & Role Diversity:**
    - Port the preflight slot-completeness gate concept from `DeterministicCatalogEngine` onto `StyleSimulatorEngine`'s `ClothingItem` pool (aborting before AI spend if required slots cannot be filled), then delete the unused `DeterministicCatalogEngine` class.
-   - Adopt `RoleGapAnalyzer` as the single slot-diversity implementation (removing the simulator's duplicate inline partitioning) or delete `RoleGapAnalyzer`.
+   - `RoleGapAnalyzer` was adopted as the requirements source for upstream slot completion in Phase 1.2 — here, delete the simulator's old duplicate inline partitioning (`categorizedPool`/`slotsPerCategory` budget logic in `adaptContextToProvider`) so exactly one slot-diversity implementation remains.
    - Delete dead methods/fields: `WardrobeCandidateFilter.getCandidates`, `WardrobeCandidateFilter.getCosmeticCandidates`, `DeterministicContextEngine.enforceRoleDiversity`, `FirebaseAiClient.getStyleAdvice`, `FirebaseAiClient.estimateTokens`, and unused `rotationScoringUseCase`/`repository` constructor injections in `DeterministicContextEngine`.
 2. **Consolidate Duplicates:**
    - Merge duplicate `hexToLCh`, `calculateChroma`, chroma-weighted circular mean, and JSON brace-stripping helpers into shared utilities in `core/color` and `core/json`.
