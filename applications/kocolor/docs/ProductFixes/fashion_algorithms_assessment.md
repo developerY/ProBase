@@ -316,10 +316,9 @@ keyword matchers in 5+ files.
 2. Route `SuggestionEngine`/`AnalyzerEngine` through `AiProvider` (budgets, cache,
    audit) or formally exempt them; downscale analyzer bitmaps; resolve the
    face-photo-to-cloud vs text-only-cloud contradiction as a product decision.
-3. Replace `UNKNOWN` manifest defaults (Cotton/SATIN/KoColor/Balanced) — the model
-   is reasoning over invented facts today.
-4. Fix BYOK JSON body construction (use `kotlinx.serialization`).
-5. Plumb the real validator verdict into the creation-flow checklist (or remove it).
+3. ~~Replace `UNKNOWN` manifest defaults (Cotton/SATIN/KoColor/Balanced) — the model is reasoning over invented facts today.~~ **(Resolved: `CompactManifestSerializer` now uses `UNKNOWN`)**
+4. ~~Fix BYOK JSON body construction (use `kotlinx.serialization`).~~ **(Resolved: Built safely using `kotlinx.serialization` JSON builders)**
+5. Plumb the real validator verdict into the creation-flow checklist (or remove it). *(Structural fix applied, pending domain model expansion in `StyleBlueprint`)*
 
 **P1 (token spend)**
 6. Make Nano viable (minimal scaffold) or stop routing to it; it currently only
