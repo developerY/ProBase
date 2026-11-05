@@ -82,12 +82,9 @@ fun CollapsibleFashionistaScoreCard(
     var selectedTab by remember { mutableStateOf(ScoreViewTab.GAUGE) }
 
     val defaultBreakdown = breakdown ?: FashionistaFeatureVector(
-        composition = FeatureValue((score * 0.95 / 100.0).coerceIn(0.1, 1.0), 1.0),
-        colorHarmony = FeatureValue((score * 0.98 / 100.0).coerceIn(0.1, 1.0), 1.0),
-        silhouette = FeatureValue((score * 0.90 / 100.0).coerceIn(0.1, 1.0), 1.0),
-        textureHarmony = FeatureValue((score * 0.88 / 100.0).coerceIn(0.1, 1.0), 0.8),
-        visualHierarchy = FeatureValue((score * 0.92 / 100.0).coerceIn(0.1, 1.0), 1.0),
-        presentationIntegration = FeatureValue((score * 0.80 / 100.0).coerceIn(0.1, 1.0), 0.6)
+        colorHarmony = FeatureValue((score.toDouble() * 0.98 / 100.0).coerceIn(0.1, 1.0), 1.0),
+        silhouette = FeatureValue((score.toDouble() * 0.90 / 100.0).coerceIn(0.1, 1.0), 1.0),
+        contrast = FeatureValue((score.toDouble() * 0.90 / 100.0).coerceIn(0.1, 1.0), 1.0)
     )
 
     Card(

@@ -12,13 +12,21 @@ data class FashionistaScore(
     val score: Double = totalScore.toDouble(),
     val coverage: Double = 1.0,
     val standardId: String = "FASHIONISTA_STD",
-    val standardVersion: String = "v1.1",
+    val standardVersion: String = "v1",
     val breakdown: FashionistaFeatureVector = FashionistaFeatureVector(
-        composition = FeatureValue(0.85, 1.0),
-        colorHarmony = FeatureValue(0.85, 1.0),
-        silhouette = FeatureValue(0.85, 1.0),
-        textureHarmony = FeatureValue(0.85, 1.0),
-        visualHierarchy = FeatureValue(0.85, 1.0),
-        presentationIntegration = FeatureValue(0.85, 1.0)
+        colorHarmony = FeatureValue(colorHarmonyScore.toDouble() / 100.0, 1.0),
+        silhouette = FeatureValue(silhouetteScore.toDouble() / 100.0, 1.0),
+        contrast = FeatureValue(contrastScore.toDouble() / 100.0, 1.0)
     )
+)
+
+data class FashionistaFeatureVector(
+    val colorHarmony: FeatureValue,
+    val silhouette: FeatureValue,
+    val contrast: FeatureValue
+)
+
+data class FeatureValue(
+    val value: Double,
+    val availability: Double
 )

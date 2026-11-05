@@ -26,12 +26,9 @@ class FashionistaScoreMapper @Inject constructor() {
         val breakdown = domainScore.breakdown
 
         val featureExplanations = listOf(
-            mapFeature("Composition", "Category Harmony & Proportion", breakdown.composition),
-            mapFeature("Color Harmony", "CIEDE2000 & Hue Distribution", breakdown.colorHarmony),
-            mapFeature("Silhouette", "Center of Gravity & Mass Distribution", breakdown.silhouette),
-            mapFeature("Texture Harmony", "GLCM Scale & Material Coherence", breakdown.textureHarmony),
-            mapFeature("Visual Hierarchy", "Focal Point Clarity & Dominance", breakdown.visualHierarchy),
-            mapFeature("Presentation Integration", "Biometric ITA & Facial Contrast", breakdown.presentationIntegration)
+            mapFeature("Color Harmony", "Geometric Hue & Temperature Cohesion", breakdown.colorHarmony),
+            mapFeature("Silhouette", "Structural & Layering Appropriateness", breakdown.silhouette),
+            mapFeature("Contrast", "Outfit & Biometric Adherence", breakdown.contrast)
         )
 
         return FashionistaExplanation(

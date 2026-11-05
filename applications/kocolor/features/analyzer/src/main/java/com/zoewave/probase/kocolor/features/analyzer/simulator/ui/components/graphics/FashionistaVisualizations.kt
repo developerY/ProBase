@@ -295,14 +295,12 @@ fun FashionistaRadarChart(
     breakdown: FashionistaFeatureVector,
     modifier: Modifier = Modifier
 ) {
-    val labels = listOf("Comp", "Color", "Shape", "Texture", "Hierarchy", "Integration")
+    // Updated for 3-evaluator pipeline
+    val labels = listOf("Color", "Shape", "Contrast")
     val features = listOf(
-        breakdown.composition,
         breakdown.colorHarmony,
         breakdown.silhouette,
-        breakdown.textureHarmony,
-        breakdown.visualHierarchy,
-        breakdown.presentationIntegration
+        breakdown.contrast
     )
 
     Column(
@@ -316,7 +314,7 @@ fun FashionistaRadarChart(
             Canvas(modifier = Modifier.fillMaxSize().padding(24.dp)) {
                 val center = Offset(size.width / 2, size.height / 2)
                 val maxRadius = size.minDimension / 2 - 12.dp.toPx()
-                val angleStep = (2 * Math.PI / 6).toFloat()
+                val angleStep = (2 * Math.PI / 3).toFloat()
 
                 // 1. Draw Hexagonal Grid Background (25%, 50%, 75%, 100%)
                 for (step in 1..4) {
@@ -674,12 +672,9 @@ fun FashionistaDecompositionBar(
 @Composable
 private fun FashionistaHeroDialPreview() {
     val sampleVector = FashionistaFeatureVector(
-        composition = FeatureValue(0.85, 1.0),
         colorHarmony = FeatureValue(0.92, 1.0),
         silhouette = FeatureValue(0.78, 1.0),
-        textureHarmony = FeatureValue(0.80, 0.7),
-        visualHierarchy = FeatureValue(0.88, 1.0),
-        presentationIntegration = FeatureValue(0.65, 0.5)
+        contrast = FeatureValue(0.88, 1.0)
     )
 
     Column(modifier = Modifier.padding(16.dp)) {

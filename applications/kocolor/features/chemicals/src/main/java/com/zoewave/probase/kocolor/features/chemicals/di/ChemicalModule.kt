@@ -24,7 +24,7 @@ object ChemicalModule {
     @Singleton
     fun providePubChemApi(): PubChemApi {
         val loggingInterceptor = HttpLoggingInterceptor().apply {
-            level = if (com.zoewave.probase.core.model.BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
+            level = if (com.zoewave.probase.core.network.BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
         }
 
         val httpClient = OkHttpClient.Builder()

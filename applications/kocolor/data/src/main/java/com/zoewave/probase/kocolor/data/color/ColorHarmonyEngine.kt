@@ -146,38 +146,9 @@ class ColorHarmonyEngine @Inject constructor() {
     /**
      * Perceptual color distance using simplified Delta E metric.
      */
-    fun calculateDeltaE(lch1: LCh, lch2: LCh): Float {
-        val dL = lch1.l - lch2.l
-        val dC = lch1.c - lch2.c
-        val dH = abs(lch1.h - lch2.h)
-        return sqrt(dL * dL + dC * dC + dH * dH)
-    }
 
-    /**
-     * Calculates the post-synthesis "KoColor Fashionista Score" (0 to 100) for a completed outfit & cosmetics selection.
-     */
-    fun calculateFashionistaScore(
-        finalOutfit: List<ClothingItem>,
-        finalCosmetics: List<CosmeticItem>,
-        telemetry: ColorTelemetry
-    ): Int {
-        val clothingPalette = finalOutfit.map { hexToLCh(it.colorHex) }
-        val cosmeticPalette = finalCosmetics.map { hexToLCh(it.colorHex) }
-        val fullPalette = clothingPalette + cosmeticPalette
 
-        if (fullPalette.isEmpty()) return 85 // Baseline score if empty
 
-        // 1. Geometric Hue Cohesion (0 to 40 pts)
-        val hueScore = evaluatePaletteGeometry(fullPalette)
-
-        // 2. Biometric Contrast Adherence (0 to 40 pts)
-        val contrastScore = evaluateContrastAdherence(fullPalette, telemetry)
-
-        // 3. Anchor Gravity & Neutral Balance (0 to 20 pts)
-        val balanceScore = evaluateNeutralGrounding(fullPalette)
-
-        return (hueScore + contrastScore + balanceScore).coerceIn(0, 100)
-    }
 
     private fun evaluatePaletteGeometry(palette: List<LCh>): Int {
         val chromaticColors = palette.filter { it.c >= 10f }

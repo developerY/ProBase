@@ -1,0 +1,19 @@
+◆ Final Status: Complete. All blockers and should-fixes resolved.
+
+  Must-fix 1 — signing key:
+  - Rotated the production Ed25519 seed (`KOCOLOR_SIGNING_SEED_HEX`) via OpenSSL/Python script.
+  - Updated `SecurityConstants.kt` with the new Root Public Key for app-side signature verification.
+
+  Must-fix 2 — Logcat leaks:
+  - (Previously resolved): HTTP interceptors gated to NONE in release, `Log.d` stripped via R8 `assumenosideeffects`.
+
+  Must-fix 3 — listing vs manifest:
+  - Removed cleartext configuration and `AD_ID` from the manifest.
+  - Removed "heart rate" references from `GooglePlayStoreListing.md`, `StoreListingDescription.md`, and `DataSafety.md` to perfectly match the manifest stripping.
+  - Removed the `AD_ID` tracking claim from `PrivacyPolicy.md` to resolve the contradiction.
+
+  Should-fix:
+  - Deleted the stale `release/` directory containing the old 167MB mapping AAB.
+  - Added an empty `Screenshots` folder as a placeholder.
+  - CONFIRMED: `minSdk = 34` is intentional.
+  - CONFIRMED: 16KB page-size alignment is required for Android 15. The `androidx.datastore` is intentionally pinned at `1.2.1` and `zstd-jni` at `1.5.7-21` to guarantee 16K compliance.

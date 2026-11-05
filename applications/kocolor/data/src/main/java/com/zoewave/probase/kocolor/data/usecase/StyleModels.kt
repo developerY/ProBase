@@ -101,6 +101,23 @@ data class StyleBlueprint(
     val recommendedPalette: List<String> = emptyList()
 )
 
+data class SimulationResult(
+    val blueprint: StyleBlueprint,
+    val fashionistaScore: com.zoewave.probase.kocolor.fashionista.domain.FashionistaScore,
+    val intentFulfillment: IntentFulfillment,
+    val validation: ValidationReport
+)
+
+data class ValidationReport(
+    val isValid: Boolean,
+    val isAnchorIncluded: Boolean,
+    val hasRequiredSlots: Boolean,
+    val hasRequiredRoles: Boolean,
+    val areAllIdsGrounded: Boolean,
+    val noForbiddenItems: Boolean,
+    val rationaleClean: Boolean
+)
+
 data class RecommendationComposition(
     val clothingSlots: Set<OutfitSlot>,
     val cosmeticRoles: Set<CosmeticRole>,

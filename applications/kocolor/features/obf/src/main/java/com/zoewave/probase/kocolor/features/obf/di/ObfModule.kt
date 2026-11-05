@@ -19,7 +19,7 @@ object ObfModule {
     @Singleton
     fun provideOpenBeautyFactsApi(): OpenBeautyFactsApi {
         val logging = HttpLoggingInterceptor().apply {
-            level = if (com.zoewave.probase.core.model.BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
+            level = if (com.zoewave.probase.core.network.BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
         }
         
         val client = OkHttpClient.Builder()

@@ -32,7 +32,7 @@ Whether you are curating your daily outfit, building a 7-day style playlist, dig
 
 📊 THE FASHIONISTA SCORE ENGINE
 • Standardized Aesthetic Evaluation: Get an instant, reference-calibrated 0–100 Fashionista Score for any outfit combination.
-• 6-Axis Aesthetic Radar: Inspect your outfit’s shape across Composition, Color Harmony, Silhouette, Texture, Visual Hierarchy, and Presentation Integration.
+• 3-Axis Style Radar: Inspect your outfit’s shape across Color Harmony, Silhouette, and Contrast — every axis scored live by the on-device engine.
 • Math Decomposition: View a transparent waterfall chart auditing base evidence, interaction synergies, and unresolved conflict penalties.
 
 👗 INTERACTIVE STYLE SIMULATOR & PLAYLISTS
@@ -47,7 +47,7 @@ Whether you are curating your daily outfit, building a 7-day style playlist, dig
 
 💧 WELLNESS & BIO-ELEMENT CORRELATION
 • Daily Hydration Goals: Set personalized water volume targets (e.g., 2.5L daily) with progress tracking.
-• Google Health Connect: Optionally sync steps, active calories, and heart rate bio-markers to correlate physical activity with skin moisture defense.
+• Google Health Connect: Optionally sync steps and active calories to correlate physical activity with skin moisture defense.
 
 ==================================================
 🔒 PRIVACY-FIRST & ON-DEVICE PRIVACY

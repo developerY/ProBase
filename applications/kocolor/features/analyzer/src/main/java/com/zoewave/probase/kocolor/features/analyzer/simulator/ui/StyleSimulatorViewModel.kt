@@ -335,13 +335,8 @@ class StyleSimulatorViewModel @Inject constructor(
                 aiSelectedCosmeticIds = result?.selectedCosmeticIds ?: emptyList(),
                 inventory = allClothing,
                 cosmetics = allCosmetics,
-                activeClothingAnchors = allClothing.filter { item ->
-                    anchoredClothing[item.category] == item.colorFamily
-                },
-                activeCosmeticAnchors = allCosmetics.filter { item ->
-                    anchoredCosmetics[item.macroCategory] == item.colorFamily
-                },
                 palette = result?.recommendedPalette ?: emptyList(),
+                fashionistaScore = fashionScore?.totalScore?.toInt() ?: 85,
                 isComplete = (step == SimulationStep.RESULT || result != null)
             )
         )

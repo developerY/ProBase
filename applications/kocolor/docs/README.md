@@ -21,7 +21,9 @@ Welcome to the KoColor documentation directory. This folder contains the officia
 
 ## Core Documents
 
-*   **`analysis_results.md`**: The definitive Production Readiness Review. This document assesses the application across MAD architecture, algorithms, AI/ML, and UI design, confirming that the module is 100% ready for production.
+*   **`ProductFixes/analysis_results.md`**: The definitive Production Readiness Review. This document assesses the application across MAD architecture, algorithms, AI/ML, and UI design, confirming that the module is 100% ready for production.
+*   **`ProductFixes/fashion_algorithms_assessment.md`**: Fashion math, AI token usage, and pipeline-gears assessment (live-vs-dead analysis, token spend risks, scoring calibration, prioritized fixes).
+*   **`ProductFixes/findings_rollup_2026-11-04.md`**: Consolidated findings rollup — pipeline verification, checklist audit, assessment summary, and ordered open items.
 
 ## Maintenance Guidelines
 
