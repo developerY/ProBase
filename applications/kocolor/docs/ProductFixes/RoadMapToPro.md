@@ -1,10 +1,10 @@
-This engineering remediation plan addresses all unresolved findings across token governance, color mathematics, orchestration gears, dead code, and test coverage in the KoColor assessment. Note that P0 recommendations #3 (`CompactManifestSerializer` `UNKNOWN` defaults) and #4 (`ByokAiProvider` JSON serialization) are already resolved in the codebase.
+This engineering remediation plan addresses all unresolved findings across token governance, color mathematics, orchestration gears, dead code, and test coverage in the KoColor assessment. Status of assessment P0s already in the tree: #4 (`ByokAiProvider` JSON serialization) is resolved (verified: `kotlinx.serialization` body builder, manual escaping gone). #3 (`UNKNOWN` defaults) is only partly resolved — `material` now emits `UNKNOWN`, but `finish` (`SATIN`), `brand` (`KoColor`), and `depth` (`Balanced`) still assert invented facts; finishing it is Phase 1 item 4 below.
 
 ## Execution Roadmap Matrix
 
 | Phase | Priority | Focus Area | Key Target Files |
 | --- | --- | --- | --- |
-| **Phase 1** | **P0** | Scoring, Privacy, Validation | `StyleSimulatorEngine.kt`, `GreedyRehydrator.kt`, `AnalyzerEngine.kt`, `SuggestionEngine.kt`
+| **Phase 1** | **P0** | Pipeline decision, Scoring, Privacy, Validation | `StyleSimulatorEngine.kt`, `GreedyRehydrator.kt`, `AnalyzerEngine.kt`, `SuggestionEngine.kt`, `CompactManifestSerializer.kt` |
 
 |
 | **Phase 2** | **P1** | Token Budgets, Providers, Cache | `LocalNanoAiProvider.kt`, `FirebaseAiProvider.kt`, `PromptAssembler.kt`, `PromptCacheRepository.kt`
@@ -17,12 +17,21 @@ This engineering remediation plan addresses all unresolved findings across token
 
 |
 
-## Phase 1: P0 — Scoring Unification, AI Governance & Privacy
+## Phase 1: P0 — Pipeline Decision, Scoring Unification, AI Governance & Privacy
+
+**0. Gating decision: keep or kill the 6-feature scorer (blocks Phase 3.1)**
+`FashionistaScorerImpl`, `DeterministicScorer`, `CalibrationCurve`, the five extractors, and the engines behind them (`ChromaticHarmonyEngine`, `GlcmTextureEngine`, `SilhouetteEngine`, `VisualMassEngine`, `ItaCalculator`) have no DI binding and no production callers. Decide before any calibration work:
+
+* **Keep:** commit to wiring the real engines first (Phase 3.4, option A), then calibrate.
+* **Kill (recommended):** delete the dead path and skip the `ChromaticHarmonyEngine` / τ items in Phase 3.1 entirely; all scoring work targets the live 3-evaluator `FashionistaEngine` + UI score.
+
+No `ChromaticHarmonyEngine`/`CalibrationCurve` edits land until this decision is recorded.
+
 
 **1. Reconcile Fashionista Scoring & Eliminate Double Evaluation**
 Currently, `StyleSimulatorEngine` runs `FashionistaEngine` (40/35/25 split) for auditing, `GenerateStyleResultUseCase` immediately re-runs it (doubling blocking DB reads in `SilhouetteGrader`), and `GreedyRehydrator` computes a third score via `ColorHarmonyEngine.calculateFashionistaScore` (40/40/20 split).
 
-* **Single Evaluation Pass:** Persist the `FashionistaScore` and `IntentFulfillment` results inside `StyleBlueprint` during `StyleSimulatorEngine.generateBlueprint()` so `GenerateStyleResultUseCase` reads the cached evaluation.
+* **Single Evaluation Pass:** Return the `FashionistaScore` and `IntentFulfillment` alongside the blueprint from `StyleSimulatorEngine.generateBlueprint()` (new result wrapper or extended `StyleResult` flow) so `GenerateStyleResultUseCase` reuses them instead of re-evaluating. Do not add eval fields to `StyleBlueprint` itself — it is the AI JSON contract; keep scoring results on the result channel.
 
 
 * **Preload Silhouette Data:** Pass already-resolved domain models into `SilhouetteGrader` instead of executing blocking database queries on `Dispatchers.Default`.
@@ -51,11 +60,16 @@ Currently, `StyleSimulatorEngine` runs `FashionistaEngine` (40/35/25 split) for 
 **3. Complete Validator Checklist Plumbing**
 `GenerateStyleResultUseCase.kt:147` currently hardcodes all six creation-flow validation checks to `isValid = true` regardless of what `RecommendationValidator` returned.
 
-* **Expand `StyleBlueprint`:** Add a `validationReport: ValidationReport` field to `StyleBlueprint` containing per-rule boolean results from `RecommendationValidator` (ID grounding, anchor retention, role firewall, rationale scrub).
+* **Return the report:** Have `RecommendationValidator` return per-rule booleans (ID grounding, anchor retention, role firewall, rationale scrub) in a `ValidationReport` carried on the result channel next to the blueprint — not inside `StyleBlueprint`, which is the AI JSON contract.
 
 
-* **Bind to UI State:** Map `blueprint.validationReport` directly to the creation-flow UI checklist in `GenerateStyleResultUseCase`.
+* **Bind to UI State:** Map that report to the creation-flow checklist in `GenerateStyleResultUseCase.executeCreationResult()`, replacing the hardcoded all-`true` items.
 
+
+**4. Finish `UNKNOWN` manifest defaults (assessment P0 #3, partly landed)**
+`material` already emits `UNKNOWN`; `finish` (`SATIN`), `brand` (`KoColor`), and `depth` (`Balanced`) in `CompactManifestSerializer` still assert invented facts to the model.
+
+* **Emit unknowns:** Replace the three remaining defaults with `UNKNOWN` (wardrobe + cosmetics paths) so the grounded manifest never states what the catalog does not know.
 
 
 ## Phase 2: P1 — Token Spend, Fit-Loop Latency & Provider Hardening
@@ -93,19 +107,22 @@ Output token limits are declared in provider capabilities but omitted from API r
 **4. Add Validation Repair & Harden BYOK/Gemma/Cache (T3, T7, T8, T9)**
 Validation failures currently burn up to 4 full prompts across failover providers.
 
-* **Deterministic Repair Before Failover:** When `RecommendationValidator` fails solely on missing anchors or ungrounded cosmetic IDs, repair the selection locally via `GreedyRehydrator` rules or execute one compact repair prompt before failing over.
+* **Deterministic Repair Before Failover:** Note the validator already re-injects omitted locked anchors — do not rebuild that. Target the actually-unrepaired failures: substitute valid same-slot/same-role candidates for removed invalid IDs, backfill missing cosmetic roles deterministically, and only then spend one compact repair prompt before failing over to the next provider.
 
 
 * **Provider Timeout & Temperature Parity:** Configure an 8s OkHttp timeout and pass `temperatureOverride` in `ByokAiProvider`; reduce `GemmaRestFallbackProvider` read timeout from 180s to 60s and forward `temperatureOverride`.
 
 
-* **Stabilize Prompt Cache:** In `PromptCacheRepository`, join hashed fields with an explicit delimiter (`\u001F`), sort manifest lines deterministically, and round rotation scores to 1 decimal place to prevent daily cache misses.
+* **Stabilize Prompt Cache:** In `PromptCacheRepository`, join hashed fields with an explicit delimiter (`\u001F`). Do not alphabetically sort manifest lines (order carries the rank signal the model relies on) and do not round rotation scores (the manifest carries no scores, so rounding changes nothing — busts come from membership/order shifts driven by freshness timestamps). If hit rate disappoints, quantize recency upstream into day-buckets before scoring so identical days produce identical manifests.
 
 
 
 ## Phase 3: P2 — Fashion Math Discrimination, Calibration & NLP
 
 **1. Widen Live Scoring Dynamic Range & Smooth Cliffs**
+
+> Gate: the `ChromaticHarmonyEngine` and `CalibrationCurve` bullets below apply ONLY if the Phase 1 item-0 decision keeps the 6-feature pipeline; if killed, skip them. The baseline and single-chroma bullets target the live path either way.
+
 `ChromaticHarmonyEngine.kt:50` restricts color harmony to `[0.55, 0.95]` with step-function cliffs at $\Delta E = 10.0$, while lenient evaluator baselines (`78±20`, `75±20`, `70±25`) cause almost every outfit to pass the 80-point gate.
 
 * **Continuous Harmony Curve:** Remove the 0.5 hue floor in `ChromaticHarmonyEngine`, replace quantized $\Delta E_{00}$ steps (`{0.6, 0.75, 0.9}`) with a smooth Gaussian/piecewise-linear curve over `[0.0, 1.0]`, and remove dead `meanHue` (`:23`).
@@ -131,11 +148,12 @@ Validation failures currently burn up to 4 full prompts across failover provider
 **3. Replace Substring Keyword Matching**
 Raw `contains()` calls in `WardrobeCandidateFilter`, `HeuristicStyleEngine`, `SilhouetteGrader`, and `GreedyRehydrator` cause false positives like `"a"` matching every item or `"lip"` matching `"eclipse"`.
 
-* **Shared Word-Boundary Matcher:** Extract `IntentAnalyzer`'s regex word-boundary (`\b`) tokenizer with stop-word stripping into a shared core utility and replace all 5 substring matchers.
+* **Shared Word-Boundary Matcher:** Build a shared core utility combining whole-word matching (as `IntentAnalyzer` does via split + exact match — it has no `\b` tokenizer to extract) with `\b` regex boundaries and stop-word stripping, and replace all 5 substring matchers (`WardrobeCandidateFilter`, `HeuristicStyleEngine`, `SilhouetteGrader`, `GreedyRehydrator`, cosmetic scorer).
 
 
 
 **4. Resolve or Descope Engine Stubs**
+Executes the Phase 1 item-0 decision; do not revisit the keep/kill question here.
 Five classes in the 6-feature scorer are stubs or proxies (`GlcmTextureEngine`, `SilhouetteEngine`, `CosmeticIntegrationEngine`, `VisualHierarchyEngine`, `CompositionEngine`).
 
 * **Wire Real CV Math or Prune:** If keeping the 6-feature pipeline, wire `VisualMassEngine.processBitmap` into `SilhouetteEngine`, wire `ItaCalculator` and `calculateMichelsonContrast` into `CosmeticIntegrationEngine`, and measure chroma/contrast isolation in `VisualHierarchyEngine` instead of `brand != null`.
@@ -169,14 +187,14 @@ Temperature, rotation, and chroma thresholds are duplicated with conflicting cut
 * **True Audit Funnel & Priority:** Record distinct sequential counts for `afterWeather`, `afterRotation`, and `finalEligible` in `DeterministicContextEngine.kt:58`, and log the actual anchor priority score in `StyleAuditLogger.kt:103`.
 
 
-* **Normalize `totalScore` & Document Cosmetics Policy:** Scale both wardrobe and cosmetic provenance `totalScore` values to `[0.0, 1.0]` in `ColorModels.kt:27`, and document the pigment-only filter (`EYES`, `DIMENSION`, `LIPS`, `NAILS`).
+* **Normalize `totalScore` & Document Cosmetics Policy:** WARNING — do not rescale alone: anchors sort first only because 2.5/4.0 exceeds the 0–1 composite range (`sortedPartitionedPool`), and the audit display keys on `>2.0`. First add an explicit anchor-priority signal (separate `priority`/`isAnchor` field with anchors-first ranking + updated audit thresholds), *then* scale both wardrobe and cosmetic `totalScore` values to `[0.0, 1.0]` in `ColorModels.kt:27`. Document the pigment-only filter (`EYES`, `DIMENSION`, `LIPS`, `NAILS`).
 
 
 
 **3. Dead Code Cleanup, Utility Consolidation & Test Suite**
 Several engines and duplicate math helpers remain unreferenced or redundant.
 
-* **Wire or Delete Dead Code:** Wire `DeterministicCatalogEngine` (preflight slot check) and `RoleGapAnalyzer` into `StyleSimulatorEngine`, and delete dead methods (`WardrobeCandidateFilter.getCandidates`, `DeterministicContextEngine.enforceRoleDiversity`, `FirebaseAiClient.getStyleAdvice`, unused injected fields in `DeterministicContextEngine`).
+* **Wire or Delete Dead Code:** Do not wire `DeterministicCatalogEngine` directly — it speaks `CatalogRecord`, the simulator speaks `ClothingItem`/`CosmeticItem`. Instead port its *idea* (slot-completeness preflight gate before AI spend) onto the simulator's models, or delete it. For `RoleGapAnalyzer`, adopt it as the single slot-diversity implementation (removing the simulator's inline equivalent) or delete it — never run both. Delete dead methods (`WardrobeCandidateFilter.getCandidates`, `DeterministicContextEngine.enforceRoleDiversity`, `FirebaseAiClient.getStyleAdvice`, unused injected fields in `DeterministicContextEngine`).
 
 
 * **Consolidate Duplicates:** Merge duplicate `hexToLCh`, `calculateChroma`, chroma-weighted circular mean, and JSON brace-stripping helpers into `core/color` and `core/json`.
