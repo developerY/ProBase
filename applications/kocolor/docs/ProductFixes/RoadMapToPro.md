@@ -20,7 +20,7 @@ This engineering remediation plan addresses all unresolved findings across token
 ## Phase 1: P0 — Pipeline Decision, Scoring Unification, AI Governance & Privacy
 
 **0. Gating decision: keep or kill the 6-feature scorer (blocks Phase 3.1)**
-`FashionistaScorerImpl`, `DeterministicScorer`, `CalibrationCurve`, the five extractors, and the engines behind them (`ChromaticHarmonyEngine`, `GlcmTextureEngine`, `SilhouetteEngine`, `VisualMassEngine`, `ItaCalculator`) have no DI binding and no production callers. Decide before any calibration work:
+`FashionistaScorerImpl`, `DeterministicScorer`, `CalibrationCurve`, the five extractors, and the engines behind them (`ChromaticHarmonyEngine`, `GlcmTextureEngine`, `SilhouetteEngine`, `VisualMassEngine`) have no DI binding and no production callers. Decide before any calibration work (`ItaCalculator` is excluded from deletion — it is a dependency-free object that Phase 1.2 reuses for on-device skin telemetry):
 
 * **Keep:** commit to wiring the real engines first (Phase 3.4, option A), then calibrate.
 * **Kill (recommended):** delete the dead path and skip the `ChromaticHarmonyEngine` / τ items in Phase 3.1 entirely; all scoring work targets the live 3-evaluator `FashionistaEngine` + UI score.
@@ -37,10 +37,13 @@ Currently, `StyleSimulatorEngine` runs `FashionistaEngine` (40/35/25 split) for 
 * **Preload Silhouette Data:** Pass already-resolved domain models into `SilhouetteGrader` instead of executing blocking database queries on `Dispatchers.Default`.
 
 
-* **Unify UI and Audit Math:** Remove `ColorHarmonyEngine.calculateFashionistaScore` from `GreedyRehydrator` and display the canonical `FashionistaEngine` score computed after final slot assignment.
+* **Unify UI and Audit Math:** Remove `ColorHarmonyEngine.calculateFashionistaScore` from `GreedyRehydrator`. To keep the single evaluation valid, move deterministic slot completion *before* `FashionistaEngine` runs inside `generateBlueprint()` (backfill missing TOP/BOTTOM/SHOES only from eligible candidates, honoring anchors/hidden/thermal/rotation) — then audit, score, and display all describe the identical outfit. `GreedyRehydrator` becomes a pure ID→UI mapper: delete its keyword recategorization (`applyClothingKeywordFallbacks`), anchor fail-safe + `distinctBy` (superseded by upstream completion), inventory-wide backfill (`assignToSlots` `inventory.find` fallbacks), name-based cosmetic fallbacks, and rescoring. It resolves IDs and assigns slots from the guaranteed-complete set only.
 
 
 * **Delete Broken Delta-E:** Delete the unused and dimensionally invalid `ColorHarmonyEngine.calculateDeltaE` (`:149`) that mixes hue degrees with $L^*/C^*$ units.
+
+
+* **Reshape `FashionistaScore` to the live pipeline:** Remove the fake all-`0.85` default `breakdown` vector and the `standardVersion` mismatch (`"v1.1"` default vs calibration `"v1"`). On the kill path, derive `breakdown` from the evaluated 3-evaluator sub-scores (or drop the 6-feature breakdown type) so the UI never renders placeholder vectors.
 
 
 
@@ -54,6 +57,9 @@ Currently, `StyleSimulatorEngine` runs `FashionistaEngine` (40/35/25 split) for 
 
 
 * **Resolve Multimodal Policy:** Extract facial skin/hair telemetry on-device using `ItaCalculator` and `ColorQuantizer`, sending only text telemetry to cloud providers, or explicitly restrict `Multimodal` inputs to providers that support vision.
+
+
+* **Reject (don't strip) Multimodal on cloud paths:** `ByokAiProvider` and `GemmaRestFallbackProvider` currently accept `AiInput.Multimodal` and silently drop the image. Make them explicitly reject it (as `FirebaseAiProvider` already does), or guard once in `CapabilityRouter` via `supportsLocalImageIngestion`, so callers get a loud routing failure instead of silently degraded text-only behavior.
 
 
 
@@ -131,7 +137,7 @@ Validation failures currently burn up to 4 full prompts across failover provider
 * **Fix Single-Chroma Scoring:** In `ColorHarmonyEngine.kt:184`, replace the automatic `38/40` score for `<= 1` chromatic item with a neutral-contrast evaluation based on $L^*$ separation.
 
 
-* **Recalibrate Baselines & Logistic Curve:** Lower evaluator baselines in `FashionistaEngine` to `50` (full 0–100 spread) and adjust `CalibrationCurve.kt:8` from $\tau = 0.20$ to $\tau = 0.14$ so `EXCEPTIONAL_EDITORIAL` (`95+`) is reachable.
+* **Recalibrate Baselines & Logistic Curve:** Lower evaluator baselines in `FashionistaEngine` to `50` (full 0–100 spread) and adjust `CalibrationCurve.kt:8` from $\tau = 0.20$ to $\tau = 0.14$ so `EXCEPTIONAL_EDITORIAL` (`95+`) is reachable. WARNING — lowering baselines without widening spreads breaks the gate: naive 50-baselines cap the maxima at color 70 (`50+avg×10`), silhouette 80 (`50`, modifiers −20/+30), contrast 75 (`50±25`), capping the blend at $0.40(70)+0.35(80)+0.25(75)=74.75 < 80$, so *every* outfit would fail `isApproved`. Scale the spreads with the baseline (e.g. color avg×10→×25, silhouette/contrast modifiers ×2.5 toward ±50) or lower the 80-point gate to match the new distribution — and verify max-achievable ≥ gate before landing.
 
 
 
@@ -148,7 +154,7 @@ Validation failures currently burn up to 4 full prompts across failover provider
 **3. Replace Substring Keyword Matching**
 Raw `contains()` calls in `WardrobeCandidateFilter`, `HeuristicStyleEngine`, `SilhouetteGrader`, and `GreedyRehydrator` cause false positives like `"a"` matching every item or `"lip"` matching `"eclipse"`.
 
-* **Shared Word-Boundary Matcher:** Build a shared core utility combining whole-word matching (as `IntentAnalyzer` does via split + exact match — it has no `\b` tokenizer to extract) with `\b` regex boundaries and stop-word stripping, and replace all 5 substring matchers (`WardrobeCandidateFilter`, `HeuristicStyleEngine`, `SilhouetteGrader`, `GreedyRehydrator`, cosmetic scorer).
+* **Shared Word-Boundary Matcher:** Build a shared core utility combining whole-word matching (as `IntentAnalyzer` does via split + exact match — it has no `\b` tokenizer to extract) with `\b` regex boundaries and stop-word stripping, and replace the 4 remaining substring matchers (`WardrobeCandidateFilter`, cosmetic scorer, `HeuristicStyleEngine`, `SilhouetteGrader`). `GreedyRehydrator` is off this list: Phase 1.1 deletes its matchers (`"lip"`/`"top"` fallbacks and keyword recategorization) rather than migrating them.
 
 
 
@@ -168,7 +174,7 @@ Five classes in the 6-feature scorer are stubs or proxies (`GlcmTextureEngine`, 
 **1. Fix Rehydrator Ordering, Deterministic Fallback & Dress Slots**
 `GreedyRehydrator` can evict locked anchors and scores outfits before slot backfill, while `HeuristicStyleEngine` uses `.random()` and mishandles dresses.
 
-* **Anchor Prepending:** In `GreedyRehydrator.kt:44`, prepend locked anchors *before* AI-resolved items prior to calling `distinctBy { it.category }`, and restrict slot backfill to eligible candidates.
+* **Anchor-first ordering upstream:** The Phase 1.1 redesign moved slot completion into `generateBlueprint()` and stripped `GreedyRehydrator` to a pure mapper — so apply anchor-first ordering there, not in the rehydrator: locked anchors take their slots before any AI-resolved or backfilled item (anchors win category conflicts by construction, no `distinctBy` race), with backfill restricted to eligible candidates as specified in Phase 1.1.
 
 
 * **Deterministic Heuristic Fallback:** Replace `.randomOrNull()` and random neutral padding in `HeuristicStyleEngine.kt:39` with deterministic top-ranked selection (`maxByOrNull { it.compositeScore }`) using actual item hex values.
