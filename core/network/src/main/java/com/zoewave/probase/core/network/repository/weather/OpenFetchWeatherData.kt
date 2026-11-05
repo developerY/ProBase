@@ -80,7 +80,7 @@ private object OpenMeteoRetrofitClient {
     private const val BASE_URL = "https://api.open-meteo.com/"
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
-        level = if (com.zoewave.probase.core.model.BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
+        level = if (com.zoewave.probase.core.network.BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
     }
 
     private val httpClient = OkHttpClient.Builder()
@@ -101,7 +101,7 @@ private object OpenRetrofitClient {
     private const val BASE_URL = "https://api.openweathermap.org/"
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
-        level = if (com.zoewave.probase.core.model.BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
+        level = if (com.zoewave.probase.core.network.BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
     }
 
     private val httpClient = OkHttpClient.Builder()

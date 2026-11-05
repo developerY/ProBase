@@ -4,6 +4,10 @@ import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
+import kotlinx.serialization.json.buildJsonArray
+import kotlinx.serialization.json.add
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
@@ -61,16 +65,23 @@ class ByokAiProvider @Inject constructor() : AiProvider {
         val normalizedModel = currentModelName.removePrefix("models/")
         val url = "https://generativelanguage.googleapis.com/v1beta/models/$normalizedModel:generateContent?key=$apiKey"
         
-        // Ensure valid JSON escaping for prompt
-        val escapedPrompt = input.promptString.replace("\"", "\\\"").replace("\n", "\\n")
-        
-        val jsonBody = """
-            {
-                "contents": [{
-                    "parts": [{"text": "$escapedPrompt"}]
-                }]
-            }
-        """.trimIndent()
+                // Build JSON body securely using kotlinx.serialization
+        val jsonBody = kotlinx.serialization.json.buildJsonObject {
+            put("contents", kotlinx.serialization.json.buildJsonArray {
+                add(kotlinx.serialization.json.buildJsonObject {
+                    put("parts", kotlinx.serialization.json.buildJsonArray {
+                        add(kotlinx.serialization.json.buildJsonObject {
+                            put("text", input.promptString)
+                        })
+                    })
+                })
+            })
+            // Enforce low temperature for reliability unless overriden
+            val temp = input.temperatureOverride ?: 0.2f
+            put("generationConfig", kotlinx.serialization.json.buildJsonObject {
+                put("temperature", temp)
+            })
+        }.toString()
         
         val requestBody = jsonBody.toRequestBody("application/json".toMediaTypeOrNull())
         val request = Request.Builder()

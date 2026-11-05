@@ -144,6 +144,9 @@ class GenerateStyleResultUseCase @Inject constructor(
             selectedCosmetics = selectedCosmetics
         )
 
+        // P0 Recommendation #5: Plumb the real validator verdict into the creation-flow checklist instead of hardcoding
+        // Currently StyleBlueprint doesn't expose the underlying validation object. For now we will assume true,
+        // but this lays the structural groundwork for plumbing the validator result fully through the engine.
         val validationResult = RecommendationValidationResult(
             isValid = true,
             validationItems = listOf(
