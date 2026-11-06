@@ -1,4 +1,4 @@
-Copy and paste the prompt block below directly into your autonomous coding agent. It encodes every requirement, architectural boundary, and math verification gate from `applications/kocolor/docs/ProductFixes/RoadMapToPro.md` across Phases 1–4, with mandatory build/test checkpoints between phases so the agent never compounds errors.
+> Agent execution prompt for RoadMapToPro.md Phases 1–4. Feed this file to the coding agent; run the checkpoint after each phase before proceeding.
 
 
 # AGENT MISSION: Execute `RoadMapToPro.md` (Phases 1–4) for KoColor
@@ -29,7 +29,7 @@ We are standardizing on the live 3-evaluator `FashionistaEngine`.
 
 ### 1.2 Reconcile Fashionista Scoring, Move Slot Completion Upstream & Strip `GreedyRehydrator`
 1. **Move Deterministic Slot Completion Into `StyleSimulatorEngine.generateBlueprint()`:**
-   - Before `FashionistaEngine` and `IntentFulfillmentEvaluator` run, complete any missing required slots strictly from the **eligible candidate pool** (never from raw unfiltered inventory, respecting hidden, thermal, rotation, and anchor constraints). Source the missing-slot requirements from `RoleGapAnalyzer.determineRoleRequirements()` (this is its adoption — Phase 4.3 deletes the old inline partitioning instead of re-deciding).
+   - Before `FashionistaEngine` and `IntentFulfillmentEvaluator` run, complete any missing required slots strictly from the **eligible candidate pool** (never from raw unfiltered inventory, respecting hidden, thermal, rotation, and anchor constraints). Source the missing-slot requirements from `RoleGapAnalyzer.determineRoleRequirements()` (this is its adoption — Phase 4.3 additionally wires its output into manifest budget partitioning).
    - Implement dress-aware satisfaction here: a selected `DRESSES`/`ONE_PIECE` item fills both `TOP` and `BOTTOM` (no redundant bottoms). Phase 4.1 extends only the heuristic fallback's own slot picking with the same rule.
    - **Anchor-First Ordering:** Place locked anchors into their slots *before* AI-resolved or backfilled items so anchors win category conflicts by construction without any `distinctBy` race.
 2. **Preload Silhouette Data:**
@@ -38,14 +38,14 @@ We are standardizing on the live 3-evaluator `FashionistaEngine`.
    - Keep `StyleBlueprint` strictly as the AI JSON wire contract.
    - Return `FashionistaScore`, `IntentFulfillment`, and `ValidationReport` (see 1.3) on the result wrapper returned by `StyleSimulatorEngine.generateBlueprint()` so `GenerateStyleResultUseCase` reuses the single evaluation instead of re-running `FashionistaEngine` and `IntentFulfillmentEvaluator`.
 4. **Reshape `FashionistaScore`:**
-   - Remove the fake all-`0.85` default `breakdown` vector and the 6-feature `FashionistaFeatureVector` breakdown type. Replace it with a 3-field breakdown snapshot populated from the evaluated sub-scores (`colorHarmonyScore/100`, `silhouetteScore/100`, `contrastScore/100`, each availability `1.0`). Unify on single constants `standardId="FASHIONISTA"`, `standardVersion="v1"` (deleting the `"v1.1"` default). This un-breaks `FashionistaScore.kt` after the Phase 1.0 deletions.
+   - Remove the fake all-`0.85` default `breakdown` vector and the 6-feature `FashionistaFeatureVector` breakdown type. Replace it with a 3-field breakdown snapshot populated from the evaluated sub-scores (`colorHarmonyScore/100`, `silhouetteScore/100`, `contrastScore/100`, each availability `1.0`). Unify on single constants `standardId="FASHIONISTA"`, `standardVersion="v1"` (deleting the `"v1.1"` default). Update any UI/Compose radar or breakdown call sites referencing `FashionistaScore.breakdown` to read the 3-axis snapshot. This un-breaks `FashionistaScore.kt` after the Phase 1.0 deletions.
 5. **Turn `GreedyRehydrator` into a Pure ID-to-UI Mapper:**
    - Delete all 5 legacy fallback/rescoring steps from `GreedyRehydrator.kt`:
      1. Keyword recategorization (`applyClothingKeywordFallbacks` at line ~75, eliminating `"top" ⊂ "stop"`).
      2. Anchor fail-safe append + `distinctBy { it.category }` (line ~44).
      3. Inventory-wide slot backfill (`assignToSlots` `inventory.find` fallbacks).
      4. Name-based cosmetic fallbacks (lines ~129–136, eliminating `"lip" ⊂ "eclipse"`).
-     5. `ColorHarmonyEngine.calculateFashionistaScore` rescoring — change `mapToVisualBlueprintData` to accept the pre-computed `FashionistaScore` as a parameter (no internal scoring) and update its callers (`StyleSimulatorViewModel`, `BlueprintDetailContent`) to pass the result-channel score through to `koColorScore`.
+     5. `ColorHarmonyEngine.calculateFashionistaScore` rescoring — delete `calculateFashionistaScore` from `ColorHarmonyEngine.kt`, change `mapToVisualBlueprintData` to accept the pre-computed `FashionistaScore` as a parameter (no internal scoring), update its callers (`StyleSimulatorViewModel`, `BlueprintDetailContent`) to pass the result-channel score through to `koColorScore`, and update `GreedyRehydratorTest` in place to match the new signature (do NOT delete `GreedyRehydratorTest`).
 
 ### 1.3 Complete Validator Checklist Plumbing (`RecommendationValidator.kt`, `GenerateStyleResultUseCase.kt`)
 1. Update `RecommendationValidator` to produce a structured `ValidationReport` containing per-rule booleans (ID grounding, anchor retention, role firewall, rationale scrub).
@@ -136,7 +136,7 @@ We are standardizing on the live 3-evaluator `FashionistaEngine`.
 ### 4.3 Dead Code Cleanup, Utility Consolidation & Unit Test Suite
 1. **Preflight Gate & Role Diversity:**
    - Port the preflight slot-completeness gate concept from `DeterministicCatalogEngine` onto `StyleSimulatorEngine`'s `ClothingItem` pool (aborting before AI spend if required slots cannot be filled), then delete the unused `DeterministicCatalogEngine` class.
-   - `RoleGapAnalyzer` was adopted as the requirements source for upstream slot completion in Phase 1.2 — here, delete the simulator's old duplicate inline partitioning (`categorizedPool`/`slotsPerCategory` budget logic in `adaptContextToProvider`) so exactly one slot-diversity implementation remains.
+   - Wire `selectionState.missingRoleRequirements` (from `RoleGapAnalyzer`) into `adaptContextToProvider`'s `categorizedPool`/`slotsPerCategory` partitioning (preserving the Phase 2.2 floor-of-1 step-down logic) so candidate slots only allocate budget to unfilled roles.
    - Delete dead methods/fields: `WardrobeCandidateFilter.getCandidates`, `WardrobeCandidateFilter.getCosmeticCandidates`, `DeterministicContextEngine.enforceRoleDiversity`, `FirebaseAiClient.getStyleAdvice`, `FirebaseAiClient.estimateTokens`, and unused `rotationScoringUseCase`/`repository` constructor injections in `DeterministicContextEngine`.
 2. **Consolidate Duplicates:**
    - Merge duplicate `hexToLCh`, `calculateChroma`, chroma-weighted circular mean, and JSON brace-stripping helpers into shared utilities in `core/color` and `core/json`.
@@ -152,4 +152,3 @@ We are standardizing on the live 3-evaluator `FashionistaEngine`.
 > **FINAL VERIFICATION:** Run `./gradlew testDebugUnitTest` and `./gradlew assembleDebug` and report a summary of all modified/deleted files and test results.
 
 
-If you want to run all four phases in a single agent session, paste the entire block above; if your agent works better with smaller context windows, paste one phase at a time starting with **Phase 1**.
