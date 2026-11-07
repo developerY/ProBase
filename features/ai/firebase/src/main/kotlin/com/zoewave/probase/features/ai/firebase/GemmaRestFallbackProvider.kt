@@ -87,13 +87,13 @@ class GemmaRestFallbackProvider @Inject constructor(
     }
 
     override suspend fun execute(input: AiInput): Result<String> = withContext(Dispatchers.IO) {
+        if (input is AiInput.Multimodal) {
+            return@withContext Result.failure(UnsupportedOperationException("Gemma REST proxy does not support multimodal inputs for privacy and token budget reasons"))
+        }
+
         val userKey = aiSettings.getGeminiApiKey()
         val targetModel = activeModel.ifBlank { "gemma-4-26b-a4b-it" }
-
-        val promptStr = when (input) {
-            is AiInput.TextOnly -> input.promptString
-            is AiInput.Multimodal -> input.promptString
-        }
+        val promptStr = input.promptString
 
         if (!userKey.isNullOrBlank()) {
             return@withContext executeDirectApi(userKey, targetModel, promptStr, input.temperatureOverride)

@@ -571,7 +571,7 @@ private fun StyleResultScreenPreview() {
                     totalScore = 92.7f,
                     isApproved = true,
                     coverage = 1.0,
-                    standardId = "FASHIONISTA_STD",
+                    standardId = "FASHIONISTA",
                     standardVersion = "v1.1"
                 ),
                 intentFulfillment = IntentFulfillment(

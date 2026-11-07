@@ -17,6 +17,7 @@ dependencies {
     implementation(project(":applications:kocolor:model"))
     implementation(project(":applications:kocolor:data"))
     implementation(project(":applications:kocolor:db"))
+    api(project(":features:ai:core"))
     implementation(project(":features:ai:configuration"))
     implementation(project(":features:ai:local"))
     implementation(project(":features:ai:firebase"))

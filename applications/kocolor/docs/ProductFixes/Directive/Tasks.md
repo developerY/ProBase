@@ -45,7 +45,7 @@ We are standardizing on the live 3-evaluator `FashionistaEngine`.
      2. Anchor fail-safe append + `distinctBy { it.category }` (line ~44).
      3. Inventory-wide slot backfill (`assignToSlots` `inventory.find` fallbacks).
      4. Name-based cosmetic fallbacks (lines ~129–136, eliminating `"lip" ⊂ "eclipse"`).
-     5. `ColorHarmonyEngine.calculateFashionistaScore` rescoring — delete `calculateFashionistaScore` from `ColorHarmonyEngine.kt`, change `mapToVisualBlueprintData` to accept the pre-computed `FashionistaScore` as a parameter (no internal scoring), update its callers (`StyleSimulatorViewModel`, `BlueprintDetailContent`) to pass the result-channel score through to `koColorScore`, and update `GreedyRehydratorTest` in place to match the new signature (do NOT delete `GreedyRehydratorTest`).
+     5. `ColorHarmonyEngine.calculateFashionistaScore` rescoring — delete `calculateFashionistaScore` from `ColorHarmonyEngine.kt`, change `mapToVisualBlueprintData` to accept the pre-computed score `Int` as a parameter (no internal scoring and no default value), update its callers (`StyleSimulatorViewModel`, `BlueprintDetailContent`) to pass the result-channel score through to `koColorScore`, and update `GreedyRehydratorTest` in place to match the new signature (do NOT delete `GreedyRehydratorTest`).
 
 ### 1.3 Complete Validator Checklist Plumbing (`RecommendationValidator.kt`, `GenerateStyleResultUseCase.kt`)
 1. Update `RecommendationValidator` to produce a structured `ValidationReport` containing per-rule booleans (ID grounding, anchor retention, role firewall, rationale scrub).

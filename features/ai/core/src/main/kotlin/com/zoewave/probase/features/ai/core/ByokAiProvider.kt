@@ -56,6 +56,10 @@ class ByokAiProvider @Inject constructor() : AiProvider {
     }
 
     override suspend fun execute(input: AiInput): Result<String> = withContext(Dispatchers.IO) {
+        if (input is AiInput.Multimodal) {
+            return@withContext Result.failure(UnsupportedOperationException("BYOK Provider does not support multimodal inputs for privacy and token budget reasons"))
+        }
+
         val apiKey = currentApiKey
         if (apiKey.isNullOrBlank()) {
             Log.w("ByokAiProvider", "API Key is null or blank")

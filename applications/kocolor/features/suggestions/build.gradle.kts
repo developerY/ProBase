@@ -15,6 +15,7 @@ dependencies {
     implementation(project(":core:util"))
     implementation(project(":applications:kocolor:model"))
     implementation(project(":applications:kocolor:data"))
+    api(project(":features:ai:core"))
     implementation(project(":features:ai:configuration"))
 
     implementation(platform(libs.firebase.bom))

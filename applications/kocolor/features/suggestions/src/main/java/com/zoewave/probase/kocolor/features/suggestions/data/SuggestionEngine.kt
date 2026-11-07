@@ -21,53 +21,43 @@ class SuggestionEngine @Inject constructor(
 
     suspend fun getPersonalizedAdvice(
         profile: FashionProfile,
-        query: String?,
-        apiKey: String,
-        modelName: String = "gemini-3.8-flash"
+        query: String?
     ): FashionAdvice {
         return try {
-            val generativeModel = Firebase.ai(
-                backend = GenerativeBackend.googleAI(),
-                useLimitedUseAppCheckTokens = false
-            ).generativeModel(
-                modelName = modelName,
-                generationConfig = generationConfig {
-                    responseMimeType = "application/json"
+            val textPrompt = """
+                You are a professional personal fashion consultant. 
+                Based on the user's profile, provide personalized fashion and makeup advice.
+                
+                USER PROFILE:
+                - Seasonal Type: ${profile.seasonalType}
+                - Undertone: ${profile.undertone}
+                - Skin Tone: ${profile.skinToneHex ?: "Not specified"}
+                - Eye Color: ${profile.eyeColor ?: "Not specified"}
+                - Hair Color: ${profile.hairColor ?: "Not specified"}
+                
+                ${if (!query.isNullOrBlank()) "USER REQUEST: $query" else "GOAL: Provide a comprehensive update on makeup and clothing suggestions."}
+                
+                Respond ONLY with a valid JSON object matching this exact schema:
+                {
+                  "summary": "string",
+                  "seasonalType": "SPRING" | "SUMMER" | "AUTUMN" | "WINTER",
+                  "undertone": "WARM" | "COOL" | "NEUTRAL",
+                  "makeupSuggestions": [
+                    { "category": "string", "advice": "string", "recommendedColors": ["string"] }
+                  ],
+                  "outfitSuggestions": [
+                    { "occasion": "string", "advice": "string", "keyPieces": ["string"], "colorCombinations": ["string"] }
+                  ],
+                  "recommendedPalette": ["#HEX", "#HEX", ...]
                 }
-            )
+            """.trimIndent()
 
-            val prompt = content {
-                text("""
-                    You are a professional personal fashion consultant. 
-                    Based on the user's profile, provide personalized fashion and makeup advice.
-                    
-                    USER PROFILE:
-                    - Seasonal Type: ${profile.seasonalType}
-                    - Undertone: ${profile.undertone}
-                    - Skin Tone: ${profile.skinToneHex ?: "Not specified"}
-                    - Eye Color: ${profile.eyeColor ?: "Not specified"}
-                    - Hair Color: ${profile.hairColor ?: "Not specified"}
-                    
-                    ${if (!query.isNullOrBlank()) "USER REQUEST: $query" else "GOAL: Provide a comprehensive update on makeup and clothing suggestions."}
-                    
-                    Respond ONLY with a valid JSON object matching this exact schema:
-                    {
-                      "summary": "string",
-                      "seasonalType": "SPRING" | "SUMMER" | "AUTUMN" | "WINTER",
-                      "undertone": "WARM" | "COOL" | "NEUTRAL",
-                      "makeupSuggestions": [
-                        { "category": "string", "advice": "string", "recommendedColors": ["string"] }
-                      ],
-                      "outfitSuggestions": [
-                        { "occasion": "string", "advice": "string", "keyPieces": ["string"], "colorCombinations": ["string"] }
-                      ],
-                      "recommendedPalette": ["#HEX", "#HEX", ...]
-                    }
-                """.trimIndent())
-            }
+            val provider = capabilityRouter.getRankedAvailableProviders().firstOrNull()
+                ?: throw IllegalStateException("No AI providers available")
 
-            val response = generativeModel.generateContent(prompt)
-            val jsonText = response.text ?: throw IllegalStateException("Empty response from AI")
+            val input = AiInput.TextOnly(promptString = textPrompt)
+            val result = provider.execute(input)
+            val jsonText = result.getOrNull() ?: throw IllegalStateException("Empty response from AI")
             
             val cleanedJson = jsonText.substringAfter("{").substringBeforeLast("}")
             val finalJson = "{$cleanedJson}"

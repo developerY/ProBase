@@ -23,7 +23,7 @@ class GreedyRehydrator @Inject constructor() {
         inventory: List<ClothingItem>,
         cosmetics: List<CosmeticItem>,
         palette: List<String> = emptyList(),
-        fashionistaScore: Int = 85,
+        fashionistaScore: Int,
         isComplete: Boolean = false
     ): VisualBlueprintData {
         // 1. Initial Resolution

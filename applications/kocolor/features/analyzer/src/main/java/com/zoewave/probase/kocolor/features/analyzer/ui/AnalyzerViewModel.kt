@@ -193,9 +193,7 @@ class AnalyzerViewModel @Inject constructor(
                     shoes = shoesBitmap,
                     clothes = clothesBitmap,
                     occasion = occasion,
-                    location = location,
-                    apiKey = apiKey,
-                    modelName = modelName
+                    location = location
                 )
                 fashionRepository.generatePrediction(result)
                 _analyzerState.value = AnalyzerUiState.Success(result)

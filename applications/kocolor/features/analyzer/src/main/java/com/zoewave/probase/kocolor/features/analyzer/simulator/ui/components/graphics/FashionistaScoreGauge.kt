@@ -66,7 +66,6 @@ import kotlin.math.sin
 import androidx.compose.ui.res.stringResource
 import com.zoewave.probase.kocolor.features.analyzer.R
 import com.zoewave.probase.kocolor.fashionista.domain.FashionistaFeatureVector
-import com.zoewave.probase.kocolor.fashionista.domain.FeatureValue
 
 enum class ScoreViewTab { GAUGE, RADAR, MATH, DECOMP }
 
@@ -82,9 +81,9 @@ fun CollapsibleFashionistaScoreCard(
     var selectedTab by remember { mutableStateOf(ScoreViewTab.GAUGE) }
 
     val defaultBreakdown = breakdown ?: FashionistaFeatureVector(
-        colorHarmony = FeatureValue((score.toDouble() * 0.98 / 100.0).coerceIn(0.1, 1.0), 1.0),
-        silhouette = FeatureValue((score.toDouble() * 0.90 / 100.0).coerceIn(0.1, 1.0), 1.0),
-        contrast = FeatureValue((score.toDouble() * 0.90 / 100.0).coerceIn(0.1, 1.0), 1.0)
+        colorHarmony = (score.toDouble() * 0.98 / 100.0).coerceIn(0.1, 1.0),
+        silhouette = (score.toDouble() * 0.90 / 100.0).coerceIn(0.1, 1.0),
+        contrast = (score.toDouble() * 0.90 / 100.0).coerceIn(0.1, 1.0)
     )
 
     Card(

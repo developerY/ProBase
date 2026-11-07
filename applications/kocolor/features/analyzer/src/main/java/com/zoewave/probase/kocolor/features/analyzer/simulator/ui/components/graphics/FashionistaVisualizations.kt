@@ -41,19 +41,16 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoewave.probase.kocolor.features.analyzer.R
 import com.zoewave.probase.kocolor.fashionista.domain.FashionistaFeatureVector
-import com.zoewave.probase.kocolor.fashionista.domain.FeatureValue
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -70,8 +67,7 @@ data class FashionistaMathBreakdown(
 )
 
 /**
- * Component 1: Pearlescent Hero Dial (Based on design reference image_c2a0ca.png)
- * Features segmented feature sweeps, coverage track with glowing node caps, and organic shimmer.
+ * Component 1: Pearlescent Hero Dial
  */
 @Composable
 fun FashionistaHeroDial(
@@ -130,15 +126,14 @@ fun FashionistaHeroDial(
                 val center = Offset(size.width / 2, size.height / 2)
                 val outerRadius = size.minDimension / 2
 
-                // 1. Outer Pearlescent Disk Base
                 val pearlescentBrush = Brush.sweepGradient(
                     colors = listOf(
-                        Color(0xFFF3E7D3), // Champagne
-                        Color(0xFFE8C8D5), // Soft Rose
-                        Color(0xFFDCD5EF), // Lavender
-                        Color(0xFFC6DAC9), // Soft Sage
-                        Color(0xFFE2CBB7), // Warm Taupe
-                        Color(0xFFF3E7D3)  // Loop
+                        Color(0xFFF3E7D3),
+                        Color(0xFFE8C8D5),
+                        Color(0xFFDCD5EF),
+                        Color(0xFFC6DAC9),
+                        Color(0xFFE2CBB7),
+                        Color(0xFFF3E7D3)
                     ),
                     center = center
                 )
@@ -149,7 +144,6 @@ fun FashionistaHeroDial(
                     center = center
                 )
 
-                // 2. Beveled White Border Ring
                 val borderStrokeWidth = 4.dp.toPx()
                 drawCircle(
                     color = Color.White.copy(alpha = 0.85f),
@@ -158,11 +152,9 @@ fun FashionistaHeroDial(
                     style = Stroke(width = borderStrokeWidth)
                 )
 
-                // 3. Segmented Sweeps Ring (Outer Ring)
                 val outerTrackRadius = outerRadius - 16.dp.toPx()
                 val outerTrackStrokeWidth = 6.dp.toPx()
 
-                // Draw background track
                 drawCircle(
                     color = Color.Black.copy(alpha = 0.06f),
                     radius = outerTrackRadius,
@@ -172,7 +164,6 @@ fun FashionistaHeroDial(
 
                 val sweepAngle = animatedProgress * 360f
 
-                // Outer Pearlescent Progress Arc
                 val silverBrush = Brush.linearGradient(
                     colors = listOf(
                         Color(0xFFE2E8F0),
@@ -196,11 +187,9 @@ fun FashionistaHeroDial(
                     size = Size(outerTrackRadius * 2, outerTrackRadius * 2)
                 )
 
-                // 4. Inner Coverage Track (Thinner Track with Glowing Node Caps)
                 val innerTrackRadius = outerTrackRadius - 14.dp.toPx()
                 val innerTrackStrokeWidth = 3.dp.toPx()
 
-                // Inactive Coverage Track
                 drawCircle(
                     color = Color.Black.copy(alpha = 0.05f),
                     radius = innerTrackRadius,
@@ -213,7 +202,6 @@ fun FashionistaHeroDial(
                 if (coverageSweepAngle > 0f) {
                     val iceBlueGlow = Color(0xFF38BDF8)
 
-                    // Inner Coverage Arc
                     drawArc(
                         color = iceBlueGlow.copy(alpha = 0.75f),
                         startAngle = -90f,
@@ -224,13 +212,11 @@ fun FashionistaHeroDial(
                         size = Size(innerTrackRadius * 2, innerTrackRadius * 2)
                     )
 
-                    // Glowing Node Caps at start and end of coverage arc
                     val endAngleRad = Math.toRadians((-90f + coverageSweepAngle).toDouble())
 
                     val endCapX = center.x + (innerTrackRadius * cos(endAngleRad)).toFloat()
                     val endCapY = center.y + (innerTrackRadius * sin(endAngleRad)).toFloat()
 
-                    // End Node Glow
                     drawCircle(
                         color = iceBlueGlow.copy(alpha = 0.35f),
                         radius = 6.dp.toPx(),
@@ -243,7 +229,6 @@ fun FashionistaHeroDial(
                     )
                 }
 
-                // 5. Inner White Core Disc
                 val innerCoreRadius = innerTrackRadius - 10.dp.toPx()
                 drawCircle(
                     color = Color.White.copy(alpha = 0.95f),
@@ -252,7 +237,6 @@ fun FashionistaHeroDial(
                 )
             }
 
-            // Score Display Text
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -287,16 +271,14 @@ fun FashionistaHeroDial(
 }
 
 /**
- * Component 2: 6-Axis Aesthetic Radar (Spider Chart)
- * Renders the hexagonal feature shape of the outfit. Dashed lines indicate partial availability.
+ * Component 2: 3-Axis Aesthetic Radar (Triangle Chart)
  */
 @Composable
 fun FashionistaRadarChart(
     breakdown: FashionistaFeatureVector,
     modifier: Modifier = Modifier
 ) {
-    // Updated for 3-evaluator pipeline
-    val labels = listOf("Color", "Shape", "Contrast")
+    val labels = listOf("Color", "Silhouette", "Contrast")
     val features = listOf(
         breakdown.colorHarmony,
         breakdown.silhouette,
@@ -316,11 +298,11 @@ fun FashionistaRadarChart(
                 val maxRadius = size.minDimension / 2 - 12.dp.toPx()
                 val angleStep = (2 * Math.PI / 3).toFloat()
 
-                // 1. Draw Hexagonal Grid Background (25%, 50%, 75%, 100%)
+                // 1. Draw Triangular Grid Background (25%, 50%, 75%, 100%)
                 for (step in 1..4) {
                     val r = maxRadius * (step / 4f)
                     val gridPath = Path()
-                    for (i in 0 until 6) {
+                    for (i in 0 until 3) {
                         val angle = -Math.PI / 2 + i * angleStep
                         val x = center.x + r * cos(angle).toFloat()
                         val y = center.y + r * sin(angle).toFloat()
@@ -334,8 +316,8 @@ fun FashionistaRadarChart(
                     )
                 }
 
-                // 2. Draw 6 Spoke Axis Lines
-                for (i in 0 until 6) {
+                // 2. Draw 3 Spoke Axis Lines
+                for (i in 0 until 3) {
                     val angle = -Math.PI / 2 + i * angleStep
                     val endX = center.x + maxRadius * cos(angle).toFloat()
                     val endY = center.y + maxRadius * sin(angle).toFloat()
@@ -351,9 +333,9 @@ fun FashionistaRadarChart(
                 val polyPath = Path()
                 val points = mutableListOf<Offset>()
 
-                for (i in 0 until 6) {
-                    val feature = features[i]
-                    val r = (maxRadius * feature.value.coerceIn(0.0, 1.0)).toFloat()
+                for (i in 0 until 3) {
+                    val featureVal = features[i]
+                    val r = (maxRadius * featureVal.coerceIn(0.0, 1.0)).toFloat()
                     val angle = -Math.PI / 2 + i * angleStep
                     val x = center.x + r * cos(angle).toFloat()
                     val y = center.y + r * sin(angle).toFloat()
@@ -363,48 +345,27 @@ fun FashionistaRadarChart(
                 }
                 polyPath.close()
 
-                // Filled Polygon Area
                 drawPath(
                     path = polyPath,
                     color = Color(0xFF2F6364).copy(alpha = 0.25f)
                 )
 
-                // Outline Edges (Dashed line if availability < 1.0)
-                for (i in 0 until 6) {
-                    val nextIdx = (i + 1) % 6
-                    val avail = (features[i].availability * features[nextIdx].availability).toFloat()
+                for (i in 0 until 3) {
+                    val nextIdx = (i + 1) % 3
                     val startPt = points[i]
                     val endPt = points[nextIdx]
 
-                    if (avail < 0.99f) {
-                        // Dashed path for low availability/missing evidence
-                        val dashedPath = Path().apply {
-                            moveTo(startPt.x, startPt.y)
-                            lineTo(endPt.x, endPt.y)
-                        }
-                        drawPath(
-                            path = dashedPath,
-                            color = Color(0xFF2F6364).copy(alpha = 0.5f),
-                            style = Stroke(
-                                width = 2.dp.toPx(),
-                                pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
-                            )
-                        )
-                    } else {
-                        drawLine(
-                            color = Color(0xFF2F6364),
-                            start = startPt,
-                            end = endPt,
-                            strokeWidth = 2.dp.toPx()
-                        )
-                    }
+                    drawLine(
+                        color = Color(0xFF2F6364),
+                        start = startPt,
+                        end = endPt,
+                        strokeWidth = 2.dp.toPx()
+                    )
                 }
 
-                // Vertex Dots
-                points.forEachIndexed { i, pt ->
-                    val avail = features[i].availability.toFloat()
+                points.forEach { pt ->
                     drawCircle(
-                        color = Color(0xFF2F6364).copy(alpha = avail),
+                        color = Color(0xFF2F6364),
                         radius = 4.dp.toPx(),
                         center = pt
                     )
@@ -417,13 +378,12 @@ fun FashionistaRadarChart(
             }
         }
 
-        // Radar Axis Labels Legend
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.SpaceAround
         ) {
             labels.forEachIndexed { i, label ->
-                val valPct = (features[i].value * 100).toInt()
+                val valPct = (features[i] * 100).toInt()
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         text = label,
@@ -442,11 +402,6 @@ fun FashionistaRadarChart(
     }
 }
 
-/**
- * Component 3: MATH Tab - Detailed Waterfall Math Decomposition
- * Visually audits the deterministic scoring equation:
- * Q = (1 - λ)Q_base + λ Q_interaction - P_unresolved
- */
 @Composable
 fun FashionistaMathDecomposition(
     breakdown: FashionistaMathBreakdown,
@@ -489,7 +444,6 @@ fun FashionistaMathDecomposition(
 
         Spacer(Modifier.height(16.dp))
 
-        // Canvas Waterfall Chart
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -504,7 +458,6 @@ fun FashionistaMathDecomposition(
                 val basePixelWidth = (barWidth * baseWidthRatio).coerceAtMost(barWidth)
                 val interPixelWidth = (barWidth * interWidthRatio).coerceAtMost(barWidth - basePixelWidth)
 
-                // 1. Solid Base Score Bar (Dark Slate)
                 if (basePixelWidth > 0f) {
                     drawRect(
                         color = Color(0xFF1E293B),
@@ -513,7 +466,6 @@ fun FashionistaMathDecomposition(
                     )
                 }
 
-                // 2. Synergy Addition Bar (Premium Muted Green)
                 if (interPixelWidth > 0f) {
                     drawRect(
                         color = Color(0xFF10B981),
@@ -522,7 +474,6 @@ fun FashionistaMathDecomposition(
                     )
                 }
 
-                // 3. Conflict Penalty (Red Subtraction Bar)
                 if (penaltyRatio > 0f) {
                     val penaltyPixelWidth = (barWidth * penaltyRatio).coerceAtMost(basePixelWidth + interPixelWidth)
                     val penaltyStartX = (basePixelWidth + interPixelWidth - penaltyPixelWidth).coerceAtLeast(0f)
@@ -534,7 +485,6 @@ fun FashionistaMathDecomposition(
                     )
                 }
 
-                // 4. Sharp Q-Marker Tick at Net qFinal Position
                 val qMarkerX = (barWidth * netWidthRatio).toFloat()
                 drawLine(
                     color = Color.Black,
@@ -547,7 +497,6 @@ fun FashionistaMathDecomposition(
 
         Spacer(Modifier.height(12.dp))
 
-        // Explanatory Labels
         val blendedVal = (1.0 - breakdown.effectiveLambda) * breakdown.qBase + breakdown.effectiveLambda * breakdown.qInteraction
 
         Column(modifier = Modifier.fillMaxWidth()) {
@@ -578,10 +527,6 @@ fun FashionistaMathDecomposition(
     }
 }
 
-/**
- * Component 4: Decomposition Bar (Waterfall / Math Breakdown)
- * Explains Q_base evidence, Q_interaction synergy, and P_unresolved chaos penalties.
- */
 @Composable
 fun FashionistaDecompositionBar(
     score: Double,
@@ -605,7 +550,6 @@ fun FashionistaDecompositionBar(
 
         Spacer(Modifier.height(12.dp))
 
-        // Horizontal Stacked Waterfall Bar
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -614,21 +558,18 @@ fun FashionistaDecompositionBar(
                 .background(Color.Black.copy(alpha = 0.06f))
         ) {
             Row(modifier = Modifier.fillMaxSize()) {
-                // Base Evidence Bar (Solid Dark)
                 Box(
                     modifier = Modifier
                         .fillMaxHeight()
                         .weight(qBasePct)
                         .background(Color(0xFF1E293B))
                 )
-                // Interaction Synergy Bar (Green)
                 Box(
                     modifier = Modifier
                         .fillMaxHeight()
                         .weight(qInterPct)
                         .background(Color(0xFF10B981))
                 )
-                // Chaos Penalty Bar (Red, if present)
                 if (pChaosPct > 0f) {
                     Box(
                         modifier = Modifier
@@ -642,7 +583,6 @@ fun FashionistaDecompositionBar(
 
         Spacer(Modifier.height(8.dp))
 
-        // Legend Row
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
@@ -672,9 +612,9 @@ fun FashionistaDecompositionBar(
 @Composable
 private fun FashionistaHeroDialPreview() {
     val sampleVector = FashionistaFeatureVector(
-        colorHarmony = FeatureValue(0.92, 1.0),
-        silhouette = FeatureValue(0.78, 1.0),
-        contrast = FeatureValue(0.88, 1.0)
+        colorHarmony = 0.92,
+        silhouette = 0.78,
+        contrast = 0.88
     )
 
     Column(modifier = Modifier.padding(16.dp)) {

@@ -69,9 +69,16 @@ class ProjectedVsCommittedIsolationTest {
             ClothingItem(internalId = 1, remoteId = product1, name = "Shirt", category = ClothingCategory.TOPS, colorHex = "#FFFFFF")
         ))
         coEvery { cosmeticRepository.getAllCosmetics() } returns flowOf(emptyList())
+        val blueprint = StyleBlueprint("Rationale", listOf("w_1"), listOf("c_1", "c_2", "c_3", "c_4"), emptyList())
+        val simulationResult = SimulationResult(
+            blueprint = blueprint,
+            fashionistaScore = com.zoewave.probase.kocolor.fashionista.domain.FashionistaScore(85f, 85f, 85f, 85f),
+            intentFulfillment = IntentFulfillment(),
+            validation = ValidationReport(true, true, true, true, true, true, true)
+        )
         coEvery { 
             simulatorEngine.generateBlueprint(any(), any(), any()) 
-        } returns StyleBlueprint("Rationale", listOf("w_1"), listOf("c_1", "c_2", "c_3", "c_4"), emptyList())
+        } returns simulationResult
 
         // 2. Generate Playlist
         val playlistId = useCase.generateWeeklyPlaylist(LocalDate.now()).getOrThrow()
