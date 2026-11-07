@@ -1,114 +1,114 @@
-Phase 2 is verified and complete. Your Phase 2 audit confirms that the compact Nano scaffold sits at 82 tokens (328 chars), `provider.countTokens()` is called at most once per provider attempt (`StyleSimulatorEngine.kt:528`), `maxOutputTokens` and `temperatureOverride` are wired across Firebase, BYOK, and Gemma, `PromptCacheRepository` uses the `"\u001F"` delimiter inside a thread-safe `Collections.synchronizedMap`, `RotationScoringUseCase` quantizes timestamps into `86_400_000L` UTC day-buckets, and all 55 unit tests pass across all 5 modules.
-
-Below is the complete, copy-pasteable agent specification for **Phase 3 (P2 — Fashion Math Discrimination, Calibration, Intent Fulfillment & Word-Boundary NLP)** based on `fashion_algorithms_assessment.md`, `Tasks.md`, and `Tasks_2.md`.
+Below is the revised **Phase 3 Agent Specification (v2)** 
 
 ```markdown
-# AGENT MISSION: Execute Phase 3 (P2 — Fashion Math Discrimination, Intent Fulfillment & Word-Boundary NLP)
+# AGENT MISSION: Execute Phase 3 (v2 — Fashion Math Discrimination, Active Intent Fulfillment & Canonical Word-Boundary NLP)
 
-You are executing **Phase 3 (P3.1 through P3.5)** of the KoColor remediation plan (`RoadMapToPro.md` / `Tasks.md` / `Tasks_2.md`).
+You are executing **Phase 3 (P3.1 through P3.5)** of the KoColor remediation plan (`RoadMapToPro.md` / `Tasks.md` / `Phase3_Open_feedback.md`).
 
 ## STRICT EXECUTION INVARIANTS (READ FIRST)
-1. **Do NOT recreate deleted 6-feature classes:** `ChromaticHarmonyEngine`, `CalibrationCurve`, `GlcmTextureEngine`, `SilhouetteEngine`, `VisualMassEngine`, `CosmeticIntegrationEngine`, `VisualHierarchyEngine`, and `CompositionEngine` were permanently deleted in Phase 1.0. Skip the gated `ChromaticHarmonyEngine` / `CalibrationCurve` bullets and apply all Phase 3 scoring work strictly to the live 3-evaluator `FashionistaEngine` pipeline (`ColorHarmonyEngine`, `ColorHarmonicsEvaluator`, `SilhouetteGrader`, `ContrastAnchorEvaluator`).
-2. **Do NOT regress Phase 1 or Phase 2 invariants:**
+1. **Inspect existing repository types before editing:** The repository's actual domain models, enum definitions, score ranges, and call sites are authoritative. Inspect each target file before modifying signatures.
+2. **Do NOT recreate any deleted 6-feature classes:** `FashionistaScorerImpl`, `DeterministicScorer`, `CalibrationCurve`, `InteractionModel`, `ChromaticHarmonyEngine`, `GlcmTextureEngine`, `TextureHarmonyEngine`, `SilhouetteEngine`, `VisualMassEngine`, `CosmeticIntegrationEngine`, `OutfitIntegrationEngine`, `VisualHierarchyEngine`, `CompositionEngine`, the 5 feature extractors, and `FeatureValue` were permanently deleted in Phase 1.0. Apply all Phase 3 scoring work strictly to the live 3-evaluator `FashionistaEngine` pipeline (`ColorHarmonyEngine`, `ColorHarmonicsEvaluator`, `SilhouetteGrader`, `ContrastAnchorEvaluator`).
+3. **Do NOT regress Phase 1 or Phase 2 invariants:**
    - Keep `SilhouetteGrader` free of `runBlocking` and database queries (it must continue accepting preloaded `List<ClothingItem>`).
    - Keep `StyleSimulatorEngine.countTokens()` at a single call site outside the heuristic fit loop.
    - Keep `ByokAiProvider` and `GemmaRestFallbackProvider` `UnsupportedOperationException` multimodal guards intact.
-3. **Never delete unit test files:** Update any existing unit test assertions that relied on the old lenient evaluator baselines (`78 / 75 / 70`) and add all required Phase 3 unit tests.
+4. **Never delete unit test files:** Update any existing unit test assertions affected by the recalibrated `[0, 100]` evaluator curves and add all new unit and integration tests required in P3.5.
 
 ---
 
-## P3.1: Widen Live Scoring Dynamic Range & Fix Single-Chroma Scoring
+## P3.1: Deterministic Single-Chroma Curve & 3-Evaluator Calibration
 
 **Problem:**
-1. In `ColorHarmonyEngine.kt` (`applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/color/ColorHarmonyEngine.kt:184`), palettes with `<= 1` chromatic color automatically return `38f` out of `40f` (near-perfect score for trivial or flat monotone input), and empty input can still earn high baseline points.
-2. In the live 3-evaluator path (`ColorHarmonicsEvaluator`, `SilhouetteGrader`, `ContrastAnchorEvaluator`), lenient baselines (`78±20`, `75` with `-20/+30`, `70±25`) compress almost every outfit into `55–98`, making the `80`-point `isApproved` gate pass by construction and leaving poor outfits unpenalized.
+1. In `ColorHarmonyEngine.kt` (`applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/color/ColorHarmonyEngine.kt:184`), palettes with `<= 1` chromatic color automatically return `38f` out of `40f` (near-max score for trivial or flat grey input), and empty outfits can receive high baseline scores.
+2. In the live 3-evaluator path (`ColorHarmonicsEvaluator`, `SilhouetteGrader`, `ContrastAnchorEvaluator`), lenient baselines (`78±20`, `75` with `-20/+30`, `70±25`) compress almost every outfit into `55–98`.
 
 ### Required Changes:
 
-1. **Empty-Outfit Guard (`FashionistaEngine.kt`, `ColorHarmonyEngine.kt`):**
-   - If the resolved clothing item list is empty (`items.isEmpty()`), `FashionistaEngine` and all three evaluators MUST immediately return a score of `0` (`totalScore = 0`, `isApproved = false`, `breakdown = (0.0, 0.0, 0.0)`), preventing empty manifests from ever receiving a non-zero score.
+1. **Empty-Outfit Guard (`FashionistaEngine.kt`, `ColorHarmonyEngine.kt`, and Evaluators):**
+   - If the resolved clothing item list is empty (`clothingItems.isEmpty()`), `FashionistaEngine` and each individual evaluator MUST immediately return `0` (`totalScore = 0`, `isApproved = false`, `breakdown = (0.0, 0.0, 0.0)`), ensuring empty manifests never receive a non-zero score.
 
-2. **Fix Single-Chroma / Achromatic Neutral-Contrast Scoring (`ColorHarmonyEngine.kt`):**
-   - Locate the palette geometry / harmony calculation around line 184 where `chromaticColors.size <= 1` currently returns a hardcoded `38f` (out of `40f`).
-   - Replace the hardcoded `38f` with a continuous lightness-separation ($L^*$) evaluation across all colors in the outfit:
-     - If `allColors.size <= 1`, return `0f` (a single item has no multi-item harmony).
-     - Compute the lightness span across the outfit's LCh colors: `val lSpan = (allColors.maxOf { it.l } - allColors.minOf { it.l })`.
-     - Reward intentional monochromatic/achromatic tonal layering (`lSpan` in `30f..65f` peaks up to `36f / 40f`), penalize flat muddy monotony (`lSpan < 12f` scores `10f..16f / 40f`), and moderately score extreme starkness (`lSpan > 75f` scores `26f..30f / 40f`) using a smooth piecewise-linear curve with no step-function cliffs.
-   - Smooth any remaining discrete $\Delta E$ step cliffs in `ColorHarmonyEngine` using linear interpolation between band thresholds.
+2. **Deterministic Piecewise-Linear Single-Chroma Curve (`ColorHarmonyEngine.kt`):**
+   - Locate the palette geometry / harmony branch around line 184 where `chromaticColors.size <= 1` currently returns `38f` (out of `40f`).
+   - If total outfit colors `< 2`, return `0f`.
+   - Otherwise, compute the lightness span across all outfit LCh colors:
+     ```kotlin
+     val lSpan = (allColors.maxOf { it.l } - allColors.minOf { it.l }).coerceAtLeast(0f)
+     ```
+   - Replace the hardcoded `38f` with a deterministic piecewise-linear interpolation function `evaluateNeutralLightnessSpan(lSpan: Float): Float` (returning a score out of `40f`) anchored at these exact control points:
+     | `lSpan` ($L^*$ difference) | Control-Point Score (out of `40f`) | Semantic Meaning |
+     | :--- | :--- | :--- |
+     | `0f` | `10f` | Identical lightness; flat muddy monotony |
+     | `12f` | `16f` | Still relatively flat tonal separation |
+     | `30f` | `30f` | Intentional tonal separation |
+     | `45f..55f` (plateau) | `36f` | Optimal monochromatic/achromatic tonal layering |
+     | `65f` | `32f` | Good tonal separation |
+     | `75f` | `28f` | Stark contrast |
+     | `>= 85f` | `26f` | Extreme separation; moderate score |
+   - Linearly interpolate between adjacent control points so there are zero step-function cliffs. Smooth any remaining discrete $\Delta E_{00}$ step cliffs in `ColorHarmonyEngine` using linear interpolation.
 
-3. **Recalibrate Live Evaluator Baselines to `50` AND Scale Spreads (`ColorHarmonicsEvaluator.kt`, `SilhouetteGrader.kt`, `ContrastAnchorEvaluator.kt`, `FashionistaEngine.kt`):**
-   - **WARNING (Math Gate):** Lowering baselines to `50` without widening the modifier spreads caps the blended score at `74.75 < 80`, which would cause *every* outfit to fail `isApproved`. You MUST scale the spreads proportionally alongside the `50` baseline so each evaluator spans `[0, 100]` and the blended total ($0.40 \times \text{Color} + 0.35 \times \text{Silhouette} + 0.25 \times \text{Contrast}$) can reach $\ge 95$:
-     - **`ColorHarmonicsEvaluator.kt`:** Recenter the baseline from `78` to `50` and widen the harmony delta multiplier (`avg * 10` -> `avg * 25`, or map normalized `[0.0, 1.0]` harmony across `[0, 100]`) so clashing palettes score `< 45`, neutral/average palettes score `~50–70`, and harmonious multi-item palettes with strong skin-temperature alignment reach `90–100`.
-     - **`SilhouetteGrader.kt`:** Recenter the baseline from `75` to `50`. Scale positive proportion modifiers (e.g., tapered balance `+15` -> `+25`, rule-of-thirds / volume contrast `+15` -> `+25`) so an ideal proportioned silhouette reaches `100`, and scale negative penalties (e.g., all-oversized / conflicting volume `-20` -> `-35`) so boxy/unbalanced silhouettes drop to `15–35`. Clamp to `[0, 100]`.
-     - **`ContrastAnchorEvaluator.kt`:** Recenter the baseline from `70` to `50` and scale the contrast/depth alignment modifiers from `±25` to `±50` so ideal user-to-outfit contrast alignment reaches `95–100` and severe contrast mismatches drop to `0–35`. Clamp to `[0, 100]`.
-   - Verify that `FashionistaScore.isApproved` (`totalScore >= 80`) passes for well-matched outfits (`totalScore >= 85`, with top editorial combinations reaching `>= 95`) and fails (`totalScore < 60`) for clashing/unbalanced outfits.
+3. **5-Step Evaluator Calibration Protocol (`ColorHarmonicsEvaluator.kt`, `SilhouetteGrader.kt`, `ContrastAnchorEvaluator.kt`):**
+   - **WARNING (Math Gate):** Lowering baselines to `50` without scaling the modifier spreads caps the blended score at $0.40(70) + 0.35(80) + 0.25(75) = 74.75 < 80$, which would cause *every* outfit to fail `isApproved`.
+   - Before changing multipliers, inspect each evaluator's existing input measurements and follow this 5-step calibration for each of the 3 evaluators:
+     1. Identify the exact numeric range of every raw input measurement and modifier in `ColorHarmonicsEvaluator`, `SilhouetteGrader`, and `ContrastAnchorEvaluator`.
+     2. Normalize the underlying measurement into a documented range (`[0.0, 1.0]` or signed `[-1.0, +1.0]` centered at `0.0` = neutral baseline `50`).
+     3. Map that normalized value onto `[0, 100]` centered at baseline `50` with full `±50` dynamic range (clamped to `[0, 100]`).
+     4. Verify each evaluator independently satisfies these semantic anchors:
+        - **Poor / Clashing / Unbalanced input:** `< 45`
+        - **Neutral / Average / Unremarkable input:** `50–68`
+        - **Good / Harmonious / Proportioned input:** `80–89`
+        - **Exceptional / Editorial input:** `95–100`
+     5. Verify that under the live `40% Color + 35% Silhouette + 25% Contrast` blend in `FashionistaEngine`:
+        - Clashing/poor outfits score `< 60` (`isApproved == false`).
+        - Solid everyday outfits score `80–89` (`isApproved == true`).
+        - Exceptional editorial outfits reach `>= 95` (`EXCEPTIONAL_EDITORIAL` reachable).
 
 ---
 
-## P3.2: Complete `IntentFulfillmentEvaluator` & Numeric Appearance Matching
+## P3.2: Active-Dimension Intent Fulfillment & Typed Appearance Matching
 
 **Problem:**
-1. `IntentFulfillmentEvaluator.kt` observes only `colorfulness` and hardcodes `contrast = 0.5f`, `novelty = 0.5f`, and `formality = 0.5f`. Any requested novelty `> 0.6` is *always* reported unmet, and the `0–100` score ignores contrast, novelty, and formality.
-2. `ContrastAnchorEvaluator.kt` and cosmetic temperature scorers in `WardrobeCandidateFilter.kt` / `DeterministicContextEngine.kt` match free-text appearance strings via `.contains("High")` / `.contains("Light")`.
+1. `IntentFulfillmentEvaluator.kt` observes only `colorfulness` and hardcodes `contrast = 0.5f`, `novelty = 0.5f`, and `formality = 0.5f`.
+2. Unconditionally averaging all 4 dimensions penalizes outfits on dimensions the user never requested (e.g., when a user asks for `"colorful and unusual"`, `contrast` and `formality` were not requested).
+3. `ContrastAnchorEvaluator.kt`, `WardrobeCandidateFilter.kt`, and `DeterministicContextEngine.kt` use fragile string `.contains("High")` / `.contains("Light")` checks on appearance fields.
 
 ### Required Changes:
 
-1. **Implement Real `contrast`, `novelty`, and `formality` Observation in `IntentFulfillmentEvaluator.kt`:**
-   - Update `IntentFulfillmentEvaluator.evaluate(...)` to accept:
-     - The resolved `clothingItems: List<ClothingItem>` and `cosmeticItems: List<CosmeticItem>`
-     - `rotationScores: Map<String, Double>` (or `Map<String, Float>`, matching `StyleRequestContext.rotationScores` / `RotationScoringUseCase` output)
-   - Update all callers of `IntentFulfillmentEvaluator.evaluate(...)` (`StyleSimulatorEngine.kt` and unit tests) to pass `context.rotationScores`.
-   - Compute the 4 observed dimensions in `[0.0f, 1.0f]`:
-     - **`observedColorfulness`:** Keep the existing chroma ($C^*$) calculation normalized to `[0.0f, 1.0f]`.
-     - **`observedContrast`:** Convert selected items' hex colors to CIELAB $L^*$ (via `ColorHarmonyEngine.hexToLCh` or `ColorSpaceConverter`). If `>= 2` items exist, compute `((maxL - minL) / 85.0f).coerceIn(0.0f, 1.0f)` (so an $L^*$ span of $\ge 85$ maps to `1.0f` and identical lightness maps to `0.0f`; fallback to `0.0f` if `< 2` items).
-     - **`observedNovelty`:** Inspect `RotationScoringUseCase.kt` to confirm the polarity of `rotationScores[itemId]`:
-       - Note: In `RotationScoringUseCase.kt`, verify whether `1.0` represents a *penalty* (worn within 24h) or *freshness* (unworn).
-       - Map the selected items' rotation values so **unworn/fresh items yield `observedNovelty = 1.0f`** and **items worn within 24h yield `observedNovelty = 0.0f`** (i.e., `1.0f - meanPenalty` if `rotationScores` stores penalty, or `meanFreshness` if it stores freshness; default to `1.0f` for items with no wear history).
-     - **`observedFormality`:** Compute from the resolved `clothingItems` ONLY (cosmetics do not have a formality field and must not dilute the average). Map the core-model `ClothingItem.formality` enum (`Formality` — do NOT confuse with taxonomy `FormalityLevel`) to `[0.0f, 1.0f]` using its rank/ordinal normalized by the maximum enum rank:
-       ```kotlin
-       val formalityValues = clothingItems.map { item ->
-           // Map CASUAL -> 0.0f up to FORMAL/GALA -> 1.0f
-           item.formality.ordinal.toFloat() / (Formality.entries.size - 1).coerceAtLeast(1).toFloat()
-       }
-       val observedFormality = if (formalityValues.isNotEmpty()) formalityValues.average().toFloat().coerceIn(0f, 1f) else 0.5f
-       ```
-   - **Multi-Dimensional Fulfillment Score (`0–100`):**
-     - Compute the fulfillment score across all active intent dimensions (`colorfulness`, `contrast`, `novelty`, `formality`) rather than `colorfulness` alone:
-       ```kotlin
-       val diffs = listOf(
-           kotlin.math.abs(intentProfile.targetColorfulness - observedColorfulness),
-           kotlin.math.abs(intentProfile.targetContrast - observedContrast),
-           kotlin.math.abs(intentProfile.targetNovelty - observedNovelty),
-           kotlin.math.abs(intentProfile.targetFormality - observedFormality)
-       )
-       val meanError = diffs.average().toFloat()
-       val fulfillmentScore = ((1.0f - meanError) * 100.0f).coerceIn(0.0f, 100.0f)
-       ```
+1. **Compute Real Observations for All 4 Dimensions (`IntentFulfillmentEvaluator.kt`):**
+   - If `clothingItems.isEmpty()`, immediately return a zero/unfulfilled result (`score = 0`, `status = UNFULFILLED` or `NOT_SPECIFIED` if no intent was given) — do **not** fabricate `observedFormality = 0.5f` for an empty outfit.
+   - Update `IntentFulfillmentEvaluator.evaluate(...)` to accept the resolved `clothingItems: List<ClothingItem>`, `cosmeticItems: List<CosmeticItem>`, and `rotationScores: Map<String, Double>` (or `Float`, matching `StyleRequestContext.rotationScores`).
+   - Compute the 4 observed properties in `[0.0f, 1.0f]`:
+     - **`observedColorfulness`:** Existing chroma ($C^*$) calculation normalized to `[0.0f, 1.0f]`.
+     - **`observedContrast`:** Convert selected items' hex colors to CIELAB $L^*$. For `>= 2` items, compute `((maxL - minL) / 85.0f).coerceIn(0.0f, 1.0f)` (`0.0f` if `< 2` items).
+     - **`observedNovelty`:** Inspect `RotationScoringUseCase.kt` to verify the exact polarity of `rotationScores[itemId]`. Map the selected items' rotation scores so **unworn/fresh items yield `observedNovelty = 1.0f`** and **items worn within 24h yield `observedNovelty = 0.0f`**.
+     - **`observedFormality`:** Inspect the actual `ClothingItem` domain model to confirm its canonical formality type (use the type actually stored on `ClothingItem`, not a similarly named taxonomy enum). Map its enum levels to `[0.0f, 1.0f]` using an **explicit, exhaustive `when` expression** (do **not** rely on `.ordinal`, which breaks if enum declaration order is reorganized). Compute the mean across `clothingItems` only (cosmetics do not have formality and must not dilute the garment formality average).
 
-2. **Replace Fragile String `.contains()` Appearance Checks with Typed Telemetry (`ContrastAnchorEvaluator.kt`, `WardrobeCandidateFilter.kt`, `DeterministicContextEngine.kt`):**
-   - Inspect `ContrastAnchorEvaluator.kt` and cosmetic/wardrobe temperature scorers for free-text `.contains("High")`, `.contains("Low")`, `.contains("Light")`, `.contains("Deep")`, `.contains("Warm")`, `.contains("Cool")`.
-   - Where numeric `ColorTelemetry` (`lStar`, `cStar`, `bStar`, `itaAngle`) or typed enums (`ColorTemperature`, `ContrastLevel`, `SkinDepth`) are available on the context/profile, evaluate them directly (e.g., numeric ITA / $L^*$ thresholds or enum equality `==`).
-   - Where a legacy string field on `UserProfile` / `StyleRequestContext` is still read as a fallback, parse it into a canonical enum via an explicit mapper (`ContrastLevel.fromKey(raw)` / `ColorTemperature.fromKey(raw)` using exact token/enum matching) instead of raw substring `.contains()`.
+2. **Score ONLY Active Intent Dimensions (`IntentAnalyzer.kt`, `IntentFulfillmentEvaluator.kt`):**
+   - Inspect `IntentProfile` (or `StyleIntentProfile`) and `IntentAnalyzer.kt` to see how user-specified dimensions are represented.
+   - Ensure `IntentProfile` explicitly tracks which dimensions (`colorfulness`, `contrast`, `novelty`, `formality`) are **active** (either via an explicit `activeDimensions: Set<IntentDimension>` / boolean flags populated by `IntentAnalyzer` when keywords for that dimension match, or by checking non-null / non-default active targets).
+   - **Fulfillment Scoring Rule:**
+     - If **no** dimensions are active (blank intent or no recognized dimension keywords), report `status = NOT_SPECIFIED` and do not penalize the outfit.
+     - If one or more dimensions are active, compute the fulfillment score (`0–100`) and met/unmet status **solely across the active requested dimensions** — never penalize an outfit for unrequested dimensions sitting at a neutral `0.5f` default.
+
+3. **Replace Fragile String `.contains()` Appearance Checks with Typed Telemetry (`ContrastAnchorEvaluator.kt`, `WardrobeCandidateFilter.kt`, `DeterministicContextEngine.kt`):**
+   - Inspect `ContrastAnchorEvaluator.kt`, `WardrobeCandidateFilter.kt`, and `DeterministicContextEngine.kt` for free-text `.contains("High")`, `.contains("Low")`, `.contains("Light")`, `.contains("Deep")`, `.contains("Warm")`, `.contains("Cool")`.
+   - Use numeric `ColorTelemetry` (`lStar`, `cStar`, `bStar`, `itaAngle`) or typed enum comparisons (`==`) wherever available, and parse any legacy profile string through an explicit canonical enum mapper (`fromKey()` / exact token match) instead of substring `.contains()`.
 
 ---
 
-## P3.3: Shared Word-Boundary Keyword Matcher & Stop-Word Stripping
+## P3.3: Canonical-Stem `KeywordMatcher` & Consumer Integration
 
 **Problem:**
-Four live scorers split intent or item names on whitespace and call raw `String.contains()`:
-1. `WardrobeCandidateFilter.calculateScore` (+2.0 per match)
-2. `WardrobeCandidateFilter.calculateCosmeticScore` (+0.75 per match)
-3. `HeuristicStyleEngine.smartPick`
-4. `SilhouetteGrader` (volume/proportion keyword classification)
-
-Because there are no word boundaries or stop-words, an intent like `"a red dress"` matches nearly every item via `"a"`, and `"top"` matches `"stop"`. (`GreedyRehydrator` is already off this list because Phase 1.2 deleted its matchers).
+Four live components use raw `String.contains()` substring matching (`WardrobeCandidateFilter.calculateScore`, `WardrobeCandidateFilter.calculateCosmeticScore`, `HeuristicStyleEngine.smartPick`, and `SilhouetteGrader`), causing `"a"` to match nearly every item, `"lip"` to match `"eclipse"`, and `"top"` to match `"stop"`.
 
 ### Required Changes:
 
-1. **Create Shared `KeywordMatcher` Utility (`applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/util/KeywordMatcher.kt`):**
-   - Implement a pure, allocation-light word-boundary tokenizer and matcher:
+1. **Create Canonical-Stem `KeywordMatcher` (`applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/util/KeywordMatcher.kt`):**
+   - **CRITICAL DESIGN FIX:** Every word must normalize to **one canonical stem token** (never emit both the plural and singular into the token set, which causes double-counting and breaks asymmetric `containsAll` checks).
+   - Implement `containsWholeWord()` to require a **contiguous token sequence** for multi-word phrases, while `countMatchingTokens()` performs unordered canonical-token overlap:
      ```kotlin
      package com.zoewave.probase.kocolor.data.util
+
+     import java.util.Collections
 
      object KeywordMatcher {
          private val WORD_REGEX = Regex("\\b[a-z0-9]+\\b")
@@ -120,46 +120,58 @@ Because there are no word boundaries or stop-words, an intent like `"a red dress
          )
 
          /**
-          * Extracts lowercase alphanumeric whole words of length >= 2, excluding stop-words.
-          * Also normalizes simple English plurals (trailing "es" / "s" for words >= 4 chars)
-          * so "boots" matches "boot" and "dresses" matches "dress".
+          * Normalizes a lowercase word into a single canonical stem so singular and plural
+          * forms ("boot" / "boots", "dress" / "dresses") map to the exact same token.
+          */
+         fun normalizeStem(word: String): String = when {
+             word.length > 4 && word.endsWith("resses") -> word.removeSuffix("es")
+             word.length > 4 && word.endsWith("ches") -> word.removeSuffix("es")
+             word.length > 4 && word.endsWith("shes") -> word.removeSuffix("es")
+             word.length > 4 && word.endsWith("xes") -> word.removeSuffix("es")
+             word.length > 4 && word.endsWith("ies") -> word.removeSuffix("ies") + "y"
+             word.length > 3 && word.endsWith("s") && !word.endsWith("ss") && !word.endsWith("us") -> word.removeSuffix("s")
+             else -> word
+         }
+
+         /**
+          * Returns a Set of unique canonical stems (length >= 2, stop-words removed)
+          * for unordered intent-token overlap scoring.
           */
          fun tokenize(text: String): Set<String> {
              if (text.isBlank()) return emptySet()
              return WORD_REGEX.findAll(text.lowercase())
                  .map { it.value }
                  .filter { it.length >= 2 && it !in STOP_WORDS }
-                 .flatMap { word ->
-                     val stem = normalizeStem(word)
-                     if (stem != word) sequenceOf(word, stem) else sequenceOf(word)
-                 }
+                 .map { normalizeStem(it) }
                  .toSet()
          }
 
-         private fun normalizeStem(word: String): String = when {
-             word.length > 4 && word.endsWith("resses") -> word.removeSuffix("es")
-             word.length > 4 && word.endsWith("ches") -> word.removeSuffix("es")
-             word.length > 4 && word.endsWith("shes") -> word.removeSuffix("es")
-             word.length > 4 && word.endsWith("xes") -> word.removeSuffix("es")
-             word.length > 3 && word.endsWith("s") && !word.endsWith("ss") -> word.removeSuffix("s")
-             else -> word
+         /**
+          * Returns an ordered List of canonical stems for contiguous phrase matching.
+          */
+         fun tokenizeSequence(text: String): List<String> {
+             if (text.isBlank()) return emptyList()
+             return WORD_REGEX.findAll(text.lowercase())
+                 .map { normalizeStem(it.value) }
+                 .toList()
          }
 
          /**
-          * Returns true if [targetText] contains [keyword] as a whole word (or multi-word phrase)
-          * respecting word boundaries.
+          * Returns true if [targetText] contains [keyword] as a whole word (or contiguous
+          * multi-word phrase) after canonical stem normalization.
           */
          fun containsWholeWord(targetText: String, keyword: String): Boolean {
              if (targetText.isBlank() || keyword.isBlank()) return false
-             val queryTokens = tokenize(keyword)
-             if (queryTokens.isEmpty()) return false
-             val targetTokens = tokenize(targetText)
-             return targetTokens.containsAll(queryTokens)
+             val querySeq = tokenizeSequence(keyword)
+             if (querySeq.isEmpty()) return false
+             val targetSeq = tokenizeSequence(targetText)
+             if (targetSeq.isEmpty()) return false
+             return Collections.indexOfSubList(targetSeq, querySeq) != -1
          }
 
          /**
-          * Counts how many distinct non-stopword tokens from [intentQuery] appear as whole words
-          * in [itemText].
+          * Counts how many distinct non-stopword canonical tokens from [intentQuery]
+          * appear in [itemText]. Each concept is counted at most once.
           */
          fun countMatchingTokens(itemText: String, intentQuery: String): Int {
              val queryTokens = tokenize(intentQuery)
@@ -173,93 +185,123 @@ Because there are no word boundaries or stop-words, an intent like `"a red dress
      }
      ```
 
-2. **Replace All 4 Substring Matchers with `KeywordMatcher`:**
-   - **`WardrobeCandidateFilter.kt` (`calculateScore` & `calculateCosmeticScore`):**
-     - Replace `intent.split(" ")` + `.contains(...)` with `KeywordMatcher.countMatchingTokens(...)` (or `KeywordMatcher.hasAnyMatchingToken(...)`) so stop-words like `"a"` or `"for"` never award `+2.0` / `+0.75` points, and `"lip"` never matches `"eclipse"`.
-   - **`HeuristicStyleEngine.kt` (`smartPick`):**
-     - Replace raw substring `.contains()` with `KeywordMatcher.hasAnyMatchingToken(itemSearchableText, intent)`.
-   - **`SilhouetteGrader.kt`:**
-     - Replace raw `.contains(...)` checks on garment names/materials/notes (e.g., `"crop"`, `"slim"`, `"fitted"`, `"oversized"`, `"wide"`, `"tailored"`, `"structured"`) with `KeywordMatcher.containsWholeWord(...)` so `"top"` never matches `"stop"` and `"slim"` only matches whole tokens.
+2. **Wire `KeywordMatcher` Into All 4 Consumers:**
+   - **`WardrobeCandidateFilter.calculateScore`:** Replace whitespace split + `.contains()` with `KeywordMatcher.countMatchingTokens(...)`.
+   - **`WardrobeCandidateFilter.calculateCosmeticScore`:** Replace whitespace split + `.contains()` with `KeywordMatcher.countMatchingTokens(...)`.
+   - **`HeuristicStyleEngine.smartPick`:** Replace substring `.contains()` with `KeywordMatcher.hasAnyMatchingToken(...)`.
+   - **`SilhouetteGrader.kt`:** Replace garment keyword `.contains()` checks with `KeywordMatcher.containsWholeWord(...)`.
 
 ---
 
-## P3.4: Confirm Engine Stub Cleanup (Phase 1.0 Cross-Check)
+## P3.4: Comprehensive Dead-Code Verification
 
-Verify that zero references or dead imports remain to `GlcmTextureEngine`, `SilhouetteEngine`, `CosmeticIntegrationEngine`, `VisualHierarchyEngine`, `CompositionEngine`, `ChromaticHarmonyEngine`, or `CalibrationCurve`.
+Verify that all 21 files deleted in Phase 1.0 remain absent from the repository:
+- Scorers/Engines (13): `FashionistaScorerImpl`, `DeterministicScorer`, `CalibrationCurve`, `InteractionModel`, `ChromaticHarmonyEngine`, `GlcmTextureEngine`, `TextureHarmonyEngine`, `SilhouetteEngine`, `VisualMassEngine`, `CosmeticIntegrationEngine`, `OutfitIntegrationEngine`, `VisualHierarchyEngine`, `CompositionEngine`.
+- Extractors (5): `ColorFeatureExtractor`, `CompositionFeatureExtractor`, `HierarchyFeatureExtractor`, `SilhouetteFeatureExtractor`, `TextureFeatureExtractor`.
+- Domain Types (3): `FashionistaScorer`, `FashionistaObservation`, `FeatureValue`.
 
 ---
 
-## P3.5: Mandatory Unit Tests for Phase 3
+## P3.5: Mandatory Unit & Consumer Integration Tests
 
-Create or expand unit test suites in `:applications:kocolor:data` to verify every Phase 3 requirement:
+Create or expand unit test suites in `:applications:kocolor:data` covering every mathematical curve, evaluator, and consumer integration:
 
-1. **`KeywordMatcherTest.kt` (NEW):**
-   - Verify `"a red dress for a party"` strips `"a"` and `"for"`, and does **not** match `"Alpine Jacket"` via `"a"`.
-   - Verify `"lip"` does **not** match `"Eclipse Eyeshadow"`, and `"top"` does **not** match `"Stop Sign Red Tee"`.
-   - Verify plural normalization: `"black boots"` matches `"Ankle Boot"` and `"summer dresses"` matches `"Silk Dress"`.
-2. **`FashionistaEngineTest.kt` (NEW or EXPANDED):**
-   - **Empty Outfit Guard:** Verify `evaluate(emptyList(), ...)` returns `totalScore == 0` and `isApproved == false`.
-   - **Dynamic Range & Approval Gate:**
-     - Verify a harmonious, well-proportioned, contrast-aligned outfit scores `>= 85` (`isApproved == true`), and an ideal editorial combination reaches `>= 95` (`EXCEPTIONAL_EDITORIAL`).
-     - Verify a clashing, poorly proportioned, contrast-mismatched outfit scores `< 60` (`isApproved == false`).
-   - **Single-Chroma Neutral Contrast:** Verify that an outfit of 3 identical `#808080` grey items ($L^*$ span = `0`) scores significantly lower on color harmony than an intentional high-contrast monochromatic outfit (`#1A1A1A` charcoal + `#F5F5F5` ivory, $L^*$ span > `70`), proving the hardcoded `38/40` shortcut is gone.
-3. **`IntentFulfillmentEvaluatorTest.kt` (NEW or EXPANDED):**
-   - Verify `observedContrast` reflects actual $L^*$ separation (`> 0.7` for black+white vs. `< 0.1` for two identical greys).
-   - Verify `observedNovelty` reflects `rotationScores` (unworn items yield `observedNovelty >= 0.9f`, whereas recently worn items yield `observedNovelty <= 0.2f`, and a high-novelty intent `targetNovelty = 0.8f` is **met** when unworn items are selected).
-   - Verify `observedFormality` differentiates `Formality.CASUAL` (`<= 0.25f`) from `Formality.FORMAL` (`>= 0.75f`).
+1. **`KeywordMatcherTest.kt` (Unit Tests for Tokenizer & Phrase Matcher):**
+   - **Canonical Stem Symmetry:** Verify `tokenize("black boots") == setOf("black", "boot")` and `tokenize("Ankle Boot") == setOf("ankle", "boot")`.
+   - **No Double-Counting on Plurals:** Verify `countMatchingTokens("Ankle Boots", "boots") == 1` (never `2`) and `containsWholeWord("Ankle Boot", "boots") == true`.
+   - **Contiguous Phrase Matching:** Verify `containsWholeWord("Tailored Red Dress", "red dress") == true`, whereas `containsWholeWord("Red Blouse with a Dress", "red dress") == false` (while `countMatchingTokens("Red Blouse with a Dress", "red dress") == 2`).
+   - **Substring & Stop-Word Protection:** Verify `"a red dress"` does not match `"Alpine Jacket"` via `"a"`, `"lip"` does not match `"Eclipse"`, and `"top"` does not match `"Stop"`.
+
+2. **Consumer Integration Tests (Prove All 4 Consumers Use `KeywordMatcher` Correctly):**
+   - **`WardrobeCandidateFilterTest.kt`:**
+     1. *Wardrobe Scorer:* Verify an intent full of stop-words (`"a look for the style"`) awards `0.0` intent bonus to `"Alpine Coat"`.
+     2. *Cosmetic Scorer:* Verify intent `"lip"` awards `0.0` bonus to `"Eclipse Eyeshadow"` while awarding `+0.75` to `"Velvet Lip Tint"`.
+   - **`HeuristicStyleEngineTest.kt`:**
+     - Verify `smartPick` with intent `"top"` does NOT match `"Stop Sign Graphic Tee"`.
+   - **`SilhouetteGraderTest.kt`:**
+     - Verify `"slim"` does NOT match a garment description containing `"slim"` only as a substring of another word (e.g., `"muslin"` / `"sublimated"` / `"slimy"`), while matching `"Slim Fit Trousers"`.
+
+3. **Individual Evaluator & `ColorHarmonyEngine` Tests (`ColorHarmonyEngineTest.kt`, `ColorHarmonicsEvaluatorTest.kt`, `SilhouetteGraderTest.kt`, `ContrastAnchorEvaluatorTest.kt`, `FashionistaEngineTest.kt`):**
+   - **Single-Chroma Control Points (`ColorHarmonyEngineTest`):** Test all regions of `evaluateNeutralLightnessSpan`:
+     - Low end: `lSpan = 0f` $\rightarrow$ `10f`, `lSpan = 12f` $\rightarrow$ `16f`
+     - Mid/Peak: `lSpan = 30f` $\rightarrow$ `30f`, `lSpan = 50f` $\rightarrow$ `36f`, `lSpan = 65f` $\rightarrow$ `32f`
+     - High end: `lSpan = 75f` $\rightarrow$ `28f`, `lSpan = 90f` $\rightarrow$ `26f`
+   - **Individual Evaluator Range Tests:** Test `ColorHarmonicsEvaluator`, `SilhouetteGrader`, and `ContrastAnchorEvaluator` individually to prove each evaluator outputs `0` on empty input, `< 45` on poor/clashing input, `50–68` on neutral input, and `>= 95` on optimal input (ensuring no single evaluator masks a broken sibling).
+   - **Blended `FashionistaEngine` Gate Test:** Verify empty input returns `0` (`isApproved == false`), clashing outfit scores `< 60` (`isApproved == false`), good outfit scores `80–89` (`isApproved == true`), and optimal editorial outfit scores `>= 95`.
+
+4. **`IntentFulfillmentEvaluatorTest.kt` (Active Dimensions & Observations):**
+   - **Active-Only Scoring:** Verify that for an intent requesting *only* colorfulness and novelty (e.g., `"colorful bold new look"`), an outfit with high colorfulness and high novelty scores `>= 85` even if its contrast (`0.1f`) or formality (`0.9f`) diverges from `0.5f`.
+   - **Unobservable / Empty Guard:** Verify an empty outfit returns `0` fulfillment rather than matching a neutral `0.5f` formality default.
+   - **Formality & Novelty Polarity:** Verify `Formality.CASUAL` vs. `Formality.FORMAL` map accurately via the exhaustive `when` mapper, and unworn items yield `observedNovelty >= 0.9f` vs. `<= 0.2f` for items worn within 24h.
 
 ---
 
 ## MANDATORY PHASE 3 VERIFICATION GATE (RUN & PASTE EXACT OUTPUT)
 
-Do NOT stamp Phase 3 complete or write `Phase3_Audit_final.md` until every command below passes and its verbatim output is included in the audit report:
+Do NOT stamp Phase 3 complete or write `Phase3_Audit_final.md` until every check below is executed and categorized in the audit report:
 
-1. **`KeywordMatcher` Created & Wired into All 4 Target Files:**
+### Category A: Expected Zero Matches (Must Return 0 Lines)
+1. **All 21 Phase 1.0 Dead Files Remain Deleted:**
    ```bash
-   grep -rn "KeywordMatcher" applications/kocolor/data/src/
+   find applications/kocolor/ -name "FashionistaScorerImpl.kt" -o -name "DeterministicScorer.kt" -o -name "CalibrationCurve.kt" -o -name "InteractionModel.kt" -o -name "ChromaticHarmonyEngine.kt" -o -name "GlcmTextureEngine.kt" -o -name "TextureHarmonyEngine.kt" -o -name "SilhouetteEngine.kt" -o -name "VisualMassEngine.kt" -o -name "CosmeticIntegrationEngine.kt" -o -name "OutfitIntegrationEngine.kt" -o -name "VisualHierarchyEngine.kt" -o -name "CompositionEngine.kt" -o -name "*FeatureExtractor.kt" -o -name "FashionistaScorer.kt" -o -name "FashionistaObservation.kt" -o -name "FeatureValue.kt"
 
 ```
 
-*(Must show usage in `WardrobeCandidateFilter.kt`, `HeuristicStyleEngine.kt`, `SilhouetteGrader.kt`, and `KeywordMatcherTest.kt`).*
-
-2. **No Raw `.contains(` Substring Matchers Left in the 4 Target Files or `ContrastAnchorEvaluator.kt`:**
-```bash
-grep -n "\.contains(" \
-  applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/usecase/WardrobeCandidateFilter.kt \
-  applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/usecase/HeuristicStyleEngine.kt \
-  applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/fashionista/scoring/SilhouetteGrader.kt \
-  applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/fashionista/scoring/ContrastAnchorEvaluator.kt
-
-```
-
-
-*(Must return zero `String.contains` substring checks; `Set`/`List`/`Collection.contains` on typed enums/IDs is fine).*
-3. **Hardcoded `0.5f` Removed from `IntentFulfillmentEvaluator.kt`:**
-```bash
-grep -n "0\.5f" applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/fashionista/scoring/IntentFulfillmentEvaluator.kt
-
-```
-
-
-*(Must show that `observedContrast` and `observedNovelty` are no longer hardcoded to `0.5f`).*
-4. **Hardcoded `38f` Single-Chroma Shortcut Removed from `ColorHarmonyEngine.kt`:**
+2. **Hardcoded `38f` Single-Chroma Shortcut Gone from `ColorHarmonyEngine.kt`:**
 ```bash
 grep -n "38f\|38\.0" applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/color/ColorHarmonyEngine.kt
 
 ```
 
 
-*(Must return 0 matches).*
-5. **Phase 1 & Phase 2 Invariants Preserved:**
+3. **Zero `runBlocking` Calls in `SilhouetteGrader.kt`:**
 ```bash
 grep -n "runBlocking" applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/fashionista/scoring/SilhouetteGrader.kt
+
+```
+
+
+
+### Category B: Inspected Context Matches (Must Paste & Justify Every Line)
+
+4. **`KeywordMatcher` Wired Across All 4 Consumers & Tests:**
+```bash
+grep -rn "KeywordMatcher" applications/kocolor/data/src/
+
+```
+
+
+5. **Audit All `.contains(` Calls Across All 5 Target Files (Including `DeterministicContextEngine.kt`):**
+```bash
+grep -n "\.contains(" \
+  applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/usecase/WardrobeCandidateFilter.kt \
+  applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/usecase/HeuristicStyleEngine.kt \
+  applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/usecase/DeterministicContextEngine.kt \
+  applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/fashionista/scoring/SilhouetteGrader.kt \
+  applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/fashionista/scoring/ContrastAnchorEvaluator.kt
+
+```
+
+
+*(Permitted: `Set`/`List`/`Enum` collection membership checks. Prohibited: `String.contains` on intent words, garment names, or appearance strings).*
+6. **Verify `observedContrast`, `observedNovelty`, and `observedFormality` Assignment Lines in `IntentFulfillmentEvaluator.kt`:**
+```bash
+grep -n -C 3 "observedContrast\|observedNovelty\|observedFormality" applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/fashionista/scoring/IntentFulfillmentEvaluator.kt
+
+```
+
+
+
+### Category C: Preserved Phase 2 Invariants & Full Gradle Verification
+
+7. **Exactly One `provider.countTokens` Call in `StyleSimulatorEngine.kt`:**
+```bash
 grep -n "countTokens" applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/usecase/StyleSimulatorEngine.kt
 
 ```
 
 
-*(Must show 0 `runBlocking` matches in `SilhouetteGrader.kt` and at most 1 `countTokens` call in `StyleSimulatorEngine.kt`).*
-6. **Full Gradle Test & Assemble Verification:**
+8. **Full Gradle Test & Assemble Verification:**
 ```bash
 ./gradlew :features:ai:core:testDebugUnitTest :features:ai:firebase:testDebugUnitTest :features:ai:local:testDebugUnitTest :applications:kocolor:data:testDebugUnitTest :applications:kocolor:features:analyzer:testDebugUnitTest :applications:kocolor:apps:mobile:assembleDebug
 
@@ -269,12 +311,6 @@ grep -n "countTokens" applications/kocolor/data/src/main/java/com/zoewave/probas
 
 ```
 
-### Key Protections Built Into This Phase 3 Prompt
-
-* **Fixes the Empty-Outfit 85.4/100 Bug:** Explicitly enforces a zero-item guard at the top of `FashionistaEngine` and `ColorHarmonyEngine` so an empty selection immediately returns `0 / 100` (`isApproved = false`)[cite: 4].
-* **Prevents the `rotationScores` Polarity Bug in P3.2:** Forces the agent to check how `RotationScoringUseCase.kt` defines `rotationScores` and prove via a unit test (`IntentFulfillmentEvaluatorTest`) that unworn items produce `observedNovelty >= 0.9f` and fulfill a `targetNovelty = 0.8f` intent[cite: 1, 2, 3].
-* **Enforces Stem-Aware Whole-Word NLP in P3.3:** Gives the agent the complete `KeywordMatcher` implementation with stop-word stripping (`"a"`, `"the"`, `"for"`) and plural stem normalization (`"boots"` $\leftrightarrow$ `"boot"`, `"dresses"` $\leftrightarrow$ `"dress"`) so fixing the `"a"` and `"top" ⊂ "stop"` bugs doesn't break legitimate plural user queries[cite: 1, 2, 3].
-
-Hand this prompt to your coding agent for Phase 3, and share the resulting Phase 3 audit when it finishes!
+Hand this revised Phase 3 specification to your coding agent and share the resulting Phase 3 audit when it finishes.
 
 ```
