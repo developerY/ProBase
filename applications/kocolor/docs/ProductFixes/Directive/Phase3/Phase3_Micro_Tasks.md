@@ -317,19 +317,19 @@ Read the full contents of:
 
 ## STEP 6 (P3.5): Write the Complete Unit & Consumer Integration Test Suites
 
-Create or update the following test classes in `applications/kocolor/data/src/test/java/...` and verify every single test passes:
+Create or update the following test classes in `applications/kocolor/data/src/test/java/...` and verify every single test passes. Any test exercising `Color.parseColor`/`ColorUtils` paths (evaluator color logic, fulfillment contrast) MUST run under the repo's existing Robolectric setup (mirror `ProjectedVsCommittedIsolationTest`) — plain JVM execution throws `Stub!` on framework color APIs.
 
 1. **Individual Evaluator Tests (`ColorHarmonicsEvaluatorTest.kt`, `SilhouetteGraderTest.kt`, `ContrastAnchorEvaluatorTest.kt`):**
     - For **each** of the 3 evaluators independently, write 4 test methods:
         1. `emptyOutfit_returnsZero()` $\rightarrow$ asserts score is `0f`.
         2. `poorOrClashingInput_scoresBelow45()` $\rightarrow$ asserts score `< 45.0`.
-        3. `neutralInput_scoresBetween50And68()` $\rightarrow$ asserts score in `50.0..68.0`.
+        3. `neutralInput_scoresBetween50And68()` $\rightarrow$ asserts score in `50f..68f`.
         4. `exceptionalInput_scoresAtLeast95()` $\rightarrow$ asserts score `>= 95.0`.
 
 2. **Blended `FashionistaEngineTest.kt`:**
     - `emptyOutfit_returnsZeroAndUnapproved()` $\rightarrow$ `totalScore == 0`, `isApproved == false`.
     - `clashingUnbalancedOutfit_scoresBelow60AndFailsGate()` $\rightarrow$ `totalScore < 60`, `isApproved == false`.
-    - `goodEverydayOutfit_scoresBetween80And89AndPassesGate()` $\rightarrow$ `totalScore in 80..89`, `isApproved == true`.
+    - `goodEverydayOutfit_scoresBetween80And89AndPassesGate()` $\rightarrow$ `totalScore in 80f..89f`, `isApproved == true`.
     - `exceptionalEditorialOutfit_scoresAtLeast95()` $\rightarrow$ `totalScore >= 95`, `isApproved == true`.
 
 3. **`IntentFulfillmentEvaluatorTest.kt`:**
