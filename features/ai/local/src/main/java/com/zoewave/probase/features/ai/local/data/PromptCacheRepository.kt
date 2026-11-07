@@ -1,6 +1,7 @@
 package com.zoewave.probase.features.ai.local.data
 
 import java.security.MessageDigest
+import java.util.Collections
 import java.util.LinkedHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -12,16 +13,17 @@ import javax.inject.Singleton
 @Singleton
 class PromptCacheRepository @Inject constructor() {
 
-    private val cache = object : LinkedHashMap<String, String>(50, 0.75f, true) {
-        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, String>?): Boolean {
-            return size > 50
+    private val cache: MutableMap<String, String> = Collections.synchronizedMap(
+        object : LinkedHashMap<String, String>(50, 0.75f, true) {
+            override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, String>?): Boolean {
+                return size > 50
+            }
         }
-    }
+    )
 
     /**
      * Retrieves a cached AI response for the given fingerprint.
      */
-    @Synchronized
     fun get(fingerprint: String): String? {
         return cache[fingerprint]
     }
@@ -29,7 +31,6 @@ class PromptCacheRepository @Inject constructor() {
     /**
      * Caches an AI response.
      */
-    @Synchronized
     fun put(fingerprint: String, result: String) {
         cache[fingerprint] = result
     }
@@ -70,6 +71,5 @@ class PromptCacheRepository @Inject constructor() {
     /**
      * Returns the current number of items in the cache.
      */
-    @Synchronized
     fun size(): Int = cache.size
 }

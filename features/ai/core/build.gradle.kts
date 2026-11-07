@@ -14,4 +14,9 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.javax.inject)
     implementation(libs.squareup.okhttp)
+
+    testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.truth)
+    testImplementation(libs.kotlinx.coroutines.test)
 }

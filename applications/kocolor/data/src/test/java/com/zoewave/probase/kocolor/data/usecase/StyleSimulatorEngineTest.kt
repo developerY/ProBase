@@ -223,4 +223,37 @@ class StyleSimulatorEngineTest {
         assertThat(result.blueprint.rationale).isEqualTo("Fallback Rationale")
         io.mockk.coVerify(exactly = 0) { provider.execute(any()) }
     }
+
+    @Test
+    fun `generateBlueprint validationFlagsUngroundedId repairsLocallyWithoutFailover`() = runTest {
+        val context = StyleRequestContext(intent = "work", weather = "sunny")
+        val provider1 = mockk<AiProvider>()
+        val provider2 = mockk<AiProvider>()
+        val capability1 = AiProviderCapability(id = "p1", displayName = "P1", maxInputTokens = 1000, maxOutputTokens = 10, timeoutMillis = 1000, isLocal = false)
+        val capability2 = AiProviderCapability(id = "p2", displayName = "P2", maxInputTokens = 1000, maxOutputTokens = 10, timeoutMillis = 1000, isLocal = false)
+        val item = ClothingItem(internalId = 1, name = "Shirt", category = ClothingCategory.TOPS, colorHex = "#000")
+
+        every { provider1.capability } returns capability1
+        every { provider2.capability } returns capability2
+        coEvery { provider1.countTokens(any()) } returns 100
+        coEvery { provider2.countTokens(any()) } returns 100
+
+        // Provider 1 returns ungrounded item "w_999", triggering local deterministic repair
+        coEvery { provider1.execute(any()) } returns Result.success(
+            com.zoewave.probase.features.ai.core.AiExecutionResult("{\"rationale\": \"Primary AI\", \"selectedClothingIds\": [\"w_999\"]}")
+        )
+        coEvery { provider2.execute(any()) } returns Result.success(
+            com.zoewave.probase.features.ai.core.AiExecutionResult("{\"rationale\": \"Secondary AI\", \"selectedClothingIds\": [\"w_1\"]}")
+        )
+
+        coEvery { capabilityRouter.getRankedAvailableProviders() } returns listOf(provider1, provider2)
+        coEvery { contextEngine.generateSelectionState(any(), any(), any()) } returns StyleSelectionState(fullRankedCandidatePool = listOf(CandidateProvenance(clothingItem = item)))
+        coEvery { candidateFilter.getCosmeticCandidateProvenance(any(), any(), any()) } returns emptyList()
+
+        val result = engine.generateBlueprint(listOf(item), emptyList(), context)
+
+        // Verify local repair succeeded on Provider 1 and Provider 2 was NEVER invoked
+        assertThat(result.blueprint.selectedClothingIds).contains("w_1")
+        io.mockk.coVerify(exactly = 0) { provider2.execute(any()) }
+    }
 }
