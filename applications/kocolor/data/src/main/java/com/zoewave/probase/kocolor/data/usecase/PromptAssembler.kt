@@ -1,7 +1,6 @@
 package com.zoewave.probase.kocolor.data.usecase
 
 import com.zoewave.probase.core.model.ritual.ClothingCategory
-import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.features.ai.core.AiInput
 import com.zoewave.probase.features.ai.core.AiProviderCapability
 import com.zoewave.probase.kocolor.data.color.CandidateProvenance
@@ -10,6 +9,38 @@ import javax.inject.Singleton
 
 @Singleton
 class PromptAssembler @Inject constructor() {
+
+    fun assembleCompactNano(
+        context: StyleRequestContext,
+        wardrobeManifest: String,
+        cosmeticManifest: String,
+        missingRoles: Set<String> = emptySet(),
+        providerCapability: AiProviderCapability
+    ): AiInput {
+        val profile = context.appearanceProfile
+        val thermalStr = context.weatherTempC?.let {
+            when {
+                it > 25f -> "HOT"
+                it > 18f -> "WARM"
+                it < 10f -> "COLD"
+                else -> "COOL"
+            }
+        } ?: "MOD"
+
+        val anchorIds = context.lockedConstraints.map { it.itemId }.joinToString(",")
+
+        val prompt = """
+            SKIN:${profile.depth}_${profile.undertone} | TEMP:$thermalStr | INTENT:${context.intent} | ANCHORS:$anchorIds | ROLES:${missingRoles.joinToString(",")}
+            WARDROBE:
+            $wardrobeManifest
+            COSMETICS:
+            $cosmeticManifest
+            TASK: Output raw valid JSON matching schema: {"selectedClothingIds":[],"selectedCosmeticIds":[],"recommendedPalette":[],"rationale":""}
+        """.trimIndent()
+
+        val tempOverride = if (context.intent.equals("Surprise Me", ignoreCase = true)) 0.85f else null
+        return AiInput.TextOnly(promptString = prompt, temperatureOverride = tempOverride)
+    }
 
     fun buildExactRequest(
         context: StyleRequestContext,

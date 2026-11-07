@@ -1,7 +1,8 @@
 package com.zoewave.probase.features.ai.local.data
 
-import android.util.LruCache
 import java.security.MessageDigest
+import java.util.Collections
+import java.util.LinkedHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -12,25 +13,31 @@ import javax.inject.Singleton
 @Singleton
 class PromptCacheRepository @Inject constructor() {
 
-    private val cache = LruCache<String, String>(50)
+    private val cache: MutableMap<String, String> = Collections.synchronizedMap(
+        object : LinkedHashMap<String, String>(50, 0.75f, true) {
+            override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, String>?): Boolean {
+                return size > 50
+            }
+        }
+    )
 
     /**
      * Retrieves a cached AI response for the given fingerprint.
      */
     fun get(fingerprint: String): String? {
-        return cache.get(fingerprint)
+        return cache[fingerprint]
     }
 
     /**
      * Caches an AI response.
      */
     fun put(fingerprint: String, result: String) {
-        cache.put(fingerprint, result)
+        cache[fingerprint] = result
     }
 
     /**
      * Generates a SHA-256 fingerprint from the deterministic inputs to the AI model.
-     * Any change in these inputs (e.g., tier, weather, wardrobe, intent) will result in a cache miss.
+     * Uses Unit Separator delimiter "\u001F" to prevent boundary collisions across fields.
      */
     fun generateFingerprint(
         executionTier: String,
@@ -42,17 +49,17 @@ class PromptCacheRepository @Inject constructor() {
         userIntent: String,
         minifiedManifest: String
     ): String {
-        val input = StringBuilder().apply {
-            append(executionTier)
-            append(promptVersion)
-            append(modelVersion)
-            append(retrievalPolicyVersion)
-            append(appearanceTelemetry)
-            append(weatherState)
-            append(userIntent)
-            append(minifiedManifest)
-        }.toString()
-        
+        val input = listOf(
+            executionTier,
+            promptVersion,
+            modelVersion,
+            retrievalPolicyVersion,
+            appearanceTelemetry,
+            weatherState,
+            userIntent,
+            minifiedManifest
+        ).joinToString("\u001F")
+
         return hashString(input)
     }
 
@@ -64,5 +71,5 @@ class PromptCacheRepository @Inject constructor() {
     /**
      * Returns the current number of items in the cache.
      */
-    fun size(): Int = cache.size()
+    fun size(): Int = cache.size
 }

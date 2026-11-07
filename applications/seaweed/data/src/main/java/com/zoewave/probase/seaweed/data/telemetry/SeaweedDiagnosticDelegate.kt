@@ -59,7 +59,7 @@ class SeaweedDiagnosticDelegate @Inject constructor() : AppDiagnosticDelegate {
         val duration = System.currentTimeMillis() - startTime
 
         if (result.isSuccess) {
-            val outputText = result.getOrNull() ?: ""
+            val outputText = result.getOrNull()?.text ?: ""
             updateStep(3, DiagnosticStepState.SUCCESS, "Received response in ${duration}ms (${outputText.length} chars)")
 
             updateStep(4, DiagnosticStepState.RUNNING, "Normalizing JSON & validating schema...")

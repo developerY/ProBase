@@ -45,6 +45,7 @@ class StyleSimulatorIntegrationTest {
         every { cache.generateFingerprint(any(), any(), any(), any(), any(), any(), any(), any()) } returns "test_hash"
         every { cache.get(any()) } returns null
         every { cache.put(any(), any()) } just Runs
+        coEvery { contextEngine.generateSelectionState(any(), any(), any()) } returns StyleSelectionState()
         every { fallbackEngine.generate(any()) } returns StyleBlueprint("Fallback", emptyList(), emptyList(), emptyList())
 
         engine = StyleSimulatorEngine(
@@ -77,7 +78,7 @@ class StyleSimulatorIntegrationTest {
 
         every { provider.capability } returns capability
         coEvery { provider.countTokens(any()) } returns 200
-        coEvery { provider.execute(any()) } returns Result.success("{\"rationale\": \"Harmonic look\", \"selectedClothingIds\": [\"w_1\"], \"selectedCosmeticIds\": [\"c_1\", \"c_2\", \"c_3\", \"c_4\"], \"recommendedPalette\": [\"#FF0000\"]}")
+        coEvery { provider.execute(any()) } returns Result.success(com.zoewave.probase.features.ai.core.AiExecutionResult("{\"rationale\": \"Harmonic look\", \"selectedClothingIds\": [\"w_1\"], \"selectedCosmeticIds\": [\"c_1\", \"c_2\", \"c_3\", \"c_4\"], \"recommendedPalette\": [\"#FF0000\"]}"))
         
         val mockCosmetics = listOf(
             CandidateProvenance(cosmeticItem = CosmeticItem(internalId = 1, name = "Eye Shadow", brand = "KoColor", macroCategory = MacroCategory.EYES, microCategory = MicroCategory.EYESHADOW, colorHex = "#000000")),

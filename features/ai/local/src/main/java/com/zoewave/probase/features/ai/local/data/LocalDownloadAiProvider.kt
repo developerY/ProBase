@@ -1,11 +1,12 @@
 package com.zoewave.probase.features.ai.local.data
 
 import android.content.Context
+import com.zoewave.probase.features.ai.core.AiExecutionResult
 import com.zoewave.probase.features.ai.core.AiInput
 import com.zoewave.probase.features.ai.core.AiProvider
 import com.zoewave.probase.features.ai.core.AiProviderCapability
+import com.zoewave.probase.features.ai.core.TokenUsage
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.toList
 import java.io.File
 import javax.inject.Inject
@@ -26,7 +27,8 @@ class LocalDownloadAiProvider @Inject constructor(
         maxCandidateAdditions = 8,
         minCandidateAdditions = 4,
         isLocal = true,
-        supportsLocalImageIngestion = false // LiteRT-LM primarily text in this setup
+        supportsLocalImageIngestion = false,
+        defaultTemperature = 0.2f
     )
 
     override suspend fun isAvailable(): Boolean {
@@ -38,7 +40,7 @@ class LocalDownloadAiProvider @Inject constructor(
         return input.promptString.length / 4
     }
 
-    override suspend fun execute(input: AiInput): Result<String> {
+    override suspend fun execute(input: AiInput): Result<AiExecutionResult> {
         val modelFile = File(context.filesDir, "model.litertlm")
         if (!modelFile.exists()) {
             return Result.failure(IllegalStateException("Model not downloaded"))
@@ -52,8 +54,15 @@ class LocalDownloadAiProvider @Inject constructor(
 
             // Collect all tokens and combine them
             val fullResponse = responseFlow.toList().joinToString(separator = "")
+            val inTokens = (input.promptString.length + 3) / 4
+            val outTokens = (fullResponse.length + 3) / 4
 
-            Result.success(fullResponse)
+            Result.success(
+                AiExecutionResult(
+                    text = fullResponse,
+                    usage = TokenUsage(promptTokens = inTokens, candidatesTokens = outTokens)
+                )
+            )
         } catch (e: Exception) {
             Result.failure(e)
         }

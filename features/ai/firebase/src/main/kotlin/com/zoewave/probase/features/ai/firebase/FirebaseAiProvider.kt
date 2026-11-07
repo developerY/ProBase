@@ -2,9 +2,11 @@ package com.zoewave.probase.features.ai.firebase
 
 import android.util.Log
 import com.zoewave.probase.features.ai.core.AiExecutionFailure
+import com.zoewave.probase.features.ai.core.AiExecutionResult
 import com.zoewave.probase.features.ai.core.AiInput
 import com.zoewave.probase.features.ai.core.AiProvider
 import com.zoewave.probase.features.ai.core.AiProviderCapability
+import com.zoewave.probase.features.ai.core.TokenUsage
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -22,28 +24,26 @@ class FirebaseAiProvider @Inject constructor(
         timeoutMillis = 15000L,
         maxCandidateAdditions = 25,
         minCandidateAdditions = 6,
-        isLocal = false
+        isLocal = false,
+        defaultTemperature = 0.2f
     )
 
     override suspend fun isAvailable(): Boolean {
-        // In a real app, check network status
-        return true 
+        return true
     }
 
     override suspend fun countTokens(input: AiInput): Int {
         return client.countTokens(input.promptString)
     }
 
-    override suspend fun execute(input: AiInput): Result<String> {
+    override suspend fun execute(input: AiInput): Result<AiExecutionResult> {
         Log.d("FirebaseAiProvider", "Executing Cloud AI Request. Type: ${input.javaClass.simpleName}")
         
         // Defense-in-Depth Privacy Enforcement
         if (input is AiInput.Multimodal) {
             val err = IllegalArgumentException("Cloud providers strictly reject Multimodal image inputs.")
             Log.e("FirebaseAiProvider", "Validation failed", err)
-            return Result.failure(
-                AiExecutionFailure.ExecutionError(err).let { Exception(it.throwable) }
-            )
+            return Result.failure(err)
         }
 
         return try {
@@ -54,7 +54,16 @@ class FirebaseAiProvider @Inject constructor(
             val response = client.generateContent(input.promptString, input.temperatureOverride)
             
             Log.d("FirebaseAiProvider", "Cloud AI Request completed successfully. Parsed text length: ${response.text.length}")
-            Result.success(response.text)
+            Result.success(
+                AiExecutionResult(
+                    text = response.text,
+                    usage = TokenUsage(
+                        promptTokens = response.promptTokens,
+                        candidatesTokens = response.completionTokens,
+                        totalTokens = response.totalTokens
+                    )
+                )
+            )
         } catch (e: Exception) {
             Log.e("FirebaseAiProvider", "FATAL EXECUTION ERROR in Cloud Provider", e)
             Result.failure(e)

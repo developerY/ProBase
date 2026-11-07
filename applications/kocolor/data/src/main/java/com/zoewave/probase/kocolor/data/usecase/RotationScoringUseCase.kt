@@ -59,10 +59,11 @@ class RotationScoringUseCase @Inject constructor(
         val effectiveUseCount = customUseCount?.toLong() ?: targetItem.useCount
         val effectiveLastUsed = customLastUsed ?: targetItem.lastUsedTimestamp
 
-        // 3. Derived Metrics calculation
+        // 3. Derived Metrics calculation (P2.4 Quantize timestamps to UTC day-buckets for prompt cache stability)
         val currentUsageShare = effectiveUseCount.toDouble() / totalCategoryUsage
-        val currentTime = System.currentTimeMillis()
-        val recencyMs = effectiveLastUsed?.let { currentTime - it } ?: Long.MAX_VALUE
+        val currentDayBucket = (System.currentTimeMillis() / 86_400_000L) * 86_400_000L
+        val lastUsedDayBucket = effectiveLastUsed?.let { (it / 86_400_000L) * 86_400_000L }
+        val recencyMs = lastUsedDayBucket?.let { currentDayBucket - it } ?: Long.MAX_VALUE
 
         // 4. Transform to scoring factors
         val frequencyPenalty = if (currentUsageShare > highFrequencyShare) 0.85 else 0.0
