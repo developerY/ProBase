@@ -7,7 +7,7 @@ This document provides the single, canonical, authoritative audit record for all
 ## 1. Summary of Completed Architectural Remediations
 
 ### 1.0 Dead Code Removal (The "Kill" Decision)
-Standardized the application entirely on the active 3-evaluator `FashionistaEngine` pipeline, purging all un-injected, incomplete, and un-calibrated legacy code.
+Standardized the application entirely on the active 3-evaluator `FashionistaEngine` pipeline, purging all un-injected, incomplete, and un-calibrated legacy code (22 production classes/interfaces deleted + 1 test file).
 
 - **Deleted 13 Legacy Scorer & Engine Classes Across Packages**:
   - `fashionista/scoring/FashionistaScorerImpl.kt`
@@ -29,7 +29,7 @@ Standardized the application entirely on the active 3-evaluator `FashionistaEngi
   - `fashionista/extraction/HierarchyFeatureExtractor.kt`
   - `fashionista/extraction/SilhouetteFeatureExtractor.kt`
   - `fashionista/extraction/TextureFeatureExtractor.kt`
-- **Deleted Dead Domain Types & Tests**:
+- **Deleted 4 Dead Domain Types & 1 Test File**:
   - `fashionista/domain/FashionistaScorer.kt` (interface)
   - `fashionista/domain/FashionistaObservation.kt`
   - `fashionista/domain/FashionistaFeatureVector.kt` (the 6-feature version)
