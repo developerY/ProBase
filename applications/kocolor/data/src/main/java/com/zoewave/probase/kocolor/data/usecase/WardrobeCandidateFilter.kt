@@ -8,6 +8,7 @@ import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.core.model.ritual.Temperature
 import com.zoewave.probase.core.util.color.ColorQuantizer
+import com.zoewave.probase.kocolor.data.util.KeywordMatcher
 import com.zoewave.probase.kocolor.data.color.CandidateProvenance
 import com.zoewave.probase.kocolor.data.color.RecommendationWeights
 import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
@@ -60,8 +61,8 @@ class WardrobeCandidateFilter @Inject constructor(
 
     private fun isWeatherCompatible(item: ClothingItem, weather: String): Boolean {
         // Basic heuristic: check if weather context mentions high temp and filter heavy categories
-        val isHot = weather.contains("Temp: 2", ignoreCase = true) || weather.contains("Temp: 3", ignoreCase = true)
-        val isCold = weather.contains("Temp: -", ignoreCase = true) || weather.contains("Temp: 0", ignoreCase = true) || weather.contains("Temp: 5", ignoreCase = true)
+        val isHot = KeywordMatcher.containsWholeWord(weather, "Temp: 2") || KeywordMatcher.containsWholeWord(weather, "Temp: 3")
+        val isCold = KeywordMatcher.containsWholeWord(weather, "Temp: -") || KeywordMatcher.containsWholeWord(weather, "Temp: 0") || KeywordMatcher.containsWholeWord(weather, "Temp: 5")
         
         return when {
             isHot -> item.category != ClothingCategory.OUTERWEAR
@@ -81,6 +82,9 @@ class WardrobeCandidateFilter @Inject constructor(
         return lastUsed > threeDaysAgo
     }
 
+    fun calculateScoreTest(item: ClothingItem, context: StyleRequestContext): Double = calculateScore(item, context)
+    fun calculateCosmeticScoreTest(item: CosmeticItem, context: StyleRequestContext): Double = calculateCosmeticScore(item, context)
+
     private fun calculateScore(item: ClothingItem, context: StyleRequestContext): Double {
         var score = 1.0
         val tempC = context.weatherTempC ?: 22f
@@ -88,7 +92,7 @@ class WardrobeCandidateFilter @Inject constructor(
         // 1. Appearance Temperature Harmony Bonus
         val appearanceString = "${context.appearanceProfile.undertone} • ${context.appearanceProfile.depth} • ${context.appearanceProfile.contrast}"
         val itemTemp = item.colorTemperature ?: "Neutral"
-        if (appearanceString.contains(itemTemp, ignoreCase = true)) {
+        if (KeywordMatcher.containsWholeWord(appearanceString, itemTemp)) {
             score += RecommendationWeights.APPEARANCE_TEMPERATURE_HARMONY_BONUS
         } else if (itemTemp.equals("Neutral", ignoreCase = true)) {
             score += RecommendationWeights.NEUTRAL_ANCHOR_BONUS
@@ -99,14 +103,14 @@ class WardrobeCandidateFilter @Inject constructor(
         val materialLower = (item.material ?: "").lowercase()
 
         // Cold-weather & insulating constructions (fleece, shearling, down, velvet, heavy wool)
-        val isInsulatingConstruction = nameLower.contains("velvet") || nameLower.contains("shearling") ||
-                nameLower.contains("wool") || nameLower.contains("fleece") || nameLower.contains("down") ||
-                materialLower.contains("velvet") || materialLower.contains("shearling") || materialLower.contains("wool") || materialLower.contains("fleece")
+        val isInsulatingConstruction = KeywordMatcher.containsWholeWord(nameLower, "velvet") || KeywordMatcher.containsWholeWord(nameLower, "shearling") ||
+                KeywordMatcher.containsWholeWord(nameLower, "wool") || KeywordMatcher.containsWholeWord(nameLower, "fleece") || KeywordMatcher.containsWholeWord(nameLower, "down") ||
+                KeywordMatcher.containsWholeWord(materialLower, "velvet") || KeywordMatcher.containsWholeWord(materialLower, "shearling") || KeywordMatcher.containsWholeWord(materialLower, "wool") || KeywordMatcher.containsWholeWord(materialLower, "fleece")
 
         // Warm-weather-compatible materials (linen, lightweight cotton, silk, seersucker)
-        val isWarmWeatherMaterial = nameLower.contains("linen") || nameLower.contains("cotton") ||
-                nameLower.contains("silk") || nameLower.contains("seersucker") ||
-                materialLower.contains("linen") || materialLower.contains("silk") || materialLower.contains("seersucker")
+        val isWarmWeatherMaterial = KeywordMatcher.containsWholeWord(nameLower, "linen") || KeywordMatcher.containsWholeWord(nameLower, "cotton") ||
+                KeywordMatcher.containsWholeWord(nameLower, "silk") || KeywordMatcher.containsWholeWord(nameLower, "seersucker") ||
+                KeywordMatcher.containsWholeWord(materialLower, "linen") || KeywordMatcher.containsWholeWord(materialLower, "silk") || KeywordMatcher.containsWholeWord(materialLower, "seersucker")
 
         if (tempC > 20.0f && isInsulatingConstruction) {
             score += RecommendationWeights.THERMAL_MISMATCH_PENALTY // -3.0
@@ -125,9 +129,9 @@ class WardrobeCandidateFilter @Inject constructor(
         }
 
         // 4. Score contextual relevance against user intent keywords and occasion
-        val keywords = context.intent.lowercase().split(" ", ",", ".")
-        if (keywords.any { item.name.contains(it, ignoreCase = true) || (item.notes?.contains(it, ignoreCase = true) ?: false) }) {
-            score += 2.0
+        val matchCount = KeywordMatcher.countMatchingTokens("${item.name} ${item.category} ${item.material.orEmpty()} ${item.notes.orEmpty()}", context.intent)
+        if (matchCount > 0) {
+            score += matchCount * 2.0
         }
 
         // 5. Recently-Worn Novelty Penalty (-2.5f)
@@ -253,14 +257,14 @@ class WardrobeCandidateFilter @Inject constructor(
 
         // 1. Relational Temperature Boost (evaluates raw float threshold + string label)
         val isWarmContext = telemetry.undertoneScore > 0.02f ||
-                appearance.undertone.contains("Warm", ignoreCase = true) ||
-                appearance.undertone.contains("Golden", ignoreCase = true) ||
-                appearance.undertone.contains("Peach", ignoreCase = true)
+                KeywordMatcher.containsWholeWord(appearance.undertone, "warm") ||
+                KeywordMatcher.containsWholeWord(appearance.undertone, "golden") ||
+                KeywordMatcher.containsWholeWord(appearance.undertone, "peach")
 
         val isCoolContext = telemetry.undertoneScore < -0.02f ||
-                appearance.undertone.contains("Cool", ignoreCase = true) ||
-                appearance.undertone.contains("Pink", ignoreCase = true) ||
-                appearance.undertone.contains("Blue", ignoreCase = true)
+                KeywordMatcher.containsWholeWord(appearance.undertone, "cool") ||
+                KeywordMatcher.containsWholeWord(appearance.undertone, "pink") ||
+                KeywordMatcher.containsWholeWord(appearance.undertone, "blue")
 
         val effectiveTemp = if (item.temperature != Temperature.UNKNOWN) {
             item.temperature
@@ -271,26 +275,26 @@ class WardrobeCandidateFilter @Inject constructor(
         val cosmeticTemp = effectiveTemp.name.uppercase()
         when {
             // Appearance Temperature Harmony: Warm cosmetic in Warm context OR Cool in Cool context
-            (isWarmContext && cosmeticTemp.contains("WARM")) ||
-            (isCoolContext && cosmeticTemp.contains("COOL")) -> {
+            (isWarmContext && cosmeticTemp == "WARM") ||
+            (isCoolContext && cosmeticTemp == "COOL") -> {
                 score += RecommendationWeights.APPEARANCE_TEMPERATURE_HARMONY_BONUS // +2.0
             }
             // Appearance Temperature Clash Penalty: Cool cosmetic in Warm context OR Warm in Cool context
-            (isWarmContext && cosmeticTemp.contains("COOL")) ||
-            (isCoolContext && cosmeticTemp.contains("WARM")) -> {
+            (isWarmContext && cosmeticTemp == "COOL") ||
+            (isCoolContext && cosmeticTemp == "WARM") -> {
                 score += RecommendationWeights.APPEARANCE_TEMPERATURE_CLASH_PENALTY // -2.5
             }
             // Neutral Anchor Bonus
-            cosmeticTemp.contains("NEUTRAL") -> {
+            cosmeticTemp == "NEUTRAL" -> {
                 score += RecommendationWeights.NEUTRAL_ANCHOR_BONUS // +1.25
             }
             else -> score += 0.50
         }
 
         // 2. Keyword & Intent Relevance
-        val keywords = context.intent.lowercase().split(" ", ",", ".")
-        if (keywords.any { item.name.contains(it, ignoreCase = true) || (item.notes?.contains(it, ignoreCase = true) ?: false) }) {
-            score += 0.75
+        val matchCount = KeywordMatcher.countMatchingTokens("${item.name} ${item.macroCategory} ${item.shadeName.orEmpty()}", context.intent)
+        if (matchCount > 0) {
+            score += matchCount * 0.75
         }
 
         // 3. Signature Item Boost

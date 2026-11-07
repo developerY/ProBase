@@ -12,6 +12,7 @@ import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
 import com.zoewave.probase.kocolor.data.telemetry.AnchorSource
 import com.zoewave.probase.kocolor.data.telemetry.PruningRecord
 import com.zoewave.probase.kocolor.data.telemetry.StyleAuditLogger
+import com.zoewave.probase.kocolor.data.util.KeywordMatcher
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.sqrt
@@ -242,11 +243,13 @@ class DeterministicContextEngine @Inject constructor(
             if (item.category == ClothingCategory.OUTERWEAR) return false
             
             // Fallback heuristics
-            if (item.material?.contains("Wool", ignoreCase = true) == true || 
-                item.material?.contains("Fleece", ignoreCase = true) == true ||
-                item.material?.contains("Shearling", ignoreCase = true) == true ||
-                item.name.contains("Overcoat", ignoreCase = true) ||
-                item.name.contains("Puffer", ignoreCase = true)) {
+            val materialLower = item.material?.lowercase() ?: ""
+            val nameLower = item.name.lowercase()
+            if (KeywordMatcher.containsWholeWord(materialLower, "wool") || 
+                KeywordMatcher.containsWholeWord(materialLower, "fleece") ||
+                KeywordMatcher.containsWholeWord(materialLower, "shearling") ||
+                KeywordMatcher.containsWholeWord(nameLower, "overcoat") ||
+                KeywordMatcher.containsWholeWord(nameLower, "puffer")) {
                 return false
             }
         }
@@ -255,9 +258,11 @@ class DeterministicContextEngine @Inject constructor(
             // Exclude extreme winter wear in warm weather
             if (item.category == ClothingCategory.OUTERWEAR) return false
             
-            if (item.material?.contains("Fleece", ignoreCase = true) == true ||
-                item.name.contains("Puffer", ignoreCase = true) ||
-                item.name.contains("Overcoat", ignoreCase = true)) {
+            val materialLower = item.material?.lowercase() ?: ""
+            val nameLower = item.name.lowercase()
+            if (KeywordMatcher.containsWholeWord(materialLower, "fleece") ||
+                KeywordMatcher.containsWholeWord(nameLower, "puffer") ||
+                KeywordMatcher.containsWholeWord(nameLower, "overcoat")) {
                 return false
             }
         }
@@ -267,7 +272,7 @@ class DeterministicContextEngine @Inject constructor(
 
     private fun calculateContextScore(item: ClothingItem, context: StyleRequestContext): Float {
         var score = 0.5f
-        if (context.intent.contains(item.category.name, ignoreCase = true)) score += 0.3f
+        if (KeywordMatcher.containsWholeWord(context.intent, item.category.name)) score += 0.3f
 
         // Apply dynamic CIELAB chroma intent scaling curve to un-flatten candidate ranks
         if (context.intentProfile.colorfulness > 0.7f) {

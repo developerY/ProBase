@@ -60,7 +60,7 @@ class StyleSimulatorEngineTest {
             totalScore = 80f,
             isApproved = true
         )
-        every { intentFulfillmentEvaluator.evaluate(any(), any(), any()) } returns IntentFulfillment()
+        every { intentFulfillmentEvaluator.evaluate(any(), any(), any(), any()) } returns IntentFulfillment()
 
         engine = StyleSimulatorEngine(
             contextEngine,

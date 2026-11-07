@@ -4,6 +4,7 @@ import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.core.model.ritual.MacroCategory
+import com.zoewave.probase.kocolor.data.util.KeywordMatcher
 import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
 import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
 import kotlinx.coroutines.flow.first
@@ -17,6 +18,12 @@ class HeuristicStyleEngine @Inject constructor(
     private val cosmeticRepository: CosmeticInventoryRepository,
     private val contextEngine: DeterministicContextEngine
 ) : DeterministicStyleEngine {
+
+    internal fun <T> findMatches(items: List<T>, intent: String, nameSelector: (T) -> String, notesSelector: (T) -> String?): List<T> {
+        return items.filter { item ->
+            KeywordMatcher.hasAnyMatchingToken("${nameSelector(item)} ${notesSelector(item).orEmpty()}", intent)
+        }
+    }
 
     override fun generate(context: StyleRequestContext): StyleBlueprint {
         // Use runBlocking for the deterministic fallback as it's usually called as a last resort
@@ -38,12 +45,7 @@ class HeuristicStyleEngine @Inject constructor(
 
         fun <T> List<T>.smartPick(nameSelector: (T) -> String, notesSelector: (T) -> String?): T? {
             if (this.isEmpty()) return null
-            val matches = this.filter { item ->
-                context.intent.split(" ").any { keyword -> 
-                    nameSelector(item).contains(keyword, ignoreCase = true) || 
-                    (notesSelector(item)?.contains(keyword, ignoreCase = true) ?: false)
-                }
-            }
+            val matches = findMatches(this, context.intent, nameSelector, notesSelector)
             return matches.randomOrNull() ?: this.random()
         }
 

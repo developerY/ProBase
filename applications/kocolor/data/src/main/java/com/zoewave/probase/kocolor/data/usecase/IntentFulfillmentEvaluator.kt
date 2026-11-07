@@ -16,8 +16,18 @@ class IntentFulfillmentEvaluator @Inject constructor() {
     fun evaluate(
         intentProfile: StyleIntentProfile,
         selectedClothing: List<ClothingItem>,
-        selectedCosmetics: List<CosmeticItem>
+        selectedCosmetics: List<CosmeticItem>,
+        rotationScores: Map<String, Double>
     ): IntentFulfillment {
+        if (selectedClothing.isEmpty()) {
+            return IntentFulfillment(
+                state = if (intentProfile.activeDimensions.isEmpty()) StyleIntentState.NotSpecified else StyleIntentState.Specified(intentProfile),
+                score = if (intentProfile.activeDimensions.isEmpty()) null else 0f,
+                observedMetrics = ObservedEnsembleMetrics(0f, 0f, 0f, 0f),
+                unmetIntent = intentProfile.activeDimensions.map { it.name }
+            )
+        }
+
         val clothingChromaValues = selectedClothing.mapNotNull { calculateChroma(it.colorHex) }
         val cosmeticChromaValues = selectedCosmetics.mapNotNull { calculateChroma(it.colorHex) }
         val allChromaValues = clothingChromaValues + cosmeticChromaValues
@@ -31,21 +41,45 @@ class IntentFulfillmentEvaluator @Inject constructor() {
         val evaluatedColorfulness = ((maxChroma / 120.0f) * 0.4f) + (meanChroma / 100.0f * 0.4f) + (chromaticRatio * 0.2f)
         val normalizedEvaluatedColorfulness = evaluatedColorfulness.coerceIn(0.0f, 1.0f)
 
-        val observedMetrics = ObservedEnsembleMetrics(
-            colorfulness = normalizedEvaluatedColorfulness,
-            colorContrast = 0.50f,
-            novelty = 0.50f,
-            formality = 0.50f
-        )
-
-        val intentState = if (intentProfile.colorfulness != 0.5f || intentProfile.colorContrast != 0.5f || intentProfile.novelty != 0.5f || intentProfile.formality != 0.5f) {
-            StyleIntentState.Specified(intentProfile)
+        val clothingLStars = selectedClothing.mapNotNull { calculateLStar(it.colorHex) }
+        val cosmeticLStars = selectedCosmetics.mapNotNull { calculateLStar(it.colorHex) }
+        val allLStars = clothingLStars + cosmeticLStars
+        
+        val colorContrast = if (allLStars.size >= 2) {
+            ((allLStars.maxOrNull()!! - allLStars.minOrNull()!!) / 85.0f).coerceIn(0.0f, 1.0f)
         } else {
-            StyleIntentState.NotSpecified
+            0.0f
         }
 
-        // If intent was NOT explicitly specified, return observed metrics without false positive 0-100 match score!
-        if (intentState is StyleIntentState.NotSpecified) {
+        val novelty = if (selectedClothing.isNotEmpty()) {
+            selectedClothing.map { 1.0f - (rotationScores["w_${it.internalId}"]?.toFloat() ?: 0.0f) }.average().toFloat()
+        } else {
+            1.0f
+        }
+
+        val formality = if (selectedClothing.isNotEmpty()) {
+            selectedClothing.map { (it.formality.rank - 1) / 5f }.average().toFloat()
+        } else {
+            0.5f
+        }
+
+        val observedMetrics = ObservedEnsembleMetrics(
+            colorfulness = normalizedEvaluatedColorfulness,
+            colorContrast = colorContrast,
+            novelty = novelty,
+            formality = formality
+        )
+
+        val effectiveActiveDimensions = intentProfile.activeDimensions.ifEmpty {
+            buildSet {
+                if (kotlin.math.abs(intentProfile.colorfulness - 0.5f) > 0.01f) add(IntentDimension.COLORFULNESS)
+                if (kotlin.math.abs(intentProfile.colorContrast - 0.5f) > 0.01f) add(IntentDimension.CONTRAST)
+                if (kotlin.math.abs(intentProfile.novelty - 0.5f) > 0.01f) add(IntentDimension.NOVELTY)
+                if (kotlin.math.abs(intentProfile.formality - 0.5f) > 0.01f) add(IntentDimension.FORMALITY)
+            }
+        }
+
+        if (effectiveActiveDimensions.isEmpty()) {
             return IntentFulfillment(
                 state = StyleIntentState.NotSpecified,
                 score = null,
@@ -54,27 +88,40 @@ class IntentFulfillmentEvaluator @Inject constructor() {
             )
         }
 
-        var colorfulnessDelta = 1.0f - abs(intentProfile.colorfulness - normalizedEvaluatedColorfulness)
-        
-        // Asymmetric penalty: If they want colorful and we gave them neutral, hit them hard.
-        if (intentProfile.colorfulness > 0.7f && normalizedEvaluatedColorfulness < 0.3f) {
-            colorfulnessDelta *= 0.5f 
-        }
-
-        val score = (colorfulnessDelta * 100.0f).coerceIn(0.0f, 100.0f)
-
+        var totalError = 0.0f
         val unmet = mutableListOf<String>()
-        if (intentProfile.colorfulness > 0.6f && observedMetrics.colorfulness < 0.6f) {
-            unmet.add("Colorfulness")
+
+        if (IntentDimension.COLORFULNESS in effectiveActiveDimensions) {
+            var error = abs(intentProfile.colorfulness - observedMetrics.colorfulness)
+            if (intentProfile.colorfulness > 0.7f && observedMetrics.colorfulness < 0.3f) {
+                error += 0.5f // Asymmetric penalty
+            }
+            totalError += error
+            if (intentProfile.colorfulness > 0.6f && observedMetrics.colorfulness < 0.6f) unmet.add("Colorfulness")
         }
-        if (intentProfile.colorContrast > 0.6f && observedMetrics.colorContrast < 0.6f) {
-            unmet.add("Color Contrast")
+        
+        if (IntentDimension.CONTRAST in effectiveActiveDimensions) {
+            val error = abs(intentProfile.colorContrast - observedMetrics.colorContrast)
+            totalError += error
+            if (intentProfile.colorContrast > 0.6f && observedMetrics.colorContrast < 0.6f) unmet.add("Color Contrast")
         }
-        if (intentProfile.novelty > 0.6f && observedMetrics.novelty < 0.6f) {
-            unmet.add("Novelty")
+        
+        if (IntentDimension.NOVELTY in effectiveActiveDimensions) {
+            val error = abs(intentProfile.novelty - observedMetrics.novelty)
+            totalError += error
+            if (intentProfile.novelty > 0.6f && observedMetrics.novelty < 0.6f) unmet.add("Novelty")
         }
+        
+        if (IntentDimension.FORMALITY in effectiveActiveDimensions) {
+            val error = abs(intentProfile.formality - observedMetrics.formality)
+            totalError += error
+        }
+
+        val avgError = totalError / effectiveActiveDimensions.size
+        val score = ((1.0f - avgError) * 100.0f).coerceIn(0.0f, 100.0f)
+        
         if (score < 70.0f && unmet.isEmpty()) {
-            unmet.add("Colorfulness & Vibrancy")
+            unmet.add("General Alignment")
         }
 
         return IntentFulfillment(
@@ -83,6 +130,18 @@ class IntentFulfillmentEvaluator @Inject constructor() {
             observedMetrics = observedMetrics,
             unmetIntent = unmet
         )
+    }
+
+    private fun calculateLStar(hex: String?): Float? {
+        if (hex == null) return null
+        return try {
+            val colorInt = Color.parseColor(hex)
+            val lab = DoubleArray(3)
+            ColorUtils.colorToLAB(colorInt, lab)
+            lab[0].toFloat()
+        } catch (e: Exception) {
+            null
+        }
     }
 
     private fun calculateChroma(hex: String?): Float? {

@@ -134,7 +134,7 @@ class StyleSimulatorEngine @Inject constructor(
                         SimulationResult(
                             blueprint = decodedBlueprint,
                             fashionistaScore = fashionistaEvaluator.evaluate(decodedBlueprint, requestContext, selectedClothing),
-                            intentFulfillment = intentFulfillmentEvaluator.evaluate(requestContext.intentProfile, selectedClothing, selectedCosmetics),
+                            intentFulfillment = intentFulfillmentEvaluator.evaluate(requestContext.intentProfile, selectedClothing, selectedCosmetics, requestContext.rotationScores),
                             validation = cachedValidation
                         )
                     } catch (e: Exception) {
@@ -212,7 +212,7 @@ class StyleSimulatorEngine @Inject constructor(
         return SimulationResult(
             blueprint = blueprint,
             fashionistaScore = fashionistaEvaluator.evaluate(blueprint, requestContext, selectedClothing),
-            intentFulfillment = intentFulfillmentEvaluator.evaluate(requestContext.intentProfile, selectedClothing, selectedCosmetics),
+            intentFulfillment = intentFulfillmentEvaluator.evaluate(requestContext.intentProfile, selectedClothing, selectedCosmetics, requestContext.rotationScores),
             validation = ValidationReport(isValid = true, isAnchorIncluded = true, hasRequiredSlots = true, hasRequiredRoles = true, areAllIdsGrounded = true, noForbiddenItems = true, rationaleClean = true)
         )
     }
@@ -314,7 +314,8 @@ class StyleSimulatorEngine @Inject constructor(
                 val intentFulfillment = intentFulfillmentEvaluator.evaluate(
                     intentProfile = requestContext.intentProfile,
                     selectedClothing = selectedClothingItems,
-                    selectedCosmetics = selectedCosmeticItems
+                    selectedCosmetics = selectedCosmeticItems,
+                    rotationScores = requestContext.rotationScores
                 )
                 auditLogger.logIntentFulfillment(requestContext.requestId, intentFulfillment)
 

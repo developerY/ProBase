@@ -20,9 +20,19 @@ class FashionistaEngine @Inject constructor(
         userContext: StyleRequestContext,
         resolvedClothing: List<ClothingItem>
     ): FashionistaScore {
-        val colorScore = colorHarmonicsEvaluator.evaluate(blueprint)
+        if (blueprint.selectedClothingIds.isEmpty()) {
+            return FashionistaScore(
+                colorHarmonyScore = 0f,
+                silhouetteScore = 0f,
+                contrastScore = 0f,
+                totalScore = 0f,
+                isApproved = false
+            )
+        }
+
+        val colorScore = colorHarmonicsEvaluator.evaluate(blueprint, userContext, resolvedClothing)
         val silhouetteScore = silhouetteGrader.grade(blueprint, resolvedClothing)
-        val contrastScore = contrastAnchorEvaluator.evaluate(blueprint, userContext)
+        val contrastScore = contrastAnchorEvaluator.evaluate(blueprint, userContext, resolvedClothing)
 
         val totalScore = (colorScore * 0.40f) + (silhouetteScore * 0.35f) + (contrastScore * 0.25f)
 

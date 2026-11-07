@@ -50,8 +50,11 @@ data class StyleIntentProfile(
     val colorfulness: Float = 0.5f, 
     val colorContrast: Float = 0.5f,
     val novelty: Float = 0.5f,
-    val formality: Float = 0.5f
+    val formality: Float = 0.5f,
+    val activeDimensions: Set<IntentDimension> = emptySet()
 )
+
+enum class IntentDimension { COLORFULNESS, CONTRAST, NOVELTY, FORMALITY }
 
 sealed interface StyleIntentState {
     @Serializable
