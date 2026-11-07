@@ -16,6 +16,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -24,7 +25,11 @@ class ByokAiProvider @Inject constructor() : AiProvider {
 
     private var currentApiKey: String? = null
     private var currentModelName: String = "gemini-2.0-flash"
-    private val httpClient = OkHttpClient()
+    private val httpClient = OkHttpClient.Builder()
+        .connectTimeout(8, TimeUnit.SECONDS)
+        .readTimeout(8, TimeUnit.SECONDS)
+        .writeTimeout(8, TimeUnit.SECONDS)
+        .build()
 
     fun setApiKey(key: String?) {
         this.currentApiKey = key
@@ -44,7 +49,8 @@ class ByokAiProvider @Inject constructor() : AiProvider {
         timeoutMillis = 8000L,
         maxCandidateAdditions = 25,
         minCandidateAdditions = 6,
-        isLocal = false
+        isLocal = false,
+        defaultTemperature = 0.2f
     )
 
     override suspend fun isAvailable(): Boolean {
@@ -55,7 +61,7 @@ class ByokAiProvider @Inject constructor() : AiProvider {
         return input.promptString.length / 4
     }
 
-    override suspend fun execute(input: AiInput): Result<String> = withContext(Dispatchers.IO) {
+    override suspend fun execute(input: AiInput): Result<AiExecutionResult> = withContext(Dispatchers.IO) {
         if (input is AiInput.Multimodal) {
             return@withContext Result.failure(UnsupportedOperationException("BYOK Provider does not support multimodal inputs for privacy and token budget reasons"))
         }
@@ -69,21 +75,21 @@ class ByokAiProvider @Inject constructor() : AiProvider {
         val normalizedModel = currentModelName.removePrefix("models/")
         val url = "https://generativelanguage.googleapis.com/v1beta/models/$normalizedModel:generateContent?key=$apiKey"
         
-                // Build JSON body securely using kotlinx.serialization
-        val jsonBody = kotlinx.serialization.json.buildJsonObject {
-            put("contents", kotlinx.serialization.json.buildJsonArray {
-                add(kotlinx.serialization.json.buildJsonObject {
-                    put("parts", kotlinx.serialization.json.buildJsonArray {
-                        add(kotlinx.serialization.json.buildJsonObject {
+        val jsonBody = buildJsonObject {
+            put("contents", buildJsonArray {
+                add(buildJsonObject {
+                    put("parts", buildJsonArray {
+                        add(buildJsonObject {
                             put("text", input.promptString)
                         })
                     })
                 })
             })
-            // Enforce low temperature for reliability unless overriden
-            val temp = input.temperatureOverride ?: 0.2f
-            put("generationConfig", kotlinx.serialization.json.buildJsonObject {
+            val temp = input.temperatureOverride ?: capability.defaultTemperature
+            put("generationConfig", buildJsonObject {
                 put("temperature", temp)
+                put("maxOutputTokens", capability.maxOutputTokens)
+                put("responseMimeType", "application/json")
             })
         }.toString()
         
@@ -115,10 +121,20 @@ class ByokAiProvider @Inject constructor() : AiProvider {
                     ?.jsonArray?.get(0)
                     ?.jsonObject?.get("text")
                     ?.jsonPrimitive?.contentOrNull
-                    
+
+                val usageMeta = json["usageMetadata"]?.jsonObject
+                val promptTokens = usageMeta?.get("promptTokenCount")?.jsonPrimitive?.contentOrNull?.toIntOrNull() ?: 0
+                val candidatesTokens = usageMeta?.get("candidatesTokenCount")?.jsonPrimitive?.contentOrNull?.toIntOrNull() ?: 0
+                val totalTokens = usageMeta?.get("totalTokenCount")?.jsonPrimitive?.contentOrNull?.toIntOrNull() ?: (promptTokens + candidatesTokens)
+
                 if (text != null) {
                     Log.d("ByokAiProvider", "Successfully executed prompt")
-                    Result.success(text)
+                    Result.success(
+                        AiExecutionResult(
+                            text = text,
+                            usage = TokenUsage(promptTokens = promptTokens, candidatesTokens = candidatesTokens, totalTokens = totalTokens)
+                        )
+                    )
                 } else {
                     Log.e("ByokAiProvider", "Failed to parse text from response: $bodyString")
                     Result.failure(Exception("Invalid response format"))

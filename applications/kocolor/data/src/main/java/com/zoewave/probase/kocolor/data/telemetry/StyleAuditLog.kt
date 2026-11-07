@@ -41,6 +41,8 @@ data class StyleAuditTrail(
     var reasoningSet: List<CandidateProvenance>? = null,
     var aiProviderUsed: String? = null,
     var tokensUsed: Int? = null,
+    var promptTokensUsed: Int = 0,
+    var outputTokensUsed: Int = 0,
     var finalBlueprint: StyleBlueprint? = null,
     var fashionistaScore: FashionistaScore? = null,
     var intentFulfillment: IntentFulfillment? = null

@@ -100,7 +100,7 @@ class AnalyzerEngine @Inject constructor(
             }
 
             val response = provider.execute(input)
-            val jsonText = response.getOrNull() ?: throw IllegalStateException("Empty response from AI")
+            val jsonText = response.getOrNull()?.text ?: throw IllegalStateException("Empty response from AI")
             
             val cleanedJson = jsonText.substringAfter("{").substringBeforeLast("}")
             val finalJson = "{$cleanedJson}"
@@ -147,7 +147,7 @@ class AnalyzerEngine @Inject constructor(
             }
 
             val response = provider.execute(input)
-            val jsonText = response.getOrNull() ?: return null
+            val jsonText = response.getOrNull()?.text ?: return null
             val cleanedJson = jsonText.substringAfter("{").substringBeforeLast("}")
             val finalJson = "{$cleanedJson}"
             

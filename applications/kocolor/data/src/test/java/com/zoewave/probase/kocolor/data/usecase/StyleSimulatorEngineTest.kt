@@ -52,7 +52,8 @@ class StyleSimulatorEngineTest {
         coEvery { cache.get(any()) } returns null
         coEvery { cache.put(any(), any()) } returns Unit
 
-        every { fashionistaEvaluator.evaluate(any(), any()) } returns FashionistaScore(
+        coEvery { fallbackEngine.generate(any()) } returns StyleBlueprint("Fallback Rationale", emptyList(), emptyList(), emptyList())
+        every { fashionistaEvaluator.evaluate(any(), any(), any()) } returns FashionistaScore(
             colorHarmonyScore = 80f,
             silhouetteScore = 80f,
             contrastScore = 80f,
@@ -89,7 +90,7 @@ class StyleSimulatorEngineTest {
 
         every { provider.capability } returns capability
         coEvery { provider.countTokens(any()) } returns 100
-        coEvery { provider.execute(any()) } returns Result.success("{\"rationale\": \"Primary AI\", \"selectedClothingIds\": [\"w_1\"], \"selectedCosmeticIds\": [], \"recommendedPalette\": []}")
+        coEvery { provider.execute(any()) } returns Result.success(com.zoewave.probase.features.ai.core.AiExecutionResult("{\"rationale\": \"Primary AI\", \"selectedClothingIds\": [\"w_1\"], \"selectedCosmeticIds\": [], \"recommendedPalette\": []}"))
         
         coEvery { capabilityRouter.getRankedAvailableProviders() } returns listOf(provider)
         coEvery { contextEngine.generateSelectionState(any(), any(), any()) } returns StyleSelectionState(fullRankedCandidatePool = listOf(CandidateProvenance(clothingItem = item)))
@@ -163,7 +164,7 @@ class StyleSimulatorEngineTest {
             }
         """.trimIndent()
 
-        coEvery { provider.execute(any()) } returns Result.success(nestedJson)
+        coEvery { provider.execute(any()) } returns Result.success(com.zoewave.probase.features.ai.core.AiExecutionResult(nestedJson))
         coEvery { capabilityRouter.getRankedAvailableProviders() } returns listOf(provider)
         coEvery { contextEngine.generateSelectionState(any(), any(), any()) } returns StyleSelectionState(fullRankedCandidatePool = provList)
         coEvery { candidateFilter.getCosmeticCandidateProvenance(any(), any(), any()) } returns cosmeticProvList
@@ -175,5 +176,51 @@ class StyleSimulatorEngineTest {
         assertThat(blueprint.selectedClothingIds).containsExactly("w_38", "w_32", "w_48")
         assertThat(blueprint.selectedCosmeticIds).containsExactly("c_61", "c_12")
         assertThat(blueprint.recommendedPalette).containsExactly("#1E88E5", "#D4AF37")
+    }
+
+    @Test
+    fun `adaptContextToProvider stepDown invokes countTokens at most once`() = runTest {
+        val context = StyleRequestContext(intent = "work", weather = "sunny")
+        val provider = mockk<AiProvider>()
+        val capability = AiProviderCapability(
+            id = "p1", displayName = "P1", maxInputTokens = 1000, maxOutputTokens = 10, timeoutMillis = 1000,
+            isLocal = false
+        )
+        val item = ClothingItem(internalId = 1, name = "Shirt", category = ClothingCategory.TOPS, colorHex = "#000")
+
+        every { provider.capability } returns capability
+        coEvery { provider.countTokens(any()) } returns 1200
+        coEvery { provider.execute(any()) } returns Result.success(com.zoewave.probase.features.ai.core.AiExecutionResult("{\"rationale\": \"Success\", \"selectedClothingIds\": [\"w_1\"]}"))
+        coEvery { capabilityRouter.getRankedAvailableProviders() } returns listOf(provider)
+        coEvery { contextEngine.generateSelectionState(any(), any(), any()) } returns StyleSelectionState(fullRankedCandidatePool = listOf(CandidateProvenance(clothingItem = item)))
+        coEvery { candidateFilter.getCosmeticCandidateProvenance(any(), any(), any()) } returns emptyList()
+
+        engine.generateBlueprint(listOf(item), emptyList(), context)
+
+        // Verify countTokens is called at most once during adaptation
+        io.mockk.coVerify(atMost = 1) { provider.countTokens(any()) }
+    }
+
+    @Test
+    fun `nanoFastFail exceedsFloor skipsProviderWithoutLooping`() = runTest {
+        val context = StyleRequestContext(intent = "work", weather = "sunny")
+        val provider = mockk<AiProvider>()
+        val capability = AiProviderCapability(
+            id = "gemini_nano", displayName = "Nano", maxInputTokens = 10, maxOutputTokens = 10, timeoutMillis = 1000,
+            isLocal = true
+        )
+        val items = (1..10).map { ClothingItem(internalId = it.toLong(), name = "Shirt $it", category = ClothingCategory.TOPS, colorHex = "#000") }
+        val provList = items.map { CandidateProvenance(clothingItem = it) }
+
+        every { provider.capability } returns capability
+        coEvery { capabilityRouter.getRankedAvailableProviders() } returns listOf(provider)
+        coEvery { contextEngine.generateSelectionState(any(), any(), any()) } returns StyleSelectionState(fullRankedCandidatePool = provList)
+        coEvery { candidateFilter.getCosmeticCandidateProvenance(any(), any(), any()) } returns emptyList()
+
+        val result = engine.generateBlueprint(items, emptyList(), context)
+
+        // Since Nano fast-failed, it drops to deterministic fallback
+        assertThat(result.blueprint.rationale).isEqualTo("Fallback Rationale")
+        io.mockk.coVerify(exactly = 0) { provider.execute(any()) }
     }
 }

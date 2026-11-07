@@ -9,15 +9,14 @@ import com.zoewave.probase.kocolor.fashionista.domain.FashionistaScore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class StyleAuditLogger @Inject constructor() {
 
-    private val trails = ConcurrentHashMap<String, StyleAuditTrail>()
-    
+    private val trails = mutableMapOf<String, StyleAuditTrail>()
+
     private val _recentLogs = MutableStateFlow<List<String>>(emptyList())
     val recentLogs: StateFlow<List<String>> = _recentLogs.asStateFlow()
 
@@ -63,10 +62,12 @@ class StyleAuditLogger @Inject constructor() {
         trails[requestId]?.reasoningSet = candidates
     }
 
-    fun logAiExecution(requestId: String, providerId: String, tokens: Int, blueprint: StyleBlueprint) {
+    fun logAiExecution(requestId: String, providerId: String, tokens: Int, blueprint: StyleBlueprint, promptTokens: Int = 0, outputTokens: Int = 0) {
         trails[requestId]?.apply {
             aiProviderUsed = providerId
             tokensUsed = tokens
+            promptTokensUsed = promptTokens
+            outputTokensUsed = outputTokens
             finalBlueprint = blueprint
         }
     }
@@ -130,7 +131,6 @@ class StyleAuditLogger @Inject constructor() {
                     appendLine("      ANCHOR PRIORITY: $score / $anchorScale")
                     appendLine("      Reason: ${prov.retrievalReason.replace("\n", "\n  ")}")
                 } else if (prov.id.startsWith("c_")) {
-                    // Normalize cosmetic scores to a 1.00 scale for cleaner comparison
                     val normalizedScore = "%.3f".format(prov.totalScore / 6.0f)
                     appendLine("    - [${prov.id}] \"${prov.name}\"")
                     appendLine("      COSMETIC COMPATIBILITY SCORE: $normalizedScore / 1.000")
@@ -144,7 +144,10 @@ class StyleAuditLogger @Inject constructor() {
             appendLine()
 
             appendLine("[5] AI AESTHETIC SYNTHESIS")
-            appendLine("    Provider: ${trail.aiProviderUsed ?: "N/A"} (Tokens: ${trail.tokensUsed ?: 0})")
+            val totalIn = trail.promptTokensUsed
+            val totalOut = trail.outputTokensUsed
+            val totalTok = trail.tokensUsed ?: 0
+            appendLine("    Provider: ${trail.aiProviderUsed ?: "N/A"} (Tokens: $totalTok (In: $totalIn, Out: $totalOut))")
             appendLine("    Selected Clothing: ${trail.finalBlueprint?.selectedClothingIds}")
             appendLine("    Selected Cosmetics: ${trail.finalBlueprint?.selectedCosmeticIds}")
             appendLine("    AI Rationale: \"${trail.finalBlueprint?.rationale ?: "N/A"}\"")
@@ -178,10 +181,9 @@ class StyleAuditLogger @Inject constructor() {
             appendLine("==================================================")
         }.toString()
 
-        Log.d("KoColor_Audit", output)
-        
-        // Retain in recent logs for UI Debug Telemetry
-        trail.let {
+        Log.i("KoColor_Audit", output)
+
+        trails[requestId]?.let {
             _recentTrails.value = (listOf(it) + _recentTrails.value).take(20)
             _recentLogs.value = (listOf(output) + _recentLogs.value).take(20)
         }

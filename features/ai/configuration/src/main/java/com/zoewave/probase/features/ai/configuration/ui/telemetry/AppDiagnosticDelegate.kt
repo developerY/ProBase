@@ -59,7 +59,7 @@ class DefaultPingDiagnosticDelegate @Inject constructor() : AppDiagnosticDelegat
             val latency = System.currentTimeMillis() - startMs
             
             if (result.isSuccess) {
-                val raw = result.getOrNull() ?: ""
+                val raw = result.getOrNull()?.text ?: ""
                 updateStep(3, DiagnosticStepState.SUCCESS, "Responded in ${latency}ms")
 
                 val valid = raw.contains("\"status\"") && raw.contains("\"ok\"")

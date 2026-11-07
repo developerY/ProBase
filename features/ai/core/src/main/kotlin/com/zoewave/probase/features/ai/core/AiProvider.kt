@@ -12,7 +12,8 @@ data class AiProviderCapability(
     val maxCandidateAdditions: Int = 25,
     val minCandidateAdditions: Int = 4,
     val isLocal: Boolean,
-    val supportsLocalImageIngestion: Boolean = false
+    val supportsLocalImageIngestion: Boolean = false,
+    val defaultTemperature: Float = 0.2f
 )
 
 /**
@@ -27,6 +28,17 @@ sealed interface AiExecutionFailure {
     data class ExecutionError(val throwable: Throwable) : AiExecutionFailure
 }
 
+data class TokenUsage(
+    val promptTokens: Int = 0,
+    val candidatesTokens: Int = 0,
+    val totalTokens: Int = promptTokens + candidatesTokens
+)
+
+data class AiExecutionResult(
+    val text: String,
+    val usage: TokenUsage = TokenUsage()
+)
+
 /**
  * Common interface for all AI Providers (Local Nano, Firebase AI, BYOK Cloud, etc.)
  */
@@ -34,5 +46,5 @@ interface AiProvider {
     val capability: AiProviderCapability
     suspend fun isAvailable(): Boolean
     suspend fun countTokens(input: AiInput): Int
-    suspend fun execute(input: AiInput): Result<String>
+    suspend fun execute(input: AiInput): Result<AiExecutionResult>
 }

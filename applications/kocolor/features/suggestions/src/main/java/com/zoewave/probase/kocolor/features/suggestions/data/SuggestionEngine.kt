@@ -57,7 +57,7 @@ class SuggestionEngine @Inject constructor(
 
             val input = AiInput.TextOnly(promptString = textPrompt)
             val result = provider.execute(input)
-            val jsonText = result.getOrNull() ?: throw IllegalStateException("Empty response from AI")
+            val jsonText = result.getOrNull()?.text ?: throw IllegalStateException("Empty response from AI")
             
             val cleanedJson = jsonText.substringAfter("{").substringBeforeLast("}")
             val finalJson = "{$cleanedJson}"

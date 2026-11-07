@@ -1,8 +1,10 @@
 package com.zoewave.probase.features.ai.local.data
 
+import com.zoewave.probase.features.ai.core.AiExecutionResult
 import com.zoewave.probase.features.ai.core.AiInput
 import com.zoewave.probase.features.ai.core.AiProvider
 import com.zoewave.probase.features.ai.core.AiProviderCapability
+import com.zoewave.probase.features.ai.core.TokenUsage
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -20,7 +22,8 @@ class LocalNanoAiProvider @Inject constructor(
         maxCandidateAdditions = 8,
         minCandidateAdditions = 4,
         isLocal = true,
-        supportsLocalImageIngestion = true
+        supportsLocalImageIngestion = true,
+        defaultTemperature = 0.2f
     )
 
     override suspend fun isAvailable(): Boolean {
@@ -34,14 +37,22 @@ class LocalNanoAiProvider @Inject constructor(
         return engine.estimateTokens(input.promptString)
     }
 
-    override suspend fun execute(input: AiInput): Result<String> {
-        return when (input) {
+    override suspend fun execute(input: AiInput): Result<AiExecutionResult> {
+        val estimatedIn = (input.promptString.length + 3) / 4
+        val rawResult = when (input) {
             is AiInput.Multimodal -> {
                 engine.generateMultimodalContent(input.promptString, input.localImage)
             }
             is AiInput.TextOnly -> {
                 engine.generateStructuredContent(input.promptString)
             }
+        }
+        return rawResult.map { text ->
+            val estimatedOut = (text.length + 3) / 4
+            AiExecutionResult(
+                text = text,
+                usage = TokenUsage(promptTokens = estimatedIn, candidatesTokens = estimatedOut)
+            )
         }
     }
 }

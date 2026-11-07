@@ -7,10 +7,11 @@ import android.util.Log
 import com.google.firebase.appcheck.FirebaseAppCheck
 import com.google.firebase.auth.FirebaseAuth
 import com.zoewave.probase.core.data.repository.AiConfigurationSettings
+import com.zoewave.probase.features.ai.core.AiExecutionResult
 import com.zoewave.probase.features.ai.core.AiInput
 import com.zoewave.probase.features.ai.core.AiProvider
 import com.zoewave.probase.features.ai.core.AiProviderCapability
-import dagger.hilt.android.qualifiers.ApplicationContext
+import com.zoewave.probase.features.ai.core.TokenUsage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
@@ -35,7 +36,7 @@ import javax.inject.Singleton
 
 @Singleton
 class GemmaRestFallbackProvider @Inject constructor(
-    @ApplicationContext private val context: Context,
+    private val context: Context,
     private val aiSettings: AiConfigurationSettings
 ) : AiProvider {
 
@@ -45,7 +46,7 @@ class GemmaRestFallbackProvider @Inject constructor(
 
     private val httpClient = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)
-        .readTimeout(180, TimeUnit.SECONDS)
+        .readTimeout(60, TimeUnit.SECONDS)
         .writeTimeout(30, TimeUnit.SECONDS)
         .build()
 
@@ -61,7 +62,8 @@ class GemmaRestFallbackProvider @Inject constructor(
         timeoutMillis = 60000L,
         maxCandidateAdditions = 25,
         minCandidateAdditions = 6,
-        isLocal = false
+        isLocal = false,
+        defaultTemperature = 0.2f
     )
 
     fun setModelName(modelName: String) {
@@ -70,23 +72,16 @@ class GemmaRestFallbackProvider @Inject constructor(
         }
     }
 
-    private fun resolveGemmaApiKey(): String {
-        return aiSettings.getGeminiApiKey() ?: "PROXY_ACTIVE_NO_LOCAL_KEY"
-    }
-
     override suspend fun isAvailable(): Boolean {
-        return resolveGemmaApiKey().isNotBlank()
+        return true
     }
 
     override suspend fun countTokens(input: AiInput): Int {
-        val promptStr = when (input) {
-            is AiInput.TextOnly -> input.promptString
-            is AiInput.Multimodal -> input.promptString
-        }
+        val promptStr = input.promptString
         return (promptStr.length / 4).coerceAtLeast(100)
     }
 
-    override suspend fun execute(input: AiInput): Result<String> = withContext(Dispatchers.IO) {
+    override suspend fun execute(input: AiInput): Result<AiExecutionResult> = withContext(Dispatchers.IO) {
         if (input is AiInput.Multimodal) {
             return@withContext Result.failure(UnsupportedOperationException("Gemma REST proxy does not support multimodal inputs for privacy and token budget reasons"))
         }
@@ -106,7 +101,7 @@ class GemmaRestFallbackProvider @Inject constructor(
         modelName: String,
         promptStr: String,
         temperatureOverride: Float?
-    ): Result<String> {
+    ): Result<AiExecutionResult> {
         return try {
             val appCheckToken = try {
                 FirebaseAppCheck.getInstance().getAppCheckToken(false).await().token
@@ -120,10 +115,9 @@ class GemmaRestFallbackProvider @Inject constructor(
                 try {
                     auth.signInAnonymously().await()
                 } catch (e: Exception) {
-                    Log.w("Gemma4Rest", "Failed anonymous sign in", e)
+                    Log.w("Gemma4Rest", "Failed to sign in anonymously", e)
                 }
             }
-
             val idToken = try {
                 auth.currentUser?.getIdToken(false)?.await()?.token ?: ""
             } catch (e: Exception) {
@@ -134,6 +128,8 @@ class GemmaRestFallbackProvider @Inject constructor(
             val requestJson = buildJsonObject {
                 put("model", modelName)
                 put("prompt", promptStr)
+                put("maxOutputTokens", capability.maxOutputTokens)
+                put("temperature", temperatureOverride ?: capability.defaultTemperature)
             }.toString()
 
             val requestBuilder = Request.Builder()
@@ -148,7 +144,6 @@ class GemmaRestFallbackProvider @Inject constructor(
             }
 
             Log.d("Gemma4Rest", "Executing Keyless Proxy Request to $DEFAULT_PROXY_URL (Model=$modelName)")
-            Log.d("Gemma4Rest", "Security Headers: AppCheck=${appCheckToken.isNotBlank()} (${appCheckToken.take(12)}...), AuthToken=${idToken.isNotBlank()}")
 
             val request = requestBuilder
                 .post(requestJson.toRequestBody("application/json".toMediaType()))
@@ -179,7 +174,7 @@ class GemmaRestFallbackProvider @Inject constructor(
         targetModel: String,
         promptStr: String,
         temperatureOverride: Float?
-    ): Result<String> {
+    ): Result<AiExecutionResult> {
         Log.d("Gemma4Rest", ">>> DIRECT REQUEST TO HOSTED GEMMA 4 (Model=$targetModel):\n$promptStr")
 
         val url = "https://generativelanguage.googleapis.com/v1beta/models/$targetModel:generateContent?key=$apiKey"
@@ -194,7 +189,8 @@ class GemmaRestFallbackProvider @Inject constructor(
                 }
             }
             putJsonObject("generationConfig") {
-                put("temperature", temperatureOverride ?: 0.2f)
+                put("temperature", temperatureOverride ?: capability.defaultTemperature)
+                put("maxOutputTokens", capability.maxOutputTokens)
                 putJsonObject("thinkingConfig") {
                     put("thinkingLevel", "MINIMAL")
                 }
@@ -225,9 +221,7 @@ class GemmaRestFallbackProvider @Inject constructor(
                 val body = response.body?.string().orEmpty()
                 if (!response.isSuccessful) {
                     if (response.code == 403 && body.contains("API_KEY_SERVICE_BLOCKED")) {
-                        val warnMsg = "Gemma 4 REST Direct Call blocked (403 API_KEY_SERVICE_BLOCKED). " +
-                                "The API Key is restricted in Google Cloud Console. " +
-                                "To resolve: Enable 'Generative Language API' on key in Google Cloud Console."
+                        val warnMsg = "Gemma 4 REST Direct Call blocked (403 API_KEY_SERVICE_BLOCKED)."
                         Log.w("Gemma4Rest", warnMsg)
                         return Result.failure(IllegalStateException(warnMsg))
                     }
@@ -243,7 +237,7 @@ class GemmaRestFallbackProvider @Inject constructor(
         }
     }
 
-    private fun parseGemmaResponse(body: String): Result<String> {
+    private fun parseGemmaResponse(body: String): Result<AiExecutionResult> {
         val root = json.parseToJsonElement(body).jsonObject
         val candidates = root["candidates"]?.jsonArray
         val parts = candidates?.firstOrNull()?.jsonObject
@@ -254,7 +248,6 @@ class GemmaRestFallbackProvider @Inject constructor(
             return Result.failure(IllegalStateException("Empty response from Gemma 4 REST API"))
         }
 
-        // 1. Collect ONLY non-thought parts (skip internal reasoning if sent back)
         val nonThoughtText = buildString {
             for (i in 0 until parts.size) {
                 val partObj = parts[i].jsonObject
@@ -265,7 +258,6 @@ class GemmaRestFallbackProvider @Inject constructor(
             }
         }.trim()
 
-        // 2. Strip ```json ... ``` markdown fences if present and isolate the JSON object '{ ... }'
         val cleaned = nonThoughtText
             .removePrefix("```json")
             .removePrefix("```")
@@ -281,8 +273,18 @@ class GemmaRestFallbackProvider @Inject constructor(
             cleaned
         }
 
+        val usageMeta = root["usageMetadata"]?.jsonObject
+        val promptTokens = usageMeta?.get("promptTokenCount")?.jsonPrimitive?.contentOrNull?.toIntOrNull() ?: 0
+        val candidatesTokens = usageMeta?.get("candidatesTokenCount")?.jsonPrimitive?.contentOrNull?.toIntOrNull() ?: 0
+        val totalTokens = usageMeta?.get("totalTokenCount")?.jsonPrimitive?.contentOrNull?.toIntOrNull() ?: (promptTokens + candidatesTokens)
+
         Log.d("Gemma4Rest", "^^^ RESPONSE FROM GEMMA 4:\n$finalJson")
-        return Result.success(finalJson)
+        return Result.success(
+            AiExecutionResult(
+                text = finalJson,
+                usage = TokenUsage(promptTokens = promptTokens, candidatesTokens = candidatesTokens, totalTokens = totalTokens)
+            )
+        )
     }
 
     private fun getSignatureSha1(): String {
@@ -304,9 +306,9 @@ class GemmaRestFallbackProvider @Inject constructor(
             val cert = signatures?.firstOrNull()?.toByteArray() ?: return ""
             val md = MessageDigest.getInstance("SHA-1")
             val digest = md.digest(cert)
-            digest.joinToString("") { "%02X".format(it) }
+            digest.joinToString(":") { String.format("%02X", it) }
         } catch (e: Exception) {
-            Log.w("Gemma4Rest", "Failed to calculate SHA-1 cert fingerprint", e)
+            Log.e("Gemma4Rest", "Failed to extract package signature SHA-1", e)
             ""
         }
     }
