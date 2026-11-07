@@ -72,7 +72,8 @@ class StyleSimulatorEngineTest {
             fallbackEngine,
             validator,
             fashionistaEvaluator,
-            intentFulfillmentEvaluator
+            intentFulfillmentEvaluator,
+            RoleGapAnalyzer()
         )
     }
 
@@ -96,7 +97,7 @@ class StyleSimulatorEngineTest {
 
         val result = engine.generateBlueprint(listOf(item), emptyList(), context)
 
-        assertThat(result.rationale).isEqualTo("Primary AI")
+        assertThat(result.blueprint.rationale).isEqualTo("Primary AI")
     }
 
     @Test
@@ -120,7 +121,7 @@ class StyleSimulatorEngineTest {
 
         val result = engine.generateBlueprint(listOf(item), emptyList(), context)
 
-        assertThat(result.rationale).isEqualTo("Fallback Rationale")
+        assertThat(result.blueprint.rationale).isEqualTo("Fallback Rationale")
     }
 
     @Test
@@ -167,7 +168,8 @@ class StyleSimulatorEngineTest {
         coEvery { contextEngine.generateSelectionState(any(), any(), any()) } returns StyleSelectionState(fullRankedCandidatePool = provList)
         coEvery { candidateFilter.getCosmeticCandidateProvenance(any(), any(), any()) } returns cosmeticProvList
 
-        val blueprint = engine.generateBlueprint(clothingItems, cosmeticItems, context)
+        val result = engine.generateBlueprint(clothingItems, cosmeticItems, context)
+        val blueprint = result.blueprint
 
         assertThat(blueprint.rationale).isEqualTo("Harmonic autumn style")
         assertThat(blueprint.selectedClothingIds).containsExactly("w_38", "w_32", "w_48")

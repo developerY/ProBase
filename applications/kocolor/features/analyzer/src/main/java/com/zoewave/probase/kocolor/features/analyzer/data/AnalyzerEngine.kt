@@ -1,15 +1,16 @@
 package com.zoewave.probase.kocolor.features.analyzer.data
 
 import android.graphics.Bitmap
-import com.zoewave.probase.features.ai.core.AiProvider
+import com.zoewave.probase.core.model.ritual.*
+import com.zoewave.probase.core.util.color.ColorQuantizer
 import com.zoewave.probase.features.ai.core.AiInput
 import com.zoewave.probase.kocolor.data.usecase.CapabilityRouter
-import com.zoewave.probase.kocolor.data.usecase.ColorTelemetry
 import com.zoewave.probase.kocolor.fashionista.math.ItaCalculator
-import com.zoewave.probase.core.model.ritual.*
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class AnalyzerEngine @Inject constructor(
     private val capabilityRouter: CapabilityRouter,
     private val itaCalculator: ItaCalculator
@@ -30,6 +31,16 @@ class AnalyzerEngine @Inject constructor(
         return Bitmap.createScaledBitmap(bitmap, (width * ratio).toInt(), (height * ratio).toInt(), true)
     }
 
+    private fun extractFaceTelemetryHex(face: Bitmap?): String? {
+        if (face == null) return null
+        return try {
+            val pixel = face.getPixel(face.width / 2, face.height / 2)
+            String.format("#%06X", (0xFFFFFF and pixel))
+        } catch (e: Exception) {
+            null
+        }
+    }
+
     suspend fun analyzeStyle(
         face: Bitmap?,
         hair: Bitmap?,
@@ -38,60 +49,59 @@ class AnalyzerEngine @Inject constructor(
         occasion: String,
         location: String?
     ): FashionAdvice {
-        // P1.4 Privacy: Downscale vision inputs and extract local skin telemetry
         val downscaledFace = downscale(face)
-        val faceTelemetry = downscaledFace?.let { itaCalculator.calculateIta(it) }
+        val faceHex = extractFaceTelemetryHex(downscaledFace)
+        val undertone = faceHex?.let { ColorQuantizer.determineTemperature(it) }
+
+        // P1.4.3 Wire ItaCalculator on-device skin telemetry
+        val faceIta = downscaledFace?.let { itaCalculator.calculateIta(it) }
 
         val textPrompt = """
-                You are a professional personal color analyst and style consultant. 
-                The user is preparing for a specific occasion: $occasion.
-                ${if (location != null) "Current Location Context: $location. Take local climate and fashion trends for this area into account." else ""}
-                
-                I have provided up to 4 images:
-                1. Face selfie
-                2. Hair photo
-                3. Shoes photo
-                4. Clothing/Outfit photo
-                
-                GOAL:
-                Analyze the provided physical attributes (face, hair) and coordinate them with the outfit (clothes, shoes) to recommend a perfect makeup and nail polish palette TAILORED for the occasion: $occasion.
-                
-                OCCASION GUIDANCE:
-                - If "Work": Lean toward sophisticated, professional neutrals and polished finishes.
-                - If "Date Night": Tilt toward romantic, bold, or glamorous shades with alluring finishes.
-                - If "Outdoor/Sport": Focus on fresh, natural, and durable looks.
-                - If "Formal": Aim for high-fidelity elegance, classic harmonies, and refined palettes.
-                
-                TASKS:
-                1. Identify the Seasonal Type (SPRING, SUMMER, AUTUMN, WINTER) of the face.
-                2. Identify the Undertone (WARM, COOL, NEUTRAL) of the face.
-                3. Analyze how the hair and shoe colors (if provided) interact with the skin tone and clothing.
-                4. Provide a cohesive summary explaining the coordination strategy for the $occasion ${if (location != null) "in $location" else ""}.
-                5. Give specific makeup suggestions (Foundation, Lip, Eye, Blush) appropriate for $occasion.
-                6. Give a specific recommendation for NAIL POLISH color and finish that ties the whole look together for $occasion. Ensure this is categorized as "Nail Polish" in your response.
-                7. Recommend a makeup color palette (HEX codes).
-                
-                Respond ONLY with a valid JSON object matching this exact schema:
-                {
-                  "summary": "string",
-                  "seasonalType": "SPRING" | "SUMMER" | "AUTUMN" | "WINTER",
-                  "undertone": "WARM" | "COOL" | "NEUTRAL",
-                  "makeupSuggestions": [
-                    { "category": "string", "advice": "string", "recommendedColors": ["string"] }
-                  ],
-                  "outfitSuggestions": [
-                    { "occasion": "$occasion", "advice": "string", "keyPieces": ["string"], "colorCombinations": ["string"] }
-                  ],
-                  "recommendedPalette": ["#HEX", "#HEX", ...]
-                }
-            """.trimIndent())
+            You are a professional personal color analyst and style consultant. 
+            The user is preparing for a specific occasion: $occasion.
+            ${if (location != null) "Current Location Context: $location. Take local climate and fashion trends for this area into account." else ""}
+            
+            GOAL:
+            Analyze physical attributes and coordinate them with the outfit to recommend a makeup and nail polish palette TAILORED for occasion: $occasion.
+            
+            TASKS:
+            1. Identify Seasonal Type (SPRING, SUMMER, AUTUMN, WINTER) of the face.
+            2. Identify Undertone (WARM, COOL, NEUTRAL) of the face.
+            3. Recommend makeup and nail polish palette.
+            
+            Respond ONLY with valid JSON matching schema:
+            {
+              "summary": "string",
+              "seasonalType": "SPRING",
+              "undertone": "WARM",
+              "makeupSuggestions": [],
+              "outfitSuggestions": [],
+              "recommendedPalette": ["#HEX"]
+            }
+        """.trimIndent()
+
+        val finalPrompt = if (faceIta != null) {
+            "FACE TELEMETRY (L*: ${String.format("%.1f", faceIta.lStar)}, b*: ${String.format("%.1f", faceIta.bStar)}, ITA°: ${String.format("%.1f", faceIta.itaScore)}, Skin Tone: ${faceIta.skinToneCategory}, Undertone: ${undertone?.name ?: "NEUTRAL"})\n$textPrompt"
+        } else {
+            textPrompt
         }
 
         return try {
-            val response = generativeModel.generateContent(prompt)
-            val jsonText = response.text ?: throw IllegalStateException("Empty response from AI")
+            val provider = capabilityRouter.getRankedAvailableProviders().firstOrNull()
+                ?: throw IllegalStateException("No AI providers available")
+
+            val input = if (provider.capability.supportsLocalImageIngestion && downscaledFace != null) {
+                AiInput.Multimodal(
+                    promptString = finalPrompt,
+                    localImage = downscaledFace
+                )
+            } else {
+                AiInput.TextOnly(promptString = finalPrompt)
+            }
+
+            val response = provider.execute(input)
+            val jsonText = response.getOrNull() ?: throw IllegalStateException("Empty response from AI")
             
-            // Clean JSON string in case of LLM artifacts
             val cleanedJson = jsonText.substringAfter("{").substringBeforeLast("}")
             val finalJson = "{$cleanedJson}"
             
@@ -109,43 +119,35 @@ class AnalyzerEngine @Inject constructor(
     }
 
     suspend fun analyzeCosmeticProduct(
-        image: Bitmap,
-        apiKey: String,
-        modelName: String = "gemini-3.8-flash"
+        image: Bitmap
     ): CosmeticItem? {
-        val generativeModel = Firebase.ai(
-            backend = GenerativeBackend.googleAI(),
-            useLimitedUseAppCheckTokens = false
-        ).generativeModel(
-            modelName = modelName,
-            generationConfig = generationConfig {
-                responseMimeType = "application/json"
+        val downscaledImage = downscale(image) ?: return null
+        val promptText = """
+            Identify this cosmetic product from the image. 
+            Extract product name, brand, shade name, and hex color.
+            Categorize into: ${MicroCategory.entries.filter { it != MicroCategory.AI_PENDING }.joinToString(", ") { it.name }}
+            
+            Respond ONLY with valid JSON schema:
+            {
+              "name": "string",
+              "brand": "string",
+              "microCategory": "LIPSTICK",
+              "shadeName": "string",
+              "colorHex": "#HEX",
+              "notes": "string"
             }
-        )
-
-        val prompt = content {
-            image(image)
-            text("""
-                Identify this cosmetic product from the image. 
-                Extract the product name, brand, shade name (if visible), and the most prominent color (as a HEX code).
-                Also, categorize the product into one of the following micro-categories:
-                ${MicroCategory.entries.filter { it != MicroCategory.AI_PENDING }.joinToString(", ") { it.name }}
-                
-                Respond ONLY with a valid JSON object matching this exact schema:
-                {
-                  "name": "string",
-                  "brand": "string",
-                  "microCategory": "string (one of the enum values provided)",
-                  "shadeName": "string",
-                  "colorHex": "#HEX",
-                  "notes": "string (brief description of product features)"
-                }
-            """.trimIndent())
-        }
+        """.trimIndent()
 
         return try {
-            val response = generativeModel.generateContent(prompt)
-            val jsonText = response.text ?: return null
+            val provider = capabilityRouter.getRankedAvailableProviders().firstOrNull() ?: return null
+            val input = if (provider.capability.supportsLocalImageIngestion) {
+                AiInput.Multimodal(promptString = promptText, localImage = downscaledImage)
+            } else {
+                AiInput.TextOnly(promptString = promptText)
+            }
+
+            val response = provider.execute(input)
+            val jsonText = response.getOrNull() ?: return null
             val cleanedJson = jsonText.substringAfter("{").substringBeforeLast("}")
             val finalJson = "{$cleanedJson}"
             

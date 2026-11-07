@@ -58,7 +58,8 @@ class StyleSimulatorIntegrationTest {
             fallbackEngine,
             RecommendationValidator(),
             fashionistaEvaluator,
-            IntentFulfillmentEvaluator()
+            IntentFulfillmentEvaluator(),
+            RoleGapAnalyzer()
         )
     }
 
@@ -93,8 +94,8 @@ class StyleSimulatorIntegrationTest {
 
         val result = engine.generateBlueprint(items, emptyList(), context)
 
-        assertThat(result.rationale).isEqualTo("Harmonic look")
-        assertThat(result.selectedClothingIds).contains("w_1")
+        assertThat(result.blueprint.rationale).isEqualTo("Harmonic look")
+        assertThat(result.blueprint.selectedClothingIds).contains("w_1")
     }
 
     @Test
@@ -107,6 +108,6 @@ class StyleSimulatorIntegrationTest {
 
         val result = engine.generateBlueprint(emptyList(), emptyList(), context)
 
-        assertThat(result.rationale).isEqualTo("Fallback Rationale")
+        assertThat(result.blueprint.rationale).isEqualTo("Fallback Rationale")
     }
 }

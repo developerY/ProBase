@@ -9,6 +9,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:network"))
     implementation(project(":core:util"))
 
     implementation(libs.squareup.retrofit)

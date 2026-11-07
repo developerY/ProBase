@@ -73,7 +73,7 @@ class SuggestionsViewModel @Inject constructor(
             val modelName = aiSettings.aiModelFlow.first()
 
             try {
-                val result = suggestionEngine.getPersonalizedAdvice(profile, query, apiKey, modelName)
+                val result = suggestionEngine.getPersonalizedAdvice(profile, query)
                 _loadingState.value = SuggestionsLoadingState.Success(result)
             } catch (e: Exception) {
                 _loadingState.value = SuggestionsLoadingState.Error(e.localizedMessage ?: "Unknown error")

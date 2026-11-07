@@ -52,9 +52,15 @@ class GeneratePlaylistUseCaseTest {
         coEvery { playlistRepository.savePlaylist(any(), any()) } just Runs
         
         val blueprint = StyleBlueprint("Rationale", listOf("w_1"), listOf("c_1", "c_2", "c_3", "c_4"), emptyList())
+        val simulationResult = SimulationResult(
+            blueprint = blueprint,
+            fashionistaScore = com.zoewave.probase.kocolor.fashionista.domain.FashionistaScore(85f, 85f, 85f, 85f),
+            intentFulfillment = IntentFulfillment(),
+            validation = ValidationReport(true, true, true, true, true, true, true)
+        )
         coEvery { 
             simulatorEngine.generateBlueprint(any(), any(), any())
-        } returns blueprint
+        } returns simulationResult
 
         useCase.generateWeeklyPlaylist(startDate, day1Anchors = anchors)
 

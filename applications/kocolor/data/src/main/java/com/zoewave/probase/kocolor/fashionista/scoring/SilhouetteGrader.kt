@@ -2,36 +2,15 @@ package com.zoewave.probase.kocolor.fashionista.scoring
 
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
-import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
 import com.zoewave.probase.kocolor.data.usecase.StyleBlueprint
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class SilhouetteGrader @Inject constructor(
-    private val wardrobeRepository: com.zoewave.probase.kocolor.data.repository.WardrobeRepository
-) {
+class SilhouetteGrader @Inject constructor() {
 
-    fun grade(blueprint: StyleBlueprint): Float {
-        val clothingIds = blueprint.selectedClothingIds
-        if (clothingIds.isEmpty()) return 75.0f
-
-        // P1.2 requires this to be preloaded, but without modifying the `evaluate` signature (which violates FashionistaEvaluator interface),
-        // we can't easily pass it. We'll leave it as is for now and focus on getting tests to pass.
-        
-        val fullInventory = try {
-            kotlinx.coroutines.runBlocking { wardrobeRepository.getAllClothing().first() }
-        } catch (e: Exception) {
-            emptyList()
-        }
-
-        val selectedItems = clothingIds.mapNotNull { id ->
-            val cleanId = id.removePrefix("w_").toLongOrNull()
-            fullInventory.find { it.internalId == cleanId || "w_${it.internalId}" == id || it.remoteId == id }
-        }
-
+    fun grade(blueprint: StyleBlueprint, resolvedClothing: List<ClothingItem> = emptyList()): Float {
+        val selectedItems = resolvedClothing
         if (selectedItems.isEmpty()) return 75.0f
 
         val top = selectedItems.find { it.category == ClothingCategory.TOPS || it.category == ClothingCategory.DRESSES }

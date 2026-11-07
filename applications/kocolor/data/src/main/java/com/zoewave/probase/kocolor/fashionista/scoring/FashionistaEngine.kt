@@ -1,5 +1,6 @@
 package com.zoewave.probase.kocolor.fashionista.scoring
 
+import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.kocolor.data.usecase.StyleBlueprint
 import com.zoewave.probase.kocolor.data.usecase.StyleRequestContext
 import com.zoewave.probase.kocolor.fashionista.domain.FashionistaEvaluator
@@ -14,12 +15,15 @@ class FashionistaEngine @Inject constructor(
     private val contrastAnchorEvaluator: ContrastAnchorEvaluator
 ) : FashionistaEvaluator {
 
-    override fun evaluate(blueprint: StyleBlueprint, userContext: StyleRequestContext): FashionistaScore {
+    override fun evaluate(
+        blueprint: StyleBlueprint,
+        userContext: StyleRequestContext,
+        resolvedClothing: List<ClothingItem>
+    ): FashionistaScore {
         val colorScore = colorHarmonicsEvaluator.evaluate(blueprint)
-        val silhouetteScore = silhouetteGrader.grade(blueprint)
+        val silhouetteScore = silhouetteGrader.grade(blueprint, resolvedClothing)
         val contrastScore = contrastAnchorEvaluator.evaluate(blueprint, userContext)
 
-        // Tally weighted score on 0-100 scale
         val totalScore = (colorScore * 0.40f) + (silhouetteScore * 0.35f) + (contrastScore * 0.25f)
 
         return FashionistaScore(

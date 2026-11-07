@@ -15,9 +15,9 @@ import com.zoewave.probase.core.model.ritual.ArchiveStatus
 import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.core.model.ritual.Finish
 import com.zoewave.probase.core.model.ritual.Formulation
+import com.zoewave.probase.core.model.ritual.InventorySource
 import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.core.model.ritual.MicroCategory
-import com.zoewave.probase.core.model.ritual.InventorySource
 import com.zoewave.probase.core.network.repository.weather.WeatherRepo
 import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
 import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
@@ -513,8 +513,7 @@ class CosmeticsViewModel @Inject constructor(
                 val bitmap = loadBitmapFromUri(uri.toUri())
                 if (bitmap != null) {
                     val result = analyzerEngine.analyzeCosmeticProduct(
-                        image = bitmap,
-                        apiKey = apiKey
+                        image = bitmap
                     )
                     _aiResult.value = result
                     

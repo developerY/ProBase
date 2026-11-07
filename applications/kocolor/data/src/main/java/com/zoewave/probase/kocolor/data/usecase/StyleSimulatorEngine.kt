@@ -34,7 +34,8 @@ class StyleSimulatorEngine @Inject constructor(
     private val fallbackEngine: DeterministicStyleEngine,
     private val validator: RecommendationValidator,
     private val fashionistaEvaluator: FashionistaEvaluator,
-    private val intentFulfillmentEvaluator: IntentFulfillmentEvaluator
+    private val intentFulfillmentEvaluator: IntentFulfillmentEvaluator,
+    private val roleGapAnalyzer: RoleGapAnalyzer
 ) {
 
     companion object {
@@ -275,7 +276,7 @@ class StyleSimulatorEngine @Inject constructor(
                 // We need to fetch the eligible candidates here.
                 val eligibleClothing = fitResult.clothingCandidates.mapNotNull { it.clothingItem }
                 
-                val completedClothing = fillMissingSlotsDeterministically(anchorsFirst, eligibleClothing)
+                val completedClothing = fillMissingSlotsDeterministically(anchorsFirst, eligibleClothing, requestContext)
                 
                 // Update blueprint with the fully resolved, completed IDs
                 val completedBlueprint = cleanBlueprint.copy(selectedClothingIds = completedClothing.map { "w_${it.internalId}" })
@@ -606,28 +607,28 @@ class StyleSimulatorEngine @Inject constructor(
 
     private fun fillMissingSlotsDeterministically(
         currentSelection: List<ClothingItem>,
-        eligibleCatalog: List<ClothingItem>
+        eligibleCatalog: List<ClothingItem>,
+        context: StyleRequestContext
     ): List<ClothingItem> {
-        val selectedCategories = currentSelection.map { it.category }.toSet()
         val completed = currentSelection.toMutableList()
 
-        // Dress-aware fulfillment: If DRESSES is selected, both TOPS and BOTTOMS are fulfilled.
-        val hasDress = ClothingCategory.DRESSES in selectedCategories
-        val needsTop = !hasDress && ClothingCategory.TOPS !in selectedCategories
-        val needsBottom = !hasDress && ClothingCategory.BOTTOMS !in selectedCategories
-        val needsShoes = ClothingCategory.SHOES !in selectedCategories
+        // P1.2.1 Wire RoleGapAnalyzer directly into deterministic slot completion
+        val missingRequirements = roleGapAnalyzer.determineRoleRequirements(
+            anchors = completed,
+            occasion = context.occasion,
+            weatherTempC = context.weatherTempC ?: 20f
+        )
 
-        if (needsTop) {
-            eligibleCatalog.firstOrNull { it.category == ClothingCategory.TOPS }?.let { completed.add(it) }
-        }
-        if (needsBottom) {
-            eligibleCatalog.firstOrNull { it.category == ClothingCategory.BOTTOMS }?.let { completed.add(it) }
-        }
-        if (needsShoes) {
-            eligibleCatalog.firstOrNull { it.category == ClothingCategory.SHOES }?.let { completed.add(it) }
+        for (req in missingRequirements) {
+            val cat = try { ClothingCategory.valueOf(req.role) } catch (e: Exception) { null } ?: continue
+            if (cat == ClothingCategory.ACCESSORIES) continue
+            val existing = completed.count { it.category == cat }
+            if (existing < req.minCount) {
+                eligibleCatalog.firstOrNull { it.category == cat && it !in completed }?.let { completed.add(it) }
+            }
         }
         
-        // Ensure no duplicate categories (anchor-first order guarantees anchors win)
+        // Preserve anchor-first ordering and dress-aware satisfaction
         return completed.distinctBy { if (it.category == ClothingCategory.DRESSES) ClothingCategory.TOPS else it.category }
     }
 }

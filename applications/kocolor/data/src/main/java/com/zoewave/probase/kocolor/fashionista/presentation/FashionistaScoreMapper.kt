@@ -1,7 +1,6 @@
 package com.zoewave.probase.kocolor.fashionista.presentation
 
 import com.zoewave.probase.kocolor.fashionista.domain.FashionistaScore
-import com.zoewave.probase.kocolor.fashionista.domain.FeatureValue
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.roundToInt
@@ -39,16 +38,15 @@ class FashionistaScoreMapper @Inject constructor() {
         )
     }
 
-    private fun mapFeature(name: String, title: String, feature: FeatureValue): FeatureExplanation {
+    private fun mapFeature(name: String, title: String, scoreValue: Double): FeatureExplanation {
         val (status, value) = when {
-            feature.availability >= 0.99 -> AvailabilityStatus.MEASURED to (feature.value * 100.0).roundToInt().coerceIn(0, 100)
-            feature.availability > 0.0 -> AvailabilityStatus.PARTIAL to (feature.value * 100.0).roundToInt().coerceIn(0, 100)
+            scoreValue >= 0.0 -> AvailabilityStatus.MEASURED to (scoreValue * 100.0).roundToInt().coerceIn(0, 100)
             else -> AvailabilityStatus.NOT_MEASURABLE to null
         }
 
         val explanation = when (status) {
             AvailabilityStatus.NOT_MEASURABLE -> "Not measurable from this image."
-            AvailabilityStatus.PARTIAL -> "The available visual evidence indicates partial measurement confidence (${(feature.availability * 100).roundToInt()}%)."
+            AvailabilityStatus.PARTIAL -> "The available visual evidence indicates partial measurement confidence."
             AvailabilityStatus.MEASURED -> "The observed visual system contains fully measurable feature indicators."
         }
 

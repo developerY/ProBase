@@ -30,7 +30,7 @@ class CompactManifestSerializer @Inject constructor() {
             val name = item.name
             val hex = item.colorHex
             val temperature = item.colorTemperature?.takeIf { it != "UNKNOWN" } ?: ColorQuantizer.determineTemperature(item.colorHex).name
-            val depth = item.seasonalPalette?.takeIf { it != "UNKNOWN" } ?: "Balanced"
+            val depth = item.seasonalPalette?.takeIf { it != "UNKNOWN" } ?: "UNKNOWN"
             val material = item.material ?: "UNKNOWN"
 
             when (detailLevel) {
