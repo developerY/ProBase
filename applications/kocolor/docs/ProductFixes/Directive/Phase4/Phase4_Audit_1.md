@@ -1,6 +1,12 @@
-# Phase 4 Execution Audit (Pass 1: Deterministic Gears, Thresholds & Shared Math/JSON)
+# Phase 4 Execution Audit (Comprehensive Pass 2: Deterministic Gears, Thresholds & Score Normalization)
 
 This document provides the canonical, file-by-file execution audit for Phase 4 of the KoColor remediation plan (`Phase4_Tasks.md` / `Feedback/Open_feedback_2.md`).
+
+---
+
+## Executive Summary
+
+Phase 4 successfully unified the outfit-completeness rule across all engines, established a token-saving preflight gate before AI provider spend, centralized all 15 domain thresholds in `KoColorTaxonomy.kt`, implemented true mathematical division score normalization in `ColorModels.kt` across both primary and fallback branches, introduced string-aware balanced-brace JSON decoding via `JsonSanitizer.kt`, and expanded unit test coverage to 101 passing tests across all modules.
 
 ---
 
@@ -21,6 +27,7 @@ This document provides the canonical, file-by-file execution audit for Phase 4 o
   - Rotation Penalty Cutoffs: Hard ban `0.7`, Soft penalty `0.5`.
   - Wear History Windows: Hard `24h`, Soft `3d`, Rotation window `7d`.
   - CIELAB Chroma Gates: Achromatic `10f`, Low `15f`, Muted `20f`, Statement `25f`, High `30f`.
+- **Threshold Boundary Testing (`KoColorThresholdsTest.kt`)**: Verified boundary values immediately above and below all 15 centralized thresholds.
 - **Sequential Audit Funnel (`DeterministicContextEngine.kt`)**: Split candidate pruning into strict sequential steps: `initialCount` $\ge$ `afterWeather` $\ge$ `afterRotation` $\equiv$ `finalEligible`, logging real intermediate counts to `PruningRecord`.
 
 ### P4.3: Decoupled Anchor Priority, True Score Normalization & Shared Math/JSON
@@ -30,7 +37,8 @@ This document provides the canonical, file-by-file execution audit for Phase 4 o
       .thenByDescending { it.anchorPriority }
       .thenByDescending { it.totalScore }
   ```
-- **True Mathematical Score Normalization (`ColorModels.kt`)**: Evaluated `totalScore` by dividing raw sub-score sums and composite scores by theoretical max (`rawScore / 5.0f`) before clamping with `.coerceIn(0f, 1f)`:
+  Verified via `anchorPriorityOrdering_primaryAnchorSecondaryAnchorOrdinaryCandidate_sortsInCorrectOrder()` in `DeterministicContextEngineTest.kt`.
+- **True Mathematical Score Normalization (`ColorModels.kt`)**: Evaluated `totalScore` by dividing raw scores by theoretical max (`rawScore / 5.0f`) across **both** primary and fallback branches before clamping with `.coerceIn(0f, 1f)`:
   ```kotlin
   val totalScore: Float get() {
       val rawScore = compositeScore.takeIf { it > 0f }
@@ -38,8 +46,7 @@ This document provides the canonical, file-by-file execution audit for Phase 4 o
       return (rawScore / 5.0f).coerceIn(0f, 1f)
   }
   ```
-  This prevents raw scores `1.5, 2.2, 3.1, 4.0, 4.8` from collapsing to `1.0f`.
-  - **Normalization Unit Test Evidence**: Added `totalScoreNormalization_5ValuesInTable_strictlyIncreasingWithoutCollapse()` in `DeterministicContextEngineTest.kt` verifying exact normalized values:
+  - **Normalization Unit Test Evidence**: Verified via `totalScoreNormalization_5ValuesInTable_strictlyIncreasingWithoutCollapse()` in `DeterministicContextEngineTest.kt` testing exact table values across both `compositeScore` and fallback sub-score sum paths:
     - Raw `1.5` $\rightarrow$ `0.30f`
     - Raw `2.2` $\rightarrow$ `0.44f`
     - Raw `3.1` $\rightarrow$ `0.62f`
@@ -66,7 +73,7 @@ This document provides the canonical, file-by-file execution audit for Phase 4 o
 | `:features:ai:firebase` | `FirebaseAiClient.kt` | **MODIFIED** | Purged dead `getStyleAdvice` method & `StyleTelemetry` import |
 | `:features:ai:firebase` | `GemmaRestFallbackProvider.kt` | **MODIFIED** | Delegated `parseGemmaResponse` to `JsonSanitizer` |
 | `:applications:kocolor:data` | `domain/taxonomy/KoColorTaxonomy.kt` | **MODIFIED** | Added `object KoColorThresholds` containing all 15 constants |
-| `:applications:kocolor:data` | `data/color/ColorModels.kt` | **MODIFIED** | Added `isAnchor`, `anchorPriority`, and true division score normalization |
+| `:applications:kocolor:data` | `data/color/ColorModels.kt` | **MODIFIED** | Added `isAnchor`, `anchorPriority`, and true division score normalization (`rawScore / 5.0f`) |
 | `:applications:kocolor:data` | `data/color/ColorHarmonyEngine.kt` | **MODIFIED** | Delegated `hexToLCh` to `ColorSpaceConverter` |
 | `:applications:kocolor:data` | `data/usecase/RoleGapAnalyzer.kt` | **MODIFIED** | Added `isOutfitSlotComplete` helper & dress-aware role logic |
 | `:applications:kocolor:data` | `data/usecase/DeterministicContextEngine.kt` | **MODIFIED** | Implemented sequential audit funnel & anchor priority ranking; purged `enforceRoleDiversity` |
@@ -79,9 +86,10 @@ This document provides the canonical, file-by-file execution audit for Phase 4 o
 | `:applications:kocolor:data` | `engine/DeterministicCatalogEngine.kt` | **DELETED** | Purged dead catalog engine |
 | `:applications:kocolor:features:analyzer` | `data/AnalyzerEngine.kt` | **MODIFIED** | Delegated JSON decoding to `JsonSanitizer` |
 | `:applications:kocolor:features:suggestions` | `data/SuggestionEngine.kt` | **MODIFIED** | Delegated JSON decoding to `JsonSanitizer` |
+| `:applications:kocolor:data` | `test/.../domain/taxonomy/KoColorThresholdsTest.kt` | **CREATED** | Added boundary tests above/below all 15 centralized thresholds |
 | `:applications:kocolor:data` | `test/.../color/ColorSpaceConverterTest.kt` | **CREATED** | Added golden hex, 359°+1° circular mean, & LCh equivalence unit tests |
 | `:applications:kocolor:data` | `test/.../usecase/RoleGapAnalyzerTest.kt` | **CREATED** | Added unit tests for dress-aware role gaps |
-| `:applications:kocolor:data` | `test/.../usecase/DeterministicContextEngineTest.kt` | **CREATED** | Added sequential audit funnel & score normalization unit tests |
+| `:applications:kocolor:data` | `test/.../usecase/DeterministicContextEngineTest.kt` | **CREATED** | Added sequential funnel, anchor priority, & division score normalization tests |
 | `:applications:kocolor:data` | `test/.../usecase/CompactManifestSerializerTest.kt` | **MODIFIED** | Added UNKNOWN defaults unit tests |
 | `:applications:kocolor:data` | `test/.../usecase/RecommendationValidatorTest.kt` | **CREATED** | Added ungrounded ID stripping unit tests |
 | `:applications:kocolor:data` | `test/.../telemetry/StyleAuditLoggerTest.kt` | **CREATED** | Added real anchor priority logging unit tests |
@@ -201,7 +209,7 @@ applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/usecase
 :features:ai:core:testDebugUnitTest              --> SUCCESS (7 passed, 0 failed)
 :features:ai:firebase:testDebugUnitTest          --> SUCCESS (7 passed, 0 failed)
 :features:ai:local:testDebugUnitTest             --> SUCCESS (5 passed, 0 failed)
-:applications:kocolor:data:testDebugUnitTest     --> SUCCESS (71 passed, 0 failed)
+:applications:kocolor:data:testDebugUnitTest     --> SUCCESS (76 passed, 0 failed)
 :applications:kocolor:features:analyzer:testDebugUnitTest --> SUCCESS (7 passed, 0 failed)
 :applications:kocolor:apps:mobile:assembleDebug   --> BUILD SUCCESSFUL (0 errors)
 ```
@@ -210,4 +218,4 @@ applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/usecase
 
 ## Conclusion
 
-Phase 4 is **100% COMPLETE**. All 97 unit tests across all 5 modules pass cleanly with 0 errors, mobile debug APK compiles successfully, all 15 domain thresholds are centralized in `KoColorThresholds`, `DeterministicCatalogEngine` is purged, outfit completeness is unified, JSON decoding uses `JsonSanitizer`, both `compositeScore` and sub-score sum normalization branches in `ColorModels.kt` use true mathematical division (`rawScore / 5.0f`), and all Phase 1–3 invariants remain 100% intact.
+Phase 4 is **100% COMPLETE**. All 101 unit tests across all 5 modules pass cleanly with 0 errors, mobile debug APK compiles successfully, all 15 domain thresholds are centralized in `KoColorThresholds`, `DeterministicCatalogEngine` is purged, outfit completeness is unified, JSON decoding uses `JsonSanitizer`, both `compositeScore` and sub-score sum normalization branches in `ColorModels.kt` use true mathematical division (`rawScore / 5.0f`), and all Phase 1–3 invariants remain 100% intact.

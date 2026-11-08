@@ -81,4 +81,37 @@ class DeterministicContextEngineTest {
             assertThat(provSubScores.totalScore).isWithin(0.01f).of(expected[i])
         }
     }
+
+    @Test
+    fun anchorPriorityOrdering_primaryAnchorSecondaryAnchorOrdinaryCandidate_sortsInCorrectOrder() {
+        val primaryAnchor = com.zoewave.probase.kocolor.data.color.CandidateProvenance(
+            clothingItem = ClothingItem(internalId = 1, name = "Primary Lock", category = ClothingCategory.TOPS, colorHex = "#000"),
+            isAnchor = true,
+            anchorPriority = 4.0f,
+            compositeScore = 1.0f
+        )
+        val secondaryAnchor = com.zoewave.probase.kocolor.data.color.CandidateProvenance(
+            clothingItem = ClothingItem(internalId = 2, name = "Secondary Lock", category = ClothingCategory.BOTTOMS, colorHex = "#000"),
+            isAnchor = true,
+            anchorPriority = 2.5f,
+            compositeScore = 2.0f
+        )
+        val ordinaryHighCandidate = com.zoewave.probase.kocolor.data.color.CandidateProvenance(
+            clothingItem = ClothingItem(internalId = 3, name = "High Ordinary", category = ClothingCategory.SHOES, colorHex = "#000"),
+            isAnchor = false,
+            anchorPriority = 0.0f,
+            compositeScore = 4.8f
+        )
+
+        val list = listOf(ordinaryHighCandidate, secondaryAnchor, primaryAnchor)
+        val sorted = list.sortedWith(
+            compareByDescending<com.zoewave.probase.kocolor.data.color.CandidateProvenance> { it.isAnchor }
+                .thenByDescending { it.anchorPriority }
+                .thenByDescending { it.totalScore }
+        )
+
+        assertThat(sorted[0].name).isEqualTo("Primary Lock")
+        assertThat(sorted[1].name).isEqualTo("Secondary Lock")
+        assertThat(sorted[2].name).isEqualTo("High Ordinary")
+    }
 }
