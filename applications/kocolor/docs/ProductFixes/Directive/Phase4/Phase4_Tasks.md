@@ -1,9 +1,9 @@
-`Open_feedback_1.md` caught five subtle traps that a weaker coding agent would otherwise get wrong in Phase 4:
+`Feedback/Open_feedback_1.md` caught five subtle traps that a weaker coding agent would otherwise get wrong in Phase 4:
 
 1. **Preventing the `coerceIn(0f, 1f)` Score-Collapse Bug (Point 1):** If cosmetic provenance sub-scores sum to `1.5, 2.2, 3.1, 4.0, 4.8`, calling `.coerceIn(0.0f, 1.0f)` collapses all five items to `1.0f` and destroys candidate ranking. The updated specification below explicitly forbids using `coerceIn()` as the normalization formula and requires dividing by the true theoretical maximum scale (`rawScore / maxPossibleScore`) before clamping floating-point rounding.
 
 
-2. **All 13 Threshold Constants Accounted For (Point 2):** `KoColorThresholds` now includes the missing chroma gates (`15f` and `25f`, completing `10, 15, 20, 25, 30`) and the `7-day` wear history window (completing `24h, 3d, 7d`, plus `0.7` hard / `0.5` soft rotation and `7, 14, 20, 26°C` thermal / `18°C` outerwear cutoffs) while preserving rain/wind outerwear exceptions and Phase 3's `TEMP_REGEX`.
+2. **All 15 Threshold Constants Accounted For (Point 2):** `KoColorThresholds` now includes the missing chroma gates (`15f` and `25f`, completing `10, 15, 20, 25, 30`) and the `7-day` wear history window (completing `24h, 3d, 7d`, plus `0.7` hard / `0.5` soft rotation and `7, 14, 20, 26°C` thermal / `18°C` outerwear cutoffs) while preserving rain/wind outerwear exceptions and Phase 3's `TEMP_REGEX`.
 
 
 3. **Unified Outfit-Completeness Rule & Explicit Dual-Anchor Preservation (Point 3):** Defines a single shared completeness rule—`SHOES AND (DRESSES/ONE_PIECE OR (TOPS AND BOTTOMS))`—across `RoleGapAnalyzer`, `DeterministicContextEngine`, `HeuristicStyleEngine`, and `StyleSimulatorEngine` preflight on the **eligible pool**, while preserving both items if a user explicitly locks both a dress and a separate bottom.
@@ -18,10 +18,10 @@
 
 Copy and paste the complete **Phase 4 Agent Specification (v2)** below into your coding agent:
 
-```markdown
+````markdown
 # AGENT MISSION: Execute Phase 4 (v2 — Foolproof 6-Step Runbook: Deterministic Gears, Thresholds, True Score Normalization & Shared Math/JSON)
 
-You are executing **Phase 4 (P4.1 through P4.3)** — the final phase of the KoColor remediation plan (`RoadMapToPro.md` / `Tasks.md` / `Open_feedback_1.md`).
+You are executing **Phase 4 (P4.1 through P4.3)** — the final phase of the KoColor remediation plan (`RoadMapToPro.md` / `Tasks.md` / `Feedback/Open_feedback_1.md`).
 
 ## STRICT SCOPE CONTROL & ANTI-SHORTCUT RULES (READ FIRST)
 1. **SCOPE CONTROL:** Implement only the Phase 4 requirements. Do not redesign the Fashionista scoring pipeline, AI provider router, manifest contract, Room schema, or navigation architecture. Preserve existing public APIs unless a documented Phase 4 change requires modification. Before deleting or moving any shared utility, verify all production callers and module dependency direction. Each micro-checkpoint must leave the project in a compilable, testable state.
@@ -32,7 +32,7 @@ You are executing **Phase 4 (P4.1 through P4.3)** — the final phase of the KoC
 6. **PRESERVE ALL PHASE 1–3 INVARIANTS:**
    - Zero `runBlocking` in `SilhouetteGrader.kt`.
    - At most ONE `provider.countTokens(` call in `StyleSimulatorEngine.kt`.
-   - Keep `UnsupportedOperationException` multimodal guards at line 1 of `ByokAiProvider.execute()` and `GemmaRestFallbackProvider.execute()`.
+   - Keep `UnsupportedOperationException` multimodal guards as the first statement of `ByokAiProvider.execute()` and `GemmaRestFallbackProvider.execute()`.
    - Keep `KeywordMatcher` and `TEMP_REGEX` (`26.0°C` and `7.0°C` boundaries) intact in `WardrobeCandidateFilter.kt`.
 
 ---
@@ -57,7 +57,7 @@ All four classes (`RoleGapAnalyzer`, `DeterministicContextEngine`, `HeuristicSty
 fun isOutfitSlotComplete(categories: Iterable<ClothingCategory>): Boolean {
     val set = categories.toSet()
     val hasShoes = ClothingCategory.SHOES in set
-    val hasOnePiece = ClothingCategory.DRESSES in set // (include ONE_PIECE if defined on ClothingCategory)
+    val hasOnePiece = ClothingCategory.DRESSES in set // (ONE_PIECE is not currently defined on ClothingCategory; add it to this check if the enum ever gains it)
     val hasTwoPiece = ClothingCategory.TOPS in set && ClothingCategory.BOTTOMS in set
     return hasShoes && (hasOnePiece || hasTwoPiece)
 }
@@ -66,24 +66,27 @@ fun isOutfitSlotComplete(categories: Iterable<ClothingCategory>): Boolean {
     - If the locked anchors (or current selection) contain a `DRESSES` item, both `TOPS` and `BOTTOMS` are satisfied; only `SHOES` (and optional `OUTERWEAR` when thermally required) is reported as a missing role requirement.
     - **Locked Anchor Precedence Rule:** If a user locks a `DRESSES` anchor, do NOT auto-inject a separate `TOPS` or `BOTTOMS` item. **However**, if the user *explicitly locks both* a `DRESSES` anchor AND a `BOTTOMS` (or `TOPS`) anchor, do **NOT** silently discard either user lock — preserve all explicit user anchors and let validation/reporting surface any feedback.
 2. **Eligible-Pool Preflight Gate in `StyleSimulatorEngine.kt`:**
-    - Before invoking **any** `AiProvider` (local or cloud) in `StyleSimulatorEngine.generateBlueprint()`, evaluate `isOutfitSlotComplete(...)` over the union of `selectionState.resolvedAnchors` and `selectionState.eligibleCandidates` (the **actual eligible pool** after hidden, thermal, and rotation filtering — NEVER raw Room inventory).
-    - If the eligible pool + anchors cannot form a complete outfit, abort the AI provider loop immediately (making **zero** `provider.execute()` or `provider.countTokens()` calls) and return the deterministic fallback / empty-pool result.
-    - In `StyleSimulatorEngine.adaptContextToProvider()`, wire `selectionState.missingRoleRequirements` (from `RoleGapAnalyzer`) so `categorizedPool` prioritizes unfilled roles while preserving the Phase 2.2 `slotsPerCategory` floor-of-1 step-down logic (`if (currentK <= minCandidateAdditions) 1 else ...`).
+    - Before invoking **any** `AiProvider` (local or cloud) in `StyleSimulatorEngine.generateBlueprint()`, evaluate `isOutfitSlotComplete(...)` over the union of `selectionState.activeAnchors` (`List<ClothingItem>`) and `selectionState.fullRankedCandidatePool` (map each `CandidateProvenance` via `prov.clothingItem?.category`, dropping nulls) — the **actual eligible pool** after hidden, thermal, and rotation filtering — NEVER raw Room inventory.
+    - If the eligible pool + anchors cannot form a complete outfit, abort the AI provider loop immediately (making **zero** `provider.execute()` or `provider.countTokens()` calls) and return through the existing deterministic-fallback path (same `SimulationResult` shape as the all-providers-failed fallback).
+    - In `StyleSimulatorEngine.adaptContextToProvider()`, wire `selectionState.missingRoleRequirements` (from `RoleGapAnalyzer`) so `categorizedPool` **filters to unfilled roles — candidate slots only allocate budget to unfilled roles** — while preserving the Phase 2.2 `slotsPerCategory` floor-of-1 step-down logic (`if (currentK <= minCandidateAdditions) 1 else ...`).
 
 ### 1C. Eliminate All Randomness & Add Dress Support in `HeuristicStyleEngine.kt`
 1. Remove every call to `.random()` and `.randomOrNull()` in `HeuristicStyleEngine.kt`.
-2. In `smartPick(...)` and slot fallback selection, select deterministically using the highest provenance/composite score with a stable `item.id` tie-breaker:
+2. In `smartPick(...)` and slot fallback selection, select deterministically using the highest provenance/composite score with a stable `internalId` tie-breaker. Build the score map from the ranked pool already in scope (`selectionState` is available inside `generate()`):
    ```kotlin
+   val scoreById: Map<Long, Float> = selectionState.fullRankedCandidatePool
+       .mapNotNull { prov -> prov.clothingItem?.let { it.internalId to prov.compositeScore } }
+       .toMap()
    candidates.sortedWith(
-       compareByDescending<ClothingItem> { scoreMap[it.id] ?: 0.0 }
-           .thenBy { it.id }
+       compareByDescending<ClothingItem> { scoreById[it.internalId] ?: 0f }
+           .thenBy { it.internalId }
    ).firstOrNull()
    ```
 3. **Dress-Aware Slot Picking in `HeuristicStyleEngine.kt`:**
     - Preserve all explicit locked anchors first.
     - If a locked anchor is `DRESSES`, do not pick a separate `TOPS` or `BOTTOMS` item (unless the user explicitly locked both).
     - If neither `TOPS` nor `BOTTOMS` is locked, allow selecting the highest-scoring eligible `DRESSES` item (satisfying both upper and lower body) when either (a) `TOPS` or `BOTTOMS` is unavailable in the eligible pool, or (b) the best `DRESSES` candidate outscores the average of the best `TOPS` + `BOTTOMS` pair.
-4. **Real Hex Palette Only:** Build `recommendedPalette` strictly from the actual `colorHex` values of the selected clothing and cosmetic items (`selectedItems.map { it.colorHex }.filter { it.isNotBlank() }.distinct()`). Delete all random neutral hex padding.
+4. **Real Hex Palette Only:** Build `recommendedPalette` strictly from the actual `colorHex` values of the selected clothing and cosmetic items (both models expose `colorHex`; confirm the local list variable names when reading), e.g. `(selectedClothing.map { it.colorHex } + selectedCosmetics.map { it.colorHex }).filter { it.isNotBlank() }.distinct()`. Delete all random neutral hex padding.
 
 > **MICRO-CHECKPOINT 1:**
 > 1. Run `grep -n "\.random" applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/usecase/HeuristicStyleEngine.kt` (must return **0 matches**).
@@ -91,13 +94,13 @@ fun isOutfitSlotComplete(categories: Iterable<ClothingCategory>): Boolean {
 
 ---
 
-## STEP 2 (P4.2a & b): Inventory & Centralize All 13 Thresholds + Fix Sequential Audit Funnel & Anchor Priority Logging
+## STEP 2 (P4.2a & b): Inventory & Centralize All 15 Thresholds + Fix Sequential Audit Funnel
 
 ### 2A. Inventory Existing Thresholds Before Editing
 Read `KoColorTaxonomy.kt`, `DeterministicContextEngine.kt`, `WardrobeCandidateFilter.kt`, `RotationScoringUseCase.kt`, `PromptAssembler.kt`, `StyleSimulatorEngine.kt`, and `StyleAuditLogger.kt`. Inspect every existing temperature, rotation, wear-recency, and chroma cutoff.
 
-### 2B. Define All 13 Canonical Thresholds in `KoColorTaxonomy.kt`
-Add `object KoColorThresholds` inside `KoColorTaxonomy.kt` containing all 13 existing domain thresholds (do not invent new cutoffs or drop existing weather conditions like rain/wind):
+### 2B. Define All 15 Canonical Thresholds in `KoColorTaxonomy.kt`
+Add `object KoColorThresholds` inside `KoColorTaxonomy.kt` containing all 15 existing domain thresholds (do not invent new cutoffs or drop existing weather conditions like rain/wind):
 ```kotlin
 object KoColorThresholds {
     // 1. Thermal Bands (°C) — matches KoColorTaxonomy.ThermalBand & Phase 3 TEMP_REGEX
@@ -139,32 +142,33 @@ Split the filtering into distinct sequential steps so each funnel metric records
 4. `val finalEligibleItems = ...` (final candidate pool) $\rightarrow$ `finalEligibleCount = finalEligibleItems.size`
    Verify that `initialCount >= afterWeatherCount >= afterRotationCount >= finalEligibleCount`.
 
-### 2D. Log Real Anchor Priority in `StyleAuditLogger.kt`
-In `StyleAuditLogger.kt` (around line 103), replace the hardcoded literal `"Priority: 4.00 / 4.00"` with the actual formatted priority of the anchor (`String.format(Locale.US, "Priority: %.2f / 4.00", anchorProvenance.anchorPriority)`).
-
 > **MICRO-CHECKPOINT 2:** Run `./gradlew :applications:kocolor:data:testDebugUnitTest`.
 
 ---
 
-## STEP 3 (P4.2c): Decouple Anchor Priority & Mathematically Normalize `totalScore` to `[0.0, 1.0]`
+## STEP 3 (P4.2c): Decouple Anchor Priority, Normalize `totalScore` & Log Real Anchor Priority
 
 ### 3A. Read First
 Read `ColorModels.kt`, `DeterministicContextEngine.kt`, `WardrobeCandidateFilter.kt`, and `StyleAuditLogger.kt`.
-Inspect how wardrobe `compositeScore` and cosmetic sub-scores (`seasonalMatchScore`, `temperatureAlignmentScore`, `undertoneHarmonyScore`, `intentBonus`, etc.) are computed and summed.
+Inspect how wardrobe `compositeScore` and the four `CandidateProvenance` sub-scores (`contextScore`, `colorScore`, `appearanceScore`, `freshnessScore`) are computed and summed into `totalScore`.
 
 ### 3B. Add Explicit Anchor Priority Fields First (`ColorModels.kt`)
-1. On the provenance model in `ColorModels.kt` (e.g., `ColorProvenance` / `ItemColorProvenance`), add:
+1. On `CandidateProvenance` in `ColorModels.kt`, add:
    ```kotlin
    val isAnchor: Boolean = false,
    val anchorPriority: Float = 0.0f // 4.0f for primary locked anchor, 2.5f for secondary anchor, 0.0f for non-anchor
    ```
 2. In `DeterministicContextEngine.kt`, when creating provenance for locked/resolved anchors, set `isAnchor = true` and `anchorPriority = 4.0f` (or `2.5f` for secondary anchors), while keeping `compositeScore` in `[0.0f, 1.0f]`.
-3. Update all candidate sorting (`sortedPartitionedPool`, etc.) to sort by:
+3. Unify all candidate sorting on one anchor-aware comparator over `CandidateProvenance`. Replace each of these existing sort sites (verify exact lines when reading):
+    - `StyleSimulatorEngine.kt` (~line 499): `partitionedCandidates.sortedByDescending { it.compositeScore }.take(currentK)` preceded by a separate `anchorProv + ...` prepend — fold the prepend into the single sorted list below (anchors win by comparator, no separate concat), preserving the `.take(currentK)` cap.
+    - `DeterministicContextEngine.kt` (`sortedByDescending { it.compositeScore }` and the two `sortedByDescending { it.totalScore }` sites).
+    - `WardrobeCandidateFilter.kt` (`sortedByDescending { it.totalScore }`).
    ```kotlin
-   compareByDescending<ProvenanceType> { it.isAnchor }
+   compareByDescending<CandidateProvenance> { it.isAnchor }
        .thenByDescending { it.anchorPriority }
        .thenByDescending { it.totalScore }
    ```
+   Unifying on `totalScore` is safe: for wardrobe items `totalScore == compositeScore` (composite `> 0f` short-circuits the getter), and cosmetics require the sub-score-sum fallback the getter provides.
 4. Update `StyleAuditLogger.kt` to check `it.isAnchor` (instead of `it.totalScore > 2.0f`).
 
 ### 3C. Mathematically Normalize `totalScore` into `[0.0f, 1.0f]` (NO Raw Clamping!)
@@ -177,7 +181,10 @@ Inspect `ColorModels.kt:27` and `WardrobeCandidateFilter.kt`:
       val normalized = (rawSubScoreSum / MAX_SUB_SCORE_SUM).coerceIn(0.0f, 1.0f)
       ```
     - **Self-Check:** Verify that five cosmetic items with raw sums `1.5f, 2.2f, 3.1f, 4.0f, 4.8f` produce five **strictly increasing** normalized `totalScore` values in `(0.0f, 1.0f)` (e.g., `0.30f < 0.44f < 0.62f < 0.80f < 0.96f`) and do **NOT** collapse to `1.0f`!
-3. Add KDoc on `WardrobeCandidateFilter.kt` documenting the **Pigment-Only Cosmetics Policy** (`EYES`, `DIMENSION`, `LIPS`, `NAILS` are included for chromatic styling; `PREP`, `COMPLEXION`, `HAIR` are intentionally excluded).
+3. Add KDoc on `WardrobeCandidateFilter.kt` documenting the **Pigment-Only Cosmetics Policy** (`EYES`, `DIMENSION`, `LIPS`, `NAILS` are included for chromatic styling; `PREP`, `COMPLEXION`, `HAIR`, and all other non-pigment macros are intentionally excluded).
+
+### 3D. Log Real Anchor Priority in `StyleAuditLogger.kt`
+In `StyleAuditLogger.kt` (around line 103), replace the hardcoded literal `"Priority: 4.00 / 4.00"` with the actual formatted priority of the anchor (`String.format(Locale.US, "Priority: %.2f / 4.00", anchorProvenance.anchorPriority)`, using the field added in 3B — confirm the local variable name when reading).
 
 > **MICRO-CHECKPOINT 3:** Run `./gradlew :applications:kocolor:data:testDebugUnitTest`.
 
@@ -196,10 +203,10 @@ grep -rn "getStyleAdvice\|estimateTokens" applications/ features/ core/
 1. **`DeterministicCatalogEngine.kt`:** After verifying Step 1B's preflight slot-completeness gate is active in `StyleSimulatorEngine.kt` and zero callers reference `DeterministicCatalogEngine`, delete `DeterministicCatalogEngine.kt`.
 2. **`DeterministicContextEngine.enforceRoleDiversity`:** Verify zero callers exist and delete `enforceRoleDiversity(...)`.
 3. **Unused Constructor Injections in `DeterministicContextEngine.kt`:** Inspect `DeterministicContextEngine`'s constructor. If `rotationScoringUseCase` and/or `repository` have zero references inside the class body, remove those unused constructor parameters and update test constructor calls.
-4. **`WardrobeCandidateFilter.getCandidates` / `getCosmeticCandidates`:** If they have zero production callers, delete them (and migrate any test calling them to test the live `filterAndRank*` / `calculateScore` methods instead).
+4. **`WardrobeCandidateFilter.getCandidates` / `getCosmeticCandidates`:** If they have zero production callers, delete them (and migrate any test calling them to test the live `calculateScore` / `calculateCosmeticScore` methods instead).
 5. **`FirebaseAiClient.getStyleAdvice` & `estimateTokens`:** Only delete if the whole-repo `grep` above confirms zero callers across all modules (including `:applications:seaweed` or diagnostic delegates). If any module still calls `estimateTokens`, keep that method!
 
-> **MICRO-CHECKPOINT 4:** Run `./gradlew :features:ai:firebase:testDebugUnitTest :applications:kocolor:data:testDebugUnitTest :applications:kocolor:apps:mobile: compileDebugKotlin`.
+> **MICRO-CHECKPOINT 4:** Run `./gradlew :features:ai:firebase:testDebugUnitTest :applications:kocolor:data:testDebugUnitTest :applications:kocolor:apps:mobile:assembleDebug`.
 
 ---
 
@@ -207,7 +214,7 @@ grep -rn "getStyleAdvice\|estimateTokens" applications/ features/ core/
 
 ### 5A. Create String-Aware Balanced-Brace `JsonSanitizer`
 Do **NOT** use `raw.indexOf('{')` / `raw.lastIndexOf('}')`, which breaks when braces appear inside JSON string values or when trailing commentary contains `{...}`.
-1. Check module dependencies: place `JsonSanitizer` in `core/json` (if accessible to `:features:ai:*` and `:applications:kocolor:*`) or in `:features:ai:core` (`com.zoewave.probase.features.ai.core.util.JsonSanitizer`) so `:applications:kocolor:data`, `:applications:kocolor:features:analyzer`, and `:applications:kocolor:features:suggestions` can all call it without circular dependencies.
+1. Check module dependencies: place `JsonSanitizer` in `core/json` (if accessible to `:features:ai:*` and `:applications:kocolor:*`) or in `:features:ai:core` (`com.zoewave.probase.features.ai.core.util.JsonSanitizer`) so `:applications:kocolor:data`, `:applications:kocolor:features:analyzer`, `:applications:kocolor:features:suggestions`, and `:features:ai:firebase` can all call it without circular dependencies.
 2. Implement `JsonSanitizer` with a balanced-brace state machine that tracks string literals (`"..."`) and backslash escapes (`\\`, `\"`):
 
 ```kotlin
@@ -261,13 +268,13 @@ object JsonSanitizer {
     }
 }
 ```
-3. Delegate the duplicate JSON fence/brace-extraction logic in `StyleSimulatorEngine`, `AnalyzerEngine`, and `SuggestionEngine` to `JsonSanitizer.extractFirstJsonObject(raw)`.
+3. Delegate the duplicate JSON fence/brace-extraction logic in `StyleSimulatorEngine`, `AnalyzerEngine`, `SuggestionEngine`, and `GemmaRestFallbackProvider.parseGemmaResponse` (fence stripping + brace extraction only — preserve any provider-specific response handling) to `JsonSanitizer.extractFirstJsonObject(raw)`.
 
-### 5B. Consolidate Duplicate Color Math While Preserving Exact D65 CIELAB Equivalence
+### 5B. Consolidate Duplicate Color Math While Preserving D65 CIELAB Equivalence Within Tolerance
 1. Inspect `ColorHarmonyEngine.kt` (`data/color/ColorHarmonyEngine.kt`), `ColorSpace.kt` (`fashionista/color/ColorSpace.kt`), and `CircularStatistics.kt` (`fashionista/math/CircularStatistics.kt`).
 2. Ensure there is **one canonical implementation** of:
     - sRGB $\rightarrow$ linear RGB (`0.04045` pivot, $\gamma = 2.4$) $\rightarrow$ XYZ (D65 reference white) $\rightarrow$ CIELAB (`0.008856` pivot) $\rightarrow$ CIELCh ($L^*, C^* = \sqrt{a^{*2} + b^{*2}}, h^\circ \in [0^\circ, 360^\circ)$).
-    - Delegate `ColorHarmonyEngine.hexToLCh` to the canonical converter in `ColorSpaceConverter` (or vice versa) so only one copy of the matrix/pivot math exists, preserving exact numerical outputs.
+    - Delegate `ColorHarmonyEngine.hexToLCh` to the canonical converter in `ColorSpaceConverter` (or vice versa) so only one copy of the matrix/pivot math exists, without changing the underlying math (Float vs Double implementations must agree within the `1e-4` gate tolerance below — exact bitwise equality is not achievable across precisions).
     - Delegate any duplicate inline `calculateChroma` or chroma-weighted circular hue averaging to `ColorSpaceConverter` / `CircularStatistics`.
 
 > **MICRO-CHECKPOINT 5:** Run `./gradlew :features:ai:core:testDebugUnitTest :applications:kocolor:data:testDebugUnitTest :applications:kocolor:features:analyzer:testDebugUnitTest`.
@@ -302,7 +309,7 @@ Create or expand the following **9 unit test suites** to lock in every Phase 1�
     - Test `EXPANDED`, `BALANCED`, and `MINIMAL` serialization on items with missing/null `material`, `seasonalPalette`, `finish`, and `brand`.
     - Assert `"UNKNOWN"` is emitted in every detail level that includes those fields (accounting for fields intentionally omitted in `MINIMAL`), and assert `"Cotton"`, `"SATIN"`, `"KoColor"`, and `"Balanced"` never appear.
 7. **`RecommendationValidatorTest.kt` (Create):**
-    - Verify ungrounded IDs and `PREP` cosmetics are stripped, missing locked anchors are re-injected, rationale decimals are scrubbed, and `ValidationReport` booleans accurately report rule compliance.
+    - Verify ungrounded IDs and `PREP` cosmetics are stripped, missing locked anchors are re-injected, rationale sentences naming unselected items are removed (preserving decimal numbers), and `ValidationReport` booleans accurately report rule compliance.
 8. **`StyleSimulatorEngineTest.kt` (Expand):**
     - **Dress Wardrobe Preflight Passes:** A wardrobe with only `DRESSES` + `SHOES` passes preflight and invokes the AI provider.
     - **Incomplete Wardrobe Preflight Aborts with Zero Cloud Spend:** A wardrobe missing `SHOES` (or missing both `BOTTOMS` and `DRESSES`) aborts at preflight with **zero** calls to `provider.execute()` or `provider.countTokens()`.
@@ -327,17 +334,24 @@ grep -n "4\.00 / 4\.00" applications/kocolor/data/src/main/java/com/zoewave/prob
 # A3. Dead classes/methods removed across the entire repo:
 find applications/ features/ core/ -name "DeterministicCatalogEngine.kt"
 grep -rn "fun enforceRoleDiversity" applications/ features/ core/
+grep -rn "fun getCandidates\|fun getCosmeticCandidates" applications/ features/ core/
+grep -rn "fun getStyleAdvice" applications/ features/ core/
+# NOTE: fun estimateTokens is intentionally NOT in this zero-gate — per Step 4 item 5 it stays iff any module still calls it.
 
-# A4. Zero naive indexOf('{') / lastIndexOf('}') left in simulator, analyzer, or suggestion engines:
+# A4. Zero naive indexOf('{') / lastIndexOf('}') left in simulator, analyzer, suggestion, or Gemma engines:
 grep -n "indexOf('{')\|lastIndexOf('}')" \
   applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/usecase/StyleSimulatorEngine.kt \
   applications/kocolor/features/analyzer/src/main/java/com/zoewave/probase/kocolor/features/analyzer/data/AnalyzerEngine.kt \
-  applications/kocolor/features/suggestions/src/main/java/com/zoewave/probase/kocolor/features/suggestions/data/SuggestionEngine.kt
+  applications/kocolor/features/suggestions/src/main/java/com/zoewave/probase/kocolor/features/suggestions/data/SuggestionEngine.kt \
+  features/ai/firebase/src/main/kotlin/com/zoewave/probase/features/ai/firebase/GemmaRestFallbackProvider.kt
+
+# A5. Fabricated manifest defaults absent from CompactManifestSerializer.kt:
+grep -n '"Cotton"\|"SATIN"\|"KoColor"\|"Balanced"' applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/usecase/CompactManifestSerializer.kt
 ```
 
 ### Category B: Line-by-Line Inspected Context Matches (Paste Verbatim Output)
 ```bash
-# B1. All 13 centralized thresholds in KoColorTaxonomy.kt:
+# B1. All 15 centralized thresholds in KoColorTaxonomy.kt:
 grep -n -A 25 "object KoColorThresholds" applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/domain/taxonomy/KoColorTaxonomy.kt
 
 # B2. Distinct sequential audit funnel counts in DeterministicContextEngine.kt:
@@ -345,9 +359,7 @@ grep -n -C 5 "afterWeather\|afterRotation\|finalEligible" applications/kocolor/d
 
 # B3. Mathematical division normalization (NOT bare coerceIn) + isAnchor / anchorPriority in ColorModels.kt & WardrobeCandidateFilter.kt:
 grep -n -C 6 "isAnchor\|anchorPriority\|totalScore" applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/color/ColorModels.kt
-
-# B4. Inspect any remaining occurrences of "SATIN"|"KoColor"|"Balanced" in CompactManifestSerializer.kt:
-grep -n '"SATIN"\|"KoColor"\|"Balanced"' applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/usecase/CompactManifestSerializer.kt
+grep -n -C 6 "MAX_WARDROBE_RAW_SCORE\|MAX_COSMETIC_RAW_SCORE\|MAX_SUB_SCORE_SUM\|rawSubScoreSum" applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/usecase/WardrobeCandidateFilter.kt
 ```
 
 ### Category C: Preserved Phase 1–3 Invariants & Full Gradle Build/Test Suite
@@ -361,7 +373,6 @@ grep -n "TEMP_REGEX" applications/kocolor/data/src/main/java/com/zoewave/probase
 # C2. Execute full unit test suite across all modules and mobile debug APK assembly:
 ./gradlew :features:ai:core:testDebugUnitTest :features:ai:firebase:testDebugUnitTest :features:ai:local:testDebugUnitTest :applications:kocolor:data:testDebugUnitTest :applications:kocolor:features:analyzer:testDebugUnitTest :applications:kocolor:apps:mobile:assembleDebug
 ```
-
-```
+````
 
 Hand this revised Phase 4 specification to your coding agent and share the resulting `Phase4_Audit_final.md` output when it finishes.
