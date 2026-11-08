@@ -5,6 +5,19 @@ import com.zoewave.probase.core.model.ritual.ClothingItem
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Canonical KoColor Outfit Completeness Rule:
+ * A wardrobe/selection can form a complete outfit if and only if it contains:
+ *   SHOES AND ( (DRESSES / ONE_PIECE) OR (TOPS AND BOTTOMS) )
+ */
+fun isOutfitSlotComplete(categories: Iterable<ClothingCategory>): Boolean {
+    val set = categories.toSet()
+    val hasShoes = ClothingCategory.SHOES in set
+    val hasOnePiece = ClothingCategory.DRESSES in set
+    val hasTwoPiece = ClothingCategory.TOPS in set && ClothingCategory.BOTTOMS in set
+    return hasShoes && (hasOnePiece || hasTwoPiece)
+}
+
 @Singleton
 class RoleGapAnalyzer @Inject constructor() {
 

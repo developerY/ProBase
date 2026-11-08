@@ -36,13 +36,14 @@ class StyleAuditLogger @Inject constructor() {
         trails[requestId]?.compositionRecord = CompositionRecord(requiredRoles, outerwearPermission, reason)
     }
 
-    fun logAnchorResolution(requestId: String, anchor: ClothingItem, source: AnchorSource, reason: String) {
+    fun logAnchorResolution(requestId: String, anchor: ClothingItem, source: AnchorSource, reason: String, priority: Float = 4.00f) {
         trails[requestId]?.anchorRecord = AnchorRecord(
             id = "w_${anchor.internalId}",
             name = anchor.name,
             role = anchor.category.name,
             source = source,
-            reason = reason
+            reason = reason,
+            anchorPriority = priority
         )
     }
     
@@ -101,7 +102,7 @@ class StyleAuditLogger @Inject constructor() {
                 appendLine("    Item: [${it.id}] \"${it.name}\"")
                 appendLine("    Role: ${it.role}")
                 appendLine("    Source: ${it.source.name}")
-                appendLine("    Priority: 4.00 / 4.00")
+                appendLine("    Priority: ${String.format(java.util.Locale.US, "%.2f", it.anchorPriority)} / 4.00")
                 appendLine("    Reason: ${it.reason}")
                 it.wasSelected?.let { selected ->
                     val statusText = if (selected) "SELECTED" else "NOT_SELECTED"

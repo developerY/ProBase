@@ -3,56 +3,23 @@ package com.zoewave.probase.kocolor.data.color
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.kocolor.data.usecase.ColorTelemetry
+import com.zoewave.probase.kocolor.fashionista.color.ColorSpaceConverter
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.cos
-import kotlin.math.pow
 import kotlin.math.sin
-import kotlin.math.sqrt
 
 @Singleton
 class ColorHarmonyEngine @Inject constructor() {
 
     /**
-     * Converts a HEX color to CIELAB L*C*h° color space using pure Kotlin math
-     * to ensure unit tests run in JVM environments without needing Android runtime mocks.
+     * Converts a HEX color to CIELAB L*C*h° color space via ColorSpaceConverter.
      */
     fun hexToLCh(hex: String): LCh {
-        val cleanHex = hex.removePrefix("#")
-        val colorInt = cleanHex.toLongOrNull(16)?.toInt() ?: 0x808080
-
-        val r = ((colorInt shr 16) and 0xFF) / 255f
-        val g = ((colorInt shr 8) and 0xFF) / 255f
-        val b = (colorInt and 0xFF) / 255f
-
-        // Convert RGB to XYZ
-        fun pivotRgb(c: Float): Double {
-            return if (c > 0.04045f) ((c + 0.055) / 1.055).pow(2.4) else (c / 12.92)
-        }
-
-        val x = (pivotRgb(r) * 0.4124 + pivotRgb(g) * 0.3576 + pivotRgb(b) * 0.1805) / 0.95047
-        val y = (pivotRgb(r) * 0.2126 + pivotRgb(g) * 0.7152 + pivotRgb(b) * 0.0722) / 1.00000
-        val z = (pivotRgb(r) * 0.0193 + pivotRgb(g) * 0.1192 + pivotRgb(b) * 0.9505) / 1.08883
-
-        fun pivotXyz(c: Double): Double {
-            return if (c > 0.008856) Math.cbrt(c) else (7.787 * c) + (16.0 / 116.0)
-        }
-
-        val fx = pivotXyz(x)
-        val fy = pivotXyz(y)
-        val fz = pivotXyz(z)
-
-        val l = ((116.0 * fy) - 16.0).coerceIn(0.0, 100.0).toFloat()
-        val labA = (500.0 * (fx - fy)).toFloat()
-        val labB = (200.0 * (fy - fz)).toFloat()
-
-        val c = sqrt(labA * labA + labB * labB)
-        var h = Math.toDegrees(atan2(labB.toDouble(), labA.toDouble())).toFloat()
-        if (h < 0) h += 360f
-
-        return LCh(l, c, h)
+        val lch = ColorSpaceConverter.hexToLCh(hex)
+        return LCh(lch.l.toFloat(), lch.c.toFloat(), lch.h.toFloat())
     }
 
     /**

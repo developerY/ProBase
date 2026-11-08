@@ -101,9 +101,7 @@ class AnalyzerEngine @Inject constructor(
 
             val response = provider.execute(input)
             val jsonText = response.getOrNull()?.text ?: throw IllegalStateException("Empty response from AI")
-            
-            val cleanedJson = jsonText.substringAfter("{").substringBeforeLast("}")
-            val finalJson = "{$cleanedJson}"
+            val finalJson = com.zoewave.probase.features.ai.core.util.JsonSanitizer.extractFirstJsonObject(jsonText) ?: jsonText
             
             json.decodeFromString<FashionAdvice>(finalJson)
         } catch (e: Exception) {
@@ -148,8 +146,7 @@ class AnalyzerEngine @Inject constructor(
 
             val response = provider.execute(input)
             val jsonText = response.getOrNull()?.text ?: return null
-            val cleanedJson = jsonText.substringAfter("{").substringBeforeLast("}")
-            val finalJson = "{$cleanedJson}"
+            val finalJson = com.zoewave.probase.features.ai.core.util.JsonSanitizer.extractFirstJsonObject(jsonText) ?: jsonText
             
             val result = json.decodeFromString<CosmeticItemJson>(finalJson)
             val micro = try { MicroCategory.valueOf(result.microCategory) } catch (e: Exception) { MicroCategory.OTHER }

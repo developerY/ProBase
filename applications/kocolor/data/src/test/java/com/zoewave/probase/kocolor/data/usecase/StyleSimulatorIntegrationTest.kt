@@ -73,7 +73,9 @@ class StyleSimulatorIntegrationTest {
             isLocal = true
         )
         val items = listOf(
-            ClothingItem(internalId = 1, name = "Silk Top", category = ClothingCategory.TOPS, colorHex = "#FF0000")
+            ClothingItem(internalId = 1, name = "Silk Top", category = ClothingCategory.TOPS, colorHex = "#FF0000"),
+            ClothingItem(internalId = 2, name = "Pants", category = ClothingCategory.BOTTOMS, colorHex = "#00FF00"),
+            ClothingItem(internalId = 3, name = "Shoes", category = ClothingCategory.SHOES, colorHex = "#0000FF")
         )
 
         every { provider.capability } returns capability
@@ -89,7 +91,7 @@ class StyleSimulatorIntegrationTest {
 
         coEvery { capabilityRouter.getRankedAvailableProviders() } returns listOf(provider)
         coEvery { capabilityRouter.getActiveProviderName() } returns "Mock AI"
-        val mockProv = listOf(CandidateProvenance(clothingItem = ClothingItem(internalId = 1, name = "Silk Top", category = ClothingCategory.TOPS, colorHex = "#FF0000")))
+        val mockProv = items.map { CandidateProvenance(clothingItem = it) }
         coEvery { contextEngine.generateSelectionState(any(), any(), any()) } returns StyleSelectionState(fullRankedCandidatePool = mockProv)
         coEvery { candidateFilter.getCosmeticCandidateProvenance(any(), any(), any()) } returns mockCosmetics
 

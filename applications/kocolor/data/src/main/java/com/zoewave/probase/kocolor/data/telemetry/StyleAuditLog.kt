@@ -17,6 +17,7 @@ data class AnchorRecord(
     val role: String,
     val source: AnchorSource, 
     val reason: String,
+    val anchorPriority: Float = 4.00f,
     var wasSelected: Boolean? = null
 )
 

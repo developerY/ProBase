@@ -9,7 +9,6 @@ import com.google.firebase.ai.type.Schema
 import com.google.firebase.ai.type.content
 import com.google.firebase.ai.type.generationConfig
 import com.zoewave.probase.core.data.repository.AiConfigurationSettings
-import com.zoewave.probase.features.ai.firebase.models.StyleTelemetry
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.withTimeout
@@ -26,17 +25,6 @@ data class AiResponse(
 )
 
 interface FirebaseAiClient {
-    /**
-     * Enforced Architectural Boundary: Only accepts StyleTelemetry.
-     * Prevents raw appearance data from ever leaving the device.
-     */
-    suspend fun getStyleAdvice(telemetry: StyleTelemetry): AiResponse
-
-    /**
-     * Estimates the number of tokens for a given prompt without executing the model.
-     */
-    suspend fun estimateTokens(telemetry: StyleTelemetry): Int
-
     /**
      * Executes a raw prompt with optional temperature and model name overrides.
      */
@@ -102,53 +90,6 @@ class FirebaseAiClientImpl @Inject constructor(
                 temperature = temperatureOverride ?: 0.2f
             }
         )
-    }
-
-    private fun buildPrompt(telemetry: StyleTelemetry): String {
-        return """
-            You are the KoColor Style Engine. Analyze the following Appearance and Context:
-            
-            APPEARANCE:
-            - Temperature: ${telemetry.appearance.temperature}
-            - Depth: ${telemetry.appearance.depth}
-            - Contrast: ${telemetry.appearance.contrast}
-            
-            CONTEXT:
-            - Weather: ${telemetry.weatherContext}
-            - Circadian: ${telemetry.circadianContext}
-            
-            AVAILABLE VAULT (MATRIX REPRESENTATION):
-            ${telemetry.vaultManifest}
-            
-            GOAL:
-            1. Select BEST 3 clothing items (Top, Bottom, Shoes) from the wardrobe section of the manifest. 
-            2. Select exactly 4 PIGMENT makeup items (1 Eye, 1 Cheek, 1 Lip, 1 Nail) strictly from the cosmetics section of the manifest.
-            3. Select 1-2 DEFENSIVE items (Complexion/Skincare) from the cosmetics section based strictly on the WEATHER context.
-            4. Create a 4-color Palette (HEX codes) harmonizing the whole look.
-            
-            CRITICAL SYNTAX RULE: When referencing ANY selected item in your rationale, you MUST use the exact inline tag format <ITEM:id>.
-            EXAMPLE RATIONALE: "The <ITEM:w_55> creates a warm focal point against the cool <ITEM:w_38>, while the <ITEM:c_151> keeps the palette grounded."
-            
-            Provide a styling blueprint optimized for this context.
-            
-            Respond ONLY with a valid JSON object matching this schema:
-            {
-              "rationale": "string",
-              "selectedClothingIds": ["w_id", "w_id", "w_id"],
-              "selectedCosmeticIds": ["c_id", "c_id", "c_id", "c_id", ...],
-              "recommendedPalette": ["#HEX", "#HEX", "#HEX", "#HEX"]
-            }
-        """.trimIndent()
-    }
-
-    override suspend fun estimateTokens(telemetry: StyleTelemetry): Int {
-        val prompt = buildPrompt(telemetry)
-        return countTokens(prompt)
-    }
-
-    override suspend fun getStyleAdvice(telemetry: StyleTelemetry): AiResponse {
-        val prompt = buildPrompt(telemetry)
-        return generateContent(prompt)
     }
 
     private fun isAppCheckOrRateLimitError(e: Throwable): Boolean {

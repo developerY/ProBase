@@ -63,6 +63,41 @@ class StyleSimulatorEngine @Inject constructor(
         // P2.2 Hoist selection-state generation to run once per request
         val selectionState = contextEngine.generateSelectionState(wardrobe, requestContext.lockedConstraints, requestContext)
 
+        // P4.1 Eligible-Pool Preflight Gate: Abort AI providers if eligible pool cannot form a complete outfit
+        val eligibleCategories = selectionState.activeAnchors.map { it.category } +
+                selectionState.fullRankedCandidatePool.mapNotNull { it.clothingItem?.category }
+
+        if (!isOutfitSlotComplete(eligibleCategories)) {
+            Log.w("StyleSimulatorEngine", "Preflight gate aborted AI providers: eligible pool cannot form a complete outfit")
+            val fallbackStartTime = System.currentTimeMillis()
+            val blueprint = fallbackEngine.generate(requestContext)
+            val fashionistaScore = fashionistaEvaluator.evaluate(blueprint, requestContext)
+            auditLogger.logFashionistaEvaluation(requestContext.requestId, fashionistaScore)
+            auditLogger.logAiExecution(
+                requestId = requestContext.requestId,
+                providerId = "DETERMINISTIC_FALLBACK_PREFLIGHT",
+                tokens = 0,
+                blueprint = blueprint
+            )
+            auditLogger.printAuditTrail(requestContext.requestId)
+            logTelemetry(
+                tier = "DETERMINISTIC_FALLBACK_PREFLIGHT",
+                kLimit = 0,
+                detail = SerializationDetailLevel.MINIMAL,
+                tokens = 0,
+                latency = System.currentTimeMillis() - fallbackStartTime,
+                success = true
+            )
+            val selectedClothing = blueprint.selectedClothingIds.mapNotNull { id -> wardrobe.find { "w_${it.internalId}" == id || it.remoteId == id } }
+            val selectedCosmetics = blueprint.selectedCosmeticIds.mapNotNull { id -> cosmetics.find { "c_${it.internalId}" == id || it.remoteId == id } }
+            return SimulationResult(
+                blueprint = blueprint,
+                fashionistaScore = fashionistaEvaluator.evaluate(blueprint, requestContext, selectedClothing),
+                intentFulfillment = intentFulfillmentEvaluator.evaluate(requestContext.intentProfile, selectedClothing, selectedCosmetics, requestContext.rotationScores),
+                validation = ValidationReport(isValid = true, isAnchorIncluded = true, hasRequiredSlots = true, hasRequiredRoles = true, areAllIdsGrounded = true, noForbiddenItems = true, rationaleClean = true)
+            )
+        }
+
         for (provider in providers) {
             val providerStartTime = System.currentTimeMillis()
             Log.d("StyleSimulatorEngine", "Attempting provider: ${provider.capability.displayName}")
@@ -96,7 +131,7 @@ class StyleSimulatorEngine @Inject constructor(
                             rationaleClean = true
                         )
                         auditLogger.logAnchorSynthesisResult(requestContext.requestId, decodedBlueprint.selectedClothingIds)
-                        val isOuterwearForbidden = (requestContext.weatherTempC != null && requestContext.weatherTempC > 17f)
+                        val isOuterwearForbidden = (requestContext.weatherTempC != null && requestContext.weatherTempC >= com.zoewave.probase.kocolor.domain.taxonomy.KoColorThresholds.OUTERWEAR_BAN_TEMP_C)
                         val thermalStr = when {
                             requestContext.weatherTempC == null -> "MODERATE"
                             requestContext.weatherTempC > 25f -> "HOT"
@@ -145,7 +180,7 @@ class StyleSimulatorEngine @Inject constructor(
                     }
                 }
 
-                val isOuterwearForbidden = (requestContext.weatherTempC != null && requestContext.weatherTempC > 17f)
+                val isOuterwearForbidden = (requestContext.weatherTempC != null && requestContext.weatherTempC >= com.zoewave.probase.kocolor.domain.taxonomy.KoColorThresholds.OUTERWEAR_BAN_TEMP_C)
                 val thermalStr = when {
                     requestContext.weatherTempC == null -> "MODERATE"
                     requestContext.weatherTempC > 25f -> "HOT"
@@ -459,7 +494,7 @@ class StyleSimulatorEngine @Inject constructor(
             }
 
             val anchorIds = anchorProv.mapNotNull { it.clothingItem?.internalId }.toSet()
-            val isOuterwearForbidden = (context.weatherTempC != null && context.weatherTempC > 17f)
+            val isOuterwearForbidden = (context.weatherTempC != null && context.weatherTempC >= com.zoewave.probase.kocolor.domain.taxonomy.KoColorThresholds.OUTERWEAR_BAN_TEMP_C)
             
             val validCategories = mutableSetOf(ClothingCategory.TOPS, ClothingCategory.BOTTOMS, ClothingCategory.SHOES)
             if (!isOuterwearForbidden) {
@@ -626,8 +661,7 @@ class StyleSimulatorEngine @Inject constructor(
     }
 
     private fun decodeBlueprint(jsonText: String): StyleBlueprint {
-        val cleanedJson = jsonText.substringAfter("{").substringBeforeLast("}")
-        val finalJson = "{$cleanedJson}"
+        val finalJson = com.zoewave.probase.features.ai.core.util.JsonSanitizer.extractFirstJsonObject(jsonText) ?: jsonText
 
         return try {
             val rootElement = json.parseToJsonElement(finalJson).jsonObject

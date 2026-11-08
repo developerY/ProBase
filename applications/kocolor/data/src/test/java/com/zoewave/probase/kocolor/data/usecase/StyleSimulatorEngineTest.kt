@@ -86,17 +86,21 @@ class StyleSimulatorEngineTest {
             id = "p1", displayName = "P1", maxInputTokens = 1000, maxOutputTokens = 10, timeoutMillis = 1000,
             isLocal = true
         )
-        val item = ClothingItem(internalId = 1, name = "Shirt", category = ClothingCategory.TOPS, colorHex = "#000")
+        val items = listOf(
+            ClothingItem(internalId = 1, name = "Shirt", category = ClothingCategory.TOPS, colorHex = "#000"),
+            ClothingItem(internalId = 2, name = "Pants", category = ClothingCategory.BOTTOMS, colorHex = "#000"),
+            ClothingItem(internalId = 3, name = "Shoes", category = ClothingCategory.SHOES, colorHex = "#000")
+        )
 
         every { provider.capability } returns capability
         coEvery { provider.countTokens(any()) } returns 100
         coEvery { provider.execute(any()) } returns Result.success(com.zoewave.probase.features.ai.core.AiExecutionResult("{\"rationale\": \"Primary AI\", \"selectedClothingIds\": [\"w_1\"], \"selectedCosmeticIds\": [], \"recommendedPalette\": []}"))
         
         coEvery { capabilityRouter.getRankedAvailableProviders() } returns listOf(provider)
-        coEvery { contextEngine.generateSelectionState(any(), any(), any()) } returns StyleSelectionState(fullRankedCandidatePool = listOf(CandidateProvenance(clothingItem = item)))
+        coEvery { contextEngine.generateSelectionState(any(), any(), any()) } returns StyleSelectionState(fullRankedCandidatePool = items.map { CandidateProvenance(clothingItem = it) })
         coEvery { candidateFilter.getCosmeticCandidateProvenance(any(), any(), any()) } returns emptyList()
 
-        val result = engine.generateBlueprint(listOf(item), emptyList(), context)
+        val result = engine.generateBlueprint(items, emptyList(), context)
 
         assertThat(result.blueprint.rationale).isEqualTo("Primary AI")
     }
@@ -186,16 +190,20 @@ class StyleSimulatorEngineTest {
             id = "p1", displayName = "P1", maxInputTokens = 1000, maxOutputTokens = 10, timeoutMillis = 1000,
             isLocal = false
         )
-        val item = ClothingItem(internalId = 1, name = "Shirt", category = ClothingCategory.TOPS, colorHex = "#000")
+        val items = listOf(
+            ClothingItem(internalId = 1, name = "Shirt", category = ClothingCategory.TOPS, colorHex = "#000"),
+            ClothingItem(internalId = 2, name = "Pants", category = ClothingCategory.BOTTOMS, colorHex = "#000"),
+            ClothingItem(internalId = 3, name = "Shoes", category = ClothingCategory.SHOES, colorHex = "#000")
+        )
 
         every { provider.capability } returns capability
         coEvery { provider.countTokens(any()) } returns 1200
         coEvery { provider.execute(any()) } returns Result.success(com.zoewave.probase.features.ai.core.AiExecutionResult("{\"rationale\": \"Success\", \"selectedClothingIds\": [\"w_1\"]}"))
         coEvery { capabilityRouter.getRankedAvailableProviders() } returns listOf(provider)
-        coEvery { contextEngine.generateSelectionState(any(), any(), any()) } returns StyleSelectionState(fullRankedCandidatePool = listOf(CandidateProvenance(clothingItem = item)))
+        coEvery { contextEngine.generateSelectionState(any(), any(), any()) } returns StyleSelectionState(fullRankedCandidatePool = items.map { CandidateProvenance(clothingItem = it) })
         coEvery { candidateFilter.getCosmeticCandidateProvenance(any(), any(), any()) } returns emptyList()
 
-        engine.generateBlueprint(listOf(item), emptyList(), context)
+        engine.generateBlueprint(items, emptyList(), context)
 
         // Verify countTokens is called at most once during adaptation
         io.mockk.coVerify(atMost = 1) { provider.countTokens(any()) }
@@ -231,7 +239,11 @@ class StyleSimulatorEngineTest {
         val provider2 = mockk<AiProvider>()
         val capability1 = AiProviderCapability(id = "p1", displayName = "P1", maxInputTokens = 1000, maxOutputTokens = 10, timeoutMillis = 1000, isLocal = false)
         val capability2 = AiProviderCapability(id = "p2", displayName = "P2", maxInputTokens = 1000, maxOutputTokens = 10, timeoutMillis = 1000, isLocal = false)
-        val item = ClothingItem(internalId = 1, name = "Shirt", category = ClothingCategory.TOPS, colorHex = "#000")
+        val items = listOf(
+            ClothingItem(internalId = 1, name = "Shirt", category = ClothingCategory.TOPS, colorHex = "#000"),
+            ClothingItem(internalId = 2, name = "Pants", category = ClothingCategory.BOTTOMS, colorHex = "#000"),
+            ClothingItem(internalId = 3, name = "Shoes", category = ClothingCategory.SHOES, colorHex = "#000")
+        )
 
         every { provider1.capability } returns capability1
         every { provider2.capability } returns capability2
@@ -247,10 +259,10 @@ class StyleSimulatorEngineTest {
         )
 
         coEvery { capabilityRouter.getRankedAvailableProviders() } returns listOf(provider1, provider2)
-        coEvery { contextEngine.generateSelectionState(any(), any(), any()) } returns StyleSelectionState(fullRankedCandidatePool = listOf(CandidateProvenance(clothingItem = item)))
+        coEvery { contextEngine.generateSelectionState(any(), any(), any()) } returns StyleSelectionState(fullRankedCandidatePool = items.map { CandidateProvenance(clothingItem = it) })
         coEvery { candidateFilter.getCosmeticCandidateProvenance(any(), any(), any()) } returns emptyList()
 
-        val result = engine.generateBlueprint(listOf(item), emptyList(), context)
+        val result = engine.generateBlueprint(items, emptyList(), context)
 
         // Verify local repair succeeded on Provider 1 and Provider 2 was NEVER invoked
         assertThat(result.blueprint.selectedClothingIds).contains("w_1")
