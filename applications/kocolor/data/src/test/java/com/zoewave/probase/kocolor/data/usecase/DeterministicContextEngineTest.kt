@@ -62,4 +62,23 @@ class DeterministicContextEngineTest {
         assertThat(record.afterRotation).isAtMost(record.afterWeather)
         assertThat(record.finalEligible).isEqualTo(record.afterRotation)
     }
+
+    @Test
+    fun totalScoreNormalization_5ValuesInTable_strictlyIncreasingWithoutCollapse() {
+        val rawValues = listOf(1.5f, 2.2f, 3.1f, 4.0f, 4.8f)
+        val expected = listOf(0.30f, 0.44f, 0.62f, 0.80f, 0.96f)
+
+        for (i in rawValues.indices) {
+            val provComposite = com.zoewave.probase.kocolor.data.color.CandidateProvenance(compositeScore = rawValues[i])
+            assertThat(provComposite.totalScore).isWithin(0.01f).of(expected[i])
+
+            val provSubScores = com.zoewave.probase.kocolor.data.color.CandidateProvenance(
+                contextScore = rawValues[i],
+                colorScore = 0f,
+                appearanceScore = 0f,
+                freshnessScore = 0f
+            )
+            assertThat(provSubScores.totalScore).isWithin(0.01f).of(expected[i])
+        }
+    }
 }

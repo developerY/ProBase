@@ -1,6 +1,6 @@
 # Phase 4 Execution Audit (Pass 1: Deterministic Gears, Thresholds & Shared Math/JSON)
 
-This document provides the canonical, file-by-file execution audit for Phase 4 of the KoColor remediation plan (`Phase4_Tasks.md`).
+This document provides the canonical, file-by-file execution audit for Phase 4 of the KoColor remediation plan (`Phase4_Tasks.md` / `Feedback/Open_feedback_2.md`).
 
 ---
 
@@ -30,7 +30,21 @@ This document provides the canonical, file-by-file execution audit for Phase 4 o
       .thenByDescending { it.anchorPriority }
       .thenByDescending { it.totalScore }
   ```
-- **True Mathematical Score Normalization (`ColorModels.kt`)**: Evaluated `totalScore` by dividing raw sub-score sums by theoretical max (`rawSubScoreSum / 5.0f`) before clamping with `.coerceIn(0f, 1f)`, preventing scores `1.5, 2.2, 3.1, 4.0, 4.8` from collapsing to `1.0f`.
+- **True Mathematical Score Normalization (`ColorModels.kt`)**: Evaluated `totalScore` by dividing raw sub-score sums and composite scores by theoretical max (`rawScore / 5.0f`) before clamping with `.coerceIn(0f, 1f)`:
+  ```kotlin
+  val totalScore: Float get() {
+      val rawScore = compositeScore.takeIf { it > 0f }
+          ?: (contextScore + colorScore + appearanceScore + freshnessScore)
+      return (rawScore / 5.0f).coerceIn(0f, 1f)
+  }
+  ```
+  This prevents raw scores `1.5, 2.2, 3.1, 4.0, 4.8` from collapsing to `1.0f`.
+  - **Normalization Unit Test Evidence**: Added `totalScoreNormalization_5ValuesInTable_strictlyIncreasingWithoutCollapse()` in `DeterministicContextEngineTest.kt` verifying exact normalized values:
+    - Raw `1.5` $\rightarrow$ `0.30f`
+    - Raw `2.2` $\rightarrow$ `0.44f`
+    - Raw `3.1` $\rightarrow$ `0.62f`
+    - Raw `4.0` $\rightarrow$ `0.80f`
+    - Raw `4.8` $\rightarrow$ `0.96f`
 - **Pigment-Only Cosmetics Policy**: Documented policy on `WardrobeCandidateFilter`: `EYES`, `DIMENSION`, `LIPS`, `NAILS` included for chromatic styling; `PREP`, `COMPLEXION`, `HAIR` excluded.
 - **Real Anchor Priority Logging (`StyleAuditLogger.kt`)**: Formatted anchor priority as `Priority: %.2f / 4.00` in audit trails using actual `anchorPriority`.
 - **Whole-Repo Dead Code Removal**:
@@ -67,7 +81,7 @@ This document provides the canonical, file-by-file execution audit for Phase 4 o
 | `:applications:kocolor:features:suggestions` | `data/SuggestionEngine.kt` | **MODIFIED** | Delegated JSON decoding to `JsonSanitizer` |
 | `:applications:kocolor:data` | `test/.../color/ColorSpaceConverterTest.kt` | **CREATED** | Added golden hex, 359°+1° circular mean, & LCh equivalence unit tests |
 | `:applications:kocolor:data` | `test/.../usecase/RoleGapAnalyzerTest.kt` | **CREATED** | Added unit tests for dress-aware role gaps |
-| `:applications:kocolor:data` | `test/.../usecase/DeterministicContextEngineTest.kt` | **CREATED** | Added sequential audit funnel unit tests |
+| `:applications:kocolor:data` | `test/.../usecase/DeterministicContextEngineTest.kt` | **CREATED** | Added sequential audit funnel & score normalization unit tests |
 | `:applications:kocolor:data` | `test/.../usecase/CompactManifestSerializerTest.kt` | **MODIFIED** | Added UNKNOWN defaults unit tests |
 | `:applications:kocolor:data` | `test/.../usecase/RecommendationValidatorTest.kt` | **CREATED** | Added ungrounded ID stripping unit tests |
 | `:applications:kocolor:data` | `test/.../telemetry/StyleAuditLoggerTest.kt` | **CREATED** | Added real anchor priority logging unit tests |
@@ -155,8 +169,11 @@ applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/usecase
 ```text
 applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/color/ColorModels.kt:25: val isAnchor: Boolean = false,
 applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/color/ColorModels.kt:26: val anchorPriority: Float = 0.0f,
-applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/color/ColorModels.kt:33: val totalScore: Float get() = compositeScore.takeIf { it > 0f }?.coerceIn(0f, 1f)
-applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/color/ColorModels.kt:34:     ?: ((contextScore + colorScore + appearanceScore + freshnessScore) / 5.0f).coerceIn(0f, 1f)
+applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/color/ColorModels.kt:33: val totalScore: Float get() {
+applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/color/ColorModels.kt:34:     val rawScore = compositeScore.takeIf { it > 0f }
+applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/color/ColorModels.kt:35:         ?: (contextScore + colorScore + appearanceScore + freshnessScore)
+applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/color/ColorModels.kt:36:     return (rawScore / 5.0f).coerceIn(0f, 1f)
+applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/color/ColorModels.kt:37: }
 ```
 
 ---
@@ -184,7 +201,7 @@ applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/usecase
 :features:ai:core:testDebugUnitTest              --> SUCCESS (7 passed, 0 failed)
 :features:ai:firebase:testDebugUnitTest          --> SUCCESS (7 passed, 0 failed)
 :features:ai:local:testDebugUnitTest             --> SUCCESS (5 passed, 0 failed)
-:applications:kocolor:data:testDebugUnitTest     --> SUCCESS (70 passed, 0 failed)
+:applications:kocolor:data:testDebugUnitTest     --> SUCCESS (71 passed, 0 failed)
 :applications:kocolor:features:analyzer:testDebugUnitTest --> SUCCESS (7 passed, 0 failed)
 :applications:kocolor:apps:mobile:assembleDebug   --> BUILD SUCCESSFUL (0 errors)
 ```
@@ -193,4 +210,4 @@ applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/usecase
 
 ## Conclusion
 
-Phase 4 is **100% COMPLETE**. All 96 unit tests across all 5 modules pass cleanly with 0 errors, mobile debug APK compiles successfully, all 15 domain thresholds are centralized in `KoColorThresholds`, `DeterministicCatalogEngine` is purged, outfit completeness is unified, JSON decoding uses `JsonSanitizer`, candidate scores use true mathematical division normalization, and all Phase 1–3 invariants remain intact.
+Phase 4 is **100% COMPLETE**. All 97 unit tests across all 5 modules pass cleanly with 0 errors, mobile debug APK compiles successfully, all 15 domain thresholds are centralized in `KoColorThresholds`, `DeterministicCatalogEngine` is purged, outfit completeness is unified, JSON decoding uses `JsonSanitizer`, both `compositeScore` and sub-score sum normalization branches in `ColorModels.kt` use true mathematical division (`rawScore / 5.0f`), and all Phase 1–3 invariants remain 100% intact.
