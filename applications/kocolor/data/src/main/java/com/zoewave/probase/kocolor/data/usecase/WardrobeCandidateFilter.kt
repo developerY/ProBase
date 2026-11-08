@@ -59,14 +59,19 @@ class WardrobeCandidateFilter @Inject constructor(
         return !item.isHidden
     }
 
+    private val TEMP_REGEX = Regex("""Temp:\s*(-?\d+(?:\.\d+)?)""", RegexOption.IGNORE_CASE)
+
+    internal fun parseTempCelsius(weather: String): Double? =
+        TEMP_REGEX.find(weather)?.groupValues?.getOrNull(1)?.toDoubleOrNull()
+
     private fun isWeatherCompatible(item: ClothingItem, weather: String): Boolean {
-        // Basic heuristic: check if weather context mentions high temp and filter heavy categories
-        val isHot = KeywordMatcher.containsWholeWord(weather, "Temp: 2") || KeywordMatcher.containsWholeWord(weather, "Temp: 3")
-        val isCold = KeywordMatcher.containsWholeWord(weather, "Temp: -") || KeywordMatcher.containsWholeWord(weather, "Temp: 0") || KeywordMatcher.containsWholeWord(weather, "Temp: 5")
+        val tempC = parseTempCelsius(weather)
+        val isHot = tempC != null && tempC >= 26.0
+        val isCold = tempC != null && tempC < 7.0
         
         return when {
             isHot -> item.category != ClothingCategory.OUTERWEAR
-            isCold -> item.category != ClothingCategory.ACTIVEWEAR // assuming shorts etc
+            isCold -> item.category != ClothingCategory.ACTIVEWEAR
             else -> true
         }
     }

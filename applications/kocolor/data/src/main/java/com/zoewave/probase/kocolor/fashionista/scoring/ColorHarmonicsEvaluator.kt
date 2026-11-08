@@ -81,13 +81,7 @@ class ColorHarmonicsEvaluator @Inject constructor() {
 
         // Single chroma tonal evaluation
         if (hslList.filter { !isNeutralColor(it) }.size <= 1) {
-            if (lSpan < 15f) {
-                modifier += 5f // Flat neutral (scores ~55)
-            } else if (lSpan in 40f..60f) {
-                modifier += 35f // Exceptional single-color tonal separation
-            } else {
-                modifier += 15f
-            }
+            modifier += evaluateNeutralLightnessModifier(lSpan)
         } else {
             // Apply scale reduction so poor combinations properly hit the low end of the spectrum
             modifier = modifier * 1.5f - 40.0f
@@ -109,6 +103,20 @@ class ColorHarmonicsEvaluator @Inject constructor() {
 
         // Map baseline score (50.0) + weighted pair harmony/undertone to 0 - 100 scale
         return (50.0f + modifier).coerceIn(0.0f, 100.0f)
+    }
+
+    internal fun evaluateNeutralLightnessModifier(lSpan: Float): Float {
+        return when {
+            lSpan <= 0f -> -15f
+            lSpan <= 12f -> -15f + ((lSpan - 0f) / 12f) * 20f
+            lSpan <= 30f -> 5f + ((lSpan - 12f) / 18f) * 20f
+            lSpan <= 45f -> 25f + ((lSpan - 30f) / 15f) * 13f
+            lSpan <= 55f -> 38f
+            lSpan <= 65f -> 38f - ((lSpan - 55f) / 10f) * 8f
+            lSpan <= 75f -> 30f - ((lSpan - 65f) / 10f) * 10f
+            lSpan <= 85f -> 20f - ((lSpan - 75f) / 10f) * 5f
+            else -> 15f
+        }
     }
 
     private fun calculateHueDistance(hue1: Float, hue2: Float): Float {

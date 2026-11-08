@@ -63,4 +63,15 @@ class WardrobeCandidateFilterTest {
         // Eclipse gets no keyword bonus, Velvet gets +0.75
         assertThat(scoreVelvet).isGreaterThan(scoreEclipse)
     }
+
+    @Test
+    fun parseTempCelsius_hotWeather_setsIsHotTrueAndIsColdFalse() {
+        val weatherHot = "Clear, Temp: 28°C"
+        val tempHot = filter.parseTempCelsius(weatherHot)
+        assertThat(tempHot).isEqualTo(28.0)
+
+        val weatherCold = "Snow, Temp: -5°C"
+        val tempCold = filter.parseTempCelsius(weatherCold)
+        assertThat(tempCold).isEqualTo(-5.0)
+    }
 }

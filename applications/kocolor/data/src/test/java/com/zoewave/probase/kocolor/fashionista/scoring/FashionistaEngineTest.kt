@@ -62,11 +62,12 @@ class FashionistaEngineTest {
     @Test
     fun goodEverydayOutfit_scoresBetween80And89AndPassesGate() {
         val clothing = listOf(
-            ClothingItem(internalId = 1, name = "Slim Fit Shirt", category = ClothingCategory.TOPS, colorHex = "#808080", colorTemperature = "Neutral"),
-            ClothingItem(internalId = 2, name = "Jeans", category = ClothingCategory.BOTTOMS, colorHex = "#A0A0A0", colorTemperature = "Neutral")
+            ClothingItem(internalId = 1, name = "Cropped Slim Top", category = ClothingCategory.TOPS, colorHex = "#808080", colorTemperature = "Neutral"),
+            ClothingItem(internalId = 2, name = "High Waisted Jeans", category = ClothingCategory.BOTTOMS, colorHex = "#A0A0A0", colorTemperature = "Neutral"),
+            ClothingItem(internalId = 3, name = "Jacket", category = ClothingCategory.OUTERWEAR, colorHex = "#808080", colorTemperature = "Neutral")
         )
         val blueprint = StyleBlueprint(
-            selectedClothingIds = listOf("w_1", "w_2"),
+            selectedClothingIds = listOf("w_1", "w_2", "w_3"),
             recommendedPalette = listOf("#808080", "#A0A0A0")
         )
 
@@ -76,9 +77,9 @@ class FashionistaEngineTest {
         )
 
         val score = engine.evaluate(blueprint, neutralContext, clothing)
-        assertThat(score.totalScore).isAtLeast(70f)
+        assertThat(score.totalScore).isAtLeast(80f)
         assertThat(score.totalScore).isAtMost(89f)
-        assertThat(score.isApproved).isFalse()
+        assertThat(score.isApproved).isTrue()
     }
 
     @Test
