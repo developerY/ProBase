@@ -1,6 +1,6 @@
 # Phase 3 Execution Audit (Pass 2: Punchlist Fixes & Verifications)
 
-This document provides the canonical execution audit for Pass 2 of Phase 3, recording the complete remediation of all 4 findings flagged in `Phase3_issues_1.md`.
+This document provides the canonical execution audit for Pass 2 of Phase 3, recording the complete remediation of all 4 findings flagged in `drafts/Phase3_issues_1.md`.
 
 ---
 
@@ -35,7 +35,7 @@ This document provides the canonical execution audit for Pass 2 of Phase 3, reco
 - **Test Evidence**: Added `singleChromaLightnessCurve_matchesAllSevenControlPoints()` in `ColorHarmonicsEvaluatorTest.kt` asserting exact scalar outputs across all control points `0f, 12f, 30f, 50f, 65f, 75f, 90f`.
 
 ### 3. [TEST FIX] Restored `80f..89f` Approval Gate Assertion (`FashionistaEngineTest.kt`)
-- **Root Cause**: The test `goodEverydayOutfit_scoresBetween80And89AndPassesGate()` had its lower bound assertion weakened to `70f..89f` and `isApproved == false` because a 2-piece outfit lacked complete composition credit.
+- **Root Cause**: The test `goodEverydayOutfit_scoresBetween80And89AndPassesGate()` had its lower bound assertion weakened to `70f..89f` and `isApproved == false` because a 2-piece outfit lacked a 3rd piece for full-ensemble credit.
 - **Fix**: Updated the test ensemble to a complete 3-piece everyday outfit (`Cropped Slim Top` + `High Waisted Jeans` + `Jacket`).
 - **Assertion**: Restored strict gate assertions:
   - `assertThat(score.totalScore).isAtLeast(80f)`
@@ -79,7 +79,20 @@ applications/kocolor/data/src/test/java/com/zoewave/probase/kocolor/fashionista/
 applications/kocolor/data/src/test/java/com/zoewave/probase/kocolor/fashionista/scoring/FashionistaEngineTest.kt:82: assertThat(score.isApproved).isTrue()
 ```
 
-### 4. Full Gradle Suite & Mobile Debug Build
+### 4. Preserved Phase 1 & Phase 2 Invariants (Zero `runBlocking`, Single `countTokens`, Multimodal Rejection)
+```text
+# Zero runBlocking in SilhouetteGrader.kt
+applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/fashionista/scoring/SilhouetteGrader.kt: (No matches found)
+
+# Exactly 1 countTokens call in StyleSimulatorEngine.kt
+applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/usecase/StyleSimulatorEngine.kt:529: val exactTokens = provider.countTokens(candidateInput)
+
+# Multimodal UnsupportedOperationException rejection guards intact
+features/ai/core/src/main/kotlin/com/zoewave/probase/features/ai/core/ByokAiProvider.kt:66:            return@withContext Result.failure(UnsupportedOperationException("BYOK Provider does not support multimodal inputs for privacy and token budget reasons"))
+features/ai/firebase/src/main/kotlin/com/zoewave/probase/features/ai/firebase/GemmaRestFallbackProvider.kt:86:            return@withContext Result.failure(UnsupportedOperationException("Gemma REST proxy does not support multimodal inputs for privacy and token budget reasons"))
+```
+
+### 5. Full Gradle Suite & Mobile Debug Build
 ```text
 :features:ai:core:testDebugUnitTest              --> SUCCESS (3 passed, 0 failed)
 :features:ai:firebase:testDebugUnitTest          --> SUCCESS (7 passed, 0 failed)
