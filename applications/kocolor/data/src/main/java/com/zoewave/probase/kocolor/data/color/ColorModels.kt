@@ -27,13 +27,16 @@ data class CandidateProvenance(
     val retrievalReason: String = ""
 ) {
     /**
-     * True mathematical score normalization: divides raw sub-score sums by theoretical max (5.0f)
-     * before rounding with coerceIn(0f, 1f), preventing raw sums (1.5, 2.2, 3.1, 4.0, 4.8) from collapsing to 1.0f.
+     * True mathematical score normalization:
+     * Handles compositeScore whether already in [0, 1] or raw (0..5 scale),
+     * and divides fallback sub-score sums by theoretical max (5.0f) before clamping with coerceIn(0f, 1f).
      */
     val totalScore: Float get() {
-        val rawScore = compositeScore.takeIf { it > 0f }
-            ?: (contextScore + colorScore + appearanceScore + freshnessScore)
-        return (rawScore / 5.0f).coerceIn(0f, 1f)
+        if (compositeScore > 0f) {
+            return if (compositeScore <= 1.0f) compositeScore.coerceIn(0f, 1f) else (compositeScore / 5.0f).coerceIn(0f, 1f)
+        }
+        val rawSubScoreSum = contextScore + colorScore + appearanceScore + freshnessScore
+        return (rawSubScoreSum / 5.0f).coerceIn(0f, 1f)
     }
 
     val id: String get() = clothingItem?.let { "w_${it.internalId}" } ?: cosmeticItem?.let { "c_${it.internalId}" } ?: "unknown"

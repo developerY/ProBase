@@ -24,6 +24,11 @@ import kotlin.math.sqrt
 class WardrobeCandidateFilter @Inject constructor(
     private val rotationScoringUseCase: RotationScoringUseCase
 ) {
+    companion object {
+        const val MAX_WARDROBE_RAW_SCORE: Float = 5.0f
+        const val MAX_COSMETIC_RAW_SCORE: Float = 5.0f
+        const val MAX_SUB_SCORE_SUM: Float = 5.0f
+    }
 
 
 
