@@ -62,4 +62,56 @@ class DeterministicContextEngineTest {
         assertThat(record.afterRotation).isAtMost(record.afterWeather)
         assertThat(record.finalEligible).isEqualTo(record.afterRotation)
     }
+
+    @Test
+    fun totalScoreNormalization_5ValuesInTable_strictlyIncreasingWithoutCollapse() {
+        val rawValues = listOf(1.5f, 2.2f, 3.1f, 4.0f, 4.8f)
+        val expected = listOf(0.30f, 0.44f, 0.62f, 0.80f, 0.96f)
+
+        for (i in rawValues.indices) {
+            val provComposite = com.zoewave.probase.kocolor.data.color.CandidateProvenance(compositeScore = rawValues[i])
+            assertThat(provComposite.totalScore).isWithin(0.01f).of(expected[i])
+
+            val provSubScores = com.zoewave.probase.kocolor.data.color.CandidateProvenance(
+                contextScore = rawValues[i],
+                colorScore = 0f,
+                appearanceScore = 0f,
+                freshnessScore = 0f
+            )
+            assertThat(provSubScores.totalScore).isWithin(0.01f).of(expected[i])
+        }
+    }
+
+    @Test
+    fun anchorPriorityOrdering_primaryAnchorSecondaryAnchorOrdinaryCandidate_sortsInCorrectOrder() {
+        val primaryAnchor = com.zoewave.probase.kocolor.data.color.CandidateProvenance(
+            clothingItem = ClothingItem(internalId = 1, name = "Primary Lock", category = ClothingCategory.TOPS, colorHex = "#000"),
+            isAnchor = true,
+            anchorPriority = 4.0f,
+            compositeScore = 1.0f
+        )
+        val secondaryAnchor = com.zoewave.probase.kocolor.data.color.CandidateProvenance(
+            clothingItem = ClothingItem(internalId = 2, name = "Secondary Lock", category = ClothingCategory.BOTTOMS, colorHex = "#000"),
+            isAnchor = true,
+            anchorPriority = 2.5f,
+            compositeScore = 2.0f
+        )
+        val ordinaryHighCandidate = com.zoewave.probase.kocolor.data.color.CandidateProvenance(
+            clothingItem = ClothingItem(internalId = 3, name = "High Ordinary", category = ClothingCategory.SHOES, colorHex = "#000"),
+            isAnchor = false,
+            anchorPriority = 0.0f,
+            compositeScore = 4.8f
+        )
+
+        val list = listOf(ordinaryHighCandidate, secondaryAnchor, primaryAnchor)
+        val sorted = list.sortedWith(
+            compareByDescending<com.zoewave.probase.kocolor.data.color.CandidateProvenance> { it.isAnchor }
+                .thenByDescending { it.anchorPriority }
+                .thenByDescending { it.totalScore }
+        )
+
+        assertThat(sorted[0].name).isEqualTo("Primary Lock")
+        assertThat(sorted[1].name).isEqualTo("Secondary Lock")
+        assertThat(sorted[2].name).isEqualTo("High Ordinary")
+    }
 }
