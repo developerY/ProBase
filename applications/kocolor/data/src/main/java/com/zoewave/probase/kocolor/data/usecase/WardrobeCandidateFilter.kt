@@ -12,6 +12,7 @@ import com.zoewave.probase.kocolor.data.util.KeywordMatcher
 import com.zoewave.probase.kocolor.data.color.CandidateProvenance
 import com.zoewave.probase.kocolor.data.color.RecommendationWeights
 import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
+import com.zoewave.probase.kocolor.domain.taxonomy.KoColorThresholds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -24,68 +25,12 @@ class WardrobeCandidateFilter @Inject constructor(
     private val rotationScoringUseCase: RotationScoringUseCase
 ) {
 
-    /**
-     * Local Candidate RAG Engine (The 85/15 Local-First split).
-     * Reduces the full wardrobe inventory to an initial ranked candidate pool.
-     */
-    suspend fun getCandidates(
-        inventory: List<ClothingItem>,
-        context: StyleRequestContext,
-        limit: Int
-    ): List<ClothingItem> {
-        val eligibleItems = inventory.filter { item ->
-            isAvailable(item) && 
-            isWeatherCompatible(item, context.weather) && 
-            !isRotationViolated(item, context.rotationScores)
-        }
 
-        // Priority for anchored items: if they are in the eligible list, they should be at the top
-        val anchoredItems = eligibleItems.filter { "w_${it.internalId}" in context.anchoredClothingIds }
-        val remainingItems = eligibleItems.filter { "w_${it.internalId}" !in context.anchoredClothingIds }
-
-        // Stage 2: Soft Scoring & Ranking
-        val rankedRemaining = remainingItems.map { item ->
-            item to calculateScore(item, context)
-        }.sortedByDescending { it.second }
-         .map { it.first }
-
-        // Stage 3: Pool Truncation
-        val combined = (anchoredItems + rankedRemaining).distinctBy { it.internalId }
-        return combined.take(limit)
-    }
-
-    private fun isAvailable(item: ClothingItem): Boolean {
-        // Filter out garments marked as hidden or archived.
-        return !item.isHidden
-    }
 
     private val TEMP_REGEX = Regex("""Temp:\s*(-?\d+(?:\.\d+)?)""", RegexOption.IGNORE_CASE)
 
     internal fun parseTempCelsius(weather: String): Double? =
         TEMP_REGEX.find(weather)?.groupValues?.getOrNull(1)?.toDoubleOrNull()
-
-    private fun isWeatherCompatible(item: ClothingItem, weather: String): Boolean {
-        val tempC = parseTempCelsius(weather)
-        val isHot = tempC != null && tempC >= 26.0
-        val isCold = tempC != null && tempC < 7.0
-        
-        return when {
-            isHot -> item.category != ClothingCategory.OUTERWEAR
-            isCold -> item.category != ClothingCategory.ACTIVEWEAR
-            else -> true
-        }
-    }
-
-    private fun isRotationViolated(item: ClothingItem, scores: Map<String, Double>): Boolean {
-        // 1. Use the passed rotation scores (calculated by the projected state if applicable)
-        val penalty = scores[item.remoteId] ?: 0.0
-        if (penalty >= 0.70) return true
-        
-        // 2. Fallback to physical lastUsedTimestamp if score is missing (Exclude if worn in last 3 days)
-        val lastUsed = item.lastUsedTimestamp ?: 0L
-        val threeDaysAgo = System.currentTimeMillis() - (3 * 24 * 60 * 60 * 1000L)
-        return lastUsed > threeDaysAgo
-    }
 
     fun calculateScoreTest(item: ClothingItem, context: StyleRequestContext): Double = calculateScore(item, context)
     fun calculateCosmeticScoreTest(item: CosmeticItem, context: StyleRequestContext): Double = calculateCosmeticScore(item, context)

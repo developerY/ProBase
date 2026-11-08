@@ -258,20 +258,7 @@ class GemmaRestFallbackProvider @Inject constructor(
             }
         }.trim()
 
-        val cleaned = nonThoughtText
-            .removePrefix("```json")
-            .removePrefix("```")
-            .removeSuffix("```")
-            .trim()
-
-        val firstBrace = cleaned.indexOf('{')
-        val lastBrace = cleaned.lastIndexOf('}')
-        
-        val finalJson = if (firstBrace != -1 && lastBrace > firstBrace) {
-            cleaned.substring(firstBrace, lastBrace + 1)
-        } else {
-            cleaned
-        }
+        val finalJson = com.zoewave.probase.features.ai.core.util.JsonSanitizer.extractFirstJsonObject(nonThoughtText) ?: nonThoughtText
 
         val usageMeta = root["usageMetadata"]?.jsonObject
         val promptTokens = usageMeta?.get("promptTokenCount")?.jsonPrimitive?.contentOrNull?.toIntOrNull() ?: 0

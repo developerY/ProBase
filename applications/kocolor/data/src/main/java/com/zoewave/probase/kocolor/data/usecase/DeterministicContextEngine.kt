@@ -13,6 +13,7 @@ import com.zoewave.probase.kocolor.data.telemetry.AnchorSource
 import com.zoewave.probase.kocolor.data.telemetry.PruningRecord
 import com.zoewave.probase.kocolor.data.telemetry.StyleAuditLogger
 import com.zoewave.probase.kocolor.data.util.KeywordMatcher
+import com.zoewave.probase.kocolor.domain.taxonomy.KoColorThresholds
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.sqrt
@@ -50,24 +51,33 @@ class DeterministicContextEngine @Inject constructor(
             weatherTempC = context.weatherTempC ?: 22f // Fallback for legacy role logic
         )
 
-        // 4. Hard Constraints (Eliminate impossible items)
+        // 4. Hard Constraints (Sequential Audit Funnel)
         val lockedIds = lockedAnchors.map { it.id }.toSet()
-        val eligibleItems = inventory.filter { item ->
-            item.id !in lockedIds && isContextuallyViable(item, context)
+        val unlockedInventory = inventory.filter { it.id !in lockedIds }
+
+        val afterWeatherItems = unlockedInventory.filter { isContextuallyViable(it, context) }
+        val afterRotationItems = afterWeatherItems.filter { item ->
+            val penalty = rotationScoringUseCase.calculateRotationPenalty(
+                productId = "w_${item.internalId}",
+                category = item.category.name,
+                isSignature = item.isSignature
+            )
+            penalty < KoColorThresholds.ROTATION_HARD_BAN_PENALTY
         }
+        val finalEligibleItems = afterRotationItems
 
         auditLogger.logDeterministicPruning(
             context.requestId,
             PruningRecord(
                 initialCount = initialCount,
-                afterWeather = eligibleItems.size,
-                afterRotation = eligibleItems.size,
-                finalEligible = eligibleItems.size
+                afterWeather = afterWeatherItems.size,
+                afterRotation = afterRotationItems.size,
+                finalEligible = finalEligibleItems.size
             )
         )
 
         // 5. Soft Scoring & Ranking
-        val rankedPool = eligibleItems.map { item ->
+        val rankedPool = finalEligibleItems.map { item ->
             val lch = colorEngine.hexToLCh(item.colorHex)
             val colorScore = colorEngine.scoreCandidate(lch, compositeProfile, context.appearanceTelemetry)
             val contextScore = calculateContextScore(item, context)
@@ -294,33 +304,7 @@ class DeterministicContextEngine @Inject constructor(
         return if (daysSince > 7) 1.0f else (daysSince / 7.0f).toFloat()
     }
 
-    private fun enforceRoleDiversity(
-        anchor: ClothingItem,
-        candidates: List<CandidateProvenance>,
-        context: StyleRequestContext
-    ): List<CandidateProvenance> {
-        val sorted = candidates.sortedByDescending { it.totalScore }
-        val result = mutableListOf<CandidateProvenance>()
-        
-        val rolesNeeded = mutableSetOf(ClothingCategory.TOPS, ClothingCategory.BOTTOMS, ClothingCategory.SHOES)
-        rolesNeeded.remove(anchor.category)
-        
-        // Greedy diversity selection
-        for (prov in sorted) {
-            val item = prov.clothingItem ?: continue
-            if (item.category in rolesNeeded) {
-                result.add(prov)
-                // We keep needing more of a role until we have enough, say 3 per primary category
-                if (result.count { it.clothingItem?.category == item.category } >= 3) {
-                    rolesNeeded.remove(item.category)
-                }
-            } else if (result.size < 12) {
-                result.add(prov)
-            }
-        }
-        
-        return result.sortedByDescending { it.totalScore }
-    }
+
 }
 
 private val ClothingItem.id: String get() = "w_$internalId"

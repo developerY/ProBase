@@ -54,7 +54,7 @@ class PromptAssembler @Inject constructor() {
         val availableClothingCategories = clothingCandidates.mapNotNull { it.clothingItem?.category }.toSet()
         val hasShoes = availableClothingCategories.contains(ClothingCategory.SHOES) || (clothingCandidates.isEmpty() && compactManifest.contains("SHOES", ignoreCase = true))
 
-        val isOuterwearForbidden = (context.weatherTempC != null && context.weatherTempC > 17f) // HOT or WARM
+        val isOuterwearForbidden = (context.weatherTempC != null && context.weatherTempC >= com.zoewave.probase.kocolor.domain.taxonomy.KoColorThresholds.OUTERWEAR_BAN_TEMP_C)
         
         val thermalStr = when {
             context.weatherTempC == null -> "MODERATE"

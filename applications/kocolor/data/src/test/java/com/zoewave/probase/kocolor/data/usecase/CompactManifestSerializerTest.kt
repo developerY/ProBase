@@ -35,4 +35,17 @@ class CompactManifestSerializerTest {
 
         assertThat(result).contains("[w_55|TOPS|Trench|#B8A992|Warm|Deep|Cotton]")
     }
+
+    @Test
+    fun unknownDefaults_emitsUnknownAndNeverInventedLiterals() {
+        val item = ClothingItem(internalId = 1, name = "Unasserted Item", category = ClothingCategory.TOPS, colorHex = "#000")
+        val prov = CandidateProvenance(clothingItem = item)
+        val expanded = serializer.serialize(listOf(prov), emptyList(), SerializationDetailLevel.EXPANDED)
+
+        assertThat(expanded).contains("UNKNOWN")
+        assertThat(expanded).doesNotContain("Cotton")
+        assertThat(expanded).doesNotContain("SATIN")
+        assertThat(expanded).doesNotContain("KoColor")
+        assertThat(expanded).doesNotContain("Balanced")
+    }
 }

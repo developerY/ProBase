@@ -58,9 +58,7 @@ class SuggestionEngine @Inject constructor(
             val input = AiInput.TextOnly(promptString = textPrompt)
             val result = provider.execute(input)
             val jsonText = result.getOrNull()?.text ?: throw IllegalStateException("Empty response from AI")
-            
-            val cleanedJson = jsonText.substringAfter("{").substringBeforeLast("}")
-            val finalJson = "{$cleanedJson}"
+            val finalJson = com.zoewave.probase.features.ai.core.util.JsonSanitizer.extractFirstJsonObject(jsonText) ?: jsonText
             
             json.decodeFromString<FashionAdvice>(finalJson)
         } catch (e: Exception) {
