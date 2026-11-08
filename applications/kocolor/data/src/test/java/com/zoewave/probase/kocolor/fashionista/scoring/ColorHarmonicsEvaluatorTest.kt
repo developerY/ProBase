@@ -73,4 +73,15 @@ class ColorHarmonicsEvaluatorTest {
         val score = evaluator.evaluate(blueprint, warmContext, clothing)
         assertThat(score).isAtLeast(95f)
     }
+
+    @Test
+    fun singleChromaLightnessCurve_matchesAllSevenControlPoints() {
+        assertThat(evaluator.evaluateNeutralLightnessModifier(0f)).isEqualTo(-15f)
+        assertThat(evaluator.evaluateNeutralLightnessModifier(12f)).isEqualTo(5f)
+        assertThat(evaluator.evaluateNeutralLightnessModifier(30f)).isEqualTo(25f)
+        assertThat(evaluator.evaluateNeutralLightnessModifier(50f)).isEqualTo(38f)
+        assertThat(evaluator.evaluateNeutralLightnessModifier(65f)).isEqualTo(30f)
+        assertThat(evaluator.evaluateNeutralLightnessModifier(75f)).isEqualTo(20f)
+        assertThat(evaluator.evaluateNeutralLightnessModifier(90f)).isEqualTo(15f)
+    }
 }

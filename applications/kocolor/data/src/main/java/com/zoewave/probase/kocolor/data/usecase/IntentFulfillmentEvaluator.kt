@@ -19,12 +19,21 @@ class IntentFulfillmentEvaluator @Inject constructor() {
         selectedCosmetics: List<CosmeticItem>,
         rotationScores: Map<String, Double>
     ): IntentFulfillment {
+        val effectiveActiveDimensions = intentProfile.activeDimensions.ifEmpty {
+            buildSet {
+                if (kotlin.math.abs(intentProfile.colorfulness - 0.5f) > 0.01f) add(IntentDimension.COLORFULNESS)
+                if (kotlin.math.abs(intentProfile.colorContrast - 0.5f) > 0.01f) add(IntentDimension.CONTRAST)
+                if (kotlin.math.abs(intentProfile.novelty - 0.5f) > 0.01f) add(IntentDimension.NOVELTY)
+                if (kotlin.math.abs(intentProfile.formality - 0.5f) > 0.01f) add(IntentDimension.FORMALITY)
+            }
+        }
+
         if (selectedClothing.isEmpty()) {
             return IntentFulfillment(
-                state = if (intentProfile.activeDimensions.isEmpty()) StyleIntentState.NotSpecified else StyleIntentState.Specified(intentProfile),
-                score = if (intentProfile.activeDimensions.isEmpty()) null else 0f,
+                state = if (effectiveActiveDimensions.isEmpty()) StyleIntentState.NotSpecified else StyleIntentState.Specified(intentProfile),
+                score = if (effectiveActiveDimensions.isEmpty()) null else 0f,
                 observedMetrics = ObservedEnsembleMetrics(0f, 0f, 0f, 0f),
-                unmetIntent = intentProfile.activeDimensions.map { it.name }
+                unmetIntent = effectiveActiveDimensions.map { it.name }
             )
         }
 
@@ -70,14 +79,7 @@ class IntentFulfillmentEvaluator @Inject constructor() {
             formality = formality
         )
 
-        val effectiveActiveDimensions = intentProfile.activeDimensions.ifEmpty {
-            buildSet {
-                if (kotlin.math.abs(intentProfile.colorfulness - 0.5f) > 0.01f) add(IntentDimension.COLORFULNESS)
-                if (kotlin.math.abs(intentProfile.colorContrast - 0.5f) > 0.01f) add(IntentDimension.CONTRAST)
-                if (kotlin.math.abs(intentProfile.novelty - 0.5f) > 0.01f) add(IntentDimension.NOVELTY)
-                if (kotlin.math.abs(intentProfile.formality - 0.5f) > 0.01f) add(IntentDimension.FORMALITY)
-            }
-        }
+
 
         if (effectiveActiveDimensions.isEmpty()) {
             return IntentFulfillment(
