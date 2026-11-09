@@ -2,6 +2,7 @@ package com.zoewave.probase.kocolor.data.usecase
 
 import com.zoewave.probase.kocolor.data.model.ClothingWithUsage
 import com.zoewave.probase.kocolor.data.repository.RotationRepository
+import com.zoewave.probase.kocolor.domain.taxonomy.KoColorThresholds
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
@@ -14,8 +15,8 @@ class RotationScoringUseCase @Inject constructor(
     // Thresholds and Policy Constants
     private val minimumOutfitsForPenalty = 5L 
     private val highFrequencyShare = 0.35 // Item used in >35% of category selections
-    private val maximumClothingRecencyWindowMs = 3 * 24 * 60 * 60 * 1000L // 3 days
-    private val maximumCosmeticRecencyWindowMs = 24 * 60 * 60 * 1000L // 24h
+    private val maximumClothingRecencyWindowMs = KoColorThresholds.RECENT_WEAR_SOFT_DAYS * 24 * 60 * 60 * 1000L
+    private val maximumCosmeticRecencyWindowMs = KoColorThresholds.RECENT_WEAR_HARD_HOURS * 60 * 60 * 1000L
 
     fun observeAllClothingWithUsage(): Flow<List<ClothingWithUsage>> {
         return rotationRepository.observeAllClothingWithUsage()

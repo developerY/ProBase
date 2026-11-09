@@ -42,9 +42,9 @@ android {
     signingConfigs {
         create("release") {
             storeFile = file(System.getenv("RELEASE_STORE_FILE") ?: "keystore.jks")
-            storePassword = System.getenv("RELEASE_STORE_PASSWORD")
-            keyAlias = System.getenv("RELEASE_KEY_ALIAS")
-            keyPassword = System.getenv("RELEASE_KEY_PASSWORD")
+            storePassword = System.getenv("RELEASE_STORE_PASSWORD") ?: "dummy"
+            keyAlias = System.getenv("RELEASE_KEY_ALIAS") ?: "dummy"
+            keyPassword = System.getenv("RELEASE_KEY_PASSWORD") ?: "dummy"
         }
     }
 

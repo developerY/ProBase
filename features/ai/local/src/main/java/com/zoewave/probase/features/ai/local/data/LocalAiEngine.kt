@@ -183,7 +183,9 @@ class LocalAiEngine @Inject constructor() {
                 "$prompt\n\nReturn ONLY a valid JSON object matching this schema:\n$jsonSchema"
             } else prompt
 
+        if (com.zoewave.probase.features.ai.local.BuildConfig.DEBUG) {
             Log.d("KoColorAI_IO", ">>> REQUEST TO GEMINI (Local Nano):\n$finalPrompt")
+        }
 
             val response = withTimeout(10000) {
                 localModel.generateContent(finalPrompt)
@@ -192,7 +194,9 @@ class LocalAiEngine @Inject constructor() {
             val text = response.candidates.firstOrNull()?.text 
                 ?: return@withContext Result.failure(Exception("Empty AI response"))
 
+        if (com.zoewave.probase.features.ai.local.BuildConfig.DEBUG) {
             Log.d("KoColorAI_IO", "^^^ RESPONSE FROM GEMINI (Local Nano):\n$text")
+        }
 
             Result.success(text)
         } catch (e: Exception) {
@@ -224,7 +228,9 @@ class LocalAiEngine @Inject constructor() {
                 text(finalPrompt)
             }
 
+        if (com.zoewave.probase.features.ai.local.BuildConfig.DEBUG) {
             Log.d("KoColorAI_IO", ">>> REQUEST TO GEMINI (Local Multimodal):\n$finalPrompt")
+        }
 
             val response = withTimeout(15000) { // Slightly longer timeout for vision
                 localModel.generateContent(
@@ -235,7 +241,9 @@ class LocalAiEngine @Inject constructor() {
             val text = response.candidates.firstOrNull()?.text 
                 ?: return@withContext Result.failure(Exception("Empty AI response"))
 
+        if (com.zoewave.probase.features.ai.local.BuildConfig.DEBUG) {
             Log.d("KoColorAI_IO", "^^^ RESPONSE FROM GEMINI (Local Multimodal):\n$text")
+        }
 
             Result.success(text)
         } catch (e: Exception) {

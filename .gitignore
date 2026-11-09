@@ -17,6 +17,9 @@
 local.properties
 secrets.defaults.properties
 
+# Release
+/release/
+
 # Firebase
 google-services.json
 google-services-ylabz.json
@@ -35,3 +38,4 @@ google-services-zoewave.json
 
 # No Python Scripts
 *.py
+

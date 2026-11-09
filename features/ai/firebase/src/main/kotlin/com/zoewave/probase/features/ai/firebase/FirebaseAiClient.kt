@@ -224,17 +224,21 @@ class FirebaseAiClientImpl @Inject constructor(
         modelNameOverride: String?
     ): AiResponse {
         val initialModelName = resolveModelName(modelNameOverride)
-        Log.d("KoColorAI_IO", ">>> REQUEST TO GEMINI (RAW, Target Model=$initialModelName):\n$prompt")
+        if (BuildConfig.DEBUG) {
+            Log.d("KoColorAI_IO", ">>> REQUEST TO GEMINI (RAW, Target Model=$initialModelName):\n$prompt")
+        }
 
         return executeWithRetry("generateContent", initialModelName) { currentModel ->
             val model = getModel(temperatureOverride, currentModel)
             val response = model.generateContent(prompt)
-
-            Log.d("KoColorAI_IO", "^^^ RESPONSE FROM GEMINI (RAW, Model=$currentModel):\n${response.text ?: "EMPTY_RESPONSE"}")
-
+            
             val metadata = response.usageMetadata
-            if (metadata != null) {
-                Log.d("KoColorAI_IO", "TOKEN USAGE: Prompt=${metadata.promptTokenCount}, Candidates=${metadata.candidatesTokenCount}, Total=${metadata.totalTokenCount}")
+
+            if (BuildConfig.DEBUG) {
+                Log.d("KoColorAI_IO", "^^^ RESPONSE FROM GEMINI (RAW, Model=$currentModel):\n${response.text ?: "EMPTY_RESPONSE"}")
+                if (metadata != null) {
+                    Log.d("KoColorAI_IO", "TOKEN USAGE: Prompt=${metadata.promptTokenCount}, Candidates=${metadata.candidatesTokenCount}, Total=${metadata.totalTokenCount}")
+                }
             }
 
             val text = response.text ?: throw IllegalStateException("Empty response from Firebase AI Logic")
