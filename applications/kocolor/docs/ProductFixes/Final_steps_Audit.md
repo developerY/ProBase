@@ -50,7 +50,7 @@ Because KoColor explicitly chose Option A (removing all Health Connect permissio
 ## STEP 3: Final Rebuild, Merged Release Manifest Audit & Full Test Suite Verification
 **What was done:**
 1. Ran `./gradlew :applications:kocolor:apps:mobile:processReleaseMainManifest --rerun-tasks` to force a clean generation of the merged release manifest.
-2. Evaluated the final merged manifest file (`build/intermediates/merged_manifest/release/processReleaseMainManifest/AndroidManifest.xml`) for any residual `AD_ID` strings or active `android.permission.health.` permission requirements.
+2. Evaluated the final merged manifest file (`build/intermediates/merged_manifest/release/processReleaseMainManifest/AndroidManifest.xml`) for any residual `AD_ID` strings or active `health` permission requirements.
 3. Re-ran the entire test suite and verified standard static analysis passes.
 
 **Why it was done:**
@@ -62,10 +62,14 @@ To provide irrefutable proof that no transitive library stealthily injected `AD_
    ```
    PASS: ZERO AD_ID IN MERGED RELEASE MANIFEST
    ```
-2. `grep -n -i "android.permission.health." "$MERGED_MANIFEST"`
+2. `grep -n -i "health" "$MERGED_MANIFEST"`
    Output:
    ```
-   PASS: ZERO HEALTH ENTRIES IN MERGED RELEASE MANIFEST
+   38:        <package android:name="com.google.android.wearable.healthservices" />
+   157:            android:name="androidx.health.platform.client.impl.sdkservice.HealthDataSdkService"
+   161:                <action android:name="androidx.health.platform.client.ACTION_BIND_SDK_SERVICE" />
+   417:            android:name="androidx.health.services.client.VersionApiService"
+   419:            android:permission="com.google.android.wearable.healthservices.permission.PASSIVE_DATA_BINDING" >
    ```
 3. Full Gradle Test Suite:
    ```

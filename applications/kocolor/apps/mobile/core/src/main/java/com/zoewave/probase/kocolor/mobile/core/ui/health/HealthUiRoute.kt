@@ -83,12 +83,6 @@ fun HealthContent(
     navTo: (KoColorRoute) -> Unit
 ) {
     val context = LocalContext.current
-    val permissionsLauncher = rememberLauncherForActivityResult(
-        contract = androidx.health.connect.client.PermissionController.createRequestPermissionResultContract()
-    ) {
-        onEvent(HealthEvent.LoadHealthData)
-    }
-
     val settingsLauncher = rememberLauncherForActivityResult(
         contract = androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult()
     ) {
@@ -100,11 +94,7 @@ fun HealthContent(
         uiState.sideEffects.collect { effect ->
             when (effect) {
                 is HealthSideEffect.LaunchPermissions -> {
-                    try {
-                        permissionsLauncher.launch(effect.permissions)
-                    } catch (e: Exception) {
-                        android.util.Log.e("HealthContent", "Failed to launch permissions", e)
-                    }
+                    navTo(KoColorRoute.Back)
                 }
                 HealthSideEffect.OpenHealthConnectSettings -> {
                     val packageName = context.packageName
