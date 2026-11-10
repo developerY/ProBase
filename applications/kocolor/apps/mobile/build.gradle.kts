@@ -39,12 +39,39 @@ android {
         }
     }
 
+    val releaseStoreFile = System.getenv("RELEASE_STORE_FILE")?.takeIf { it.isNotBlank() }
+    val releaseStorePassword = System.getenv("RELEASE_STORE_PASSWORD")?.takeIf { it.isNotBlank() }
+    val releaseKeyAlias = System.getenv("RELEASE_KEY_ALIAS")?.takeIf { it.isNotBlank() }
+    val releaseKeyPassword = System.getenv("RELEASE_KEY_PASSWORD")?.takeIf { it.isNotBlank() }
+
+    val isReleaseTaskRequested = gradle.startParameter.taskNames.any { taskName ->
+        taskName.contains("Release", ignoreCase = true) &&
+            !taskName.contains("lint", ignoreCase = true) &&
+            !taskName.contains("UnitTest", ignoreCase = true) &&
+            !taskName.contains("Manifest", ignoreCase = true)
+    }
+
+    if (isReleaseTaskRequested) {
+        if (releaseStoreFile == null || releaseStorePassword == null || releaseKeyAlias == null || releaseKeyPassword == null) {
+            throw GradleException(
+                "FATAL: Missing required release signing credentials (RELEASE_STORE_FILE, RELEASE_STORE_PASSWORD, RELEASE_KEY_ALIAS, RELEASE_KEY_PASSWORD). Refusing to fall back to keystore.jks."
+            )
+        }
+        if (!file(releaseStoreFile).exists()) {
+            throw GradleException(
+                "FATAL: RELEASE_STORE_FILE does not exist at path: $releaseStoreFile"
+            )
+        }
+    }
+
     signingConfigs {
         create("release") {
-            storeFile = file(System.getenv("RELEASE_STORE_FILE") ?: "keystore.jks")
-            storePassword = System.getenv("RELEASE_STORE_PASSWORD") ?: "dummy"
-            keyAlias = System.getenv("RELEASE_KEY_ALIAS") ?: "dummy"
-            keyPassword = System.getenv("RELEASE_KEY_PASSWORD") ?: "dummy"
+            if (releaseStoreFile != null) {
+                storeFile = file(releaseStoreFile)
+            }
+            storePassword = releaseStorePassword
+            keyAlias = releaseKeyAlias
+            keyPassword = releaseKeyPassword
         }
     }
 
