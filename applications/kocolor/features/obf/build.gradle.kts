@@ -32,3 +32,4 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
 }
+android { buildFeatures { buildConfig = true } }

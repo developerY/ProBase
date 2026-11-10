@@ -21,3 +21,4 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 }
+android { buildFeatures { buildConfig = true } }

@@ -6,4 +6,5 @@ object SecurityConstants {
      * This is the "Root of Trust" for the entire package ecosystem.
      */
     const val KOCOLOR_ROOT_PUBLIC_KEY = "cb2958775e659815c07275134366f9702dc7a8c542c61faf41b9b340f9957ce5"
+    const val KOCOLOR_TRUSTED_KEY_ID = "atelier-dev-01"
 }

@@ -26,3 +26,4 @@ dependencies {
     testImplementation(libs.truth)
     testImplementation(libs.kotlinx.coroutines.test)
 }
+android { buildFeatures { buildConfig = true } }

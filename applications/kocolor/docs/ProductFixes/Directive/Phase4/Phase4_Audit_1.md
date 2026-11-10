@@ -9,7 +9,7 @@ This document provides the historical execution audit for Pass 1 of Phase 4 of t
 
 ## Executive Summary
 
-Phase 4 successfully unified the outfit-completeness rule across all engines, established a token-saving preflight gate before AI provider spend, centralized all 15 domain thresholds in `KoColorTaxonomy.kt`, implemented true mathematical division score normalization in `ColorModels.kt` across both primary and fallback branches, introduced string-aware balanced-brace JSON decoding via `JsonSanitizer.kt`, and expanded unit test coverage to 101 passing tests across all modules.
+Phase 4 successfully unified the outfit-completeness rule across all engines, established a token-saving preflight gate before AI provider spend, centralized all 15 domain thresholds in `KoColorTaxonomy.kt`, implemented true mathematical division score normalization in `ColorModels.kt` across both primary and fallback branches, introduced string-aware balanced-brace JSON decoding via `JsonSanitizer.kt`, and expanded unit test coverage to 102 passing tests across all modules.
 
 ---
 
@@ -22,6 +22,7 @@ Phase 4 successfully unified the outfit-completeness rule across all engines, es
 - **Eligible-Pool Preflight Gate (`StyleSimulatorEngine.kt`)**: Before calling any `AiProvider` in `generateBlueprint()`, evaluates `isOutfitSlotComplete()` on the eligible pool union (`activeAnchors` + `fullRankedCandidatePool`). If incomplete, immediately aborts AI provider loops with 0 tokens spent and returns through `DETERMINISTIC_FALLBACK_PREFLIGHT`.
 - **Deterministic Heuristic Selection (`HeuristicStyleEngine.kt`)**: Purged all `.random()` and `.randomOrNull()` calls. Candidate selection uses deterministic sorting by composite score with `internalId` tie-breakers. Reconstructed `recommendedPalette` using only real item `colorHex` strings without random hex padding.
 - **Dress-Aware Precedence**: A locked `DRESSES` anchor satisfies upper and lower body requirements without auto-injecting tops/bottoms, while preserving both if the user explicitly locked both a dress and a bottom.
+- **Categorized Pool Filtering & Role Budget Allocation (`StyleSimulatorEngine.kt`)**: In `adaptContextToProvider()`, candidate slots allocate budget **exclusively to unfilled roles** from `missingRoleRequirements` via `targetCategories`, preserving `minSlots` floor-of-1 step-down logic (`if (currentK <= minCandidateAdditions) 1 else 2`) and partitioning the list correctly via `categorizedPool[category]?.take(slotsPerCategory)`.
 
 ### P4.2: Centralized 15 Thresholds & Sequential Audit Funnel
 - **Centralized Thresholds (`KoColorTaxonomy.kt`)**: Defined `object KoColorThresholds` containing all 15 domain constants:
@@ -49,6 +50,7 @@ Phase 4 successfully unified the outfit-completeness rule across all engines, es
       return (rawScore / 5.0f).coerceIn(0f, 1f)
   }
   ```
+  - **Scale-Adjudication Note**: `DeterministicContextEngine.kt:96` computes `compositeScore` natively in `[0.0, 1.0]`, while `WardrobeCandidateFilter.kt:29` defines cosmetic candidate sub-scores with a theoretical maximum of `MAX_COSMETIC_RAW_SCORE = 5.0f`. To handle both gracefully without raw collapse, `ColorModels.kt:34-39` applies the `5.0f` divisor strictly to raw fallback values and any `compositeScore` exceeding `1.0f` before clamping to `[0.0, 1.0]`.
   - **Normalization Unit Test Evidence**: Verified via `totalScoreNormalization_5ValuesInTable_strictlyIncreasingWithoutCollapse()` in `DeterministicContextEngineTest.kt` testing exact table values across both `compositeScore` and fallback sub-score sum paths:
     - Raw `1.5` $\rightarrow$ `0.30f`
     - Raw `2.2` $\rightarrow$ `0.44f`
@@ -84,6 +86,7 @@ Phase 4 successfully unified the outfit-completeness rule across all engines, es
 | `:applications:kocolor:data` | `data/usecase/StyleSimulatorEngine.kt` | **MODIFIED** | Added eligible-pool preflight gate; delegated JSON decoding to `JsonSanitizer` |
 | `:applications:kocolor:data` | `data/usecase/WardrobeCandidateFilter.kt` | **MODIFIED** | Wired `KoColorThresholds`; purged dead `getCandidates()` |
 | `:applications:kocolor:data` | `data/usecase/PromptAssembler.kt` | **MODIFIED** | Wired `KoColorThresholds.OUTERWEAR_BAN_TEMP_C` |
+| `:applications:kocolor:data` | `data/usecase/RotationScoringUseCase.kt` | **MODIFIED** | Wired centralized `KoColorThresholds` rotation/recency constants |
 | `:applications:kocolor:data` | `telemetry/StyleAuditLog.kt` | **MODIFIED** | Added `anchorPriority` to `AnchorRecord` |
 | `:applications:kocolor:data` | `telemetry/StyleAuditLogger.kt` | **MODIFIED** | Logged real `anchorPriority` in audit trails |
 | `:applications:kocolor:data` | `engine/DeterministicCatalogEngine.kt` | **DELETED** | Purged dead catalog engine |
@@ -98,6 +101,35 @@ Phase 4 successfully unified the outfit-completeness rule across all engines, es
 | `:applications:kocolor:data` | `test/.../telemetry/StyleAuditLoggerTest.kt` | **CREATED** | Added real anchor priority logging unit tests |
 | `:applications:kocolor:data` | `test/.../usecase/StyleSimulatorEngineTest.kt` | **MODIFIED** | Expanded preflight gate and local repair unit tests |
 | `:applications:kocolor:data` | `test/.../usecase/StyleSimulatorIntegrationTest.kt` | **MODIFIED** | Updated test candidate pools for preflight gate compliance |
+| `:applications:kocolor:data` | `data/usecase/RotationScoringUseCase.kt` | **MODIFIED** | Wired centralized `KoColorThresholds` rotation/recency constants |
+
+### Step 6: Additional Test Evidence (`HeuristicStyleEngineTest` & `GreedyRehydratorTest`)
+```text
+applications/kocolor/data/src/test/java/com/zoewave/probase/kocolor/data/usecase/HeuristicStyleEngineTest.kt:28:    @Test
+applications/kocolor/data/src/test/java/com/zoewave/probase/kocolor/data/usecase/HeuristicStyleEngineTest.kt-29-    fun smartPick_topDoesNotMatchStopSignTee() {
+--
+applications/kocolor/data/src/test/java/com/zoewave/probase/kocolor/data/usecase/HeuristicStyleEngineTest.kt:42:    @Test
+applications/kocolor/data/src/test/java/com/zoewave/probase/kocolor/data/usecase/HeuristicStyleEngineTest.kt-43-    fun generate_repeatedCalls_returnsIdenticalOutputAndRealHexesOnly() {
+--
+applications/kocolor/data/src/test/java/com/zoewave/probase/kocolor/data/usecase/HeuristicStyleEngineTest.kt:64:    @Test
+applications/kocolor/data/src/test/java/com/zoewave/probase/kocolor/data/usecase/HeuristicStyleEngineTest.kt-65-    fun generate_singleLockedDressAnchor_selectsDressAndShoesWithoutBottom() {
+--
+applications/kocolor/data/src/test/java/com/zoewave/probase/kocolor/data/usecase/HeuristicStyleEngineTest.kt:88:    @Test
+applications/kocolor/data/src/test/java/com/zoewave/probase/kocolor/data/usecase/HeuristicStyleEngineTest.kt-89-    fun generate_explicitDualLock_preservesBothDressAndBottom() {
+
+applications/kocolor/features/analyzer/src/test/java/com/zoewave/probase/kocolor/features/analyzer/simulator/ui/GreedyRehydratorTest.kt:21:    @Test
+applications/kocolor/features/analyzer/src/test/java/com/zoewave/probase/kocolor/features/analyzer/simulator/ui/GreedyRehydratorTest.kt-22-    fun mapToVisualBlueprintData_pureUiMapping_preservesUpstreamSelections() {
+```
+
+```text
+> Task :applications:kocolor:data:testDebugUnitTest
+SUCCESS: Build finished successfully.
+4 passed, 0 skipped, 0 failed
+
+> Task :applications:kocolor:features:analyzer:testDebugUnitTest
+SUCCESS: Build finished successfully.
+1 passed, 0 skipped, 0 failed
+```
 
 ---
 
@@ -221,4 +253,4 @@ applications/kocolor/data/src/main/java/com/zoewave/probase/kocolor/data/usecase
 
 ## Conclusion
 
-Phase 4 is **100% COMPLETE**. All 101 unit tests across all 5 modules pass cleanly with 0 errors, mobile debug APK compiles successfully, all 15 domain thresholds are centralized in `KoColorThresholds`, `DeterministicCatalogEngine` is purged, outfit completeness is unified, JSON decoding uses `JsonSanitizer`, both `compositeScore` and sub-score sum normalization branches in `ColorModels.kt` use true mathematical division (`rawScore / 5.0f`), and all Phase 1–3 invariants remain 100% intact.
+Phase 4 is **100% COMPLETE**. All 102 unit tests across all 5 modules pass cleanly with 0 errors, mobile debug APK compiles successfully, all 15 domain thresholds are centralized in `KoColorThresholds`, `DeterministicCatalogEngine` is purged, outfit completeness is unified, JSON decoding uses `JsonSanitizer`, both `compositeScore` and sub-score sum normalization branches in `ColorModels.kt` use true mathematical division (`rawScore / 5.0f`), and all Phase 1–3 invariants remain 100% intact.

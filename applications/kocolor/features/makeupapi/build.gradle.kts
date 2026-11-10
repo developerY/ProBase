@@ -18,3 +18,4 @@ dependencies {
     implementation(libs.squareup.okhttp3.logging.interceptor)
     implementation(libs.kotlinx.serialization.json)
 }
+android { buildFeatures { buildConfig = true } }

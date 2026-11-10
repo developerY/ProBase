@@ -30,7 +30,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.decodeFromJsonElement
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import okio.HashingSink
 import okio.buffer
 import okio.sink
@@ -82,6 +85,12 @@ class StarterPackRepository @Inject constructor(
         Log.d(TAG, "getManifest: Signature from envelope: ${envelope.signature}")
 
         // Root of Trust Verification
+        val keyId = envelope.data.jsonObject["key_id"]?.jsonPrimitive?.contentOrNull
+        if (keyId != SecurityConstants.KOCOLOR_TRUSTED_KEY_ID) {
+            Log.e(TAG, "getManifest: Key ID mismatch! Expected ${SecurityConstants.KOCOLOR_TRUSTED_KEY_ID}, got $keyId")
+            throw PackException.SignatureException("Trust Bootstrap Failed: Key ID mismatch!")
+        }
+
         if (!verifier.verify(rawDataBytes, envelope.signature, "")) {
             Log.e(TAG, "getManifest: Signature verification failed!")
             throw PackException.SignatureException("Trust Bootstrap Failed: Manifest signature is invalid!")

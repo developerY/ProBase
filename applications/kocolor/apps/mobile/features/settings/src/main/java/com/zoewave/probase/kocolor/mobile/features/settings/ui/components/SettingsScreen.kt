@@ -142,12 +142,6 @@ fun SettingsScreen(
                 onEvent = onEvent
             )
 
-            HealthConnectCard(
-                uiState = uiState.isHealthExpanded,
-                onEvent = onEvent,
-                navTo = navTo
-            )
-
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(stringResource(R.string.applications_kocolor_apps_mobile_core_settings_about), style = MaterialTheme.typography.titleMedium)
