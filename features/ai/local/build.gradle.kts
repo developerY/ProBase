@@ -52,3 +52,5 @@ dependencies {
     testImplementation("androidx.test.ext:junit:1.1.5")
     testImplementation("org.robolectric:robolectric:4.11.1")
 }
+
+android { buildFeatures { buildConfig = true } }

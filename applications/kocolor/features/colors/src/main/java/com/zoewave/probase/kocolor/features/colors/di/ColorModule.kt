@@ -31,7 +31,7 @@ object ColorModule {
     @Singleton
     fun provideColorApiService(): ColorApiService {
         val loggingInterceptor = HttpLoggingInterceptor().apply {
-            level = if (com.zoewave.probase.core.network.BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
+            level = if (com.zoewave.probase.kocolor.features.colors.BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
         }
 
         val httpClient = OkHttpClient.Builder()

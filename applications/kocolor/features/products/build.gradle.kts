@@ -15,3 +15,4 @@ dependencies {
     implementation(libs.squareup.retrofit.converter.gson)
     implementation(libs.squareup.okhttp3.logging.interceptor)
 }
+android { buildFeatures { buildConfig = true } }
