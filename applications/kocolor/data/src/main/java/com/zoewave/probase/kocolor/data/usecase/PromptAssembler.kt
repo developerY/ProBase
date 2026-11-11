@@ -71,9 +71,9 @@ class PromptAssembler @Inject constructor() {
         }
 
         val clothingGoal = if (hasShoes) {
-            "1. CLOTHING COMPOSITION:\n- TOP: exactly 1\n- BOTTOM: exactly 1\n- SHOES: exactly 1\n$outerwearInstruction"
+            "1. CLOTHING COMPOSITION:\n- NEVER select two items from the same clothing category (for example, NEVER select two pairs of SHOES).\n- If a DRESSES / one-piece item is used, select 1 DRESSES item + 1 SHOES item.\n- If separates are used, select 1 TOPS item + 1 BOTTOMS item + 1 SHOES item.\n$outerwearInstruction"
         } else {
-            "1. CLOTHING COMPOSITION:\n- TOP: exactly 1\n- BOTTOM: exactly 1\n$outerwearInstruction"
+            "1. CLOTHING COMPOSITION:\n- NEVER select two items from the same clothing category (for example, NEVER select two pairs of SHOES).\n- If a DRESSES / one-piece item is used, select exactly 1 DRESSES item.\n- If separates are used, select exactly 1 TOPS item + 1 BOTTOMS item.\n$outerwearInstruction"
         }
 
         val cosmeticCategories = cosmeticCandidates.mapNotNull { prov ->

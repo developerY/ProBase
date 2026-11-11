@@ -140,9 +140,15 @@ class StyleSimulatorEngine @Inject constructor(
                             else -> "COOL"
                         }
                         
+                        val requiredRolesString = if (decodedBlueprint.selectedClothingIds.any { id -> wardrobe.find { "w_${it.internalId}" == id || it.remoteId == id }?.category == ClothingCategory.DRESSES }) {
+                            "DRESSES (One-Piece) + SHOES"
+                        } else {
+                            if (fitResult.request.promptString.contains("SHOES item")) "TOP + BOTTOM + SHOES" else "TOP + BOTTOM"
+                        }
+                        
                         auditLogger.logCompositionPolicy(
                             requestId = requestContext.requestId,
-                            requiredRoles = if (fitResult.request.promptString.contains("SHOES: exactly 1")) "TOP + BOTTOM + SHOES" else "TOP + BOTTOM",
+                            requiredRoles = requiredRolesString,
                             outerwearPermission = if (isOuterwearForbidden) "FORBIDDEN" else "OPTIONAL_IF_ENVIRONMENTALLY_REQUIRED",
                             reason = "Thermal context = $thermalStr"
                         )
@@ -189,9 +195,15 @@ class StyleSimulatorEngine @Inject constructor(
                     else -> "COOL"
                 }
                 
+                val requiredRolesString = if (fitResult.request.promptString.contains("DRESSES item")) {
+                    "DRESSES (One-Piece) + SHOES"
+                } else {
+                    if (fitResult.request.promptString.contains("SHOES item")) "TOP + BOTTOM + SHOES" else "TOP + BOTTOM"
+                }
+                
                 auditLogger.logCompositionPolicy(
                     requestId = requestContext.requestId,
-                    requiredRoles = if (fitResult.request.promptString.contains("SHOES: exactly 1")) "TOP + BOTTOM + SHOES" else "TOP + BOTTOM",
+                    requiredRoles = requiredRolesString,
                     outerwearPermission = if (isOuterwearForbidden) "FORBIDDEN" else "OPTIONAL_IF_ENVIRONMENTALLY_REQUIRED",
                     reason = "Thermal context = $thermalStr"
                 )
