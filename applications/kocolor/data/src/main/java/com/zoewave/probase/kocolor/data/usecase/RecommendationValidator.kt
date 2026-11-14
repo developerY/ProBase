@@ -2,6 +2,7 @@ package com.zoewave.probase.kocolor.data.usecase
 
 import android.util.Log
 import com.zoewave.probase.kocolor.data.color.CandidateProvenance
+import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.core.model.ritual.CosmeticItem
 import javax.inject.Inject
@@ -62,21 +63,42 @@ class RecommendationValidator @Inject constructor() {
             it.retrievalReason.contains("LOCKED ANCHOR", ignoreCase = true)
         }.mapNotNull { prov -> prov.clothingItem?.let { "w_${it.internalId}" } }
 
-        val finalClothingIds = filteredClothingIds.toMutableList()
-        lockedAnchorIds.forEach { anchorId ->
-            if (anchorId !in finalClothingIds) {
-                Log.w("RecommendationValidator", "Re-injecting omitted locked anchor $anchorId into selection")
-                val anchorItem = clothingCandidates.find { it.clothingItem?.let { item -> "w_${item.internalId}" } == anchorId }?.clothingItem
-                if (anchorItem != null) {
-                    // Remove any item sharing the same category (e.g. remove w_51 if w_50 is locked shoes)
-                    finalClothingIds.removeAll { id ->
-                        val item = clothingCandidates.find { it.clothingItem?.let { c -> "w_${c.internalId}" } == id }?.clothingItem
-                        item != null && item.category == anchorItem.category && id != anchorId
+        // 1c. Slot Deduplication (Never allow multiple shoes)
+        val categoryMap = mutableMapOf<ClothingCategory, String>()
+        val finalClothingIds = mutableListOf<String>()
+
+        val hasLockedDress = lockedAnchorIds.any { id ->
+            clothingCandidates.find { it.clothingItem?.let { c -> "w_${c.internalId}" } == id }?.clothingItem?.category == ClothingCategory.DRESSES
+        }
+
+        // Process locked anchors first
+        lockedAnchorIds.forEach { id ->
+            val item = clothingCandidates.find { it.clothingItem?.let { c -> "w_${c.internalId}" } == id }?.clothingItem
+            if (item != null) {
+                categoryMap[item.category] = id
+                finalClothingIds.add(id)
+            }
+        }
+
+        // Then process the remaining selected IDs
+        filteredClothingIds.forEach { id ->
+            if (id !in finalClothingIds) {
+                val item = clothingCandidates.find { it.clothingItem?.let { c -> "w_${c.internalId}" } == id }?.clothingItem
+                if (item != null) {
+                    val isConflictingSeparate = hasLockedDress && (item.category == ClothingCategory.TOPS || item.category == ClothingCategory.BOTTOMS)
+                    
+                    if (item.category !in categoryMap && !isConflictingSeparate) {
+                        categoryMap[item.category] = id
+                        finalClothingIds.add(id)
+                    } else {
+                        val reason = if (isConflictingSeparate) "Conflicts with locked dress" else "Duplicate category ${item.category}"
+                        errors.add("Duplicate or conflicting slot removed: $id ($reason)")
+                        Log.w("RecommendationValidator", "Sanitizing blueprint: removed $id ($reason)")
                     }
-                    finalClothingIds.add(anchorId)
                 }
             }
         }
+
 
         // 2. Cosmetic Role Category Firewall Enforcement
         val finalCosmeticIds = filteredCosmeticIds.filter { id ->

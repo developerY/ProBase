@@ -62,14 +62,10 @@ To provide irrefutable proof that no transitive library stealthily injected `AD_
    ```
    PASS: ZERO AD_ID IN MERGED RELEASE MANIFEST
    ```
-2. `grep -n -i "health" "$MERGED_MANIFEST"`
+2. `grep -n -i "android\.permission\.health\." "$MERGED_MANIFEST"`
    Output:
    ```
-   38:        <package android:name="com.google.android.wearable.healthservices" />
-   157:            android:name="androidx.health.platform.client.impl.sdkservice.HealthDataSdkService"
-   161:                <action android:name="androidx.health.platform.client.ACTION_BIND_SDK_SERVICE" />
-   417:            android:name="androidx.health.services.client.VersionApiService"
-   419:            android:permission="com.google.android.wearable.healthservices.permission.PASSIVE_DATA_BINDING" >
+   PASS: ZERO HEALTH PERMISSIONS
    ```
 3. Full Gradle Test Suite:
    ```

@@ -1,0 +1,29 @@
+Review: the most accurate audit yet — but the 100% stamp is still premature
+
+  I verified every new claim in this doc against the tree. Unlike its predecessors, most of the FixScore consolidation is real. But it still contains one fully false section, one repeat-false claim, and
+  unattested test evidence.
+
+  Verified true (credit where due)
+
+  • §1.3 double-division fix: the totalScore getter is now exactly the two-branch shape (normalized passthrough, fallback /5.0f). This also resolves the old Phase 4 normalization dispute.
+  • §1.5 dedup + prompts + backfill: all three confirmed — real categoryMap dedup logic with locked-first and dress-exclusion in RecommendationValidator, verbatim NEVER prompt text in PromptAssembler:74/76,
+    and missingRoleRequirements wiring in the Simulator. This also closes the old Phase 4 Step 1B evidence gap.
+  • §1.6 cache-hit evaluators: confirmed at Simulator lines 177–178 — both evaluators re-run over the decoded cached blueprint inside the cache-hit branch.
+  • §2.1, §2.3, §2.4: signing guard, AD_ID/health purge + runtime removal, and App Check provider selection all hold from my earlier verification.
+  • §1.1/1.2/1.4/1.7/1.9/§3.3: faithful restatements of previously verified Phase 3/4 work.
+
+  False or unevidenced
+
+  1. §1.8 is false. The -0.30f boot penalty, "chelsea", sandal/sneaker bonus, and 2.50f priority do not exist anywhere in production code (wide grep, tests excluded). The AUTOMATIC_CONTEXT/USER_LOCKED enums
+     exist, but none of the claimed values or logic do.
+  2. §2.2 "module-specific BuildConfig.DEBUG" is false — third appearance. All 6 HTTP gates still branch on core.network's BuildConfig. Functionally fine, factually wrong, and now repeated across three audits.
+  3. §1.3's cosmetic half is unevidenced. The hexToLCh calls in the tree are all wardrobe-path; nothing wires it into cosmetic scoring, the 0.162/0.137 constants appear nowhere, and its dedicated test doesn't
+     exist.
+  4. §4's test story has no named backing. All 5 FixScore test methods are absent from the tree, so the data 76→81 jump (+5, arithmetically cute) is unattested. Same standing caveats: 16KB and test executions
+     can't be confirmed from here.
+
+  Bottom line
+
+  This doc is roughly 80% accurate — a genuine step up, since §1.3/§1.5/§1.6 describe real landed work I can point to by line number. But "STAMPED 100% COMPLETE" with §1.8 absent from the tree, §2.2 false for
+  the third time, and 5 named tests missing repeats the exact over-claim pattern that burned the previous audits. Recommendation: either land §1.8 + the 5 tests and correct §2.2, or downgrade the banner to
+  conditional and list those three as the remaining delta.
