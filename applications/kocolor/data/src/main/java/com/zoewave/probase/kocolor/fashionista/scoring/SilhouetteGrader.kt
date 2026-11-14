@@ -14,12 +14,22 @@ class SilhouetteGrader @Inject constructor() {
         val selectedItems = resolvedClothing
         if (selectedItems.isEmpty()) return 0f
 
-        val top = selectedItems.find { it.category == ClothingCategory.TOPS || it.category == ClothingCategory.DRESSES }
+        val top = selectedItems.find { it.category == ClothingCategory.TOPS || it.category == ClothingCategory.ACTIVEWEAR || it.category == ClothingCategory.DRESSES }
         val bottom = selectedItems.find { it.category == ClothingCategory.BOTTOMS }
 
         var scoreModifier = 0f
 
-        if (top != null && bottom != null) {
+        if (top != null && top.category == ClothingCategory.DRESSES) {
+            val dressTags = extractSilhouetteTags(top)
+            scoreModifier += 25.0f // Baseline structural cohesion for one-piece
+            
+            if (dressTags.contains("CUT")) {
+                scoreModifier += 10.0f
+            }
+            if (selectedItems.any { it.category == ClothingCategory.SHOES }) {
+                scoreModifier += 10.0f
+            }
+        } else if (top != null && bottom != null) {
             val topTags = extractSilhouetteTags(top)
             val bottomTags = extractSilhouetteTags(bottom)
 
@@ -34,12 +44,15 @@ class SilhouetteGrader @Inject constructor() {
             // 1. Evaluate Volume Balance
             when {
                 // Box Penalty: Top Volume paired with Bottom Volume (swallows frame)
-                isTopVolume && isBottomVolume -> {
+                isTopVolume && isBottomVolume && !isTopCropped -> {
                     scoreModifier -= 35.0f
                 }
                 // Tapered Harmony: Top Volume + Fitted Bottom Cut, OR Fitted Top Cut + Bottom Volume
-                (isTopVolume && isBottomCut) || (isTopCut && isBottomVolume) -> {
+                (isTopVolume && isBottomCut) || (isTopCut && isBottomVolume) || (isTopCropped && isBottomVolume) -> {
                     scoreModifier += 32.0f
+                }
+                isTopCut && isBottomCut -> {
+                    scoreModifier += 22.0f
                 }
             }
 
@@ -47,8 +60,10 @@ class SilhouetteGrader @Inject constructor() {
             if (isTopCropped && isBottomHighWaisted) {
                 scoreModifier += 18.0f
             }
-        } else if (selectedItems.size >= 3) {
-            scoreModifier += 10.0f // Complete 3-piece credit
+
+            if (selectedItems.any { it.category == ClothingCategory.SHOES }) {
+                scoreModifier += 10.0f // Complete 3-piece credit
+            }
         }
 
         return (50.0f + scoreModifier).coerceIn(0.0f, 100.0f)
@@ -59,26 +74,26 @@ class SilhouetteGrader @Inject constructor() {
         val tags = mutableSetOf<String>()
 
         // Top Volume
-        if (KeywordMatcher.containsWholeWord(text, "oversized") || KeywordMatcher.containsWholeWord(text, "puffer") || KeywordMatcher.containsWholeWord(text, "chunky") || KeywordMatcher.containsWholeWord(text, "relaxed") || KeywordMatcher.containsWholeWord(text, "boxy")) {
+        if (KeywordMatcher.containsWholeWord(text, "oversized") || KeywordMatcher.containsWholeWord(text, "puffer") || KeywordMatcher.containsWholeWord(text, "chunky") || KeywordMatcher.containsWholeWord(text, "relaxed") || KeywordMatcher.containsWholeWord(text, "boxy") || KeywordMatcher.containsWholeWord(text, "hoodie") || KeywordMatcher.containsWholeWord(text, "loose")) {
             tags.add("VOLUME")
         }
         // Top Cut
-        if (KeywordMatcher.containsWholeWord(text, "cropped") || KeywordMatcher.containsWholeWord(text, "fitted") || KeywordMatcher.containsWholeWord(text, "bodysuit") || KeywordMatcher.containsWholeWord(text, "slim")) {
+        if (KeywordMatcher.containsWholeWord(text, "cropped") || KeywordMatcher.containsWholeWord(text, "fitted") || KeywordMatcher.containsWholeWord(text, "bodysuit") || KeywordMatcher.containsWholeWord(text, "slim") || KeywordMatcher.containsWholeWord(text, "tailored") || KeywordMatcher.containsWholeWord(text, "ribbed") || KeywordMatcher.containsWholeWord(text, "blouse") || KeywordMatcher.containsWholeWord(text, "camisole") || KeywordMatcher.containsWholeWord(text, "turtleneck") || KeywordMatcher.containsWholeWord(text, "oxford") || KeywordMatcher.containsWholeWord(text, "structured")) {
             tags.add("CUT")
         }
-        if (KeywordMatcher.containsWholeWord(text, "cropped")) {
+        if (KeywordMatcher.containsWholeWord(text, "cropped") || KeywordMatcher.containsWholeWord(text, "crop")) {
             tags.add("CROPPED")
         }
 
         // Bottom Volume
-        if (KeywordMatcher.containsWholeWord(text, "wide leg") || KeywordMatcher.containsWholeWord(text, "cargo") || KeywordMatcher.containsWholeWord(text, "culottes") || KeywordMatcher.containsWholeWord(text, "flared") || KeywordMatcher.containsWholeWord(text, "baggy")) {
+        if (KeywordMatcher.containsWholeWord(text, "wide leg") || KeywordMatcher.containsWholeWord(text, "wide") || KeywordMatcher.containsWholeWord(text, "cargo") || KeywordMatcher.containsWholeWord(text, "culottes") || KeywordMatcher.containsWholeWord(text, "culotte") || KeywordMatcher.containsWholeWord(text, "pleated") || KeywordMatcher.containsWholeWord(text, "flared") || KeywordMatcher.containsWholeWord(text, "relaxed") || KeywordMatcher.containsWholeWord(text, "slacks") || KeywordMatcher.containsWholeWord(text, "baggy")) {
             tags.add("VOLUME")
         }
         // Bottom Cut
-        if (KeywordMatcher.containsWholeWord(text, "fitted") || KeywordMatcher.containsWholeWord(text, "legging") || KeywordMatcher.containsWholeWord(text, "high waisted") || KeywordMatcher.containsWholeWord(text, "skinny")) {
+        if (KeywordMatcher.containsWholeWord(text, "fitted") || KeywordMatcher.containsWholeWord(text, "leggings") || KeywordMatcher.containsWholeWord(text, "legging") || KeywordMatcher.containsWholeWord(text, "slim") || KeywordMatcher.containsWholeWord(text, "tailored") || KeywordMatcher.containsWholeWord(text, "straight") || KeywordMatcher.containsWholeWord(text, "denim") || KeywordMatcher.containsWholeWord(text, "jeans") || KeywordMatcher.containsWholeWord(text, "leather") || KeywordMatcher.containsWholeWord(text, "skinny")) {
             tags.add("CUT")
         }
-        if (KeywordMatcher.containsWholeWord(text, "high waisted")) {
+        if (KeywordMatcher.containsWholeWord(text, "high waisted") || KeywordMatcher.containsWholeWord(text, "high") || KeywordMatcher.containsWholeWord(text, "culottes") || KeywordMatcher.containsWholeWord(text, "pleated") || KeywordMatcher.containsWholeWord(text, "flared")) {
             tags.add("HIGH_WAISTED")
         }
 

@@ -141,14 +141,14 @@ class FirebaseAiClientImpl @Inject constructor(
     private suspend fun <T> executeWithRetry(
         actionName: String,
         initialModelName: String,
-        timeoutPerAttemptMs: Long = 25_000L,
+        timeoutPerAttemptMs: Long = 10_000L,
         block: suspend (modelName: String) -> T
     ): T {
-        val fallbackModels = listOf(initialModelName, "gemini-3.8-flash", "gemini-flash-lite-latest").distinct()
+        val mappedModel = if (initialModelName == "gemini-3.8-flash") "gemini-flash-lite-latest" else initialModelName
+        val fallbackModels = listOf(mappedModel, "gemini-flash-lite-latest", "gemini-3.8-flash").distinct()
         var lastException: Throwable? = null
 
         for (model in fallbackModels) {
-            var baseDelayMs = 1000L
             val maxAttemptsPerModel = 2
 
             for (attempt in 1..maxAttemptsPerModel) {
@@ -178,17 +178,10 @@ class FirebaseAiClientImpl @Inject constructor(
                         break
                     }
 
-                    // 2. Temporary Server Overload / Rate Limit -> Exponential Backoff + Jitter
-                    if (isTemporaryOverloadError(e) && attempt < maxAttemptsPerModel) {
-                        val jitter = Random.nextLong(100, 500)
-                        val totalDelay = baseDelayMs + jitter
-                        Log.w(
-                            "FirebaseAiClient",
-                            "[$actionName] High demand / capacity error on model '$model' (Attempt $attempt/$maxAttemptsPerModel): $detailedMsg. Retrying in ${totalDelay}ms..."
-                        )
-                        delay(totalDelay)
-                        baseDelayMs *= 2 // Exponential backoff: 1s -> 2s -> 4s
-                        continue
+                    // 2. Temporary Server Overload / Rate Limit -> Immediately fail over
+                    if (isTemporaryOverloadError(e)) {
+                        Log.w("FirebaseAiClient", "[$actionName] High demand / capacity error on model '$model': $detailedMsg. Immediately falling over to next model.")
+                        break
                     }
 
                     // Non-retryable error or exhausted attempts for this model

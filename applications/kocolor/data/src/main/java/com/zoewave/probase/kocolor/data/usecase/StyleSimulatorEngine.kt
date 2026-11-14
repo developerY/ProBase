@@ -311,7 +311,11 @@ class StyleSimulatorEngine @Inject constructor(
                     val eligibleClothing = fitResult.clothingCandidates.mapNotNull { it.clothingItem }
 
                     val repairedClothing = fillMissingSlotsDeterministically(anchorsFirst, eligibleClothing, requestContext)
-                    cleanBlueprint = cleanBlueprint.copy(selectedClothingIds = repairedClothing.map { "w_${it.internalId}" })
+                    val repairedCosmetics = fillMissingCosmeticRolesDeterministically(cleanBlueprint.selectedCosmeticIds, fitResult.cosmeticCandidates)
+                    cleanBlueprint = cleanBlueprint.copy(
+                        selectedClothingIds = repairedClothing.map { "w_${it.internalId}" },
+                        selectedCosmeticIds = repairedCosmetics
+                    )
 
                     val repairedValidation = validator.validateAndSanitize(
                         rawBlueprint = cleanBlueprint,
@@ -624,6 +628,39 @@ class StyleSimulatorEngine @Inject constructor(
 
         // Preserve anchor-first ordering and dress-aware satisfaction
         return completed.distinctBy { if (it.category == ClothingCategory.DRESSES) ClothingCategory.TOPS else it.category }
+    }
+
+    private fun fillMissingCosmeticRolesDeterministically(
+        currentCosmeticIds: List<String>,
+        eligibleCosmetics: List<CandidateProvenance>
+    ): List<String> {
+        val completedIds = currentCosmeticIds.toMutableList()
+        val requiredRoles = listOf(CosmeticRole.EYE, CosmeticRole.CHEEK, CosmeticRole.LIP, CosmeticRole.NAIL)
+        
+        val currentRoles = completedIds.mapNotNull { id ->
+            eligibleCosmetics.find { it.cosmeticItem?.internalId?.let { i -> "c_$i" } == id }?.cosmeticItem?.let { CosmeticRole.fromMacroCategory(it.macroCategory) }
+        }.toSet()
+        
+        for (role in requiredRoles) {
+            if (role !in currentRoles) {
+                val bestCandidate = eligibleCosmetics.firstOrNull { prov ->
+                    prov.cosmeticItem?.let { CosmeticRole.fromMacroCategory(it.macroCategory) } == role &&
+                    prov.cosmeticItem.internalId.let { i -> "c_$i" } !in completedIds
+                }
+                bestCandidate?.cosmeticItem?.internalId?.let { id -> completedIds.add("c_$id") }
+            }
+        }
+        
+        val roleMap = mutableMapOf<CosmeticRole, String>()
+        val deduplicatedIds = mutableListOf<String>()
+        for (id in completedIds) {
+            val role = eligibleCosmetics.find { it.cosmeticItem?.internalId?.let { i -> "c_$i" } == id }?.cosmeticItem?.let { CosmeticRole.fromMacroCategory(it.macroCategory) }
+            if (role != null && role !in roleMap) {
+                roleMap[role] = id
+                deduplicatedIds.add(id)
+            }
+        }
+        return deduplicatedIds
     }
 
     private fun logTelemetry(
