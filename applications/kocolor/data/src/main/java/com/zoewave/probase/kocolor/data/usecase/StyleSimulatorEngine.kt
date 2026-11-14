@@ -119,7 +119,7 @@ class StyleSimulatorEngine @Inject constructor(
 
                 val cachedResponse = cache.get(fingerprint)
                 if (cachedResponse != null) {
-                    return try {
+                    try {
                         val decodedBlueprint = decodeBlueprint(cachedResponse)
                         val cachedValidation = ValidationReport(
                             isValid = true,
@@ -172,7 +172,7 @@ class StyleSimulatorEngine @Inject constructor(
                         )
                         val selectedClothing = decodedBlueprint.selectedClothingIds.mapNotNull { id -> wardrobe.find { "w_${it.internalId}" == id || it.remoteId == id } }
                         val selectedCosmetics = decodedBlueprint.selectedCosmeticIds.mapNotNull { id -> cosmetics.find { "c_${it.internalId}" == id || it.remoteId == id } }
-                        SimulationResult(
+                        return SimulationResult(
                             blueprint = decodedBlueprint,
                             fashionistaScore = fashionistaEvaluator.evaluate(decodedBlueprint, requestContext, selectedClothing),
                             intentFulfillment = intentFulfillmentEvaluator.evaluate(requestContext.intentProfile, selectedClothing, selectedCosmetics, requestContext.rotationScores),
