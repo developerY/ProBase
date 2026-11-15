@@ -29,12 +29,14 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AddShoppingCart
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Luggage
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -114,7 +116,8 @@ fun CollectionDetailScreen(
     if (isTravelCapsule) {
         TravelChecklistDetailView(
             advice = advice,
-            onBack = { navTo(KoColorRoute.Back) }
+            onBack = { navTo(KoColorRoute.Back) },
+            navTo = navTo
         )
         return
     }
@@ -620,12 +623,14 @@ private fun VerticalCollectionItem(
 @Composable
 private fun TravelChecklistDetailView(
     advice: FashionAdvice,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
     val checkedStateMap = remember { mutableStateMapOf<String, Boolean>() }
 
     // Parse items from outfitSuggestions and makeupSuggestions
-    val suggestedItems = advice.outfitSuggestions.firstOrNull()?.suggestedItems ?: emptyList()
+    val firstOutfit = advice.outfitSuggestions.firstOrNull()
+    val suggestedItems = firstOutfit?.suggestedItems ?: emptyList()
     val makeupItems = advice.makeupSuggestions
 
     // Group suggestedItems by category
@@ -678,7 +683,9 @@ private fun TravelChecklistDetailView(
                         imageUrl = item.imageUrl,
                         isOwned = item.isOwned,
                         isChecked = isChecked,
-                        onToggle = { checkedStateMap[item.name] = !isChecked }
+                        onToggle = { checkedStateMap[item.name] = !isChecked },
+                        onClick = if (item.isOwned) { { firstOutfit?.wardrobeItemIds?.getOrNull(firstOutfit.suggestedItems.indexOf(item))?.let { id -> navTo(KoColorRoute.WardrobeDetail(id)) } } } else null,
+                        onEdit = if (item.isOwned) { { firstOutfit?.wardrobeItemIds?.getOrNull(firstOutfit.suggestedItems.indexOf(item))?.let { id -> navTo(KoColorRoute.WardrobeEdit(id)) } } } else null
                     )
                 }
             }
@@ -704,7 +711,9 @@ private fun TravelChecklistDetailView(
                         imageUrl = item.suggestedProductImageUrl,
                         isOwned = isOwned,
                         isChecked = isChecked,
-                        onToggle = { checkedStateMap[name] = !isChecked }
+                        onToggle = { checkedStateMap[name] = !isChecked },
+                        onClick = if (item.productId != null) { { navTo(KoColorRoute.CosmeticDetail(item.productId!!)) } } else null,
+                        onEdit = if (item.productId != null) { { navTo(KoColorRoute.CosmeticEdit(item.productId!!)) } } else null
                     )
                 }
             }
@@ -718,7 +727,9 @@ private fun TravelDetailRow(
     imageUrl: String?,
     isOwned: Boolean,
     isChecked: Boolean,
-    onToggle: () -> Unit
+    onToggle: () -> Unit,
+    onClick: (() -> Unit)? = null,
+    onEdit: (() -> Unit)? = null
 ) {
     Row(
         modifier = Modifier
@@ -775,6 +786,17 @@ private fun TravelDetailRow(
             val subText = if (!isOwned) "To Buy/Pack" else "Owned"
             val subColor = if (!isOwned) Color(0xFFEF4444) else Color.Gray
             Text(subText, color = subColor, fontSize = 12.sp, fontWeight = if (!isOwned) FontWeight.Bold else FontWeight.Normal)
+        }
+        
+        if (onClick != null) {
+            IconButton(onClick = onClick, modifier = Modifier.size(32.dp)) {
+                Icon(Icons.Default.Visibility, contentDescription = "View", tint = Color.Gray)
+            }
+        }
+        if (onEdit != null) {
+            IconButton(onClick = onEdit, modifier = Modifier.size(32.dp)) {
+                Icon(Icons.Default.Edit, contentDescription = "Edit", tint = Color.Gray)
+            }
         }
     }
 }
