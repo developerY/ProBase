@@ -459,7 +459,8 @@ item {
                             title = suggested.name,
                             description = suggested.description ?: "Professional selected piece for this look.",
                             imageModel = suggested.imageUrl ?: R.drawable.advice_clothes_fallback,
-                            isOwned = suggested.isOwned
+                            isOwned = suggested.isOwned,
+                            onClick = if (suggested.isOwned) { { outfit.wardrobeItemIds.getOrNull(outfit.suggestedItems.indexOf(suggested))?.let { id -> navTo(KoColorRoute.WardrobeDetail(id)) } } } else null
                         )
                         Spacer(Modifier.height(16.dp))
                     }
@@ -482,7 +483,8 @@ item {
                         title = makeup.suggestedProductName ?: makeup.category,
                         description = makeup.advice,
                         imageModel = makeup.suggestedProductImageUrl ?: R.drawable.advice_makeup_fallback,
-                        isOwned = makeup.productId != null
+                        isOwned = makeup.productId != null,
+                        onClick = if (makeup.productId != null) { { navTo(KoColorRoute.CosmeticDetail(makeup.productId!!)) } } else null
                     )
                     Spacer(Modifier.height(16.dp))
                 }
@@ -543,12 +545,14 @@ private fun VerticalCollectionItem(
     title: String,
     description: String,
     imageModel: Any,
-    isOwned: Boolean = true
+    isOwned: Boolean = true,
+    onClick: (() -> Unit)? = null
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .alpha(if (isOwned) 1f else 0.4f),
+            .alpha(if (isOwned) 1f else 0.4f)
+            .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Surface(
