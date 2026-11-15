@@ -16,6 +16,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.clickable
 import coil.compose.AsyncImage
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.core.model.ritual.CosmeticItem
@@ -37,7 +38,13 @@ fun ResultCard(
     val colorHex = clothingItem?.colorHex ?: cosmeticItem?.colorHex
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().clickable {
+            if (clothingItem != null) {
+                navTo(KoColorRoute.WardrobeDetail(clothingItem.internalId))
+            } else if (cosmeticItem != null) {
+                navTo(KoColorRoute.CosmeticDetail(cosmeticItem.internalId))
+            }
+        },
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFEEEEEE))
