@@ -40,21 +40,31 @@ class RecommendationValidator @Inject constructor() {
         }.toSet() + cosmeticCandidates.mapNotNull { it.cosmeticItem?.remoteId }.toSet()
 
         // 1. ID Existence Check
-        val filteredClothingIds = rawBlueprint.selectedClothingIds.filter { id ->
-            if (id in validClothingIds) {
-                true
+        val filteredClothingIds = rawBlueprint.selectedClothingIds.mapNotNull { rawId ->
+            val normalizedClothingId = when {
+                rawId in validClothingIds -> rawId
+                "w_${rawId.trim()}" in validClothingIds -> "w_${rawId.trim()}"
+                else -> rawId
+            }
+            if (normalizedClothingId in validClothingIds) {
+                normalizedClothingId
             } else {
-                errors.add("Invalid or unmanifested clothing ID removed: $id")
-                false
+                errors.add("Invalid or unmanifested clothing ID removed: $rawId")
+                null
             }
         }
 
-        val filteredCosmeticIds = rawBlueprint.selectedCosmeticIds.filter { id ->
-            if (id in validCosmeticIds) {
-                true
+        val filteredCosmeticIds = rawBlueprint.selectedCosmeticIds.mapNotNull { rawId ->
+            val normalizedCosmeticId = when {
+                rawId in validCosmeticIds -> rawId
+                "c_${rawId.trim()}" in validCosmeticIds -> "c_${rawId.trim()}"
+                else -> rawId
+            }
+            if (normalizedCosmeticId in validCosmeticIds) {
+                normalizedCosmeticId
             } else {
-                errors.add("Invalid or unmanifested cosmetic ID removed: $id")
-                false
+                errors.add("Invalid or unmanifested cosmetic ID removed: $rawId")
+                null
             }
         }
 
