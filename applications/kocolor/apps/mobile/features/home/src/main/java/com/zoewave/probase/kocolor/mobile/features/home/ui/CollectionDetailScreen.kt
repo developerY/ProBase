@@ -678,14 +678,17 @@ private fun TravelChecklistDetailView(
 
                 items(items) { item ->
                     val isChecked = checkedStateMap[item.name] ?: false
+                    val wId = firstOutfit?.wardrobeItemIds?.getOrNull(firstOutfit.suggestedItems.indexOf(item))
+                    val hasValidId = item.isOwned && wId != null && wId != -1L
+
                     TravelDetailRow(
                         name = item.name,
                         imageUrl = item.imageUrl,
                         isOwned = item.isOwned,
                         isChecked = isChecked,
                         onToggle = { checkedStateMap[item.name] = !isChecked },
-                        onClick = if (item.isOwned) { { firstOutfit?.wardrobeItemIds?.getOrNull(firstOutfit.suggestedItems.indexOf(item))?.let { id -> navTo(KoColorRoute.WardrobeDetail(id)) } } } else null,
-                        onEdit = if (item.isOwned) { { firstOutfit?.wardrobeItemIds?.getOrNull(firstOutfit.suggestedItems.indexOf(item))?.let { id -> navTo(KoColorRoute.WardrobeEdit(id)) } } } else null
+                        onClick = if (hasValidId) { { navTo(KoColorRoute.WardrobeDetail(wId!!)) } } else null,
+                        onEdit = if (hasValidId) { { navTo(KoColorRoute.WardrobeEdit(wId!!)) } } else null
                     )
                 }
             }
@@ -706,14 +709,17 @@ private fun TravelChecklistDetailView(
                     val name = item.suggestedProductName ?: "Cosmetic Item"
                     val isChecked = checkedStateMap[name] ?: false
                     val isOwned = item.advice == "Owned"
+                    val cId = item.productId
+                    val hasValidId = isOwned && cId != null && cId != -1L
+                    
                     TravelDetailRow(
                         name = name,
                         imageUrl = item.suggestedProductImageUrl,
                         isOwned = isOwned,
                         isChecked = isChecked,
                         onToggle = { checkedStateMap[name] = !isChecked },
-                        onClick = if (item.productId != null) { { navTo(KoColorRoute.CosmeticDetail(item.productId!!)) } } else null,
-                        onEdit = if (item.productId != null) { { navTo(KoColorRoute.CosmeticEdit(item.productId!!)) } } else null
+                        onClick = if (hasValidId) { { navTo(KoColorRoute.CosmeticDetail(cId!!)) } } else null,
+                        onEdit = if (hasValidId) { { navTo(KoColorRoute.CosmeticEdit(cId!!)) } } else null
                     )
                 }
             }

@@ -159,6 +159,7 @@ class TravelCapsuleViewModel @Inject constructor(
                 advice = summary,
                 keyPieces = clothingChecklist.map { it.name },
                 colorCombinations = listOf("#1E88E5", "#22C55E", "#D4AF37"),
+                wardrobeItemIds = clothingChecklist.map { it.id.removePrefix("w_").toLongOrNull() ?: -1L },
                 suggestedItems = suggestedPieces
             )
 
@@ -169,6 +170,7 @@ class TravelCapsuleViewModel @Inject constructor(
                     category = "Cosmetics & Toiletries",
                     advice = if (item.isOwned) "Owned" else "To Buy/Pack",
                     recommendedColors = listOf("#D4AF37"),
+                    productId = item.id.removePrefix("c_").toLongOrNull(),
                     suggestedProductName = item.name,
                     suggestedProductImageUrl = item.imageUrl
                 )
