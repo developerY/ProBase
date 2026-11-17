@@ -102,7 +102,7 @@ If you have questions about this Privacy Policy or the privacy practices of Brea
 **Android Package:** com.zoewave.breathe  
 **Developer:** ZoeWave  
 **Website:** https://www.zoewave.com  
-**Privacy Policy:** [GitHub URL](https://github.com/developerY/ProBase/blob/main/docs/GooglePlayStore/Breath/Breath_Privacy_Policy.md)
+**Privacy Policy:** [GitHub URL](https://github.com/developerY/ProBase/blob/main/docs/GooglePlayStore/Breathe/Breathe_Privacy_Policy.md)
 **Email:** developer@zoewave.com
 
 **ZoeWave**  
