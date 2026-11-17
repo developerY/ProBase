@@ -145,7 +145,7 @@ TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL ZOEWAVE / K
 
 ## 11. Governing Law & Changes to Terms
 
-* **Governing Law:** These Terms shall be governed by and construed in accordance with the laws of **[Insert Governing State/Jurisdiction, e.g., the State of California, United States]**, without regard to its conflict-of-law principles.
+* **Governing Law:** These Terms shall be governed by and construed in accordance with the laws of the State of California, United States, without regard to its conflict-of-law principles.
 * **Modifications:** We may revise these Terms from time to time to reflect new features or legal requirements. Updated Terms will be posted with a revised Effective Date inside the App or on our official website, and your continued use of KoColor after such updates constitutes acceptance of the revised Terms.
 
 ---
@@ -156,6 +156,6 @@ For questions, legal notices, or support inquiries regarding KoColor, contact:
 
 **ZoeWave / KoColor Atelier Engineering**
 
-**Email:** `[Insert Support/Legal Email Address]`
+**Email:** `develoepr@zoewave.com`
 
-**Website:** `[Insert KoColor Website URL]`
+**Website:** `www.kocolor.com`
