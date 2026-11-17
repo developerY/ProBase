@@ -7,6 +7,8 @@ import com.zoewave.probase.features.ai.core.AiProvider
 import com.zoewave.probase.features.ai.core.ByokAiProvider
 import com.zoewave.probase.features.ai.firebase.FirebaseAiProvider
 import com.zoewave.probase.features.ai.firebase.GemmaRestFallbackProvider
+import com.zoewave.probase.features.ai.local.data.LocalModelAssetManager
+import com.zoewave.probase.features.ai.local.data.LocalModelState
 import com.zoewave.probase.features.ai.local.data.LocalNanoAiProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,9 +19,6 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import android.content.Context
-import com.zoewave.probase.features.ai.local.data.LocalModelAssetManager
-import com.zoewave.probase.features.ai.local.data.LocalModelState
 
 enum class TestTargetProvider(val label: String) {
     LOCAL_NANO("1. Local Nano"),
@@ -71,10 +70,11 @@ class AiDebugViewModel @Inject constructor(
     private val downloadProvider: com.zoewave.probase.features.ai.local.data.LocalDownloadAiProvider,
     private val firebaseProvider: FirebaseAiProvider,
     private val gemmaProvider: GemmaRestFallbackProvider,
-    private val appDiagnosticDelegate: AppDiagnosticDelegate,
+    resolvedDelegate: ResolvedDiagnosticDelegate,
     private val localModelAssetManager: LocalModelAssetManager
 ) : ViewModel() {
 
+    private val appDiagnosticDelegate = resolvedDelegate.delegate
     private val _selectedTarget = MutableStateFlow(TestTargetProvider.AUTO)
     private val _isTesting = MutableStateFlow(false)
     private val _testOutput = MutableStateFlow<String?>(null)
