@@ -19,3 +19,18 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 -renamesourcefileattribute SourceFile
+
+# Hilt
+-keep,allowobfuscation,allowshrinking class dagger.hilt.** { *; }
+
+# Room
+-keep class * extends androidx.room.RoomDatabase { *; }
+
+# Maps
+-keep class com.google.android.gms.maps.** { *; }
+
+# Health Connect
+-keep class androidx.health.connect.client.records.** { *; }
+
+# Serialization
+-keep class * extends kotlinx.serialization.KSerializer { *; }

@@ -35,7 +35,7 @@ android {
                 keyAlias = keyAliasProp
                 keyPassword = keyPasswordProp
             } else {
-                println("⚠️ Wear OS Release signing keys not found.")
+                throw GradleException("Wear OS Release signing keys not found. Release build must be signed.")
             }
         }
     }

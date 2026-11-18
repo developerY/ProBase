@@ -7,7 +7,6 @@ plugins {
 
     // ✅ 2. Apply Specific Plugins for this App
     alias(libs.plugins.ksp)
-    alias(libs.plugins.mapsplatform.secrets)
     // alias(libs.plugins.androidx.baselineprofile)
 }
 
@@ -37,7 +36,7 @@ android {
                 keyAlias = keyAliasProp
                 keyPassword = keyPasswordProp
             } else {
-                println("⚠️ Release signing keys not found. Release build will not be signed.")
+                throw GradleException("Release signing keys not found. Release build must be signed.")
             }
         }
     }

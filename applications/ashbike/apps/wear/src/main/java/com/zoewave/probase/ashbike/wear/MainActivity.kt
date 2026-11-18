@@ -4,8 +4,7 @@ package com.zoewave.probase.ashbike.wear
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import com.google.firebase.Firebase
-import com.google.firebase.analytics.analytics
+
 import com.zoewave.probase.ashbike.features.main.service.BikeServiceManager
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -20,9 +19,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val firebaseAnalytics = Firebase.analytics
-        // Tags all future events from this user's watch
-        firebaseAnalytics.setUserProperty("device_platform", "wear_os")
+        // Tags all future events from this user's watch (removed per privacy guidelines)
 
         setContent {
             // Your Compose UI theme wrapper goes here

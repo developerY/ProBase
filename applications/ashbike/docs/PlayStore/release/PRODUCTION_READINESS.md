@@ -19,14 +19,14 @@ Findings below come from a static audit of this repo. Re-verify each line before
 |---|---|---|
 | Mobile `applicationId` | `com.zoewave.probase.ashbike`, `versionCode = 1`, `versionName = "0.0.1"` (`apps/mobile/build.gradle.kts`) | ⚠️ Not release versioning |
 | Wear `applicationId` | `com.zoewave.probase.ashbike`, `versionCode = 2`, `versionName = "0.0.1"` (`apps/wear/build.gradle.kts`) | ⚠️ Same package as mobile — confirm paired-delivery strategy |
-| SDK floor | `android-minSdk = "34"`, wear overrides `minSdk = 35`; `targetSdk = 37`, `compileSdk = 37` (`gradle/libs.versions.toml`) | 🛑 minSdk far too high for production |
+| SDK floor | `android-minSdk = "34"`, wear overrides `minSdk = 35`; `targetSdk = 37`, `compileSdk = 37` (`gradle/libs.versions.toml`) | ✅ Latest-only is a deliberate product decision — confirm Wear 35 (Wear OS 6+) vs 34 (Wear OS 5+) |
 | Release signing | `release` signing config reads `RELEASE_*` Gradle props; prints warning and builds **unsigned** if missing (both app modules) | 🛑 No enforced signed-release gate |
 | R8 / minify | `isMinifyEnabled` gated on `isMinifyForRelease` Gradle property (convention plugin); module `proguard-rules.pro` files are near-empty templates | ⚠️ Verify release is actually shrunk + tested |
 | Lint | `apps/mobile/lint-baseline.xml` baselines 1 issue: `Instantiatable` on `BikeForegroundService` in the manifest | 🛑 Resolve, don't ship a baselined service error |
 | Mobile permissions | Location (fine/coarse/background), FGS `location\|connectedDevice`, Health background-read, BLE scan/connect/advertise, NFC, RECORD_AUDIO, VIBRATE, POST_NOTIFICATIONS; AD_ID explicitly removed ✅ | 🛑 Sensitive-permission review needed (background location, mic, health) |
 | Wear permissions | Location (fine/coarse/background), FGS `location\|health`, BODY_SENSORS, ACTIVITY_RECOGNITION, POST_NOTIFICATIONS; `standalone=true` ✅ | ⚠️ Needs Wear quality + health declarations |
 | Health Connect | Writes `ExerciseSessionRecord` (`SyncRideUserCase.kt`); manifest declares background-read + rationale intent-filters; **no granular `health.WRITE_*` / `health.READ_*` decls found** | 🛑 Incomplete permission declaration |
-| Analytics / trackers | Firebase Analytics active in both `MainActivity`s (`setUserProperty("device_platform", …)`); convention plugin applies Firebase to both apps | 🛑 Contradicts "no hidden trackers" store copy — decide and disclose |
+| Analytics / trackers | Firebase Analytics + Crashlytics applied to both apps via convention plugin (`AndroidApplicationFirebaseConventionPlugin`); Analytics active in both `MainActivity`s | ✅ DECIDED: telemetry stays — implement consent + disclosure (P0-6) |
 | Privacy policy | No policy file or URL anywhere in repo | 🛑 Hard Play requirement (Health + background location + Data safety) |
 | Backup | Mobile uses `android:fullBackupContent="true"` (default rules); extraction rules commented out; only the glass feature ships `backup_rules.xml` | ⚠️ Write explicit rules for Room cache |
 | Tests | Only `ExampleUnitTest` / `ExampleInstrumentedTest` placeholders; TestPlan targets 80% unit coverage | 🛑 No real coverage on tracking/sync |
@@ -38,7 +38,15 @@ Findings below come from a static audit of this repo. Re-verify each line before
 
 ## 2. P0 — Release Blockers (must be done before any track upload)
 
-### P0-1. Set the production SDK floor and versioning
+### P0-1. Confirm the latest-only SDK floor and versioning
+> **Product decision (recorded):** AshBike intentionally supports only the latest phones and uses cutting-edge libs.
+> minSdk 34+ stays. The tasks below just make that decision explicit and verified.
+
+- [ ] Mobile `minSdk = 34` (Android 14+): keep. Check Play Console → Device catalog reach is acceptable for a v1
+  and state "requires Android 14 or newer" in the store listing so users aren't surprised.
+- [ ] Wear `minSdk = 35`: **confirm deliberately.** API mapping — Wear OS 4 = API 33, Wear OS 5/5.1 = API 34,
+  Wear OS 6 = API 35. `minSdk = 35` means **Wear OS 6 watches only**; `34` covers all "latest watches" (5+).
+  If 35 is intended, keep the override in `apps/wear/build.gradle.kts` and note it in the listing; otherwise lower to 34.
 - [ ] Confirm the dual-app strategy: both apps share `applicationId = com.zoewave.probase.ashbike`.
   That's the correct shape for one Play listing with a Wear companion — keep it, but align `versionCode` so the Wear AAB
   never ships a lower code than the phone AAB in the same release, and document the rule here.
@@ -98,21 +106,38 @@ Findings below come from a static audit of this repo. Re-verify each line before
 - **Accept:** on a Health-Connect-capable device, fresh install → rationale → grant → ride syncs `ExerciseSessionRecord` →
   visible in Health Connect toolbox; denial path keeps the app fully usable on Room alone.
 
-### P0-6. Resolve the privacy contradiction, then publish the policy
-- [ ] Decide v1's analytics stance — today both apps initialize **Firebase Analytics**, while `Info.md` promises
-  "no hidden trackers, no ads, no cloud dependencies". Pick one:
-  - **Option A (privacy-first, recommended for this listing):** remove Analytics/Crashlytics from v1, delete the
-    `Firebase.analytics` calls in both `MainActivity`s, and keep the zero-footprint claim; *or*
-  - **Option B (telemetry):** keep Firebase, add opt-in consent before first collection, and rewrite the listing +
-    Data-safety form to disclose device IDs, app activity, and diagnostics.
+### P0-6. Ship Firebase properly: consent, Crashlytics verification, disclosure
+> **Product decision (recorded):** Firebase stays — Crashlytics + Analytics are needed to build good software.
+> Already wired: `AndroidApplicationFirebaseConventionPlugin` applies the Crashlytics + google-services Gradle plugins
+> and adds `firebase-analytics`, `firebase-crashlytics`, `firebase-installations` to both apps. What remains is
+> consent gating, crash-pipeline verification, and honest disclosure.
+
+- [ ] **Gate collection behind user consent (both apps).** Firebase collects from first launch by default — for a
+  Health & Fitness app with background location, Play review + user trust require opt-in:
+  - Set `firebase_crashlytics_collection_enabled=false` and `firebase_analytics_collection_enabled=false`
+    (manifest meta-data) so nothing leaves the device before consent.
+  - Add a first-run consent screen (Crashlytics + Analytics, separately toggleable) that calls
+    `Firebase.crashlytics.setCrashlyticsCollectionEnabled(true)` / `Firebase.analytics.setAnalyticsCollectionEnabled(true)`.
+  - Persist the choice (DataStore) and expose it in Settings with an opt-out that disables collection + deletes the
+    Analytics app instance (`resetAnalyticsData()`).
+  - Keep the existing `setUserProperty("device_platform", …)` calls — but move them after consent is granted.
+- [ ] **Verify the Crashlytics pipeline on a release build:** force a test crash in `bundleRelease` output,
+  confirm it appears deobfuscated in the Firebase console (mapping upload from P0-3 working), then remove the test trigger.
+- [ ] **Make crashes actionable for ride debugging:** add custom keys (`ride_state`, `tracking_engine`, `sensor_source`)
+  and `log()` breadcrumbs at ride start/pause/stop/sync points; record non-fatals for sync failures
+  (Health Connect write errors, Data Layer handoff failures) instead of swallowing them.
+- [ ] **Rewrite the privacy claims to match reality.** `Info.md` / `video.md` currently promise "no hidden trackers,
+  no cloud dependencies" — replace with accurate copy, e.g.: "Free forever, ad-free. Optional, opt-in crash &
+  usage reporting helps us improve AshBike; ride data stays on your device (Room + Health Connect)."
+  "Offline ride maps" stays claimable only if the map path never requires map tiles/network.
 - [ ] Write and host a public **Privacy Policy** covering: location (foreground + background), health data via Health Connect
-  (what's written/read, retention, deletion semantics), Bluetooth/NFC, microphone (if kept), Firebase (if kept),
-  data residency ("on-device Room cache + on-device Health Connect; no first-party server"), contact email, and account-deletion
-  statement ("no accounts; uninstall wipes local data; Health Connect data managed in the Health Connect UI").
-- [ ] Reconcile `Info.md` + `video.md` claims ("offline", "no cloud", "no trace") with reality:
-  Firebase (if kept), Google Maps Compose dependency, and one-shot weather calls all need either removal or disclosure.
-  "Offline ride maps" is only claimable if the release AAB never requires map tiles/network for the map path.
-- **Accept:** policy URL live; listing copy, Data-safety answers, and actual network behavior all agree.
+  (what's written/read, retention, deletion semantics), Bluetooth/NFC, microphone (if kept), Firebase Crashlytics +
+  Analytics (what's collected, opt-in/out, retention), data residency ("ride data on-device in Room + Health Connect;
+  diagnostics go to Firebase only with consent"), contact email, and account-deletion statement
+  ("no accounts; uninstall wipes local data; Health Connect data managed in the Health Connect UI").
+- **Accept:** fresh install sends zero Firebase traffic before consent (verify with proxy/logcat);
+  test crash + non-fatal appear in console with custom keys; policy URL live; listing copy, Data-safety answers,
+  and actual network behavior all agree.
 
 ### P0-7. Lock the production Firebase / Maps configuration
 - [ ] Confirm `android-zoewave` is the production Firebase project (both `google-services.json` files point there);
@@ -140,7 +165,8 @@ Findings below come from a static audit of this repo. Re-verify each line before
 ### P1-1. Console declarations (several need lead time)
 - [ ] App access, target audience + content rating (**Everyone** per `Info.md`), News/COVID declarations as applicable.
 - [ ] **Data safety form** — map every type from the P0-4/P0-5 audit (location incl. background, health/fitness, microphone if kept,
-  Bluetooth, diagnostics). "No data shared with third parties" is only true under Option A + no Firebase.
+  Bluetooth), plus Firebase Crashlytics + Analytics (device IDs, app activity, diagnostics — collected only after opt-in consent
+  per P0-6, Google Firebase declared as a service provider).
 - [ ] Background-location declaration + video; Health Connect / health-data declaration; foreground-service declaration
   (location + connectedDevice + health types must match the manifests exactly).
 - [ ] Confirm **Contains ads: No** (AD_ID already removed ✅ — keep it that way; adding any ads SDK later reopens this).
