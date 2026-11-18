@@ -14,7 +14,7 @@ fun isOutfitSlotComplete(categories: Iterable<ClothingCategory>): Boolean {
     val set = categories.toSet()
     val hasShoes = ClothingCategory.SHOES in set
     val hasOnePiece = ClothingCategory.DRESSES in set
-    val hasTwoPiece = ClothingCategory.TOPS in set && ClothingCategory.BOTTOMS in set
+    val hasTwoPiece = (ClothingCategory.TOPS in set || ClothingCategory.ACTIVEWEAR in set) && ClothingCategory.BOTTOMS in set
     return hasShoes && (hasOnePiece || hasTwoPiece)
 }
 
@@ -32,9 +32,9 @@ class RoleGapAnalyzer @Inject constructor() {
         val presentCategories = anchors.map { it.category }.toSet()
         val requirements = mutableListOf<RoleRequirement>()
 
-        // 1. Tops (if no dress or top is anchored)
+        // 1. Tops (if no dress, top, or activewear is anchored)
         val hasDress = presentCategories.contains(ClothingCategory.DRESSES)
-        val hasTop = presentCategories.contains(ClothingCategory.TOPS)
+        val hasTop = presentCategories.contains(ClothingCategory.TOPS) || presentCategories.contains(ClothingCategory.ACTIVEWEAR)
         if (!hasDress && !hasTop) {
             requirements.add(RoleRequirement(role = ClothingCategory.TOPS.name, minCount = 1, maxCount = 2))
         }

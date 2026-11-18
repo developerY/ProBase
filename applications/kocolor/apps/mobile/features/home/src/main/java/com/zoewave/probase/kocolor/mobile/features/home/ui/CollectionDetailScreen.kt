@@ -29,12 +29,14 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AddShoppingCart
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Luggage
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -114,7 +116,8 @@ fun CollectionDetailScreen(
     if (isTravelCapsule) {
         TravelChecklistDetailView(
             advice = advice,
-            onBack = { navTo(KoColorRoute.Back) }
+            onBack = { navTo(KoColorRoute.Back) },
+            navTo = navTo
         )
         return
     }
@@ -459,7 +462,8 @@ item {
                             title = suggested.name,
                             description = suggested.description ?: "Professional selected piece for this look.",
                             imageModel = suggested.imageUrl ?: R.drawable.advice_clothes_fallback,
-                            isOwned = suggested.isOwned
+                            isOwned = suggested.isOwned,
+                            onClick = if (suggested.isOwned) { { outfit.wardrobeItemIds.getOrNull(outfit.suggestedItems.indexOf(suggested))?.let { id -> navTo(KoColorRoute.WardrobeDetail(id)) } } } else null
                         )
                         Spacer(Modifier.height(16.dp))
                     }
@@ -482,7 +486,8 @@ item {
                         title = makeup.suggestedProductName ?: makeup.category,
                         description = makeup.advice,
                         imageModel = makeup.suggestedProductImageUrl ?: R.drawable.advice_makeup_fallback,
-                        isOwned = makeup.productId != null
+                        isOwned = makeup.productId != null,
+                        onClick = if (makeup.productId != null) { { navTo(KoColorRoute.CosmeticDetail(makeup.productId!!)) } } else null
                     )
                     Spacer(Modifier.height(16.dp))
                 }
@@ -543,12 +548,14 @@ private fun VerticalCollectionItem(
     title: String,
     description: String,
     imageModel: Any,
-    isOwned: Boolean = true
+    isOwned: Boolean = true,
+    onClick: (() -> Unit)? = null
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .alpha(if (isOwned) 1f else 0.4f),
+            .alpha(if (isOwned) 1f else 0.4f)
+            .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Surface(
@@ -616,12 +623,14 @@ private fun VerticalCollectionItem(
 @Composable
 private fun TravelChecklistDetailView(
     advice: FashionAdvice,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
     val checkedStateMap = remember { mutableStateMapOf<String, Boolean>() }
 
     // Parse items from outfitSuggestions and makeupSuggestions
-    val suggestedItems = advice.outfitSuggestions.firstOrNull()?.suggestedItems ?: emptyList()
+    val firstOutfit = advice.outfitSuggestions.firstOrNull()
+    val suggestedItems = firstOutfit?.suggestedItems ?: emptyList()
     val makeupItems = advice.makeupSuggestions
 
     // Group suggestedItems by category
@@ -669,12 +678,17 @@ private fun TravelChecklistDetailView(
 
                 items(items) { item ->
                     val isChecked = checkedStateMap[item.name] ?: false
+                    val wId = firstOutfit?.wardrobeItemIds?.getOrNull(firstOutfit.suggestedItems.indexOf(item))
+                    val hasValidId = item.isOwned && wId != null && wId != -1L
+
                     TravelDetailRow(
                         name = item.name,
                         imageUrl = item.imageUrl,
                         isOwned = item.isOwned,
                         isChecked = isChecked,
-                        onToggle = { checkedStateMap[item.name] = !isChecked }
+                        onToggle = { checkedStateMap[item.name] = !isChecked },
+                        onClick = if (hasValidId) { { navTo(KoColorRoute.WardrobeDetail(wId!!)) } } else null,
+                        onEdit = if (hasValidId) { { navTo(KoColorRoute.WardrobeEdit(wId!!)) } } else null
                     )
                 }
             }
@@ -695,12 +709,17 @@ private fun TravelChecklistDetailView(
                     val name = item.suggestedProductName ?: "Cosmetic Item"
                     val isChecked = checkedStateMap[name] ?: false
                     val isOwned = item.advice == "Owned"
+                    val cId = item.productId
+                    val hasValidId = isOwned && cId != null && cId != -1L
+                    
                     TravelDetailRow(
                         name = name,
                         imageUrl = item.suggestedProductImageUrl,
                         isOwned = isOwned,
                         isChecked = isChecked,
-                        onToggle = { checkedStateMap[name] = !isChecked }
+                        onToggle = { checkedStateMap[name] = !isChecked },
+                        onClick = if (hasValidId) { { navTo(KoColorRoute.CosmeticDetail(cId!!)) } } else null,
+                        onEdit = if (hasValidId) { { navTo(KoColorRoute.CosmeticEdit(cId!!)) } } else null
                     )
                 }
             }
@@ -714,7 +733,9 @@ private fun TravelDetailRow(
     imageUrl: String?,
     isOwned: Boolean,
     isChecked: Boolean,
-    onToggle: () -> Unit
+    onToggle: () -> Unit,
+    onClick: (() -> Unit)? = null,
+    onEdit: (() -> Unit)? = null
 ) {
     Row(
         modifier = Modifier
@@ -771,6 +792,17 @@ private fun TravelDetailRow(
             val subText = if (!isOwned) "To Buy/Pack" else "Owned"
             val subColor = if (!isOwned) Color(0xFFEF4444) else Color.Gray
             Text(subText, color = subColor, fontSize = 12.sp, fontWeight = if (!isOwned) FontWeight.Bold else FontWeight.Normal)
+        }
+        
+        if (onClick != null) {
+            IconButton(onClick = onClick, modifier = Modifier.size(32.dp)) {
+                Icon(Icons.Default.Visibility, contentDescription = "View", tint = Color.Gray)
+            }
+        }
+        if (onEdit != null) {
+            IconButton(onClick = onEdit, modifier = Modifier.size(32.dp)) {
+                Icon(Icons.Default.Edit, contentDescription = "Edit", tint = Color.Gray)
+            }
         }
     }
 }
