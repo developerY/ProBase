@@ -77,6 +77,7 @@ class RideStatsUseCase @Inject constructor(
                     .scan<Location, Pair<Location?, Float>>(null to 0f) { (prev, total), curr ->
                         val deltaKm = prev
                             ?.distanceTo(curr)
+                            ?.takeIf { it > 3.0f } // Filter out GPS jitter < 3 meters
                             ?.div(1_000f)
                             ?: 0f
                         curr to (total + deltaKm)
@@ -100,22 +101,25 @@ class RideStatsUseCase @Inject constructor(
             }
             .distinctUntilChanged()
 
-    /** Average speed (km/h) as running mean, resettable. */
+    /** Average speed (km/h) based on true total distance and time. */
     fun averageSpeedFlow(
         resetSignal: Flow<Unit>,
-        speedFlow: Flow<Float>
+        distanceKmFlow: Flow<Float>,
+        clockMs: () -> Long = { android.os.SystemClock.elapsedRealtime() }
     ): Flow<Double> =
         resetSignal
             .onStart { emit(Unit) }
-            .flatMapLatest<Unit, Double> {
-                speedFlow
-                    .map<Float, Double> { it.toDouble() }
-                    .scan<Double, Pair<Double, Int>>(0.0 to 0) { (sum, count), curr ->
-                        (sum + curr) to (count + 1)
+            .flatMapLatest {
+                val startMs = clockMs()
+                distanceKmFlow.map { distanceKm ->
+                    val elapsedMs = clockMs() - startMs
+                    if (elapsedMs > 0) {
+                        val hours = elapsedMs / 3_600_000.0
+                        if (hours > 0) (distanceKm / hours) else 0.0
+                    } else {
+                        0.0
                     }
-                    .map<Pair<Double, Int>, Double> { (sum, count) ->
-                        if (count > 0) sum / count else 0.0
-                    }
+                }
             }
             .distinctUntilChanged()
 
@@ -175,7 +179,7 @@ class RideStatsUseCase @Inject constructor(
         speedFlow: Flow<Float>,
         headingFlow: Flow<Float>,
         userStatsFlow: Flow<UserStats>,
-        clockMs: () -> Long = { System.currentTimeMillis() }
+        clockMs: () -> Long = { android.os.SystemClock.elapsedRealtime() } // Use elapsedRealtime to avoid timezone/clock sync bugs
     ): StateFlow<RideSession> {
         val upstream: Flow<RideSession> = resetSignal
             .onStart { emit(Unit) }
@@ -187,7 +191,7 @@ class RideStatsUseCase @Inject constructor(
                 val pFlow = pathFlow(resetSignal, locationFlow)
                 val dFlow = distanceKmFlow(resetSignal, locationFlow)
                 val mFlow = maxSpeedFlow(resetSignal, speedFlow)
-                val aFlow = averageSpeedFlow(resetSignal, speedFlow)
+                val aFlow = averageSpeedFlow(resetSignal, dFlow, clockMs)
                 val gFlow = elevationGainFlow(resetSignal, locationFlow)
                 val lFlow = elevationLossFlow(resetSignal, locationFlow)
                 val cFlow = calculateCaloriesUseCase(dFlow, speedFlow, userStatsFlow)

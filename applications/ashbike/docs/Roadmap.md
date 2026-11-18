@@ -1,1 +1,0 @@
-1. check all numbers after a ride. 

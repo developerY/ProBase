@@ -56,10 +56,10 @@ fun RidesScreen(
                     onSyncClick = onSyncClick,
                     navTo = navTo,
                     selectedRideId = selectedRideId,
-                    bikeEvent = TODO(),
-                    syncedIds = TODO(),
-                    healthEvent = TODO(),
-                    healthUiState = TODO()
+                    bikeEvent = { },
+                    syncedIds = emptySet(),
+                    healthEvent = { },
+                    healthUiState = com.zoewave.probase.features.health.core.ui.HealthUiState.Uninitialized
                 )
             }
         }

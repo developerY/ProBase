@@ -156,3 +156,27 @@ fun BikeRideCard(
         }
     }
 }
+
+@androidx.compose.ui.tooling.preview.Preview(showBackground = true)
+@Composable
+fun BikeRideCardPreview() {
+    com.zoewave.probase.core.ui.theme.AshBikeTheme {
+        BikeRideCard(
+            ride = BikeRideUiModel(
+                rideId = "1",
+                dateRange = "Oct 12, 10:00 AM",
+                duration = "01:15:00",
+                distance = "22.5 km",
+                avgSpeed = "18.0 km/h",
+                maxSpeed = "35.2 km/h",
+                rideType = "Road",
+                weatherCondition = "Sunny",
+                notes = "Great morning ride along the coast.",
+                isSynced = false
+            ),
+            onDeleteClick = {},
+            onSyncClick = {},
+            onNavigate = {}
+        )
+    }
+}

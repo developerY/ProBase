@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.padding
 
 // Example 10-segment indicator
 @Composable
@@ -47,4 +48,20 @@ fun batteryColor(batteryLevel: Int): Color {
     val clamped = batteryLevel.coerceIn(0, 100)
     val fraction = clamped / 100f
     return lerp(Color.Red, Color.Green, fraction)
+}
+
+@androidx.compose.ui.tooling.preview.Preview(showBackground = true)
+@Composable
+fun SegmentedBatteryIndicatorPreview() {
+    com.zoewave.probase.core.ui.theme.AshBikeTheme {
+        androidx.compose.foundation.layout.Column(
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.padding(16.dp)
+        ) {
+            SegmentedBatteryIndicator(batteryLevel = 10)
+            SegmentedBatteryIndicator(batteryLevel = 50)
+            SegmentedBatteryIndicator(batteryLevel = 85)
+            SegmentedBatteryIndicator(batteryLevel = 100)
+        }
+    }
 }

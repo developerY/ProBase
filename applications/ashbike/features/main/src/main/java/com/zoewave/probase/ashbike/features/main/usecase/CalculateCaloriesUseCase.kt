@@ -113,10 +113,10 @@ class CalculateCaloriesUseCase @Inject constructor() {
         CalorieState(
             lastTickMs = nowMs,
             lastDistanceKm = distanceKm,
-            totalCalories = tickCalories // Emit the DELTA, not the total
+            totalCalories = state.totalCalories + tickCalories // Emit the running total
         )
     }.map { state ->
-        // Expose only the DELTA Float to the UI
+        // Expose the total accumulated calories to the UI
         state.totalCalories
     }
 }

@@ -1,6 +1,6 @@
 package com.zoewave.ashbike.mobile.home.components.main
 
-//import androidx.compose.ui.tooling.preview.Preview
+//
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -120,42 +120,7 @@ fun StatsRow(
 }
 
 /*
-@Preview(showBackground = true)
-@Composable
-fun StatsRowPreview() {
-    val demoInfoOn = BikeRideInfo(
-        location = LatLng(37.4219999, -122.0862462),
-        currentSpeed = 0.0,
-        averageSpeed = 18.5,
-        maxSpeed = 35.2,
-        currentTripDistance = 12.3f,
-        totalTripDistance   = null,
-        remainingDistance   = null,
-        elevationGain       = 123.0,
-        elevationLoss       = 0.0,
-        caloriesBurned      = 0,
-        rideDuration        = "01:15:30",
-        settings            = persistentMapOf(),
-        heading             = 0f,
-        elevation           = 25.0,
-        isBikeConnected     = true,
-        batteryLevel        = 80,
-        motorPower          = 100f,
-        rideState           = RideState.Riding, // Simulates BikeComputerOn
-        heartbeat           = null,
-    )
 
-    val previewUiStateOn = HomeUiState.Success(demoInfoOn)
-
-    StatsRow(
-        uiState = previewUiStateOn,
-        onEvent = {}
-    )
-}
-*/
-
-/*
-@Preview(showBackground = true)
 @Composable
 fun StatsRowPreviewOff() {
     val demoInfoOff = BikeRideInfo(
