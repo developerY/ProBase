@@ -39,9 +39,6 @@ Findings below come from a static audit of this repo. Re-verify each line before
 ## 2. P0 — Release Blockers (must be done before any track upload)
 
 ### P0-1. Set the production SDK floor and versioning
-- [ ] Lower `minSdk` to a deliberate production value. Today's `34` (mobile) / `35` (wear) excludes nearly all devices.
-  Suggested starting point: mobile `26` (or lowest you field-test), Wear `30` (Health Services requirement).
-  Change in `gradle/libs.versions.toml` (`android-minSdk`) and remove/justify the `minSdk = 35` override in `apps/wear/build.gradle.kts`.
 - [ ] Confirm the dual-app strategy: both apps share `applicationId = com.zoewave.probase.ashbike`.
   That's the correct shape for one Play listing with a Wear companion — keep it, but align `versionCode` so the Wear AAB
   never ships a lower code than the phone AAB in the same release, and document the rule here.
