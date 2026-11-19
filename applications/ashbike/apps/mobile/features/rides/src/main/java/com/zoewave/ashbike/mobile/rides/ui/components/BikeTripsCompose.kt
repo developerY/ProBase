@@ -14,12 +14,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.ashbike.mobile.rides.R
 import com.zoewave.ashbike.mobile.rides.ui.RidesEvent
 import com.zoewave.ashbike.mobile.rides.ui.model.BikeRideUiModel
 import com.zoewave.probase.features.health.core.ui.HealthEvent
-import androidx.compose.ui.tooling.preview.Preview
 import com.zoewave.probase.features.health.core.ui.HealthUiState
 
 @Composable
@@ -54,6 +54,8 @@ fun BikeTripsCompose(
                     onEvent = bikeEvent,
                     title = stringResource(R.string.applications_ashbike_apps_mobile_features_rides_feature_trips_bike_rides_section_title),
                     bgColor = MaterialTheme.colorScheme.surfaceVariant,
+                    count = bikeRides.size,
+
                     healthConnected = connected,
                     onHealthToggle = {
                         healthEvent(HealthEvent.RequestPermissions)
@@ -62,6 +64,16 @@ fun BikeTripsCompose(
             }
 
 
+            item {
+                androidx.compose.material3.Button(
+                    onClick = { 
+                        android.util.Log.d("RideHistoryDump", "Total rides: ${bikeRides.size}\\n" + bikeRides.joinToString("\\n")) 
+                    },
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+                ) {
+                    Text("Dump Rides to Logcat")
+                }
+            }
 
             if (bikeRides.isEmpty()) {
                 item {

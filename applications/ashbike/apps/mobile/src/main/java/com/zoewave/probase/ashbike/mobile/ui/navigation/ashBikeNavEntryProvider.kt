@@ -58,10 +58,7 @@ fun ashBikeNavEntryProvider(
             // -----------------------------------------------------------------
             is AshBikeDestination.Trips -> {
                 NavEntry(
-                    key = key,
-                    metadata = ListDetailSceneStrategy.listPane(
-                        detailPlaceholder = { RideDetailPlaceholder() }
-                    )
+                    key = key
                 ) {
                     RidesUIRoute(
                         modifier = Modifier.fillMaxSize(),
@@ -80,8 +77,7 @@ fun ashBikeNavEntryProvider(
             // -----------------------------------------------------------------
             is AshBikeDestination.RideDetail -> {
                 NavEntry(
-                    key = key,
-                    metadata = ListDetailSceneStrategy.detailPane()
+                    key = key
                 ) {
                     // A. Get ViewModels
                     // Hilt scopes these to this specific NavEntry (Screen)

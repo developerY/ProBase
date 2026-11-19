@@ -13,9 +13,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.zoewave.ashbike.mobile.rides.R
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.ui.Alignment
+
 @Composable
 fun LoadingScreen() {
-    Text(text = stringResource(R.string.applications_ashbike_apps_mobile_features_rides_state_loading), modifier = Modifier.fillMaxSize())
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        CircularProgressIndicator()
+    }
 }
 /*
 @Preview

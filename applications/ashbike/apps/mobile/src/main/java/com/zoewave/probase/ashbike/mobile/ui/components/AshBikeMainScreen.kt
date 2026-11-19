@@ -228,7 +228,7 @@ fun AshBikeMainScreen(
                 backStack = backStack,
                 modifier = Modifier.padding(innerPadding),
                 onBack = { backStack.removeLastOrNull() }, // Default back action
-                sceneStrategies = listOf(listDetailSceneStrategy),
+                sceneStrategies = listOf(),
                 entryDecorators = listOf(
                     rememberSaveableStateHolderNavEntryDecorator(),
                     rememberViewModelStoreNavEntryDecorator()
