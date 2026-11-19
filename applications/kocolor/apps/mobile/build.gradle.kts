@@ -134,6 +134,8 @@ dependencies {
     implementation(project(":features:health:core"))
     implementation(project(":features:health:hydration"))
     implementation(project(":features:health:nutrition"))
+    // Direct dep: KoColorHealthPermissionModule references Health Connect record types.
+    implementation(libs.androidx.health.connect.client)
     implementation(project(":features:weather"))
     implementation(project(":features:readers:barcode"))
     implementation(project(":features:readers:qrscanner"))

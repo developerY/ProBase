@@ -93,9 +93,19 @@ Findings below come from a static audit of this repo. Re-verify each line before
   each sensitive one has an in-app rationale string and a Play-declaration owner.
 
 ### P0-5. Complete the Health Connect integration for review
-- [ ] Declare the granular permissions you actually use (`android.permission.health.WRITE_EXERCISE`,
-  plus every `READ_*` type you read: exercise, heart rate, distance, calories, speed, elevation — match to `SyncRideUserCase.kt`).
-  A lone `READ_HEALTH_DATA_IN_BACKGROUND` will not pass review.
+- [ ] Declare the granular permissions you actually use. Notes from the Nov-19 sync-button fix:
+  `features/health/core`'s library manifest declares ~all Health Connect types and merges them into the app —
+  functionally complete but a Play-review liability (every declared type needs justification; trim to what v1 uses:
+  exercise/distance/calories/heart-rate/steps/sleep/hydration, and drop unused speed/elevation).
+  The actual runtime request set is `HealthViewModel.permissions` — it must 1:1 cover every type inserted
+  (`SyncRideUseCase`: ExerciseSession, Distance, TotalCaloriesBurned, HeartRate) and read (`initialLoad`).
+  A type that is never requested can never be granted, so sync fails with `SecurityException` (this was the bug;
+  caused Oct-2 by KoColor's minimum-scope commit `b45624ea0` trimming the *shared* request set).
+  Per-app system now in place (Nov-19): each app binds its own `AppHealthPermissionPolicy` in its app module
+  (`AshBikeHealthPermissionModule`, `KoColorHealthPermissionModule`); `HealthViewModel`/`GetHealthSummaryUseCase`
+  consume the resolved set via Hilt, with `DefaultHealthPermissionPolicy` as fallback. Future Play-scope changes
+  go in the affected app's own module — never the shared default. AshBike's coverage is guarded by
+  `AshBikeHealthPermissionPolicyTest`.
 - [ ] Verify the `ACTION_SHOW_PERMISSIONS_RATIONALE` and `VIEW_PERMISSION_USAGE` intent-filters in the mobile manifest
   resolve to real UI explaining *why* each health type is needed.
 - [ ] Align behavior with [Data_Residency&Privacy.md](../../Data_Residency&Privacy.md): "delete removes Room copy, Health Connect

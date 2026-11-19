@@ -1,11 +1,9 @@
 package com.zoewave.probase.features.health.core.domain
 
 import androidx.health.connect.client.HealthConnectClient
-import androidx.health.connect.client.permission.HealthPermission
-import androidx.health.connect.client.records.HydrationRecord
-import androidx.health.connect.client.records.SleepSessionRecord
 import com.zoewave.probase.core.data.service.health.HealthSessionManager
 import com.zoewave.probase.features.health.core.WellnessCorrelationEngine
+import com.zoewave.probase.features.health.core.di.ResolvedHealthPermissionPolicy
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
@@ -17,19 +15,13 @@ import javax.inject.Inject
 
 class GetHealthSummaryUseCase @Inject constructor(
     private val healthSessionManager: HealthSessionManager,
-    private val wellnessEngine: WellnessCorrelationEngine
+    private val wellnessEngine: WellnessCorrelationEngine,
+    private val resolvedPolicy: ResolvedHealthPermissionPolicy
 ) {
     operator fun invoke(): Flow<HealthSummary> {
         return healthSessionManager.availability.flatMapLatest { availability ->
             if (availability == HealthConnectClient.SDK_AVAILABLE) {
-                val permissions = setOf(
-                    HealthPermission.getReadPermission(androidx.health.connect.client.records.StepsRecord::class),
-                    HealthPermission.getReadPermission(androidx.health.connect.client.records.TotalCaloriesBurnedRecord::class),
-                    HealthPermission.getReadPermission(androidx.health.connect.client.records.ActiveCaloriesBurnedRecord::class),
-                    HealthPermission.getReadPermission(SleepSessionRecord::class),
-                    HealthPermission.getReadPermission(HydrationRecord::class),
-                    HealthPermission.getWritePermission(HydrationRecord::class)
-                )
+                val permissions = resolvedPolicy.permissions
                 flow {
                     val hasPerms = healthSessionManager.hasAllPermissions(permissions)
                     if (hasPerms) {

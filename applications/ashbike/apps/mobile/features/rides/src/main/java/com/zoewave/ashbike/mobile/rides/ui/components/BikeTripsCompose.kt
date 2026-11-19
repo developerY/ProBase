@@ -54,8 +54,6 @@ fun BikeTripsCompose(
                     onEvent = bikeEvent,
                     title = stringResource(R.string.applications_ashbike_apps_mobile_features_rides_feature_trips_bike_rides_section_title),
                     bgColor = MaterialTheme.colorScheme.surfaceVariant,
-                    count = bikeRides.size,
-
                     healthConnected = connected,
                     onHealthToggle = {
                         healthEvent(HealthEvent.RequestPermissions)
@@ -64,16 +62,6 @@ fun BikeTripsCompose(
             }
 
 
-            item {
-                androidx.compose.material3.Button(
-                    onClick = { 
-                        android.util.Log.d("RideHistoryDump", "Total rides: ${bikeRides.size}\\n" + bikeRides.joinToString("\\n")) 
-                    },
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
-                ) {
-                    Text("Dump Rides to Logcat")
-                }
-            }
 
             if (bikeRides.isEmpty()) {
                 item {
@@ -98,8 +86,7 @@ fun BikeTripsCompose(
         }
     }
 }
-/*
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun BikeTripsComposePreview() {
     val previewRides = listOf(
@@ -128,16 +115,17 @@ fun BikeTripsComposePreview() {
             isSynced = true
         )
     )
-    BikeTripsCompose(
-        bikeRides = previewRides,
-        onDeleteClick = {},
-        onSyncClick = {},
-        navTo = {},
-        modifier = TODO(),
-        bikeEvent = TODO(),
-        syncedIds = TODO(),
-        healthEvent = TODO(),
-        healthUiState = TODO()
-    )
+    com.zoewave.probase.core.ui.theme.AshBikeTheme {
+        BikeTripsCompose(
+            bikeRides = previewRides,
+            onDeleteClick = {},
+            onSyncClick = {},
+            navTo = {},
+            modifier = Modifier,
+            bikeEvent = {},
+            syncedIds = emptySet(),
+            healthEvent = {},
+            healthUiState = com.zoewave.probase.features.health.core.ui.HealthUiState.Uninitialized
+        )
+    }
 }
-*/

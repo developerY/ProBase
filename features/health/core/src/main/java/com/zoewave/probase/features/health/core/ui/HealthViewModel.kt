@@ -3,17 +3,11 @@ package com.zoewave.probase.features.health.core.ui
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.health.connect.client.HealthConnectClient
-import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.DistanceRecord
 import androidx.health.connect.client.records.ExerciseSessionRecord
-import androidx.health.connect.client.records.HeartRateRecord
 import androidx.health.connect.client.records.StepsRecord
-import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
 import androidx.health.connect.client.records.TotalCaloriesBurnedRecord
-import androidx.health.connect.client.records.WeightRecord
-import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.health.connect.client.records.HydrationRecord
-import androidx.health.connect.client.records.NutritionRecord
 import androidx.health.connect.client.records.metadata.Metadata
 import androidx.health.connect.client.units.Volume
 import androidx.lifecycle.ViewModel
@@ -22,6 +16,7 @@ import com.zoewave.probase.core.data.repository.HydrationSettings
 import com.zoewave.probase.core.data.service.health.HealthSessionManager
 import com.zoewave.probase.core.data.repository.bluetoothLE.BluetoothLeRepository
 import com.zoewave.probase.core.model.ble.GattConnectionState
+import com.zoewave.probase.features.health.core.di.ResolvedHealthPermissionPolicy
 import com.zoewave.probase.features.health.core.domain.HealthRideRequest
 import com.zoewave.probase.features.health.core.domain.SyncRideUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -48,7 +43,8 @@ class HealthViewModel @Inject constructor(
     private val wellnessEngine: com.zoewave.probase.features.health.core.WellnessCorrelationEngine,
     private val syncRideUseCase: SyncRideUseCase,
     private val bleRepository: BluetoothLeRepository,
-    private val hydrationSettings: HydrationSettings
+    private val hydrationSettings: HydrationSettings,
+    resolvedPolicy: ResolvedHealthPermissionPolicy
 ) : ViewModel() {
 
     // 2. State & Events
@@ -82,15 +78,10 @@ class HealthViewModel @Inject constructor(
         }
     }
 
-    // 3. Define Permissions (Read permissions for wellness sync + Write permission for Hydration ONLY)
-    val permissions = setOf(
-        HealthPermission.getReadPermission(StepsRecord::class),
-        HealthPermission.getReadPermission(TotalCaloriesBurnedRecord::class),
-        HealthPermission.getReadPermission(ActiveCaloriesBurnedRecord::class),
-        HealthPermission.getReadPermission(SleepSessionRecord::class),
-        HealthPermission.getReadPermission(HydrationRecord::class),
-        HealthPermission.getWritePermission(HydrationRecord::class)
-    )
+    // 3. Per-app permission set, resolved from Hilt (see HealthPermissionPolicy):
+    // each app module binds its own AppHealthPermissionPolicy, so Play-policy scoping in one
+    // app can never silently break another app's sync. Apps without a binding get the default.
+    val permissions: Set<String> = resolvedPolicy.permissions
 
     // Note: Acceptable for specific UI toggles, though Flow is preferred for data
     var backgroundReadAvailable = mutableStateOf(false)
