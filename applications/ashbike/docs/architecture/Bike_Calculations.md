@@ -58,7 +58,8 @@ Calories are calculated on a "tick-by-tick" basis using a Metabolic Equivalent o
 ### The Math
 For every tick (delta in milliseconds between updates), the app calculates:
 `tickCalories = MET * userWeightKg * deltaHours`
-This `tickCalories` is then added to a running `totalCalories` accumulator.
+
+**CRITICAL DELTA EMISSION:** To prevent "geometric progression" bugs (e.g. calories jumping to 100,000 in 15 minutes), `CalculateCaloriesUseCase` strictly emits **only the delta burned during the current tick** (`tickCalories`). It does *not* emit a running total. The downstream services (`BikeForegroundService` and `RideStatsUseCase`) take these delta emissions and accumulate them safely using `+=` or `.scan { acc, delta -> acc + delta }`.
 
 ### The MET Curve
 AshBike uses an expanded aerodynamic curve to estimate effort based on speed (km/h):
@@ -78,5 +79,5 @@ AshBike uses an expanded aerodynamic curve to estimate effort based on speed (km
 ### Caloric Gatekeepers & Guards
 To prevent falsely inflating calorie burn counts, the use case has three strict guards:
 1.  **The Pause Guard:** If a gap between updates exceeds 30 seconds, that time block is ignored. This safely accommodates slow 10-20s GPS intervals without dropping tracking, but ignores massive jumps.
-2.  **The Stoplight Guard:** If `currentSpeedKmh <= 0f`, the algorithm holds the state and does not accumulate calories. You do not burn active cycling calories while waiting at a red light.
-3.  **The Phantom Speed Guard:** If `currentSpeed > 0` but `deltaDistance <= 0`, no calories are added. This protects against false speed readings from GPS bounce while completely stationary. The time is held in reserve until actual distance is covered, ensuring the delta duration is correctly applied to the subsequent movement.
+2.  **The Stoplight Guard:** If `currentSpeedKmh <= 0f`, the algorithm emits `0f` calories and advances the internal timer. You do not burn active cycling calories while waiting at a red light.
+3.  **The Phantom Speed Guard:** If `currentSpeed > 0` but `deltaDistance <= 0`, the algorithm emits `0f` calories. This protects against false speed readings from GPS bounce while completely stationary. The elapsed time is held in reserve until actual distance is covered, ensuring the accumulated time delta is correctly applied to the subsequent movement without double-counting.

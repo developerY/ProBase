@@ -23,3 +23,15 @@ Because AshBike tracks highly dynamic hardware data (GPS, BLE, Heart Rate), it r
 The `BikeForegroundService` is the heartbeat of the application. It runs independently of the Activity lifecycle. 
 
 When the user opens the app, the `MainActivity` binds to this service to observe the live `StateFlow`s. If the user backgrounds the app, the service continues to execute the mathematical calculations and write to the Room database, ensuring no ride data is dropped.
+
+### Feedback Loop Prevention (`distinctUntilChanged`)
+
+A common pitfall in heavily chained Coroutine Flows is creating an infinite feedback loop. 
+For example, if updating the `caloriesBurned` property on `_rideInfo` immediately triggers the downstream `distanceFlow` and `speedFlow` collectors (because they map directly from `_rideInfo`), the calorie calculator will aggressively recount, mutating `_rideInfo` again and spinning the CPU endlessly (causing exponential math bugs).
+
+To prevent this, any flow derived from a master `StateFlow` that feeds back into an accumulator **must** use `.distinctUntilChanged()`:
+```kotlin
+val distanceFlow = _rideInfo.map { it.distance }.distinctUntilChanged()
+val speedFlow = _rideInfo.map { it.speed }.distinctUntilChanged()
+```
+This ensures the derived streams only emit when their specific slice of data actually changes, breaking the infinite loop.

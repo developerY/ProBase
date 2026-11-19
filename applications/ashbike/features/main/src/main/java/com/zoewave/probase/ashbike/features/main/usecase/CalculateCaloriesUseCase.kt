@@ -31,7 +31,8 @@ class CalculateCaloriesUseCase @Inject constructor() {
     operator fun invoke(
         distanceKmFlow: Flow<Float>,
         currentSpeedKmhFlow: Flow<Float>,
-        userStatsFlow: Flow<UserStats>
+        userStatsFlow: Flow<UserStats>,
+        clockMs: () -> Long = { SystemClock.elapsedRealtime() }
     ): Flow<Float> = combine(
         distanceKmFlow,
         currentSpeedKmhFlow,
@@ -40,8 +41,8 @@ class CalculateCaloriesUseCase @Inject constructor() {
         Triple(distanceKm, currentSpeedKmh, userStats)
     }.scan(CalorieState()) { state, (distanceKm, currentSpeedKmh, userStats) ->
 
-        // Use elapsedRealtime to prevent timezone/network sync bugs!
-        val nowMs = SystemClock.elapsedRealtime()
+        // Use elapsedRealtime (or mock clock) to prevent timezone/network sync bugs!
+        val nowMs = clockMs()
 
         // 1. First tick initialization
         if (state.lastTickMs == 0L) {
