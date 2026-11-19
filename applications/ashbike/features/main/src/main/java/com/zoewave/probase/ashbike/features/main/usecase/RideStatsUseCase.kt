@@ -195,6 +195,7 @@ class RideStatsUseCase @Inject constructor(
                 val gFlow = elevationGainFlow(resetSignal, locationFlow)
                 val lFlow = elevationLossFlow(resetSignal, locationFlow)
                 val cFlow = calculateCaloriesUseCase(dFlow, speedFlow, userStatsFlow)
+                    .scan(0f) { acc, delta -> acc + delta }
                     .map { it.toInt() }
 
                 // first combine path + dist + max + avg + gain

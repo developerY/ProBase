@@ -25,7 +25,7 @@ class CalculateCaloriesUseCase @Inject constructor() {
     private data class CalorieState(
         val lastTickMs: Long = 0L,
         val lastDistanceKm: Float = 0f,
-        val totalCalories: Float = 0f
+        val tickCalories: Float = 0f
     )
 
     operator fun invoke(
@@ -48,7 +48,7 @@ class CalculateCaloriesUseCase @Inject constructor() {
             return@scan CalorieState(
                 lastTickMs = nowMs,
                 lastDistanceKm = distanceKm,
-                totalCalories = 0f
+                tickCalories = 0f
             )
         }
 
@@ -59,7 +59,7 @@ class CalculateCaloriesUseCase @Inject constructor() {
         // We use 30 seconds to safely accommodate 10-20 second passive GPS intervals 
         // without dropping valid active tracking gaps.
         if (deltaMs > 30_000L) {
-            return@scan state.copy(lastTickMs = nowMs, lastDistanceKm = distanceKm)
+            return@scan state.copy(lastTickMs = nowMs, lastDistanceKm = distanceKm, tickCalories = 0f)
         }
 
         // 3. THE GATEKEEPER: Ignore all math until they ride 10 meters.
@@ -69,21 +69,16 @@ class CalculateCaloriesUseCase @Inject constructor() {
         }*/
 
         // 4. Stoplight Guard (If speed is 0, hold state)
-        // Check this FIRST. If we are stationary, advance the clock so we don't
-        // retroactively charge calories for time spent waiting at a stoplight.
         if (currentSpeedKmh <= 0f) {
-            return@scan state.copy(lastTickMs = nowMs, lastDistanceKm = distanceKm)
+            return@scan state.copy(lastTickMs = nowMs, lastDistanceKm = distanceKm, tickCalories = 0f)
         }
 
         // 5. Phantom Speed Guard:
-        // If the distance hasn't increased, do not add calories, even if speed > 0.
-        // We use maxOf to protect against weird negative GPS jumps.
-        // IMPORTANT: We do NOT advance lastTickMs here. This ensures that when distance
-        // finally increases, deltaMs will represent the full time elapsed since the last
-        // distance increase, properly calculating calories for the whole interval.
         if (deltaDistance <= 0f) {
             return@scan state.copy(
-                lastDistanceKm = maxOf(distanceKm, state.lastDistanceKm)
+                lastTickMs = nowMs,
+                lastDistanceKm = maxOf(distanceKm, state.lastDistanceKm),
+                tickCalories = 0f
             )
         }
 
@@ -109,14 +104,14 @@ class CalculateCaloriesUseCase @Inject constructor() {
         // 8. Calculate calories burned JUST during this tick
         val tickCalories = met * userStats.weightKg * deltaHours
 
-        // 9. Accumulate
+        // 9. Emit tick delta calories
         CalorieState(
             lastTickMs = nowMs,
             lastDistanceKm = distanceKm,
-            totalCalories = state.totalCalories + tickCalories // Emit the running total
+            tickCalories = tickCalories
         )
     }.map { state ->
-        // Expose the total accumulated calories to the UI
-        state.totalCalories
+        // Expose the tick delta calories burned to the service/collector
+        state.tickCalories
     }
 }

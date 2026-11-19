@@ -16,6 +16,8 @@ import com.zoewave.ashbike.data.services.RideTrackingEngine
 import com.zoewave.ashbike.model.bike.BikeRideInfo
 import com.zoewave.ashbike.model.bike.LocationEnergyLevel
 import com.zoewave.ashbike.model.bike.RideState
+import kotlinx.coroutines.flow.distinctUntilChanged
+
 import com.zoewave.probase.ashbike.database.BikeRideEntity
 import com.zoewave.probase.ashbike.database.BikeRideRepo
 import com.zoewave.probase.ashbike.database.RideLocationEntity
@@ -485,8 +487,8 @@ class BikeForegroundService : LifecycleService() {
         caloriesCalculationJob?.cancel()
 
         // Always use continuous distance, because delta distance is all that matters
-        val distanceFlow = _rideInfo.map { continuousDistanceMeters / 1000f }
-        val speedFlow = _rideInfo.map { it.currentSpeed.toFloat() }
+        val distanceFlow = _rideInfo.map { continuousDistanceMeters / 1000f }.distinctUntilChanged()
+        val speedFlow = _rideInfo.map { it.currentSpeed.toFloat() }.distinctUntilChanged()
 
         caloriesCalculationJob = lifecycleScope.launch {
             calculateCaloriesUseCase(distanceFlow, speedFlow, userStatsFlow).collect { deltaCal ->
