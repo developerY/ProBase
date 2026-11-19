@@ -98,7 +98,8 @@ fun BikeTripsCompose(
         }
     }
 }
-@Preview(showBackground = true)
+/*
+@Preview
 @Composable
 fun BikeTripsComposePreview() {
     val previewRides = listOf(
@@ -127,17 +128,16 @@ fun BikeTripsComposePreview() {
             isSynced = true
         )
     )
-    com.zoewave.probase.core.ui.theme.AshBikeTheme {
-        BikeTripsCompose(
-            bikeRides = previewRides,
-            onDeleteClick = {},
-            onSyncClick = {},
-            navTo = {},
-            modifier = Modifier,
-            bikeEvent = {},
-            syncedIds = emptySet(),
-            healthEvent = {},
-            healthUiState = com.zoewave.probase.features.health.core.ui.HealthUiState.Uninitialized
-        )
-    }
+    BikeTripsCompose(
+        bikeRides = previewRides,
+        onDeleteClick = {},
+        onSyncClick = {},
+        navTo = {},
+        modifier = TODO(),
+        bikeEvent = TODO(),
+        syncedIds = TODO(),
+        healthEvent = TODO(),
+        healthUiState = TODO()
+    )
 }
+*/
