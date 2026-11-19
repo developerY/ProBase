@@ -32,8 +32,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
-import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -61,7 +59,7 @@ import com.zoewave.probase.ashbike.mobile.ui.MainUiEvent
 import com.zoewave.probase.ashbike.mobile.ui.MainViewModel
 import com.zoewave.probase.ashbike.mobile.ui.navigation.ashBikeNavEntryProvider
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AshBikeMainScreen(
     viewModel: MainViewModel = hiltViewModel(),
@@ -82,8 +80,6 @@ fun AshBikeMainScreen(
     val backStack = remember {
         mutableStateListOf<AshBikeDestination>(AshBikeDestination.Home)
     }
-
-    val listDetailSceneStrategy = rememberListDetailSceneStrategy<AshBikeDestination>()
 
     // Helper to push a new screen
     fun navigateTo(destination: AshBikeDestination) {
