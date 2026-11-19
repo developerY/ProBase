@@ -33,6 +33,7 @@ Welcome to the AshBike documentation hub. All documentation for the mobile app, 
     *   `TestPlan.md` - Unit, Integration, and Field test matrices.
 *   **`data_and_privacy/`**: Legal and compliance.
     *   `Data_Residency&Privacy.md` - Local-first data retention.
+    *   `HEALTH_PERMISSIONS.md` - Per-app Health Connect policy system (AshBike & KoColor).
     *   `PRIVACY_POLICY_PUBLIC.md` - Plain-text privacy policy for the Play Store.
 *   **`operations/`**: Background services and debugging.
     *   `SYNC.md` - Health Connect syncing workflows.
