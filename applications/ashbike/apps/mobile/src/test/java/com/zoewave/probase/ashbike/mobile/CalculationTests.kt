@@ -1,4 +1,3 @@
-
 package com.zoewave.probase.ashbike.mobile
 
 import com.zoewave.probase.ashbike.features.main.usecase.CalculateCaloriesUseCase

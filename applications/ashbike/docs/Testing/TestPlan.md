@@ -1,6 +1,6 @@
 # 🧪 ProBase Repository Test Plan
 
-**Project Name:** ProBase Monorepo (AshBike, PhotoDo)
+**Project Name:** ProBase Monorepo (AshBike, KoColor)
 
 **Version:** 1.0 (Alpha/Dev)
 
@@ -10,14 +10,14 @@
 
 ## 1. Introduction
 
-This document outlines the testing strategy for the **ProBase** repository. This monorepo contains multiple applications and modularized features. The testing goal is to ensure the stability of the core architecture while verifying the functional requirements of the flagship **AshBike** application and the **PhotoDo** utility app.
+This document outlines the **functional** test plan matrices (Unit, Integration, and Field tests) for the ProBase repository. For a technical breakdown of the testing libraries, mock implementations, and execution commands, see the [TESTING_STRATEGY.md](TESTING_STRATEGY.md) guide.
 
 ### 1.1 Scope of Testing
 
 * **Applications**:
 * AshBike Mobile (`applications/ashbike/apps/mobile`)
 * AshBike Wear OS (`applications/ashbike/apps/wear`)
-* PhotoDo (`applications/photodo/apps/mobile`)
+* KoColor (`applications/photodo/apps/mobile`)
 
 
 * **Feature Modules**: BLE, NFC, Health, Weather, Places, QR Scanner, ML.
@@ -117,7 +117,7 @@ We follow the **Testing Pyramid** approach, prioritizing fast, reliable unit tes
 
 
 
-### 3.3 PhotoDo Application
+### 3.3 KoColor Application
 
 * **Unit**: Test Task management logic (Create, Read, Update, Delete).
 * **UI**: Verify CameraX preview stream starts and captures image successfully.
@@ -133,7 +133,7 @@ We follow the **Testing Pyramid** approach, prioritizing fast, reliable unit tes
 | **TC-003** | AshBike | **Record Ride** | Timer starts; Speed/Distance increment; Map updates position. |
 | **TC-004** | AshBike | **End Ride** | Ride summary shown; Session saved to History & Health Connect. |
 | **TC-005** | AshBike | **Wear OS Sync** | Launching Wear app shows status matches Phone app. |
-| **TC-006** | PhotoDo | **Capture Task** | Taking a photo creates a new Task entry in the list. |
+| **TC-006** | KoColor | **Capture Task** | Taking a photo creates a new Task entry in the list. |
 | **TC-007** | General | **Dark Mode** | All UI elements remain visible and legible in System Dark Mode. |
 
 ---

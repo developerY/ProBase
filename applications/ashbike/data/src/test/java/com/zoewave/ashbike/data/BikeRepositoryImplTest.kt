@@ -3,7 +3,7 @@ package com.zoewave.ashbike.data
 import com.zoewave.ashbike.data.repository.bike.BikeRepositoryImpl
 import com.zoewave.ashbike.model.bike.SuspensionState
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -20,7 +20,7 @@ class BikeRepositoryImplTest {
     }
 
     @Test
-    fun `initial gear is 1 and gearUp increases gear count up to 12`() = runBlocking {
+    fun `initial gear is 1 and gearUp increases gear count up to 12`() = runTest {
         assertEquals(1, repo.currentGear.first())
 
         repo.gearUp()
@@ -35,7 +35,7 @@ class BikeRepositoryImplTest {
     }
 
     @Test
-    fun `gearDown decreases gear count down to 1`() = runBlocking {
+    fun `gearDown decreases gear count down to 1`() = runTest {
         repo.setGear(3)
         assertEquals(3, repo.currentGear.first())
 
@@ -51,7 +51,7 @@ class BikeRepositoryImplTest {
     }
 
     @Test
-    fun `toggleSuspension cycles through OPEN, TRAIL, and LOCK`() = runBlocking {
+    fun `toggleSuspension cycles through OPEN, TRAIL, and LOCK`() = runTest {
         assertEquals(SuspensionState.OPEN, repo.suspensionState.first())
 
         repo.toggleSuspension()
@@ -65,7 +65,7 @@ class BikeRepositoryImplTest {
     }
 
     @Test
-    fun `glass session cannot be active if hardware is disconnected`() = runBlocking {
+    fun `glass session cannot be active if hardware is disconnected`() = runTest {
         assertFalse(repo.isGlassConnected.first())
 
         // Request active session while disconnected should be rejected
@@ -82,5 +82,27 @@ class BikeRepositoryImplTest {
         // Disconnecting hardware forces session to false
         repo.updateGlassConnectionState(false)
         assertFalse(repo.isGlassSessionActive.first())
+    }
+
+    @Test
+    fun `updateConnectionState sets isBikeConnected`() = runTest {
+        assertFalse(repo.isBikeConnected.first())
+
+        repo.updateConnectionState(true)
+        assertTrue(repo.isBikeConnected.first())
+
+        repo.updateConnectionState(false)
+        assertFalse(repo.isBikeConnected.first())
+    }
+
+    @Test
+    fun `updateRideInfo emits new info`() = runTest {
+        val initial = repo.rideInfo.first()
+
+        val newInfo = initial.copy(currentSpeed = 25.0)
+        repo.updateRideInfo(newInfo)
+
+        val updated = repo.rideInfo.first()
+        assertEquals(25.0, updated.currentSpeed, 0.01)
     }
 }
