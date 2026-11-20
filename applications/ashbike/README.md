@@ -1,53 +1,92 @@
 # AshBike 🚴‍♂️
 
-Next-generation ride tracking built with Kotlin, Jetpack Compose, and a pure multi-module architecture.
+Next-generation ride tracking built with Kotlin, Jetpack Compose, Navigation 3, and a modular MVI architecture.
 
-## Overview
+---
 
-AshBike is a modern health and fitness application designed to deliver a **truly standalone Wear OS experience** alongside a powerful companion Android mobile app.
+## 🌟 Overview
 
-Our core engineering philosophy is simple: **The watch should be able to do everything the phone can do.** Whether you leave your phone at home or bring it along for the ride, AshBike seamlessly tracks your performance, persists your data locally on your wrist, and intelligently handles cloud and ecosystem syncing.
+AshBike is a modern health and cycling fitness platform designed to deliver a **truly standalone Wear OS experience**, a feature-packed companion **Android Mobile app**, and projected **Smart Glasses (XR)** telemetry displays.
 
-## Core Features
+### Our Engineering Philosophy
+1. **Wear OS Autonomy:** The watch can do everything untethered—GPS tracking, local Room persistence, and direct cloud sync.
+2. **Local-First & Privacy-Focused:** Data remains on-device first, with strictly-scoped Health Connect synchronization.
+3. **Reactive & Deterministic:** Jetpack Compose UI state is powered by pure `StateFlow` streams with strict feedback-loop protections (`distinctUntilChanged`).
 
-* **Standalone Wear OS Tracking:** Track your rides using the watch's hardware GPS and Heart Rate sensors via Android Health Services, entirely untethered from a mobile device.
-* **The "Best of Both Worlds" Sync Engine:**
-    * *No Phone?* The watch app operates autonomously, saving the completed ride to a local Room Database and syncing directly to the AshBike cloud backend via Wi-Fi or LTE.
-    * *Phone Nearby?* The watch seamlessly beams the finished ride data over Bluetooth (via the Wearable Data Layer API) to the mobile app. The mobile app then acts as a bridge to write your official workout record into **Google Health Connect**.
-* **Modern Declarative UI:** Built entirely in Jetpack Compose and Wear Compose Material 3 for fluid, responsive, and hardware-optimized interfaces (including native ScalingLazyColumns and Swipe-to-Dismiss gestures).
-* **Strict Type-Safe Navigation:** Utilizes the cutting-edge Navigation 3 (Nav3) architecture. Routing is handled by pure state lists, eliminating standard string-based route parsing.
+---
 
-## Architecture
+## 🚀 Key Features
 
-AshBike follows a strict feature-based, multi-module architecture. This maximizes code sharing between the phone and the watch, enforces separation of concerns, and keeps Gradle build times incredibly fast.
+* **Standalone Wear OS Tracking:** Track cycling workouts using watch hardware sensors via Android Health Services, independent of the phone.
+* **Smart Health Connect Sync:** Seamlessly bridge completed rides into Google Health Connect using a Play-Policy compliant **13-permission set** tailored strictly for AshBike (Exercise, Distance, Heart Rate, and Calories).
+* **Accurate Caloric Burn Engine:** Uses an aerodynamic MET-curve algorithm emitting **per-tick delta calories**, guarded by:
+  * *Stoplight Guard:* Zeroes calorie burn when stationary.
+  * *Phantom Speed Guard:* Ignores GPS bounce while holding time deltas in reserve.
+  * *Pause Guard:* Prevents large jumps when resuming tracking after long pauses.
+* **Nav3 Type-Safe Navigation:** Built on AndroidX Navigation 3 (`NavEntry`, `NavDisplay`, state lists), delivering smooth, full-screen top-level destination switching.
+* **Projected Smart Glasses (Glass) Telemetry:** Real-time HUD integration for gear selection, electronic suspension toggles, and live speed/elevation profiles.
 
+---
 
+## 🏗️ Architecture & Module Breakdown
 
-### Module Breakdown
+AshBike uses a multi-module feature structure to maximize code sharing across Mobile, Wear, and XR targets:
 
-* **:core:* (Model, UI, Network, Data):** Form-factor agnostic logic, state models, and utilities shared across the entire project.
-* **:mobile:app** & **:wear:app:** The lightweight entry points. These modules contain the Hilt setups, main activities, and the Nav3 `NavDisplay` wireframes.
-* **:wear:features:rides:** The standalone watch tracking experience. Uses `Health Services` for battery-efficient live sensor batching and `Room` DAOs for local persistence.
-* **:mobile:features:rides:** The rich mobile dashboard. Uses `Health Connect` to read/write historical fitness data to the centralized Android ecosystem.
+```
+applications/ashbike/
+├── model/                # Form-factor agnostic domain models (BikeRide, LocationPoint)
+├── database/             # Room DB, DAOs, DataStore Preferences (AppSettings, UserProfile)
+├── data/                 # BikeRepositoryImpl, BLE location engines, Sync Engine
+├── features/
+│   ├── main/             # BikeForegroundService, CalculateCaloriesUseCase, RideStatsUseCase
+│   └── places/           # Coffee shop & route landmark discovery
+└── apps/
+    ├── mobile/           # Mobile App entry point, Nav3 NavDisplay, and feature modules:
+    │   ├── features/home/      # Main Dashboard & Live Speedometer
+    │   ├── features/rides/     # Ride History List & Detailed Ride Analytics
+    │   ├── features/settings/  # Units, GPS accuracy, and Profile configuration
+    │   └── features/glass/     # Projected XR HUD panels & Gear controls
+    └── wear/             # Wear OS App entry point, Wear Compose UI, and standalone features
+```
 
-### The Tracking Data Flow
+---
 
+## 🧪 Testing & Quality Assurance
 
+AshBike is backed by a comprehensive unit testing infrastructure powered by **JUnit 4**, **MockK**, **kotlinx-coroutines-test**, and **Truth**.
 
-1.  **Track:** Wear OS `Health Services` continuously reads live hardware sensors.
-2.  **Store:** Wear OS saves the completed run to its local `Room` database.
-3.  **Handoff:** If a paired phone is detected, the `Wearable Data Layer API` transmits the payload to the mobile app in the background.
-4.  **Publish:** The mobile app takes the payload and writes it to the `Health Connect` database on the phone.
+### Key Test Coverage
+* **UseCases & Calculations:** `CalculateCaloriesUseCaseTest`, `RideStatsUseCaseTest`, `CalculationTests` (100% logic validation with mockable virtual clocks).
+* **Persistence & Mappers:** `BikeRideDaoTest` (In-memory Room DB), `RideMappersTest`, `DataStoreAppSettingsRepositoryTest`, `DataStoreUserProfileRepositoryTest`.
+* **Repositories & Services:** `BikeRepositoryImplTest`, `AshBikeHealthPermissionPolicyTest`.
+* **ViewModels:** `HomeViewModelTest`, `RidesViewModelTest`, `SettingsViewModelTest`, `GlassViewModelTest`, `WearBikeViewModelTest`, `WearRidesViewModelTest`.
 
-## Local Development Setup
+### Running Tests
+To run all AshBike unit tests without compiling unrelated monorepo modules:
+```bash
+./gradlew \
+    :applications:ashbike:database:testDebugUnitTest \
+    :applications:ashbike:data:testDebugUnitTest \
+    :applications:ashbike:model:testDebugUnitTest \
+    :applications:ashbike:features:main:testDebugUnitTest \
+    :applications:ashbike:apps:mobile:testDebugUnitTest \
+    :applications:ashbike:apps:wear:testDebugUnitTest \
+    --continue
+```
+*(Or right-click the `applications/ashbike` directory in Android Studio and select **Run 'Tests in ashbike'**).*
 
-### Prerequisites
-* Android Studio (Latest stable or canary supporting KSP 2.3+)
-* JDK 17+
-* A physical Wear OS 3+ device or emulator
+---
 
-### Building the Project
-We use custom convention plugins to manage our build logic across both form factors.
-1. Clone the repository:
-   ```bash
-   git clone [https://github.com/your-org/ashbike.git](https://github.com/your-org/ashbike.git)
+## 📚 Documentation Directory
+
+Detailed technical guides, architectural decision records, and Play Store release documents are organized in `docs/`:
+
+* **Getting Started:** [`docs/GETTING_STARTED.md`](docs/GETTING_STARTED.md)
+* **Architecture Overview:** [`docs/architecture/ARCHITECTURE_OVERVIEW.md`](docs/architecture/ARCHITECTURE_OVERVIEW.md)
+* **Mathematical Calculations:** [`docs/architecture/Bike_Calculations.md`](docs/architecture/Bike_Calculations.md)
+* **State Management & Flow Loops:** [`docs/architecture/STATE_MANAGEMENT.md`](docs/architecture/STATE_MANAGEMENT.md)
+* **Health Permissions Architecture:** [`docs/data_and_privacy/HEALTH_PERMISSIONS.md`](docs/data_and_privacy/HEALTH_PERMISSIONS.md)
+* **Testing Strategy:** [`docs/testing/TESTING_STRATEGY.md`](docs/testing/TESTING_STRATEGY.md)
+* **Test Execution Guide:** [`docs/testing/TEST_EXECUTION.md`](docs/testing/TEST_EXECUTION.md)
+* **Production Readiness Checklist:** [`docs/release/PRODUCTION_READINESS.md`](docs/release/PRODUCTION_READINESS.md)
+* **Full Documentation Hub:** [`docs/README.md`](docs/README.md)
