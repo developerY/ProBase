@@ -2,12 +2,13 @@ package com.zoewave.probase.ashbike.features.main
 
 import com.zoewave.probase.ashbike.features.main.usecase.CalculateCaloriesUseCase
 import com.zoewave.probase.ashbike.features.main.usecase.RideStatsUseCase
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import kotlinx.coroutines.delay
 
 class RideStatsUseCaseTest {
 
@@ -17,8 +18,8 @@ class RideStatsUseCaseTest {
     fun `maxSpeedFlow retains highest speed recorded`() = runBlocking {
         val maxSpeed = useCase.maxSpeedFlow(
             resetSignal = emptyFlow(),
-            speedFlow = flowOf(10f, 25f, 15f, 32f, 20f)
-        ).first()
+            speedFlow = flow { emit(10f); delay(10); emit(25f); delay(10); emit(15f); delay(10); emit(32f); delay(10); emit(20f) }
+        ).toList().last()
 
         assertEquals(32f, maxSpeed, 0.001f)
     }
@@ -29,11 +30,11 @@ class RideStatsUseCaseTest {
         var calls = 0
         val avgSpeed = useCase.averageSpeedFlow(
             resetSignal = emptyFlow(),
-            distanceKmFlow = flowOf(15f),
+            distanceKmFlow = flow { emit(15f) },
             clockMs = { 
                 if (calls++ == 0) 0L else 2700000L // startMs is 0, elapsed is 45 mins
             }
-        ).first()
+        ).toList().last()
 
         assertEquals(20.0, avgSpeed, 0.01)
     }
@@ -42,9 +43,9 @@ class RideStatsUseCaseTest {
     fun `averageSpeedFlow returns 0 when time elapsed is 0`() = runBlocking {
         val avgSpeed = useCase.averageSpeedFlow(
             resetSignal = emptyFlow(),
-            distanceKmFlow = flowOf(10f),
+            distanceKmFlow = flow { emit(10f) },
             clockMs = { 0L }
-        ).first()
+        ).toList().last()
 
         assertEquals(0.0, avgSpeed, 0.001)
     }

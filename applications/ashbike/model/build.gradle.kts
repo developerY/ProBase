@@ -25,3 +25,8 @@ dependencies {
     // Recommended for Compose stability (e.g. List<LocationPoint>)
     implementation(libs.kotlinx.collections.immutable)
 }
+dependencies {
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.runner)
+}

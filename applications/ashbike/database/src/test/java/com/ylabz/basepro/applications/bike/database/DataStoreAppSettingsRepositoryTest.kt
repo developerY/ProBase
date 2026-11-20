@@ -34,14 +34,16 @@ class DataStoreAppSettingsRepositoryTest {
         every { dataStore.data } returns preferencesFlow
 
         // Mock edit / updateData for DataStore
-        coEvery { dataStore.updateData(any()) } answers {
-            val transform = arg<(Preferences) -> Preferences>(0)
+        coEvery { dataStore.updateData(any()) } coAnswers {
+            val transform = arg<suspend (Preferences) -> Preferences>(0) as suspend (Preferences) -> Preferences
             val updated = transform(preferencesFlow.value)
             preferencesFlow.value = updated
             updated
         }
 
         secureApiKeyRepository = mockk()
+        every { secureApiKeyRepository.isKeySetFlow } returns kotlinx.coroutines.flow.MutableStateFlow(false) as kotlinx.coroutines.flow.StateFlow<Boolean>
+
         repository = DataStoreAppSettingsRepository(dataStore, secureApiKeyRepository)
     }
 
@@ -72,7 +74,7 @@ class DataStoreAppSettingsRepositoryTest {
     @Test
     fun `isGeminiApiKeySetFlow maps from secureApiKeyRepository`() = runTest {
         val flow = MutableStateFlow(true)
-        every { secureApiKeyRepository.isKeySetFlow } returns flow
+        every { secureApiKeyRepository.isKeySetFlow } returns flow as kotlinx.coroutines.flow.StateFlow<Boolean>
 
         val isSet = repository.isGeminiApiKeySetFlow.first()
         assertEquals(true, isSet)

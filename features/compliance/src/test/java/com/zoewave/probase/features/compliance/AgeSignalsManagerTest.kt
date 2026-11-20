@@ -51,9 +51,10 @@ class AgeSignalsManagerTest {
         val now = Date()
         val mockResult = mockk<AgeSignalsResult> {
             every { ageLower() } returns 18
-            every { ageUpper() } returns null
-            every { userStatus() } returns AgeSignalsVerificationStatus.VERIFIED
-            every { mostRecentApprovalDate() } returns now
+            every { ageUpper() } returns null as Int?
+            every { significantChangeStatus() } returns AgeSignalsVerificationStatus.VERIFIED
+            every { ageRangeSource() } returns AgeSignalsVerificationStatus.VERIFIED
+            every { significantChangeApprovalDate() } returns now
         }
         every { playAgeSignalsManager.checkAgeSignals(any()) } returns Tasks.forResult(mockResult)
 

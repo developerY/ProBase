@@ -31,8 +31,8 @@ class DataStoreUserProfileRepositoryTest {
         dataStore = mockk()
         every { dataStore.data } returns preferencesFlow
 
-        coEvery { dataStore.updateData(any()) } answers {
-            val transform = arg<(Preferences) -> Preferences>(0)
+        coEvery { dataStore.updateData(any()) } coAnswers {
+            val transform = invocation.args[0] as suspend (Preferences) -> Preferences
             val updated = transform(preferencesFlow.value)
             preferencesFlow.value = updated
             updated

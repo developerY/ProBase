@@ -31,6 +31,7 @@ Welcome to the AshBike documentation hub. All documentation for the mobile app, 
     *   `Info.md` & `video.md` - Store listing copy and promo scripts.
 *   **`testing/`**: Quality assurance.
     *   `TESTING_STRATEGY.md` - Testing architecture, tools, and layers.
+    *   `TEST_EXECUTION.md` - Commands for executing tests without monorepo bleed.
     *   `TestPlan.md` - Unit, Integration, and Field test matrices.
 *   **`data_and_privacy/`**: Legal and compliance.
     *   `Data_Residency&Privacy.md` - Local-first data retention.
