@@ -44,15 +44,15 @@ abstract class AshBikeHealthPermissionModule {
 @Singleton
 class AshBikeHealthPermissionPolicy @Inject constructor() : AppHealthPermissionPolicy {
     override val permissions: Set<String> = setOf(
-        HealthPermission.getReadPermission(StepsRecord::class),
+        
         HealthPermission.getReadPermission(TotalCaloriesBurnedRecord::class),
         HealthPermission.getReadPermission(ActiveCaloriesBurnedRecord::class),
-        HealthPermission.getReadPermission(SleepSessionRecord::class),
-        HealthPermission.getReadPermission(HydrationRecord::class),
+        
+        
         HealthPermission.getReadPermission(ExerciseSessionRecord::class),
         HealthPermission.getReadPermission(DistanceRecord::class),
         HealthPermission.getReadPermission(HeartRateRecord::class),
-        HealthPermission.getWritePermission(HydrationRecord::class),
+        
         HealthPermission.getWritePermission(ExerciseSessionRecord::class),
         HealthPermission.getWritePermission(DistanceRecord::class),
         HealthPermission.getWritePermission(TotalCaloriesBurnedRecord::class),
