@@ -45,7 +45,8 @@ android {
     val releaseKeyPassword = System.getenv("RELEASE_KEY_PASSWORD")?.takeIf { it.isNotBlank() }
 
     val isReleaseTaskRequested = gradle.startParameter.taskNames.any { taskName ->
-        taskName.contains("Release", ignoreCase = true) &&
+        (taskName.contains("kocolor", ignoreCase = true) || !taskName.contains(":")) &&
+            taskName.contains("Release", ignoreCase = true) &&
             !taskName.contains("lint", ignoreCase = true) &&
             !taskName.contains("UnitTest", ignoreCase = true) &&
             !taskName.contains("Manifest", ignoreCase = true)
