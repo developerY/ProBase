@@ -16,6 +16,8 @@ import com.zoewave.ashbike.data.services.RideTrackingEngine
 import com.zoewave.ashbike.model.bike.BikeRideInfo
 import com.zoewave.ashbike.model.bike.LocationEnergyLevel
 import com.zoewave.ashbike.model.bike.RideState
+import kotlinx.coroutines.flow.distinctUntilChanged
+
 import com.zoewave.probase.ashbike.database.BikeRideEntity
 import com.zoewave.probase.ashbike.database.BikeRideRepo
 import com.zoewave.probase.ashbike.database.RideLocationEntity
@@ -145,11 +147,21 @@ class BikeForegroundService : LifecycleService() {
             combine(currentEnergyLevelState, appSettingsRepository.longRideEnabledFlow) { level, isLong ->
                 Pair(level, isLong)
             }.collect { (level, isLongRide) ->
-                val isRiding = _rideInfo.value.rideState == RideState.Riding
-                val interval = if (isRiding) level.activeRideIntervalMillis else level.passiveTrackingIntervalMillis
-                val minInterval = if (isRiding) level.activeRideMinUpdateIntervalMillis else level.passiveTrackingMinUpdateIntervalMillis
+                if (_rideInfo.value.rideState == RideState.Riding) {
+                    startLocationUpdates(level.activeRideIntervalMillis, level.activeRideMinUpdateIntervalMillis, isLongRide)
+                }
+            }
+        }
 
-                startLocationUpdates(interval, minInterval, isLongRide)
+        // Initial GPS Fix: Request location updates on startup until first fix is acquired so WaitingForGpsScreen can complete
+        if (_rideInfo.value.location == null) {
+            lifecycleScope.launch {
+                val level = currentEnergyLevelState.first()
+                startLocationUpdates(
+                    level.activeRideIntervalMillis,
+                    level.activeRideMinUpdateIntervalMillis,
+                    appSettingsRepository.longRideEnabledFlow.first()
+                )
             }
         }
 
@@ -213,6 +225,8 @@ class BikeForegroundService : LifecycleService() {
 
     override fun onDestroy() {
         super.onDestroy()
+        trackingEngine.stopRide()
+        caloriesCalculationJob?.cancel()
         wakeLock?.takeIf { it.isHeld }?.release()
     }
 
@@ -335,6 +349,7 @@ class BikeForegroundService : LifecycleService() {
 
         )
 
+        val wasLocationNull = _rideInfo.value.location == null
         _rideInfo.value = newInfo
 
         // 4. Update External Consumers
@@ -342,6 +357,10 @@ class BikeForegroundService : LifecycleService() {
 
         if (isFormalRide) {
             notificationManager.updateNotification(BikeNotificationManager.NOTIFICATION_ID, newInfo)
+        } else if (wasLocationNull) {
+            // Once initial location fix is acquired to dismiss WaitingForGpsScreen, stop location updates until user hits Start
+            Log.i(TAG, "Initial GPS fix acquired for WaitingForGpsScreen. Powering down location updates until Start Ride.")
+            trackingEngine.stopRide()
         }
     }
 
@@ -457,6 +476,7 @@ class BikeForegroundService : LifecycleService() {
         stopForeground(STOP_FOREGROUND_REMOVE)
         notificationManager.cancel(BikeNotificationManager.NOTIFICATION_ID)
         wakeLock?.takeIf { it.isHeld }?.release()
+        stopSelf()
 
         // 3. Reset StateFlow (But keep location/connection)
         val resetState = getInitialRideInfo().copy(
@@ -470,13 +490,9 @@ class BikeForegroundService : LifecycleService() {
         _rideInfo.value = resetState
         lifecycleScope.launch { bikeRepository.updateRideInfo(resetState) }
 
-        // 4. Return GPS to Passive Mode
-        lifecycleScope.launch {
-            val level = currentEnergyLevelState.first()
-            startLocationUpdates(level.passiveTrackingIntervalMillis, level.passiveTrackingMinUpdateIntervalMillis, appSettingsRepository.longRideEnabledFlow.first())
-        }
-
-        startOrRestartCalorieCalculation()
+        // 4. Power Down the Tracking Engine entirely
+        trackingEngine.stopRide()
+        caloriesCalculationJob?.cancel()
     }
 
     // --- Helpers ---
@@ -485,8 +501,8 @@ class BikeForegroundService : LifecycleService() {
         caloriesCalculationJob?.cancel()
 
         // Always use continuous distance, because delta distance is all that matters
-        val distanceFlow = _rideInfo.map { continuousDistanceMeters / 1000f }
-        val speedFlow = _rideInfo.map { it.currentSpeed.toFloat() }
+        val distanceFlow = _rideInfo.map { continuousDistanceMeters / 1000f }.distinctUntilChanged()
+        val speedFlow = _rideInfo.map { it.currentSpeed.toFloat() }.distinctUntilChanged()
 
         caloriesCalculationJob = lifecycleScope.launch {
             calculateCaloriesUseCase(distanceFlow, speedFlow, userStatsFlow).collect { deltaCal ->

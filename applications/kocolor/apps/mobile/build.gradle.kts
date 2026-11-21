@@ -45,7 +45,8 @@ android {
     val releaseKeyPassword = System.getenv("RELEASE_KEY_PASSWORD")?.takeIf { it.isNotBlank() }
 
     val isReleaseTaskRequested = gradle.startParameter.taskNames.any { taskName ->
-        taskName.contains("Release", ignoreCase = true) &&
+        (taskName.contains("kocolor", ignoreCase = true) || !taskName.contains(":")) &&
+            taskName.contains("Release", ignoreCase = true) &&
             !taskName.contains("lint", ignoreCase = true) &&
             !taskName.contains("UnitTest", ignoreCase = true) &&
             !taskName.contains("Manifest", ignoreCase = true)
@@ -134,6 +135,8 @@ dependencies {
     implementation(project(":features:health:core"))
     implementation(project(":features:health:hydration"))
     implementation(project(":features:health:nutrition"))
+    // Direct dep: KoColorHealthPermissionModule references Health Connect record types.
+    implementation(libs.androidx.health.connect.client)
     implementation(project(":features:weather"))
     implementation(project(":features:readers:barcode"))
     implementation(project(":features:readers:qrscanner"))

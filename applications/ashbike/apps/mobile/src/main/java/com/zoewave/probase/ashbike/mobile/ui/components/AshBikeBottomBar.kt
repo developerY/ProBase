@@ -31,7 +31,7 @@ fun AshBikeBottomBar(
             label = { Text(stringResource(R.string.applications_ashbike_apps_mobile_bottom_nav_home)) }
         )
         NavigationBarItem(
-            selected = currentDestination is AshBikeDestination.Trips,
+            selected = currentDestination is AshBikeDestination.Trips || currentDestination is AshBikeDestination.RideDetail,
             onClick = { onNavigate(AshBikeDestination.Trips) },
             icon = {
                 if (unsyncedRidesCount > 0) {

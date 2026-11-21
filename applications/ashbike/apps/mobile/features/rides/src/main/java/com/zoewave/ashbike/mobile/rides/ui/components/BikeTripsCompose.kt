@@ -14,12 +14,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.ashbike.mobile.rides.R
 import com.zoewave.ashbike.mobile.rides.ui.RidesEvent
 import com.zoewave.ashbike.mobile.rides.ui.model.BikeRideUiModel
 import com.zoewave.probase.features.health.core.ui.HealthEvent
-import androidx.compose.ui.tooling.preview.Preview
 import com.zoewave.probase.features.health.core.ui.HealthUiState
 
 @Composable

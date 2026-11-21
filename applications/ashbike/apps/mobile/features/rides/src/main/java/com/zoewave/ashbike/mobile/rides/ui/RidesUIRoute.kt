@@ -150,9 +150,9 @@ fun RidesUIRoute(
             BikeTripsCompose(
                 modifier = modifier,
                 bikeRides = state.rides,
-                bikeEvent = ridesViewModel::onEvent,
+                bikeEvent = { ridesViewModel.onEvent(it) },
                 syncedIds = syncedIds, // Pass the synced IDs here
-                healthEvent = healthViewModel::onEvent,
+                healthEvent = { healthViewModel.onEvent(it) },
                 onDeleteClick = { rideId ->
                     ridesViewModel.onEvent(RidesEvent.DeleteItem(rideId))
                 },

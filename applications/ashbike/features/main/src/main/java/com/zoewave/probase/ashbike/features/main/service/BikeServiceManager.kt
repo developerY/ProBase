@@ -43,9 +43,7 @@ class BikeServiceManager @Inject constructor(
 
     fun bindService(activityContext: Context) {
         val intent = Intent(activityContext, BikeForegroundService::class.java)
-        // Start it (so it keeps running in foreground)
-        activityContext.startService(intent)
-        // Bind to it (so we can talk to it)
+        // Bind to it (creates the service but DOES NOT start it permanently in the background yet)
         activityContext.bindService(intent, connection, Context.BIND_AUTO_CREATE)
     }
 

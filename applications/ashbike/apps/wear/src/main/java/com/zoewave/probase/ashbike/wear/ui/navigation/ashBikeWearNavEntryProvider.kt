@@ -60,7 +60,7 @@ fun ashBikeWearNavEntryProvider(
             }
             is AshBikeRoute.Info.Elevation -> ElevationProfileScreen(locations = emptyList())
             is AshBikeRoute.Info.HrGraph -> WeeklyHeartRateGraphScreen(weeklyData = emptyList())
-            is AshBikeRoute.Info.RideMap -> WearRideMapRoute(rideId = "")
+            AshBikeRoute.Info.RideMap -> TODO()
             AshBikeRoute.Info.About -> AboutScreen()
         }
     }

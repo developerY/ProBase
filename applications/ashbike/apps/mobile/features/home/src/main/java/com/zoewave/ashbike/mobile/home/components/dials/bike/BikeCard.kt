@@ -79,3 +79,25 @@ fun BikeCard(
         }
     }
 }
+
+@RequiresApi(Build.VERSION_CODES.S)
+@androidx.compose.ui.tooling.preview.Preview(showBackground = true)
+@Composable
+fun BikeCardPreview() {
+    com.zoewave.probase.core.ui.theme.AshBikeTheme {
+        BikeCard(
+            uiState = HomeUiState.Success(
+                bikeData = com.zoewave.ashbike.model.bike.BikeRideInfo(
+                    location = null, currentSpeed = 0.0, averageSpeed = 0.0, maxSpeed = 0.0,
+                    currentTripDistance = 0f, totalTripDistance = null, remainingDistance = null,
+                    elevationGain = 0.0, elevationLoss = 0.0, caloriesBurned = 0,
+                    rideDuration = "00:00", settings = kotlinx.collections.immutable.persistentMapOf(), heading = 0f,
+                    elevation = 0.0, isBikeConnected = true, batteryLevel = 85, motorPower = null,
+                    rideState = com.zoewave.ashbike.model.bike.RideState.NotStarted, bikeWeatherInfo = null, heartbeat = null,
+                    gpsUpdateIntervalMillis = 0L, ridePath = emptyList()
+                )
+            ),
+            onHomeEvent = {}
+        )
+    }
+}

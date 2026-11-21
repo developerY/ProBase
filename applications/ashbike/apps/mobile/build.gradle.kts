@@ -7,7 +7,6 @@ plugins {
 
     // ✅ 2. Apply Specific Plugins for this App
     alias(libs.plugins.ksp)
-    alias(libs.plugins.mapsplatform.secrets)
     // alias(libs.plugins.androidx.baselineprofile)
 }
 
@@ -16,8 +15,8 @@ android {
 
     defaultConfig {
         applicationId = "com.zoewave.probase.ashbike"
-        versionCode = 1
-        versionName = "0.0.1"
+        versionCode = 3
+        versionName = "0.0.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -37,7 +36,11 @@ android {
                 keyAlias = keyAliasProp
                 keyPassword = keyPasswordProp
             } else {
-                println("⚠️ Release signing keys not found. Release build will not be signed.")
+                println("⚠️ Release signing keys not found. Falling back to debug keys for local testing.")
+                storeFile = signingConfigs.getByName("debug").storeFile
+                storePassword = signingConfigs.getByName("debug").storePassword
+                keyAlias = signingConfigs.getByName("debug").keyAlias
+                keyPassword = signingConfigs.getByName("debug").keyPassword
             }
         }
     }
@@ -102,6 +105,8 @@ dependencies {
     implementation(project(":features:places"))
     implementation(project(":features:ai:configuration"))
     implementation(project(":features:ai:capture"))
+    // Direct dep: the app module binds its own Health Connect permission set.
+    implementation(project(":features:health:core"))
     /* Shared Features (Assuming these paths exist in your monorepo)
     implementation(project(":feature:listings"))
     implementation(project(":feature:camera"))
@@ -165,6 +170,9 @@ dependencies {
 
     // Testing
     testImplementation(libs.junit)
+    // Policy test builds a BikeRide to exercise SyncRideUseCase; the model is otherwise
+    // visible only inside the rides feature (implementation dep), not to this module.
+    testImplementation(project(":applications:ashbike:model"))
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

@@ -83,3 +83,17 @@ fun HeartRateCard(
         }
     }
 }
+
+@androidx.compose.ui.tooling.preview.Preview(showBackground = true)
+@Composable
+fun HeartRateCardPreview() {
+    com.zoewave.probase.core.ui.theme.AshBikeTheme {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(16.dp)) {
+            HeartRateCard(bpm = null)
+            HeartRateCard(bpm = 85)
+            HeartRateCard(bpm = 115)
+            HeartRateCard(bpm = 145)
+            HeartRateCard(bpm = 175)
+        }
+    }
+}
