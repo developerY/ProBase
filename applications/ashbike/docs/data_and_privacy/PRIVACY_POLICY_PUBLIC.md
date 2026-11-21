@@ -1,10 +1,10 @@
-# Privacy Policy for YLabzBike (AshBike)
+# Privacy Policy for AshBike
 
 **Last Updated:** March 30, 2026
 
-Welcome to **YLabzBike: Experimental Dev** (also referred to as **AshBike** within the application). This Privacy Policy applies to the Android applications developed under package identifiers `com.ylabz.basepro.applications.bike` and `com.zoewave.probase.ashbike` by **ZoeWave** / **YLabz** ("we", "us", or "our").
+Welcome to **AshBike**! This Privacy Policy applies to the Android application developed under package identifier `com.zoewave.probase.ashbike` by **ZoeWave** ("we", "us", or "our").
 
-We built YLabzBike (AshBike) to be a powerful, local-first companion for your rides. **We do not track you across apps, we do not serve advertisements, and we do not upload your personal ride data to external servers.**
+We built AshBike to be a powerful, local-first companion for your rides. **We do not track you across apps, we do not serve advertisements, and we do not upload your personal ride data to external servers.**
 
 This policy explains how your data is accessed, processed, and stored on your device.
 
@@ -12,7 +12,7 @@ This policy explains how your data is accessed, processed, and stored on your de
 
 ## 1. Data Collection, Access & In-App Usage
 
-YLabzBike (AshBike) accesses specific device permissions solely to deliver core cycling fitness and telemetry features:
+AshBike accesses specific device permissions solely to deliver core cycling fitness and telemetry features:
 
 ### A. Location Data (`ACCESS_FINE_LOCATION` & `ACCESS_COARSE_LOCATION`)
 * **In-App Usage:** Location access is used during active cycling workouts to calculate live speed, record ride distance, measure elevation changes, and display your route map.
@@ -20,7 +20,7 @@ YLabzBike (AshBike) accesses specific device permissions solely to deliver core 
 * **Privacy Guarantee:** Location data is saved exclusively in the app's local database on your device. It is **never sold, shared with third parties, or transmitted to external servers**.
 
 ### B. Google Health Connect Data
-If you explicitly grant permission, YLabzBike (AshBike) interacts with Android Health Connect to read and write the following fitness data:
+If you explicitly grant permission, AshBike interacts with Android Health Connect to read and write the following fitness data:
 * **Distance (`READ_DISTANCE` / `WRITE_DISTANCE`):** Used by the Ride Tracker and Ride History screens to calculate total mileage per session and sync completed bike rides with Health Connect.
 * **Exercise Sessions (`READ_EXERCISE` / `WRITE_EXERCISE`):** Used by the Bike Computer and Ride Summary features to log structured cycling workouts to Health Connect.
 * **Total Calories Burned (`READ_TOTAL_CALORIES_BURNED` / `WRITE_TOTAL_CALORIES_BURNED`):** Used by the Ride Summary screen to calculate and save estimated energy expenditure for tracked rides.
@@ -36,7 +36,7 @@ Used solely on-device to discover and connect to external heart rate monitors, e
 
 ## 2. Local-First Data Retention & No Third-Party Analytics
 
-* **No Cloud Accounts:** You are not required to create an account or log in to use YLabzBike (AshBike).
+* **No Cloud Accounts:** You are not required to create an account or log in to use AshBike.
 * **Local Storage Only:** Your ride history, routes, and performance statistics are stored in an encrypted/local Room Database on your device.
 * **No Analytics or Trackers:** We do not include third-party tracking SDKs, advertising SDKs (e.g. AdMob, AdID), or external crash reporting engines that automatically collect telemetry.
 
@@ -55,7 +55,7 @@ You have full control over your data:
 
 If you have any questions, feedback, or inquiries regarding this Privacy Policy or data handling practices, please contact us:
 
-* **Application Name:** YLabzBike: Experimental Dev (AshBike)
-* **Package Identifiers:** `com.ylabz.basepro.applications.bike` / `com.zoewave.probase.ashbike`
-* **Developer Name:** ZoeWave / YLabz
-* **Developer Contact Email:** support@zoewave.com
+* **Application Name:** AshBike
+* **Package Identifier:** `com.zoewave.probase.ashbike`
+* **Developer Name:** ZoeWave
+* **Developer Contact Email:** developer@zoewave.com

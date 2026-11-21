@@ -165,7 +165,7 @@ fun AshBikeMainScreen(
             title = { Text(text = "Location Access for Ride Tracking") },
             text = {
                 Text(
-                    text = "YLabzBike (AshBike) accesses your device's location data to track your live cycling speed, distance, elevation, and route map during rides.\n\nYour location data is stored locally on your device and is never sold or shared with third parties."
+                    text = "AshBike accesses your device's location data to track your live cycling speed, distance, elevation, and route map during rides.\n\nYour location data is stored locally on your device and is never sold or shared with third parties."
                 )
             },
             confirmButton = {
