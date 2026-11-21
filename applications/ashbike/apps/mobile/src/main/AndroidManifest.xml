@@ -46,6 +46,12 @@
         android:enableOnBackInvokedCallback="true"
         tools:targetApi="36">
 
+        <!-- ARCore Metadata: Declare as optional so Google Play Console allows installation on non-AR devices -->
+        <meta-data
+            android:name="com.google.ar.core"
+            android:value="optional"
+            tools:replace="android:value" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
