@@ -1,37 +1,61 @@
-# AshBike Privacy Policy (Public Template)
+# Privacy Policy for YLabzBike (AshBike)
 
-**Last Updated:** [Insert Date]
+**Last Updated:** March 30, 2026
 
-Welcome to AshBike! We built AshBike to be a powerful, privacy-first companion for your rides. This means **we do not track you, we do not show you ads, and we do not upload your ride data to our own servers.** 
+Welcome to **YLabzBike: Experimental Dev** (also referred to as **AshBike** within the application). This Privacy Policy applies to the Android applications developed under package identifiers `com.ylabz.basepro.applications.bike` and `com.zoewave.probase.ashbike` by **ZoeWave** / **YLabz** ("we", "us", or "our").
 
-This Privacy Policy outlines how your data is handled strictly on your device.
+We built YLabzBike (AshBike) to be a powerful, local-first companion for your rides. **We do not track you across apps, we do not serve advertisements, and we do not upload your personal ride data to external servers.**
 
-## 1. What Data We Collect & How We Use It
+This policy explains how your data is accessed, processed, and stored on your device.
 
-AshBike operates entirely locally on your device. We request specific device permissions solely to make the app function during your ride. 
+---
 
-*   **Location Data (Foreground & Background):** We require access to your location to track your bike ride route, calculate your speed, and measure distance. We request background location access so AshBike can continue tracking your ride seamlessly even if you turn off your screen or switch to another app while riding. **This location data never leaves your device.** It is saved locally in the app's secure database.
-*   **Health & Fitness Data (Health Connect):** AshBike calculates your calories burned and distance traveled. If you explicitly grant us permission, we write this data (Exercise sessions, Heart Rate, Distance, Calories, Speed, and Elevation) to Android Health Connect. We do not read other apps' data, and we do not transmit your health data to our servers.
-*   **Bluetooth (BLE):** We use Bluetooth to connect locally to your E-Bike and external heart rate monitors or speed/cadence sensors. 
+## 1. Data Collection, Access & In-App Usage
 
-## 2. Where Your Data is Stored
+YLabzBike (AshBike) accesses specific device permissions solely to deliver core cycling fitness and telemetry features:
 
-AshBike is a "local-first" application. 
-*   **No Cloud Storage:** We do not operate a backend server. We do not require you to create an account, and your ride history, routes, and statistics are stored exclusively in a local database (Room) on your phone or smartwatch.
-*   **No Analytics or Trackers:** We do not include third-party tracking SDKs, analytics engines (e.g., Firebase Analytics), or crash reporters that automatically collect device telemetry or usage behavior.
+### A. Location Data (`ACCESS_FINE_LOCATION` & `ACCESS_COARSE_LOCATION`)
+* **In-App Usage:** Location access is used during active cycling workouts to calculate live speed, record ride distance, measure elevation changes, and display your route map.
+* **Ride Service Processing:** Location data is processed while a ride is active using an Android Foreground Service with a persistent status bar notification, allowing tracking to continue seamlessly when your screen is off.
+* **Privacy Guarantee:** Location data is saved exclusively in the app's local database on your device. It is **never sold, shared with third parties, or transmitted to external servers**.
 
-## 3. Data Deletion & Management
+### B. Google Health Connect Data
+If you explicitly grant permission, YLabzBike (AshBike) interacts with Android Health Connect to read and write the following fitness data:
+* **Distance (`READ_DISTANCE` / `WRITE_DISTANCE`):** Used by the Ride Tracker and Ride History screens to calculate total mileage per session and sync completed bike rides with Health Connect.
+* **Exercise Sessions (`READ_EXERCISE` / `WRITE_EXERCISE`):** Used by the Bike Computer and Ride Summary features to log structured cycling workouts to Health Connect.
+* **Total Calories Burned (`READ_TOTAL_CALORIES_BURNED` / `WRITE_TOTAL_CALORIES_BURNED`):** Used by the Ride Summary screen to calculate and save estimated energy expenditure for tracked rides.
+* **Heart Rate (`READ_HEART_RATE` / `WRITE_HEART_RATE`):** Used to display real-time cardiac intensity during rides and log heart rate samples for synced workout sessions.
+* **Speed & Elevation (`READ_SPEED`, `READ_ELEVATION_GAINED`):** Used to display speed and elevation profiles on the ride dashboard and history summary screens.
 
-Because your data lives only on your device, you have complete control over it:
-*   **Deleting Ride History:** You can delete individual rides directly within the AshBike app.
-*   **Uninstalling the App:** Uninstalling AshBike will permanently delete all local ride data stored within the app.
-*   **Health Connect Data:** Data that AshBike has synced to Google Health Connect is managed entirely through the Android Health Connect settings menu, where you can view, manage, and delete it at any time.
+*Note: We do not request or access Steps, Cadence, Sleep, Hydration, or Weight data from Health Connect.*
 
-## 4. Third-Party Integrations
+### C. Bluetooth (BLE)
+Used solely on-device to discover and connect to external heart rate monitors, e-bike hardware controllers, or smart glasses (XR) telemetry displays.
 
-While we do not track you, AshBike uses offline and on-device APIs provided by Google (such as Google Maps for route rendering). Your interaction with the Maps SDK is governed by the Google Privacy Policy.
+---
 
-## 5. Contact Us
+## 2. Local-First Data Retention & No Third-Party Analytics
 
-If you have any questions or concerns regarding this Privacy Policy or how your data is handled locally, please contact us at:
-**[Insert Developer/Support Email Address]**
+* **No Cloud Accounts:** You are not required to create an account or log in to use YLabzBike (AshBike).
+* **Local Storage Only:** Your ride history, routes, and performance statistics are stored in an encrypted/local Room Database on your device.
+* **No Analytics or Trackers:** We do not include third-party tracking SDKs, advertising SDKs (e.g. AdMob, AdID), or external crash reporting engines that automatically collect telemetry.
+
+---
+
+## 3. Data Control & Deletion
+
+You have full control over your data:
+* **In-App Deletion:** You can delete individual rides or clear your entire ride history at any time from the Ride History screen.
+* **App Uninstall:** Uninstalling the app permanently removes all local databases and stored ride routes from your device.
+* **Health Connect Data Management:** Data synced to Google Health Connect can be viewed, modified, or deleted at any time through the system Android Health Connect settings menu (`Settings -> Security & Privacy -> Privacy -> Health Connect`).
+
+---
+
+## 4. Developer Contact Information
+
+If you have any questions, feedback, or inquiries regarding this Privacy Policy or data handling practices, please contact us:
+
+* **Application Name:** YLabzBike: Experimental Dev (AshBike)
+* **Package Identifiers:** `com.ylabz.basepro.applications.bike` / `com.zoewave.probase.ashbike`
+* **Developer Name:** ZoeWave / YLabz
+* **Developer Contact Email:** support@zoewave.com

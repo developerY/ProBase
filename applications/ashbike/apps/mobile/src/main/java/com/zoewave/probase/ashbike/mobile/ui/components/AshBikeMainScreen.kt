@@ -24,11 +24,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -37,6 +39,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -142,18 +146,51 @@ fun AshBikeMainScreen(
         viewModel.onEvent(MainUiEvent.OnPermissionResult(isGranted))
     }
 
+    var showLocationDisclosureModal by remember { mutableStateOf(false) }
+
     LaunchedEffect(Unit) {
         val hasPermission = ContextCompat.checkSelfPermission(
             context, Manifest.permission.ACCESS_FINE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
 
         viewModel.onEvent(MainUiEvent.OnPermissionResult(hasPermission))
-
         if (!hasPermission) {
-            permissionLauncher.launch(
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
-            )
+            showLocationDisclosureModal = true
         }
+    }
+
+    if (showLocationDisclosureModal) {
+        AlertDialog(
+            onDismissRequest = { showLocationDisclosureModal = false },
+            title = { Text(text = "Location Access for Ride Tracking") },
+            text = {
+                Text(
+                    text = "YLabzBike (AshBike) accesses your device's location data to track your live cycling speed, distance, elevation, and route map during rides.\n\nYour location data is stored locally on your device and is never sold or shared with third parties."
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showLocationDisclosureModal = false
+                        permissionLauncher.launch(
+                            arrayOf(
+                                Manifest.permission.ACCESS_FINE_LOCATION,
+                                Manifest.permission.ACCESS_COARSE_LOCATION
+                            )
+                        )
+                    }
+                ) {
+                    Text("Agree & Continue")
+                }
+            },
+            dismissButton = {
+                OutlinedButton(
+                    onClick = { showLocationDisclosureModal = false }
+                ) {
+                    Text("Not Now")
+                }
+            }
+        )
     }
 
     // --- System Back Handler ---
@@ -252,9 +289,7 @@ fun AshBikeMainScreen(
                 )
                 Text(stringResource(R.string.applications_ashbike_apps_mobile_permission_location_required), modifier = Modifier.padding(16.dp))
                 Button(onClick = {
-                    permissionLauncher.launch(
-                        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
-                    )
+                    showLocationDisclosureModal = true
                 }) {
                     Text(stringResource(R.string.applications_ashbike_apps_mobile_permission_grant_permissions))
                 }
