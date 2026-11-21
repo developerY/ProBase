@@ -147,11 +147,9 @@ class BikeForegroundService : LifecycleService() {
             combine(currentEnergyLevelState, appSettingsRepository.longRideEnabledFlow) { level, isLong ->
                 Pair(level, isLong)
             }.collect { (level, isLongRide) ->
-                val isRiding = _rideInfo.value.rideState == RideState.Riding
-                val interval = if (isRiding) level.activeRideIntervalMillis else level.passiveTrackingIntervalMillis
-                val minInterval = if (isRiding) level.activeRideMinUpdateIntervalMillis else level.passiveTrackingMinUpdateIntervalMillis
-
-                startLocationUpdates(interval, minInterval, isLongRide)
+                if (_rideInfo.value.rideState == RideState.Riding) {
+                    startLocationUpdates(level.activeRideIntervalMillis, level.activeRideMinUpdateIntervalMillis, isLongRide)
+                }
             }
         }
 
@@ -215,6 +213,8 @@ class BikeForegroundService : LifecycleService() {
 
     override fun onDestroy() {
         super.onDestroy()
+        trackingEngine.stopRide()
+        caloriesCalculationJob?.cancel()
         wakeLock?.takeIf { it.isHeld }?.release()
     }
 
@@ -459,6 +459,7 @@ class BikeForegroundService : LifecycleService() {
         stopForeground(STOP_FOREGROUND_REMOVE)
         notificationManager.cancel(BikeNotificationManager.NOTIFICATION_ID)
         wakeLock?.takeIf { it.isHeld }?.release()
+        stopSelf()
 
         // 3. Reset StateFlow (But keep location/connection)
         val resetState = getInitialRideInfo().copy(
@@ -472,13 +473,9 @@ class BikeForegroundService : LifecycleService() {
         _rideInfo.value = resetState
         lifecycleScope.launch { bikeRepository.updateRideInfo(resetState) }
 
-        // 4. Return GPS to Passive Mode
-        lifecycleScope.launch {
-            val level = currentEnergyLevelState.first()
-            startLocationUpdates(level.passiveTrackingIntervalMillis, level.passiveTrackingMinUpdateIntervalMillis, appSettingsRepository.longRideEnabledFlow.first())
-        }
-
-        startOrRestartCalorieCalculation()
+        // 4. Power Down the Tracking Engine entirely
+        trackingEngine.stopRide()
+        caloriesCalculationJob?.cancel()
     }
 
     // --- Helpers ---
