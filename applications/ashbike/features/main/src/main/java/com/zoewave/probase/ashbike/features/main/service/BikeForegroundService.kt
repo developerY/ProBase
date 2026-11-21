@@ -153,6 +153,18 @@ class BikeForegroundService : LifecycleService() {
             }
         }
 
+        // Initial GPS Fix: Request location updates on startup until first fix is acquired so WaitingForGpsScreen can complete
+        if (_rideInfo.value.location == null) {
+            lifecycleScope.launch {
+                val level = currentEnergyLevelState.first()
+                startLocationUpdates(
+                    level.activeRideIntervalMillis,
+                    level.activeRideMinUpdateIntervalMillis,
+                    appSettingsRepository.longRideEnabledFlow.first()
+                )
+            }
+        }
+
         // ADD: Listen to the new Engine's GPS stream
         lifecycleScope.launch {
             trackingEngine.currentLocation.collect { point ->
@@ -337,6 +349,7 @@ class BikeForegroundService : LifecycleService() {
 
         )
 
+        val wasLocationNull = _rideInfo.value.location == null
         _rideInfo.value = newInfo
 
         // 4. Update External Consumers
@@ -344,6 +357,10 @@ class BikeForegroundService : LifecycleService() {
 
         if (isFormalRide) {
             notificationManager.updateNotification(BikeNotificationManager.NOTIFICATION_ID, newInfo)
+        } else if (wasLocationNull) {
+            // Once initial location fix is acquired to dismiss WaitingForGpsScreen, stop location updates until user hits Start
+            Log.i(TAG, "Initial GPS fix acquired for WaitingForGpsScreen. Powering down location updates until Start Ride.")
+            trackingEngine.stopRide()
         }
     }
 
