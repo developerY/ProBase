@@ -261,7 +261,8 @@ class BikeForegroundService : LifecycleService() {
         if (prevLoc != null && (prevLoc.latitude != 0.0 || prevLoc.longitude != 0.0)) {
             val lastLoc = Location("").apply { latitude = prevLoc.latitude; longitude = prevLoc.longitude; altitude = _rideInfo.value.elevation }
 
-            if (location.accuracy <= MAX_ACCURACY_THRESHOLD_METERS) {
+            // Guard against GPS bounce while stationary: only add distance if device reports speed > 0.5 m/s (~1.8 km/h)
+            if (location.accuracy <= MAX_ACCURACY_THRESHOLD_METERS && location.speed > 0.5f) {
                 val dist = location.distanceTo(lastLoc)
                 if (dist >= MIN_DISTANCE_THRESHOLD_METERS) {
                     continuousDistanceMeters += dist
@@ -301,7 +302,8 @@ class BikeForegroundService : LifecycleService() {
             formalRideSegmentMaxSpeedKph = max(formalRideSegmentMaxSpeedKph, speedKph)
             displayMaxSpeed = formalRideSegmentMaxSpeedKph
 
-            displayAverageSpeed = if (segmentDurationSeconds > MIN_TIME_FOR_AVG_SPEED_SECONDS && segmentDistMeters > 0) {
+            // Require at least 30 meters of true movement before computing average speed to prevent GPS noise divide artifacts
+            displayAverageSpeed = if (segmentDurationSeconds > MIN_TIME_FOR_AVG_SPEED_SECONDS && segmentDistMeters >= 30.0) {
                 (segmentDistMeters / segmentDurationSeconds) * 3.6
             } else {
                 -1.0 // Code for "Show --"
@@ -321,7 +323,7 @@ class BikeForegroundService : LifecycleService() {
             displayDuration = formatDuration(sessionDurationMillis)
             displayMaxSpeed = continuousMaxSpeedKph
 
-            displayAverageSpeed = if (sessionDurationSeconds > MIN_TIME_FOR_AVG_SPEED_SECONDS && continuousDistanceMeters > 0) {
+            displayAverageSpeed = if (sessionDurationSeconds > MIN_TIME_FOR_AVG_SPEED_SECONDS && continuousDistanceMeters >= 30.0) {
                 (continuousDistanceMeters / sessionDurationSeconds) * 3.6
             } else {
                 -1.0 // Code for "Show --"
