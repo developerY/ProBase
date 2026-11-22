@@ -40,7 +40,7 @@ fun WearRideMapRoute(
         } else {
             // Fallback if a ride was saved without GPS data
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(text = "No GPS data for this ride")
+                Text(text = androidx.compose.ui.res.stringResource(com.zoewave.ashbike.wear.rides.R.string.applications_ashbike_apps_wear_features_rides_no_gps_data))
             }
         }
     }

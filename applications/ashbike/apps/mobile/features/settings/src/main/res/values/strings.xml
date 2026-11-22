@@ -62,6 +62,7 @@
     <string name="applications_ashbike_apps_mobile_features_settings_theme_settings_card_title">Theme Settings</string>
     <string name="applications_ashbike_apps_mobile_features_settings_theme_icon_cd">Theme selection icon</string>
     <string name="applications_ashbike_apps_mobile_features_settings_settings_bike_advanced">settings_bike_advanced</string>
+    <string name="applications_ashbike_apps_mobile_features_settings_health_cd">Health</string>
     <string name="applications_ashbike_apps_mobile_features_settings_test_hello_world">Hello World!</string>
     <string name="applications_ashbike_apps_mobile_features_settings_test_feature_title">AshBike Settings Feature</string>
     <string name="applications_ashbike_apps_mobile_features_settings_test_navigation_button">Test Navigation to Settings</string>

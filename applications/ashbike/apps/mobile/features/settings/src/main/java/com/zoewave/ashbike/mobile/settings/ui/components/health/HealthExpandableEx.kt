@@ -48,7 +48,7 @@ fun HealthExpandableEx(
             ) {
                 Icon(
                     imageVector = Icons.Default.Favorite,
-                    contentDescription = "Health",
+                    contentDescription = androidx.compose.ui.res.stringResource(com.zoewave.ashbike.mobile.settings.R.string.applications_ashbike_apps_mobile_features_settings_health_cd),
                     tint = MaterialTheme.colorScheme.primary
                 )
                 Spacer(modifier = Modifier.width(16.dp))

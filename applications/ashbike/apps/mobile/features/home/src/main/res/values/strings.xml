@@ -65,4 +65,8 @@
     <string name="applications_ashbike_apps_mobile_features_home_cd_show_map">Show Map</string>
     <string name="applications_ashbike_apps_mobile_features_home_cd_suspension">Suspension</string>
     <string name="applications_ashbike_apps_mobile_features_home_cd_heart_rate">Heart Rate</string>
+
+    <!-- Glass Projection Toasts -->
+    <string name="applications_ashbike_apps_mobile_features_home_toast_projection_failed">Projection Failed: %1$s</string>
+    <string name="applications_ashbike_apps_mobile_features_home_toast_android15_required">Glasses require Android 15+</string>
 </resources>

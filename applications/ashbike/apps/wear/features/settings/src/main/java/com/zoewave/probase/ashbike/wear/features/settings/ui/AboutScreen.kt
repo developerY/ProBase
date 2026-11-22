@@ -29,7 +29,7 @@ fun AboutScreen(modifier: Modifier = Modifier) {
         // swap this to your actual painterResource AshBike logo!)
         Icon(
             imageVector = Icons.Rounded.DirectionsBike,
-            contentDescription = "AshBike Logo",
+            contentDescription = androidx.compose.ui.res.stringResource(com.zoewave.ashbike.wear.settings.R.string.applications_ashbike_apps_wear_features_settings_about_icon_cd),
             modifier = Modifier.size(48.dp),
             tint = MaterialTheme.colors.primary
         )
