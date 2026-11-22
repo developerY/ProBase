@@ -5,7 +5,7 @@
 ## 📱 Google Play Store "What's New" (Copy-Paste for Play Console)
 
 ```text
-What's new in AshBike v0.0.3:
+What's new in AshBike v0.0.4:
 
 • Enhanced GPS Accuracy: Added stationary noise filtering so distance and average speed stay precise while stopped.
 • Improved Calorie Engine: Overhauled calorie calculations with aerodynamic MET curves tailored to your riding pace and weight.
