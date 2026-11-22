@@ -75,6 +75,15 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Health Connect Privacy Policy Intent Handling
+        val action = intent?.action
+        if (action == "androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" || action == Intent.ACTION_VIEW_PERMISSION_USAGE) {
+            val privacyPolicyUrl = "https://www.ylabz.com" // Update to your actual privacy policy URL
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(privacyPolicyUrl)))
+            finish()
+            return
+        }
+
         // Tags all future events from this user's phone (removed per privacy guidelines)
 
         // Initial permission check trigger

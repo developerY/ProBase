@@ -172,12 +172,12 @@ fun AshBikeMainScreen(
                 Button(
                     onClick = {
                         showLocationDisclosureModal = false
-                        permissionLauncher.launch(
-                            arrayOf(
-                                Manifest.permission.ACCESS_FINE_LOCATION,
-                                Manifest.permission.ACCESS_COARSE_LOCATION
-                            )
+                        val perms = arrayOf(
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION,
+                            Manifest.permission.POST_NOTIFICATIONS
                         )
+                        permissionLauncher.launch(perms)
                     }
                 ) {
                     Text(stringResource(R.string.applications_ashbike_apps_mobile_location_disclosure_agree))
