@@ -262,7 +262,12 @@ class BikeForegroundService : LifecycleService() {
             val lastLoc = Location("").apply { latitude = prevLoc.latitude; longitude = prevLoc.longitude; altitude = _rideInfo.value.elevation }
 
             // Guard against GPS bounce while stationary: only add distance if device reports speed > 0.5 m/s (~1.8 km/h)
-            if (location.accuracy <= MAX_ACCURACY_THRESHOLD_METERS && location.speed > 0.5f) {
+            // (Fallback to calculating distance delta over time if the hardware doesn't natively populate hasSpeed())
+            val effectiveSpeed = if (location.hasSpeed()) location.speed else {
+                val timeDeltaSeconds = (location.time - _rideInfo.value.lastGpsUpdateTime) / 1000f
+                if (timeDeltaSeconds > 0f) (location.distanceTo(lastLoc) / timeDeltaSeconds) else 0f
+            }
+            if (location.accuracy <= MAX_ACCURACY_THRESHOLD_METERS && effectiveSpeed > 0.5f) {
                 val dist = location.distanceTo(lastLoc)
                 if (dist >= MIN_DISTANCE_THRESHOLD_METERS) {
                     continuousDistanceMeters += dist

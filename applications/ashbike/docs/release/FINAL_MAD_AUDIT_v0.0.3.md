@@ -47,13 +47,14 @@ This is the most critical area for Play Store approval, and AshBike is in perfec
     *   Only `foregroundServiceType="location"` is requested on Mobile. Overly broad `connectedDevice` and `dataSync` types were dropped.
     *   Mobile and Wear Service types exactly match their manifest `<uses-permission>` pairs.
 *   **Hardware Compatibility (`<uses-feature>`):**
-    *   Camera, microphone, faketouch, and portrait orientation are strictly declared with `android:required="false"`. This guarantees Google Play will not block tablet, chromebook, or non-camera device installations.
+    *   `android.hardware.location.gps` is **intentionally required** for high-accuracy outdoor cycling telemetry.
+    *   Camera, microphone, faketouch, and portrait orientation are strictly declared with `android:required="false"`. This guarantees Google Play will not unnecessarily block non-camera or non-touch device installations.
 *   **Privacy Policy Intercepts:**
-    *   `MainActivity` correctly intercepts `androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE` and `Intent.ACTION_VIEW_PERMISSION_USAGE` to launch the exact privacy policy URL for Health Connect auditors.
+    *   `MainActivity` correctly intercepts `androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE` and the `<activity-alias>` correctly wires `android.intent.action.VIEW_PERMISSION_USAGE` with `android.permission.START_VIEW_PERMISSION_USAGE` and the `HEALTH_PERMISSIONS` category to satisfy Android 14+ Health Connect auditing.
 
 ## 4. ⚙️ Background Execution & Resource Management
 
-*   **CPU WakeLocks:** `PARTIAL_WAKE_LOCK` is safely acquired when a ride begins and strictly released in the `finally` or `onDestroy()` blocks.
+*   **CPU WakeLocks:** `PARTIAL_WAKE_LOCK` is safely acquired with a hard 10-hour timeout ceiling when a ride begins, ensuring battery safety if the app crashes, and strictly released in the `finally` or `onDestroy()` blocks.
 *   **Clean Teardown:** The fatal "lingering ghost service" bug is fixed. Hitting **Stop** invokes `trackingEngine.stopRide()`, `caloriesCalculationJob.cancel()`, `stopForeground(STOP_FOREGROUND_REMOVE)`, and `stopSelf()`. The app exits the Android 14 active apps tray instantly.
 
 ## 5. 📦 Build & Release Readiness
