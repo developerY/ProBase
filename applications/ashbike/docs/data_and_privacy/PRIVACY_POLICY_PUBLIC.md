@@ -37,7 +37,7 @@ Used solely on-device to discover and connect to external heart rate monitors, e
 ## 2. Local-First Data Retention & No Third-Party Analytics
 
 * **No Cloud Accounts:** You are not required to create an account or log in to use AshBike.
-* **Local Storage Only:** Your ride history, routes, and performance statistics are stored in an encrypted/local Room Database on your device.
+* **Local Storage Only:** Your ride history, routes, and performance statistics are stored exclusively in a secure, local Room Database on your device.
 * **No Analytics or Trackers:** We do not include third-party tracking SDKs, advertising SDKs (e.g. AdMob, AdID), or external crash reporting engines that automatically collect telemetry.
 
 ---
