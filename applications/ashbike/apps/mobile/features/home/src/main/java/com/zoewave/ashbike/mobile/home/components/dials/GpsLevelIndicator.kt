@@ -138,7 +138,7 @@ fun GpsLevelIndicator(
             val icon = if (showCountdown) Icons.Default.SatelliteAlt else Icons.Default.Satellite
             Icon(
                 imageVector = icon,
-                contentDescription = "GPS Status",
+                contentDescription = androidx.compose.ui.res.stringResource(com.zoewave.ashbike.mobile.home.R.string.applications_ashbike_apps_mobile_features_home_cd_gps_status),
                 tint = animatedColor.value,
                 modifier = Modifier.size(24.dp)
             )

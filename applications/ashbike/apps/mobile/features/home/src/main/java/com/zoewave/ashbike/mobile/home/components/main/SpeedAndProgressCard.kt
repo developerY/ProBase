@@ -96,7 +96,7 @@ fun SpeedAndProgressCard(
 
             Icon(
                 imageVector = Icons.Default.WbSunny,
-                contentDescription = "Toggle Weather",
+                contentDescription = androidx.compose.ui.res.stringResource(com.zoewave.ashbike.mobile.home.R.string.applications_ashbike_apps_mobile_features_home_cd_toggle_weather),
                 tint = contentColor.copy(alpha = 0.8f),
                 modifier = Modifier
                     .align(Alignment.TopCenter)

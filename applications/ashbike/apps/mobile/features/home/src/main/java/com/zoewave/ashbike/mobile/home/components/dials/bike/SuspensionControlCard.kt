@@ -58,13 +58,13 @@ fun SuspensionControlCard(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     imageVector = Icons.Default.Tune,
-                    contentDescription = "Suspension",
+                    contentDescription = androidx.compose.ui.res.stringResource(com.zoewave.ashbike.mobile.home.R.string.applications_ashbike_apps_mobile_features_home_cd_suspension),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Column {
                     Text(
-                        text = "Suspension",
+                        text = androidx.compose.ui.res.stringResource(com.zoewave.ashbike.mobile.home.R.string.applications_ashbike_apps_mobile_features_home_cd_suspension),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

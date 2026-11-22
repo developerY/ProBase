@@ -162,10 +162,10 @@ fun AshBikeMainScreen(
     if (showLocationDisclosureModal) {
         AlertDialog(
             onDismissRequest = { showLocationDisclosureModal = false },
-            title = { Text(text = "Location Access for Ride Tracking") },
+            title = { Text(text = stringResource(R.string.applications_ashbike_apps_mobile_location_disclosure_title)) },
             text = {
                 Text(
-                    text = "AshBike accesses your device's location data to track your live cycling speed, distance, elevation, and route map during rides.\n\nYour location data is stored locally on your device and is never sold or shared with third parties."
+                    text = stringResource(R.string.applications_ashbike_apps_mobile_location_disclosure_message)
                 )
             },
             confirmButton = {
@@ -180,14 +180,14 @@ fun AshBikeMainScreen(
                         )
                     }
                 ) {
-                    Text("Agree & Continue")
+                    Text(stringResource(R.string.applications_ashbike_apps_mobile_location_disclosure_agree))
                 }
             },
             dismissButton = {
                 OutlinedButton(
                     onClick = { showLocationDisclosureModal = false }
                 ) {
-                    Text("Not Now")
+                    Text(stringResource(R.string.applications_ashbike_apps_mobile_location_disclosure_not_now))
                 }
             }
         )

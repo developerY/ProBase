@@ -15,4 +15,7 @@
     <string name="applications_ashbike_apps_wear_features_settings_ebike_icon_description">E-Bike</string>
     <string name="applications_ashbike_apps_wear_features_settings_ashbike_labs_label">AshBike Labs</string>
     <string name="applications_ashbike_apps_wear_features_settings_experiments_icon_description">Experiments</string>
+    <string name="applications_ashbike_apps_wear_features_settings_about_label">About AshBike</string>
+    <string name="applications_ashbike_apps_wear_features_settings_version_format">Version 1.0.0</string>
+    <string name="applications_ashbike_apps_wear_features_settings_about_icon_cd">About icon</string>
 </resources>

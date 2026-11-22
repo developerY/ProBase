@@ -46,13 +46,13 @@ fun WearSettingsPage(
         // --- V1 Active Settings ---
         item {
             Chip(
-                label = { Text("About AshBike") },
-                secondaryLabel = { Text("Version 1.0.0") },
+                label = { Text(stringResource(R.string.applications_ashbike_apps_wear_features_settings_about_label)) },
+                secondaryLabel = { Text(stringResource(R.string.applications_ashbike_apps_wear_features_settings_version_format)) },
                 onClick = onNavigateToAbout, // Wired up the navigation!
                 icon = {
                     Icon(
                         imageVector = Icons.Rounded.Info,
-                        contentDescription = "About icon"
+                        contentDescription = stringResource(R.string.applications_ashbike_apps_wear_features_settings_about_icon_cd)
                     )
                 },
                 colors = ChipDefaults.secondaryChipColors(),

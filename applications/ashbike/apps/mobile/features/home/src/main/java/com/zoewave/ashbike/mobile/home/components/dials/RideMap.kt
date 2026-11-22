@@ -37,7 +37,7 @@ fun RideMap(
         ) {
             Icon(
                 imageVector = Icons.Default.Map,
-                contentDescription = "Show Map",
+                contentDescription = androidx.compose.ui.res.stringResource(com.zoewave.ashbike.mobile.home.R.string.applications_ashbike_apps_mobile_features_home_cd_show_map),
                 modifier = Modifier.size(24.dp)
             )
         }

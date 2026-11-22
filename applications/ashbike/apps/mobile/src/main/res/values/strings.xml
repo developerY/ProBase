@@ -43,4 +43,10 @@
 
     <!-- Content description for accessibility -->
     <string name="applications_ashbike_apps_mobile_weather_content_desc">Current weather: %1$s, %2$d°C</string>
+
+    <!-- Prominent Disclosure Dialog for Location -->
+    <string name="applications_ashbike_apps_mobile_location_disclosure_title">Location Access for Ride Tracking</string>
+    <string name="applications_ashbike_apps_mobile_location_disclosure_message">AshBike accesses your device\'s location data to track your live cycling speed, distance, elevation, and route map during rides.\n\nYour location data is stored locally on your device and is never sold or shared with third parties.</string>
+    <string name="applications_ashbike_apps_mobile_location_disclosure_agree">Agree &amp; Continue</string>
+    <string name="applications_ashbike_apps_mobile_location_disclosure_not_now">Not Now</string>
 </resources>

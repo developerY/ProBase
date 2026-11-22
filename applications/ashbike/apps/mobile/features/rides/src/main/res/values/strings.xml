@@ -92,4 +92,18 @@
     <string name="applications_ashbike_apps_mobile_features_rides_test_hello_world">Hello World!</string>
     <string name="applications_ashbike_apps_mobile_features_rides_test_feature_title">AshBike Rides History Feature</string>
     <string name="applications_ashbike_apps_mobile_features_rides_test_navigation_button">Test Navigation to Settings</string>
+
+    <!-- Health Connect Sync Dialogs & Icons -->
+    <string name="applications_ashbike_apps_mobile_features_rides_sync_complete_title">Sync Complete</string>
+    <string name="applications_ashbike_apps_mobile_features_rides_sync_complete_message">Your ride has been successfully synced to Health Connect.</string>
+    <string name="applications_ashbike_apps_mobile_features_rides_sync_action_ok">OK</string>
+    <string name="applications_ashbike_apps_mobile_features_rides_sync_successful_title">Sync Successful</string>
+    <string name="applications_ashbike_apps_mobile_features_rides_sync_successful_message_format">Your ride has been written to Health Connect!\n\n%1$s</string>
+
+    <!-- Section Header Content Descriptions -->
+    <string name="applications_ashbike_apps_mobile_features_rides_cd_health_connected">Health Connected</string>
+    <string name="applications_ashbike_apps_mobile_features_rides_cd_health_error">Health Error</string>
+    <string name="applications_ashbike_apps_mobile_features_rides_cd_connect_health">Connect Health</string>
+    <string name="applications_ashbike_apps_mobile_features_rides_cd_delete_all">Delete all</string>
+    <string name="applications_ashbike_apps_mobile_features_rides_cd_delete_ride">Delete ride</string>
 </resources>
