@@ -39,6 +39,6 @@ google-services-zoewave.json
 # No Python Scripts
 *.py
 
-# No Shell Scitps
-*.sh
+# Audit Dumps
+ashbike_audit_report.txt
 

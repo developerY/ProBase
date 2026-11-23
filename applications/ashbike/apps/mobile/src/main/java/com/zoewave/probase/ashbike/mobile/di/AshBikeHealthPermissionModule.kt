@@ -1,7 +1,6 @@
 package com.zoewave.probase.ashbike.mobile.di
 
 import androidx.health.connect.client.permission.HealthPermission
-import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
 import androidx.health.connect.client.records.DistanceRecord
 import androidx.health.connect.client.records.ExerciseSessionRecord
 import androidx.health.connect.client.records.HeartRateRecord
@@ -20,7 +19,7 @@ import javax.inject.Singleton
  * Each app binds its own [AppHealthPermissionPolicy] so Play-policy scoping in one app can never
  * silently break another app's sync again. This set 1:1 covers every record type AshBike reads or writes:
  * - Ride sync (`SyncRideUseCase`): writes ExerciseSession, Distance, TotalCaloriesBurned, HeartRate.
- * - Dashboard load (`HealthViewModel.initialLoad`): reads Exercise, Distance, Total/ActiveCalories, HeartRate.
+ * - Dashboard load (`HealthViewModel.initialLoad`): reads Exercise, Distance, TotalCalories, HeartRate.
  * Guarded by [AshBikeHealthPermissionPolicyTest].
  */
 @Module
@@ -38,7 +37,6 @@ abstract class AshBikeHealthPermissionModule {
 class AshBikeHealthPermissionPolicy @Inject constructor() : AppHealthPermissionPolicy {
     override val permissions: Set<String> = setOf(
         HealthPermission.getReadPermission(TotalCaloriesBurnedRecord::class),
-        HealthPermission.getReadPermission(ActiveCaloriesBurnedRecord::class),
         HealthPermission.getReadPermission(ExerciseSessionRecord::class),
         HealthPermission.getReadPermission(DistanceRecord::class),
         HealthPermission.getReadPermission(HeartRateRecord::class),
