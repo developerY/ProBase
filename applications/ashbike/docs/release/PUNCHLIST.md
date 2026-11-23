@@ -77,8 +77,8 @@ translations, hosts the videos, and the listing itself is done. Items below are 
     to match. Either way all three layers must agree.
   - Accept: manifest, runtime policy, and policy doc list exactly the same HC types.
 
-- [ ] **9. Settle the Firebase project config.** `google-services-ylabz.json` sits next to
-  `google-services.json` (undecided), both pointing at `android-zoewave`.
+- [ ] **9. Settle the Firebase project config.**
+  - Confirm the production project (`android-zoewave`), restrict API keys to the app
   - Confirm the production project, delete or document the variant, restrict API keys to the app
     + upload/Play-signing certs.
   - Accept: one prod config, restrictions in place, no stray variant.

@@ -31,7 +31,7 @@ Findings below come from a static audit of this repo. Re-verify each line before
 | Backup | Mobile uses `android:fullBackupContent="true"` (default rules); extraction rules commented out; only the glass feature ships `backup_rules.xml` | ⚠️ Write explicit rules for Room cache |
 | Tests | Only `ExampleUnitTest` / `ExampleInstrumentedTest` placeholders; TestPlan targets 80% unit coverage | 🛑 No real coverage on tracking/sync |
 | Store assets | Listing copy drafted (`Info.md`); `PlayStore/Graphics/` **empty**; Wear has one `ic_launcher-playstore.png` | ⚠️ Screenshots/feature graphic/phone+Wear assets missing |
-| `google-services.json` | Committed for mobile (+ `google-services-ylabz.json` variant) and wear, same Firebase project `android-zoewave` | ⚠️ Confirm production project + restrict API keys |
+| `google-services.json` | Committed for mobile and wear, same Firebase project `android-zoewave` | ⚠️ Confirm production project + restrict API keys |
 | Asset packs | Mobile references `assetPacks += setOf(":features:ai:model_pack")` | ⚠️ Verify the pack exists and is wanted in the release AAB |
 
 ---
@@ -150,8 +150,7 @@ Findings below come from a static audit of this repo. Re-verify each line before
   and actual network behavior all agree.
 
 ### P0-7. Lock the production Firebase / Maps configuration
-- [ ] Confirm `android-zoewave` is the production Firebase project (both `google-services.json` files point there);
-  decide the fate of `apps/mobile/google-services-ylabz.json` (flavor file? delete if unused).
+- [ ] Confirm `android-zoewave` is the production Firebase project.
 - [ ] Restrict API keys (Android-app + SHA-1/SHA-256 of upload **and** Play-signing certs) and enable App Check if any callable backend exists.
 - [ ] Audit Maps: `google.maps.compose` is a dependency but the secrets-plugin block is commented out in `apps/mobile/build.gradle.kts`.
   Either wire the key properly (never committed) or drop the dependency if Smart Trip Maps are fully offline.
