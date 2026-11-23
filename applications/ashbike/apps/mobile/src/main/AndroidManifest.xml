@@ -154,6 +154,16 @@
             tools:node="remove"
             tools:ignore="MissingClass" />
 
+        <!-- Remove unused dataSync foreground services from Play Asset Delivery and WorkManager to avoid Play Console FGS policy rejections -->
+        <service
+            android:name="androidx.work.impl.foreground.SystemForegroundService"
+            tools:node="remove"
+            tools:ignore="MissingClass" />
+        <service
+            android:name="com.google.android.play.core.assetpacks.ExtractionForegroundService"
+            tools:node="remove"
+            tools:ignore="MissingClass" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"

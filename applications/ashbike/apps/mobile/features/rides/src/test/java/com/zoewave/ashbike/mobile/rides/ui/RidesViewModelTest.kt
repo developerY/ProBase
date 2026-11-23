@@ -27,7 +27,7 @@ class RidesViewModelTest {
     private val bikeRideRepo: BikeRideRepo = mockk()
     private val syncRideUseCase: SyncRideUseCase = mockk()
     private val markRideAsSyncedUseCase: MarkRideAsSyncedUseCase = mockk()
-    private val testDispatcher = StandardTestDispatcher()
+    private val testDispatcher = kotlinx.coroutines.test.UnconfinedTestDispatcher()
 
     @Before
     fun setup() {

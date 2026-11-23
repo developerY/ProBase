@@ -9,6 +9,10 @@ plugins {
 android {
     // Unique namespace for the Home Feature
     namespace = "com.zoewave.ashbike.mobile.rides"
+
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
 }
 
 dependencies {
