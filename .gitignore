@@ -39,3 +39,6 @@ google-services-zoewave.json
 # No Python Scripts
 *.py
 
+# No Shell Scitps
+*.sh
+
