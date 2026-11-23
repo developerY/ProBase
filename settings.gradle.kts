@@ -70,6 +70,7 @@ include(":applications:ashbike:database")
 include(":applications:ashbike:apps:mobile")
 include(":applications:ashbike:apps:wear")
 include(":applications:ashbike:features:main")
+include(":applications:ashbike:features:ble")
 //include(":applications:ashbike:features:settings")
 
 include(":core:data")
