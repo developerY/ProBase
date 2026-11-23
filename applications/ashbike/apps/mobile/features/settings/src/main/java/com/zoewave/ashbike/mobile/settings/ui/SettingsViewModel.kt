@@ -81,49 +81,36 @@ class SettingsViewModel @Inject constructor(
             initialValue = true
         )*/
 
+    private val telemetryStateFlow = combine(
+        appRepo.crashlyticsEnabledFlow,
+        appRepo.analyticsEnabledFlow
+    ) { crash, analytics ->
+        Pair(crash, analytics)
+    }
+
     val uiState: StateFlow<SettingsUiState> =
         combine(
             _locallySelectedEnergyLevel,
             settingsSelections,
             profileData,
-            profileRepo.profileReviewedOrSavedFlow,
             appRepo.gpsAccuracyFlow,
-            appRepo.longRideEnabledFlow, // Added for isLongRideEnabled
-            _expandedSection // ✅ 1. Add this flow to the combine block
-        ) { localOverride, selections, profile, profileHasBeenReviewedOrSaved, savedEnergyLevel, isLongRideEnabled, expandedSectionId -> // Added isLongRideEnabled
+            telemetryStateFlow,
+            _expandedSection
+        ) { localOverride, selections, profile, savedEnergyLevel, telemetry, expandedSectionId ->
 
-            // This is the key change: Use the local selection if it exists, otherwise use the saved one.
-            // This prevents the UI from "snapping back" while the save is in progress.
             val energyLevel = localOverride ?: savedEnergyLevel
-
-            Log.d(
-                "ViewModelCombine",
-                "Profile in combine: Name='${profile.name}', H='${profile.heightCm}', W='${profile.weightKg}'"
-            )
-            Log.d(
-                "ViewModelCombine",
-                "Profile reviewed or saved by user: $profileHasBeenReviewedOrSaved"
-            )
-            Log.d("ViewModelCombine", "Energy Level in combine: $energyLevel")
-            Log.d(
-                "ViewModelCombine",
-                "Long Ride Enabled in combine: $isLongRideEnabled"
-            ) // Added for logging
-
-            val actuallyIncomplete = !profileHasBeenReviewedOrSaved
-            Log.d(
-                "ViewModelCombine",
-                "Calculated actuallyIncomplete (isProfileIncomplete): $actuallyIncomplete"
-            )
+            val isLongRideEnabled = selections[AppPreferenceKeys.KEY_LONG_RIDE_ENABLED]?.toBoolean() ?: false
 
             SettingsUiState.Success(
                 options = staticOptions,
                 selections = selections,
                 profile = profile,
-                isProfileIncomplete = actuallyIncomplete,
+                isProfileIncomplete = false,
                 currentEnergyLevel = energyLevel,
-                isLongRideEnabled = isLongRideEnabled, // Added for isLongRideEnabled
-                expandedSectionId = expandedSectionId // ✅ 3. Pass it to the UI State
+                isLongRideEnabled = isLongRideEnabled,
+                isCrashlyticsEnabled = telemetry.first,
+                isAnalyticsEnabled = telemetry.second,
+                expandedSectionId = expandedSectionId
             )
         }
             .map { successState -> successState as SettingsUiState }
@@ -197,12 +184,28 @@ class SettingsViewModel @Inject constructor(
                     Log.d("SettingsViewModel", "Updating Long Ride Enabled to: ${event.enabled}")
                     try {
                         appRepo.setLongRideEnabled(event.enabled)
-                        Log.d(
-                            "SettingsViewModel",
-                            "Successfully called repo to set long ride enabled."
-                        )
                     } catch (e: Exception) {
                         Log.e("SettingsViewModel", "Failed to set long ride enabled.", e)
+                    }
+                }
+            }
+
+            is SettingsEvent.UpdateCrashlyticsEnabled -> {
+                viewModelScope.launch {
+                    try {
+                        appRepo.setCrashlyticsEnabled(event.enabled)
+                    } catch (e: Exception) {
+                        Log.e("SettingsViewModel", "Failed to set Crashlytics enabled.", e)
+                    }
+                }
+            }
+
+            is SettingsEvent.UpdateAnalyticsEnabled -> {
+                viewModelScope.launch {
+                    try {
+                        appRepo.setAnalyticsEnabled(event.enabled)
+                    } catch (e: Exception) {
+                        Log.e("SettingsViewModel", "Failed to set Analytics enabled.", e)
                     }
                 }
             }

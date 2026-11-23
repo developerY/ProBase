@@ -1,12 +1,10 @@
 # Privacy Policy for AshBike
 
-**Last Updated:** March 30, 2026
+**Last Updated:** November 2026
 
 Welcome to **AshBike**! This Privacy Policy applies to the Android application developed under package identifier `com.zoewave.probase.ashbike` by **ZoeWave** ("we", "us", or "our").
 
-We built AshBike to be a powerful, local-first companion for your rides. **We do not track you across apps, we do not serve advertisements, and we do not upload your personal ride data to external servers.**
-
-This policy explains how your data is accessed, processed, and stored on your device.
+We built AshBike to be a powerful, privacy-focused companion for your rides. This policy explains how your data is accessed, processed, stored, and managed on your device.
 
 ---
 
@@ -25,7 +23,6 @@ If you explicitly grant permission, AshBike interacts with Android Health Connec
 * **Exercise Sessions (`READ_EXERCISE` / `WRITE_EXERCISE`):** Used by the Bike Computer and Ride Summary features to log structured cycling workouts to Health Connect.
 * **Total Calories Burned (`READ_TOTAL_CALORIES_BURNED` / `WRITE_TOTAL_CALORIES_BURNED`):** Used by the Ride Summary screen to calculate and save estimated energy expenditure for tracked rides.
 * **Heart Rate (`READ_HEART_RATE` / `WRITE_HEART_RATE`):** Used to display real-time cardiac intensity during rides and log heart rate samples for synced workout sessions.
-* **Speed & Elevation (`READ_SPEED`, `READ_ELEVATION_GAINED`):** Used to display speed and elevation profiles on the ride dashboard and history summary screens.
 
 *Note: We do not request or access Steps, Cadence, Sleep, Hydration, or Weight data from Health Connect.*
 
@@ -34,20 +31,24 @@ Used solely on-device to discover and connect to external heart rate monitors, e
 
 ---
 
-## 2. Local-First Data Retention & No Third-Party Analytics
+## 2. Telemetry, Crash Reporting & Analytics
 
-* **No Cloud Accounts:** You are not required to create an account or log in to use AshBike.
-* **Local Storage Only:** Your ride history, routes, and performance statistics are stored exclusively in a secure, local Room Database on your device.
-* **No Analytics or Trackers:** We do not include third-party tracking SDKs, advertising SDKs (e.g. AdMob, AdID), or external crash reporting engines that automatically collect telemetry.
+To ensure application stability, diagnose bugs, and improve ride features, AshBike includes third-party SDKs provided by Google Firebase:
+
+* **Firebase Crashlytics:** Collects anonymized crash logs, stack traces, and device diagnostic state when an unexpected crash occurs.
+* **Firebase Analytics:** Collects high-level feature interaction metrics and performance insights to help us optimize app responsiveness.
+* **Advertising ID Collection Disabled:** We explicitly disable Google Advertising ID (`google_analytics_adid_collection_enabled = false`). We do not track you across other applications, nor do we serve ads.
+* **Enabled by Default & User Opt-Out Control:** Both Crashlytics and Analytics are enabled by default on app launch to ensure diagnostic reliability out of the box. You have complete control to independently turn off **Crash Reporting** or **Usage Analytics** at any time in the app **Settings**.
 
 ---
 
-## 3. Data Control & Deletion
+## 3. Local-First Storage & Data Control
 
-You have full control over your data:
+* **No Cloud Accounts Required:** You are not required to create an account or log in to use AshBike.
+* **Local Storage & Backup Exclusion:** Your ride history, routes, and performance statistics are stored in an app-private Room Database on your device. Ride data is explicitly excluded from cloud backup and device transfer rules to safeguard your privacy.
 * **In-App Deletion:** You can delete individual rides or clear your entire ride history at any time from the Ride History screen.
 * **App Uninstall:** Uninstalling the app permanently removes all local databases and stored ride routes from your device.
-* **Health Connect Data Management:** Data synced to Google Health Connect can be viewed, modified, or deleted at any time through the system Android Health Connect settings menu (`Settings -> Security & Privacy -> Privacy -> Health Connect`).
+* **Health Connect Data Management:** Data synced to Google Health Connect can be viewed, modified, or deleted at any time through system settings (`Settings -> Security & Privacy -> Privacy -> Health Connect`).
 
 ---
 

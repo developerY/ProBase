@@ -200,6 +200,32 @@ fun AppPreferencesExpandable(
                     }
                     Spacer(modifier = Modifier.height(16.dp))
 
+                    // Crash Reporting (Firebase Crashlytics) Setting
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(stringResource(id = R.string.applications_ashbike_apps_mobile_features_settings_settings_crashlytics_label))
+                        Spacer(modifier = Modifier.weight(1f))
+                        Switch(
+                            checked = uiState.isCrashlyticsEnabled,
+                            onCheckedChange = { newChecked ->
+                                onEvent(SettingsEvent.UpdateCrashlyticsEnabled(newChecked))
+                            }
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Usage Analytics (Firebase Analytics) Setting
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(stringResource(id = R.string.applications_ashbike_apps_mobile_features_settings_settings_analytics_label))
+                        Spacer(modifier = Modifier.weight(1f))
+                        Switch(
+                            checked = uiState.isAnalyticsEnabled,
+                            onCheckedChange = { newChecked ->
+                                onEvent(SettingsEvent.UpdateAnalyticsEnabled(newChecked))
+                            }
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+
                     // Units Setting
                     val isMetric =
                         uiState.selections[AppPreferenceKeys.KEY_UNITS] == AppPreferenceKeys.VALUE_UNITS_METRIC

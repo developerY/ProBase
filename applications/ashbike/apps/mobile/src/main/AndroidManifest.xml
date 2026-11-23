@@ -125,6 +125,11 @@
         android:enableOnBackInvokedCallback="true"
         tools:targetApi="36">
 
+        <!-- Explicitly disable Google Analytics Advertising ID Collection -->
+        <meta-data
+            android:name="google_analytics_adid_collection_enabled"
+            android:value="false" />
+
         <!-- Remove transitive ARCore metadata & activities from mobile app -->
         <meta-data
             android:name="com.google.ar.core"

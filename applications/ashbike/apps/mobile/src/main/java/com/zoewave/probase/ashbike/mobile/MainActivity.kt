@@ -78,8 +78,7 @@ class MainActivity : ComponentActivity() {
         // Health Connect Privacy Policy Intent Handling
         val action = intent?.action
         if (action == "androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" || action == Intent.ACTION_VIEW_PERMISSION_USAGE) {
-            val privacyPolicyUrl = "https://www.ylabz.com" // Update to your actual privacy policy URL
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(privacyPolicyUrl)))
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(PRIVACY_POLICY_URL)))
             finish()
             return
         }
@@ -246,5 +245,9 @@ class MainActivity : ComponentActivity() {
             data = Uri.fromParts("package", packageName, null)
             startActivity(this)
         }
+    }
+
+    companion object {
+        const val PRIVACY_POLICY_URL = "https://github.com/developerY/ProBase/blob/main/applications/ashbike/docs/data_and_privacy/PRIVACY_POLICY_PUBLIC.md"
     }
 }
