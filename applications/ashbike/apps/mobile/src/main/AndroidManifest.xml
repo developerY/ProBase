@@ -79,8 +79,8 @@
     <uses-permission android:name="android.permission.health.READ_EXERCISE_ROUTE" tools:node="remove" />
     <uses-permission android:name="android.permission.health.WRITE_EXERCISE_ROUTE" tools:node="remove" />
 
-    <uses-permission android:name="android.permission.NFC" />
-    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.NFC" tools:node="remove" />
+    <uses-permission android:name="android.permission.VIBRATE" tools:node="remove" />
 
     <uses-permission android:name="android.permission.health.WRITE_EXERCISE" />
     <uses-permission android:name="android.permission.health.READ_EXERCISE" />
@@ -100,7 +100,7 @@
 
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN" android:usesPermissionFlags="neverForLocation" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" tools:node="remove" />
 
     <!-- Hardware Feature Declarations for Google Play Store Compatibility -->
     <uses-feature android:name="android.hardware.location" android:required="true" />
@@ -111,8 +111,7 @@
     <uses-feature android:name="android.hardware.faketouch" android:required="false" />
     <uses-feature android:name="android.hardware.screen.portrait" android:required="false" />
 
-    <!-- android:dataExtractionRules="@xml/data_extraction_rules" -->
-    <!-- android:enableOnBackInvokedCallback="true" -->
+    <!-- Extraction rules for Android 12+ and Backup rules for older versions -->
     <application
         android:name=".AshBikeApp"
         android:icon="@mipmap/ic_launcher"
@@ -120,15 +119,23 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.BasePro"
-        android:fullBackupContent="true"
+        android:allowBackup="true"
+        android:fullBackupContent="@xml/backup_rules"
+        android:dataExtractionRules="@xml/data_extraction_rules"
         android:enableOnBackInvokedCallback="true"
         tools:targetApi="36">
 
-        <!-- ARCore Metadata: Declare as optional so Google Play Console allows installation on non-AR devices -->
+        <!-- Remove transitive ARCore metadata & activities from mobile app -->
         <meta-data
             android:name="com.google.ar.core"
-            android:value="optional"
-            tools:replace="android:value" />
+            tools:node="remove" />
+        <meta-data
+            android:name="com.google.ar.core.min_apk_version"
+            tools:node="remove" />
+        <activity
+            android:name="com.google.ar.core.InstallActivity"
+            tools:node="remove"
+            tools:ignore="MissingClass" />
 
         <activity
             android:name=".MainActivity"

@@ -27,7 +27,7 @@ Welcome to the AshBike documentation hub. All documentation for the mobile app, 
     *   `Roadmap.md` - Future development goals.
 *   **`release/`**: Google Play Store and shipping.
     *   `RELEASE_NOTES.md` - Public release notes and Play Console "What's New" copy.
-    *   `PRODUCTION_READINESS.md` - P0/P1/P2 release gates checklist.
+    *   `FINAL_MAD_AUDIT_v0.0.4.md` - Master release audit & readiness verification.
     *   `DEPLOYMENT_PLAY_STORE.md` - Deployment runbook.
     *   `Info.md` & `video.md` - Store listing copy and promo scripts.
 *   **`testing/`**: Quality assurance.
