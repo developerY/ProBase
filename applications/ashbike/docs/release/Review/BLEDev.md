@@ -14,10 +14,10 @@ You make mistakes when you guess binary offsets, forget that FTMS Bit 0 (`More D
 ---
 
 ## USER-PROVIDED DECISIONS (DO NOT INVENT OR ALTER)
-- `DEFAULT_WHEEL_CIRCUMFERENCE_MM`: [FILL IN: e.g., 2105 (700x25c default; user-editable in Settings)]
-- `DEMO_MODE_POLICY`: [FILL IN: "DEBUG_TOGGLE_ONLY" (recommended — live BLE is default; DemoModeSimulator only runs when explicitly enabled) OR "REMOVE_SIMULATOR_FROM_LIVE_PATH"]
-- `LOW_BATTERY_WARNING_PCT`: [FILL IN: e.g., 15]
-- `PAIRING_TRANSPORT`: [FILL IN: "STANDARD_BLE_SCAN" (recommended for v1.1 — uses BLUETOOTH_SCAN + BLUETOOTH_CONNECT) OR "COMPANION_DEVICE_MANAGER"]
+- `DEFAULT_WHEEL_CIRCUMFERENCE_MM`: 2136 (700x28c modern road/commuter standard; user-editable in Settings)
+- `DEMO_MODE_POLICY`: "DEBUG_TOGGLE_ONLY" (live BLE is default; DemoModeSimulator only runs when explicitly enabled)
+- `LOW_BATTERY_WARNING_PCT`: 15
+- `PAIRING_TRANSPORT`: "STANDARD_BLE_SCAN" (uses BLUETOOTH_SCAN + BLUETOOTH_CONNECT)
 
 *(If any value above still says `[FILL IN...]`, STOP during Phase 0 and ask the user before editing any files.)*
 
