@@ -6,6 +6,10 @@ plugins {
 
 android {
     namespace = "com.zoewave.ashbike.features.ble"
+
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+    }
 }
 
 dependencies {
@@ -16,4 +20,5 @@ dependencies {
     // Testing
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
+    testImplementation(libs.robolectric)
 }

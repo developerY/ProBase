@@ -37,11 +37,13 @@
   5. Open Google Health Connect (or Google Fit) and verify the `HeartRateRecord` graph appears.
 - **Pass/Fail:** [ ] PASS [ ] FAIL
 
-## 3. Leave No Trace Check
+## 3. NFC Forum BLE Handover (Tap-to-Pair)
+- **Setup:** Program a blank NTAG215 sticker using the "Write NFC Tag" feature in AshBike Settings.
 - **Test:**
-  1. Go to Android Settings -> Apps -> AshBike -> Uninstall.
-  2. Reinstall AshBike from Android Studio.
-  3. Open BLE Settings; verify the saved sensor list is completely empty.
+  1. Hold the NTAG215 tag against the back of the phone.
+  2. Verify AshBike instantly attempts to connect to the previously written sensor MAC address via standard BLE.
+  3. Go to Android Settings -> Apps -> AshBike -> Uninstall. Reinstall.
+  4. Open BLE Settings; verify the saved sensor list is completely empty.
 - **Pass/Fail:** [ ] PASS [ ] FAIL
 
 ## Diagnostic Logs
