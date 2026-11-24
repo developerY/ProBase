@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# AshBike Phone — Full End-to-End Verification & BLE Hub Readiness Suite
+# AshBike Phone v1 — Full End-to-End Verification & BLE Hub Readiness Suite
 # ==============================================================================
 # Covers:
 #   0. Tooling & Auto-ADB Resolution (reads local.properties sdk.dir)
@@ -13,7 +13,7 @@
 #       OpenBikeControl, BleSensorHub, RideSensorFusionEngine, ObcRideActionMapper)
 #   6. Privacy Policy Content & Live Main-Branch Parity Check
 #   7. Lint Baseline & Release Lint XML Audit
-#   8. Release AAB Binary Inspection & Specific R8 Nav3 Survival Check
+#   8. Release AAB Binary Inspection & Specific R8 Nav3 / BLE Survival Check
 #   9. On-Device Instrumented Tests + Cold-Launch & Rationale Intent Smoke Test
 #  10. Play Console Manifest Reference Snapshot & Scoreboard
 #
@@ -37,7 +37,7 @@ for arg in "$@"; do
     --fast)          RUN_GRADLE=0 ;;
     --device)        RUN_DEVICE=1 ;;
     --with-ble-hub)  WITH_BLE_HUB=1 ;;
-    --v1-no-ble)     WITH_BLE_HUB=0 ;;
+    --no-ble-hub|--v1-no-ble) WITH_BLE_HUB=0 ;;
     --include-glass) INCLUDE_GLASS=1 ;;
     --offline)       SKIP_LIVE_NET=1 ;;
     -h|--help)
@@ -54,7 +54,7 @@ Options:
                    connectedDebugAndroidTest, and execute a live cold-launch +
                    Health Connect rationale intent crash check on the phone.
   --with-ble-hub   Enforce strict BLE Hub verification (enabled by default).
-  --v1-no-ble      Skip strict v1.1 BLE Hub code/test assertions (Phone v1 mode).
+  --no-ble-hub     Skip strict BLE Hub code/test assertions (alias: --v1-no-ble).
   --include-glass  Include :applications:ashbike:apps:mobile:features:glass
                    in unit test runs and JUnit totals (excluded by default).
   --offline        Skip live curl HTTP check against the hosted Privacy Policy.
@@ -83,22 +83,22 @@ warn()    { WARN=$((WARN + 1));     printf "${YELLOW}[WARN]${NC}   %s\n" "$1"; }
 manual()  { MANUAL=$((MANUAL + 1)); printf "${BOLD}[MANUAL]${NC} %s\n" "$1"; }
 info()    { printf "         %s\n" "$1"; }
 
-# Always exclude build/, .gradle/, and .git/ so generated files and API keys never leak
+# Always exclude build/, .gradle/, intermediates/, and .git/ so generated files and API keys never leak
 src_search() {
   local pattern="$1"; shift
   if command -v rg >/dev/null 2>&1; then
-    rg -n --no-heading --glob '!**/build/**' --glob '!**/.gradle/**' --glob '!**/.git/**' "$pattern" "$@" 2>/dev/null || true
+    rg -n --no-heading --glob '!**/build/**' --glob '!**/.gradle/**' --glob '!**/.git/**' --glob '!**/intermediates/**' "$pattern" "$@" 2>/dev/null || true
   else
-    grep -rnE --exclude-dir=build --exclude-dir=.gradle --exclude-dir=.git "$pattern" "$@" 2>/dev/null || true
+    grep -rnE --exclude-dir=build --exclude-dir=.gradle --exclude-dir=.git --exclude-dir=intermediates "$pattern" "$@" 2>/dev/null || true
   fi
 }
 
 src_search_i() {
   local pattern="$1"; shift
   if command -v rg >/dev/null 2>&1; then
-    rg -ni --no-heading --glob '!**/build/**' --glob '!**/.gradle/**' --glob '!**/.git/**' "$pattern" "$@" 2>/dev/null || true
+    rg -ni --no-heading --glob '!**/build/**' --glob '!**/.gradle/**' --glob '!**/.git/**' --glob '!**/intermediates/**' "$pattern" "$@" 2>/dev/null || true
   else
-    grep -rniE --exclude-dir=build --exclude-dir=.gradle --exclude-dir=.git "$pattern" "$@" 2>/dev/null || true
+    grep -rniE --exclude-dir=build --exclude-dir=.gradle --exclude-dir=.git --exclude-dir=intermediates "$pattern" "$@" 2>/dev/null || true
   fi
 }
 
@@ -139,7 +139,7 @@ if ! command -v python3 >/dev/null 2>&1; then
   exit 1
 fi
 
-printf "${BOLD}AshBike Phone — Full End-to-End Verification Suite${NC}\n"
+printf "${BOLD}AshBike Phone v1 — Full End-to-End Verification Suite${NC}\n"
 printf "Timestamp    : %s\n" "$(date '+%Y-%m-%d %H:%M:%S %Z')"
 printf "Branch       : %s\n" "$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo 'unknown')"
 printf "Commit       : %s\n" "$(git rev-parse --short HEAD 2>/dev/null || echo 'unknown')"
@@ -244,6 +244,7 @@ MODULE_DIRS=(
   "applications/ashbike/apps/mobile/data"
   "applications/ashbike/features/main"
   "applications/ashbike/features/places"
+  "applications/ashbike/features/ble"
   "applications/ashbike/data"
   "applications/ashbike/database"
   "applications/ashbike/model"
@@ -400,7 +401,15 @@ else
   echo "$JUNIT_REPORT" | grep "^FAILFILE|" | sed 's/^FAILFILE|/         | /'
 fi
 
-IGNORED_TESTS=$(src_search "@Ignore" "$MOBILE_DIR/src/test" "$MOBILE_DIR/src/androidTest" "applications/ashbike/features/main/src/test" "features/ble/src/test")
+IGNORED_TESTS=$(src_search "@Ignore" \
+  "$MOBILE_DIR/src/test" \
+  "$MOBILE_DIR/src/androidTest" \
+  "$MOBILE_DIR/features/home/src/test" \
+  "$MOBILE_DIR/features/rides/src/test" \
+  "$MOBILE_DIR/features/settings/src/test" \
+  "applications/ashbike/features/main/src/test" \
+  "applications/ashbike/features/ble/src/test" \
+  "features/ble/src/test")
 if [[ -n "$IGNORED_TESTS" ]]; then
   warn "@Ignore annotation(s) found in test sources:"
   echo "$IGNORED_TESTS" | sed 's/^/         | /'
@@ -610,7 +619,7 @@ android.permission.health.WRITE_TOTAL_CALORIES_BURNED"
 
 ACTUAL_HC=$(py_get 'print("\n".join(sorted(p["name"] for p in d["permissions"] if p["name"].startswith("android.permission.health."))))')
 if [[ "$ACTUAL_HC" == "$EXPECTED_HC" ]]; then
-  pass "Health Connect merged manifest matches exact 8-permission set (1:1 parity)"
+  pass "Health Connect merged manifest matches exact 8-permission v1 set (1:1 parity)"
 else
   fail "Health Connect permission mismatch! Actual merged permissions:"
   echo "$ACTUAL_HC" | sed 's/^/         | /'
@@ -668,7 +677,15 @@ HAS_BLE_CONN=$(py_get 'print(any(p["name"]=="android.permission.BLUETOOTH_CONNEC
 BLE_SCAN_FLAGS=$(py_get 'print(",".join(p["flags"] for p in d["permissions"] if p["name"]=="android.permission.BLUETOOTH_SCAN"))')
 BLE_FEAT=$(py_get 'print(",".join(f["required"] for f in d["features"] if f["name"]=="android.hardware.bluetooth_le"))')
 
-BLE_SEARCH_ROOTS=("features/ble" "applications/ashbike/apps/mobile" "applications/ashbike/features/main" "applications/ashbike/data" "applications/ashbike/model")
+BLE_MODULE_ROOTS=("applications/ashbike/features/ble" "features/ble")
+BLE_SEARCH_ROOTS=(
+  "applications/ashbike/features/ble"
+  "features/ble"
+  "applications/ashbike/apps/mobile"
+  "applications/ashbike/features/main"
+  "applications/ashbike/data"
+  "applications/ashbike/model"
+)
 
 if [[ "$WITH_BLE_HUB" -eq 1 ]]; then
   # 5A: Manifest BLE permissions & hardware feature
@@ -677,7 +694,7 @@ if [[ "$WITH_BLE_HUB" -eq 1 ]]; then
   [[ "$HAS_BLE_CONN" == "True" ]] && pass "BLE Permission: BLUETOOTH_CONNECT present" || fail "BLE Permission: BLUETOOTH_CONNECT missing"
   [[ "$BLE_FEAT" == "false" ]] && pass "BLE Feature: android.hardware.bluetooth_le declared required=false" || fail "BLE Feature: android.hardware.bluetooth_le required='$BLE_FEAT' (expected 'false')"
 
-  # 5B: Required Source Components (Tasks 1-3)
+  # 5B: Required Source Components
   info "--- 5B. Required BLE Hub Source Files ---"
   for spec in \
     "CyclingBleUuids|CscUuids|BLE Protocol UUID Registry" \
@@ -720,38 +737,38 @@ if [[ "$WITH_BLE_HUB" -eq 1 ]]; then
     "d273f683-d548-419d-b9d1-fa0472345229|OpenBikeControl App Info"; do
     IFS='|' read -r uuid label <<< "$uuid_spec"
     short_hex=$(echo "$uuid" | cut -c5-8)
-    # Match full UUID (or 16-bit helper constant like 0x1816 for standard SIG UUIDs)
     if [[ "$uuid" == 0000*-0000-1000-8000-00805f9b34fb ]]; then
-      hit=$(src_search_i "${uuid}|0x${short_hex}\b" "${BLE_SEARCH_ROOTS[@]}" | grep -v "Test\.kt:" | head -n 1 || true)
+      hit=$(src_search_i "${uuid}|0x${short_hex}\b" "${BLE_MODULE_ROOTS[@]}" | grep -v "Test\.kt:" | head -n 1 || true)
     else
-      hit=$(src_search_i "${uuid}" "${BLE_SEARCH_ROOTS[@]}" | grep -v "Test\.kt:" | head -n 1 || true)
+      hit=$(src_search_i "${uuid}" "${BLE_MODULE_ROOTS[@]}" | grep -v "Test\.kt:" | head -n 1 || true)
     fi
     if [[ -n "$hit" ]]; then
       pass "UUID wired: $label"
     else
-      fail "UUID MISSING in source: $label ($uuid)"
+      fail "UUID MISSING in BLE modules: $label ($uuid)"
     fi
   done
 
   # Verify FTMS remains strictly read-only (no 0x2AD9 Control Point writes)
   FTMS_CP=$(src_search_i "00002ad9|0x2ad9\b" "${BLE_SEARCH_ROOTS[@]}" | grep -v "Test\.kt:" || true)
   if [[ -n "$FTMS_CP" ]]; then
-    fail "FTMS Control Point (0x2AD9) found in source — v1.1 FTMS must be read-only:"
+    fail "FTMS Control Point (0x2AD9) found in source — v1 FTMS must be read-only:"
     echo "$FTMS_CP" | head -n 5 | sed 's/^/         | /'
   else
     pass "FTMS is strictly read-only (zero 0x2AD9 Control Point writes)"
   fi
 
-  # Verify CPS 1/2048s wheel timer constant exists (common bug: using 1024 for CPS)
-  if src_search "2048" features/ble applications/ashbike/apps/mobile | grep -v "Test\.kt:" | grep -q .; then
-    pass "CPS 1/2048s wheel-event time resolution constant (2048) present in BLE source"
+  # Verify CPS 1/2048s wheel timer constant exists specifically inside BLE modules (not random mobile constants)
+  if src_search "2048" "${BLE_MODULE_ROOTS[@]}" | grep -v "Test\.kt:" | grep -q .; then
+    pass "CPS 1/2048s wheel-event time resolution constant (2048) verified in BLE module source"
   else
-    fail "Missing 2048 constant in BLE source — verify CPS wheel event time uses 1/2048s (not 1/1024s)!"
+    fail "Missing 2048 constant in BLE module source — verify CPS wheel event time uses 1/2048s (not 1/1024s)!"
   fi
 
-  # 5D: Android 14+ (minSdk 34) Non-Deprecated BLE API Compliance
+  # 5D: Android 14+ (minSdk 34) Non-Deprecated BLE API Compliance & DI Wiring
   info "--- 5D. Android 14+ BLE API & DI Wiring Audit ---"
-  DEP_BLE=$(src_search "descriptor\.value\s*=|characteristic\.value\s*=|override fun onCharacteristicChanged\([^,]+,[^,)]+\)|override fun onCharacteristicRead\([^,]+,[^,]+,[^,)]+\)" features/ble applications/ashbike/apps/mobile | grep -v "Test\.kt:" || true)
+  DEP_BLE=$(src_search "descriptor\.value\s*=|characteristic\.value\s*=|override fun onCharacteristicChanged\([^,]+,[^,)]+\)|override fun onCharacteristicRead\([^,]+,[^,]+,[^,)]+\)" \
+    "applications/ashbike/features/ble" "features/ble" "applications/ashbike/apps/mobile" | grep -v "Test\.kt:" || true)
   if [[ -n "$DEP_BLE" ]]; then
     fail "Deprecated pre-API-33 BluetoothGatt API(s) detected in BLE code:"
     echo "$DEP_BLE" | head -n 8 | sed 's/^/         | /'
@@ -759,7 +776,7 @@ if [[ "$WITH_BLE_HUB" -eq 1 ]]; then
     pass "Zero deprecated pre-API-33 BluetoothGatt callbacks or .value assignments in BLE code"
   fi
 
-  # Verify real BLE wiring in MobileSensorModule & Settings/Home UI
+  # Verify real BLE wiring in MobileSensorModule
   SENSOR_MOD=$(find applications/ashbike/apps/mobile -name "*MobileSensorModule*.kt" 2>/dev/null | head -n 1 || true)
   if [[ -n "$SENSOR_MOD" && -f "$SENSOR_MOD" ]]; then
     if src_search "BleSensorHub|RideSensorFusionEngine|BluetoothLeRepo" "$SENSOR_MOD" | grep -q .; then
@@ -779,7 +796,8 @@ if [[ "$WITH_BLE_HUB" -eq 1 ]]; then
   fi
 
   # Verify DemoModeSimulator is isolated (not hardcoded enabled=true by default)
-  DEMO_DEFAULT_ON=$(src_search "demoModeEnabled.*=\s*true|simulate\s*=\s*true" applications/ashbike/apps/mobile applications/ashbike/features/main | grep -v "Test\.kt:" || true)
+  DEMO_DEFAULT_ON=$(src_search "demoModeEnabled.*=\s*true|simulate\s*=\s*true" \
+    applications/ashbike/apps/mobile applications/ashbike/features/main applications/ashbike/features/ble | grep -v "Test\.kt:" || true)
   if [[ -n "$DEMO_DEFAULT_ON" ]]; then
     fail "Demo/simulator flag appears hardcoded ON in live code:"
     echo "$DEMO_DEFAULT_ON" | head -n 5 | sed 's/^/         | /'
@@ -788,21 +806,24 @@ if [[ "$WITH_BLE_HUB" -eq 1 ]]; then
   fi
 
   # Verify stubbed BikeRepositoryImpl shift/suspension TODOs were cleaned up or replaced
-  STUB_TODOS=$(src_search_i "TODO.*bluetooth|TODO.*gatt" applications/ashbike/apps/mobile applications/ashbike/data applications/ashbike/features/main || true)
+  STUB_TODOS=$(src_search_i "TODO.*bluetooth|TODO.*gatt" \
+    applications/ashbike/features/ble applications/ashbike/apps/mobile applications/ashbike/data applications/ashbike/features/main || true)
   if [[ -n "$STUB_TODOS" ]]; then
     warn "Remaining Bluetooth/GATT TODO comment(s) in AshBike source:"
     echo "$STUB_TODOS" | head -n 8 | sed 's/^/         | /'
   else
-    pass "Zero leftover Bluetooth/GATT TODO stubs in AshBike mobile/data/main"
+    pass "Zero leftover Bluetooth/GATT TODO stubs in AshBike BLE/mobile/data/main"
   fi
 
   # 5E: Mandatory BLE Unit Tests Present AND Actually Executed in JUnit XML
   info "--- 5E. BLE Unit Test Existence & Execution Audit ---"
-  BLE_TEST_COUNT=$(echo "$JUNIT_REPORT" | grep "^MOD|features/ble|" | awk -F'|' '{print $3}' | head -n 1 || true)
-  if [[ -n "$BLE_TEST_COUNT" && "$BLE_TEST_COUNT" -gt 0 ]]; then
-    pass ":features:ble executed $BLE_TEST_COUNT unit test(s) with 0 failures"
+  ASHBIKE_BLE_COUNT=$(echo "$JUNIT_REPORT" | grep -F "MOD|applications/ashbike/features/ble|" | awk -F'|' '{print $3}' | head -n 1 || true)
+  SHARED_BLE_COUNT=$(echo "$JUNIT_REPORT" | grep -F "MOD|features/ble|" | awk -F'|' '{print $3}' | head -n 1 || true)
+  TOTAL_BLE_TESTS=$(( ${ASHBIKE_BLE_COUNT:-0} + ${SHARED_BLE_COUNT:-0} ))
+  if [[ "$TOTAL_BLE_TESTS" -gt 0 ]]; then
+    pass "BLE modules executed $TOTAL_BLE_TESTS unit test(s) (ashbike/features/ble=${ASHBIKE_BLE_COUNT:-0}, features/ble=${SHARED_BLE_COUNT:-0})"
   else
-    fail ":features:ble executed 0 unit tests (JUnit XML missing or empty)"
+    fail "BLE modules executed 0 unit tests (JUnit XML missing or empty)"
   fi
 
   for test_spec in \
@@ -815,7 +836,6 @@ if [[ "$WITH_BLE_HUB" -eq 1 ]]; then
     "BleSensorHubTest|Multi-Sensor BLE Hub Session Tests" \
     "RideSensorFusionEngineTest|Sensor Fusion Priority Tests" \
     "ObcRideActionMapperTest|OpenBikeControl Action Mapper Tests"; do
-    # Support 2 or 3 pipe fields
     IFS='|' read -r f1 f2 f3 <<< "$test_spec"
     if [[ -n "$f3" ]]; then
       pat="$f1|$f2"; label="$f3"
@@ -831,7 +851,6 @@ if [[ "$WITH_BLE_HUB" -eq 1 ]]; then
         fail "BLE Test Suite issue: $label (tests=$st, fail=$sf, err=$se, skip=$ss)"
       fi
     else
-      # Distinguish between missing test file vs. file present but not executed
       file_hit=$(find features/ble applications/ashbike core/data -type f -name "*.kt" 2>/dev/null | grep -E "(${pat})\.kt$" | head -n 1 || true)
       if [[ -n "$file_hit" ]]; then
         fail "BLE Test file exists ($file_hit) but did NOT execute in JUnit results!"
@@ -845,15 +864,15 @@ if [[ "$WITH_BLE_HUB" -eq 1 ]]; then
   if [[ -f "applications/ashbike/docs/release/BLE_HUB_HARDWARE_TEST.md" ]]; then
     pass "Hardware test protocol doc exists: applications/ashbike/docs/release/BLE_HUB_HARDWARE_TEST.md"
   else
-    warn "Missing applications/ashbike/docs/release/BLE_HUB_HARDWARE_TEST.md (Task 5B deliverable)"
+    warn "Missing applications/ashbike/docs/release/BLE_HUB_HARDWARE_TEST.md"
   fi
 else
-  info "Phone v1 mode (--v1-no-ble): skipping strict v1.1 Multi-Sensor BLE Hub code assertions."
+  info "No-BLE mode (--no-ble-hub): skipping strict BLE Hub code assertions."
   info "BLE permissions in manifest: BLUETOOTH_SCAN=$HAS_BLE_SCAN (flags='$BLE_SCAN_FLAGS'), BLUETOOTH_CONNECT=$HAS_BLE_CONN, ble_feature=$BLE_FEAT"
   if [[ "$HAS_BLE_SCAN" == "True" && "$HAS_BLE_CONN" == "True" ]]; then
     pass "BLE scanner permissions configured cleanly"
   elif [[ "$HAS_BLE_SCAN" == "False" && "$HAS_BLE_CONN" == "False" ]]; then
-    pass "Unused BLE permissions cleanly stripped for phone-only v1"
+    pass "Unused BLE permissions cleanly stripped"
   else
     warn "Partial BLE permission pair (SCAN=$HAS_BLE_SCAN, CONNECT=$HAS_BLE_CONN)"
   fi
