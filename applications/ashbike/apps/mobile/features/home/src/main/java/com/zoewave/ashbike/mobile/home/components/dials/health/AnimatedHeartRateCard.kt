@@ -65,7 +65,7 @@ fun AnimatedHeartRateCard(
             // Pulsing heart icon
             Icon(
                 imageVector = Icons.Filled.Favorite,
-                contentDescription = "Heart Rate",
+                contentDescription = androidx.compose.ui.res.stringResource(com.zoewave.ashbike.mobile.home.R.string.applications_ashbike_apps_mobile_features_home_cd_heart_rate),
                 tint = Color.Red,
                 modifier = Modifier
                     .size(20.dp)

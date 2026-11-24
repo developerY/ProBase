@@ -56,4 +56,4 @@ For details on per-app permission scoping, see [`data_and_privacy/HEALTH_PERMISS
 * [Bike_Calculations.md](architecture/Bike_Calculations.md) - Aerodynamic MET calorie engine & speed/distance math.
 * [STATE_MANAGEMENT.md](architecture/STATE_MANAGEMENT.md) - MVI pattern & Flow loop prevention.
 * [TESTING_STRATEGY.md](testing/TESTING_STRATEGY.md) - Comprehensive testing framework setup.
-* [PRODUCTION_READINESS.md](release/PRODUCTION_READINESS.md) - Play Store release gates checklist.
+* [FINAL_MAD_AUDIT_v0.0.4.md](release/FINAL_MAD_AUDIT_v0.0.4.md) - Master release audit & readiness verification.

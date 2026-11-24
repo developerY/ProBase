@@ -1,12 +1,10 @@
 package com.ylabz.basepro.applications.bike.database
 
 import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.mutablePreferencesOf
 import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.core.booleanPreferencesKey
 import com.zoewave.ashbike.model.bike.LocationEnergyLevel
 import com.zoewave.probase.ashbike.database.repository.DataStoreAppSettingsRepository
 import com.zoewave.probase.core.data.repository.SecureApiKeyRepository
@@ -27,6 +25,7 @@ class DataStoreAppSettingsRepositoryTest {
     private lateinit var repository: DataStoreAppSettingsRepository
 
     private val preferencesFlow = MutableStateFlow<Preferences>(emptyPreferences())
+    private val isKeySetFlow = MutableStateFlow(false)
 
     @Before
     fun setUp() {
@@ -35,14 +34,14 @@ class DataStoreAppSettingsRepositoryTest {
 
         // Mock edit / updateData for DataStore
         coEvery { dataStore.updateData(any()) } coAnswers {
-            val transform = arg<suspend (Preferences) -> Preferences>(0) as suspend (Preferences) -> Preferences
+            val transform = arg<suspend (Preferences) -> Preferences>(0)
             val updated = transform(preferencesFlow.value)
             preferencesFlow.value = updated
             updated
         }
 
         secureApiKeyRepository = mockk()
-        every { secureApiKeyRepository.isKeySetFlow } returns kotlinx.coroutines.flow.MutableStateFlow(false) as kotlinx.coroutines.flow.StateFlow<Boolean>
+        every { secureApiKeyRepository.isKeySetFlow } returns isKeySetFlow
 
         repository = DataStoreAppSettingsRepository(dataStore, secureApiKeyRepository)
     }
@@ -73,8 +72,7 @@ class DataStoreAppSettingsRepositoryTest {
 
     @Test
     fun `isGeminiApiKeySetFlow maps from secureApiKeyRepository`() = runTest {
-        val flow = MutableStateFlow(true)
-        every { secureApiKeyRepository.isKeySetFlow } returns flow as kotlinx.coroutines.flow.StateFlow<Boolean>
+        isKeySetFlow.value = true
 
         val isSet = repository.isGeminiApiKeySetFlow.first()
         assertEquals(true, isSet)

@@ -78,7 +78,7 @@ fun BikeRideCard(
                     IconButton(onClick = onDeleteClick) {
                         Icon(
                             imageVector = Icons.Filled.Delete,
-                            contentDescription = "Delete ride",
+                            contentDescription = androidx.compose.ui.res.stringResource(com.zoewave.ashbike.mobile.rides.R.string.applications_ashbike_apps_mobile_features_rides_cd_delete_ride),
                             tint = MaterialTheme.colorScheme.error
                         )
                     }

@@ -25,7 +25,7 @@ Designed for daily commuters and privacy-conscious cyclists, AshBike turns your 
 
 * **Dark Mode & Dynamic Theming:** Whether you ride at dawn or dusk, AshBike adapts. The UI supports dynamic theming and a battery-saving Dark Mode that looks great on OLED screens.
 * **Multi-Language Support:** AshBike is fully localized and ready for the world. Available in **English, Spanish, German, and French**.
-* **Zero Footprint Privacy:** We believe your data belongs to you. AshBike has no hidden trackers, no ads, and no cloud dependencies. If you delete a ride or uninstall the app, your data is gone forever—leaving absolutely no trace behind.
+* **Zero Footprint Privacy:** We believe your data belongs to you. AshBike has no ads and no cloud account requirements. Analytics and crash reporting can be toggled off at any time in Settings. If you delete a ride or uninstall the app, your local ride history is deleted.
 
 **🔧 Advanced Tech:**
 * **Sensor Fusion:** Utilizes your device's GPS, barometer, and compass for maximum accuracy.

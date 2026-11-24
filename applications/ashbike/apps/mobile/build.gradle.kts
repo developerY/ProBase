@@ -15,8 +15,8 @@ android {
 
     defaultConfig {
         applicationId = "com.zoewave.probase.ashbike"
-        versionCode = 3
-        versionName = "0.0.3"
+        versionCode = 5
+        versionName = "0.0.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -50,6 +50,9 @@ android {
     buildTypes {
         getByName("release") {
             signingConfig = signingConfigs.getByName("release")
+            ndk {
+                debugSymbolLevel = "FULL"
+            }
         }
     }
 
@@ -59,7 +62,8 @@ android {
     }
 
     lint {
-        baseline = file("lint-baseline.xml")
+        // Disable 'Instantiatable' false-positive caused by Hilt bytecode transformation on BikeForegroundService across module boundaries
+        disable.add("Instantiatable")
     }
 
     // ✅ 6. Enable Build Config (Disabled by default in AGP 9)
@@ -92,6 +96,7 @@ dependencies {
 
     // AshBike Specific Features
     implementation(project(":applications:ashbike:features:main"))
+    implementation(project(":applications:ashbike:features:ble"))
     implementation(project(":applications:ashbike:data"))
     implementation(project(":applications:ashbike:apps:mobile:features:home"))
     implementation(project(":applications:ashbike:apps:mobile:features:rides"))
@@ -170,6 +175,7 @@ dependencies {
 
     // Testing
     testImplementation(libs.junit)
+    testImplementation(libs.mockk)
     // Policy test builds a BikeRide to exercise SyncRideUseCase; the model is otherwise
     // visible only inside the rides feature (implementation dep), not to this module.
     testImplementation(project(":applications:ashbike:model"))

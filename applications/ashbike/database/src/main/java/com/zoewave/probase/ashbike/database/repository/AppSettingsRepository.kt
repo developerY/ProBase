@@ -25,6 +25,8 @@ private object SettingsPrefsKeys {
         booleanPreferencesKey("settings_long_ride_enabled") // Added Long Ride Key
     val IS_AI_ENABLED = booleanPreferencesKey("is_ai_enabled")
     val AI_MODEL = stringPreferencesKey("ai_model")
+    val CRASHLYTICS_ENABLED = booleanPreferencesKey("settings_crashlytics_enabled")
+    val ANALYTICS_ENABLED = booleanPreferencesKey("settings_analytics_enabled")
 }
 
 // 2b) Repository contract – your ViewModel only talks to this
@@ -35,6 +37,8 @@ interface AppSettingsRepository : AiConfigurationSettings, SmartCaptureSettings 
     val unitsFlow: Flow<String> // Added Units Flow
     val gpsAccuracyFlow: Flow<LocationEnergyLevel>
     val longRideEnabledFlow: Flow<Boolean> // Added Long Ride Flow
+    val crashlyticsEnabledFlow: Flow<Boolean>
+    val analyticsEnabledFlow: Flow<Boolean>
 
     suspend fun setTheme(theme: String)
     suspend fun setLanguage(language: String)
@@ -42,6 +46,8 @@ interface AppSettingsRepository : AiConfigurationSettings, SmartCaptureSettings 
     suspend fun setUnits(units: String) // Added setUnits function
     suspend fun setGpsAccuracy(accuracy: String)
     suspend fun setLongRideEnabled(enabled: Boolean) // Added setLongRideEnabled function
+    suspend fun setCrashlyticsEnabled(enabled: Boolean)
+    suspend fun setAnalyticsEnabled(enabled: Boolean)
 }
 
 // 2c) DataStore-backed impl
@@ -79,6 +85,12 @@ class DataStoreAppSettingsRepository @Inject constructor(
     override val longRideEnabledFlow: Flow<Boolean> =
         dataStore.data // Added Long Ride Flow implementation
             .map { it[SettingsPrefsKeys.LONG_RIDE_ENABLED] ?: false } // Defaulting to false
+
+    override val crashlyticsEnabledFlow: Flow<Boolean> =
+        dataStore.data.map { it[SettingsPrefsKeys.CRASHLYTICS_ENABLED] ?: true }
+
+    override val analyticsEnabledFlow: Flow<Boolean> =
+        dataStore.data.map { it[SettingsPrefsKeys.ANALYTICS_ENABLED] ?: true }
 
     // AI Configuration Implementation
     override val isAiEnabledFlow: Flow<Boolean> = dataStore.data.map {
@@ -161,5 +173,13 @@ class DataStoreAppSettingsRepository @Inject constructor(
 
     override suspend fun setLongRideEnabled(enabled: Boolean) { // Added setLongRideEnabled implementation
         dataStore.edit { prefs -> prefs[SettingsPrefsKeys.LONG_RIDE_ENABLED] = enabled }
+    }
+
+    override suspend fun setCrashlyticsEnabled(enabled: Boolean) {
+        dataStore.edit { prefs -> prefs[SettingsPrefsKeys.CRASHLYTICS_ENABLED] = enabled }
+    }
+
+    override suspend fun setAnalyticsEnabled(enabled: Boolean) {
+        dataStore.edit { prefs -> prefs[SettingsPrefsKeys.ANALYTICS_ENABLED] = enabled }
     }
 }

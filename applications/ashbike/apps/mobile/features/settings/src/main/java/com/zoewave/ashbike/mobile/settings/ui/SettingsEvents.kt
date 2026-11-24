@@ -13,6 +13,8 @@ sealed class SettingsEvent {
     data class SaveProfile(val profile: ProfileData) : SettingsEvent()
     data class UpdateEnergyLevel(val level: LocationEnergyLevel) : SettingsEvent()
     data class UpdateLongRideEnabled(val enabled: Boolean) : SettingsEvent() // New event for short ride
+    data class UpdateCrashlyticsEnabled(val enabled: Boolean) : SettingsEvent()
+    data class UpdateAnalyticsEnabled(val enabled: Boolean) : SettingsEvent()
     // data class OnShowGpsCountdownChanged(val show: Boolean) : SettingsEvent() // New event
     data class OnSetExpandedSection(val sectionId: String?) : SettingsEvent()
 }

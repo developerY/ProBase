@@ -53,7 +53,7 @@ fun HeartRateCard(
             Column {
                 Icon(
                     imageVector = Icons.Default.Favorite,
-                    contentDescription = "Heart Rate",
+                    contentDescription = androidx.compose.ui.res.stringResource(com.zoewave.ashbike.mobile.home.R.string.applications_ashbike_apps_mobile_features_home_cd_heart_rate),
                     tint = textColor,
                     modifier = Modifier.size(28.dp)
                 )

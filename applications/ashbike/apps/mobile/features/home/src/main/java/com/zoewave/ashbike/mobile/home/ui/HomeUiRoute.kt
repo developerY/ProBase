@@ -21,6 +21,7 @@ import androidx.xr.projected.experimental.ExperimentalProjectedApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
 import com.zoewave.ashbike.mobile.glass.GlassesMainActivity
+import com.zoewave.ashbike.mobile.home.R
 import com.zoewave.ashbike.mobile.home.components.BikeDashboardContent
 import com.zoewave.ashbike.mobile.home.components.WaitingForGpsScreen
 import com.zoewave.ashbike.mobile.home.ui.BikeSideEffect
@@ -87,10 +88,10 @@ fun HomeUiRoute(
                             context.startActivity(intent, options.toBundle())
                         } catch (e: Exception) {
                             Log.e("BikeUiRoute", "Projection Launch Failed", e)
-                            Toast.makeText(context, "Projection Failed: ${e.message}", Toast.LENGTH_LONG).show()
+                            Toast.makeText(context, context.getString(R.string.applications_ashbike_apps_mobile_features_home_toast_projection_failed, e.message ?: ""), Toast.LENGTH_LONG).show()
                         }
                     } else {
-                        Toast.makeText(context, "Glasses require Android 15+", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, context.getString(R.string.applications_ashbike_apps_mobile_features_home_toast_android15_required), Toast.LENGTH_SHORT).show()
                     }
                 }
                 is BikeSideEffect.ShowToast -> {

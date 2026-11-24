@@ -16,6 +16,8 @@ sealed interface SettingsUiState {
         val isProfileIncomplete: Boolean = true, // Add this field
         val currentEnergyLevel: LocationEnergyLevel = LocationEnergyLevel.BALANCED, // Added field
         val isLongRideEnabled: Boolean = false, // Added for short ride feature
+        val isCrashlyticsEnabled: Boolean = true,
+        val isAnalyticsEnabled: Boolean = true,
         val expandedSectionId: String? = null
     ) : SettingsUiState
 

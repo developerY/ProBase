@@ -116,7 +116,7 @@ fun SlidableGoogleMap(
             ) {
                 Icon(
                     imageVector = Icons.Filled.Close,
-                    contentDescription = "Close Map",
+                    contentDescription = androidx.compose.ui.res.stringResource(com.zoewave.ashbike.mobile.home.R.string.applications_ashbike_apps_mobile_features_home_cd_close_map),
                     tint = MaterialTheme.colorScheme.onSurface
                 )
             }

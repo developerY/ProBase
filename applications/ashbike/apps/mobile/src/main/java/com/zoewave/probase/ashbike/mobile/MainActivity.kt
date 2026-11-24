@@ -75,6 +75,14 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Health Connect Privacy Policy Intent Handling
+        val action = intent?.action
+        if (action == "androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" || action == Intent.ACTION_VIEW_PERMISSION_USAGE) {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(PRIVACY_POLICY_URL)))
+            finish()
+            return
+        }
+
         // Tags all future events from this user's phone (removed per privacy guidelines)
 
         // Initial permission check trigger
@@ -237,5 +245,9 @@ class MainActivity : ComponentActivity() {
             data = Uri.fromParts("package", packageName, null)
             startActivity(this)
         }
+    }
+
+    companion object {
+        const val PRIVACY_POLICY_URL = "https://github.com/developerY/ProBase/blob/main/applications/ashbike/docs/data_and_privacy/PRIVACY_POLICY_PUBLIC.md"
     }
 }

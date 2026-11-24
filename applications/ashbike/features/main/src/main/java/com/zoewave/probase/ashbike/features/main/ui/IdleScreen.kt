@@ -30,7 +30,7 @@ fun IdleScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Ready to ride?",
+            text = androidx.compose.ui.res.stringResource(com.zoewave.probase.ashbike.features.main.R.string.applications_ashbike_features_main_ready_to_ride_title),
             style = MaterialTheme.typography.headlineSmall,
             modifier = Modifier.padding(bottom = 24.dp)
         )
@@ -40,7 +40,7 @@ fun IdleScreen(
                 .fillMaxWidth(0.6f)
                 .height(48.dp)
         ) {
-            Text(text = "Start Ride")
+            Text(text = androidx.compose.ui.res.stringResource(com.zoewave.probase.ashbike.features.main.R.string.applications_ashbike_features_main_start_ride_button))
         }
     }
 }

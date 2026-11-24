@@ -60,6 +60,7 @@
 
     <!-- Ride History Page -->
     <string name="applications_ashbike_apps_wear_features_rides_no_recent_rides">No recent rides</string>
+    <string name="applications_ashbike_apps_wear_features_rides_no_gps_data">No GPS data for this ride</string>
     <string name="applications_ashbike_apps_wear_features_rides_recent_rides">Recent Rides</string>
 
     <!-- Ride History Card -->

@@ -66,7 +66,7 @@ fun TripSectionHeader(
                 if (healthConnected) {
                     Icon(
                         imageVector = Icons.Default.HealthAndSafety,
-                        contentDescription = "Health Connected",
+                        contentDescription = androidx.compose.ui.res.stringResource(com.zoewave.ashbike.mobile.rides.R.string.applications_ashbike_apps_mobile_features_rides_cd_health_connected),
                         tint = Color(0xFF009688)
                     )
                 } else {
@@ -76,12 +76,12 @@ fun TripSectionHeader(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Error,
-                            contentDescription = "Health Error",
+                            contentDescription = androidx.compose.ui.res.stringResource(com.zoewave.ashbike.mobile.rides.R.string.applications_ashbike_apps_mobile_features_rides_cd_health_error),
                             tint = Color(0xFFA22116)
                         )
                         Icon(
                             imageVector = Icons.Default.Block,
-                            contentDescription = "Connect Health"
+                            contentDescription = androidx.compose.ui.res.stringResource(com.zoewave.ashbike.mobile.rides.R.string.applications_ashbike_apps_mobile_features_rides_cd_connect_health)
                         )
                     }
                 }
@@ -92,7 +92,7 @@ fun TripSectionHeader(
             IconButton(onClick = { onEvent(RidesEvent.DeleteAll) }) {
                 Icon(
                     imageVector = Icons.Default.DeleteSweep,
-                    contentDescription = "Delete all"
+                    contentDescription = androidx.compose.ui.res.stringResource(com.zoewave.ashbike.mobile.rides.R.string.applications_ashbike_apps_mobile_features_rides_cd_delete_all)
                 )
             }
         }

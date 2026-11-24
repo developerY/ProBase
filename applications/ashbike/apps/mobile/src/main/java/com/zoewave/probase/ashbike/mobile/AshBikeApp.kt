@@ -1,32 +1,23 @@
 package com.zoewave.probase.ashbike.mobile
 
 import android.app.Application
+import com.zoewave.probase.ashbike.mobile.telemetry.FirebaseTelemetryController
 import dagger.hilt.android.HiltAndroidApp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import javax.inject.Inject
 
 @HiltAndroidApp
 class AshBikeApp : Application() {
 
-    // TODO: REMOVE DEAD CODE
-    /* override fun onCreate() {
+    @Inject
+    lateinit var telemetryController: FirebaseTelemetryController
+
+    private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+
+    override fun onCreate() {
         super.onCreate()
-        createNotificationChannels()
+        telemetryController.initTelemetryObservers(applicationScope)
     }
-
-    private fun createNotificationChannels() {
-        // Channel for Bike Ride Service
-        val bikeServiceChannelName = "Bike Ride Updates"
-        val bikeServiceChannelDescription = "Notifications for active bike rides"
-        val bikeServiceChannelImportance = NotificationManager.IMPORTANCE_LOW
-        val bikeServiceChannel = NotificationChannel(
-            BikeForegroundService.NOTIFICATION_CHANNEL_ID, // Using the constant from your service
-            bikeServiceChannelName,
-            bikeServiceChannelImportance
-        ).apply {
-            description = bikeServiceChannelDescription
-        }
-
-        val notificationManager: NotificationManager =
-            getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.createNotificationChannel(bikeServiceChannel)
-    }*/
 }

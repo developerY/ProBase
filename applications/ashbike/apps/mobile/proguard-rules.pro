@@ -32,5 +32,13 @@
 # Health Connect
 -keep class androidx.health.connect.client.records.** { *; }
 
-# Serialization
+# Serialization & Nav3 Destination Keys
 -keep class * extends kotlinx.serialization.KSerializer { *; }
+-keep @kotlinx.serialization.Serializable class com.zoewave.probase.ashbike.features.main.navigation.** { *; }
+-keepclassmembers class com.zoewave.probase.ashbike.features.main.navigation.** {
+    public static final ** Companion;
+    public static ** serializer(...);
+}
+
+# BLE Hub & Decoders
+-keep class com.zoewave.ashbike.features.ble.** { *; }
