@@ -1,7 +1,7 @@
 package com.zoewave.ashbike.features.ble
 
 class WheelCrankKinematicsCalculator(
-    private val wheelTimeResolutionHz: Double,
+    private val wheelTimeResolutionHz: Double = CyclingBleUuids.CPS_WHEEL_TIME_RESOLUTION_HZ,
     private val crankTimeResolutionHz: Double = 1024.0,
     private val clockMs: () -> Long = { System.currentTimeMillis() },
     var wheelCircumferenceMm: Int = 2136,

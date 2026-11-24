@@ -39,3 +39,6 @@
     public static final ** Companion;
     public static ** serializer(...);
 }
+
+# BLE Hub & Decoders
+-keep class com.zoewave.ashbike.features.ble.** { *; }
