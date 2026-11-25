@@ -979,13 +979,13 @@ PRIV_URL=$(src_search "https://[^\"'[:space:])]+" "$MOBILE_DIR/src/main" | grep 
 if [[ -n "$PRIV_URL" ]]; then
   info "Wired Privacy Policy URL: $PRIV_URL"
   if [[ "$SKIP_LIVE_NET" -eq 0 ]] && command -v curl >/dev/null 2>&1; then
-    HTTP_CODE=$(curl -sIL -o /dev/null -w "%{http_code}" --max-time 10 "$PRIV_URL" 2>/dev/null || echo "000")
+    HTTP_CODE=$(curl -A "Mozilla/5.0" -sL --retry 3 --retry-delay 2 -o /dev/null -w "%{http_code}" --max-time 15 "$PRIV_URL" 2>/dev/null || echo "000")
     if [[ "$HTTP_CODE" == "200" ]]; then
       pass "Live Privacy Policy URL returned HTTP 200"
       if [[ "$PRIV_URL" == https://github.com/*/blob/* && -n "$ASHBIKE_POLICY" && -f "$ASHBIKE_POLICY" ]]; then
         RAW_URL=$(echo "$PRIV_URL" | sed 's#https://github.com/#https://raw.githubusercontent.com/#; s#/blob/#/#')
         TMP_LIVE=$(mktemp)
-        if curl -sL --max-time 10 "$RAW_URL" -o "$TMP_LIVE" 2>/dev/null; then
+        if curl -A "Mozilla/5.0" -sL --retry 3 --retry-delay 2 --max-time 15 "$RAW_URL" -o "$TMP_LIVE" 2>/dev/null; then
           if cmp -s "$ASHBIKE_POLICY" "$TMP_LIVE"; then
             pass "Live hosted policy on GitHub matches local $ASHBIKE_POLICY byte-for-byte!"
           else
