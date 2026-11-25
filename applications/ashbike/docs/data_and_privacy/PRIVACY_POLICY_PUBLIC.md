@@ -27,7 +27,7 @@ If you explicitly grant permission, AshBike interacts with Android Health Connec
 *Note: We do not request or access Steps, Cadence, Sleep, Hydration, or Weight data from Health Connect.*
 
 ### C. Bluetooth (BLE)
-Used solely on-device to discover and connect to external Bluetooth cycling sensors (Heart Rate monitors, Power meters, Speed/Cadence sensors, Indoor Smart Trainers, and OpenBikeControl remotes) or smart glasses (XR) telemetry displays. Pairing sensors is entirely optional. Mac addresses and device preferences are stored securely and locally on your device. Heart Rate syncs to Health Connect only if a user specifically pairs a heart rate monitor and explicitly grants Health Connect permission.
+Used solely on-device to discover and connect to external Bluetooth cycling sensors (Heart Rate monitors, Power meters, Speed/Cadence sensors, Indoor Smart Trainers, and OpenBikeControl remotes) or smart glasses (XR) telemetry displays. Pairing sensors is entirely optional. AshBike supports NFC (Near Field Communication) strictly for on-device Bluetooth sensor pairing (NFC Forum Connection Handover); we do not transmit any local data to the cloud via NFC. Mac addresses and device preferences are stored securely and locally on your device. Heart Rate syncs to Health Connect only if a user specifically pairs a heart rate monitor and explicitly grants Health Connect permission.
 
 ---
 

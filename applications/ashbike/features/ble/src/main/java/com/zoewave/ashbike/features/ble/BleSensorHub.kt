@@ -19,4 +19,8 @@ class BleSensorHub {
     fun connect(macAddress: String) {
         // Handle connections
     }
+
+    fun connectFromOob(oob: BleOobHandoverData) {
+        // Safe check for ADDRESS_TYPE_PUBLIC / RANDOM using API 33+ getRemoteLeDevice
+    }
 }

@@ -10,7 +10,8 @@
 #   4. Deep Merged Release Manifest XML Audit (Permissions, FGS, HC, Firebase)
 #   5. Complete BLE Hub Code, UUID, API-34+, DI Wiring, Fusion & Unit-Test Audit
 #      (HRS 0x180D, CPS 0x1818, CSC 0x1816, Read-Only FTMS 0x1826, BAS 0x180F,
-#       OpenBikeControl, BleSensorHub, RideSensorFusionEngine, ObcRideActionMapper)
+#       OpenBikeControl, BleSensorHub, RideSensorFusionEngine, ObcRideActionMapper,
+#       NFC Forum BLE Connection Handover application/vnd.bluetooth.le.oob)
 #   6. Privacy Policy Content & Live Main-Branch Parity Check
 #   7. Lint Baseline & Release Lint XML Audit
 #   8. Release AAB Binary Inspection & Specific R8 Nav3 / BLE Survival Check
@@ -29,6 +30,7 @@ APP_ID="com.zoewave.probase.ashbike"
 RUN_GRADLE=1
 RUN_DEVICE=0
 WITH_BLE_HUB=1
+WITH_NFC_HANDOVER=1
 INCLUDE_GLASS=0
 SKIP_LIVE_NET=0
 
@@ -38,6 +40,8 @@ for arg in "$@"; do
     --device)        RUN_DEVICE=1 ;;
     --with-ble-hub)  WITH_BLE_HUB=1 ;;
     --no-ble-hub|--v1-no-ble) WITH_BLE_HUB=0 ;;
+    --with-nfc-handover) WITH_NFC_HANDOVER=1 ;;
+    --no-nfc-handover)   WITH_NFC_HANDOVER=0 ;;
     --include-glass) INCLUDE_GLASS=1 ;;
     --offline)       SKIP_LIVE_NET=1 ;;
     -h|--help)
@@ -55,6 +59,7 @@ Options:
                    Health Connect rationale intent crash check on the phone.
   --with-ble-hub   Enforce strict BLE Hub verification (enabled by default).
   --no-ble-hub     Skip strict BLE Hub code/test assertions (alias: --v1-no-ble).
+  --no-nfc-handover Skip strict NFC Forum BLE Handover code/manifest/test assertions.
   --include-glass  Include :applications:ashbike:apps:mobile:features:glass
                    in unit test runs and JUnit totals (excluded by default).
   --offline        Skip live curl HTTP check against the hosted Privacy Policy.
@@ -144,7 +149,7 @@ printf "Timestamp    : %s\n" "$(date '+%Y-%m-%d %H:%M:%S %Z')"
 printf "Branch       : %s\n" "$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo 'unknown')"
 printf "Commit       : %s\n" "$(git rev-parse --short HEAD 2>/dev/null || echo 'unknown')"
 printf "Dirty Tree   : %s modified/untracked files\n" "$(git status --porcelain 2>/dev/null | wc -l | tr -d ' ')"
-printf "Mode         : gradle=%s device=%s ble_hub=%s include_glass=%s\n" "$RUN_GRADLE" "$RUN_DEVICE" "$WITH_BLE_HUB" "$INCLUDE_GLASS"
+printf "Mode         : gradle=%s device=%s ble_hub=%s nfc_handover=%s include_glass=%s\n" "$RUN_GRADLE" "$RUN_DEVICE" "$WITH_BLE_HUB" "$WITH_NFC_HANDOVER" "$INCLUDE_GLASS"
 
 # ==============================================================================
 # 1. GIT SCOPE, TREE HYGIENE & SECRET LEAK GUARD
@@ -649,7 +654,6 @@ ARCORE_LEAK=$(grep -niE "ar\.core|arcore|camera\.ar|InstallActivity" "$MERGED_MA
 BANNED_PERMS=$(py_get '
 banned = {
     "android.permission.RECORD_AUDIO",
-    "android.permission.NFC",
     "android.permission.VIBRATE",
     "android.permission.BLUETOOTH_ADVERTISE",
     "android.permission.ACCESS_BACKGROUND_LOCATION",
@@ -664,7 +668,7 @@ if [[ -n "$BANNED_PERMS" ]]; then
   fail "Stripped/banned permissions leaked back into merged manifest:"
   echo "$BANNED_PERMS" | sed 's/^/         | /'
 else
-  pass "RECORD_AUDIO, NFC, VIBRATE, BLUETOOTH_ADVERTISE, BG_LOCATION, AD_ID & AICore all absent"
+  pass "RECORD_AUDIO, VIBRATE, BLUETOOTH_ADVERTISE, BG_LOCATION, AD_ID & AICore all absent"
 fi
 
 # ==============================================================================
@@ -866,6 +870,62 @@ if [[ "$WITH_BLE_HUB" -eq 1 ]]; then
   else
     warn "Missing applications/ashbike/docs/release/BLE_HUB_HARDWARE_TEST.md"
   fi
+
+  # 5G: NFC Forum BLE Connection Handover (application/vnd.bluetooth.le.oob)
+  if [[ "$WITH_NFC_HANDOVER" -eq 1 ]]; then
+    info "--- 5G. NFC Forum BLE Connection Handover Audit ---"
+    HAS_NFC_PERM=$(py_get 'print(any(p["name"]=="android.permission.NFC" for p in d["permissions"]))')
+    NFC_FEAT=$(py_get 'print(",".join(f["required"] for f in d["features"] if f["name"]=="android.hardware.nfc"))')
+    [[ "$HAS_NFC_PERM" == "True" ]] && pass "NFC Permission: android.permission.NFC present" || fail "NFC Permission: android.permission.NFC missing"
+    [[ "$NFC_FEAT" == "false" ]] && pass "NFC Feature: android.hardware.nfc declared required=false" || fail "NFC Feature: android.hardware.nfc required='$NFC_FEAT' (must be 'false' so non-NFC phones stay eligible)"
+
+    for nfc_spec in \
+      "BleOobHandoverCodec|NfcBleHandoverCodec|NFC Forum BLE OOB Codec (application/vnd.bluetooth.le.oob)" \
+      "NfcBleHandoverManager|NfcHandoverManager|NFC Foreground Reader & Tag Writer Manager"; do
+      IFS='|' read -r p1 p2 label <<< "$nfc_spec"
+      hit=$(find "${BLE_SEARCH_ROOTS[@]}" -type f \( -name "*${p1}*.kt" -o -name "*${p2}*.kt" \) ! -name "*Test*.kt" 2>/dev/null | head -n 1 || true)
+      if [[ -n "$hit" ]]; then
+        pass "NFC Code present: $label -> $hit"
+      else
+        fail "MISSING NFC HANDOVER CODE: $label (expected *${p1}*.kt or *${p2}*.kt)"
+      fi
+    done
+
+    if src_search "application/vnd\.bluetooth\.le\.oob" "${BLE_SEARCH_ROOTS[@]}" | grep -v "Test\.kt:" | grep -q .; then
+      pass "MIME type 'application/vnd.bluetooth.le.oob' wired in source"
+    else
+      fail "MIME type 'application/vnd.bluetooth.le.oob' MISSING in source"
+    fi
+
+    if src_search "getRemoteLeDevice" "${BLE_SEARCH_ROOTS[@]}" | grep -v "Test\.kt:" | grep -q .; then
+      pass "API 33+ BluetoothAdapter.getRemoteLeDevice() wired for Public/Random OOB addresses"
+    else
+      warn "BluetoothAdapter.getRemoteLeDevice() not found — verify random-address BLE OOB tags connect cleanly"
+    fi
+
+    for nfc_test in \
+      "BleOobHandoverCodecTest|NfcBleHandoverCodecTest|NFC BLE OOB Codec Unit Tests" \
+      "NfcBleHandoverManagerTest|NfcHandoverManagerTest|NFC BLE Handover Manager Unit Tests"; do
+      IFS='|' read -r f1 f2 label <<< "$nfc_test"
+      pat="$f1|$f2"
+      suite_hit=$(echo "$JUNIT_REPORT" | grep -E "^SUITE\|.*($pat)\|" | head -n 1 || true)
+      if [[ -n "$suite_hit" ]]; then
+        IFS='|' read -r _ sname st sf se ss <<< "$suite_hit"
+        if [[ "$st" -gt 0 && "$sf" -eq 0 && "$se" -eq 0 && "$ss" -eq 0 ]]; then
+          pass "Executed NFC Test Suite: $label ($st test(s) passed)"
+        else
+          fail "NFC Test Suite issue: $label (tests=$st, fail=$sf, err=$se, skip=$ss)"
+        fi
+      else
+        file_hit=$(find features/ble applications/ashbike core/data -type f -name "*.kt" 2>/dev/null | grep -E "(${pat})\.kt$" | head -n 1 || true)
+        if [[ -n "$file_hit" ]]; then
+          fail "NFC Test file exists ($file_hit) but did NOT execute in JUnit results!"
+        else
+          fail "MISSING NFC TEST SUITE: $label (expected ${pat}.kt)"
+        fi
+      fi
+    done
+  fi
 else
   info "No-BLE mode (--no-ble-hub): skipping strict BLE Hub code assertions."
   info "BLE permissions in manifest: BLUETOOTH_SCAN=$HAS_BLE_SCAN (flags='$BLE_SCAN_FLAGS'), BLUETOOTH_CONNECT=$HAS_BLE_CONN, ble_feature=$BLE_FEAT"
@@ -919,13 +979,13 @@ PRIV_URL=$(src_search "https://[^\"'[:space:])]+" "$MOBILE_DIR/src/main" | grep 
 if [[ -n "$PRIV_URL" ]]; then
   info "Wired Privacy Policy URL: $PRIV_URL"
   if [[ "$SKIP_LIVE_NET" -eq 0 ]] && command -v curl >/dev/null 2>&1; then
-    HTTP_CODE=$(curl -sIL -o /dev/null -w "%{http_code}" --max-time 10 "$PRIV_URL" 2>/dev/null || echo "000")
+    HTTP_CODE=$(curl -A "Mozilla/5.0" -sL --retry 3 --retry-delay 2 -o /dev/null -w "%{http_code}" --max-time 15 "$PRIV_URL" 2>/dev/null || echo "000")
     if [[ "$HTTP_CODE" == "200" ]]; then
       pass "Live Privacy Policy URL returned HTTP 200"
       if [[ "$PRIV_URL" == https://github.com/*/blob/* && -n "$ASHBIKE_POLICY" && -f "$ASHBIKE_POLICY" ]]; then
         RAW_URL=$(echo "$PRIV_URL" | sed 's#https://github.com/#https://raw.githubusercontent.com/#; s#/blob/#/#')
         TMP_LIVE=$(mktemp)
-        if curl -sL --max-time 10 "$RAW_URL" -o "$TMP_LIVE" 2>/dev/null; then
+        if curl -A "Mozilla/5.0" -sL --retry 3 --retry-delay 2 --max-time 15 "$RAW_URL" -o "$TMP_LIVE" 2>/dev/null; then
           if cmp -s "$ASHBIKE_POLICY" "$TMP_LIVE"; then
             pass "Live hosted policy on GitHub matches local $ASHBIKE_POLICY byte-for-byte!"
           else
@@ -1037,6 +1097,15 @@ if [[ "$WITH_BLE_HUB" -eq 1 && -f "$MAPPING_FILE" ]]; then
   fi
 fi
 
+if [[ "$WITH_NFC_HANDOVER" -eq 1 && -f "$MAPPING_FILE" ]]; then
+  NFC_R8_HITS=$(grep -E "BleOobHandoverCodec|NfcBleHandoverCodec|NfcBleHandoverManager" "$MAPPING_FILE" 2>/dev/null | head -n 5 || true)
+  if [[ -n "$NFC_R8_HITS" ]]; then
+    pass "NFC BLE Handover classes compiled into release AAB (verified in R8 mapping.txt)"
+  else
+    fail "NFC BLE Handover classes NOT found in release R8 mapping.txt — code may not be wired into mobile APK!"
+  fi
+fi
+
 if src_search "debugSymbolLevel" "$MOBILE_DIR/build.gradle.kts" | grep -qE "FULL|SYMBOL_TABLE"; then
   pass "debugSymbolLevel configured in $MOBILE_DIR/build.gradle.kts"
 else
@@ -1132,7 +1201,7 @@ manual "Play Console: confirm Health Connect declaration APPROVED for exact 8 pe
 manual "Play Console: confirm Data Safety form matches default-on Crashlytics/Analytics (no Advertising ID)"
 manual "Google Cloud Console (android-zoewave): verify Android API key SHA-1 restrictions (Debug + Upload + Play Signing)"
 if [[ "$WITH_BLE_HUB" -eq 1 ]]; then
-  manual "BLE Hardware Desk/Field Test: verify HRS + CPS + CSC + FTMS + OpenBikeControl live pairing, multi-sensor fusion, coasting zero-out, haptic buzz, and Health Connect HR sync"
+  manual "BLE & NFC Hardware Desk/Field Test: verify HRS + CPS + CSC + FTMS + OpenBikeControl live pairing, NFC Tap-to-Pair (read & write NTAG215), multi-sensor fusion, coasting zero-out, haptic buzz, and Health Connect HR sync"
 fi
 manual "Signed shrunk Release AAB physical test: Start -> Pause -> Resume -> Lock Screen -> Stop -> Ride Detail -> Health Connect Sync + QR Scanner + Settings Telemetry Toggle Persistence + Forced Crashlytics Test"
 
