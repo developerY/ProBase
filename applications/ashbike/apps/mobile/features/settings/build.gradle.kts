@@ -34,6 +34,7 @@ dependencies {
     implementation(project(":applications:ashbike:database"))
     implementation(project(":applications:ashbike:model"))
     implementation(project(":applications:ashbike:features:main"))
+    implementation(project(":applications:ashbike:features:ble"))
 
     // --- Navigation 3 (Strict) ---
     implementation(libs.androidx.navigation3.runtime)
